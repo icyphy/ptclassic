@@ -63,6 +63,9 @@ proc ptkTychoLoadFSM { file } {
 	# Look ::tycho::view in "Displayer.itcl" to see how to
 	# create a window for a file name.
         set winName [::tycho::view EditSTD -file $file -withdrawn 1]
+
+        # To make sure the data are there before we invoke ptkCompile 
+        $winName reload
     }
 
     $winName ptkCompile
