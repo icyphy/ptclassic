@@ -110,7 +110,7 @@ for a complete explanation of the options.
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
 			w << i <<  "] = fopen(\"";
-			w << targetPtr->name() << "_$starSymbol(temp)";
+			w << target()->name() << "_$starSymbol(temp)";
 			w << i << "\",\"w\")))";
 			addCode(w);
 			addCode(err);
@@ -155,7 +155,7 @@ codeblock(closeFile) {
 		if (sf != NULL && *sf != 0) {
 			for (int i = 0; i<int(numIn); i++) {
 				cmd << "; /bin/cat ";
-				cmd << targetPtr->name(); 
+				cmd << target()->name(); 
 				cmd << "_$starSymbol(temp)" << i << " >> ";
 				cmd << sf << "; /bin/echo \"\" >> " << sf;
 				cmd << "; ";
@@ -186,13 +186,13 @@ codeblock(closeFile) {
 
 		// put file names
 		for (int i = 0; i < int(numIn); i++) {
-			cmd << targetPtr->name() << "_$starSymbol(temp)";
+			cmd << target()->name() << "_$starSymbol(temp)";
 			cmd << i << " ";
 		}
 
 		// remove temporary files
 		for (i = 0; i < int(numIn); i++) {
-			cmd << "; /bin/rm -f " << targetPtr->name();
+			cmd << "; /bin/rm -f " << target()->name();
 			cmd << "_$starSymbol(temp)" << i;
 		}
 

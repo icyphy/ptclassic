@@ -50,7 +50,7 @@ void CGCWormhole :: setup() {
 	profile = myProfile;
 
 	// get the number of processors.
-	setOuterTarget(targetPtr);
+	setOuterTarget(target());
 
 	// main setup routine.
 	CGWormBase :: setup();
@@ -76,7 +76,7 @@ CGCWormhole :: ~CGCWormhole() {
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* CGCWormhole :: clone() const {
-	LOG_NEW; return new CGCWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+	LOG_NEW; return new CGCWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 /**************************************************************************

@@ -62,7 +62,7 @@ CG56Wormhole :: ~CG56Wormhole() { freeContents(); }
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* CG56Wormhole :: clone() const {
-	LOG_NEW; return new CG56Wormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+	LOG_NEW; return new CG56Wormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 CGWormBase* CG56Wormhole :: myWormhole() { return selfWorm; }

@@ -56,14 +56,14 @@ void SDFWormhole :: setup() {
 
 void SDFWormhole :: go() {
 	// set the currentTime of the inner domain.
-	target->setCurrentTime(arrivalTime);
+	myTarget()->setCurrentTime(arrivalTime);
 
 	// run
 	Wormhole::run();
 }
 
 void SDFWormhole :: wrapup() {
-	target->wrapup();
+	myTarget()->wrapup();
 }
 
 // return the next time Stamp for the stopping condition of the inner timed
@@ -99,12 +99,12 @@ SDFWormhole :: SDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t)
 // cloner -- clone the inside and make a new wormhole from that.
 Block* SDFWormhole :: clone() const {
 	LOG_NEW; return new SDFWormhole(gal.clone()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 Block* SDFWormhole :: makeNew() const {
 	LOG_NEW; return new SDFWormhole(gal.makeNew()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 /**************************************************************************

@@ -54,14 +54,14 @@ void BDFWormhole :: setup() {
 
 void BDFWormhole :: go() {
 	// set the currentTime of the inner domain.
-	target->setCurrentTime(arrivalTime);
+	myTarget()->setCurrentTime(arrivalTime);
 
 	// run
 	Wormhole::run();
 }
 
 void BDFWormhole :: wrapup() {
-	target->wrapup();
+	myTarget()->wrapup();
 }
 
 // return the next time Stamp for the stopping condition of the inner timed
@@ -108,12 +108,12 @@ StringList BDFWormhole :: printRecursive() const {
 // cloner -- clone the inside and make a new wormhole from that.
 Block* BDFWormhole :: clone() const {
 	LOG_NEW; return new BDFWormhole(gal.clone()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 Block* BDFWormhole :: makeNew() const {
 	LOG_NEW; return new BDFWormhole(gal.makeNew()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 /**************************************************************************

@@ -76,7 +76,7 @@ public:
 	~SDFWormhole() { freeContents();}
 
 	// return my scheduler
-	Scheduler* scheduler() const { return target->scheduler();}
+	Scheduler* scheduler() const { return myTarget()->scheduler();}
 
 	// print method
 	StringList print(int verbose) const { return Wormhole::print(verbose);}

@@ -76,7 +76,7 @@ public:
 	~BDFWormhole() { freeContents();}
 
 	// return my scheduler
-	Scheduler* scheduler() const { return target->scheduler();}
+	Scheduler* scheduler() const { return myTarget()->scheduler();}
 
 	// print methods
 	StringList printVerbose() const;
