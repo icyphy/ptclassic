@@ -60,7 +60,7 @@
 # could be multiple targets, so just running *make* might not be sufficient.
 #
 # We could generate a *ClassName.mk* file and then run
-# *make -f ClassName.mk*.  This is what the *CompileCTcl* class does.
+# <CODE>make -f ClassName.mk</CODE>.  This is what the *CompileCTcl* class does.
 #
 # <H2>CLASSPATH</H2>
 # The *CLASSPATH* environment variable controls where the Java tools
