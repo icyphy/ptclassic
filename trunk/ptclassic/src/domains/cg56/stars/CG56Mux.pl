@@ -127,7 +127,7 @@ on each schedule firing.  This requires a different table for each firing.
     }
     codeblock(cbAdvancePtr) {
 	IF	$val(notAllScalorB)
-	  move	#$size(input#$curinput)-1,m2
+	  move	#$size(input#curinput)-1,m2
 	ENDIF
 	move	$ref(ptrvec,$val(curinput)),r2
 	rep	#$val(blockSize)
