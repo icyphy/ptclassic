@@ -305,22 +305,22 @@ hp_configure: $(GNU_OBJ)
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	@echo "Now configure $(GNU_SRC) with -with-gnu-as"
-	-mkdir $(GNU_OBJ)/$(GNU_SRC)
-	(cd $(GNU_OBJ)/$(GNU_SRC); \
-	$(GNU_SRC)/$(GNU_SRC)/configure --srcdir=$(GNU_SRC)/$(GNU_SRC) \
+	-mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GCC_SRC)/configure --srcdir=$(GCC_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
 		--with-gnu-as $(MACH) )
 
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
-	(cd $(GNU_OBJ)/$(GNU_SRC)/gcc; $(MAKE) installdirs)
+	(cd $(GNU_OBJ)/gcc; $(MAKE) installdirs)
 	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/binutils/gas/as
-	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/$(GNU_SRC)/gcc/as
+	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/gcc/as
 	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
-hp_bin: bin_make hp_bin_binutils hp_install_gas bin_$(GNU_SRC)
+hp_bin: bin_make hp_bin_binutils hp_install_gas hp_bin_gcc
 
 hp_bin_bison:
 	(cd $(GNU_OBJ)/bison; 
@@ -339,6 +339,12 @@ hp_install_gas:
 		$(GNU_OBJ)/make/make \
 			MAKE=$(GNU_OBJ)/make/make \
 			install)
+
+hp_bin_gcc:
+	(cd $(GNU_OBJ)/gcc; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make bootstrap)
+			#CC="$(CC)" bootstrap)
 
 hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
