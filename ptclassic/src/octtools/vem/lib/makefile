@@ -109,7 +109,7 @@ $(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib/vem symbolic.bm
 	cp symbolic.bm $(OCTTOOLS)/lib/vem/symbolic.bm
 
 $(OCTTOOLS)/lib/vem: $(OCTTOOLS)/lib
-	mkdir $(OCTTOOLS)/lib/vem
+	-mkdir $(OCTTOOLS)/lib/vem
 $(OCTTOOLS)/lib:
 	mkdir $(OCTTOOLS)/lib
 
