@@ -54,6 +54,7 @@ public:
 	/*virtual*/ int isA(const char*) const;
 
 	// The following is for keeping track of variables.
+	VHDLVariableList firingVariableList;
 	VHDLVariableList variableList;
 
 	// Main routine.
@@ -84,19 +85,36 @@ public:
 	void setGeoNames(Galaxy&);
 
 	// Declare PortHole buffer.
-	StringList declBuffer(const VHDLPortHole*);
+//	virtual StringList declBuffer(const VHDLPortHole*);
 
 	// Declare State variable.
-	StringList declState(const State*, const char*);
+//	virtual StringList declState(const State*, const char*);
 
 	// Return the VHDL type corresponding to the State type.
-	StringList stateType(const State* st);
+	virtual StringList stateType(const State* st);
+
+	// Register the temporary storage reference.
+	virtual void registerTemp(const char*, const char*);
+
+	// Register the State reference.
+	virtual void registerState(State*, int=-1);
+
+	// Register PortHole reference.
+	virtual void registerPortHole(VHDLPortHole*, int=-1);
+
+	// Register each variable in the star variable list.
+	virtual void registerVariableList(VHDLVariableList*);
+
+  	// The only reason for redefining this from HLLTarget
+ 	// is to change the separator from "." to "_".
+ 	virtual StringList sanitizedFullName(const NamedObj&) const;
 
 protected:
 	CodeStream entity_declaration;
 	CodeStream architecture_body_opener;
-	CodeStream mainInit;
-	CodeStream mainDecls;
+//	CodeStream mainInit;
+//	CodeStream mainDecls;
+	CodeStream variable_declarations;
 	CodeStream architecture_body_closer;
 
 	// virtual function to add additional codeStreams.
@@ -119,12 +137,8 @@ protected:
 
 	// Generate declarations and initialization code for
 	// Star PortHoles and States.
-	virtual void declareGalaxy(Galaxy&);
-	virtual void declareStar(VHDLStar*);
-
-  	// The only reason for redefining this from HLLTarget
- 	// is to change the separator from "." to "_".
- 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+//	virtual void declareGalaxy(Galaxy&);
+//	virtual void declareStar(VHDLStar*);
 
 private:
 };

@@ -146,7 +146,7 @@ int VHDLPortHole :: getOffset() {
     return geo().nextPut();
   }
   else {
-    return 1;
+    return 0;
   }
 }
 

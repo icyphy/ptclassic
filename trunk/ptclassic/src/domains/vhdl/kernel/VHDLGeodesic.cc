@@ -52,23 +52,23 @@ char* VHDLGeodesic :: getBufName() const {
 
 // Initialize the geodesic.
 void VHDLGeodesic :: initialize() {
-  nextIn = 1;
-  nextOut = 1;
+  nextIn = 0;
+  nextOut = 0;
   CGGeodesic::initialize();
 }
 
 // Update token put position by specified number of tokens.
 void VHDLGeodesic :: putTokens(int num) {
-  cout << getBufName() << " nextIn from " << nextIn << " to ";
+//  cout << getBufName() << " nextIn from " << nextIn << " to ";
   nextIn += num;
-  cout << nextIn << "\n";
+//  cout << nextIn << "\n";
 }
 
 // Update token get position by specified number of tokens.
 void VHDLGeodesic :: getTokens(int num) {
-  cout << getBufName() << " nextOut from " << nextOut << " to ";
+//  cout << getBufName() << " nextOut from " << nextOut << " to ";
   nextOut += num;
-  cout << nextOut << "\n";
+//  cout << nextOut << "\n";
   if (nextOut > nextIn) {
     Error::error("Read from geodesic beyond available tokens");
   }

@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLGeneric.h"
 #include "VHDLVariable.h"
 #include "VHDLSignal.h"
+#include "VHDLState.h"
 #include "VHDLPortMap.h"
 #include "VHDLGenericMap.h"
 
@@ -50,24 +51,15 @@ class VHDLTarget;
 
 class VHDLStar : public CGStar {
 public:
-	// List of all states used in the code.
-	// This is public so that VHDLTarget and other targets can access it.
-	StateList referencedStates;
-
-	// Lists of VHDL ports, generics, and variables referenced.
-	// This is public so that VHDLTarget and other targets can access it.
-	VHDLPortList firingPortList;
-	VHDLGenericList firingGenericList;
-	VHDLVariableList firingVariableList;
-	VHDLSignalList firingSignalList;
-
+	// Lists of VHDL ports, generics, signals, and variables.
 	// Lists of VHDL port and generic mappings.
 	// This is public so that VHDLTarget and other targets can access it.
-	VHDLPortMapList firingPortMapList;
-	VHDLGenericMapList firingGenericMapList;
-
-	// Add a State to the list of referenced States.
-	void registerState(State*);
+//	VHDLPortList firingPortList;
+//	VHDLGenericList firingGenericList;
+//	VHDLPortMapList firingPortMapList;
+//	VHDLGenericMapList firingGenericMapList;
+//	VHDLSignalList firingSignalList;
+//	VHDLVariableList firingVariableList;
 
 	// initialize method
 	void initialize();
@@ -83,14 +75,6 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-
-	// Generate declarations for all PortHoles and States.
-	StringList declarePortHoles();
-	StringList declareStates();
-
-	// Generate initialization code for all PortHoles and States.
-	StringList initCodePortHoles();
-	StringList initCodeStates();
 
 protected:
 	// access to target (cast is safe: always a VHDLTarget)
@@ -110,36 +94,32 @@ protected:
 	// Assignment operator, depending on variable or signal
 	StringList expandAssign(const char*);
 
+	// Temproary variable reference.
+	StringList expandTemp(const char*, const char*);
+
 	// Update the offset read and write pointers to the porthole queues.
 	void updateOffsets();
 
 private:
-	// Generate declarations for individual PortHoles and States.
-	StringList declareBuffer(const VHDLPortHole*);
-	StringList declareOffset(const VHDLPortHole*);
-	StringList declareState(const State*);
-
-	// Generate initialization code for individual PortHoles and States.
-	StringList initCodeBuffer(VHDLPortHole*);
-	StringList initCodeOffset(const VHDLPortHole*);
-	StringList initCodeState(const State*);
+	// Maintain counter of firing number.
+	int firing;
 
 	// Register port reference for use by target.
-	void registerPort(StringList ref, StringList direction,
-			  StringList type);
+//	void registerPort(StringList ref, StringList direction,
+//			  StringList type);
 	// Register generic reference for use by target.
-	void registerGeneric(StringList ref, StringList type,
-			  StringList defaultVal);
+//	void registerGeneric(StringList ref, StringList type,
+//			  StringList defaultVal);
 	// Register variable reference for use by target.
-	void registerVariable(StringList ref, StringList type,
-			      StringList initVal);
+//	void registerVariable(StringList ref, StringList type,
+//			      StringList initVal);
 	// Register the signal mapped to for use by target.
-	void registerSignal(StringList name, StringList type, 
-			    StringList from, StringList to);
+//	void registerSignal(StringList name, StringList type, 
+//			    StringList from, StringList to);
 	// Register port mapping for use by target.
-	void registerPortMap(StringList ref, StringList mapping);
+//	void registerPortMap(StringList ref, StringList mapping);
 	// Register generic mapping for use by target.
-	void registerGenericMap(StringList ref, StringList mapping);
+//	void registerGenericMap(StringList ref, StringList mapping);
 };
 
 #endif
