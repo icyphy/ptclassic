@@ -39,27 +39,37 @@ transients die away.
 		default {"0"}
 		desc { Number of samples per trace.  If 0, only one trace. }
 	}
-	protected {
-		int traceCount;
-		int nTracesSoFar;
+	defstate {
+		name {traceCount}
+		type {int}
+		default {"0"}
+		desc { Counter for samples in trace interval }
+		attributes { A_NONCONSTANT|A_SETTABLE }
 	}
-
-	setup {
-		CGCXgraph::setup();
-		traceCount = 0;
-		nTracesSoFar = 0;
+	defstate {
+		name {nTracesSoFar}
+		type {int}
+		default {"0"}
+		desc { Counter for trace intervals }
+		attributes { A_NONCONSTANT|A_SETTABLE }
 	}
 
 	go {
-		if (int(traceLength) > 0 && traceCount >= int(traceLength)) {
-			traceCount = 0;
-			addCode("\tfprintf($starSymbol(fp), \"move \");\n");
-			index = xInit;	// reinitialize x index
-			nTracesSoFar++;
+		if (int(traceLength) > 0) {
+
+@	if ($ref(traceCount) >= $val(traceLength)) {
+@		$ref(traceCount) = 0;
+@		fprintf($starSymbol(fp), "move ");
+@		$ref(index) = $val(xInit);
+@		$ref(nTracesSoFar)++;
+@	}
+@	$ref(traceCount)++;
+
 		}
-		traceCount++;
+
 		CGCXgraph::go();
 	}
+
 	exectime {
 		return 8;
 	}

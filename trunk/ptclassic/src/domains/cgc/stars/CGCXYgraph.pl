@@ -32,10 +32,8 @@ input interpreted as the x-axis data, and the other input as y-axis data.
 		xInit.setAttributes(A_NONSETTABLE);
 	}
 	go {
-		count++;
-		if (count <= int(ignore)) return;
-                addCode(
-"\tfprintf($starSymbol(fp),\"%g %g\\n\",$ref(xInput),$ref(input));\n");
+@	if (++$ref(count) >= $val(ignore)) 
+@		fprintf($starSymbol(fp),"%g %g\n",$ref(xInput),$ref(input));
 	}
 	exectime {
 		return 6;
