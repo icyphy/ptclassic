@@ -121,8 +121,8 @@ int MDSDFStar::notRunnable() {
 
   // Check to see whether the required number of row and column repetitions
   //   has been met
-  if(int(rowRepetitions) <= rowIndex ||
-     int(colRepetitions) <= colIndex)
+  if(int(rowRepetitions) <= (int)rowIndex ||
+     int(colRepetitions) <= (int)colIndex)
     return 2;
 
   // Step through all the input ports, checking to see whether the required
