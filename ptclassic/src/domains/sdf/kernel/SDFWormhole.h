@@ -3,8 +3,6 @@
 
 #include "Wormhole.h"
 #include "SDFStar.h"
-#include "Fraction.h"
-#include "FloatState.h"
 
 /*******************************************************************
  SCCS Version identification :
@@ -24,9 +22,6 @@
 
 class SDFWormhole : public Wormhole, public SDFStar {
 
-protected:
-	// Wormhole specific.
-	FloatState samplingTime;
 public:
 	void start() {Wormhole :: setup() ;}
 	void go();

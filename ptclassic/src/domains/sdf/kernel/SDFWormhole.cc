@@ -25,22 +25,13 @@ extern Error errorHandler;
 
 
 void SDFWormhole :: go() {
-
-	// inform sampler stars about sampling time.
-	gal.setState("samplingTime", 
-		form("%f",mySched()->currentTime));
-	gal.initState();
-
 	run();
-
 }
 
 // Constructor
 SDFWormhole :: SDFWormhole(Galaxy& g) : Wormhole(*this,g)
 {
 	buildEventHorizons ();
-	gal.addState(samplingTime.setState("samplingTime",&gal,"10.0",
-		     "sampling time for sampler stars"));
 }
 
 
