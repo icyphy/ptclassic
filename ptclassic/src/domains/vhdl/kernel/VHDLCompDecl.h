@@ -56,6 +56,12 @@ class VHDLCompDecl : public VHDLObj
   VHDLPortList* portList;
   // Generic list.
   VHDLGenericList* genList;
+  // Type.
+  StringList type;
+  // Port map list.
+  VHDLPortList* portMapList;
+  // Generic map list.
+  VHDLGenericList* genMapList;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -98,7 +104,8 @@ class VHDLCompDeclList : public VHDLObjList
   VHDLCompDeclList* newCopy();
 
   // Allocate memory for a new VHDLCompDecl and put it in the list.
-  void put(StringList, VHDLPortList*, VHDLGenericList*);
+  void put(StringList, VHDLPortList*, VHDLGenericList*,
+	   StringList, VHDLPortList*, VHDLGenericList*);
 };
 
 class VHDLCompDeclListIter : public VHDLObjListIter {

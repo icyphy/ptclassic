@@ -42,7 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SimVSSTarget.h"
 #include "VHDLStar.h"
 #include "VHDLCompDecl.h"
-#include "VHDLCompMap.h"
 #include "VHDLSignal.h"
 #include "VHDLState.h"
 #include "VHDLPortVar.h"
@@ -153,7 +152,7 @@ private:
 	VHDLPortList systemPortList;
 	VHDLCompDeclList mainCompDeclList;
 	VHDLSignalList mainSignalList;
-	VHDLCompMapList mainCompMapList;
+	VHDLCompDeclList mainCompMapList;
 	VHDLStateList stateList;
 	VHDLClusterList clusterList;
 

@@ -47,7 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLGeneric.h"
 #include "VHDLPort.h"
 #include "VHDLSignal.h"
-#include "VHDLCompMap.h"
+#include "VHDLCompDecl.h"
 #include "FloatArrayState.h"
 #include "IntArrayState.h"
 #include "ComplexArrayState.h"
@@ -188,7 +188,7 @@ protected:
 	StringList addSignalDeclarations(VHDLSignalList*, int=0);
 
 	// Return component mappings based on compMapList.
-	StringList addComponentMappings(VHDLCompMapList*, int=0);
+	StringList addComponentMappings(VHDLCompDeclList*, int=0);
 
 	// Return variable declarations based on variableList.
 	StringList addVariableDecls(VHDLVariableList*, int=0);

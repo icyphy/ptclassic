@@ -851,11 +851,11 @@ StringList VHDLTarget :: addSignalDeclarations(VHDLSignalList* signalList,
 }
 
 // Add in component mappings here from compMapList.
-StringList VHDLTarget :: addComponentMappings(VHDLCompMapList* compMapList,
+StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compMapList,
 					      int level/*=0*/) {
   StringList all;
-  VHDLCompMapListIter nextCompMap(*compMapList);
-  VHDLCompMap* compMap;
+  VHDLCompDeclListIter nextCompMap(*compMapList);
+  VHDLCompDecl* compMap;
   while ((compMap = nextCompMap++) != 0) {
     level++;
     all << indent(level) << compMap->name << ": " << compMap->type << "\n";

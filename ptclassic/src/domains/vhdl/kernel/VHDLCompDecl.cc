@@ -53,6 +53,9 @@ VHDLCompDecl* VHDLCompDecl :: newCopy() {
   newCompDecl->setName(this->name);
   newCompDecl->portList = this->portList->newCopy();
   newCompDecl->genList = this->genList->newCopy();
+  newCompDecl->type = this->type;
+  newCompDecl->portMapList = this->portMapList->newCopy();
+  newCompDecl->genMapList = this->genMapList->newCopy();
 
   return newCompDecl;
 }
@@ -79,10 +82,15 @@ VHDLCompDeclList* VHDLCompDeclList :: newCopy() {
 
 // Allocate memory for a new VHDLCompDecl and put it in the list.
 void VHDLCompDeclList :: put(StringList name, VHDLPortList* portList,
-			     VHDLGenericList* genList) {
+			     VHDLGenericList* genList,
+			     StringList type, VHDLPortList* portMapList,
+			     VHDLGenericList* genMapList) {
   VHDLCompDecl* newCompDecl = new VHDLCompDecl;
   newCompDecl->setName(name);
   newCompDecl->genList = genList;
   newCompDecl->portList = portList;
+  newCompDecl->type = type;
+  newCompDecl->genMapList = genMapList;
+  newCompDecl->portMapList = portMapList;
   this->put(*newCompDecl);
 }
