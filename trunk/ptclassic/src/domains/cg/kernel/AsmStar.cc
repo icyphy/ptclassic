@@ -62,6 +62,17 @@ AsmStar::lookupAddress(const char* name) {
 	return s;
 }
 
+// lookup size (of buffer or state) for symbol in a codeblock
+int
+AsmStar::lookupSize(const char* name) {
+	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	if (p) return p->bufSize();
+	State* s = stateWithName(name);
+	if (s) return s->size();
+	codeblockError(name, " is not defined");
+	return 0;
+}
+
 // lookup memory for a symbol (a porthole or state) in a
 // codeblock.
 StringList
@@ -76,10 +87,9 @@ AsmStar::lookupMem(const char* name) {
 	    s = m->readName();
 	} else {
 	    if (stateWithName(name))
-		Error::abortRun(*this," state ",name,
-			" does not have a memory assigned");
-	    else Error::abortRun(*this,name," is not defined");
-	    s = "";
+		    codeblockError(name, " is not assigned to memory");
+	    else codeblockError(name, " is not defined");
+	    s = "ERROR";
 	}
 	return s;
 }
@@ -92,7 +102,8 @@ AsmStar::lookupVal(const char* name) {
 		StringList v = s->currentValue();
 		return v;
 	}
-	return "";
+	codeblockError(name, " is not defined as a state");
+	return "ERROR";
 }
 
 // the following function is provided by the SunOS and Ultrix
@@ -115,6 +126,8 @@ AsmStar::processMacro(const char* func, const char* id) {
 		s = lookupMem(id);
 	} else if (strcasecmp(func, "fullname") == 0) {
 		s = readFullName();
+	} else if (strcasecmp(func, "size") == 0) {
+		s = lookupSize(id);
 	} else {
 		s = "ERROR: UNKNOWN MACRO ";
 		s += func;
@@ -125,19 +138,23 @@ AsmStar::processMacro(const char* func, const char* id) {
 	return s;
 }
 
+void AsmStar::codeblockError (const char* p1, const char* p2) {
+	Error::abortRun(*this, "Syntax error in codeblock: ", p1, p2);
+}
+
 const int MAXLINELEN = 256;
 const int TOKLEN = 80;
 
-static const char synerr[] = "Syntax error in codeblock: expecting ";
-static const char syn2[] = " after macro call";
 // process a CodeBlock.  This processing just substitutes for
-// symbols.
+// macro calls.
 void AsmStar::gencode(CodeBlock& cb) {
 	const char* t = cb.getText();
 // output this text
 	char line[MAXLINELEN], *o = line, c;
 	while ((c = *t++) != 0) {
 		if (c == substChar()) {
+			// two consecutive substChar values give
+			// one on the output.
 			if (*t == substChar()) {
 				*o++ = *t++;
 				continue;
@@ -150,7 +167,7 @@ void AsmStar::gencode(CodeBlock& cb) {
 			while (isspace(*t)) t++;
 			// must be pointing at a '('
 			if (*t++ != '(') {
-				Error::abortRun (*this, synerr,"'('", syn2);
+				codeblockError ("expecting '('", " after macro call");
 				return;
 			}
 			// get the identifier
@@ -161,14 +178,15 @@ void AsmStar::gencode(CodeBlock& cb) {
 			while (isspace(*t)) t++;
 			// must be pointing at a ')'
 			if (*t++ != ')') {
-				Error::abortRun (*this, synerr,"')'", syn2);
+				codeblockError ("expecting ')'",
+						"after macro call");
 				return;
 			}
 			// Don't know why the following two steps can't
 			// be consolidated, but if they are, the string
 			// becomes null
 			StringList tmp = processMacro(func,id);
-			const char* value = (char*)tmp;
+			const char* value = tmp;
 			if (value == 0 || *value == 0) {
 				value = "ERROR";
 			}
