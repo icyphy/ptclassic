@@ -213,7 +213,7 @@ TAGS:		$(HDRS) $(SRCS)
 # Rule for detecting junk files
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OTHERSRCS) \
-		$(OBJS) $(LIB) \
+		$(OBJS) $(LIB) $(PL_SRCS:.pl=.htm) \
 		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
 		$(MISC_FILES) makefile make.template SCCS TAGS
 
