@@ -34,7 +34,7 @@ This must be taken into account when determining for how many iterations
 to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
 <p>
-<b>Bugs</i>: the routine currently used (from Gabriel) recomputes trig
+<b>Bugs</b>: the routine currently used (from Gabriel) recomputes trig
 <a name="Gabriel"></a>
 functions for each term, instead of using a table.
 Instead, FFTCx::setup() should compute a table of appropriate size

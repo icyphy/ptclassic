@@ -59,9 +59,9 @@ If stereo activity is occurring, the queue length will be doubled.
 If a realtime violation occurs and the parameter <i>abortOnRealtimeError</i>
 is TRUE, execution will abort and one of the following error codes will
 be left in register y0:
-<p><b>123062</i>  
+<p><b>123062</b>  
 An interrupt occurred and the receive buffer was full.
-<p><b>123063</i>  
+<p><b>123063</b>  
 An interrupt occurred and the transmit buffer was empty.
 <h3>INTERRUPTS and QUEUES:</h3>
 <p>

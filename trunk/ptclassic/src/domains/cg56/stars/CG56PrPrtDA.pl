@@ -32,7 +32,7 @@ If this parameter is a number, it will be used for the length
 <p>
 In the event of a real-time violation, execution will abort
 and the following error code will be left in register y0:
-<p><b>123061</i>  
+<p><b>123061</b>  
 An interrupt occurred and the output buffer was empty.
 	}
         seealso { PrPrtAD, PrPrtADDA }

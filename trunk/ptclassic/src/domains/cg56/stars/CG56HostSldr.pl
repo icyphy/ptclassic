@@ -22,7 +22,7 @@ a particular X windows graphical interface on the host.
 It is indended that this star be used with a graphical target monitor
 (.e.g., qdm_s56x).
 <p>
-The <b>slider</i> widget presents the user with a "ruler" along which
+The <b>slider</b> widget presents the user with a "ruler" along which
 the user may slide a marker.  The value output corresponds to the
 current location of the slider.
 The <i>dspMin</i> and <i>dspMax</i> states control the range of values
@@ -30,7 +30,7 @@ that will be output on the DSP.
 The <i>hostMin</i> and <i>hostMax</i> states control the range of values
 the user sees (the limits of the "ruler"),
 and <i>hostInitVal</i> is the initial value in the host coordinate set.
-The host values are <b>always</i> linearly mapped onto the dsp values.
+The host values are <b>always</b> linearly mapped onto the dsp values.
 The <i>scale</i> parameter controls how host values are displayed to
 the user (linear,logrithmic,db10,db20).  It is important to note that
 this controls only the values displayed and not the mapping from host
