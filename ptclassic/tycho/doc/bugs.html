@@ -34,6 +34,15 @@ and using that.
 
 </ul>
 
+<h3><a href="$TYCHO/kernel/File.itcl">File</a></h3>
+<ul>
+<li>File names are being added to the list of open files,
+but if the constructor subsequently fails, then Tycho
+becomes incoherent. It looks like the File methods
+used by openContext barf because a widget is in the file
+index but doesn't exist.
+</ul>
+
 <h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
 <ul>
 <li>Key-driven posting of menus does not work.  Displayer needs to
