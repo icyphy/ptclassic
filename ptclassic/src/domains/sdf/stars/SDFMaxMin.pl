@@ -53,19 +53,19 @@ This star is based on the MaxMin star in the CG56 domain.
 		type {int}
 		default {"YES"}
 		desc {output maximum value else minimum is the output}
-	}    
+	}
 	state {
 		name {compareMagnitude}
 		type {int}
 		default {"NO"}
 		desc {default is not to compare magnitude}
-	}    	
+	}
 	state {
 		name {outputMagnitude}
 		type {int}
 		default {"NO"}
 		desc {default is not to output magnitude}
-	}    
+	}
 
 	code {
 #define FABS(a)	( ((a) > 0.0) ? (a) : -(a) )
