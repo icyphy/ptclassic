@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Generic code generator source star.
 	}
-	version {1.8	12 August 1998}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright {
 	    Copyright (c) 1990-1996 The Regents of the University of California.
