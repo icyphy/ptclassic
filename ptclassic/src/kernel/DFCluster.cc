@@ -46,13 +46,13 @@ DFCluster::DFCluster(const char* domain):
 DataFlowStar(),DFClusterBase(*this,domain)
 {};
 
-DFClusterPort::DFClusterPort(const PortHole* master, Star* parent)
+DFClusterPort::DFClusterPort(PortHole* master, Star* parent)
 : DFPortHole(), ClusterPort(*this,*master,parent) {
     const DFPortHole& dfmaster = *(const DFPortHole*)master;
     DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
-PortHole* DFCluster::clonePort(const PortHole* master, Star* parent) {
+PortHole* DFCluster::clonePort(PortHole* master, Star* parent) {
     return new DFClusterPort(master,parent);
 }
 

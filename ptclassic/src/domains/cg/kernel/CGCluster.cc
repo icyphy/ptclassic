@@ -82,13 +82,13 @@ CGCluster::CGCluster(const char* domain):
 CGStar(),DFClusterBase(*this,domain)
 {};
 
-CGClusterPort::CGClusterPort(const PortHole* master, Star* parent)
+CGClusterPort::CGClusterPort(PortHole* master, Star* parent)
 : CGPortHole(), ClusterPort(*this,*master,parent) {
     const DFPortHole& dfmaster = *(const DFPortHole*)master;
     DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
-PortHole* CGCluster::clonePort(const PortHole* master, Star* parent) {
+PortHole* CGCluster::clonePort(PortHole* master, Star* parent) {
     return new CGClusterPort(master,parent);
 }
 

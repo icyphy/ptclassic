@@ -93,7 +93,7 @@ public:
 
     int run();
 
-    virtual PortHole* clonePort(const PortHole*,Star* parent=NULL) = 0;
+    virtual PortHole* clonePort(PortHole*,Star* parent=NULL) = 0;
 
     // By default the domain is set to the same as this cluster.
     virtual Cluster* newCluster(Block* s = NULL,const char* domain = NULL)
