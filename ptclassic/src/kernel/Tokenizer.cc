@@ -1,3 +1,4 @@
+static const char file_id[] = "Tokenizer.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -50,6 +51,7 @@ Tokenizer::init() {
 Tokenizer::Tokenizer(istream& input,const char *spec, const char* w) {
 	special = spec;
 	strm = &input;
+	myStrm = 0;
 	whitespace = w;
 	init ();
 }
@@ -61,7 +63,8 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // istream constructor calls the second argument "char" even though it
 // is not changed.  A cast to get around this.
 	char* p = (char*) buffer;
-	strm = new istream(strlen(p), p);
+	LOG_NEW; strm = new istream(strlen(p), p);
+	myStrm = 1;
 	init ();
 }
 
@@ -69,6 +72,7 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 Tokenizer::Tokenizer() {
 	special = "()";
 	strm = &cin;
+	myStrm = 0;
 	whitespace = defWhite;
 	init ();
 }
@@ -84,6 +88,14 @@ struct TokenContext {
 	TokenContext(char* f,istream* s,int ln, TokenContext* l)
 		: filename(f), savestrm(s), line_num(ln), link(l) {}
 };
+
+// Destructor
+Tokenizer::~Tokenizer() {
+	while (depth) pop();
+	if (myStrm) {
+		LOG_DEL; delete strm;
+	}
+}
 
 // Function to interpret escaped characters in strings
 static int slash_interp(char c) {
@@ -101,7 +113,7 @@ static int slash_interp(char c) {
 void
 Tokenizer::push(istream* s,const char* f) {
 // save existing context on stack
-	stack = new TokenContext(curfile,strm,line_num,stack);
+	LOG_NEW; stack = new TokenContext(curfile,strm,line_num,stack);
 // save filename in dynamic memory, and set curfile to it.
 	curfile = savestring(f);
 	strm = s;
@@ -114,13 +126,13 @@ void
 Tokenizer::pop() {
 	if (depth == 0) return;
 	TokenContext* t = stack;
-	delete strm;
-	delete curfile;
+	LOG_DEL; delete strm;
+	LOG_DEL; delete curfile;
 	strm = t->savestrm;
 	curfile = t->filename;
 	line_num = t->line_num;
 	stack = t->link;
-	delete t;
+	LOG_DEL; delete t;
 	depth--;
 }
 
@@ -131,7 +143,7 @@ int
 Tokenizer::fromFile(const char *filename) {
 	int fd = open(expandPathName(filename), 0);
 	if (fd < 0) return 0;
-	push (new istream(fd),filename);
+	LOG_NEW; push (new istream(fd),filename);
 	return 1;
 }
 
