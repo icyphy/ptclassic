@@ -102,7 +102,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (updateDisplay) {
 	    if ($starSymbol(invCount)++ >= $val(updateInterval)) {
 		$starSymbol(invCount) = 0;
-		if(ptkSetBarGraph(interp, w,
+		if(ptkSetBarGraph(interp, &w,
 			    "$starSymbol(.bar)",
 			    &$starSymbol(taps_ptr),
 			    1,
@@ -117,7 +117,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Tcl_CreateCommand(interp, "$starSymbol(.bar)rescale",
 			$starSymbol(rescale),
 			(ClientData) 0, (void (*)()) NULL);
-	    if(ptkMakeBarGraph(interp, w,
+	    if(ptkMakeBarGraph(interp, &w,
 			 "$starSymbol(.bar)",	/* name of top level window */
 			 "$val(identifier)",	/* identifying string */
 			 &$starSymbol(taps_ptr),/* data to be plotted */
@@ -191,7 +191,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		int argc;			   /* Number of arguments. */
 		char **argv;			/* Argument strings. */
 	    {
-		if(ptkSetBarGraph(interp, w,
+		if(ptkSetBarGraph(interp, &w,
 			    "$starSymbol(.bar)",
 			    &$starSymbol(taps_ptr),
 			    1,
