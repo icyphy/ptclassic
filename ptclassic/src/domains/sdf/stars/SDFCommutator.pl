@@ -25,18 +25,16 @@ defstar {
 	}
 	output {
 		name {output}
-		type {ANYTYPE}
+		type {=input}
 	}	
-	constructor {
-		input.inheritTypeFrom(output);
-	}
 	start {
 		int n = input.numberPorts();
 		output.setSDFParams(n,n-1);
 	}
 	go {
+		MPHIter nexti(input);
 		for (int i = input.numberPorts()-1; i >= 0; i--)
-			output%i = input()%0;
+			output%i = (*nexti++)%0;
 	}
 }
 
