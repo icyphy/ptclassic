@@ -333,11 +333,13 @@ body ::tycho::EditSearch::find {{start {}}} {
 	if {$backwardssw} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
+		focusin
 		return [find end]
 	    }
 	} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
+		focusin
 		return [find 1.0]
 	    }
 	}
