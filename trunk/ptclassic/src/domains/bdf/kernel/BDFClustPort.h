@@ -85,7 +85,7 @@ public:
 	int isDupPort() const { return bagPortFlag == BCP_DUP;}
 
 	BDFClustPort* inPtr() {
-		return bagPortFlag ? (BDFClustPort*)&pPort : 0;
+		return (bagPortFlag == BCP_BAG) ? (BDFClustPort*)&pPort : 0;
 	}
 
 	// this one just traverses "inPtr" all the way.
