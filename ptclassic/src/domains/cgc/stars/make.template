@@ -88,6 +88,7 @@ PL_SRCS= \
  CGCFixToCx.pl \
  CGCFixToFix.pl \
  CGCFixToFloat.pl \
+ CGCFixToInt.pl \
  CGCFloatToCx.pl \
  CGCFloatToFix.pl \
  CGCFloatToInt.pl \
@@ -98,6 +99,7 @@ PL_SRCS= \
  CGCGainInt.pl \
  CGCImpulse.pl \
  CGCIntegrator.pl \
+ CGCIntToFix.pl \
  CGCIntToFloat.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
