@@ -36,7 +36,7 @@ $Id$
 void StringState  :: initialize() {
 	char buf[2048];
 	// cast is because cfront doesn't want to delete pointers to const
-	delete (char*)val;
+	delete val;
 	const char* p = initValue;
 	char *q = buf;
 	while (*p) {
