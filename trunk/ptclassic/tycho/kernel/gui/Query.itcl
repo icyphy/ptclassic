@@ -412,6 +412,7 @@ body ::tycho::Query::check {tag label default args} {
     lappend tags $tag
     set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
             $default]
+    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
     set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
     set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
