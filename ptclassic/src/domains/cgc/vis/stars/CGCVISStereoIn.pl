@@ -40,7 +40,7 @@ provisions.
     codeblock (convert) {
       /* Convert data in buffer to Output format */
       for (i=0;i<($val(blockSize)/2);i++) {
-	$ref(leftright,i) = $starSymbol(buf)[i] /32768.0;
+	$ref(leftright,$val(blockSize)/2-1-i) = $starSymbol(buf)[i] /32768.0;
       }
     }
     
