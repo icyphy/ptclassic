@@ -1,30 +1,42 @@
--*-Mode: text-*- -[Fri Nov  4 17:57:37 1994 by cxh]-
-README for src/tkvem
+-*-Mode: text-*- -[Fri Nov 11 15:55:24 1994 by cxh]-
+README for src/octtools/tkoct
 
 This is a prototype of a tcltk version of vem.  Kennard White did most
 of the programming.
 
-Note that the files in below this directory use packages that have
-restrictive copyrights.
-
-tkAux is Copyrighted by GE tkAux/README says:
-> Permission to use, copy, modify, and distribute this software and its
-> documentation for any purpose and without fee is hereby granted,
-
-tkAux is an auxiliary library for tk.  tkvem calls this library from
-ged.tcl 
-
-
-
-Currently tkvem reads in ged.tcl at startup.  tkvem uses the PTOLEMY
-environment variable to find $PTOLEMY/src/tkvem/tkvem/ged.tcl.
-Eventually this file should be moved in with the other tcltk lib
-files, but for the time being it should stay here.  It would be nice
-if, upon startup, tkvem would load a ged.tcl file in the current
-directory, if it exists.  If ged.tcl does not exist in the current
-directory, then it could load up the library version.
+Currently tkoct reads in tkoct.tcl at startup.  tkoct uses the PTOLEMY
+environment variable to find $PTOLEMY/lib/tcl/tkoct.tcl.
 
 Bugs:	
-	- Can't edit
-	- Copyrighted too tightly for full distribution
-	- Can't look inside icons that are actually text files.
+	- Can't edit icons
+	- ptcl is started each time you run a universe
+	- Incremental linking of stars is not supported
+
+
+You may want to add the following code to your $PTOLEMY/MAKEARCH file
+---start---
+# If tkoct directory exists, then make dirs and do links
+if ( -d $PTOLEMY/src/octtools/tkoct ) then
+	optmkdir tkoct
+	cd tkoct
+	optlink ../../../src/octtools/tkoct makefile
+	foreach x (oct2ptcl tkgraph tkoct top)
+		optmkdir $x
+		cd $x
+		optlink ../../../../src/octtools/tkoct/$x make.template
+		optlink ../../../../src/octtools/tkoct/$x makefile
+		cd ..
+	end
+	cd ..
+endif
+
+---end---
+
+You should place it just after
+foreach x ( installColors masters octfix octls oct2ps)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/octtools/$x make.template
+	optlink ../../../src/octtools/$x makefile
+	cd ..
+end
