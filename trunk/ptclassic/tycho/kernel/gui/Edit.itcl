@@ -204,7 +204,7 @@ body ::tycho::Edit::constructor {args} {
 	    -command "$itk_component(text) search"
     
     $itk_component(editMenu) add command \
-	    -label Goto\
+	    -label {Goto Line}\
 	    -underline 0 \
 	    -accelerator "C-c C-g" \
 	    -command "$itk_component(text) gotoLine"
