@@ -67,7 +67,7 @@ This star is based on the MaxMin star in the CG56 domain.
 
 	codeblock(decl) {
 	double current, currentCmp, value, valueCmp;
-	int i, minChangeFlag, valueIndex = i;
+	int i, minChangeFlag, valueIndex;
 	int cmpMagFlag, maxflag;
 	}
 
@@ -76,12 +76,12 @@ This star is based on the MaxMin star in the CG56 domain.
 	maxflag = $val(MAX);
 	i = $val(N) - 1;
 	value = $ref(input,i);
-	valueCmp = $val(cmpMagFlag) ? FABS(value) : value;
+	valueCmp = cmpMagFlag ? FABS(value) : value;
 	valueIndex = i;
 	}
 
 	codeblock(compareData) {
-	while ( i-- >= 0 ) {
+	while ( i-- > 0 ) {
 		current = $ref(input,i);
 		currentCmp = cmpMagFlag ? FABS(current) : current;
 		minChangeFlag = ( currentCmp < valueCmp )
@@ -100,7 +100,7 @@ This star is based on the MaxMin star in the CG56 domain.
 	codeblock(outputValue) {
 	/* Output the value or the magnitude of the value */
 	if ( $val(outputMagnitude) ) {
-		value = FABS(value);
+		if ( value < 0.0 ) value = -value;
 	}
 
 	/* Send the maximum/minimum value to the output port */
