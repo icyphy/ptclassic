@@ -10,12 +10,14 @@ CG56STARS = \
  $(CG56)/CG56Add.o \
  $(CG56)/CG56BiQuad.o \
  $(CG56)/CG56BlackHole.o \
+ $(CG56)/CG56Cos.o \
  $(CG56)/CG56DC.o \
  $(CG56)/CG56DownSample.o \
  $(CG56)/CG56Fork.o \
  $(CG56)/CG56Gain.o \
  $(CG56)/CG56DummySource.o \
  $(CG56)/CG56DummySink.o \
+ $(CG56)/CG56HostOut.o \
  $(CG56)/CG56IIDUniform.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Sub.o \
