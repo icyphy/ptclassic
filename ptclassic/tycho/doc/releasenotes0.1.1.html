@@ -134,17 +134,17 @@ The editors and shells included in release 0.1.1 are:
 	
 </ul>
 <H3>Graphical Editors</H3>
-<MENU>
-	<LI> EditBubbleAndArc
-	<LI> EditDAG - Directed Acyclic Graph Editor
-	<LI> EditForest - Forest Editor (a forest is a collection of trees)
-	<LI> EditPalette - Prototype of a Ptolemy Palette editor
-	<LI> EditSTD - State Transition Diagram editor
-	<LI> GanttView - Gantt Chart Viewer
-	<LI> ProfileTcl - Tcl Profiler that uses the TclX profiler
+<ul>
+	<li> EditBubbleAndArc
+	<li> EditDAG - Directed Acyclic Graph Editor
+	<li> EditForest - Forest Editor (a forest is a collection of trees)
+	<li> EditPalette - Prototype of a Ptolemy Palette editor
+	<li> EditSTD - State Transition Diagram editor
+	<li> GanttView - Gantt Chart Viewer
+	<li> ProfileTcl - Tcl Profiler that uses the TclX profiler
 	A patch to make tclXProfiler.c Itcl aware is included.
-	<LI> SlateView - Slate viewer
-</MENU>
+	<li> SlateView - Slate viewer
+</ul>
 	
 <h3><code>tydoc</code> - The Tycho documentation system</h3>
 
@@ -154,59 +154,59 @@ itcl to html.
 <H2>Changes between Tycho0.1 and Tycho0.1.1</H2>
 
 <MENU>
-<LI> 0.1.1 has the following new functionality in the Tycho kernel:
+<li> 0.1.1 has the following new functionality in the Tycho kernel:
 	<MENU>
 	
-	<LI> View/Displayer In this architecture, the Display always
+	<li> View/Displayer In this architecture, the Display always
 	provides the top-level window, the View provides a widget that
 	displays or edits data, and a Filter connects a view to the
 	underlying data structures.
 	
-	<LI> Popup menus
-	<LI> Menubar
-	<LI> Glimpse Index Browser
-	<LI> Graphical Itcl Class browser
-	<LI> Preferences
-	<LI> Exec class which can be used to run remote programs like
+	<li> Popup menus
+	<li> Menubar
+	<li> Glimpse Index Browser
+	<li> Graphical Itcl Class browser
+	<li> Preferences
+	<li> Exec class which can be used to run remote programs like
 	 <CODE>make</CODE>
-	<LI> Print Dialog
+	<li> Print Dialog
 	</MENU>
 
 
-<LI> 0.1.1 includes Slate, an infrastructure for visual programming.
-<LI> 0.1.1 includes Graphical editors.
+<li> 0.1.1 includes Slate, an infrastructure for visual programming.
+<li> 0.1.1 includes Graphical editors.
 
-<LI> The following text editors are new in 0.1.1:
+<li> The following text editors are new in 0.1.1:
 	<MENU>
-	<LI> CommandShell - A prototype of a shell interface
-	<LI> Java mode
+	<li> CommandShell - A prototype of a shell interface
+	<li> Java mode
 	</MENU>
 
 
-<LI> The HTML viewer has been tuned for performance.
+<li> The HTML viewer has been tuned for performance.
 	
-<LI> 0.1.1 has been modified to be less Unix-centric.
+<li> 0.1.1 has been modified to be less Unix-centric.
 	Tycho0.1.1 runs under NT, but not all features work underNT.
 	0.1.1 has been started up on the Mac, but the Itcl2.1 port
 	to the Mac is substantially incomplete.
 	
-<LI> 0.1.1 can handle hierarchical index, so a key in an index can have more
+<li> 0.1.1 can handle hierarchical index, so a key in an index can have more
 	than one hyperlink.
 	
-<LI> 0.1.1 has more tests.
+<li> 0.1.1 has more tests.
 </MENU>
 
 <H2>Backward compatiblity issues between 0.1 and 0.1.1</H2>
 
 <MENU>
-<LI> 0.1.1 will not work under Itcl2.0, you must have Itcl2.1.
+<li> 0.1.1 will not work under Itcl2.0, you must have Itcl2.1.
 
-<LI> 0.1.1 uses the View and Displayer classes to implement Tycho specific
+<li> 0.1.1 uses the View and Displayer classes to implement Tycho specific
 mega-widgets.  The <CODE>*Text</CODE> classes found in 0.1 have been removed.
 
-<LI> The Dismiss and the TychoWidget classes have been removed.
+<li> The Dismiss and the TychoWidget classes have been removed.
 
-<LI> TclConsole has been renamed TclShell.
+<li> TclConsole has been renamed TclShell.
 </MENU>
 
 <p>
