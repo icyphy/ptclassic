@@ -52,7 +52,7 @@ To understand the symmetry precisely, note
 that the frequency domain specification is actually only one
 cycle of a periodic specification.
 With this observation, and the fact that the first sample specifies
-the d.c. response, the symmetry is obvious.
+the DC response, the symmetry is obvious.
 .pp
 To design a filter of a different order
 from that in the demo, you must modify the \fIsize\fR and \fIorder\fR

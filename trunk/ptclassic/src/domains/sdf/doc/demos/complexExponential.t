@@ -17,6 +17,6 @@ is generated and plotted.  The sampling frequency is normalized
 to $2 pi$ radians per second.
 .SA
 expgen
-CxReal
+CxToFloat
 XMgraph
 .ES

@@ -25,12 +25,12 @@ the frequency of the sinusoid much easier, as the output plot of the
 MUSIC_M
 stars show.
 .pp
-This demo also plots the various right and left singular matricies and
+This demo also plots the various right and left singular matrices and
 the vector of singular values for the two different signals.  The data
 matrices were taken from pages 334-335 of reference [1].
 .UH "References"
 .ip [1]
-S. Haykin, \fModern Filters\fR, pp. 333-335, 
+S. Haykin, \fIModern Filters\fR, pp. 333-335, 
 Macmillan Publishing Company, New York, 1989.
 .SA
 SVD_M

@@ -27,12 +27,12 @@ specified directly.  For example, a square pulse with with 20
 could be specified using the syntax "1.0 [20] 0.0" for the value of "signal".
 .pp
 Immediately after the signal is read it is multiplied by another signal
-consisting of alternating + and - one.  This trick shifts the d.c. component
+consisting of alternating + and - one.  This trick shifts the DC component
 of the signal to the Nyquist frequency, and hence is an efficient way to
-get a spectral plot with the d.c. component in the center of the plot.
-Without this multiplication, d.c. would be at the left, and the sampling
+get a spectral plot with the DC component in the center of the plot.
+Without this multiplication, DC would be at the left, and the sampling
 frequency at the right.
-With it, the output plot is centered at d.c. (frequency 0.0), and ranges
+With it, the output plot is centered at DC (frequency 0.0), and ranges
 from -PI to PI.  The proper labeling of the x axis is achieved by using
 the FloatRamp star to generate the X input of the XYgraph stars.
 .pp

@@ -1,8 +1,8 @@
 .\" $Id$
 .NA doppler
 .SD
-A sine wave is subjected to four successive amounts of doppler shift.
-The doppler shift is accomplished by the phaseShift galaxy,
+A sine wave is subjected to four successive amounts of Doppler shift.
+The Doppler shift is accomplished by the phaseShift galaxy,
 which forms an analytic signal (using a Hilbert transform)
 that modulates a complex exponential.
 .DE
@@ -11,9 +11,9 @@ that modulates a complex exponential.
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
-.Id "doppler shift"
+.Id "Doppler shift"
 A sine wave of frequency 2*PI/40 radians
-is subjected to four successive amounts of doppler shift.
+is subjected to four successive amounts of Doppler shift.
 The first 100 samples are not shifted at all (in the first 64 samples
 transients are dying out).
 The next 160 samples are shifted up in frequency by 2*PI/160
@@ -24,7 +24,7 @@ radians (so that there is one fewer cycle for every four
 cycles of the original sinusoid).
 The remaining samples are not shifted at all.
 .pp
-The doppler shift is accomplished by the phaseShift galaxy,
+The Doppler shift is accomplished by the phaseShift galaxy,
 which forms an analytic signal (using a Hilbert transform)
 that modulates a complex exponential.
 .Ie "phase shift"
