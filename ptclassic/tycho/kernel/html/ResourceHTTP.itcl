@@ -137,13 +137,13 @@ class ::tycho::ResourceHTTP {
     ####                      public procedures                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path}
+    proc chmod {permissions path} {error "Cannot chmod HTTP files"}
 
     # Return the content type of the open file.
     proc contenttype {url}
 
     # Delete a resource
-    proc delete {path}
+    proc delete {path} {error "Cannot delete HTTP files"}
 
     # Return a directory listing
     proc dirlist {path}
@@ -152,7 +152,7 @@ class ::tycho::ResourceHTTP {
     proc exists {path}
 
     # Create a new directory
-    proc mkdir {path}
+    proc mkdir {path} {error "Cannot mkdir HTTP files"}
 
     # Create a new resource object
     proc new {path args}
@@ -163,7 +163,7 @@ class ::tycho::ResourceHTTP {
     # Get the status of a resource
     proc stat {path varName}
 
-    # Parse a url
+    # Parse a url, this is a hack
     proc splitURL {url}
 
     ###################################################################
@@ -312,12 +312,6 @@ body ::tycho::ResourceHTTP::write {string} {
 ####                          public procedures                      ####
 
 #####################################################################
-#### chmod
-body ::tycho::ResourceHTTP::chmod {permissions path} {
-    error "Cannot change status of $path"
-}
-
-#####################################################################
 #### contenttype
 # Return the content type of the open file.
 body ::tycho::ResourceHTTP::contenttype {url} {
@@ -330,12 +324,6 @@ body ::tycho::ResourceHTTP::contenttype {url} {
     } else {
         error "URL $url does not exist"
     }
-}
-
-#####################################################################
-#### delete
-body ::tycho::ResourceHTTP::delete {path} {
-    error "Cannot delete $path"
 }
 
 #####################################################################
@@ -438,12 +426,6 @@ body ::tycho::ResourceHTTP::exists {url} {
 
     set url [forward $url]
     return $_exists($url)
-}
-
-#####################################################################
-#### mkdir
-body ::tycho::ResourceHTTP::mkdir {dir} {
-    error "Cannot create $dir"
 }
 
 #####################################################################
@@ -596,7 +578,7 @@ body ::tycho::ResourceHTTP::httpdone {} {
     # Close socket
     debugputs "Closing $socketid"
     ::close $socketid
-    set socketid ""
+    set socketid -1
 
     # Close cache file
     if { $requestMode == "file" } {
