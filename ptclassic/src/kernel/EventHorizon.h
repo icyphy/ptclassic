@@ -95,9 +95,8 @@ public:
 	virtual int isItOutput() const;
 
 	// set ports
-	virtual void setEventHorizon(inOutType inOut, const char* portName, 
-		Wormhole* parentWormhole, Star* parentStar,
-		DataType type = FLOAT, unsigned numTokens = 1 );
+	void setEventHorizon(inOutType inOut, Wormhole* parentWormhole,
+			     unsigned numTokens = 1 );
 
 	// Function specifying whether more than one sample at a time
 	// can cross the wormhole boundary through this EventHorizon.

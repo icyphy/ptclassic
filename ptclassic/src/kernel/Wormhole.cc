@@ -117,43 +117,49 @@ void Wormhole :: buildEventHorizons () {
 // separate rules for connecting inputs and outputs.
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
+			PortHole& toPort = *to.asPort();
 			EventHorizon& from = inSideDomain->newFrom();
+			PortHole& fromPort = *from.asPort();
 			// If event horizons of either the inside or
 			// the outside domain transfer only one token
 			// at a time, set numToken to be 1.
-			if (to.onlyOne() || from.onlyOne())
-				numToken = 1;
-			to.setEventHorizon(in, galp.name(), this, 
-				&selfStar, type, numToken);
-			selfStar.addPort(*(to.asPort()));
-			from.setEventHorizon(in, ghostName(galp), this, 
-				&selfStar, type, numToken);
+			if (to.onlyOne() || from.onlyOne()) numToken = 1;
+
+			to.setEventHorizon(in, this, numToken);
+			toPort.setPort(galp.name(),&selfStar,type);
+			selfStar.addPort(toPort);
+			
+			from.setEventHorizon(in, this, numToken);
+			fromPort.setPort(ghostName(galp),&selfStar,type);
+			
 			to.ghostConnect (from);
-			from.asPort()->inheritTypeFrom (realGalp);
-			to.asPort()->inheritTypeFrom (*(from.asPort()));
-			from.asPort()->connect(realGalp,0);
-			if (far)
-			    far->connect(*to.asPort(),numDelays,delayValues);
+			fromPort.inheritTypeFrom (realGalp);
+			toPort.inheritTypeFrom (fromPort);
+			fromPort.connect(realGalp,0);
+			if (far) far->connect(toPort,numDelays,delayValues);
 		}
 		else {
 			EventHorizon& to = inSideDomain->newTo();
+			PortHole& toPort = *to.asPort();
 			EventHorizon& from = outSideDomain->newFrom();
+			PortHole& fromPort = *from.asPort();
 			// If event horizons of either the inside or
 			// the outside domain transfer only one token
 			// at a time, set numToken to be 1.
-			if (to.onlyOne() || from.onlyOne())
-				numToken = 1;
-			from.setEventHorizon(out, galp.name(), this, 
-				&selfStar, type, numToken);
-			selfStar.addPort(*(from.asPort()));
-			to.setEventHorizon(out, ghostName(galp), this, 
-				&selfStar, type, numToken);
+			if (to.onlyOne() || from.onlyOne()) numToken = 1;
+
+			from.setEventHorizon(out, this, numToken);
+			fromPort.setPort(galp.name(),&selfStar,type);
+			selfStar.addPort(fromPort);
+			
+			to.setEventHorizon(out, this, numToken);
+			toPort.setPort(ghostName(galp),&selfStar,type);
+			
 			to.ghostConnect (from);
-			to.asPort()->inheritTypeFrom (realGalp);
-			from.asPort()->inheritTypeFrom (*(to.asPort()));
-			realGalp.connect(*(to.asPort()),0);
-			if (far)
-			    from.asPort()->connect(*far,numDelays,delayValues);
+			toPort.inheritTypeFrom (realGalp);
+			fromPort.inheritTypeFrom (toPort);
+			realGalp.connect(toPort,0);
+			if (far) fromPort.connect(*far,numDelays,delayValues);
 		}
 	}
 // Take care of galaxy multi porthole
