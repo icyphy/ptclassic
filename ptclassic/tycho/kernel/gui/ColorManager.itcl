@@ -54,7 +54,7 @@ proc ::tycho::color {color {alternate {}}} {
 # FIXME: Add more information.
 #
 class ::tycho::ColorManager {
-    inherit ::tycho::Singleton
+    inherit ::tycho::Uninstantiable
 
     constructor {args} {}
     destructor {}

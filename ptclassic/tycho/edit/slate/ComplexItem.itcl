@@ -35,7 +35,7 @@
 # added.
 #
 class ::tycho::Picture {
-    inherit ::tycho::Singleton
+    inherit ::tycho::Uninstantiable
 
     proc construct {id tags canvas x0 y0 x1 y1 args}
     proc destruct  {id canvas}
