@@ -65,6 +65,10 @@ to become a permanent part of the system.
 #include <ctype.h>
 #include "paths.h"
 
+// Define DEBUG for dynamic linking debugging
+// DEBUG should be undefined for shipping
+//#define DEBUG
+
 // static data objects
 int Linker::activeFlag = 0;
 const char* Linker::ptolemyName = 0;
@@ -84,13 +88,13 @@ void Linker::adjustMemory() {
 		memBlock = new char[LINK_MEMORY];
 		availMem = memBlock;
 	}
-	else {
-		// bump availMem up to the next page boundary
-		size_t t = (size_t) availMem;
-		size_t ps = getpagesize();
-		size_t t2 = (t / ps) * ps;
-		if (t2 < t) availMem = (char *) (t2 + ps);
-	}
+	// bump availMem up to the next page boundary
+	// Note that now we always bump up to the next page boundary
+	// Formerly we only bumped if we were not initializing memBlock
+	size_t t = (size_t) availMem;
+	size_t ps = getpagesize();
+	size_t t2 = (t / ps) * ps;
+	if (t2 < t) availMem = (char *) (t2 + ps);
 }
 
 void Linker::init (const char* myName) {
@@ -187,8 +191,9 @@ int Linker::multiLink (int argc, char** argv) {
 // Other switches are in LOADOPTS, from Linker.sysdep.h
 
 	char command[512];
-	sprintf (command, "%s %s -A %s %s %x -o ",
-		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem);
+	// DYNLIB is hppa specific
+	sprintf (command, "%s %s -A %s %s %x %s -o ",
+		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem, DYNLIB);
 	StringList cmd = command;
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
@@ -262,11 +267,56 @@ void Linker::installTable(const char* newTable) {
 // The "nm" program is used to find the constructors.
 // It returns the number of constructors called, -1 on error.
 
+#ifdef DEBUG
+// Function to print out debugging info
+static void debugInvokeConstructors(char *symbol,long addr, const
+				    char* objName) 
+{
+  	  char buf[256];
+	  sprintf(buf, "Pipe found: %s at 0x%x", symbol, addr);
+	  Error::message(buf);
+
+// Here we violate the principal of keeping architecture dependencies
+// out of this file.  These defines are for debugging.
+#if defined(hppa)
+
+	  // Verify the address using nlist() ...
+	  char tmpname[1024];
+	  struct nlist nl[2];
+
+	  nl[0].n_name = symbol;
+	  nl[1].n_name = (char *)NULL;
+
+	  strcpy(tmpname,objName);
+
+	  if (nlist(tmpname,nl))
+	  {
+	     Error::abortRun("nlist failed");
+	     return(-1);
+	  }
+
+	  addr = nl[0].n_value;
+
+	  sprintf(buf, "Nlist found: %s at 0x%x", symbol, addr);
+	  Error::message(buf);
+#endif //hppa
+}
+#endif
+
 int
 Linker::invokeConstructors (const char* objName) {
 // Open a pipe to "nm" to get symbol information
 	StringList command = NM_PROGRAM;
 	command << " " << NM_OPTIONS << " " << objName;
+
+#ifdef DEBUG
+	{
+	  char buf[256];
+	  sprintf(buf, "NM Pipe: %s", (const char *)command);
+	  Error::message(buf);
+	}
+#endif
+
 // ALPHAFIX is needed because ALPHA/OSF provides a bogus prototype for popen.
 	FILE* fd = popen (ALPHAFIX command, "r");
 	if (fd == 0) {
@@ -280,11 +330,15 @@ Linker::invokeConstructors (const char* objName) {
 	char symbol[256], type[20];
 	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
 
+
 	while (fscanf(fd, "%lx %s %s", &addr, type, symbol) == 3) {
 		if (addr >= (size_t)availMem && addr <= memoryEnd &&
 		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
 			// it is a constructor, call it:
-			PointerToVoidFunction fn = (PointerToVoidFunction)addr;
+#ifdef DEBUG
+		  debugInvokeConstructors(symbol, addr, objName);
+#endif
+		  	PointerToVoidFunction fn = (PointerToVoidFunction)addr;
 			fn();
 			nCalls++;
 		}
@@ -321,6 +375,22 @@ size_t Linker::readInObj(const char* objName) {
 			size = 0;
 		}
 	}
+
+#ifdef DEBUG
+#ifdef hpux
+        {
+	  char buf[1024];
+	  sprintf(buf,
+	    "availmem: 0x%x\ntextseg starts at 0x%x, size: 0x%x\ndataseg starts at 0x%x, size: 0x%x\n",
+	     availMem,
+	     h2.exec_tmem, h2.exec_tsize, h2.exec_dmem, h2.exec_dsize);
+	  Error::message(buf);
+	}
+#endif
+#endif /* DEBUG */
+	INITIALIZE();
+	FLUSH_CACHE();
+
 	close(fd);
 	return size;
 }
