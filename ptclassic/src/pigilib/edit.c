@@ -502,13 +502,13 @@ long userOptionWord;
 		if (ohOpenFacet(&facet, palettes[i],
 				"schematic", "contents", "r") < 0) {
 		    PrintErr(octErrorString());
-		    break;
+		    continue;
 		}
 		vemOpenWindow(&facet, NULL);
+		FreeOctMembers(&facet);
 	    }
 	}
     }
-    FreeOctMembers(&facet);
     ViDone();
 }
 
