@@ -100,13 +100,16 @@ body ::tycho::EditStack::hyperJump {filename method line} {
     set methodline 0
     set methodline [$editorName findOne 0 0 0 0 $method 1.0 end {}]
     # Return in the following format: "23.53 53"
-    if {$methodline=={}} {return}
+    if {$methodline=={}} {
+        return
+    }
 
     set methodline [lindex $methodline 0]
     set methodline [lindex [split $methodline .] 0]
     set methodline [expr $methodline + $line - 1]
-    # FIXME: after idle doesn't work!!!
-    after idle $editorName seeFragment "\"line $methodline\""
+
+    # Jump to the right line
+    $editorName seeFragment "line $methodline"
 }
 
 #####################################################################
