@@ -22,7 +22,6 @@ Code for functions declared in DEConnect.h
 **************************************************************************/
 
 extern Error errorHandler;
-extern PlasmaList plasmaList;
 
 /**********************************************************
 
