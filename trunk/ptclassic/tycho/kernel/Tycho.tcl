@@ -310,7 +310,16 @@ package require tycho.kernel.html
 package require tycho.edit.textedit
 package require tycho.edit.visedit
 package require tycho.edit.graphedit
-package require tycho.edit.cts
+
+# For now, check for the existence of these new packages
+if [file exists [file join $TYCHO edit cts]] {
+    package require tycho.edit.cts
+}
+
+# For now, check for the existence of these new packages
+if [file exists [file join $TYCHO edit pn]] {
+    package require tycho.edit.pn
+}
 
 package require tycho.util.devtools
 package require tycho.util.tydoc
