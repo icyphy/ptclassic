@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest tytestsh
 
 MISC_FILES = README.txt
 
@@ -61,6 +61,7 @@ TYDOC_DESC =
 # Do make sources so that we ensure that the subdirectories are checked out
 all: sources $(MISC_SRCS)
 	chmod a+x tytest
+	chmod a+x tytestsh
 
 install: all
 
