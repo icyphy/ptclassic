@@ -582,7 +582,7 @@ StringList CGTarget::headerComment(const char* begin, const char* end,
 	
 int CGTarget::systemCall(const char*command,const char*error,const char*host){
 	int i;
-	if(i=rshSystem(host,command,workingDirectory()) != 0 && 
+	if( (i=rshSystem(host,command,workingDirectory())) != 0 && 
           error != NULL)
 		Error::abortRun(error);
 	return i;
