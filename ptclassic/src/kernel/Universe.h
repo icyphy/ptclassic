@@ -74,8 +74,7 @@ private:
 class Universe : public Galaxy, public Runnable {
 public:
 	// print methods
-	StringList printVerbose() const {return print(0);}
-	StringList printRecursive() const {return print(1);}
+	StringList print(int verbose = 0) const;
 
 	// constructor
 	Universe(Target* s,const char* typeDesc) :
@@ -89,9 +88,5 @@ public:
 	const char* className() const {return "Universe";}
 
 	int run() { return Runnable::run();}
-
-protected:
-	// print, possibly recursively
-	StringList print(int recursive) const;
 };
 #endif
