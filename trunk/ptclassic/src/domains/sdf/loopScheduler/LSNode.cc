@@ -91,6 +91,7 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 			int samples = g->samples();
 
 			// remove this intercluster arc
+			LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
 
 			// insert a link to this outside node
@@ -105,7 +106,9 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 		LSNode* outNode = (LSNode*) g->farEndNode();
 		if (!outNode->inActiveCluster()) {
 			int samples = g->samples();
+			LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
+			// FIXME: The makeArc() call below leaks memory 
 			cnode->makeArc(outNode,samples,0);
 		}
 	}
