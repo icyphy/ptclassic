@@ -95,6 +95,7 @@ PL_SRCS= \
  CGCLimit.pl \
  CGCLMS.pl \
  CGCLog.pl \
+ CGCMaxMin.pl \
  CGCModulo.pl \
  CGCModuloInt.pl \
  CGCMpy.pl \
@@ -131,6 +132,8 @@ PL_SRCS= \
  CGCSpread.pl \
  CGCSunSound.pl \
  CGCTable.pl \
+ CGCTableCx.pl \
+ CGCTableInt.pl \
  CGCThresh.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
