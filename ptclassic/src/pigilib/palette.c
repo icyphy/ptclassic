@@ -220,7 +220,9 @@ MkPalIconInPal(facetPtr, dir, palName)
 octObject *facetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT},
+	      palFacet = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF1(!MkPalIcon(facetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
