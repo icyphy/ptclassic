@@ -452,7 +452,7 @@ int fireSource(Star& s, int k) {
 	  	if (port.numberTokens == 0) {
 			Error::abortRun(s,
 			      ": output port has undefined number of tokens");
-			return;
+			return FALSE;
 		}
 		if (port.isItOutput()) {
 			int r = (g->size())/port.numberTokens;
