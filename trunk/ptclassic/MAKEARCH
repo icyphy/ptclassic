@@ -83,7 +83,7 @@ cd ..
 
 # Make subdirectories of tycho
 cd tycho
-foreach x (kernel)
+foreach x (tysh)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/tycho/$x make.template
