@@ -72,22 +72,22 @@ OCT_DEBUG_FLAGS =
 #	      of the OS for this architecture for c++
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
-# flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
+# Flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.  Apparently -DPOSTFIX_OP= is needed for HPPA CC 3.20,
 # but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
 # to find out what version of HPPA CC you are using.
+
 # If you are running under HPUX9, then remove -DPTHPUX10
-# We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc and 
-# pigilib/kernelCalls.cc, however, we can't have _CMA_NOWRAPPERS_ defined
+ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_REENTRANT -D_HPUX_SOURCE
+
+# We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc, 
+# pigilib/kernelCalls.cc, HOFBase.cc and others
+# however, we can't have _CMA_NOWRAPPERS_ defined
 # for octtools/Xpackages/rpc.c and some of the other files in pigilib
-ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+# So, we define it for C++ compiles, but not for C compiles.
+LOCALCCFLAGS =	-D_CMA_NOWRAPPERS_
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
-
-# -Aa turns on ansi c, needed for tkoct
-# The cc man page says that defining _HPUX_SOURCE gives the same name space
-# compatibility as -Ac
-LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
 
 # If you are using gcc and HPUX CC, uncomment the two lines below
 # It turns out that when you order HPUX CC, you don't get a cc compiler
@@ -98,7 +98,11 @@ OCT_CC =	gcc -fwritable-strings
 # If you compile with gcc, then you will need to add -lgcc to the link
 #  or you will get complaints about _eprintf missing
 LIBGCC_SPEC =	-L$(PTOLEMY)/gnu/hppa/lib/gcc-lib/hppa/2.7.2 -lgcc 
-LOCALCFLAGS = 	-DUSG
+# -Aa turns on ansi c, needed for tkoct
+# The cc man page says that defining _HPUX_SOURCE gives the same name space
+# compatibility as -Ac
+#LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa
+LOCALCFLAGS = 	-DUSGo $(CDEBUGFLAGS)
 
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
