@@ -38,7 +38,7 @@ PTOLEMY = ../..
 MAKEVARS =	\
 		"ARCH=$(ARCH)" 
 
-all install clean realclean check sources checkjunk:
+makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in $$x ; \
@@ -46,5 +46,4 @@ all install clean realclean check sources checkjunk:
 	  	cd .. ; \
 	 done
 
-sccsinfo:
-		sccs info
+
