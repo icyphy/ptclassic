@@ -75,7 +75,6 @@ ITCL_SRCS = \
 	DirSearch.itcl \
 	Displayer.itcl \
 	Edit.itcl \
-	EditModel.itcl \
 	EditSearch.itcl \
 	EditSpell.itcl \
 	EditStack.itcl \
@@ -102,6 +101,7 @@ ITCL_SRCS = \
 	Message.itcl \
 	MetaData.itcl \
 	Model.itcl \
+	ModelView.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
