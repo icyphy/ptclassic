@@ -31,10 +31,6 @@ TCL_H_DIR=/usr/tools/tcl/include
 TCL_LIBDIR=/usr/tools/tcl/lib
 
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
-# Rule for compiling C++ programs
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 SDF=$(OBJDIR)/domains/sdf/stars
 DDF=$(OBJDIR)/domains/ddf/stars
@@ -71,10 +67,6 @@ LIBFILES=\
  $(LIBDIR)/libthor.a \
  $(LIBDIR)/libptolemy.a
 
-# kernel objects
-MAIN=$(LIBDIR)/interpmain.o
-KERNOBJS=$(MAIN) $(LIBFILES)
-
 # include files for star names.  These define the symbols SDFSTARS, DESTARS,
 # DDFSTARS, ThorSTARS, and CGSTARS.
 
@@ -110,10 +102,12 @@ all:	makefile ptcl
 ALLSTARS=$(CGDDFSTARS) $(CGSTARS) $(ThorSTARS) $(DESTARS) $(DDFSTARS) $(SDFSTARS)
 
 ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+		rm -f ptcl
 		$(LINKER) $(LINKFLAGS) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
 			$(TARGETS) $(LIBS) -o ptcl
 
 ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+		rm -f ptcl.debug
 		$(LINKER) $(LINKFLAGS_D) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
 			$(TARGETS) $(LIBS) -o ptcl.debug
 
@@ -123,25 +117,17 @@ ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
 install:	$(BINDIR)/ptcl
 
 $(BINDIR)/ptcl:	ptcl
-		cp ptcl $(BINDIR)
+		rm -f $(BINDIR)/ptcl
+		ln ptcl $(BINDIR)
 
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *# ptcl
+# extra stuff to delete
+REALCLEAN_STUFF=ptcl ptcl.debug
 
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
 
-depend:
-		cd $(VPATH); \
-		g++ -MM $(INCL) $(SRCS)|cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
+LIB=dummy		# required since no LIB
+# include common definitions, rules
+include $(ROOT)/common.mk
 
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
