@@ -273,7 +273,7 @@ body ::tycho::Displayer::constructor {args} {
 	uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar
     } {
         # NOTE: keep more options?
-	keep -background -cursor
+	keep -background -cursor -font
     }
 
     # Add  a File menu with a close command so that when there are 
@@ -285,6 +285,8 @@ body ::tycho::Displayer::constructor {args} {
 
     eval itk_initialize $args
     eval preference exclude $this $args
+    preference subscribe $this \
+	    -font menuFont
 
     if $itk_option(-master) {
         set closetxt "Quit"
@@ -376,7 +378,7 @@ body ::tycho::Displayer::attachView {window viewName} {
         uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar$viewName
     } {
         # NOTE: Should we keep more options here?
-        keep -background -cursor
+        keep -background -cursor -font
     }
 
     # Create the status bar
