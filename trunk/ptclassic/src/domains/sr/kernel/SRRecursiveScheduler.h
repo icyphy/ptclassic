@@ -99,9 +99,6 @@ private:
   // The dependency graph of the galaxy
   SRDependencyGraph * dgraph;
 
-  // The schedule of the galaxy
-  SRRecursiveSchedule * schedule;
-
   SequentialList * SCCsOf(Set &);
 
   void fDFSVisit( int, Set &, int &, int * );
