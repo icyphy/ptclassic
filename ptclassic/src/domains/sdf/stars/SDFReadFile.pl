@@ -2,7 +2,7 @@ defstar
 {
     name { ReadFile }
     domain { SDF }
-    version { @(#)SDFReadFile.pl	1.8	7/28/93 }
+    version { $Id$ }
     author { T. M. Parks }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
