@@ -44,17 +44,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "type.h"
 #include "LinkedList.h"
 
+class CqLevelLink;
+
 class DestinedEventList : public LinkedList {
-	// friend class DEStar;
+	friend class DestinedEventListIter;
 
 public:
 	// Constructor 
-	DestinedEventList(); 
+	DestinedEventList() : LinkedList() {}
 
 	// Append to tail and return pointer to element
-	Link * appendGet( Link * obj ); 
+	Link * appendGet( CqLevelLink * obj ); 
 
 	// Clear list
+	// FIXME: This does not work since it does not 
+	// remove the contents of the list. See page
+	// 1-3 of the Kernel Manual
 	void clearList() { LinkedList::initialize(); }
 
 	// Remove an element from the list
@@ -65,6 +70,19 @@ public:
 
 };
 
+class DestinedEventListIter : public LinkedListIter {
+public:
+        DestinedEventListIter(DestinedEventList& sl) : LinkedListIter(sl) {}
+        inline DestinedEventList* next() 
+		{ return (DestinedEventList*)LinkedListIter::next();}
+        inline DestinedEventList* operator++(POSTFIX_OP) 
+		{ return (DestinedEventList*)LinkedListIter::next();}
+        LinkedListIter::reset;
+        LinkedListIter::remove;
+};
+
 #endif
+
+
 
 
