@@ -23,6 +23,6 @@ endif
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
 
-set path = ( $path $PTOLEMY/bin.$ARCH )
+set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
 
 exec $PTOLEMY/bin.$ARCH/ptcl $*
