@@ -34,6 +34,7 @@ Date of last revision:
 ParScheduler :: ParScheduler(BaseMultiTarget* t, const char* logName) {
 	mtarget = t;
 	logFile = logName;
+	logstrm = 0;
 	exGraph = 0;
 	inUniv = TRUE;
 }
@@ -52,15 +53,16 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 			return FALSE;
 		} 
 	} else {
-	       if ( logFile && logFile != '\0' ) {
-		    logstrm.open(logFile);
-	       }
+	       	if ( logFile && logFile != '\0' ) {
+			logstrm_real.open(logFile);
+			logstrm = &logstrm_real;
+		}
 	}
 
-	if (logstrm.good())
-		logstrm << "Starting computeSchedule\n";
+	if (logstrm)
+		*logstrm << "Starting computeSchedule\n";
 
-	exGraph->setLog(&logstrm);
+	exGraph->setLog(logstrm);
 
 	// form the expanded graph
 	if (!exGraph->createMe(galaxy, OSOPreq())) {
@@ -91,8 +93,8 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	// targetPtr setup for each processor
 	parProcs->mapTargets();
 
-	if (logstrm.good()) {
-		logstrm.flush();
+	if (logstrm) {
+		logstrm->flush();
 	}
 
         return TRUE;
@@ -205,9 +207,9 @@ void ParScheduler :: compileRun() {
 		return;
 	}
 
-	if (logstrm.good()) {
-		logstrm << parProcs->displaySubUnivs();
-		logstrm.flush();
+	if (logstrm) {
+		*logstrm << parProcs->displaySubUnivs();
+		logstrm->flush();
 	}
 
 	// run sub-universe in each processor to generate the code

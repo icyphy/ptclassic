@@ -39,7 +39,8 @@ private:
 	
 protected:
 	const char* logFile;
-	pt_ofstream logstrm;	// for logging.
+	pt_ofstream logstrm_real;	// for logging.
+	ostream *logstrm;
 
 	BaseMultiTarget* mtarget;
 	Galaxy* myGal;
