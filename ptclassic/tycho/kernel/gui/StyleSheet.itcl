@@ -128,10 +128,13 @@
 # </dl>
 #
 ensemble ::tycho::stylesheet {
+    #### NOTE: The :: in front of each "set" is required for
+    #### tcl++ (not needed for Itcl)
+
     # Get direct access to a stylesheet
     option access {stylesheet {method {}} args} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Call or return it
 	if { $method == "" } {
@@ -144,12 +147,12 @@ ensemble ::tycho::stylesheet {
     # Get a style parameter
     option get {stylesheet style {param {}}} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Get default style parameter
 	if { $param == "" } {
-	    set param $style
-	    set style [::tycho::userprofile getstyle $stylesheet]
+	    ::set param $style
+	    ::set style [::tycho::userprofile getstyle $stylesheet]
 	}
 
 	# Get it
@@ -175,15 +178,15 @@ ensemble ::tycho::stylesheet {
     # Set a style parameter
     option set {stylesheet style param {value {}}} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Get default style parameter
 	if { $value == "" } {
-	    set value $param
-	    set param $style
-	    set style [::tycho::userprofile getstyle $stylesheet]
+	    ::set value $param
+	    ::set param $style
+	    ::set style [::tycho::userprofile getstyle $stylesheet]
 	}
-        set name [concat $style [split $param .]] 
+        ::set name [concat $style [split $param .]] 
 
         # If this is a master, the parameter may not exist, so add it
         if ![$model exists $name] {
@@ -196,7 +199,7 @@ ensemble ::tycho::stylesheet {
     # Get or set the preferred style
     option style {stylesheet {subscriber {}} {style {}}} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 
 	# Call it
 	$model style $stylesheet $subscriber $style
@@ -214,7 +217,7 @@ ensemble ::tycho::stylesheet {
     # Subscribe options
     option subscribe {subscriber stylesheet args} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Call it
 	eval $model subscribe options $subscriber $args
@@ -223,7 +226,7 @@ ensemble ::tycho::stylesheet {
     # Unsubscribe options
     option unsubscribe {subscriber stylesheet args} {
 	# Make sure it's loaded
-	set model [::tycho::StyleSheet::load $stylesheet]
+	::set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Call it
 	eval $model unsubscribe options $subscriber $args
@@ -726,7 +729,7 @@ body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
             if { $args == "" } {
                 # Unsubscribe from everything
 		catch {unset _widgetstyle($subscriber)}
-		foreach i [array names _widgetoptions([list $subscriber * *]) {
+		foreach i [array names _widgetoptions([list $subscriber * *])] {
 		    unset _widgetoptions($i)
 		}
 	    } else {
