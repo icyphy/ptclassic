@@ -77,7 +77,7 @@ option add *Idoc.textWidth 32 widgetDefault
 # </tcl></pre>
 #
 class ::tycho::Idoc {
-    inherit tycho::File
+    inherit ::tycho::File
 
     ##########################################################################
     ####                            options                               ####
