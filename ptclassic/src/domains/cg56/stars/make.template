@@ -49,16 +49,13 @@ PL_SRCS= \
  CG56FixRamp.pl \
  CG56FixRect.pl \
  CG56FixSum.pl \
- CG56FixTable.pl \
- CG56FixThresh.pl \
- CG56HostAIN.pl \
- CG56HostIn.pl \
  CG56HostOut.pl \
  CG56HostSlider.pl \
  CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
+ CG56InterpTable.pl \
  CG56IntMult.pl \
  CG56IntProduct.pl \
  CG56IntQuantizer.pl \
