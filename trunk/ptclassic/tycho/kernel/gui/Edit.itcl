@@ -222,9 +222,6 @@ class ::tycho::Edit {
     # Select everything in the specified range.
     method selectRange {start stop}
 
-    # Query the user for an alternative font.
-    method setFont {}
-
     # Check the spelling.
     method spellCheck {}
 
@@ -652,9 +649,6 @@ body ::tycho::Edit::constructor {args} {
         
         # Add a Format menu
         $myMenubar addMenu Format -underline 1
-        
-        $myMenubar add "Font..." Format -underline 0 \
-                -command "$this setFont"
         
         $myMenubar addSeparator Format
         
@@ -1777,20 +1771,6 @@ body ::tycho::Edit::selectRange {start stop} {
     undoBoundary
     $text see $start
     $text tag add sel $start $stop
-}
-
-###################################################################
-#### setFont
-# Query the user for an alternative font.  This may be replaced in
-# the future with a simpler font handler that just controls the size.
-#
-body ::tycho::Edit::setFont {} {
-    set ifont [cget -textfont]
-    set wname [::tycho::autoName $itk_component(hull).font]
-    ::tycho::Dialog::new FontManager $wname \
-	    -initialfont $ifont \
-	    -okcommand \
-	    "$this configure -textfont \[$wname getCurrentFont\]"
 }
 
 #####################################################################
