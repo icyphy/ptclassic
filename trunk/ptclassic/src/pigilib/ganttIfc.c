@@ -313,3 +313,53 @@ char *stars[];
     return 1;
 }
 
+void
+FindAndMarkColor(facetP, name, pattern,Color)
+octObject *facetP;
+char *name;
+int pattern;
+char *Color;
+{
+        static RgbValue color;
+        if(strcmp(Color,"red")==0)
+        {
+                color.red = 65535;
+                color.green = 0;
+                color.blue = 0;
+        }
+        else if(strcmp(Color,"blue")==0)
+        {
+                color.red = 0;
+                color.green = 0;
+                color.blue = 65535;
+        }
+        else if(strcmp(Color,"green")==0)
+        {
+                color.red = 0;
+                color.green = 65535;
+                color.blue = 0;
+        }
+        else if(strcmp(Color,"orange")==0)
+        {
+                color.red = 65535;
+                color.green = 42405;
+                color.blue = 0;
+        }
+        else if(strcmp(Color,"violet")==0)
+        {
+                color.red = 61166;
+                color.green = 33410;
+                color.blue = 61166;
+        }
+        else if(strcmp(Color,"oilve")==0)
+        {
+                color.red = 27499;
+                color.green = 36494;
+                color.blue = 8995;
+        }
+/* name contains the universe name as well, which must be stripped */
+        name = incr(name);
+        if (!name) return;
+        FrameStar(facetP, name, &color, findSets, &findDepth, pattern);
+}
+
