@@ -8,6 +8,7 @@
 #include "StringList.h"
 #include "DataStruct.h"
 #include "dataType.h"
+#include "Fix.h"
 // include all of the Complex class except the stream functions
 #include "ComplexSubset.h"
 
@@ -64,6 +65,7 @@ public:
 	virtual operator float () const = 0;
 	virtual operator double () const = 0;
 	virtual operator Complex () const = 0;
+        virtual operator Fix () const =  0;
 
 	// print Particle
 	virtual StringList print () const = 0;
@@ -75,6 +77,7 @@ public:
 	virtual void operator << (int) = 0;
 	virtual void operator << (double) = 0;
 	virtual void operator << (const Complex&) = 0;
+        virtual void operator << (const Fix&) = 0;
 
 	// Copy a Particle -- since Stars must be able to
 	// assign Particles in type-independent fashion,
@@ -140,6 +143,7 @@ public:
 	operator double () const;
 	operator float () const;
 	operator Complex () const;
+        operator Fix () const;
 
 	StringList print() const;
 
@@ -154,6 +158,7 @@ public:
 	void operator << (int i);
 	void operator << (double f);
 	void operator << (const Complex& c);
+        void operator << (const Fix& x);
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -185,6 +190,7 @@ public:
         operator double () const;
 	operator float () const;
 	operator Complex () const;
+        operator Fix () const;
 
 	StringList print() const;
  
@@ -199,6 +205,7 @@ public:
         void operator << (int i);
         void operator << (double f);
         void operator << (const Complex& c);
+        void operator << (const Fix& x);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -230,6 +237,7 @@ public:
         operator double () const;
 	operator float () const;
 	operator Complex () const;
+        operator Fix () const;
 
 	StringList print() const;
  
@@ -246,6 +254,7 @@ public:
         void operator << (int i);
         void operator << (double f);
 	void operator << (const Complex& c);
+        void operator << (const Fix& x);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -260,6 +269,57 @@ public:
 
  private:
         Complex data;
+};
+
+        /////////////////////////////////////
+        // class FixParticle
+        /////////////////////////////////////
+ 
+class FixParticle : public Particle
+{
+public:
+        // Tell this world this Particle contains a Fix
+        DataType type() const;
+
+        // Cast to an int, double, and Complex
+        operator int () const;
+        operator double () const;
+        operator float () const;
+        operator Complex () const;
+        operator Fix () const;
+
+        StringList print() const;
+
+        // Initialize
+        FixParticle();
+        FixParticle(int len, int intBits);
+        FixParticle(double& d);
+        FixParticle(int len, int intBits, double& d);
+        FixParticle(FixParticle& x);
+        FixParticle(int len, int intBits, FixParticle& x);
+
+        // Wash the Particle
+        void initialize();
+
+        // Load up with data
+        void operator << (int i);
+        void operator << (double f);
+        void operator << (const Complex& c);
+        void operator << (const Fix& x);
+
+        // Copy the Particle
+        Particle& operator = (const Particle&);
+
+        // compare particles
+        int operator == (const Particle&);
+
+        // clone the Particle, and remove clone
+        Particle* clone() const;
+        Particle* useNew() const;
+        void die();
+
+private:
+        Fix data;
 };
 
 // inline functions to handle other types correctly
