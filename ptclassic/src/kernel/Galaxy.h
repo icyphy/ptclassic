@@ -134,6 +134,9 @@ public:
 
 	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
 	Galaxy& asGalaxy() const; // { return *this;}
+
+	// my domain
+	char* myDomain;
 };
 
 
