@@ -61,10 +61,12 @@ See the SDFRaisedCos star.
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
 			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
-					int(symbol_interval), excessBW);
+					int(symbol_interval),
+					double(excessBW));
 		    else
 			taps[i] = Ptdsp_RaisedCosine(i - center,
-					int(symbol_interval), excessBW);
+					int(symbol_interval),
+					double(excessBW));
 		}
 		C50FIR :: setup();
 	}
