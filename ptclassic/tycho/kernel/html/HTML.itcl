@@ -1992,9 +1992,13 @@ proc HMset_image {win handle src} {
                 # when we're not on UNIX, error is caught
                 catch {
                     set cachefile [::tycho::resource cachefile $image]
-                    eval exec convert -quality 5 $cachefile $cachefile.gif
-                    eval exec rm $cachefile
-                    set image $cachefile.gif
+                    # Take out extension (.jpg, .jpeg, etc)...
+                    set newcachefile {}
+                    regsub $ext $cachefile {} newcachefile
+                    ::puts "CACHEFILE:$cachefile   IMAGE:$image"
+                    eval exec convert -quality 5 $cachefile $newcachefile.gif
+                    #file delete $cachefile
+                    set image $newcachefile.gif
                 }
             }
 
