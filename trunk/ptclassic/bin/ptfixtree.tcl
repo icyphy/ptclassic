@@ -1,4 +1,4 @@
-#!/usr/tools/tcl/bin/wish -f
+#!/usr/tools/bin/wish -f
 #
 # ptfixtree (pft)
 # 
@@ -36,7 +36,7 @@ proc pftUsage { {msg} "Usage Information" } {
     exit 1
 }
 
-source ~kennard/src/tkgraph/lib/xpgetopt.tcl
+source ~ptolemy/tcl/lib/topgetopt.tcl
 
 proc pftGetFullFacet { facet } {
     if { "$facet"=="" } {
@@ -62,12 +62,19 @@ proc pftGetContentsFacet { facet } {
 }
 
 proc pftOctMvLib { facet oldpat newpat } {
-    global path_octmvlib
+    global path_octmvlib do_verbose
 
     set facet [pftGetFullFacet $facet]
     puts stdout "    $facet: $oldpat --> $newpat"
-    set r [exec $path_octmvlib -N $newpat -O $oldpat $facet]
-    puts stdout $r
+    if [catch {exec $path_octmvlib -N $newpat -O $oldpat $facet} result] {
+	puts stderr "********* octmvlib failed ***********"
+	puts stderr "failed on: $facet: $oldpat --> $newpat"
+	puts stderr "$result"
+	exit 1
+    }
+    if { $do_verbose } {
+        puts stdout "\t\t$result"
+    }
 }
 
 proc pftOctLs { facet } {
@@ -209,7 +216,7 @@ proc pftPromptAndReplace { facet master } {
     	set newcell [pftPromptSubst $oldcell]
 	pftSetCellMap $oldcell $newcell
     }
-    pftOctMvLib $facet $oldcell $newcell
+    pftOctMvLib $facet $oldcell: $newcell
 }
 
 
@@ -277,7 +284,7 @@ proc pftProcessArgs { } {
     set path_octmvlib ""
     set path_octls ""
 
-    set argCells [getopt {
+    set argCells [topgetopt {
       {v do_verbose boolean} 
       {R do_recur boolean} 
       {within within_paths append} 
@@ -300,8 +307,9 @@ proc pftProcessArgs { } {
 	}
 	set env(ARCH) $arch
     }
+#        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(ARCH)/octmvlib
     if { $path_octmvlib == "" } {
-        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(ARCH)/octmvlib
+        set path_octmvlib $env(PTOLEMY)/bin.$env(ARCH)/octfix
     }
     if { ![file isfile $path_octmvlib] || ![file exec $path_octmvlib] } {
 	puts stderr "Can't find octmvlib program."
