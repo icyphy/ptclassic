@@ -40,7 +40,10 @@ install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
 INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
-C_INCL=-I$(TCL_INCDIR)
+
+# include the headers from the kernel, even though C++ objects should be
+# avoided.  As of this writing, ieee.h is the only file referenced.
+C_INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
 
 lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
