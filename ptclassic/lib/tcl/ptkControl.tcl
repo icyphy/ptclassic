@@ -44,7 +44,7 @@ set ptkRunFlag(main) IDLE
 # It is equal to .run_$octHandle.
 
 #######################################################################
-# Set the ptkRunFlag to IDLE, indicating the run is over, and pop up the
+# Set the ptkRunFlag to FINISHED, indicating the run is over, and pop up the
 # GO button.
 #
 proc ptkClearRunFlag { name octHandle } {
@@ -135,7 +135,7 @@ proc ptkRunControl { name octHandle } {
 	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
 	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
-		-command "ptkStop $name" -width 14
+		-command "ptkStop $name $octHandle" -width 14
 	pack append $ptkControlPanel.panel \
 	    $ptkControlPanel.panel.gofr {left expand fill expand} \
 	    $ptkControlPanel.panel.pause {left expand fill expand} \
@@ -146,10 +146,6 @@ proc ptkRunControl { name octHandle } {
     frame $ptkControlPanel.debug -bd 10
 
     # Animation is off by default
-    # Note that since pre and post actions are global, there is no point
-    # in associating the universe name with the ptkGrAnimation flag.
-    global ptkGrAnimationFlag
-    set ptkGrAnimationFlag 0
     ptkGrAnimation 0
 
     frame $ptkControlPanel.disfr
@@ -179,11 +175,11 @@ proc ptkRunControl { name octHandle } {
 
     bind $ptkControlPanel.iter.entry <Return> \
 		"ptkGo $name $octHandle"
-    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name"
+    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name $octHandle"
     bind $ptkControlPanel.iter.entry <space> "ptkPause $name $octHandle"
     bind $ptkControlPanel <Return> "ptkGo $name $octHandle"
     bind $ptkControlPanel <space> "ptkPause $name $octHandle"
-    bind $ptkControlPanel <Escape> "ptkStop $name"
+    bind $ptkControlPanel <Escape> "ptkStop $name $octHandle"
     bind $ptkControlPanel <Control-d> \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
 }
@@ -206,7 +202,7 @@ proc ptkSetOrClearDebug { name octHandle } {
 	    button $w.debug.left.buttons.step -text "STEP" \
 		-command "ptkStep $name $octHandle" -width 9
 	    button $w.debug.left.buttons.abort -text "ABORT" \
-		-command "ptkAbort $name" -width 9
+		-command "ptkAbort $name $octHandle" -width 9
 	    pack append $w.debug.left.buttons \
 	        $w.debug.left.buttons.step {left fill expand} \
 	        $w.debug.left.buttons.abort {left fill expand}
@@ -237,18 +233,12 @@ proc ptkSetOrClearDebug { name octHandle } {
 	# Animation is off by default
 	# Note that since pre and post actions are global, there is no point
 	# in associating the universe name with the Animation flags.
-	global ptkGrAnimationFlag ptkTxAnimationFlag
-	set ptkGrAnimationFlag 0
 	ptkGrAnimation 0
-	set ptkTxAnimationFlag 0
 	ptkTxAnimation 0
 	ptkUpdateCount $name $octHandle
     } {
 	# Turning debug off.  Turn off animation first.
-	global ptkGrAnimationFlag ptkTxAnimationFlag
-	set ptkGrAnimationFlag 0
 	ptkGrAnimation 0
-	set ptkTxAnimationFlag 0
 	ptkTxAnimation 0
 	# Close control panel.
 	catch {pack unpack $w.debug}
@@ -273,14 +263,18 @@ proc ptkUpdateCount { name octHandle } {
 # Procedure to turn on or off graphical animation
 #
 proc ptkGrAnimation { on} {
-    global ptkGrAnimationAction
+
+    global ptkGrAnimationAction ptkGrAnimationFlag
+
+    # Note that since pre and post actions are global, there is no point
+    # in associating the universe name with the ptkGrAnimation flag.
+    set ptkGrAnimationFlag $on
     if [info exists ptkGrAnimationAction] {
  	cancelAction $ptkGrAnimationAction
  	unset ptkGrAnimationAction
     }
     if {$on} {
-	set ptkGrAnimationAction \
-	    [registerAction pre "ptkHighlightStar"]
+	set ptkGrAnimationAction [registerAction pre "ptkHighlightStar"]
     } {
 	ptkClearHighlights
     }
@@ -294,18 +288,15 @@ proc ptkGrAnimation { on} {
 proc ptkHighlightStar { star } {
     ptkClearHighlights
     ptkHighlight $star
-    after 150
+    update
 }
 
 #######################################################################
 # Procedure to turn on or off textual animation
 #
-proc ptkTxAnimation { on} {
+proc ptkTxAnimation { on } {
     global ptkTxAnimationFlag ptkTxAnimationAction
-    if [info exists ptkTxAnimationAction] {
- 	cancelAction $ptkTxAnimationAction
- 	unset ptkTxAnimationAction
-    }
+    set ptkTxAnimationFlag $on
     set win .ptkTxAnimationWindow
     if {$on} {
 	if {![winfo exists $win]} {
@@ -323,11 +314,16 @@ proc ptkTxAnimation { on} {
 	    button $win.ok -text "DISMISS" -command "ptkTxAnimation 0"
             pack append $win $win.msg {top fill} $win.text {top fill expand} \
 		$win.ok {bottom fillx}
+	    tkwait visibility $win
 	}
-	set ptkTxAnimationAction \
-	    [registerAction pre "ptkPrintStarName"]
+    }
+    if [info exists ptkTxAnimationAction] {
+ 	cancelAction $ptkTxAnimationAction
+ 	unset ptkTxAnimationAction
+    }
+    if {$on} {
+	set ptkTxAnimationAction [registerAction pre "ptkPrintStarName"]
     } {
-	set ptkTxAnimationFlag 0
 	catch {destroy $win}
     }
 }
@@ -348,13 +344,18 @@ proc ptkPrintStarName { star } {
 # Procedure to delete a control window
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
-    global ptkRunFlag
+    global ptkRunFlag ptkDebug
+
+    # Turn debug off
+    set ptkDebug($name) 0
+    ptkSetOrClearDebug $name $octHandle
+
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
 	return
     }
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
-	ptkStop $name
+	ptkStop $name $octHandle
 	update
     }
     if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
@@ -362,7 +363,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	after 200 ptkRunControlDel $name $window $octHandle $defNumIter
 	return
     }
-    unset ptkRunFlag($name)
+    catch {unset ptkRunFlag($name)}
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$window.iter.entry get]} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
@@ -373,7 +374,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 
 #######################################################################
 # basic procedure to stop a run
-proc ptkStop { name } {
+proc ptkStop { name octHandle } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -385,11 +386,12 @@ proc ptkStop { name } {
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
     halt
+    after 10000 "ptkForceReset STOP_PENDING $name $octHandle"
 }
 
 #######################################################################
 # procedure to stop a run without running wrapup
-proc ptkAbort { name } {
+proc ptkAbort { name octHandle } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -401,6 +403,17 @@ proc ptkAbort { name } {
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) ABORT
     halt
+    after 10000 "ptkForceReset ABORT $name $octHandle"
+}
+
+#######################################################################
+# Safety net: if after some time the ptkRunFlag has not been reset,
+# then reset it.
+proc ptkForceReset { trigger name octHandle } {
+    global ptkRunFlag
+    if {$ptkRunFlag($name) == $trigger} {
+	ptkClearRunFlag $name $octHandle
+    }
 }
 
 #######################################################################
@@ -484,9 +497,8 @@ proc ptkGo {name octHandle} {
         set numIter [$w.iter.entry get]
         run $numIter
 	if {$ptkRunFlag($name) != {ABORT}} {wrapup}
-	ptkClearRunFlag $name $octHandle
     } msg] == 1} {
-	ptkClearRunFlag $name $octHandle
 	error $msg
     }
+    ptkClearRunFlag $name $octHandle
 }
