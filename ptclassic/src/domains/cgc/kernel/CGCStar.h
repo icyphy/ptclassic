@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee and J. T. Buck
+ Programmer: S. Ha, E. A. Lee and J. T. Buck
 
  This is the baseclass for stars that generate C language code
 
@@ -62,7 +62,7 @@ public:
 
 protected:
 	// access to target (cast is safe: always a CGCTarget)
-	CGCTarget* target() {
+	CGCTarget* targ() {
 		return (CGCTarget*)myTarget();
 	}
 
@@ -109,6 +109,7 @@ protected:
 	void moveDataBetweenShared();
 
 	// If automatic type conversion is necessary, do it.
+	// Currently, support complex type.
 	void doTypeConversion();
 
 	// get the actual buffer reference.
@@ -119,6 +120,8 @@ private:
 	// Note that CGCTarget is a friend class to access these methods
 	// freely.
 
+	// This flag is set when no data structure is needed for this star
+	// code.
 	int emptyFlag;
 
 	// declare PortHoles and States
