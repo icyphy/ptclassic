@@ -41,7 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ComplexState.h"
 #include "Tokenizer.h"
 #include <ctype.h>
-#include <ostream.h>
 
 // The following is defined in VHDLDomain.cc -- this forces that module
 // to be included if any VHDL stars are linked in.
@@ -110,37 +109,23 @@ StringList VHDLStar :: expandRef(const char* name) {
   
   // Check if it's a State reference.
   if ((state = stateWithName(name)) != 0) {
+    StringList type;
+    StringList initVal;
+
     registerState(state);
     ref << starSymbol.lookup(state->name());
+    type = state->type();
+    initVal = state->initValue();
 
     // Register this variable reference for use by target.
-    VHDLVariableListIter varNext(firingVList);
-    VHDLVariable* nvar;
-    int isNewVar = 1;
-    while ((nvar = varNext++) != 0) {
-      // Create temporary StringLists so as to allow safe (const char*) casts.
-      StringList refTemp = ref;
-      StringList nameTemp = (*nvar).name();
-      const char* nref = (const char*) refTemp;
-      const char* nvname = (const char*) nameTemp;
-      if (!strcmp(nref,nvname)) isNewVar = 0;
-    }
-    if (isNewVar == 1) {
-      // Allocate memory for a new VHDLVariable and StringList.
-      // Create temporary StringList so as to allow safe (const char*) cast.
-      VHDLVariable* newvar = new VHDLVariable;
-      // The following new is necessary to keep entry from being corrupted.
-      StringList* newref = new StringList;
-      *newref = ref;
-      const char* refTemp = (const char*) (*newref);
-      (*newvar).setName(refTemp);
-      firingVList.put(*newvar);
-      firingVList.print();
-    }
+    registerVariable(ref, type, initVal);
   }
   
   // Check if it's a PortHole reference.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    StringList direction;
+    StringList type;
+    
     ref << port->getGeoName();
 
     // Use subscript notation for buffers of size larger than one
@@ -149,20 +134,14 @@ StringList VHDLStar :: expandRef(const char* name) {
       ref << "_";
       ref << port->bufPos();
     }
-
+    direction = port->direction();
+    type = port->dataType();
+    
     // Register this port reference for use by target.
-    StringListIter portNext(firingPortList);
-    const char* nport;
-    int isNewPort = 1;
-    while ((nport = portNext++) != 0) {
-      if (!strcmp(ref,nport)) isNewPort = 0;
-    }
-    if (isNewPort == 1) {
-      firingPortList << ref;
-    }
+    registerPort(ref, direction, type);
   }
 
-  // Error:  couldn't find a State or a PortHole with given name
+  // Error:  couldn't find a State or a PortHole with given name.
   else {
     codeblockError(name, " is not defined as a state or port");
     ref.initialize();
@@ -173,93 +152,87 @@ StringList VHDLStar :: expandRef(const char* name) {
 
 // Reference to State or PortHole with offset.
 StringList VHDLStar :: expandRef(const char* name, const char* offset) {
-    StringList ref;
-    State *state, *offsetState;
-    StringList offsetVal;
-    VHDLPortHole* port;
-    StringList portName = expandPortName(name);
+  StringList ref;
+  State *state, *offsetState;
+  StringList offsetVal;
+  VHDLPortHole* port;
+  StringList portName = expandPortName(name);
 
-    ref.initialize();
+  ref.initialize();
     
-    // Use State value as offset (if such a State exists).
-    if ((offsetState = stateWithName(offset)) != NULL) {
-	// Get State value as a string.
-      	if (offsetState->isA("IntState")) {
-	    offsetVal = expandVal(offset);
-	    offset = offsetVal;
-	}
-	else {
-	    codeblockError(offset, " is not an IntState");
-	    ref.initialize();
-	    return ref;
-	}
+  // Use State value as offset (if such a State exists).
+  if ((offsetState = stateWithName(offset)) != NULL) {
+    // Get State value as a string.
+    if (offsetState->isA("IntState")) {
+      offsetVal = expandVal(offset);
+      offset = offsetVal;
     }
-
-    // Expand array State reference.
-    if ((state = stateWithName(name)) != NULL) {
-      	if (state->isArray()) {
-	    registerState(state);
-	    ref << starSymbol.lookup(state->name());
-	    ref << "_" << offset;
-	}
-	else {
-	    codeblockError(name, " is not an array state");
-	    ref.initialize();
-	}
-
-	// Register this variable reference for use by target.
-	StringListIter varNext(firingVarList);
-	const char* nvar;
-	int isNewVar = 1;
-	while ((nvar = varNext++) != 0) {
-	  if (!strcmp(ref,nvar)) isNewVar = 0;
-	}
-	if (isNewVar == 1) {
-	  firingVarList << ref;
-	}
+    else {
+      codeblockError(offset, " is not an IntState");
+      ref.initialize();
+      return ref;
     }
+  }
 
-    // Expand PortHole reference with offset.
-    else if (port = (VHDLPortHole*)genPortWithName(portName)) {
-	ref << port->getGeoName();
+  // Expand array State reference.
+  if ((state = stateWithName(name)) != NULL) {
+    StringList type;
+    StringList initVal;
 
-	// Use array notation for large buffers and for embedded buffers
-	// which are referenced through a pointer.
-	if (port->bufSize() > 1) {
-	    ref << "_";
+    if (state->isArray()) {
+      registerState(state);
+      ref << starSymbol.lookup(state->name());
+      ref << "_" << offset;
+    }
+    else {
+      codeblockError(name, " is not an array state");
+      ref.initialize();
+    }
+    type = state->type();
+    initVal = state->initValue();
 
-	    // generate constant for index from state
-	    if (offsetState != NULL) {
-		int offset = *(IntState*)offsetState;
-		ref << ( (port->bufPos() - offset + port->bufSize())
-			 % port->bufSize() );
-	      }
+    // Register this variable reference for use by target.
+    registerVariable(ref, type, initVal);
+  }
 
-	    // generate constant for index
-	    else {
-		// must first convert offset from char* to int
-		int offsetInt = 0;
-		for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
-		    offsetInt = 10*offsetInt + (offset[i]-'0');
-		  }
-		ref << ( (port->bufPos() - offsetInt + port->bufSize())
-			 % port->bufSize() );
-	      }
-	  }
+  // Expand PortHole reference with offset.
+  else if (port = (VHDLPortHole*)genPortWithName(portName)) {
+    StringList direction;
+    StringList type;
 
-	// Register this port reference for use by target.
-	StringListIter portNext(firingPortList);
-	const char* nport;
-	int isNewPort = 1;
-	while ((nport = portNext++) != 0) {
-	  if (!strcmp(ref,nport)) isNewPort = 0;
-	}
-	if (isNewPort == 1) {
-	  firingPortList << ref;
-	}
+    ref << port->getGeoName();
+
+    // Use array notation for large buffers and for embedded buffers
+    // which are referenced through a pointer.
+    if (port->bufSize() > 1) {
+      ref << "_";
+
+      // generate constant for index from state
+      if (offsetState != NULL) {
+	int offset = *(IntState*)offsetState;
+	ref << ( (port->bufPos() - offset + port->bufSize())
+		 % port->bufSize() );
       }
 
-    return ref;
+      // generate constant for index
+      else {
+	// must first convert offset from char* to int
+	int offsetInt = 0;
+	for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
+	  offsetInt = 10*offsetInt + (offset[i]-'0');
+	}
+	ref << ( (port->bufPos() - offsetInt + port->bufSize())
+		 % port->bufSize() );
+      }
+    }
+    direction = port->direction();
+    type = port->dataType();
+    
+    // Register this port reference for use by target.
+    registerPort(ref, direction, type);
+  }
+
+  return ref;
 }
 
 // Expand an expression interspersing an operator in a list of arguments.
@@ -319,11 +292,30 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char*
 
 // Assignment operator, depending on variable or signal.
 StringList VHDLStar :: expandAssign(const char* name) {
-    // if name belongs to a variable, use ":="
-    // if name belongs to a signal, use "<="
-    StringList assign;
+  StringList assign;
+  State* state;
+  VHDLPortHole* port;
+  StringList portName = expandPortName(name);
+
+  assign.initialize();
+  
+  // Check if it's a State reference.
+  if ((state = stateWithName(name)) != 0) {
     assign << ":=";
-    return assign;
+  }
+
+  // Check if it's a PortHole reference.
+  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    assign << "<=";
+  }
+
+  // Error:  couldn't find a State or a PortHole with given name.
+  else {
+    codeblockError(name, " is not defined as a state or port");
+    assign.initialize();
+  }
+
+  return assign;
 }
 
 void VHDLStar :: registerState(State* state) {
@@ -345,9 +337,10 @@ void VHDLStar :: initialize() {
 // Run this star.
 int VHDLStar :: run() {
 	int status = 0;
-	status = targ()->runIt(this);
 	firingPortList.initialize();
-	firingVarList.initialize();
+	firingGenericList.initialize();
+	firingVariableList.initialize();
+	status = targ()->runIt(this);
 	return status;
 }
 
@@ -552,6 +545,72 @@ StringList VHDLStar :: initCodeState(const State* state) {
 	}
     }
     return code;
+}
+
+// Register port reference for use by target.
+void VHDLStar :: registerPort(StringList ref, StringList direction,
+			      StringList type) {
+  VHDLPortListIter portNext(firingPortList);
+  VHDLPort* nport;
+  int isNewPort = 1;
+  while ((nport = portNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList refTemp = ref;
+    StringList nameTemp = (*nport).name;
+    if (!strcmp(refTemp,nameTemp)) isNewPort = 0;
+  }
+  if (isNewPort == 1) {
+    // Allocate memory for a new VHDLPort and StringList.
+    VHDLPort* newport = new VHDLPort;
+    (*newport).name = ref;
+    (*newport).direction = direction;
+    (*newport).type = type;
+    firingPortList.put(*newport);
+  }
+}
+
+// Register generic reference for use by target.
+void VHDLStar :: registerGeneric(StringList ref, StringList type,
+				 StringList defaultVal) {
+  VHDLGenericListIter genericNext(firingGenericList);
+  VHDLGeneric* ngen;
+  int isNewgen = 1;
+  while ((ngen = genericNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList refTemp = ref;
+    StringList nameTemp = (*ngen).name;
+    if (!strcmp(refTemp,nameTemp)) isNewgen = 0;
+  }
+  if (isNewgen == 1) {
+    // Allocate memory for a new VHDLGeneric and StringList.
+    VHDLGeneric* newgen = new VHDLGeneric;
+    (*newgen).name = ref;
+    (*newgen).type = type;
+    (*newgen).defaultVal = defaultVal;
+    firingGenericList.put(*newgen);
+  }
+}
+
+// Register variable reference for use by target.
+void VHDLStar :: registerVariable(StringList ref, StringList type,
+				  StringList initVal) {
+  VHDLVariableListIter varNext(firingVariableList);
+  VHDLVariable* nvar;	
+  int isNewVar = 1;
+  while ((nvar = varNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList refTemp = ref;
+    StringList nameTemp = (*nvar).name;
+    if (!strcmp(refTemp,nameTemp)) isNewVar = 0;
+  }
+  if (isNewVar == 1) {
+    // Allocate memory for a new VHDLVariable and StringList.
+    VHDLVariable* newvar = new VHDLVariable;
+    (*newvar).name = ref;
+    (*newvar).type = type;
+    (*newvar).initVal = initVal;
+    firingVariableList.put(*newvar);
+  }
 }
 
 ISA_FUNC(VHDLStar,CGStar);

@@ -51,15 +51,11 @@ public:
 	// This is public so that VHDLTarget and other targets can access it.
 	StateList referencedStates;
 
-	// Lists of all port and variable references in a firing.
-	// This is public so that VHDLTarget and other targets can access it.
-	StringList firingPortList;
-	StringList firingVarList;
-
 	// Lists of VHDL ports and variables referenced.
 	// This is public so that VHDLTarget and other targets can access it.
-	VHDLPortList firingPList;
-	VHDLVariableList firingVList;
+	VHDLPortList firingPortList;
+	VHDLGenericList firingGenericList;
+	VHDLVariableList firingVariableList;
 
 	// Add a State to the list of referenced States.
 	void registerState(State*);
@@ -116,6 +112,15 @@ private:
 	StringList initCodeOffset(const VHDLPortHole*);
 	StringList initCodeState(const State*);
 
+	// Register port reference for use by target.
+	void registerPort(StringList ref, StringList direction,
+			  StringList type);
+	// Register generic reference for use by target.
+	void registerGeneric(StringList ref, StringList type,
+			  StringList defaultVal);
+	// Register variable reference for use by target.
+	void registerVariable(StringList ref, StringList type,
+			      StringList initVal);
 };
 
 #endif
