@@ -52,12 +52,12 @@ public:
 	// initialize the object
 	virtual void initialize();
 
-	// method to dump all info, must be redefined
-	virtual StringList printVerbose () = 0;
+	// method to print top-level info.  MUST BE REDEFINED
+	virtual StringList printVerbose () const = 0;
 
 	// print all info at all levels.  Same as printVerbose
 	// unless redefined
-	virtual StringList printRecursive ();
+	virtual StringList printRecursive () const;
 
 	// make destructors for all NamedObjs virtual
 	virtual ~NamedObj();

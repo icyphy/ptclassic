@@ -35,6 +35,9 @@ StringList NamedObj :: readFullName () const
 // is more efficient spacewise (and no time penalty) to put them here.
 void NamedObj::initialize() {}
 
-StringList NamedObj::printRecursive() { return printVerbose ();}
+// printing methods.  printVerbose() must always be redefined.
+// by default, printRecursive is the same as printVerbose
+
+StringList NamedObj::printRecursive() const { return printVerbose ();}
 
 NamedObj::~NamedObj() {}
