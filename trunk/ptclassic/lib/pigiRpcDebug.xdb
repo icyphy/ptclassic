@@ -7,7 +7,8 @@
 
 dbgcmdfile=$HOME/.xdbrc
 
-if [ -f $dbgcmdfile && ! -f $dbgcmdfile.bak ]; then
+if [ -f $dbgcmdfile -a ! -f $dbgcmdfile.bak ]; then
+	echo "Saving your old $dbgcmdfile to $dbgcmdfile.bak"
 	cp $dbgcmdfile $dbgcmdfile.bak
 fi
 
