@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .Id "hard limiter"
 The star hard limits the values of input samples to be in the range
@@ -52,9 +52,12 @@ The star hard limits the values of input samples to be in the range
 	lar	AR1,#$addr(input)		;Address input		=> AR1
 $label(end)
 	mar	*,AR1				;
-	bldd	*,#$addr(output)		;ouput = val at address in AR1
+	bldd	*,#$addr(output)		;output = val at address in AR1
 	}
 
+	constructor {
+		noInternalState();
+	}
  	go {
  		addCode(limitblock);
  	}

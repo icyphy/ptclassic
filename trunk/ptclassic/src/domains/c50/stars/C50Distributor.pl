@@ -15,7 +15,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 control library }
+	location { C50 main library }
 	explanation {
 .Ir "alternating data streams"
 Distributes an input signal among two outputs, alternating samples.
@@ -33,6 +33,9 @@ Distributes an input signal among two outputs, alternating samples.
 		type {int}
 		default {1}
 		desc {Number of particles in a block.}
+	}
+	constructor {
+		noInternalState();
 	}
 	setup {
 		int n = output.numberPorts();

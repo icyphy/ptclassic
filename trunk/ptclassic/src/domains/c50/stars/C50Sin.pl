@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 This star computes the sine of the input, which must be in the range
 [-1.0, 1.0).  The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
@@ -62,7 +62,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 	mar     *,AR0			;
 	lar     AR0,#$addr(input)	;Address input		=> AR0
 	lar     AR7,#$addr(output)	;Address output		=> AR1
-	bit     *			;Bit 15 = 1 in input (negativ value) ?
+	bit     *			;Bit 15 = 1 in input (negative value) ?
 	lacc    *			;Accu =  input (x)  
 	and     #0fb00h			;normalize input value for table (x1)
 	samm    INDX    		;store Accu in INDX

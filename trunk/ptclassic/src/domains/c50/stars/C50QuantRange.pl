@@ -6,14 +6,14 @@ The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
 	version { $Id$ }
-	author { A. Baesnch }
+	author { A. Baensch }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .PP
 The star quantizes the input to one of N+1 possible output levels
@@ -107,6 +107,9 @@ $label(term)
 	pac
 	sach	*,1
         }
+	constructor {
+		noInternalState();
+	}
         setup {
 		if (levels.size() != thresholds.size()+1) {
 		    Error::abortRun(*this,

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 The inputs are added and the result is written on the output.
 	}
@@ -42,6 +42,9 @@ The inputs are added and the result is written on the output.
 	mar 	*,AR5
 	lar	AR5,#$addr(input#1)	; just move data from in to out
 	bldd	*,#$addr(output)
+	}
+	constructor {
+		noInternalState();
 	}
 	go {
 		if (input.numberPorts() == 1) {

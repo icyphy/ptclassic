@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 control library }
+	location { C50 main library }
 	explanation {
 A star to stall the flow of data for parameter cycles to waste cycles.
 	}
@@ -46,6 +46,9 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	 nop					;waste cycles
 	sach	*,1				;output = input
 	} 
+	constructor {
+		noInternalState();
+	}
 	go {
 		X = int(cyclesToWaste) - 5;
 		addCode(std);

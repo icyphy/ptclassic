@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .Id "arcsine"
 .Id "sine, inverse"
@@ -18,9 +18,6 @@ limitation of liability, and disclaimer of warranty provisions.
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 }
 	seealso { ACos, Cos, Sin }
-	execTime {
-		return 47;
-	}
 	input {
 		name {input}
 		type {FIX}
@@ -44,8 +41,8 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	mar     *,AR0
 	lar     AR0,#$addr(input)	;Address input		=> AR0
 	lar     AR7,#$addr(output)	;Address output		=> AR7
-	bitt    *                       ;Bit 15 = 1 in input ?
-	lacc    *                       ;Accu = input 
+	bitt    *			;Bit 15 = 1 in input ?
+	lacc    *			;Accu = input 
 	and     #0fb00h			;normalize input value for table (x1)
 	samm    INDX    		;store Accu in INDX
 	bsar    10			;shift Accu 10 bits right
@@ -73,13 +70,13 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	initCode {
 		addCode(ASinTable);
 	}
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(asinblock);
 	}
 	execTime {
-		 return 28;
+		return 28;
 	}
 }
-
-
-

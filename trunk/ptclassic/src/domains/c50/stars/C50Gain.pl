@@ -13,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
 The only special case is for gain 1.  We eliminate ourselves from the circuit
@@ -21,14 +21,6 @@ in that case.
 	}
 	protected {
 		short identity;
-	}
-	setup {
-		double thegain = gain.asDouble();
-		if (thegain < -1.0 || thegain > 1.0) {
-			Error::warn(*this, "gain is not in the range [-1,1]");
-		}
-		identity = (thegain >= C50_ONE);
-		if (identity) forkInit(input, output);
 	}
 	input {
 		name {input}
@@ -66,6 +58,17 @@ in that case.
 	lacc	*,15,AR7			;Accu = input
 	neg					;Accu = -input
 	sach	*,1				;output = -input
+	}
+	constructor {
+		noInternalState();
+	}
+	setup {
+		double thegain = gain.asDouble();
+		if (thegain < -1.0 || thegain > 1.0) {
+			Error::warn(*this, "gain is not in the range [-1,1]");
+		}
+		identity = (thegain >= C50_ONE);
+		if (identity) forkInit(input, output);
 	}
 	go {
 		if (identity) {

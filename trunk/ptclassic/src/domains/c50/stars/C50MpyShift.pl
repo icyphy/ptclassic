@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .Id "multiplication with shifting"
 Multiply inputs \fIfactor1\fP and \fIfactor2\fP together, and shift the
@@ -33,6 +33,10 @@ or positive; right (negative) shifts are not supported.
 		name {output}
 		type {FIX}
 	}
+	constructor {
+		noInternalState();
+	}
+
 	go {
 		addCode(cbMulShift);
 	}
@@ -50,6 +54,6 @@ or positive; right (negative) shifts are not supported.
 	rpt	#$val(shift)			;
 	sfl					;shift left by {shift} bits
 $label(nolf)					;
-	sach	*,1				;ouput = Accu
+	sach	*,1				;output = Accu
 	}
 }

@@ -1,7 +1,7 @@
 defstar {
 	name { Mpy }
 	domain { C50 }
-	desc { Multipy any number of inputs, producing an output. }
+	desc { Multiply any number of inputs, producing an output. }
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .Id "multiplication"
 The inputs are multiplied and the result is written on the output.
@@ -25,13 +25,13 @@ The inputs are multiplied and the result is written on the output.
 	}
 
 	codeblock (one) {
-	lmmr	INDX,#$addr(input#1)		; just move data from in to out
+	lmmr	INDX,#$addr(input#1)		;just move data from in to out
 	smmr	INDX,#$addr(output)
 	}
 	codeblock (std) {
 	mar	*,AR7
-	lar	AR7,#$addr(output)		; Adress Output => AR7
-	lmmr	INDX,#$addr(input#1)		; 1st input -> INDX
+	lar	AR7,#$addr(output)		;Address Output => AR7
+	lmmr	INDX,#$addr(input#1)		;1st input -> INDX
 	}
 	codeblock(loop, "int i") {
 	lmmr	TREG0,#$addr(input#@i)	;2(and following)input -> TREGO
@@ -41,6 +41,10 @@ The inputs are multiplied and the result is written on the output.
 	codeblock (sat) {
 	pac					;P-reg. => Accu
 	sach	*,1				;Accu =>Output
+	}
+
+	constructor {
+		noInternalState();
 	}
 
 	go {

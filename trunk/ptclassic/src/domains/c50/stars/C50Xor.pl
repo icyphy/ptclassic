@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions  library }
+	location { C50 main library }
 	explanation {
 This star outputs the bit-wise exclusive-or of input1 and input2.
 	}
@@ -35,6 +35,10 @@ This star outputs the bit-wise exclusive-or of input1 and input2.
 	lacc	*,0,AR6				;Accu = input1
 	xor	*,AR7				;Accu = input1 XOR input2
 	sacl 	*				;output = Accu
+	}
+
+	constructor {
+		noInternalState();
 	}
 
 	go {

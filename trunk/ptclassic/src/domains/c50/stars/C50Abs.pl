@@ -10,10 +10,11 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .Id "absolute value"
-The input is moved into accumlator "a", where the "abs" instruction is applied.
+The input is moved into accumulator "a", where the "abs" instruction
+is applied.
 	}
 	input {
 		name {input}
@@ -30,6 +31,9 @@ The input is moved into accumlator "a", where the "abs" instruction is applied.
 	lacc	*,15,AR7			;Accu = input
 	abs					;Accu = |input|
 	sach	*,1				;output = |input|
+	}
+	constructor {
+		noInternalState();
 	}
 	go {
 		addCode(absblock);
