@@ -162,8 +162,10 @@ void PacketSample::operator << (const Packet& p) { data = p;}
 
 // particle copy
 Particle& PacketSample::operator = (const Particle& p) {
-	if (compareType(p))
-		data = ((const PacketSample*)&p)->data;
+	if (compareType(p)) {
+		const PacketSample& ps = *(const PacketSample*)&p;
+		data = ps.data;
+	}
 	return *this;
 }
 

@@ -175,7 +175,8 @@ Particle& ComplexSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-		data = ((const ComplexSample*)&p)->data;
+		const ComplexSample& cs = *(const ComplexSample*)&p;
+		data = cs.data;
 	}
         return *this;
 }
