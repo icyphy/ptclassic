@@ -21,12 +21,14 @@ alias optlink \
 optmkdir bin.$ARCH
 optmkdir lib.$ARCH
 optmkdir obj.$ARCH
+optmkdir octtools/obj.$ARCH
+optmkdir octtools/lib.$ARCH
 
 # Now, make stuff under obj.$ARCH
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib)
+foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib vem)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -104,7 +106,7 @@ cd ../..
 
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
-        sdf/matrix/stars \
+	sdf/matrix/stars \
 	de/tcltk/stars \
 	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
 	optmkdir $x
@@ -113,6 +115,75 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	optlink ../../../../../src/domains/$x makefile
 	cd ../../..
 end
+
+# Start of vem section
+# Handle vem and octtools
+cd ../vem
+
+foreach x (include vem-bin.mk vem-lib.mk)
+	optlink ../../src/vem	$x
+end
+
+foreach x ( Packages Xpackages attache vem)
+	optmkdir $x
+	cd $x
+	#optlink ../../../src/vem/$x make.template
+	optlink ../../../src/vem/$x makefile
+	cd ..
+end
+
+foreach x ( oct2ps octmvlib)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/vem/$x make.template
+	optlink ../../../src/vem/$x makefile
+	cd ..
+end
+
+
+cd Packages
+
+foreach x (  avl cp da errtrap fang fc gu harpoon kd lel list mm nle oct \
+	octmm oh options pep port pq region st symbolic symlib tap th timer \
+	tr uprintf utility vov vulcan)
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/vem/Packages/$x make.template
+	optlink ../../../../src/vem/Packages/$x makefile
+	cd ..
+end
+cd ../Xpackages
+foreach x (Maxport Table Tgl dds fb iv rpc ts xg xpa)
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/vem/Xpackages/$x make.template
+	optlink ../../../../src/vem/Xpackages/$x makefile
+	cd ..
+end
+cd ../vem
+
+optlink ../../../src/vem/vem include
+optlink ../../../src/vem/vem bitmaps
+foreach x (bags buffers dialogs dispatch doc drawing drs lib main \
+	options patterns physical properties rpc schematic select strings \
+	symbolic utility windows)
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/vem/vem/$x make.template
+	optlink ../../../../src/vem/vem/$x makefile
+	cd ..
+end
+
+cd lib
+foreach x (Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm \
+	folder.bm hisetDot hisetMark hiunsetDot hiunsetMark \
+	newcell.bm other.bm physical.bm schematic.bm setDot setMark \
+	symbolic.bm unsetDot unsetMark vem.bindings) 
+	optlink ../../../../src/vem/vem/lib $x
+end
+
+cd ../../
+# End of vem section
 
 # This is for the makefile
 cd ../..
