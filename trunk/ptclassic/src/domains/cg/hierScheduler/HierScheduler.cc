@@ -151,6 +151,34 @@ void clusterChains(Galaxy& g) {
     cleanupAfterCluster(g);
 }
 
+// This function is currently only at the file scope level - if others
+// depend on it, we may want to promote it to be a cluster method.
+// It is used to resolve the procId of a cluster - if there is an
+// inconsistancy, Error::abortRun will be called.
+
+inline int resolveProcId(Cluster& cluster) {
+    GalStarIter nextStar(cluster);
+    CGStar* star;
+    int procId = -1;
+    while ((star = (CGStar*) nextStar++) != NULL) {
+	int starProcId = star->getProcId();
+	if (starProcId != -1) {
+	    if (procId == -1)	procId = starProcId;
+	    else if (procId != starProcId) {
+		StringList msg;
+		msg << "The procId of the star, " << star->fullName()
+		    << ", is " << starProcId << ".  This is "
+		    " inconsistant with the resolved procId of the "
+		    " cluster, " << cluster.fullName() 
+		    << ", which is " << procId;
+		Error::abortRun(msg);
+		return procId;
+	    }
+	}
+    }
+    return procId;
+}
+
 void HierScheduler :: setup () {
 
     invalid = FALSE;
@@ -193,7 +221,11 @@ void HierScheduler :: setup () {
     Cluster* cluster;
     while ((cluster = clusters++) != NULL) {
 	if (cluster->scheduler()) {
-	    
+	    // First, resolve the procId 
+	    int procId = resolveProcId(*cluster);
+	    // Make sure there wasn't a inconsistancy in resolving the procId
+	    if (SimControl::haltRequested()) return;
+
 	    // Replace the cluster with a new wormhole
 	    clusters.remove();
 	    ShadowTarget* shadow = new ShadowTarget;
@@ -209,6 +241,11 @@ void HierScheduler :: setup () {
 	    // star
 	    ((CGWormBase*)((CGStar&)newWorm).asWormhole())->execTime =
 		((HierCluster*)cluster)->execTime;
+
+	    // If the resolved procId has been resolved to something
+	    // other than automatic mapping (-1, the default) then we
+	    // set the procId of the wormhole
+	    if (procId != -1) ((CGStar&)newWorm).setProcId(procId);
 
 	    // Configure the worm ports
 	    ClusterPortIter nextPort(*cluster);
