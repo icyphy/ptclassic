@@ -168,7 +168,6 @@ protected:
 
 };
 
-class EventHorizon;
 
         //////////////////////////////////////////
         // class PortHole
@@ -179,7 +178,6 @@ class EventHorizon;
 class PortHole : public GenericPort
 {
 	friend class Geodesic;	// allow Geodesic to access myPlasma
-	friend void EventHorizon::insideConnect(GenericPort&, int);
 public:
 
         // Every PortHole must be initialized with the setPort function
@@ -255,6 +253,14 @@ protected:
 	// size of buffer to allocate
 	int bufferSize;
 
+	// get Particle from the Geodesic
+	void getParticle();
+
+	// put Particle to the Geodesic
+	void putParticle();
+
+	// clear Particle
+	void clearParticle();
 private:
 	// Allocate new buffer
 	void allocateBuffer();
