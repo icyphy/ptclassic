@@ -21,48 +21,46 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fix }
 		desc { Output fix type }
 	}
-        defstate {
-                name { outputPrecision }
-                type { string }
-                default { "4.14" }
-                desc {
-Precision of the output, in bits.  The complex number is cast to a double
-and then converted to this precision.  If the value of the double cannot
-be represented by the number of bits specified in the precision parameter,
-then a error message is given. }
-        }
-        defstate {
-                name { masking }
-                type { string }
-                default { "truncate" }
-                desc {
-Masking method.  This parameter is used to specify the way the complex number
-converted to a double is masked for casting to the fixed-point notation. The
-keywords are: "truncate" (default), "round". }
-        }
-        protected {
-                const char* OutputPrecision;
-                const char* Masking;
-                int outIntBits;
-                int outLen;
-        }
-        setup {
-                OutputPrecision = outputPrecision;
-                Masking = masking;
-                outIntBits = Fix::get_intBits(OutputPrecision);
-                outLen = Fix::get_length(OutputPrecision);
-        }
+	defstate {
+		name { outputPrecision }
+		type { string }
+		default { "4.14" }
+		desc {
+Precision of the output, in bits.
+The complex number is cast to a double and then converted to this precision.
+If the value of the double cannot be represented by the number of bits
+specified in the precision parameter, then a error message is given.
+		}
+	}
+	defstate {
+		name { masking }
+		type { string }
+		default { "truncate" }
+		desc {
+Masking method.
+This parameter is used to specify the way the complex number converted to
+a double is masked for casting to the fixed-point notation.
+The keywords are: "truncate" (the default) and "round".
+		}
+	}
+	protected {
+		Fix out;
+	}
+	setup {
+		const char* Masking = masking;
+		const char* OutputPrecision = outputPrecision;
+		int outIntBits = Fix::get_intBits(OutputPrecision);
+		int outLen = Fix::get_length(OutputPrecision);
+		out = Fix(outLen, outIntBits);
+		if ( strcasecmp(Masking, "truncate") == 0)
+		  out.Set_MASK(Fix::mask_truncate);
+		else if ( strcasecmp(Masking, "round") == 0)
+		  out.Set_MASK(Fix::mask_truncate_round);
+		else
+		  Error::abortRun(*this, ": not a valid function for masking");
+	}
 	go {
-                Fix out(outLen, outIntBits, (double)(input%0));
-                if(strcmp(Masking, "truncate") == 0)
-                  out.Set_MASK(Fix::mask_truncate);
-                else if (strcmp(Masking, "round") == 0)
-                  out.Set_MASK(Fix::mask_truncate_round);
-                else {
-                  Error::abortRun(*this, ": not a valid function for masking");
-                }
-                output%0 << out;
+		out = (double) (input%0);
+		output%0 << out;
 	}
 }
-
-
