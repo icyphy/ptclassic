@@ -1,0 +1,290 @@
+# Test suite for the MenuBar class.
+# This test does not test absolutely eveything, as
+# much of that is sone in the test suite for MenuSupport.
+#
+# @Authors: John Reekie
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+############################################################################
+#### Define a proc that can be used to create a test MenuBar widget
+#
+proc _menubar {args} {
+    catch {delete object .m}
+    eval ::tycho::MenuBar .m $args
+    pack .m
+    wm deiconify .
+    raise .
+    return .m
+}
+
+###########################################################################
+#### Define a proc that creates a "standard" test MenuBar
+#
+proc _stdmenubar {args} {
+    _menubar
+    .m addMenu ducati -label Ducati
+    .m addMenu aprilia -label Aprilia
+    .m addMenu guzzi -label {Moto Guzzi}
+    update
+    after 250
+
+    .m post ducati
+    update
+
+    .m command supersport ducati \
+	    -label {900SS SuperSport}
+    .m command monster ducati \
+	    -label {Il Mostro M900}
+    .m add cascade hypersport ducati \
+	    -label {Desmoquattro}
+    update
+    .m post hypersport
+    update
+    .m command 916 hypersport -label {Ottovalvo 916}
+    .m command 748 hypersport -label {Ottovalvolino 748}
+}
+
+
+############################################################################
+# constructor{}
+test MenuBar-constructor-1 {Create MenuBar widget} {
+    catch {delete object .m}
+    ::tycho::MenuBar .m
+} {.m}
+
+test MenuBar-constructor-2 \
+	{Create MenuBarTester widget using utility proc} {
+    _menubar
+} {.m}
+
+############################################################################
+# addMenu{}
+#
+_menubar
+test MenuBar-add-1 {Add a menu button} {
+    .m addMenu menu1 -label {Menu 1}
+} {menu1}
+update
+
+test MenuBar-add-2 {Add another menu button} {
+    .m addMenu menu2 -label {Menu 2}
+    .m entries
+} {menu1 menu2}
+update
+
+test MenuBar-add-3 {Add before} {
+    .m addMenu menu3 -label {Menu 3} -before menu2
+    .m entries
+} {menu1 menu3 menu2}
+update
+
+test MenuBar-add-4 {Add after} {
+    .m addMenu menu4 -label {Menu 4} -after menu3
+    .m entries
+} {menu1 menu3 menu4 menu2}
+update
+
+test MenuBar-add-5 {Add left} {
+    .m addMenu menu5 -label {Menu 5} -side left
+    .m entries
+} {menu1 menu3 menu4 menu2 menu5}
+update
+
+test MenuBar-add-6 {Add right} {
+    .m addMenu menu6 -label {Menu 6} -side right
+    .m entries
+} {menu1 menu3 menu4 menu2 menu5 menu6}
+update
+
+############################################################################
+# delete{}
+#
+_stdmenubar
+test MenuBar-delete-1 {Delete cascade} {
+    .m delete hypersport
+    list [.m entries ducati] [.m exists hypersport] [.m exists 916]
+} {{supersport monster} 0 0}
+update
+
+test MenuBar-delete-2 {Delete top-level menu} {
+    .m delete ducati
+    list [.m entries] [.m exists ducati] [.m exists monster]
+} {{aprilia guzzi} 0 0}
+update
+
+############################################################################
+# disable{}, enable{}
+#
+_stdmenubar
+test MenuBar-disable-1 {Disable an entry} {
+    .m disable supersport
+    .m entrycget supersport -state
+} {disabled}
+update
+after 250
+
+test MenuBar-enable-1 {Enable an entry} {
+    .m enable supersport
+    .m entrycget supersport -state
+} {normal}
+update
+after 250
+
+test MenuBar-disable-2 {Disable a cascaded menu} {
+    .m disable hypersport
+    .m entrycget hypersport -state
+} {disabled}
+update
+after 250
+
+test MenuBar-enable-2 {Enable a cascaded menu} {
+    .m enable hypersport
+    .m entrycget hypersport -state
+} {normal}
+update
+.m post hypersport
+after 250
+
+test MenuBar-disable-3 {Disable a top-level menu} {
+    .m disable ducati
+    .m buttoncget ducati -state
+} {disabled}
+update
+after 250
+
+test MenuBar-enable-3 {Enable a top-level menu} {
+    .m enable ducati
+    .m buttoncget ducati -state
+} {normal}
+
+############################################################################
+# buttoncget{}, buttonconfigure{}
+#
+_stdmenubar
+set i 0
+foreach {option value} {
+    label {Moto-lust Italiano}
+    relief sunken
+    background blue
+    underline 0
+    state disabled
+} {
+    test MenuBar-buttonconfigure-$i "Configure and get option $option" {
+        update
+        after 250
+        incr i
+        .m buttonconfigure ducati -$option $value
+        .m buttoncget ducati -$option
+    } $value
+}
+
+############################################################################
+# inmenu{}
+#
+_stdmenubar
+set i 0
+foreach {tag menu} {
+    supersport ducati
+    hypersport ducati
+    916 hypersport
+} {
+    test MenuBar-inmenu-$i "Get menu containing $tag" {
+        incr i
+        .m inmenu $tag
+    } $menu
+}
+
+############################################################################
+# menucget{}, menuconfigure{}
+#
+_stdmenubar
+set i 0
+foreach menu {ducati aprilia} {
+    foreach {option value} {
+        relief sunken
+        tearoff 1
+    } {
+        test MenuBar-menuconfigure-$i \
+                "Configure and get menu option $option" {
+            incr i
+            .m menuconfigure $menu -$option $value
+            .m post $menu
+            after 250
+            .m menucget $menu -$option
+        } $value
+    }
+}
+
+############################################################################
+# post{}, unpost{}
+#
+_stdmenubar
+test MenuBar-unpost-1 {Unpost top-level} {
+    .m unpost ducati
+    list \
+            [winfo ismapped .m.buttonducati.menuducati] \
+            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+} {0 0}
+update
+
+test MenuBar-post-1 {Post top-level menu} {
+    .m post ducati
+    list \
+            [winfo ismapped .m.buttonducati.menuducati] \
+            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+} {1 0}
+update
+
+test MenuBar-post-2 {Post cascade menu} {
+    .m unpost ducati
+    .m post hypersport
+    list \
+            [winfo ismapped .m.buttonducati.menuducati] \
+            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+} {1 1}
+update
+
+test MenuBar-unpost-2 {Unpost bottom-level menu} {
+    .m unpost hypersport
+    list \
+            [winfo ismapped .m.buttonducati.menuducati] \
+            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+} {1 0}
+update
+
+
+########################################################################
+## CLEAN UP
+after 250
+catch {delete object .m}
