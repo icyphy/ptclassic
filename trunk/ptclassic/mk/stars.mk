@@ -37,7 +37,6 @@ CGDDFSTARS = $(LIBDIR)/cgddfstars.o
 BDFSTARS = $(LIBDIR)/bdfstars.o
 VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
-CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
 ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
 MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 
@@ -89,18 +88,12 @@ $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
-$(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX)
-
-CP_LIBFILES= $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libcpipstars.$(LIBSUFFIX) $(LIBDIR)/libcp.$(LIBSUFFIX)
-LWP_LIBFILES= $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
-AWE_LIBFILES= $(LIBDIR)/libawethread.$(LIBSUFFIX) \
-	$(LIBDIR)/libawe2.$(LIBSUFFIX)
+$(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
+$(PN_LIBFILES)
 
 ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
-
 
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
@@ -130,12 +123,8 @@ $(S56WH_LIBDIR) $(S56WH_LIB) \
 $(MATLABLIBDIR) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
--lmdsdfstars -lmdsdf
-
-# -laudio is for the Infopad stars in the CP domain
-CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
-LWP_LIBS= -llwpthread -llwp
-AWE_LIBS= -lawethread -lawe2
+-lmdsdfstars -lmdsdf \
+$(PN_LIBS)
 
 ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 
@@ -167,3 +156,28 @@ CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
 CG96TARGETS =	$(CG96T)/Sim96Target.o
 CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
+
+#
+# Architecture dependent definitions.
+#
+
+# PN domain and Awesime supported on sun4 and mips architectures.
+ifneq (,$(filter sun% cfront mips,$(ARCH)))
+PNSTARS = $(LIBDIR)/pnstars.o
+PN_LIBS= -lpnstars -lpn
+PN_LIBFILES= $(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
+AWE_LIBS= -lawethread -lawe2
+AWE_LIBFILES= $(LIBDIR)/libawethread.$(LIBSUFFIX) \
+	$(LIBDIR)/libawe2.$(LIBSUFFIX)
+endif
+
+# CP domain and lwp supported on sun4 architectures.
+ifneq (,$(filter sun% cfront,$(ARCH)))
+# -laudio is for the Infopad stars in the CP domain
+CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
+CP_LIBFILES= $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libcpipstars.$(LIBSUFFIX) $(LIBDIR)/libcp.$(LIBSUFFIX)
+LWP_LIBS= -llwpthread -llwp
+LWP_LIBFILES= $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
+endif
