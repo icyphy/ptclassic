@@ -34,80 +34,100 @@ void ComplexArrayState  :: initialize() {
 	double realval;
 	double imagval;
 	int numRepeats;
+
+	delete [nElements] val;
+	val = 0;
+	nElements = 0;
+
 	int i = 0;
 	while(!lexer.eof() && i < MAXLEN) {
-	
-	ParseToken t =getParseToken(lexer, parent()->parent());
-	if(!strcmp(t.tok,"ERROR")) break;
-        if(!strcmp(t.tok,"EOF")) break;
-	if(!strcmp(t.tok,"REPEATER")) {
-		if(t.cval != '[') return;
-		t = getParseToken(lexer, parent()->parent());
-		if(strcmp(t.tok,"INT"))return;
-		numRepeats = t.intval - 1;
-		while ( numRepeats != 0) {
+		ParseToken t =getParseToken(lexer);
+		switch (t.tok) {
+		case T_ERROR:
+			return;
+		case T_EOF:
+			break;
+		case '[':
+			t = getParseToken(lexer);
+			if (t.tok != T_Int) {
+				parseError ("expected int after '['");
+				return;
+			}
+			numRepeats = t.intval - 1;
+			while (numRepeats != 0) {
+				buf[i++] = Complex(realval,imagval);
+				numRepeats--;
+			}
+			t = getParseToken(lexer);
+			if (t.tok != ']') {
+				parseError ("expected ']'");
+				return;
+			}
+			break;
+		case '(':
+			t = evalExpression(lexer);
+			if (t.tok == T_ERROR || t.tok == T_EOF) return;
+			realval = t.doubleval;
+			t = getParseToken(lexer);
+			if (t.tok != ',') {
+				parseError ("expected ','");
+				return;
+			}
+			t = evalExpression(lexer);
+			if (t.tok == T_ERROR || t.tok == T_EOF) return;
+			imagval = t.doubleval;
+			t = getParseToken(lexer);
+			if (t.tok != ')') {
+				parseError ("expected ')'");
+				return;
+			}
 			buf[i++] = Complex(realval,imagval);
-			numRepeats--;
+			break;
+		default:
+			parseError ("syntax error");
+			return;
 		}
-		t = getParseToken(lexer,parent()->parent());
-		if(strcmp(t.tok,"REPEATER")) return;
-		if(t.cval != ']') return;
-		continue;
 	}
-        if(strcmp(t.tok,"OP")) return;
-        if(t.cval != '(') return;
-        t =  evalExpression(lexer, parent()->parent());
-        if(!strcmp(t.tok,"ERROR")) return;
-        if(!strcmp(t.tok,"EOF")) return;
-        {if(!strcmp(t.tok,"FLOAT")) realval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) realval = *(double*)((FloatState*)t.s);
-        }
-	t = getParseToken(lexer,  parent()->parent());
-        if(strcmp(t.tok,"SEPARATOR")) return;
-        if(t.cval != ',') return;
-
-        t =  evalExpression(lexer, parent()->parent());
-        if(!strcmp(t.tok,"ERROR")) return;
-        if(!strcmp(t.tok,"EOF")) return;
-        {if(!strcmp(t.tok,"FLOAT")) imagval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) imagval = *(double*)((FloatState*)t.s);
-        }
-        t =getParseToken(lexer, parent()->parent());
-        if(strcmp(t.tok,"OP")) return;
-        if(t.cval != ')') return;
-        buf[i++] = Complex(realval,imagval);
-
-			};
 	nElements  = i;
-
 	val = new Complex [nElements];	
 	for(i = 0; i < nElements; i++)
-	val[i] = buf[i];
+		val[i] = buf[i];
 }
 
-ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-         double signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn, "FLOAT");
-
-        if(!strcmp(t.tok,"EOF")) return t;
-        if(!strcmp(t.tok,"OP"))
-        {
-        if(t.cval == '-')
-                {signflag = -1;
-                t = getParseToken(lexer, blockIAmIn, "FLOAT");
-                if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}
-                }
-        }
-        if(!strcmp(t.tok,"FLOAT")) {
-                			t.doubleval = signflag * t.doubleval;
-                			return  t;
-                                }
-        else if(!strcmp(t.tok,"ID")) {
-               				t.doubleval = signflag * (*(double*)((FloatState*)t.s));
-                                        return t;
-                                }
-        else {t.tok = "ERROR"; return t;}
+ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer) {
+	double signflag = 1;
 	
+        ParseToken t = getParseToken(lexer, T_Float);
+	while (t.tok == '-') {
+		t = getParseToken(lexer, T_Float);
+		signflag = -signflag;
+	}
+	if (t.tok == T_EOF) {
+		parseError ("unexpected end of string");
+		return t;
+	}
+	if (t.tok == T_Float) {
+		t.doubleval *= signflag;
+		return t;
+	}
+	parseError ("syntax error");
+	t.tok = T_ERROR;
+	return t;
+}
+
+StringList ComplexArrayState :: currentValue() {
+	StringList s; 
+	s =  "\n";
+	for(int i = 0; i<size(); i++) 
+	{
+		s = i; 
+		s = "	("; 
+		s = val[i].real();
+		s = ","; 
+		s = val[i].imag(); 
+		s= ")\n";
+	} 
+	return s;
 }
 
 // make knownstate entry

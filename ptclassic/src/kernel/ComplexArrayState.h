@@ -72,23 +72,13 @@ public:
 	char* type() { return "ComplexArray";}
 
         // the value as a string
-        StringList currentValue() { 
-		StringList s; 
-		s =  "\n";
-		for(int i = 0; i<size(); i++) 
-		{s = i; 
-		s = "	("; 
-		s = val[i].real();
-		s = ","; 
-		s = val[i].imag(); 
-		s= ")\n";} 
-		return s;}
+        StringList currentValue();
 
 	// Parse initValue to set Value
 	void initialize();
 
 	// Parse element
-	ParseToken evalExpression(Tokenizer&, Block*);
+	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
 	virtual State* clone() {return new ComplexArrayState;}

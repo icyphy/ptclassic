@@ -39,21 +39,21 @@ public:
 	StringList currentValue();
 
         // assignment from a Complex
-        Complex operator=(const Complex& rvalue) { return val = rvalue;}
+        Complex& operator=(const Complex& rvalue) { return val = rvalue;}
 
         // casting to a Complex
         operator Complex() { return val;}
 
-	// Evaluate expression  in string
-	ParseToken evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
 
 	State* clone ();//  {return new ComplexState;}
 
 private:
-	friend class ComplexArrayState;
+	// Evaluate expression  in string
+	ParseToken evalExpression(Tokenizer& lexer);
 
+	// the real data
 	Complex val;
-};	
+};
 
 
 #endif
