@@ -403,9 +403,7 @@ $(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
 itcl_shared: $(ITCL_SHARED_OBJ) \
 		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
 		$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) \
-		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX)
+		$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX)
 	@echo "Done making all shared libraries in itcl"
 
 $(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
@@ -445,7 +443,7 @@ $(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX):
 		shared)
 
 # Install itcl
-install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
+install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT)
 	# make links be relative, not absolute so we can move the dist.
 	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
 		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
