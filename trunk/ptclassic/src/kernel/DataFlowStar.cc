@@ -89,13 +89,23 @@ void DataFlowStar :: schedError() const {
 // execute SDF star -- OVERRIDE if not SDF!
 int DataFlowStar :: run() {
 	BlockPortIter next(*this);
-	for(int i = numberPorts(); i > 0; i--)
-		(next++)->receiveData();
+	PortHole* nextPort;
+	int i;
+	for(i = numberPorts(); i > 0; i--) {
+	  nextPort = next.next();
+	  if (nextPort->isItInput()) {
+	    nextPort->receiveData();
+	  }
+	}
 	int status = Star::run();
 	// we send the data even on error
 	next.reset();
-	for(i = numberPorts(); i > 0; i--)
-		(next++)->sendData();
+	for(i = numberPorts(); i > 0; i--) {
+	  nextPort = next.next();
+	  if (nextPort->isItOutput()) {
+	    nextPort->sendData();
+	  }
+	}
 	return status;
 }
 
