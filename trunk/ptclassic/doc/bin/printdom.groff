@@ -24,6 +24,9 @@
 #
 #	-iconsnorm	Don't remove the icons when finished.
 #
+#	-html		Generate html.  This requires troff2html
+#			http://www.w3.org/hypertext/WWW/Tools/troff2html.html
+#
 # Remaining arguments are taken to be files to print options.
 # Command uses printer defined by environmental variable $PRINTER
 # User .cshrc file must contain "setenv PRINTER whatever"
@@ -75,6 +78,7 @@ set preview = 0
 set icons = 0
 set icons_nogen = 0
 set icons_norm = 0
+set html = 0
 
 if (!($?ALMAGEST_INDEX)) then
 	setenv ALMAGEST_INDEX $HOME/Almagest.index
@@ -100,6 +104,10 @@ while ($#argv)
 			breaksw
 		case -iconsnorm:
 			set icons_norm = 1
+			shift
+			breaksw
+		case -html:
+			set html = 1
 			shift
 			breaksw
 		case -*:
@@ -197,12 +205,16 @@ else if ($preview) then
 		($printcommand $printoptions -Tascii $tempTroffFile > $tempNroffFile) >& /dev/null
 		more $tempNroffFile
 	endif
+else if ($html) then
+	# Generate html 
+	$troff2html $printoptions $tempTroffFile
 else
 	# otherwise just print it out
 	($printcommand $printoptions $tempTroffFile | lpr ) >& $tempIndexFile
 	$contentscmd $tempIndexFile
 	if (-r title.t) $printcommand $printoptions $dirheader/shared title.t
 else
+endif
 endif
 
 if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
