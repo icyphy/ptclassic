@@ -50,6 +50,25 @@ char RPCErrorBuffer[MESSAGE_SIZE];
 #include "rpcApp.h"
 #endif /* SERVER */
 
+/* Forward decls */
+rpcInternalStatus RPCReceiveStranger
+	ARGS((struct octUserValue *stranger, STREAM stream));
+
+rpcInternalStatus RPCSendStranger
+	ARGS((struct octUserValue *stranger, STREAM stream));
+
+rpcInternalStatus RPCReceiveSpot
+	ARGS((RPCSpot *spot, STREAM stream));
+
+rpcStatus RPCReceiveVemArg
+	ARGS((RPCArg *arg, STREAM stream));
+
+rpcStatus RPCSendSpot
+	ARGS((RPCSpot *spot, STREAM stream));
+
+rpcStatus RPCSendVemArg
+	ARGS((RPCArg *arg, STREAM stream));
+
 rpcInternalStatus
 RPCReceiveOctObject(object, stream)
 octObject *object;
@@ -1391,7 +1410,7 @@ register char *p;
  * read
  */
 
-RPCfread(ptr, size, count, stream)
+int RPCfread(ptr, size, count, stream)
 register char *ptr;
 int size;
 int count;
