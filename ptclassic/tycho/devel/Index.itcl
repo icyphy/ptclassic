@@ -28,11 +28,10 @@
 
 
 ##########################################################################
-#### NamedData
+#### Index
 #
-# The _NamedData_ class implements a simple information model --
-# it is, in effect, an associative array, except that the array
-# can be associated with
+# The _Index_ class implements a hierarchical associative array.
+# It inherits all the capabilities of its Model superclass:
 # a set of files, changes to the array can be undone, redone, and
 # published, and each entry in the 
 # array can have options as well as a value. For example, you
@@ -46,9 +45,9 @@
 #     $dataarray entryconfigure Foo -bar 0
 # </pre>
 #
-# By default, a NamedData will accept any options. To limit
+# By default, an entry will accept any options. To limit
 # the options that will be accepted and to set the default values,
-# set the *-entryoptions* option (of the NamedData, not of an entry):
+# set the *-entryoptions* option (of the Index, not of an entry):
 # <pre>
 #     $dataarray configure -entryoptions {-bar 0 -tar 99}
 # </pre>
@@ -61,71 +60,60 @@
 # options to select the format of the returned list.
 #
 #
-class ::tycho::NamedData {
+class ::tycho::Index {
     inherit ::tycho::Model
-    
+
     constructor {args} {}
     destructor {}
     
     #################################################################
     ####                        options                          ####
 
-    # The default options of each data entry
-    public variable entryoptions {}
-    
-    # If true, options are checked, otherwise any are allowed
-    public variable checkoptions 1
 
     #################################################################
     ####                     public methods                      ####
 
     # Assign new data to en existing entry
-    method assign {index data}
+    method assign {name data}
+    
+    # Get the children of an entry
+    method children {name {select all}}
     
     # Delete an entry
-    method delete {index}
-
-    # Describe the data in the model, in the same format as write{}
-    method describe {{prefix {}}}
+    method delete {name}
 
     # Add an entry to the array
-    method entry {index data args}
+    method entry {name data args}
     
+    # Get the attributes of an entry
+    method entryattrs {name}
+
     # Get an option or options of an entry
-    method entrycget {index option}
+    method entrycget {name option}
 
     # Configure the entry with one or more options
-    method entryconfigure {index args}
-    
-    # Return all options of an entry
-    method entryoptions {index}
-    
-    # Externalize the model into a state file
-    method externalize {fd {nohistory {}}}
+    method entryconfigure {name args}
     
     # Test if an entry is present
-    method exists {index}
-    
-    # Return an entry in the array
-    method get {index}
+    method exists {name}
+
+    # Return an entry
+    method get {name}
 
     # Return a list of entries and values based on a pattern
     method match {pattern args}
 
-    # Return a list of indexes that match a pattern
+    # Return a list of names that match a pattern
     method names {{pattern *} {regexpflag {}}}
 
-    # Write the model to a file
-    method write {fd {prefix {}}}
-
-    #################################################################
-    ####                  protected variables                    ####
-
-    # The values in the array
-    protected variable _entryvalue
+    # Get the parent of an entry
+    method parent {name}
     
-    # The options of the data values
-    protected variable _entryoptns
+    # Get the root of an entry
+    method root {}
+    
+    # Get the root entries
+    method roots {{select all}}
     
     #################################################################
     ####                   private methods                       ####
@@ -137,12 +125,12 @@ class ::tycho::NamedData {
 ########################################################################
 #### constructor
 #
-body ::tycho::NamedData::constructor {args} {
+body ::tycho::Index::constructor {args} {
     # Evaluate options
     eval configure $args
-    
+
     # I have only one entity type
-    set entityTypes "entry"
+    entity entry 1
 }
 
 ########################################################################
@@ -151,13 +139,18 @@ body ::tycho::NamedData::constructor {args} {
 # Assign new data to an existsing entry. Flag an error if the entry
 # does not exist. Return the inverse command.
 #
-body ::tycho::NamedData::assign {index data} {
-    if { ! [::info exists _entryvalue($index)] } {
-	error "Entry $index does not exist in $dataname"
-    }
-    set inverse [list assign $index $_entryvalue($index)]
-    set _entryvalue($index) $data
-    return $inverse
+body ::tycho::Index::assign {name value} {
+    _verify entry $name
+    _assign entry $name $value
+}
+
+########################################################################
+#### children
+#
+# Return the children of an entry.
+#
+body ::tycho::Index::children {name {select all}} {
+    _children $name {} $select
 }
 
 ########################################################################
@@ -166,28 +159,9 @@ body ::tycho::NamedData::assign {index data} {
 # Delete an entry. Flag an error if the entry does not exist.
 # Return the inverse command.
 #
-body ::tycho::NamedData::delete {index} {
-    if { ! [::info exists _entryvalue($index)] } {
-	error "Unknown entry $index in $dataname"
-    }
-    set inverse [list entry $index $_entryvalue($index)]
-    eval lappend inverse $_entryoptns($index)
-    unset _entryvalue($index)
-    
-    return $inverse
-}
-
-########################################################################
-#### describe
-#
-# Return a string that describes the model. The data format is exactly
-# that generated by the write{} method -- note that it is 
-# _not_ a well-formed Tcl list. The _prefix_ argument, if present,
-# is a string to place at the start of each line.
-#
-body ::tycho::NamedData::describe {{prefix {}}} {
-    set string "configure -checkoptions $checkoptions"
-    append string [eval chain $prefix]
+body ::tycho::Index::delete {name} {
+    _verify entry $name
+    _delete entry $name
 }
 
 ########################################################################
@@ -197,34 +171,22 @@ body ::tycho::NamedData::describe {{prefix {}}} {
 # already exists. Additional arguments are the initial values
 # of entry options. Return the inverse command.
 #
-body ::tycho::NamedData::entry {index data args} {
-    if { [::info exists _entryvalue($index)] } {
-	error "Entry $index already exists in $dataname"
+body ::tycho::Index::entry {name value args} {
+    if { [::info exists _type($name)] } {
+	error "Entry $name already exists in [_dataname]"
     }
+    eval [list _entity entry $name $value] $args
+    return [list delete $name]
+}
 
-    # Set options
-    if { ! $checkoptions } {
-	# If this is turned off, don't even remove duplicates
-	# from the option list. It won't matter, since the
-	# option handling code all works anyway.
-	set _entryoptns($index) [concat $entryoptions $args]
-    } else {
-     	# Set default options then given options. Flag an error
-     	# if a given option is not in the defaults
- 	array set temp $entryoptions
- 	foreach {option value} $args {
- 	    if { ! [::info exists temp($option)] } {
- 		error "Unknown option $option in $dataname"
- 	    }
- 	    set temp($option) $value
- 	}
- 	set _entryoptns($index) [array get temp]
-    }
-    # set value
-    set _entryvalue($index) $data
-
-    # Return the undo command
-    return [list delete $index]
+########################################################################
+#### entryattrs
+#
+# Return a list containing the attributes of the entry as a flat
+# option-value list.
+#
+body ::tycho::Index::entryattrs {name} {
+    _attributes entry $name
 }
 
 ########################################################################
@@ -233,15 +195,9 @@ body ::tycho::NamedData::entry {index data args} {
 # Get an option of a data entry. Flag an error if the entry
 # does not exist or the option does not.
 #
-body ::tycho::NamedData::entrycget {index option} {
-    if { ! [::info exists _entryvalue($index)] } {
-	error "Entry $index does not exist in $dataname"
-    }
-    array set temp $_entryoptns($index)
-    if { ! [::info exists temp($option)] } {
-	error "Unknown option $option in $dataname"
-    }
-    return $temp($option)
+body ::tycho::Index::entrycget {name option} {
+    _verify entry $name
+    _cget entry $name $option
 }
 
 ########################################################################
@@ -256,70 +212,9 @@ body ::tycho::NamedData::entrycget {index option} {
 # Flag an error if the entry does not exist, or if an
 # option is invalid.
 # 
-body ::tycho::NamedData::entryconfigure {index args} {
-    if { ! [::info exists _entryvalue($index)] } {
-	error "Entry $index does not exist in $dataname"
-    }
-
-    set inverse [list entryconfigure $index]
-    if { $entryoptions != "" } {
-	# Can only change options that are already there
-	array set temp $_entryoptns($index)
-	foreach {option value} $args {
-	    if { ! [::info exists temp($option)] } {
-		error "Unknown option $option in $dataname"
-	    }
-	    lappend inverse $option $temp($option)
-	    set temp($option) $value
-	}
-	set _entryoptns($index) [array get temp]
-    } else {
-	# Can set any options at all
-	array set temp $_entryoptns($index)
-	foreach {option value} $args {
-	    if { $value == "_NamedDataDeleteThisOption_" } {
-		unset temp($option)
-	    } elseif { [::info exists temp($option)] } {
-		lappend inverse $option $temp($option)
-		set temp($option) $value
-	    } else {
-		lappend inverse $option _NamedDataDeleteThisOption_
-		set temp($option) $value
-	    }
-	}
-	set _entryoptns($index) [array get temp]
-    }
-    return $inverse
-}
-
-########################################################################
-#### entryoptions
-#
-# Return a list containing the options of the entry as a flat
-# option-value list.
-#
-body ::tycho::NamedData::entryoptions {index} {
-    return $_entryoptns($index)
-}
-
-########################################################################
-#### externalize
-#
-# Write the class-dependent description of the data to a file.
-# The file doesn't contain the command history only if the second
-# argument is supplied and true.
-#
-body ::tycho::NamedData::externalize {fd {nohistory {}}} {
-    # Chain the superclass' method
-    eval chain $fd $nohistory
-
-    # Write this model's data to the file
-    puts $fd "\n\n# Values of data $dataname\n\n"
-    puts $fd "array set _entryvalue \{[array get _entryvalue]\}\n"
-    puts $fd "\n\n# Options of data $dataname\n\n"
-    puts $fd "array set _entryoptns \{[array get _entryoptns]\}\n"
-
-    return ""
+body ::tycho::Index::entryconfigure {name args} {
+    _verify entry $name
+    eval _configure entry $name $args
 }
 
 ########################################################################
@@ -327,8 +222,10 @@ body ::tycho::NamedData::externalize {fd {nohistory {}}} {
 #
 # Returns true if the entry is in the model, else false.
 #
-body ::tycho::NamedData::exists {index} {
-    return [::info exists $_entryoptns($index)]
+# FIXME: Rename.
+#
+body ::tycho::Index::exists {name} {
+    _exists entry $name
 }
 
 ########################################################################
@@ -337,17 +234,15 @@ body ::tycho::NamedData::exists {index} {
 # Get the value of an entry. Flag an error if the entry does
 # not exist.
 #
-body ::tycho::NamedData::get {index} {
-    if { ! [::info exists _entryvalue($index)] } {
-	error "Entry $index does not exist in $dataname"
-    }
-    return $_entryvalue($index)
+body ::tycho::Index::get {name} {
+    _verify entry $name
+    _get entry $name
 }
 
 ########################################################################
 #### match
 #
-# Return a list of index-value pairs based on the given pattern. By
+# Return a list of name-value pairs based on the given pattern. By
 # default, the entries in the model are matched against _pattern_
 # using glob-style matching and the returned list is a flat list of
 # name-value pairs. For example, it might return
@@ -375,7 +270,9 @@ body ::tycho::NamedData::get {index} {
 # in the argument list.
 # </ul>
 #
-body ::tycho::NamedData::match {pattern args} {
+# FIXME: Works with hierarchical indexes?
+#
+body ::tycho::Index::match {pattern args} {
     set regexp 0
     set options "none"
 
@@ -400,43 +297,43 @@ body ::tycho::NamedData::match {pattern args} {
 	}
     }
 
-    # Get the matching indexes
+    # Get the matching names
     if { $regexp } {
 	set matching [names $pattern -regexp]
     } else {
 	# Glob-style matching. Optimize for the default case
 	if { $options == "none" } {
-	    return [array get _entryvalue $pattern]
+	    return [array get _value $pattern]
 	} else {
-	    set matching [array names _entryvalue $pattern]
+	    set matching [array names _value $pattern]
 	}
     }
     
     # Return the found entries with option values
-    array set default $entryoptions
+    array set default [_defaults entry]
     set result {}
     switch -exact $options {
 	"none" {
 	    # Return names and values
-	    foreach index $matching {
-		lappend result $index $_entryvalue($index)
+	    foreach name $matching {
+		lappend result $name $_value($name)
 		append result "\n"
 	    }
 	}
 	"all" {
 	    # Return list of lists with all options
-	    foreach index $matching {
-		set partial [list $index $_entryvalue($index)]
-		eval lappend partial $_entryoptns($index)
+	    foreach name $matching {
+		set partial [list $name $_value($name)]
+		eval lappend partial $_attrs($name)
                 lappend result $partial
 		append result "\n"
 	    }
 	}
 	"different" {
 	    # Include options only if they differ from the default
-	    foreach index $matching {
-		set partial [list $index $_entryvalue($index)]
-		foreach {opt val} $_entryoptns($index) {
+	    foreach name $matching {
+		set partial [list $name $_value($name)]
+		foreach {opt val} $_attrs($name) {
 		    if { ! [::info exists default($opt)] \
 			    || $default($opt) != $val } {
 			lappend partial $opt $val
@@ -448,9 +345,9 @@ body ::tycho::NamedData::match {pattern args} {
 	}
 	"withalloptions" {
 	    # Include options only if they are requested
-	    foreach index $matching {
-		lappend result $index $_entryvalue($index)
-		array set temp $_entryoptns($index)
+	    foreach name $matching {
+		lappend result $name $_value($name)
+		array set temp $_attrs($name)
 		foreach opt $requested {
 		    lappend partial $opt $temp($opt)
 		}
@@ -461,9 +358,9 @@ body ::tycho::NamedData::match {pattern args} {
 	"withdifferentoptions" {
 	    # Include options only if they are requested and they
 	    # are different from the default
-	    foreach index $matching {
-		set partial [list $index $_entryvalue($index)]
-		array set temp $_entryoptns($index)
+	    foreach name $matching {
+		set partial [list $name $_value($name)]
+		array set temp $_attrs($name)
 		foreach opt $requested {
 		    if { ! [::info exists default($opt)] \
 			    || $default($opt) != $temp($opt) } {
@@ -481,35 +378,52 @@ body ::tycho::NamedData::match {pattern args} {
 ########################################################################
 #### names
 #
-# Return a list of indexes based on the given pattern. The
+# Return a list of names based on the given pattern. The
 # *-regexp* flag following the pattern selects regular expression
 # matching instead of glob-style matching.
 #
-body ::tycho::NamedData::names {{pattern *} {regexpflag {}}} {
+# FIXME: Works with hierarchical indexes?
+#
+body ::tycho::Index::names {{pattern *} {regexpflag {}}} {
     if { $regexpflag != "" } {
-	# Get indexes using regular expression matching
+	# Get names using regular expression matching
 	set result {}
-	set testlist [array names _entryvalue]
-	while { [set index [lsearch -regexp $testlist $pattern]] != -1 } {
-	    lappend result [lindex $testlist $index]
-	    set result [lreplace $testlist 0 $index]
+	set testlist [array names _value]
+	while { [set name [lsearch -regexp $testlist $pattern]] != -1 } {
+	    lappend result [lindex $testlist $name]
+	    set result [lreplace $testlist 0 $name]
 	}
 	return $result
     } else {
 	# Glob-style matching
-	return [array names _entryvalue $pattern]
+	return [array names _value $pattern]
     }
 }
 
 ########################################################################
-#### write
+#### parent
 #
-# Write the model to a file.  The _prefix_ argument, if present,
-# is a string to place at the start of each line.
+# Return the parent of an entry.
 #
-body ::tycho::NamedData::write {fd {prefix {}}} {
-    puts $fd "# Data file of $dataname"
-    puts $fd "configure -checkoptions $checkoptions"
-    eval chain $fd $prefix
+body ::tycho::Index::parent {name} {
+    _parent entry $name
+}
+
+########################################################################
+#### root
+#
+# Return the root of an entry
+#
+body ::tycho::Index::root {name} {
+    _root $name
+}
+
+########################################################################
+#### roots
+#
+# Return the root entries.
+#
+body ::tycho::Index::roots {{select all}} {
+    _roots {} $select
 }
 
