@@ -44,14 +44,18 @@ NODE TOCNode
   HEADER
   {  
     @NavPanel=concatenate( 
-              button(image("next.gif", BOTTOM),    filename(next),
-		     image("nextg.gif", BOTTOM)     ), 
-              button(image("prev.gif", BOTTOM),filename(previous),
-		     image("prevg.gif", BOTTOM) ), 
-              button(image("top.gif", BOTTOM),     filename(top),
-		     image("topg.gif", BOTTOM)      ), 
-              button(image("index.gif", BOTTOM),   filename(INDEX),
-		     image("indexg.gif", BOTTOM)    ) 
+			  button(image("next.gif", BOTTOM),
+				      filename(next),
+				      image("nextg.gif", BOTTOM)), 
+			  button(image("prev.gif", BOTTOM),
+				      filename(previous),
+				      image("prevg.gif", BOTTOM)), 
+			  button(image("top.gif", BOTTOM),
+				      filename(top),
+				      image("topg.gif", BOTTOM)), 
+			  button(image("index.gif", BOTTOM),
+				      filename(INDEX),
+				      image("indexg.gif", BOTTOM)) 
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
@@ -91,15 +95,19 @@ NODE FirstPage
   HEADER
   {
     @NavPanel=concatenate(
-              button(image("next.gif", BOTTOM),    filename(next),
-		     image("nextg.gif", BOTTOM)), 
-              button(image("content.gif", BOTTOM), filename(exttoc),
-		     image("contentg.gif", BOTTOM)), 
-              button(image("index.gif", BOTTOM),   filename(INDEX),
-		     image("indexg.gif", BOTTOM)), 
-              button(image("search.gif", BOTTOM),
-		     "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", image("searchg.gif", BOTTOM))  
-                         );
+	  button(image("next.gif", BOTTOM),
+		      filename(next),
+		      image("nextg.gif", BOTTOM)), 
+	  button(image("content.gif", BOTTOM),
+		      filename(exttoc),
+		      image("contentg.gif", BOTTOM)), 
+          button(     image("index.gif", BOTTOM),
+		      filename(INDEX),
+		      image("indexg.gif", BOTTOM)), 
+          button(image("search.gif", BOTTOM),
+		      "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl",
+		      image("searchg.gif", BOTTOM))  
+	  );
     write(*,paragraph(@NavPanel));
   }
   FOOTER
@@ -192,17 +200,22 @@ NODE IndexNode
   HEADER
   {  
     @NavPanel=concatenate( 
-              button(image("next.gif", BOTTOM), filename(next),
-		    image("nextg.gif", BOTTOM)  ),
-              button(image("prev.gif", BOTTOM), filename(previous),
-		     image("prevg.gif", BOTTOM) ), 
-              button(image("top.gif", BOTTOM),  filename(top),
-		     image("topg.gif", BOTTOM)  ),
-              button(image("content.gif", BOTTOM),filename(exttoc),
-		     image("contentg.gif", BOTTOM)  ),
-              button(image("search.gif", BOTTOM),
-		     "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl" , image("searchg.gif", BOTTOM))  
-                         );
+		  button(image("next.gif", BOTTOM),
+			      filename(next),
+			      image("nextg.gif", BOTTOM)  ),
+		  button(image("prev.gif", BOTTOM),
+			      filename(previous),
+			      image("prevg.gif", BOTTOM) ), 
+		  button(image("top.gif", BOTTOM),
+			      filename(top),
+			      image("topg.gif", BOTTOM)  ),
+		  button(image("content.gif", BOTTOM),
+			      filename(exttoc),
+			      image("contentg.gif", BOTTOM)  ),
+		  button(image("search.gif", BOTTOM),
+			      "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl" ,
+			      image("searchg.gif", BOTTOM))  
+		  );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
   }
@@ -224,6 +237,70 @@ PARAGRAPH "IndexHeading-IndexNode" TYPE Heading
   LEVEL 1
   FILENAMEKEY INDEX
   NEWNODE IndexNode
+  ACTIONS
+  {
+    write(*,heading(1,text()));
+    write(*,hrule());
+  }
+}
+
+# IndexHeadingN-IndexNodeN is from Webmaker2.1
+#-------------------------------------------------------------------------
+#
+#  Index node, multiple nodes. Index entries are sorted alphabetically and
+#  displayed with a separate node for each letter section.
+#
+NODE IndexNodeN
+{
+  TITLE headingtext()
+  HEADER
+  {  
+    @NavPanel=concatenate( 
+              button(
+                     image("next.gif",BOTTOM),
+                     filename(next),
+                     image("nextg.gif",BOTTOM))," ", 
+              button(
+                     image("prev.gif",BOTTOM),
+                     filename(previous),
+                     image("prevg.gif",BOTTOM))," ", 
+              button(
+                     image("top.gif",BOTTOM),
+                     filename(top),
+                     image("top.gif",BOTTOM))," ", 
+              button(
+                     image("content.gif",BOTTOM),
+                     filename(TOC),
+                     image("contentg.gif",BOTTOM))
+              );
+
+    write(*,paragraph(@NavPanel));
+    write(*,paragraph(maintitle()));
+  }
+  FOOTER
+  {
+    write(*,index(Index,node));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+# Level 1 in the hierarchy.
+# Heading 1 display size.
+# Index node, multiple nodes. Index entries are sorted alphabetically
+# and displayed with a separate node for each letter section.
+# Only one index rule should be used for a document or book to produce
+# an index node or nodes. A tag mapped to this rule, such as WWW-IX,
+# should appear only once in the FrameMaker document or book.
+# Include nodesTI.wml or nodesBTI.wml from the library to create an
+# index.
+#PARAGRAPH "IndexHeadingN-IndexNodeN" TYPE Heading
+PARAGRAPH "IndexWWWTrigger" TYPE Heading
+{
+  LEVEL 1
+  FILENAMEKEY INDEX
+  NEWNODE IndexNodeN
   ACTIONS
   {
     write(*,heading(1,text()));
@@ -1020,6 +1097,11 @@ PARAGRAPH "InfoHeader" TYPE List { USES "L1GlossaryHeader" }
 PARAGRAPH "InfoBody" TYPE List { USES "L1GlossaryBody" } 
 
 PARAGRAPH "GroupTitlesIX" TYPE Normal { USES "Ignore" } 
+
+# This paragraph tag should be present once and only once in the document
+# so we can trigger the index generation
+#PARAGRAPH "IndexWWWTrigger" TYPE Heading { USES "IndexHeadingN-IndexNodeN" } 
+
 PARAGRAPH "IndexDefinitionIX" TYPE Normal { USES "Ignore" } 
 PARAGRAPH "IndexDefinitionLOM" TYPE Normal { USES "Ignore" } 
 PARAGRAPH "IndexExampleIX" TYPE Normal { USES "Ignore" } 
@@ -1151,7 +1233,7 @@ CHARACTER
 
 GRAPHIC DEFAULT
 {
-  REALSIZE   120  # Percentage scaling of output size relative to original.
+  REALSIZE   200  # Percentage scaling of output size relative to original.
   REALFORMAT GIF  # Output format may be GIF, XBM, XWD, RS, PBM, PS, PICT. 
   MARGIN     0    # Percentage margin size relative to cropped output size.
   MARGINPIX  0    # Margin size in pixels (overrides MARGIN).
