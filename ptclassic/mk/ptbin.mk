@@ -53,55 +53,58 @@
 # to pull in the domains you want.  It also must define the $(PIGI) variable.
 # Here a minimal override.mk which will just pull in SDF:
 #
-# PIGI=pigiRpc
-# SDFFULL=1
+# PIGI =	pigiRpc
+# SDFFULL =	1
 
 VERSION =	0.6devel.$(BASENAME)
 
 ifdef ALLBINARIES
 ifndef PTRIM
 ifndef PTINY
-	FULL=1
+	FULL =	1
 endif
 endif
 endif
 
 ifdef FULL
-	PIGI=$(BASENAME)
-	BDF=1
-	CG56=1
-	CG96=1
-	CGCFULL=1
-	CGFULL=1
-	DDF=1
-	DE=1
-	IPUS=1
-	MDSDF=1
-	PN=1
-	SDFFULL=1
-	SILAGE=1
-	THOR=1
-	VHDL=1
+	PIGI = 		$(BASENAME)
+	VERSION_DESC =	'With All Common Domains'
+	BDF =		1
+	CG56 =		1
+	CG96 =		1
+	CGCFULL =	1
+	CGFULL =	1
+	DDF =		1
+	DE =		1
+	IPUS =		1
+	MDSDF =		1
+	PN =		1
+	SDFFULL =	1
+	SILAGE =	1
+	THOR =		1
+	VHDL =		1
 endif
 
 ifdef PTINY
-	PIGI=$(BASENAME).ptiny
-	DE=1
-	SDF=1
-	SDFTK=1
-	SDFDSP=1
-	SDFMATRIX=1
-	SDFMATLAB=1
+	PIGI=		$(BASENAME).ptiny
+	VERSION_DESC =	'With SDF (no image stars) and DE only'
+	DE =		1
+	SDF =		1
+	SDFTK =		1
+	SDFDSP =	1
+	SDFMATRIX =	1
+	SDFMATLAB =	1
 endif
 
 ifdef PTRIM
-	PIGI=$(BASENAME).ptrim
-	BDF=1
-	CGCFULL=1
-	CGFULL=1
-	DDF=1
-	DE=1
-	SDFFULL=1
+	PIGI =		$(BASENAME).ptrim
+	VERSION_DESC =	'With SDF, DE, BDF and CGC'
+	BDF =		1
+	CGCFULL =	1
+	CGFULL =	1
+	DDF =		1
+	DE =		1
+	SDFFULL =	1
 endif
 
 ifndef TK
@@ -116,11 +119,13 @@ PIGI_OBJS += $(STARS) $(TARGETS)
 PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
 
-REALCLEAN_STUFF= $(PIGI_BINARIES) \
+EVERY_BINARY= $(PIGI_BINARIES) \
 		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
 		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
 		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
 		$(PIGI).ptrim.debug.quantify $(PIGI).ptrim.debug.purecov
+
+REALCLEAN_STUFF =	$(EVERY_BINARY)
 
 ####################################################################
 # Variable definitions are above this point.  Rules are below this point.
@@ -132,9 +137,57 @@ REALCLEAN_STUFF= $(PIGI_BINARIES) \
 
 # See the calling makefile for the all: rule
 
-
 ####################################################################
 # PIGI versions
+
+# This is the default target
+$(PIGI): $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
+	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
+
+# Same, with debugging symbols.
+$(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'and debugging symbols.' \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
+	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
+
+# Same, with debugging symbols and purify
+$(PIGI).debug.purify: $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'and debugging symbols and purify.' \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
+	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
+
+# Same, with quantify, for profiling.
+$(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'and debugging symbols and quantify.' \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
+	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
+
+# Same, with purecov, for code coverage measurements.
+$(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'and debugging symbols and purecov.' \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
+	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
+
+version.$(PIGI).o: $(PT_DEPEND)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.$(PIGI).c
+	$(CC) -c version.$(PIGI).c
 
 INSTALL += makefile $(BINDIR)/$(PIGI)
 
@@ -179,33 +232,12 @@ $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
 
 endif #ALLBINARIES
 
-$(PIGI): $(PT_DEPEND) $(ADD_OBJS)
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
-
-# Same, with debugging symbols.
-$(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
-
-# Same, with debugging symbols and purify
-$(PIGI).debug.purify: $(PT_DEPEND) $(ADD_OBJS)
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
-
-# Same, with quantify, for profiling.
-$(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_OBJS)
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
-
-# Same, with purecov, for code coverage measurements.
-$(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
-	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
-
-version.$(PIGI).o: $(PT_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.$(PIGI).c
-	$(CC) -c version.$(PIGI).c
-
 $(BINDIR)/$(PIGI): $(PIGI)
 		@echo Installing $<
 		rm -f $(BINDIR)/$(PIGI)
 		ln $< $(BINDIR)/$(PIGI)
 
 install: $(INSTALL)
+
+everything: $(REALCLEAN_STUFF)
+
