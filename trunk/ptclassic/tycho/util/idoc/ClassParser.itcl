@@ -32,7 +32,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-
 #######################################################################
 #### IDocSys
 # 
@@ -235,21 +234,45 @@ body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
 # However, there are few sources with more than one class so this is a
 # decent compromise.
 #
-# One bug, it doesn't know how to check if a classfile_rel.html should be
-# created, so doesn't check. This is not critical because docs are 
-# generated at the same time, so if one is okay, the other must be as well. 
-#
-# For non-itcl files, it silently returns 1 because it can't tell.
+# For non-itcl/itk/tcl/tk files, it silently returns 1 because it can't tell.
 #
 body ::tycho::IDocSys::modCheck {filename} {
-    if {[file extension $filename] != ".itcl"} {
-        return 1
+    set sourceTime [file mtime $filename]
+    set extension [file extension $filename]
+
+    if {$extension == ".tcl" || $extension == ".tk" || $extension == ""} {
+        set docFile [file join doc codeDoc [file root $filename].idoc]
+        if ![file exists $docFile] {
+            # No tcl-only documentation
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer than the tcl-only docs
+            return 1
+        }
+        # It's okay
+        return 0
     }
     
-    set sourceTime [file mtime $filename]
+    if {$extension != ".itcl" && $extension != ".itk"} {
+        # Can't check other types of files
+        return 1
+    }
 
     set classes [getClassesInSource $filename]
     foreach class $classes {
+        if {$class == "related"} {
+            set relFile [file join doc codeDoc [file root $filename]_rel.idoc]
+            if ![file exists $relFile] {
+                # No class-related documentation
+                return 1
+            }
+            if {$sourceTime > [file mtime $relFile]} {
+                # The source is newer than the related docs
+                return 1
+            }
+            continue
+        }
         set docFile [file join doc codeDoc [info namespace tail $class].idoc]
         if ![file exists $docFile] {
             # There is no documentation.
@@ -273,9 +296,14 @@ body ::tycho::IDocSys::modCheck {filename} {
 # Generate IDoc files for all the files named in filelist, placing the
 # output in the doc/codeDoc subdirectory.
 #
+# If there are many files, catch errors and return all of the messages.
+# If there is only one file, don't catch it so the user can trace the
+# stack.
+#
 body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     set IDocSys [::tycho::IDocSys [::tycho::autoName .IDocSys]]
-    
+    set oneFileOnly [expr [llength $filelist] == 1] 
+
     if ![file isdirectory doc/codeDoc] {
         exec mkdir -p doc/codeDoc
     }
@@ -285,7 +313,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         if ![$IDocSys modCheck $filename] {
             # file does not need to be redocumented
             if $debug {
-                puts "$filename <not modified>"
+              #  puts "$filename <not modified>"
             }
             continue
         }
@@ -296,14 +324,24 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         if ![file readable $filename] {
             set retval "$retval\nWarning: generateIDoc: $filename is not readable"
         } else {
-            if [catch {$IDocSys readFile $filename} errMsg] {
-                set retval "$retval\nWarning: $errMsg"
-            } else {
+            if {$oneFileOnly} {
+                # Don't catch errors
+                $IDocSys readFile $filename
                 cd doc/codeDoc
-                if [catch {$IDocSys generateSingleFileIDoc $filename} errMsg] {
-                    set retval "$retval\nWarning: $errMsg"
-                }
+                $IDocSys generateSingleFileIDoc $filename
                 cd ../..
+            } else {
+                # Catch and accumulate errors for multiple files.
+                if [catch {$IDocSys readFile $filename} errMsg] {
+                    set retval "$retval\nWarning: $errMsg"
+                } else {
+                    cd doc/codeDoc
+                    if [catch {$IDocSys generateSingleFileIDoc $filename} \
+                            errMsg] {
+                        set retval "$retval\nWarning: $errMsg"
+                    }
+                    cd ../..
+                }
             }
         }
     }
@@ -321,15 +359,45 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
 #####################################################################
 #### getClassesInSource
 # Quickly scan the source file for the classes which are defined within.
-# Requires around 5% of the time it takes to make the docs.
+# Requires around 5% of the time it takes to make the docs. Returns 
+# "related" if there are non-class structures (such as ensembles and 
+# procs) in the file.
+#
+# This is approximate, they must be declared before the first class 
+# in a file or after a body within a file. Which is only decent coding
+# style.
 #
 body ::tycho::IDocSys::getClassesInSource {filename} {
+    set inClass 0
+    set related 0
+    set retval {}
+    
     set fd [open $filename]
     while {![eof $fd]} {
         gets $fd lineIn
-        if [regexp {^[	 ]*(class)[ 	]+(::[a-zA-Z_:]*)[ 	]+\{} \
+        if [regexp {^[	 ]*(class)[ 	]+([^ ]+)[ 	]+\{} \
                 $lineIn dummy dummy2 classname] {
             lappend retval $classname
+            set inClass 1
+        }
+        if {$related} {
+            # don't bother checking
+            continue
+        }
+        # If no related information found yet, keep looking
+        if {$inClass} {
+            # if we see a body, we're out of the class declaration
+            if [regexp {^[	 ]*(body)[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set inClass 0
+            }
+        } else {
+            # check for outside procs or ensembles when not in the class
+            if [regexp {^[	 ]*((proc)|(ensemble))[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set retval [linsert $retval 0 "related"]
+                set related 1
+            }
         }
     }
     close $fd
@@ -794,6 +862,11 @@ body ::tycho::IDocSys::parseClass {class body} {
 
         # Below, parse keywords
         # NOTE: does not support private {method {}{} variable {} ...}
+        # Check if it has a - NOTE: switch can't handle -something's
+        if {[string index $construct 0] == "-"} {
+            # puts "#UNABLE: $construct"
+            continue
+        }
         switch $construct {
             "#" {
                 set inComment 1
@@ -1049,11 +1122,19 @@ body ::tycho::IDocSys::addBody {bodyName arguments expl} {
     # assumes the method or proc already exists
     set class [info namespace qualifiers $bodyName]
     set bodyName [info namespace tail $bodyName]
-    set classModel $myClass($class)
-    # Insert the explanation
-    set expl [formatExpl "$expl"]
-    if {$expl != {}} {
-        $classModel annotation $bodyName.explanation $expl
+
+    # Tcl allows either tycho::crap or ::tycho::crap
+    if ![info exists myClass($class)] {
+        set class "::$class"
+    }
+
+    if [info exists myClass($class)] {
+        set classModel $myClass($class)
+        # Insert the explanation
+        set expl [formatExpl "$expl"]
+        if {$expl != {}} {
+            $classModel annotation $bodyName.explanation $expl
+        }
     }
 }
 
@@ -1069,11 +1150,19 @@ body ::tycho::IDocSys::addConfigBody {configName expl} {
     # assumes the itk_option already exists
     set class [info namespace qualifiers $configName]
     set configName [info namespace tail $configName]
-    set classModel $myClass($class) 
-    set expl [formatExpl "$expl"]
-    if {$expl != {}} {
-        $classModel annotation $configName.explanation $expl
-    } 
+ 
+    # Tcl allows either tycho::crap or ::tycho::crap
+    if ![info exists myClass($class)] {
+        set class "::$class"
+    }
+
+    if [info exists myClass($class)] {
+        set classModel $myClass($class) 
+        set expl [formatExpl "$expl"]
+        if {$expl != {}} {
+            $classModel annotation $configName.explanation $expl
+        } 
+    }
 }
 
 #####################################################################
@@ -1166,4 +1255,5 @@ return "genericsource.itcl"
 body ::tycho::IDocSys::getDocFile {classname} {
 return "genericidoc.idoc"
 }
+
 
