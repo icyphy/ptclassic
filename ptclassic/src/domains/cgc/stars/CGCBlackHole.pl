@@ -18,6 +18,9 @@ This star absorbs all inputs, hence no code needs to be generated!
 		type { ANYTYPE }
 	}
 
+	constructor {
+		noInternalState();
+	}
 	go {
 		gencode( CodeBlock( "/* BLACK HOLE FOR $ref(input) */" ));
 	}

@@ -14,6 +14,9 @@ defstar {
 		name{output}
 		type{float}
 	}
+	constructor {
+		noInternalState();
+	}
 	initCode {
 		addInclude("<math.h>");
 	}

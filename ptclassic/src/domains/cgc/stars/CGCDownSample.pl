@@ -33,6 +33,9 @@ default.
 		desc { Downsample phase. }
 		attributes { A_SETTABLE }
 	}
+	constructor {
+		noInternalState();
+	}
 	start {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))

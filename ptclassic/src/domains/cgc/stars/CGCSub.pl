@@ -24,6 +24,9 @@ defstar {
 		default { 1 }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
+	constructor {
+		noInternalState();
+	}
 	go { 
 	   gencode(init); 
 	   for (int i = 1; i <= neg.numberPorts(); i++) {
