@@ -1,8 +1,9 @@
 #! /bin/sh
+# Version: $Id$
 # Check that all the facets are use $PTOLEMY
 echo 'expect a message about: invalid command name "destroy"'
 
-$PTOLEMY/tcltk/tcl.$ARCH/bin/tclsh $PTOLEMY/bin/ptfixtree.tcl \
+$PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh $PTOLEMY/bin/ptfixtree.tcl \
 	-within '$PTOLEMY' \
 	$PTOLEMY/src/domains/*/icons/*.pal \
 	$PTOLEMY/src/domains/*/*/icons/*.pal \
