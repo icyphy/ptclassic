@@ -133,8 +133,13 @@ class ::tycho::MenuSupport {
     # Set options of a menu
     method menuconfigure {tag args}
 
-    # Ppost the given menu
+    # Post the given menu
     method post {tag}
+
+    # Get the Tk path of a menu -- FIXME
+    method path {tag} {
+	return $menupath($tag)
+    }
 
     # Add a separator to a menu
     method separator {tag inMenu}
@@ -502,13 +507,12 @@ body ::tycho::MenuSupport::menuconfigure {tag args} {
 
 #####################################################################
 #### post
-# Post the given menu. This works with both top-level
+# Post the given menu, and make it "active" so that it responds
+# to cursor keys for menu traversal. This works with both top-level
 # menus and cascaded menus. If a cascaded menu is posted,
-# then its parent menus are also recursively posted/
-# Note that if performing this explicitly, an update
-# needs to be performed between posting a menu and
-# cascaded menu, or the cascade will be mapped in the
-# wrong position on the screen.
+# then its parent menus are also recursively posted. The menu will
+# not be posted if it's corresponding entry is disabled. Return
+# 1 is the menu posted, zero if not.
 #
 body ::tycho::MenuSupport::post {tag} {
     # Check validity
@@ -520,16 +524,34 @@ body ::tycho::MenuSupport::post {tag} {
 	# Post a cascade menu
 	if ![::winfo ismapped $parentmenu($tag)] {
 	    # Recursively post parent and update screen
-	    post [inmenu $tag]
+	    if { ! [post [inmenu $tag]] } {
+		return 0
+	    }
 	    ::tycho::safeUpdate $this
 	}
-	$parentmenu($tag) postcascade [index $tag]
+        # Post this cascade if it's not disabled, and activate its entry
+        set index [index $tag]
+	if { [$parentmenu($tag) entrycget $index -state] == "disabled" } {
+	    return 0
+	}
+	$parentmenu($tag) postcascade $index
+        $parentmenu($tag) activate $index
+
+        # OK, So Tk has posted the menu for us but the focus
+        # is still in the parent menu. Change the focus to the
+        # child menu the "down" key will actually go down the
+        # lowest-level posted menu
+        focus $menupath($tag)
     } else {
-	# Post a top-level menu
+        # Post a top-level menu
+        # FIXME: Use a tk proc so that traversal works correctly
 	$menupath($tag) post \
 		[winfo rootx [component hull]] \
 		[winfo rooty [component hull]]
+        # To activate it, give it the focus
+        # focus $menupath($tag)
     }
+    return 1
 }
 
 #####################################################################
@@ -564,5 +586,5 @@ body ::tycho::MenuSupport::unpost {tag} {
 	error "$tag is not a menu"
     }
     # Unpost it
-    $menupath($tag) unpost
+    tkMenuUnpost $menupath($tag)
 }
