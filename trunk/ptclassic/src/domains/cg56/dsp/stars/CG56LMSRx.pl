@@ -141,7 +141,7 @@ defstar {
 	addCode(cbSetup);
 	addCode(cbUpdateTaps);
 
-	if ( double(last_tap_min) > 0 ) {
+	if (last_tap_min.asDouble() > 0.0) {
     	    addCode(cbLastTapConstrait);
 	} else {
     	    addCode(cbStoreLastTap);
@@ -153,7 +153,7 @@ defstar {
 
     execTime {
 	int coretime = 8 * int(numTaps) + 3 * int(decimation) + 28;
-	if ( double(last_tap_min) > 0.0 )
+	if ( last_tap_min.asDouble() > 0.0 )
 	    coretime += 14;
 	if ( int(numTaps) <= 2 ) {
 	    coretime += int(decimation) <= 1 ? 0 : 3;
