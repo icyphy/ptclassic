@@ -1,11 +1,12 @@
-static const char file_id[] = "DisplayFile.cc";
+static const char file_id[] = "displayFile.c";
+
 /* 
-Functions that Display a file
+Functions that display a file
 
 Version identification:
 $Id$
 
-Copyright (c) 1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,9 +36,7 @@ Author: Christopher Hylands 9/3/96
 #include "displayFile.h"
 #include <tcl.h>
 #include <string.h>
-#include <stdlib.h>		/* For system() */
-
-extern char* getenv();
+#include <stdlib.h>		/* For system and getenv */
 
 /* We could pass this around everywhere and have displayFile.h include
  * tcl.h, but that would add a layer of complication.
@@ -62,7 +61,8 @@ static void genDispCommand(char *buf, const char *fileName)
     char* dispCmd = getenv("PT_DISPLAY");
     if (dispCmd == 0) {
 	*buf = '\0';
-    } else {
+    }
+    else {
 	sprintf(buf, dispCmd, fileName);
     }
 }
@@ -113,7 +113,8 @@ int displayFile(const char *fileName,
       return 0;
     }
     return 1;
-  } else {
+  }
+  else {
     if (debugFuncPtr != (void (*)(const char *)) NULL)    
       (debugFuncPtr)(buf);
     if (system(buf)) {
@@ -124,6 +125,4 @@ int displayFile(const char *fileName,
     }
     return 1;
   }
-
 }
-
