@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "EventQueue.h"
 #include "CalendarQueue.h"
 #include <assert.h>
