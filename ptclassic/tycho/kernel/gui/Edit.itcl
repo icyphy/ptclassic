@@ -2230,11 +2230,11 @@ body ::tycho::Edit::initializeMenubar {menubar} {
     
     # $menubar separator formatsep0 format
 
-    $menubar command fileregion format \
+    $menubar command fillregion format \
 	    -label "Fill Region" -underline 2 \
 	    -accelerator "M-q" -command "$this busy $this fillSelection"
     
-    $menubar command rightfill format \
+    $menubar command rightfillcolumn format \
 	    -label "Right Fill Column" -underline 2 \
 	    -accelerator "C-x f" -command "$this queryFillColumn"
     
