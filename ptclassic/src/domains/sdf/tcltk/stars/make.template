@@ -37,6 +37,7 @@ PL_SRCS= \
  SDFLMSCxTkPlot.pl \
  SDFTclScript.pl \
  SDFTkBarGraph.pl \
+ SDFTkBreakPt.pl \
  SDFTkButtons.pl \
  SDFTkMeter.pl \
  SDFTkPlot.pl \
@@ -48,6 +49,7 @@ PL_SRCS= \
 
 TCL_SRCS= \
  tkButtons.tcl \
+ tkBreakPt.tcl \
  tkMeter.tcl \
  tkScript.tcl \
  tkShowBooleans.tcl \
