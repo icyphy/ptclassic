@@ -25,13 +25,13 @@ provisions.
   input {
     name { left }
     type { float }
-    desc { Left channel input }
+    desc { Left channel input. Range: -1.0 to 1.0}
   }
   
   input {
     name { right }
     type { float }
-    desc { Right channel input }
+    desc { Right channel input Range: -1.0 to 1.0}
   }
 
   defstate {
