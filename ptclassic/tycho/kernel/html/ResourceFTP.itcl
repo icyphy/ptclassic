@@ -89,7 +89,7 @@ class ::tycho::ResourceFTP {
     method ftptimeout {oldstate}
 
     # Open the resource. Enable puts.
-    method open {mode}
+    method open {{mode "r"}}
 
     # Get the progress of sending ftp
     method progress {} {return $progress}
