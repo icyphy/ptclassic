@@ -96,12 +96,7 @@ StringList CGCStar::expandRef(const char* name)
 	if (port->bufType() == EMBEDDED) {
 		ref << "(*" << port->getGeoName() << ")";
 	} else {
-		if (port->isConverted() == TRUE) {
-			ref << port->getLocalGeoName();
-			if (port->numXfer() > 1) ref << "[0]";
-		} else {
-			ref << getActualRef(port, 0);
-		}
+		ref << getActualRef(port, 0);
 	}
     }
     else
@@ -158,25 +153,16 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	}
 
 	if (port->bufSize() > 1) {
-		if (port->isConverted() == TRUE) {
-			ref << port->getLocalGeoName();
-			if (useState == TRUE) {
-				ref << '[' << valOffset << ']';
-			} else {
-				ref << '[' << offset << ']';
-			}
-		} else {
-			if ((port->staticBuf() == TRUE)&&(useState == TRUE)) {
-				ref << port->getLocalGeoName();
-				int v = (port->bufPos() - valOffset +
+		if ((port->staticBuf() == TRUE)&&(useState == TRUE)) {
+			ref << port->getGeoName();
+			int v = (port->bufPos() - valOffset +
 				 	port->bufSize()) % port->bufSize();
-				ref << '[' << v << ']';
-			} else {
-				ref << getActualRef(port, offset);
-			}
+			ref << '[' << v << ']';
+		} else {
+			ref << getActualRef(port, offset);
 		}
 	} else {
-		ref << port->getLocalGeoName();
+		ref << port->getGeoName();
 	}
     }
     return ref;
@@ -186,7 +172,6 @@ void CGCStar :: initBufPointer() {
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
-		decideBufferType(p);		// buffer type determination.
 		StringList out = initializeOffset(p);
 		out << initializeBuffer(p);
 		if (out.length() > 0) addMainInit(out);
@@ -209,34 +194,43 @@ void CGCStar::registerState(const char* name) {
 void CGCStar::initialize() {
 	CGStar::initialize();
 	referencedStates.initialize();
+	spliceClust.initialize();
+	if (!spliceClust.member(this)) spliceClust.append(this);
 }
 
 /////////////////////////////////////////////////////////////
-// run: (1) move input data from shared buffer if necessary
-//	(2) prefix the code with a comment
-//	(3) body of code
-//	(4) automatic type conversion if necessary
-//	(5) update offset if necessary
-//	(6) move output data for COPIED type of portholes.
+// runIt: 
+//	(1) prefix the code with a comment
+//	(2) body of code
+//	(3) update offset if necessary
+//	(4) move output data for Spread/Collect pair
 /////////////////////////////////////////////////////////////
 
-int CGCStar::run() {
-	// data movement from shared (embedding) buffer to the private buffer
-	// if necessary.
-	moveDataFromShared();
+int CGCStar :: run() {
+	int status;
+	if (spliceClust.size() > 1) {
+		ListIter nextStar(spliceClust);
+		CGCStar* s;
+		while ((s = (CGCStar*) nextStar++) != 0) {
+			status = s->runIt();
+			if (!status) return status;
+		}
+	}
+	else status = runIt();
+	return status;
+}
 
+int CGCStar::runIt() {
 	StringList code = "\t{  /* star ";
 	code << fullName() << " (class " << className() << ") */\n";
 	addCode(code);
 	int status = CGStar::run();
+	if (!status) return status;
 
 	if (isItFork()) {
 		addCode("\t}\n");
 		return status;
 	}
-
-	// If data conversion is necessary, do now
-	doTypeConversion();
 
 	// update the offset member
 	updateOffsets();
@@ -249,81 +243,10 @@ int CGCStar::run() {
 	return status;
 }
 
-// Before firing that star, we may need to move the input data from the
-// shared buffer to the private buffer in case of embedding: when the
-// input needs past samples or delays.
-void CGCStar :: moveDataFromShared() {
-	StringList code;
-	int flag = 0;
-
-	BlockPortIter next(*this);
-	CGCPortHole* p;
-	while ((p = (CGCPortHole*) next++) != 0) {
-		// consider input only
-		if (p->isItOutput()) continue;
-
-		// type indication
-		flag = 0;
-		CGCPortHole* farP = (CGCPortHole*) p->far();
-		if (farP == 0) {
-			if (!p->switched()) continue;
-			farP = (CGCPortHole*) p->cgGeo().sourcePort();
-		}
-
-		if (farP->embedded() && (farP->bufType() == OWNER))
-			flag = 1;
-		else if (farP->embedding() && (farP->bufType() == COPIED))
-			flag = -1;
-		if (flag == 0) continue;
-
-		CGCPortHole* ep = farP;
-		if (flag > 0)
-			ep = (CGCPortHole*) farP->embedded();
-
-		StringList pname = targ()->offsetName(p);
-		StringList aname = targ()->appendedName(*p, "copy_ix");
-		code << "/* moveDataFromShared for " << p->fullName()
-		     << " */\n";
-		if (p->numXfer() > 1) {
-			code << "\t{ int i,j,k;\n\t for(i = 0; i < ";
-			code << p->numXfer() << "; i++) {\n";
-			code << "\t\t j = (" << pname;
-			int temp = p->bufSize() - p->numXfer() + 1;
-			code << " + " << temp;
-			code << " + i) % " << p->bufSize() << ";\n";
-			code << "\t\t k = (j - " << aname << " + ";
-			code << p->bufSize() << ") % ";
-			code << p->bufSize() << ";\n";
-			code << "\t\t if (" << farP->numXfer();
-			code << " <= k) continue;\n";
-			code << "\t\t" << p->getGeoName();
-			code << "[j] = ";
-			if (flag > 0) {
-				code << ep->getGeoName();
-			} else {
-				code << targ()->appendedName(*ep, "copy");
-			}
-			code << "[k];\n\t}\n\t}\n";
-		} else {
-			code << "\t{ int j;\n";
-			code << "\t  j = (" << pname;
-			code << " + 1) % " << p->bufSize() << ";\n";
-			code << "\t  " << p->getGeoName();
-			code << "[j] = ";
-			if (flag > 0) {
-				code << ep->getGeoName();
-			} else {
-				code << targ()->appendedName(*ep, "copy");
-			}
-			code << ";\n\t}\n";
-		}
-	}
-	if (code.length() > 0) addCode(code);
-}
-
 // After firing that star, we may need to move the input data between
 // shared buffers (for example, Spread/Collect) since these movements
 // are not visible from the user.
+// In case, embedded portholes are connected together.
 void CGCStar :: moveDataBetweenShared() {
 	StringList code;
 
@@ -372,12 +295,8 @@ void CGCStar :: moveDataBetweenShared() {
 			if (start < from) start = from;
 			if (stop > to) stop = to;
 
-			const char* farName;
-			if (ep->bufType() != COPIED) {
-				farName = ep->getGeoName();
-			} else {
-				farName = targ()->appendedName(*ep, "copy");
-			}
+			const char* farName = ep->getGeoName();
+
 			code << "\t/* moveDataBetweenShared */\n";
 			if (op->numXfer() > 1) {
 				code << "\t{ int i,j;\n\t  j = " << there;
@@ -390,61 +309,6 @@ void CGCStar :: moveDataBetweenShared() {
 				code << " = " << p->getGeoName();
 				code << '[' << start << "];\n";
 			}
-		}
-	}
-	if (code.length() > 0) addCode(code);
-}
-
-
-// return the code for square-root computation.
-StringList getAbs(const char* p) {
-	StringList name = p;
-	StringList out;
-	out << "sqrt( " << name << ".real *" << name << ".real + ";
-	out << name << ".imag * " << name << ".imag)";
-	return out;
-}
-
-// For automatic type conversion, we need to move data from the "private"
-// buffer to the "global buffer".
-void CGCStar :: doTypeConversion() {
-	StringList code;
-
-	BlockPortIter next(*this);
-	CGCPortHole* p;
-	while ((p = (CGCPortHole*) next++) != 0) {
-		// consider output only
-		if (p->isItInput() || (p->isConverted() == FALSE)) continue;
-		if (p->numXfer() > 1) {
-			code << "\t{ int i;\n\t for(i = 0; i < ";
-			code << p->numXfer() << "; i++) {\n\t\t";
-			if (strcmp(p->type(),COMPLEX) == 0) {
-				code << getActualRef(p, "i") << " = ";
-				StringList temp = p->getLocalGeoName();
-				temp << "[i]";
-				addInclude("<math.h>");
-				code << getAbs((const char*) temp);
-			} else {
-				StringList ar = getActualRef(p, "i");
-				code << ar << ".real = ";
-				code << p->getLocalGeoName() << "[i];\n\t\t";
-				code << ar << ".imag = 0";
-			}
-			code << ";\n\t}}\n";
-		} else {
-			code << "\t";
-			StringList ar = getActualRef(p, 0);
-			if (strcmp(p->type(),COMPLEX) == 0) {
-				code << ar << " = ";
-				addInclude("<math.h>");
-				StringList temp = p->getLocalGeoName();
-				code << getAbs((const char*) temp);
-			} else {
-				code << ar << ".real = ";
-				code << p->getLocalGeoName() << ";\n\t";
-				code << ar << ".imag = 0";
-			}
-			code << ";\n";
 		}
 	}
 	if (code.length() > 0) addCode(code);
@@ -477,40 +341,6 @@ void CGCStar :: updateOffsets() {
 	// porthole declarations and initializations
 	/////////////////////////////////////////////
 
-// Set the buffer type.
-void CGCStar :: decideBufferType(CGCPortHole* p) {
-	int copied = FALSE;
-	if (p->isItOutput()) {
-		int dimen = p->bufSize();
-
-		// If it is embedding inputs;
-		if (p->embedding()) {
-			if (dimen > p->numXfer()) {
-				copied = TRUE;
-			} else {
-				p->setBufType(OWNER);
-				return;
-			}
-		}
-
-		CGCPortHole* farP = (CGCPortHole*) p->far();
-
-		// if embedded properly, do not allocate the buffer.
-		if ((p->embedded() && (dimen == p->numXfer())) ||
-		  (farP && farP->embedded() && (dimen == farP->numXfer()))) {
-			dimen = 0;
-		}
-
-		// buffer type determination.
-		if (copied) {
-			p->setBufType(COPIED);
-		} else {
-			if (dimen) p->setBufType(OWNER);
-			else p->setBufType(EMBEDDED);
-		}
-	}
-}
-
 // Define variables only for each output port, except outputs of forks.
 StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 	StringList out;
@@ -518,42 +348,10 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 		emptyFlag = FALSE;
 		int dimen = p->bufSize();
 
-		// If it is embedding inputs;
-		if (p->embedding()) {
-			StringList pname = targ()->appendedName(*p, "copy");
-
-			out << "    " << whichType(p->resolvedType());
-			out << " " << pname;
-			// make it a scalar if size 1
-			int nx = p->numXfer();
-			if (nx > 1)
-				out << '[' << nx << "]";
-			out << ";\n";
-			// if both buffers 1, make the same with a #define
-			if (dimen == 1 && nx == 1) {
-				out << "#define " << p->getGeoName()
-				    << " " << pname << "\n";
-				return out;
-			}
-			else if (dimen <= p->numXfer()) {
-				// If the input on this arc does not have
-				// extra buffer requirements,
-				out << "    " << whichType(p->resolvedType());
-				out << "* " << p->getGeoName();
-				out << " = ";
-				out << pname;
-				out << ";\n";
-				return out;
-			}
-		}
-
 		out << "    " << whichType(p->resolvedType());
 
-		CGCPortHole* farP = (CGCPortHole*) p->far();
-
 		// if embedded properly, do not allocate the buffer.
-		if ((p->embedded() && (dimen == p->numXfer())) ||
-		   (farP && farP->embedded() && (dimen == farP->numXfer()))) {
+		if (p->bufType() == EMBEDDED) {
 			out << "*";	// add pointer
 			dimen = 0;
 		}
@@ -564,16 +362,6 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 			out << "[" << dimen << "]";
 		}
 		out << ";\n";
-
-		// if type conversion is required,
-		if (p->isConverted() == TRUE) {
-			out << "    " << whichType(p->type()) << ' ';
-			out << p->getLocalGeoName();
-			if (p->numXfer() > 1) {
-				out << '[' << p->numXfer() << ']';
-			}
-			out << ";\n";
-		}
 	}
 	return out;
 }
@@ -604,6 +392,7 @@ StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
 
 	out << "    /* initializeBuffer for " << p->fullName() << " */\n";
 	CGCPortHole* farP = (CGCPortHole*) p->far();
+
 	// if embedded properly, do not allocate the buffer.
 	if (p->bufType() == EMBEDDED) {
 		out << "    " << p->getGeoName() << " = ";
@@ -620,28 +409,16 @@ StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
 			ep = (CGCPortHole*) farP->embedded();
 			loc = farP->whereEmbedded();
 			if (ep->maxBufReq() == 1) out << "&";
-			out << targ()->appendedName(*ep, "copy");
+			out << ep->getGeoName();
 		}
 		if (ep->maxBufReq() > 1)
 			out << " + " << loc;
 		out << ";\n";
 		return out;
 
-	} else if (p->bufType() == COPIED) {
-		StringList temp = targ()->appendedName(*p, "copy");
-		if (p->numXfer() > 1) {
-			out << "    { int i;\n    for (i = 0; i < ";
-			out << p->numXfer() << "; i++) {\n\t";
-			out << typelessPortInit(p->resolvedType(), temp);
-			out << "    }}\n";
-		}
-		else {
-			out << "    " << typelessPortInit(p->resolvedType(),
-							  temp, 0);
-		}
-	}
+	} 
 
-	// for copied and owner buffer
+	// for owner buffer
 	if (p->bufSize() > 1) {
 		// initialize output buffer
 		StringList init =
@@ -649,16 +426,6 @@ StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
 
 		out << "    { int i;\n    for (i = 0; i < ";
 		out << p->bufSize() << "; i++) {\n\t" << init << "    }}\n";
-	}
-
-	// for automatic type conversion.
-	if (p->isConverted() && (p->numXfer() > 1)) {
-		out << "    { int i;\n    for (i = 0; i < ";
-		out << p->numXfer() << "; i++) {\n\t";
-
-		StringList temp = p->getLocalGeoName();
-		out << typelessPortInit(p->type(),(const char*) temp);
-		out << "    }}\n";
 	}
 
 	return out;
@@ -674,17 +441,7 @@ StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 	if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
 		emptyFlag = FALSE;
 		out << "    " << "int ";
-		out << targ()->appendedName(*p, "ix") << ";\n";
-	}
-	// copy_offset definition.
-	if (p->isItInput()) {
-		CGCPortHole* farP = (CGCPortHole*) p->far();
-		if (farP && ((farP->embedded() && farP->bufType() == OWNER) ||
-		    (farP->embedding() && farP->bufType() == COPIED))) {
-			emptyFlag = FALSE;
-			out << "    " << "int ";
-			out << targ()->appendedName(*p,"copy_ix") << " = 0;\n";
-		}
+		out << targ()->offsetName(p) << ";\n";
 	}
 	return out;
 }
@@ -805,8 +562,3 @@ int CGCStar :: addInclude(const char* decl) {
 	return addCode(temp, "include", decl);
 }
 
-// a debug function
-#include <iostream.h>
-void seeList(StringList& arg) {
-	cerr << arg << "\n";
-}

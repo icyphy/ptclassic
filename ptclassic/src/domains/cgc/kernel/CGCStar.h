@@ -55,12 +55,16 @@ public:
 	// my domain
 	const char* domain() const;
 
+	// run this star or spliceClust if there are any splice stars
 	int run();
 
 	// class identification
 	int isA(const char*) const;
 
 protected:
+	// main routine.
+	int runIt();
+
 	// access to target (cast is safe: always a CGCTarget)
 	CGCTarget* targ() {
 		return (CGCTarget*)myTarget();
@@ -100,22 +104,19 @@ protected:
 	// After each firing, update the offset pointers
 	virtual void updateOffsets();
 
-	// Before firing that star, we may need to move the input data from the
-	// shared buffer to the private buffer in case of embedding: when the
-	// input needs past samples or delays.
-	void moveDataFromShared();
-
 	// After firing that star, we may need to move the input data between
 	// shared buffers (for example, Spread/Collect) since these movements
 	// are not visible from the user.
 	void moveDataBetweenShared();
 
-	// If automatic type conversion is necessary, do it.
-	// Currently, support complex type.
-	void doTypeConversion();
-
 	// get the actual buffer reference.
 	virtual StringList getActualRef(CGCPortHole* p, const char* offset);
+
+	// unfortunate, but we need to make special treatment for
+	// Spread/Collect stars when splicing. Note that Spread/Collect
+	// are not regular stars
+	// If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
+	virtual int amISpreadCollect() {return 0; }
 
 private:
 	// define and initialize variables for C program.
@@ -127,7 +128,6 @@ private:
 	int emptyFlag;
 
 	// declare PortHoles and States
-	virtual void decideBufferType(CGCPortHole* p);
 	virtual StringList declarePortHole(CGCPortHole* p);
 	virtual StringList declareOffset(const CGCPortHole* p);
 	virtual StringList declareState(const State* p);
@@ -138,6 +138,16 @@ private:
 
 	// offset initialize
 	void initBufPointer();
+
+	// form a cluster of this star and spliced stars
+	// initially put myself in spliceClust.
+	SequentialList spliceClust;
+
+	void addSpliceStar(CGCStar* s, int flag) {
+		if (spliceClust.member(s)) return;
+		if (flag) spliceClust.append(s);
+		else spliceClust.prepend(s);
+	}
 };
 
 #endif

@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "HLLTarget.h"
 #include "StringState.h"
+#include "StringArrayState.h"
 #include "IntState.h"
 
 class CGCPortHole;
@@ -65,7 +66,6 @@ public:
 	// make public this method
 	StringList correctName(const NamedObj& p) 
 		{return  sanitizedFullName(p); }
-	StringList appendedName(const NamedObj& p, const char* s);
 
 	// set the hostMachine name
 	void setHostName(const char* s) { hostMachine = s; }
@@ -158,6 +158,8 @@ protected:
 	// the actual name
 	StringList sanitizedFullName(const NamedObj &b) const;
 
+	StringList appendedName(const NamedObj& p, const char* s);
+
 	// states
 	IntState staticBuffering;
 	IntState doCompile;
@@ -167,6 +169,7 @@ protected:
 	StringState compileOptions;
 	StringState linkOptions;
 	StringState saveFileName;
+	StringArrayState resources;
 
 	// give a unique name for a galaxy. 
 	int galId;
@@ -179,14 +182,10 @@ protected:
 	// make a comment explaining the following code.
 	StringList sectionComment(const char* s);
 
+	// splice copy stars or type conversion stars if necessary.
+	void addSpliceStars();
+
 private:
-	// assign the variable for each geodesic (connection).
-	void setGeoNames(Galaxy& galaxy);
-
-	// Update the copy-offset (for embedded portholes) after
-	// run before wrap-up stage.
-	StringList updateCopyOffset();
-
 	// setup forkDests list for all Fork input portholes
 	// This complete list is needed to decide the buffer size computation.
 	void setupForkDests(Galaxy&);

@@ -41,9 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // three different types of buffer.
 // If owner, this porthole owns buffer.
 // If embedded, no physical buffer is assigned to that porthole.
-// If copied, two different set of buffer is assigned. It is needed when
-// the output is embedding, and its far() requires past samples, or delays.
-enum BufType { NA, OWNER, EMBEDDED, COPIED };
+enum BufType { NA, OWNER, EMBEDDED };
 
 class CGCGeodesic;
 
@@ -86,15 +84,13 @@ public:
 	void giveUpStatic() { hasStaticBuf = FALSE; }
 
 	// set and get the buffer type
-	void setBufType(BufType b) { myType = b; }
+	void setBufferType();
 
 	BufType  bufType() const;
 
 	// name the porthole in the data structure.
 	void setGeoName(char* n);
 	const char* getGeoName() const;
-	// in case explicit type conversion is required.
-	const char* getLocalGeoName();
 
 	// Return the geodesic connected to this PortHole.
 	// This is typesafe because allocateGeodesic
@@ -130,9 +126,11 @@ public:
 	// allocate a geodesic
 	/* virtual */ Geodesic* allocateGeodesic();
 
-protected:
 	// determine the property of the buffer associated with this port.
 	void setFlags();
+
+	// set output offset manually
+	void setOffset(int v) { manualOffset = v; }
 
 private:
 	int maxBuf;		// Final buffer size.
@@ -147,6 +145,8 @@ private:
 	char* bufName;		// set if no geodesic is assigned.
 
 	SequentialList& myDest() { return forkDests; }
+	
+	int manualOffset;	// set the offset of the output manually.
 };
 
 class InCGCPort : public CGCPortHole {

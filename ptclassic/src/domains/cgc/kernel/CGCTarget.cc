@@ -67,6 +67,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "options to be specified for linking."));
 	addState(saveFileName.setState("saveFileName",this,"",
                         "file name to save the generated code."));
+        addState(resources.setState("resources",this,"STDIO",
+        	"standard I/O resource"));
 	initCodeStrings();
 
 	// stream definition
@@ -343,7 +345,6 @@ void CGCTarget :: wormOutputCode(PortHole& p) {
 
 void CGCTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << wormOut;
-	myCode << updateCopyOffset();
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
 
@@ -352,28 +353,16 @@ Block* CGCTarget :: makeNew () const {
 	LOG_NEW; return new CGCTarget(name(),starType(),descriptor());
 }
 
-void CGCTarget :: setGeoNames(Galaxy& galaxy) {
-    GalStarIter next(galaxy);
-    Star* b;
-    while ((b = next++) != 0) {
-	BlockPortIter nextPort(*b);
-	CGCPortHole* p;
-	while ((p = (CGCPortHole*)nextPort++) != 0) {
-	    // Assign names only for each output port
-	    if (p->isItOutput() && (!p->switched())) {
-		StringList s = sanitizedFullName(*p);
-		p->setGeoName(savestring(s));
-	    }
-	}
-    }
-}
-
 /////////////////////////////////////////
 // routines to determine the buffer sizes
 /////////////////////////////////////////
 
 // note that we allow the C compiler to do the actual allocation;
-// this routine just determines the buffer sizes, and buffer properties.
+// this routine (1) determines the buffer sizes, and buffer properties.
+// (2) splice star for copying and type conversion.
+// (3) determine the type of buffers.
+// (4) naming buffers
+// (5) buffer offset initialization
 
 int CGCTarget :: allocateMemory() {
 	int loop = int(loopingLevel);
@@ -384,6 +373,7 @@ int CGCTarget :: allocateMemory() {
 	int statBuf = useStaticBuffering();
 	if (loop) statBuf = 0;
 
+	// (1) determine the buffer size
 	GalStarIter nextStar(g);
 	CGCStar* s;
 	while ((s = (CGCStar*)nextStar++) != 0) {
@@ -394,6 +384,30 @@ int CGCTarget :: allocateMemory() {
 			p->finalBufSize(statBuf);
 		}
 	}
+
+	// (2) splice copy stars and type conversion stars if necessary.
+	addSpliceStars();
+
+	nextStar.reset();
+        while ((s = (CGCStar*)nextStar++) != 0) {
+                BlockPortIter next(*s);
+                CGCPortHole* p;
+                while ((p = (CGCPortHole*) next++) != 0) {
+
+			// (3) buffer type
+			p->setBufferType();
+
+			// (4) naming buffers.
+	    		if (p->isItOutput() && (!p->switched())) {
+				StringList s = sanitizedFullName(*p);
+				p->setGeoName(savestring(s));
+	    		}
+
+			// (5) initialize offset pointer.
+                        if (!p->initOffset()) return FALSE;
+                }
+        }
+
 	return TRUE;
 }
 
@@ -416,26 +430,10 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 
 int CGCTarget :: codeGenInit() {
 
-        // initialize the porthole offsets, and do all initCode methods.
-        GalStarIter nextStar(*galaxy());
-        CGCStar* s;
-        while ((s = (CGCStar*)nextStar++) != 0) {
-                BlockPortIter next(*s);
-                CGCPortHole* p;
-                while ((p = (CGCPortHole*) next++) != 0) {
-                        if (!p->initOffset()) return FALSE;
-                }
-        }
-
-	// Set all geodesics to contain a symbolic name that can be
-	// used as the C object representing the buffer.  That name will
-	// be of the form "universe.gal1.gal2.star.output", which designates
-	// the output port that actually produces the data.
-	setGeoNames(*galaxy());
-
 	// call initialization code.
 	switchCodeStream(galaxy(), getStream("mainInit"));
-	nextStar.reset();
+	GalStarIter nextStar(*galaxy());
+	CGCStar* s;
 	while ((s = (CGCStar*) nextStar++) != 0) {
 		if (s->isItFork()) continue;
 		s->initBufPointer();
@@ -446,35 +444,116 @@ int CGCTarget :: codeGenInit() {
 }
 
 /////////////////////////////////////////
-// updateCopyOffset
+// addSpliceStars
 /////////////////////////////////////////
 
-StringList CGCTarget :: updateCopyOffset() {
-	StringList out;
-	
+static void setupBuffer(CGCStar* s, int dimen, int bufsz) {
+	CGCPortHole* p = (CGCPortHole*) s->portWithName("output");
+	p->setSDFParams(dimen);
+	if (bufsz) {
+		p->giveUpStatic();
+		p->requestBufSize(bufsz);
+	}
+	else       p->requestBufSize(dimen);
+	p->setFlags();
+	p = (CGCPortHole*) s->portWithName("input");
+	p->setSDFParams(dimen);
+	p->setFlags();
+}
+
+// we add "copy" stars in case
+// a input/output porthole is an embedding/embedded porthole, 
+//     and buffer size is greater than the sample rate.
+
+// we add "type-conversion star" if necessary: complex to float/int and
+// int/float to complex. If we add type-conversion star, we do not need to
+// splice "copy" star.
+
+void CGCTarget :: addSpliceStars() {
+	const char* dom = galaxy()->domain();
+
 	GalStarIter nextStar(*galaxy());
 	CGCStar* s;
+	CGCPortHole* farP;
 	while ((s = (CGCStar*) nextStar++) != 0) {
-		if (s->isItFork()) continue;
-		BlockPortIter next(*s);
-		CGCPortHole* p;
-		while ((p = (CGCPortHole*) next++) != 0) {
-			if (p->isItOutput()) continue;
-			CGCPortHole* f = (CGCPortHole*) p->far();
-			if ((f->embedded() && f->bufType() == OWNER) ||
-			    (f->embedding() && f->bufType() == COPIED)) {
-				StringList temp = appendedName(*p, "copy_ix");
-				out << "    ";
-				out << temp;
-				out << " = (" << f->numXfer() << " + ";
-				out << temp;
-				out << ") % " << p->bufSize() << ";\n";
+                BlockPortIter next(*s);
+                CGCPortHole* p;
+                while ((p = (CGCPortHole*) next++) != 0) {
+			CGCStar* news = 0;
+
+			if (p->isItInput()) {
+				farP = (CGCPortHole*) p->far();
+				int flag = farP->isConverted();
+
+				// splice type conversion(CxToFloat) star.
+				if (flag > 0) {
+					news = (CGCStar*) spliceStar(p, 
+						"CxToFloat", 1, dom);
+
+				// splice type conversion(FloatToCx) star.
+				} else if (flag < 0) {
+					news = (CGCStar*) spliceStar(p, 
+						"FloatToCx", 1, dom);
+
+				// splice copy star.	
+				} 
+				if ((p->embedded() || p->embedding()) &&
+					 (p->numXfer() < p->bufSize())) {
+					// splice copy star
+					if (!flag)
+						news = (CGCStar*)
+						spliceStar(p, "Copy", 1, dom);
+					CGCPortHole* tp = (CGCPortHole*) 
+						news->portWithName("input");
+					tp->giveUpStatic();
+				}
+				if (news) {
+					news->setTarget(this);
+					setupBuffer(news, p->numXfer(), 0);
+					s->addSpliceStar(news, 0);
+					if (flag) farP->setPlasma();
+				}
+
+			// output
+			} else if ((p->embedded() || p->embedding()) &&
+				 (p->numXfer() < p->bufSize())) {
+
+				// special treatment for Collect star
+				// since it is not a normal SDF star
+				CGCStar* ps = (CGCStar*) p->parent();
+				if (ps->amISpreadCollect()) {
+					farP = (CGCPortHole*) p->far();
+					news = (CGCStar*) spliceStar(farP,
+						"Copy", 0, dom);
+					setupBuffer(news, farP->numXfer(), 
+						p->bufSize());
+					ps = (CGCStar*) farP->parent();
+					ps->addSpliceStar(news, 0);
+
+					// set offset manually
+					CGCPortHole* tp = (CGCPortHole*) 
+						news->portWithName("output");
+					int offset = p->numXfer() -
+						farP->numInitDelays() - 1;
+					if (offset < 0) offset += p->bufSize();
+					tp->setOffset(offset);
+					tp = (CGCPortHole*) news->
+						portWithName("input");
+					tp->setOffset(offset);
+				} else {
+					news = (CGCStar*) 
+						spliceStar(p,"Copy",0,dom);	
+					setupBuffer(news, p->numXfer(), 
+						p->bufSize());
+					s->addSpliceStar(news, 1);
+				}
+				p->requestBufSize(p->numXfer());
+				news->setTarget(this);
 			}
 		}
 	}
-	return out;
 }
-			
+
 /////////////////////////////////////////
 // incrementalAdd
 /////////////////////////////////////////
