@@ -87,8 +87,10 @@ extern int getrusage(int who, struct rusage *rusage);
 #include <time.h>
 #endif
 
-#ifdef SYSV
-#include <sys/rusage.h>
+#ifdef PTSOL2
+#include <fcntl.h>
+/* sys/rusage.h is in Solaris2.3, but not Solaris2.4 */
+/*#include <sys/rusage.h>*/
 #include <sys/resource.h>
 #ifndef RUSAGE_SELF
 #include <sys/procfs.h>
@@ -105,39 +107,27 @@ util_cpu_time()
     long t = 0;
 
 
-#ifdef SYSV
+#ifdef PTSOL2
 /* For Solaris2, taken from solaris2_porting.faq */
         /*
          *      getrusage --
          */
-
-#ifdef PIOCUSAGE
     int             fd;
-    char            proc[SOMETHING];
+    char            proc[BUFSIZ];
     prusage_t       prusage;
 
-    sprintf(proc,"/proc/%d", getpid());
+    sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc,O_RDONLY)) == -1) {
       perror("util_cpu_time(): open");
       return (long) 0;
     }
-    if (ioctl(fd, PIOCUSAGE,, &prusage) == -1) {
+    if (ioctl(fd, PIOCUSAGE, &prusage) == -1) {
       perror("util_cpu_time(): ioctl");
       return (long) 0;
     }
     t = prusage.pr_utime.tv_sec*1000 +     prusage.pr_utime.tv_nsec/1000000;
-#ifdef NEVER
-#else                   /* Again, assume BSD */
-                if (getrusage(RUSAGE_SELF, &rusage) == -1) {
-                        perror("getrusage");
-                        ....
-                }
-                ....
-#endif /* NEVER */
-#endif /* PIOCUSAGE */
 
 #else
-
 
 #ifndef hpux
 #ifdef BSD
@@ -185,6 +175,6 @@ util_cpu_time()
     times(&buffer);
     t = buffer.proc_user_time * 10;
 #endif
-#endif /* SYSV */
+#endif /* PTSOL2 */
     return t;
 }
