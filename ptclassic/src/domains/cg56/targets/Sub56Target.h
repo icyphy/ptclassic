@@ -45,16 +45,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 
 class Sub56Target : public CG56Target {
-private:
-	void initStates();
+public:
+	// Constructor
+	Sub56Target(const char* name, const char* desc,
+		    const char* assocDomain = CG56domainName);
+
+	// Copy constructori
+	Sub56Target(const Sub56Target&);
+
+	/*virtual*/ void mainLoopCode();
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// Type checking
+	/*virtual*/ int isA(const char*) const;
+
 protected:
         /*virtual*/ void headerCode();
-public:
-	Sub56Target(const char*,const char*);
-	Sub56Target(const Sub56Target&);
-	/*virtual*/ void mainLoopCode();
-	/*virtual*/ Block* makeNew() const;
-	/*virtual*/ int isA(const char*) const;
+
+private:
+	void initStates();
 };
 
 #endif

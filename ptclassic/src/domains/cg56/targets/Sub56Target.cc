@@ -43,8 +43,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "MotorolaTarget.h"
 
-Sub56Target :: Sub56Target(const char* nam, const char* desc) :
-	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star","CG56")
+Sub56Target :: Sub56Target(const char* nam, const char* desc,
+			   const char* assocDomain) :
+CG56Target(nam, desc, assocDomain),
+MotorolaTarget(nam, desc, "CG56Star", assocDomain)
 {
 	initStates();
 }
@@ -79,7 +81,8 @@ Block* Sub56Target::makeNew() const {
 
 ISA_FUNC(Sub56Target,CG56Target);
 
-//make an instance
-static Sub56Target proto("sub-CG56","generate subroutines pigiInit and pigiMain");
+// register an instance
+static Sub56Target proto("sub-CG56",
+			 "generate subroutines pigiInit and pigiMain");
 
 static KnownTarget entry(proto, "sub-CG56");

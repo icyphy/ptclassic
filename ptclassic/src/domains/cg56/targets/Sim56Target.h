@@ -44,21 +44,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MotorolaSimTarget.h"
 
 class Sim56Target :public CG56Target, public MotorolaSimTarget {
-private:
-	void initStates();
-protected:
-        /*virtual*/ void headerCode();
-        /*virtual*/ void trailerCode();
 public:
-	Sim56Target(const char*,const char*);
+	// Constructor
+	Sim56Target(const char* name, const char* desc,
+		    const char* assocDomain = CG56domainName);
+
+	// Copy constructor
 	Sim56Target(const Sim56Target&);
+
 	/*virtual*/ int compileCode();
 	/*virtual*/ int loadCode();
 	/*virtual*/ int runCode();
 	/*virtual*/ void writeCode();
 	/*virtual*/ void frameCode() { MotorolaSimTarget::frameCode(); }
-	Block* makeNew() const;
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// Type hierarchy checking
 	int isA(const char*) const;
+
+protected:
+        /*virtual*/ void headerCode();
+        /*virtual*/ void trailerCode();
+
+private:
+	void initStates();
 };
 
 #endif
