@@ -48,13 +48,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name {xRange}
-		type{string}
+		type{floatarray}
 		default {"-1.5 1.5"}
 		desc { The range of x-coordinate values }
 	}
 	defstate {
 		name {yRange}
-		type{string} 
+		type{floatarray} 
 		default {"-1.5 1.5"}
 		desc { The range of y-coordinate values }
 	}
@@ -90,27 +90,57 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 	  XYPlot xyplot;
 	  InfString labCopy, geoCopy, xtCopy, ytCopy;
-	  double xMin, xMax, yMin, yMax;
+	}
+
+	// The private method "validRange" takes one argument: a float
+	// array state "range".  It is only intended to be invoked by
+	// the "begin" method on the "xRange" and "yRange" states of 
+	// the star.
+	//
+	// "validRange" returns TRUE if the array state "range" has two
+	// elements, with the first element (the low end of the range)
+	// being less than the second element (the high end of the range).
+	// Otherwise, it returns FALSE.
+	method {
+	  name { validRange }
+	  access { private }
+	  arglist { "(FloatArrayState& range)" }
+	  type { int }
+	  code {
+	    if (range.size() != 2) {
+	      StringList msg;
+	      msg << "State \"" << range.name() << "\" should be a float "
+	        << "array with two elements, but it has " << range.size() 
+		<< " elements.";
+	      Error::abortRun(*this, msg);
+	      return FALSE;
+	    }
+	    if (range[0] >= range[1]) {
+	      StringList msg;
+	      msg << "The first number in the float array state \""
+	        << range.name() << "\" should be less than the second, "
+		<< "but they are " << range[0] << " and " << range[1]
+	        << ", respectively."; 
+	      Error::abortRun(*this, msg);
+	      return FALSE;
+	    }
+	    return TRUE;  // the float array "range" is valid
+	  }
 	}
 
 	begin {
-	  // Need to make non-const copies of  strings to
+	  // Need to make non-const copies of strings to
 	  // avoid compilation warnings
 	  labCopy = (const char*)label;
 	  geoCopy = (const char*)geometry;
 	  xtCopy = (const char*)xTitle;
 	  ytCopy = (const char*)yTitle;
 
-	  // parse the x and y ranges which are
-	  // specified as strings for user convenience
-	  if ((sscanf((const char *)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
-	      (xMax <= xMin )) {
-	    Error::abortRun(*this, "xRange parameter values are invalid");
-	  }
-	  if ((sscanf((const char *)yRange,"%lf %lf", &yMin, &yMax) != 2) ||
-	      (yMax <= yMin )) {
-	    Error::abortRun(*this, "yRange parameter values are invalid");
-	  }
+	  // Check for valid x and y ranges.  They should each be a
+	  // float array with the two elements, with the first element
+	  // being less than the second.
+	  if (!validRange(xRange)) return;
+	  if (!validRange(yRange)) return;
 
 	  int plotstyle = 0;
 	  if (strcmp(style,"connect") == 0) plotstyle = 1;
@@ -123,11 +153,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		       (int)    updateSize,  // The number of data points between refreshes
 		       (char*)  geoCopy,     // Geometry for the window
 		       (char*)  xtCopy,      // Title for X-axis
-		                xMin,        // minimum X range value
-		                xMax,        // maximum X range value
+		                xRange[0],   // minimum X range value
+		                xRange[1],   // maximum X range value
 		       (char*)  ytCopy,      // Title for Y-axis
-		                yMin,	     // minimum Y range value
-		                yMax,        // maximum Y range value
+		                yRange[0],   // minimum Y range value
+		                yRange[1],   // maximum Y range value
 		                Y.numberPorts(),   // The number of data sets
 		       (int)    plotstyle);  // the plot style to use
 
