@@ -34,10 +34,10 @@ ROOT=../../../..
 VPATH=$(ROOT)/src/domains/pn/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-INCL_THREADS=-I$(ROOT)/thread/include.$(ARCH) -I$(ROOT)/src/thread/posix
+INCL_THREADS=-I$(ROOT)/thread/include.$(PTARCH) -I$(ROOT)/src/thread/posix
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
 INCL= $(INCL_THREADS) -I$(KERNDIR) -I$(SDFDIR)

@@ -43,7 +43,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/utils/libcephes
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
