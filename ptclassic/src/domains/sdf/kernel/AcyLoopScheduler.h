@@ -186,7 +186,7 @@ protected:
 
 	// This one is called from AcyScheduler::runOnce and does the
 	// actual work
-	void runOnce(int i, int j, int g);
+	int runOnce(int i, int j, int g);
 
 	// Create the incMatrix and delMatrix
 	void createIncidenceMatrix(Galaxy& gal);
