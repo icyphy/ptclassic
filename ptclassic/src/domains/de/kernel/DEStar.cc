@@ -17,7 +17,6 @@ $Id$
 #include "DEStar.h"
 #include "DEScheduler.h"
 #include "StringList.h"
-#include "Output.h"
 #include "PriorityQueue.h"
 
 /*******************************************************************
@@ -25,6 +24,9 @@ $Id$
 	class DEStar methods
 
 ********************************************************************/
+
+DEStar :: DEStar()
+: delayType(FALSE), mode(SIMPLE), arrivalTime(0.0), completionTime(0.0) {}
 
 // initialize DE-specific members.
 void DEStar :: prepareForScheduling() {

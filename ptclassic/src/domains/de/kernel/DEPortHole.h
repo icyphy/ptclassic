@@ -43,6 +43,9 @@ class Particle;
 class DEPortHole : public PortHole
 {
 public:
+	DEPortHole();
+	~DEPortHole();
+
 	// The setPort function is redefined to set DE-specific members.
 	PortHole& setPort(const char* portName,
 			  Block* parent,

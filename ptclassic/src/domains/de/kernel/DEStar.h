@@ -63,9 +63,8 @@ public:
 	virtual void startNewPhase();
 
 	// constructor
-	DEStar() : delayType(FALSE), mode(SIMPLE) { arrivalTime = 0.0;
-				      completionTime = 0.0; }
-	
+	DEStar();
+
 	// Store the completion time of the current execution, which in turn
 	// the next free time. But, it may not be the start time of the next
 	// execution since some users may allow several executions 
