@@ -37,12 +37,10 @@ public:
 	virtual dataType readType() = 0;
 
 	// Cast this Particle to an int, float, Complex, and char*
-	virtual operator int () {return 0;}
-	virtual operator float () {return 0.;}
-	// For following operator, compiler won't actually perform the cast
-	//  if Complex rather than Complex&
-	virtual operator Complex& () {return 0.;}
-	virtual operator char* () {return "";}
+	virtual operator int () = 0;
+	virtual operator float () = 0;
+	virtual operator Complex () = 0;
+	virtual operator char* () = 0;
 
 	// Zero or initialize this Particle
 	virtual void initialize() = 0;
@@ -90,7 +88,7 @@ public:
 	// Cast to an int, float, and char*
 	operator int () {return data;}
 	operator float () {return (float)data;}
-	operator Complex& () {return (Complex&)data;}
+	operator Complex () {return Complex(data);}
 	operator char* ();
 
 	// Initialize
@@ -125,7 +123,7 @@ public:
         // Cast to an int, float, and char*
         operator int () {return (int)data;}
         operator float () {return data;}
-	operator Complex () {return (Complex&)data;}
+	operator Complex () {return Complex(data);}
         operator char* ();
  
         // Initialize
@@ -159,7 +157,7 @@ public:
         // Cast to an int, float, Complex, and char*
         operator int () {return (int)data.real();}
         operator float () {return (float)data.real();}
-	operator Complex& () {return data;}
+	operator Complex () {return data;}
         operator char* ();
  
         // Initialize
@@ -172,8 +170,8 @@ public:
         void initialize() {data=0.0;}
 
         // Load up with data
-        void operator << (int i) {data=(Complex)i;}
-        void operator << (float f) {data=(Complex)f;}
+        void operator << (int i) {data=Complex(i);}
+        void operator << (float f) {data=Complex(f);}
 	void operator << (Complex c) {data=c;}
 
         // Copy the Particle
