@@ -36,13 +36,14 @@ Date of last revision:
 
 *****************************************************************/
 
-class ostream;
-
 #include "ParNode.h"
 #include "DataStruct.h"
 #include "DynamicGalaxy.h"
 #include "MultiTarget.h"
 #include "StringList.h"
+
+class ostream;
+class SDFScheduler;
 
 ////////////////////////
 // class NodeSchedule //
@@ -53,7 +54,7 @@ class NodeSchedule : public DoubleLink {
 friend class UniProcessor;
 public:
 	// reset members
-	void resetMembers() { nextFree = 0; idleFlag = 0; index = -1; }
+	void resetMembers() { nextFree = 0; idleFlag = 0; }
 
 	// Constructor
 	NodeSchedule() : DoubleLink(0), myNode(0) { resetMembers(); }
@@ -70,10 +71,6 @@ public:
 	// idle indication
 	int isIdleTime() { return idleFlag; }
 
-	// set and get index
-	void setIndex(int i) { index = i; }
-	int  getIndex()	     { return index; }
-
 	// get next and previous link.
 	NodeSchedule* nextLink() { return (NodeSchedule*) next; }
 	NodeSchedule* previousLink() { return (NodeSchedule*) prev; }
@@ -81,7 +78,6 @@ public:
 private:
 	int idleFlag;		// set if idle time
 	int duration;
-	int index;		// index for dynamic constructs.
 	ParNode* myNode;
 	NodeSchedule* nextFree;	// free list management.
 };
@@ -99,7 +95,9 @@ friend class ProcessorIter;
 public:
 	// constructor
 	UniProcessor() : availTime(0), curSchedule(0), numFree(0), parent(0),
-			 freeNodeSched(0), subGal(0), targetPtr(0) {}
+			 freeNodeSched(0), subGal(0), targetPtr(0) {
+		specialStars.initialize();
+	}
 	~UniProcessor();
 
 	// return the galaxy
@@ -145,15 +143,9 @@ public:
 	// write Gantt chart
 	int writeGantt(ostream&);
 
-	// down-load the code
-	void run();
-	
 	// get the total idle time including the idle time at the end.
 	// This method should be called after "display" method.
 	int getSumIdle() { return sumIdle; }
-
-	// set index of the current Node schedule
-	void setIndex(int i)	{ curSchedule->setIndex(i); }
 
   	// set, get the availTime field.
   	void setAvailTime(int t) { availTime = t; }
@@ -178,11 +170,10 @@ public:
 	void prepareCodeGen();
 
 	// generate code
-	StringList generateCode() {
-		targetPtr->generateCode();
-		return (*targetPtr->getStream("code"));
-	}
+	StringList generateCode(); 
 
+	// generate code to the given target
+	int genCodeTo(Target* t);
 
 protected:
 	// let derived classes remove links
@@ -222,11 +213,20 @@ private:
 	// galaxy of blocks assigned to this processor
 	DynamicGalaxy* subGal;
 
+	// list of special stars (CGWormStar)  to be deleted.
+	BlockList specialStars;
+
+	// list of portholes connected to the wormholes.
+	PortList wormPartners;
+
 	// Multiprocessor object of which I am a part of
 	ParProcessors* parent;
 
 	// my id
 	int index;
+
+	// clone a star
+	DataFlowStar* cloneStar(ParNode*);
 
 	// create special stars and connect them
 	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN, int);
@@ -246,7 +246,12 @@ private:
         int OSOPreq() { return mtarget->getOSOPreq(); }
 
 	// Convert a processor schedule to an SDF schedule for child target.
-	void convertSchedule();
+	void convertSchedule(SDFScheduler* optS = 0);
+
+	// replace wormstars with wormholes before preparing code gen.
+	// and restrore the original wormhole connection after code gen.
+	void replaceWorms();
+	void restoreWorms();
 };
 
 /////////////////////////
