@@ -354,6 +354,10 @@ ifdef SDFFULL
 	endif
 endif
 
+ifndef TK
+	SDFTK=
+endif 
+
 ifdef SDF 
 	PALETTES += PTOLEMY/src/domains/sdf/icons/sdf.pal
 	ifdef SDFTK
