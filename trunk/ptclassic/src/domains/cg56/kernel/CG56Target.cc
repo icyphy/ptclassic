@@ -34,21 +34,28 @@ CG56Target :: CG56Target(const char* nam, const char* desc,
 			 unsigned x_addr, unsigned x_len,
 			 unsigned y_addr, unsigned y_len) :
 	xa(x_addr), xl(x_len), ya(y_addr), yl(y_len),
-	AsmTarget(nam,desc,"CG56Star",
-		  *new CG56Memory(x_addr,x_len,y_addr,y_len))
+	AsmTarget(nam,desc,"CG56Star")
 {
+	LOG_NEW; mem = new CG56Memory(x_addr,x_len,y_addr,y_len);
+
 }
 
 void CG56Target :: headerCode () {
         StringList code = "; generated code for target ";
         code += readFullName();
         code += "\n";
-	code += mem.printMemMap(";","");
         addCode(code);
 }
 
+void CG56Target :: wrapup () {
+	StringList map = mem->printMemMap(";","");
+	addCode (map);
+	Target::wrapup();
+	Error::message(myCode);
+}
+
 CG56Target :: ~CG56Target () {
-	LOG_DEL; delete &mem;
+	LOG_DEL; delete mem;
 }
 
 Block* CG56Target :: clone () const {
