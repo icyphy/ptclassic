@@ -205,9 +205,9 @@ int ptkCreatePicture(interp, win, name, geometry, title, height,
   sprintf(strTmp,"%s.pic",name);
 #if TCL_MAJOR_VERSION < 8
   picture->photohandle = Tk_FindPhoto(strTmp);
-#endif
-  picture->photohandle = Tk_FindPhoto(interp, strTmp);
 #else
+  picture->photohandle = Tk_FindPhoto(interp, strTmp);
+#endif
   if (picture->photohandle == NULL) return TCL_ERROR;
   picture->photoblock.width = width;
   picture->photoblock.height = height;
