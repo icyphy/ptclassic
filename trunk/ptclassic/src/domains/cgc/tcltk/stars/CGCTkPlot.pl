@@ -66,7 +66,10 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	    }
 	  }
           if ((int)repeat_border_points) {
-	    addCode("$starSymbol(sampleCount) += 1.0; }");
+	      addCode("$starSymbol(sampleCount) += 1.0; }");
+	  }
+	  else {
+	      addCode("}");
 	  }
 	}
         codeblock (updateDisplay,"int setnum") {
