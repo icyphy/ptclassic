@@ -179,11 +179,9 @@ Most of the tests are <CODE>.itcl</CODE> files.
 
 <LI> The Copyright
 
-<LI> The code that sources testDefs.tcl:
+<LI> The code that loads the test system package
 <PRE>
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel gui test testDefs.tcl]
-} {}
+package require tycho.util.tytest
 </PRE>
 
 
@@ -527,7 +525,7 @@ resources in order.
 </PRE>
 Embedded comment options can be set more than once in a file.  Embedded
 comment options are in effect until is the option is changed by another
-Embedded comment option.
+embedded comment option.
 
 <LI>  Command line arguments to <CODE>jsinstr</CODE>.
 
