@@ -86,3 +86,10 @@
 #		tk_entrySeeCaret %W
 #	}
 #   }
+
+proc ptkRecursiveBind {widget keySeq action} {
+    bind $widget $keySeq $action
+    foreach child [winfo children $widget] {
+	ptkRecursiveBind $child $keySeq $action
+    }
+}
