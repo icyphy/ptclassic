@@ -65,7 +65,7 @@ DIRS =			doc
 REALCLEAN_STUFF =			tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	"Index of classes in tycho/kernel/visedit"
+TYDOC_DESC =	Index of classes in tycho/kernel/visedit
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
