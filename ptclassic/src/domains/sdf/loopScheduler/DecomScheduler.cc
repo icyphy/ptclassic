@@ -57,13 +57,13 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 	EGGate *d;
 	DataFlowStar *currentmaster = p.myMaster();
 	MergeList ml; 
-	while ((d=nextGate.nextMaster(currentmaster)) != 0) {
+	while ((d = nextGate.nextMaster(currentmaster)) != 0) {
 		ml.insertMerge(&p,(LSNode*) d->farEndNode(), 1); 
 	}
 
 	nextGate.reconnect(p.ancestors);
 	nextGate.reset();
-	while ((d=nextGate.nextMaster(currentmaster))!=0) {
+	while ((d = nextGate.nextMaster(currentmaster))!=0) {
 		ml.insertMerge(&p, (LSNode*) d->farEndNode(), 0); 
 	}
 
@@ -84,7 +84,7 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 	MergeListIter nextMerge(ml);
 	MergeLink *m;
 	while ((m = nextMerge++) != 0)
-		if(m->formRepeatedCluster(g)) return; 
+		if (m->formRepeatedCluster(g)) return; 
 }
 
 // cluster building
@@ -93,14 +93,14 @@ void DecomScheduler::buildClusters(LSGraph &g)
 {
 	LSNode *p;
 	g.initializeCandidates();
-	while ((p=g.candidateFromFront())!=0) {
+	while ((p = g.candidateFromFront())!=0) {
 		// when all masters have only one instances, stop clustering.
 		if (p->myMaster()->repetitions == Fraction(1)) {
 			// push back the current node
 			g.candidatePushBack(p);
 			return;
 		}
-		attemptMerge(*p,g);
+		attemptMerge(*p, g);
 	}
 }
 
@@ -109,6 +109,8 @@ void DecomScheduler::buildClusters(LSGraph &g)
 //
 int DecomScheduler::genSched(DecomGal* cgal)
 {
+	if (cgal == 0) return FALSE;
+
 	// Step 1. Shuvra's decomposition idea.
 	//         After removing the arcs with enough delays.
 	//	   If no arc is removed, skip decomposition step.
@@ -124,8 +126,7 @@ int DecomScheduler::genSched(DecomGal* cgal)
 
 	// Now, cgal is a compact form to be expanded for more looping.
 	//
-	// Step3. make an APEG graph.
-	//
+	// Step3. Make an APEG graph.
 
 	myGraph.initialize();
 
@@ -139,13 +140,13 @@ int DecomScheduler::genSched(DecomGal* cgal)
 		*logstrm << myGraph.display();
 	}
 
-	// Step3. Build the PGAN cluster hierarchy.
-	//
+	// Step 4. Build the PGAN cluster hierarchy.
+
 	buildClusters(myGraph);
 
-	// Step 4. Schedule the cluster hierarchy.
-	//
-	if(!topLevelSchedule(myGraph)) {
+	// Step 5. Schedule the cluster hierarchy.
+
+	if (!topLevelSchedule(myGraph)) {
 		Error::abortRun("dead-locked... internal error");
 		invalid = TRUE;
 		return FALSE;
@@ -159,13 +160,12 @@ int DecomScheduler::genSched(DecomGal* cgal)
 int DecomScheduler::topLevelSchedule(LSGraph &g)
 {
 	LSNodeListIter nextNode(g.candidates);
-	LSNode* n;
-
 	mySchedule.initialize();
-	int flag;
+	int flag = FALSE;
 	do {
 		flag = FALSE;
 		nextNode.reset();
+		LSNode* n;
 		while ((n = nextNode++ ) != 0) {
 			if (n->fireable()) {
 				n->fireMe();
