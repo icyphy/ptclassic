@@ -958,7 +958,6 @@ void describePort ()
 {
 	char *dest, *destHTML, *color;
 	char descriptString[MEDBUFSIZE];
-        color = NULL; /* to silence warnings */
         if (portDir==2) {
             dest = inoutDescriptions;
             color = "darkviolet";
