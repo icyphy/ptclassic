@@ -192,8 +192,15 @@ proc ::tycho::pathEnvSearch {filename} {
     if ![info exists env(PATH)] {
 	error "pathEnvSearch: \$PATH is not set!"
     }
-    # FIXME: Unixism? Do all PATHs have colons?
-    return [::tycho::pathSearch $filename [split $env(PATH) :]]
+    switch $tcl_platform(platform) {
+        unix {
+            return [::tycho::pathSearch $filename [split $env(PATH) :]]
+        }
+        windows {
+            return [::tycho::pathSearch $filename [split $env(PATH) ";"]]
+        }
+        default { return {}}
+    }
 }
 
 ##############################################################################
