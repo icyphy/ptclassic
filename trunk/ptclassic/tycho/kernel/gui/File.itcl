@@ -269,6 +269,10 @@ class ::tycho::File {
     # the window in case the name is changed.
     protected variable previousfile {}
 
+    # The most recently used print command (or the default if none).
+    # FIXME: default print command should be a preference.
+    protected common printCmd {lpr}
+
     ##########################################################################
     ####                  private methods                                 ####
 
