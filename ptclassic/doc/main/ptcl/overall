@@ -8,7 +8,7 @@
 .\" Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
 .VR 0.2.6 12/3/91
-.TI "ptcl \- The \*(PT Interpreter"
+.TI "ptcl  The \*(PT Interpreter"
 .AU
 Joseph Buck
 .AE
