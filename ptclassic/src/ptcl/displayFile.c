@@ -110,8 +110,12 @@ int displayFile(const char *fileName,
 		      "::tycho::File::openContext ",
 		      fileName,
 		      (char *)NULL) ) != TCL_OK) {
-      sprintf(buf, "Cannot invoke Tycho editor for '%s':\n%s", fileName,
-	      Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+      if ( ptkInterp != NULL ) 
+	sprintf(buf, "Cannot invoke Tycho editor for '%s':\n%s", fileName,
+		Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+      else 
+	sprintf(buf, "Cannot invoke Tycho editor for '%s':\nptkInterp==NULL",
+		fileName);
       if (errFuncPtr != (void (*)(const char *)) NULL) 
 	(errFuncPtr)(buf);
       return 0;
