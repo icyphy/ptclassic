@@ -18,9 +18,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
 
-  explanation {
+	htmldoc {
 This star prints its input, which may be any supported data type.
-.pp
+<p>
 If output is directed to a file, then flushing does not occur until the
 wrapup method is called.
 Before the first data are flushed, the file will not exist.
