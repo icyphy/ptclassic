@@ -109,17 +109,6 @@ proc makeOrderedPairs {args} {
   }
 }
 
-# Function: matlabToOrderedPairs
-
-add_to_help matlabToOrderedPairs { <name> } {
-Converts a Matlab matrix called <name> to a list of ordered pairs.
-}
-
-proc matlabToOrderedPairs { name } {
-  eval makeOrderedPairs [lrange [matlab get $name] 2 end]
-}
-
-
 # Function: max
 
 add_to_help max {<x1> <x2> ...} {
