@@ -3,7 +3,7 @@
 /**************************************************************************
 Version identification:	$Id$
 
-Author: Mudit Goel, Neil Smyth
+Author: Mudit Goel, Neil Smyth, Claudio Passerone
 
 Copyright (c) 1997-%Q% The Regents of the University of California.
 All rights reserved.
@@ -67,6 +67,7 @@ class DERCStar : public DERepeatStar {
     char resource[1024];
     double timeOfArrival;
     int priority;
+    int * lastFiredPr;
     SequentialList* emittedEvents;
     SequentialList* storeList;
     FILE * Openoverflow ( char *name );
