@@ -49,21 +49,7 @@ defstar {
   setup {
   }
 
-  initCode {
-    CodeStream *compileOptions, *linkOptions;
-    if ((compileOptions = getStream("compileOptions")) == FALSE)
-      return;
-    if ((linkOptions = getStream("linkOptions")) == FALSE)
-      return;
-    linkOptions->put("-lsocket -lnsl","socket Link");
-    addInclude("<stdio.h>");
-    addInclude("<string.h>");
-    addInclude("<unistd.h>");
-    addInclude("<sys/types.h>");
-    addInclude("<sys/socket.h>");
-    addInclude("<sys/un.h>");
-    addGlobal("#define BUFFSIZE 32", "buffer");
-    addDeclaration("
+  codeblock (firstDecl) {
   /* Decls */
   int $starSymbol(count);
   int $starSymbol(intptr);
@@ -72,62 +58,24 @@ defstar {
   char $starSymbol(buffer)[BUFFSIZE];
   char *$starSymbol(dummy);
   char *$starSymbol(nearstring);
-");
+  }
 
-/*
-  StringList oneLine;
-
-    oneLine = "  char *$starSymbol(dummy) = \"  ";
-    oneLine << classname;
-    oneLine << " socket error\";";
-    addDeclaration(oneLine);
-
-    oneLine = "  char *$starSymbol(nearstring) = \"/tmp/";
-    oneLine << sndrcv;
-    oneLine << "$val(pairNumber)\\0\";";
-    addDeclaration(oneLine);
-    */
-    
-    addDeclaration("  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
+  codeblock (secondDecl) {
+  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
   int $starSymbol(nearnamelen);
   int $starSymbol(xmitaddrlen);
   int $starSymbol(nearaddrlen);
   int $starSymbol(i);
-");
+  }
 
-// This must be the first call to add code to mainInit.
-    StringList command = "";
-    command << "cd " << (const char*) destDir;
-    command << " ; ";
-    command << "ptvhdlsim -nc -i " << filePre << ".com " << "parts";
-
-    StringList startvss = "";
-    startvss << "
-  /* Start VSS Simulator */
-  system(\"";
-    startvss << command << "&";
-    startvss << "\");\n";
-    addCode(startvss, "mainInit", "startVSS");
-    addCode("
+  codeblock (genInit) {
   /* Init */
   $starSymbol(count) = 0;
   $starSymbol(intptr) = 0;
   $starSymbol(nbytes) = 12;
-");
-    
-    StringList oneLine;
+  }
 
-    oneLine = "  $starSymbol(dummy) = \"  ";
-    oneLine << classname;
-    oneLine << " socket error\";";
-    addCode(oneLine);
-
-    oneLine = "  $starSymbol(nearstring) = \"/tmp/";
-    oneLine << sndrcv;
-    oneLine << "$val(pairNumber)\\0\";";
-    addCode(oneLine);
-
-    addCode("
+  codeblock (body) {
   $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
   $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
   $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
@@ -152,11 +100,9 @@ defstar {
   if($starSymbol(xmitsock) < 0) {
     perror($starSymbol(dummy));
   }
-");
   }
 
-  wrapup {
-    addCode("
+  codeblock (wrap) {
   /* Wrapup */
   (void) shutdown($starSymbol(xmitsock),2);
   (void) close($starSymbol(xmitsock));
@@ -164,7 +110,57 @@ defstar {
   (void) shutdown($starSymbol(nearsock),2);
   (void) close($starSymbol(nearsock));
   (void) unlink($starSymbol(nearaddr).sa_data);
-");
+  }
+
+  initCode {
+    CodeStream *compileOptions, *linkOptions;
+    if ((compileOptions = getStream("compileOptions")) == FALSE)
+      return;
+    if ((linkOptions = getStream("linkOptions")) == FALSE)
+      return;
+    linkOptions->put("-lsocket -lnsl","socket Link");
+    addInclude("<stdio.h>");
+    addInclude("<string.h>");
+    addInclude("<unistd.h>");
+    addInclude("<sys/types.h>");
+    addInclude("<sys/socket.h>");
+    addInclude("<sys/un.h>");
+    addGlobal("#define BUFFSIZE 32", "buffer");
+    addDeclaration(firstDecl);
+    addDeclaration(secondDecl);
+
+// This must be the first call to add code to mainInit.
+    StringList command = "";
+    command << "cd " << (const char*) destDir;
+    command << " ; ";
+    command << "ptvhdlsim -nc -i " << filePre << ".com " << "parts";
+
+    StringList startvss = "";
+    startvss << "\n";
+    startvss << "  /* Start VSS Simulator */\n";
+    startvss << "  system(\"";
+    startvss << command << "&";
+    startvss << "\");\n";
+    addCode(startvss, "mainInit", "startVSS");
+    addCode(genInit);
+    
+    StringList oneLine;
+
+    oneLine = "  $starSymbol(dummy) = \"  ";
+    oneLine << classname;
+    oneLine << " socket error\";";
+    addCode(oneLine);
+
+    oneLine = "  $starSymbol(nearstring) = \"/tmp/";
+    oneLine << sndrcv;
+    oneLine << "$val(pairNumber)\\0\";";
+    addCode(oneLine);
+
+    addCode(body);
+  }
+
+  wrapup {
+    addCode(wrap);
   }
 
 }

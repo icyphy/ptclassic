@@ -41,21 +41,20 @@ defstar {
     StringList transfer;
     for (int i = numXfer-1 ; i >= 0 ; i--) {
       if (i > 0) transfer << "\n";
-      transfer << "
-  /* Go */
-  $starSymbol(intptr) = 0;
-  $starSymbol(status) = 0;
-  if($starSymbol(status) >= 0) {
-    $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    while($starSymbol(status) == 0) {
-      $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    }
-    if($starSymbol(status) < 0) {
-      perror($starSymbol(dummy));
-    }
-    else {
-";
-
+      transfer << "\n";
+      transfer << "  /* Go */\n";
+      transfer << "  $starSymbol(intptr) = 0;\n";
+      transfer << "  $starSymbol(status) = 0;\n";
+      transfer << "  if($starSymbol(status) >= 0) {\n";
+      transfer << "    $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));\n";
+      transfer << "    while($starSymbol(status) == 0) {\n";
+      transfer << "      $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));\n";
+      transfer << "    }\n";
+      transfer << "    if($starSymbol(status) < 0) {\n";
+      transfer << "      perror($starSymbol(dummy));\n";
+      transfer << "    }\n";
+      transfer << "    else {\n";
+      
       StringList oneline = "      (void) sscanf($starSymbol(buffer), \"";
       oneline << format;
       oneline << "\", &$ref(output,";
@@ -63,9 +62,8 @@ defstar {
       oneline << "));";
       transfer << oneline;
 
-      transfer << "    }
-  }
-";
+      transfer << "    }\n";
+      transfer << "  }\n";
     }
     addCode(transfer);
   }

@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SynthTarget.h"
 #include "KnownTarget.h"
-#include <ostream.h>
+//#include <ostream.h>
 
 // Constructor.
 SynthTarget :: SynthTarget(const char* name,const char* starclass,

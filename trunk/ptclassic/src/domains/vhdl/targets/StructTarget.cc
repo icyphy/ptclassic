@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "StructTarget.h"
 #include "KnownTarget.h"
-#include <ostream.h>
+//#include <ostream.h>
 
 // Constructor.
 StructTarget :: StructTarget(const char* name,const char* starclass,
