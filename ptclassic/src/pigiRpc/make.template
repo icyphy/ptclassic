@@ -78,6 +78,9 @@ LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
+# 'make clean' should remove these derived files
+KRUFT = $(wildcard palettes.*.c) version.c
+
 include $(ROOT)/mk/ptbin.mk
 
 all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
