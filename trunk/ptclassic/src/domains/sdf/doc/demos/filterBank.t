@@ -5,7 +5,7 @@ Discrete Wavelet Transform Filter Bank
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Date$ "November 18, 1992"
+.SV $Revision$ "November 18, 1992"
 .AL "Alan Peevers"
 .LD
 .pp
