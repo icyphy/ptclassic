@@ -321,7 +321,7 @@ void Fix::initialize()
 }
 
 static char *OverflowDescriptions[] =
-	{ "saturate", "zero_saturate", "wrapped", "warning" };
+	{ "saturate", "zero_saturate", "wrap", "warn" };
 
 void Fix::set_ovflow(const char *p)
 {
@@ -331,6 +331,16 @@ void Fix::set_ovflow(const char *p)
 	    found = TRUE;
 	    set_overflow(i);
 	    break;
+	}
+    }
+    // For backward compatibility, support "wrapped" and "warning"
+    if ( strcasecmp(p, "wrapped") == 0) {
+	found = TRUE;
+	set_overflow(ovf_wrapped);
+    } else {
+	if ( strcasecmp(p, "warning") == 0) {
+	   found = TRUE;
+	   set_overflow(ovf_warning);
 	}
     }
     if ( ! found ) {
@@ -508,7 +518,7 @@ Fix::Fix(int ln, int ib, const Fix& x)
 	applyMask(roundFlag);
     }
     else 
-	overflow_handler(x.signBit());
+	overflow_handler(x.signBit(),intBits_diff);
 }
 
 /////////////////////
@@ -550,7 +560,7 @@ Fix& Fix::operator = (const Fix& x)
 	applyMask(roundFlag);
     }
     else 
-	overflow_handler(x.signBit());
+	overflow_handler(x.signBit(),intBits_diff);
     return *this;
 }
 
@@ -566,10 +576,10 @@ void Fix::complement()
 Fix operator + (const Fix& x, const Fix& y)
 {  
   uint32 sum = 0, carry = 0;
-  // # to left of decimal point = max of the two
-  int bitsleft = max (x.length-x.intBits, y.length-y.intBits);
+  // # to right of decimal point (fractional bits) = max of the two
+  int bitsright = max (x.length-x.intBits, y.length-y.intBits);
   int new_intBits = min(max(x.intBits,y.intBits) + 1, FIX_MAX_LENGTH);
-  int new_length = min(bitsleft + new_intBits, FIX_MAX_LENGTH);
+  int new_length = min(bitsright + new_intBits, FIX_MAX_LENGTH);
 
   Fix z(new_length, new_intBits);
   uint16 XBits[WORDS_PER_FIX], YBits[WORDS_PER_FIX];
@@ -592,7 +602,7 @@ Fix operator + (const Fix& x, const Fix& y)
   if (new_intBits == FIX_MAX_LENGTH &&
       xsign == y.signBit() &&
       xsign != z.signBit())
-      z.overflow_handler(xsign);
+      z.overflow_handler(xsign,0);
   return z;
 }
 
@@ -682,7 +692,7 @@ Fix operator * (const Fix& x, int n)
   }
   if ((x.value()*n) > x.max() || (x.value()*n) < x.min()) {
       int nsign = (n < 0);
-      z.overflow_handler(x.signBit() ^ nsign);
+      z.overflow_handler(x.signBit() ^ nsign,0);
   }
   z.errors = x.errors;
   return z;
@@ -846,13 +856,17 @@ void Fix::applyMask (int round)
 // overflow handler
 ////////////////////
 
-// the first argument is the result that has been just computed, that
-// has an overflow.  As a rule, its low bits will be correct.
-
-// the second argument is the sign bit of the true result, were it available.
+// "this" is the result that has been just computed, that
+// has an overflow.  As a rule, its low order bits will be correct,
+// but they may not be aligned correctly.
+//
+// The first argument is the sign bit of the full precision result,
 // that is, 1 for negative, 0 for positive.
+//
+// The second argument is the alignment error in the bits that are
+// provided.
 
-void Fix:: overflow_handler (int rsign)
+void Fix:: overflow_handler (int rsign, int shift)
 {
     errors |= err_ovf;
     int i;
@@ -879,12 +893,9 @@ void Fix:: overflow_handler (int rsign)
 	break;
 
     case ovf_wrapped:			// wrapped
-	if (!rsign) {
-	    Bits[0] = 0x8000;
-	    for (int i=1; i < words(); i++)  Bits[i] = 0; }
-	else {
-	    Bits[0] = 0x7fff;
-	    for (int i=1; i < words(); i++)  Bits[i] = 0xffff; }
+	// Up to version 0.5.1, this did the wrong thing,
+	// giving a the largest number of the opposite sign. EAL.
+	shift_bit_pattern(shift,Bits);
 	applyMask(FALSE);
 	break;
 
