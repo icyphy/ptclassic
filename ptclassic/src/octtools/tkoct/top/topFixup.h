@@ -136,6 +136,6 @@ extern double rint TOP_ARGS((double));
  * The type of the argument to strn type functions (e.g., strncmp).
  */
 typedef unsigned TOPStrLenType;
-
+extern int nint TOP_ARGS((double));
 
 #endif /* _TOPFIXUP_H_ */
