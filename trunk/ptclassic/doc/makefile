@@ -1,50 +1,57 @@
+# Makefile for Ptolemy doc directory
+#
 # $Id$
 #
-# Makefile for the Almagest
-#
+# Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
 
-PTOLEMY = ..
+DIRS = html
 
-DIRS =	\
-	$(PTOLEMY)/src/domains/cg-ddf/doc \
-	$(PTOLEMY)/src/domains/cg56/doc \
-	$(PTOLEMY)/src/domains/cg96/doc \
-	$(PTOLEMY)/src/domains/cgc/doc \
-	$(PTOLEMY)/src/domains/cg/doc \
-	$(PTOLEMY)/src/domains/thor/doc \
-	$(PTOLEMY)/src/domains/de/doc \
-	$(PTOLEMY)/src/domains/ddf/doc \
-	$(PTOLEMY)/src/domains/sdf/doc \
-	$(PTOLEMY)/doc/main
+# Root of Ptolmy directory
+ROOT =		..
 
-# omitted from main distribution
-#	$(PTOLEMY)/src/domains/bdf/doc \
-#	$(PTOLEMY)/src/domains/silage/doc \
-#	$(PTOLEMY)/src/domains/sproc/doc \
-#	$(PTOLEMY)/src/domains/vhdl/doc \
-#	$(PTOLEMY)/src/domains/mq/doc \
-#	$(PTOLEMY)/src/domains/capsim/doc \
+# True source directory
+VPATH = 	$(ROOT)/doc
 
-almagest print:
-	rm -f $$HOME/Almagest.index
-	for x in $(DIRS); do \
-		(cd $$x ; make print) ; \
-	done; \
-	make prtitle
-	make prindex
+# Get configuration info
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
 
+MISC_FILES =	README
 
-prtitle: title.ps.Z
-	zcat title.ps.Z | lpr 
+makefiles sources all install clean depend realclean checkjunk sccsinfo \
+	itcldocs extraclean:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
 
-title.ps.Z: title.ps
-	compress title.ps
-
-title.ps: title.fm
-	fmprint title.fm; \
-	echo "Waiting for postscript file to be created"; \
-	sleep 60; \
-	echo "Assuming postscript file has been created"
-
-prindex:
-	$(PTOLEMY)/doc/bin/prindex $(HOME)/Almagest.index
+TAGS:
+	echo "Making tags makes no sense in the doc directory"
