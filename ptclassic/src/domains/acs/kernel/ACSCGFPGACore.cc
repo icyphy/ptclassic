@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)ACSCGFPGACore.cc	1.2 09/08/99
 ***********************************************************************/
 
 #ifdef __GNUG__
@@ -61,18 +61,20 @@ ACSCGFPGACore::ACSCGFPGACore()  :
   ACSCGCore(ACSCGFPGACategory), 
   acs_id(-1), comment_flag(0), acs_origin(ACS_GENERATED), 
   unique_component(0), declaration_flag(0),
-  acs_type(UNKNOWN), acs_domain(UNDEFINED), 
-  acs_device(UNASSIGNED), acs_outdevice(UNASSIGNED),
+  acs_type(UNKNOWN), acs_domain(UNDEFINED), acs_state(NO_SAVE_STATE),
+  acs_device(UNASSIGNED), target_type(XC4000), memory_device(UNASSIGNED),
   acs_existence(UNDEFINED), acs_speed(-1), sg_language(UNDEFINED),
   child_sgs(NULL),
+  target_implementation(0), implementation_lock(UNLOCKED),
   dest_dir(NULL), child_filenames(NULL), 
   black_box(0), bitslice_strategy(PRESERVE_LSB),
-  act_input(UNSCHEDULED), act_output(UNSCHEDULED),
+  act_input(UNSCHEDULED), act_output(UNSCHEDULED), 
+  act_launch(UNSCHEDULED), act_complete(UNSCHEDULED), 
   acs_delay(-1), alg_delay(-1), pipe_delay(-1), phase_dependent(0), delay_offset(0),
   pipe_alignment(NULL),
   acsdelay_count(0), acsdelay_ids(NULL),
-  address_start(-1), address_step(1),
-  initialized(0), queried(0), 
+  address_start(-1), address_step(1), word_count(-1),
+  initialized(0), lib_queried(0), macro_queried(0),
   bw_dirty(1), bw_exempt(0), bw_loop(0),
   sign_convention(UNSIGNED), total_count(0), input_count(0), output_count(0), 
   control_count(0), bidir_count(0),
@@ -89,18 +91,20 @@ ACSCGFPGACore::ACSCGFPGACore(const char* category) :
   ACSCGCore(category), 
   acs_id(-1), comment_flag(0), acs_origin(ACS_GENERATED), 
   unique_component(0), declaration_flag(0),
-  acs_type(UNKNOWN), acs_domain(UNDEFINED), 
-  acs_device(UNASSIGNED), acs_outdevice(UNASSIGNED),
+  acs_type(UNKNOWN), acs_domain(UNDEFINED), acs_state(NO_SAVE_STATE),
+  acs_device(UNASSIGNED), target_type(XC4000), memory_device(UNASSIGNED), 
   acs_existence(UNDEFINED), acs_speed(-1), sg_language(UNDEFINED),
   child_sgs(NULL),
+  target_implementation(0), implementation_lock(UNLOCKED),
   dest_dir(NULL),  child_filenames(NULL), 
   black_box(0), bitslice_strategy(PRESERVE_LSB),
   act_input(UNSCHEDULED), act_output(UNSCHEDULED), 
+  act_launch(UNSCHEDULED), act_complete(UNSCHEDULED), 
   acs_delay(-1), alg_delay(-1), pipe_delay(-1),  phase_dependent(0), delay_offset(0),
   pipe_alignment(NULL),
   acsdelay_count(0), acsdelay_ids(NULL),
-  address_start(-1), address_step(1),
-  initialized(0), queried(0), 
+  address_start(-1), address_step(1), word_count(-1),
+  initialized(0), lib_queried(0),  macro_queried(0),
   bw_dirty(1), bw_exempt(0), bw_loop(0),
   sign_convention(UNSIGNED), total_count(0), input_count(0), output_count(0), 
   control_count(0), bidir_count(0),
@@ -118,18 +122,20 @@ ACSCGFPGACore::ACSCGFPGACore(ACSCorona & corona_) :
   ACSCGCore(ACSCGFPGACategory),
   acs_id(-1), comment_flag(0), acs_origin(ACS_GENERATED), 
   unique_component(0), declaration_flag(0),
-  acs_type(UNKNOWN), acs_domain(UNDEFINED), 
-  acs_device(UNASSIGNED), acs_outdevice(UNASSIGNED),
+  acs_type(UNKNOWN), acs_domain(UNDEFINED), acs_state(NO_SAVE_STATE), 
+  acs_device(UNASSIGNED), target_type(XC4000), memory_device(UNASSIGNED), 
   acs_existence(UNDEFINED), acs_speed(-1), sg_language(UNDEFINED), 
   child_sgs(NULL),
+  target_implementation(0), implementation_lock(UNLOCKED),
   dest_dir(NULL),  child_filenames(NULL), 
   black_box(0), bitslice_strategy(PRESERVE_LSB),
   act_input(UNSCHEDULED), act_output(UNSCHEDULED), 
+  act_launch(UNSCHEDULED), act_complete(UNSCHEDULED), 
   acs_delay(-1), alg_delay(-1), pipe_delay(-1),  phase_dependent(0), delay_offset(0),
   pipe_alignment(NULL),
   acsdelay_count(0), acsdelay_ids(NULL), 
-  address_start(-1), address_step(1),
-  initialized(0), queried(0), 
+  address_start(-1), address_step(1), word_count(-1),
+  initialized(0), lib_queried(0),  macro_queried(0),
   bw_dirty(1), bw_exempt(0), bw_loop(0),
   sign_convention(UNSIGNED), total_count(0), input_count(0), output_count(0), 
   control_count(0), bidir_count(0),
@@ -195,6 +201,12 @@ char* ACSCGFPGACore::lc_name()
   delete []tmp_name;
 
   return(out_name.str());
+}
+char* ACSCGFPGACore::make_name(const char* root_name, const int param)
+{
+  ostrstream name;
+  name << root_name << param << ends;
+  return(name.str());
 }
 
 // Convert the BW into a vector length.
@@ -269,7 +281,6 @@ int ACSCGFPGACore::sg_param_query(void)
       
       if (DEBUG_STARIO)
 	printf("Recovered a sign convention of %s\n",sign_name);
-      delete []sign_name;
 
       if ((strcmp(sign_name,"signed")==0) ||
 	  (strcmp(sign_name,"SIGNED")==0) ||
@@ -280,6 +291,8 @@ int ACSCGFPGACore::sg_param_query(void)
 	sign_convention=SIGNED;
       else
 	sign_convention=UNSIGNED;
+
+      delete []sign_name;
     }
   else
     {
@@ -403,18 +416,51 @@ int ACSCGFPGACore::add_comment(const char* comment_field,
   // Return happy condition
   return(1);
 }
+int ACSCGFPGACore::add_comment(const char* comment_field,
+			       const char* ref_name)
+{
+  comment_flag=1;
+  comment << comment_field << " in support of " << ref_name << ends;
+
+  // Return happy condition
+  return(1);
+}
 int ACSCGFPGACore::add_comment(const char* ref_name,
 			       const char* comment_field,
 			       const int rank)
 {
   comment_flag=1;
-  add_comment(comment_field,rank);
+  comment << comment_field << " number " << rank;
   comment << " in support of " << ref_name << ends;
 
   // Return happy condition
   return(1);
 }
 
+
+int ACSCGFPGACore::update_sg(const int bitwidth_lock, const int design_lock)
+{
+  // Determine bitwidths
+  sg_bitwidths(bitwidth_lock);
+
+  // Determine pipe delay
+  sg_delay();
+
+  // Determine optimal design
+  sg_designs(design_lock);
+
+  // Return happy condition
+  return(1);
+}
+
+int ACSCGFPGACore::sg_delay(void)
+{
+  sg_delays();
+  pipe_delay=acs_delay;
+
+  // Return happy condition
+  return(1);
+}
 
 
 int ACSCGFPGACore::sg_delay_query(void)
@@ -428,27 +474,13 @@ int ACSCGFPGACore::sg_delay_query(void)
   if (DEBUG_STARIO)
     printf("sg_delay_query invoked for sg %s\n",comment_name());
 
-  State* delay_state=stateWithName("Delay_Impact");
-  if (delay_state!=NULL)
+  // If the user added a delay, then it needs to be ignored for pipe alignment
+  if (acs_origin==USER_GENERATED)
     {
-      char* delay_name=new char[MAX_STR];
-      strcpy(delay_name,delay_state->currentValue());
-      
-      if (DEBUG_STARIO)
-	{
-	  printf("For star %s\n",comment_name());
-	  printf("Recovered a Delay_Impact name of %s\n",delay_name);
-	  printf("acs_delay=%d\n",acs_delay);
-	}
-      
-      if ((strcmp(delay_name,"Algorithmic")==0) ||
-	  (strcmp(delay_name,"algorithmic")==0) ||
-	  (strcmp(delay_name,"ALGORITHMIC")==0) ||
-	  (strcmp(delay_name,"Algorithm")==0) ||
-	  (strcmp(delay_name,"algorithm")==0) ||
-	  (strcmp(delay_name,"ALGORITHM")==0) ||
-	  (strcmp(delay_name,"alg")==0) ||
-	  (strcmp(delay_name,"ALG")==0))
+      // Trap for the varietys of user-generated delays
+      if ((strncmp(name(),"ACSRamDelay",11)==0) ||
+	  (strncmp(name(),"ACSDelay",8)==0) ||
+	  (strncmp(name(),"ACSUnitDelay",12)==0))
 	{
 	  alg_delay=acs_delay;
 
@@ -460,16 +492,13 @@ int ACSCGFPGACore::sg_delay_query(void)
 	  alg_delay=0;
 	  pipe_delay=acs_delay;
 	}
-      delete []delay_name;
     }
   else
-    if (DEBUG_STARIO)
-      printf("sg_param_query:Unable to find state:Delay_Impact for star %s\n",
-	     comment_name());
+    {
+      alg_delay=0;
+      pipe_delay=acs_delay;
+    }
   
-  // Cleanup
-  delete []debug_name;
-
   // Return happy condition
   return(1);
 }
@@ -491,24 +520,12 @@ int ACSCGFPGACore::sg_io_query(void)
     {
       // Determine starting address address
       address_start=intparam_query("address_start");
-      if (address_start < 0)
-	{
-	  sprintf(err_message,"HWstar_queryio:Address %d is invalid for sg %s\n",
-		  address_start,
-		  comment_name());
-	  Error::error(*this,err_message);
-	  return(0);
-	}
       
       // Determine address step size
       address_step=intparam_query("address_step");
-      if (address_step <= 0)
-	{
-	  sprintf(err_message,"HWstar_queryio:Invalid address stepping for sg %s\n",
-		  comment_name());
-	  Error::error(*this,err_message);
-	  return(0);
-	}
+
+      // Determine the total number of words sourced or sinked on this node
+      word_count=intparam_query("word_count");
     }
 
   // If it survives:) cleanup
@@ -529,7 +546,7 @@ int ACSCGFPGACore::sg_initialize(void)
   return(1);
 }
 
-int ACSCGFPGACore::sg_initialize(char* set_dir,int type,int* free_acsid)
+int ACSCGFPGACore::sg_initialize(char* set_dir,int* free_acsid)
 {
   // Setup data structures, once needed
   // FIX:Is this needed?
@@ -566,21 +583,6 @@ int ACSCGFPGACore::sg_initialize(char* set_dir,int type,int* free_acsid)
       // Allocate and set pin information
       sg_setup();
 
-      // If this is a dark star, then let's build it's interior
-      if (macro_query()==DARK_STAR)
-	{
-	  // ASSUMPTION: If this IS a dark star it should 
-	  //             return a list of additional smart generators
-	  macro_build(free_acsid);
-	}
-
-      // Set initial precisions, but dont lock them
-//      sg_resources(UNLOCKED);
-
-      // Set the delay appropriately
-//      if (acs_origin==USER_GENERATED)
-//	sg_delay_query();
-
       // Determine if they are io stars, if so, determine their needs
       int rc_io_query=sg_io_query();
       if (rc_io_query==0)
@@ -588,7 +590,10 @@ int ACSCGFPGACore::sg_initialize(char* set_dir,int type,int* free_acsid)
 
       // FIX:For now assuming algorithmic stars will follow a
       //     preserve MSB bitslicing strategy. Star parameter?
-      bitslice_strategy=PRESERVE_MSB;
+      if (acs_type==BOTH)
+	bitslice_strategy=PRESERVE_MSB;
+      else
+	bitslice_strategy=PRESERVE_LSB;
     }
   
   initialized=1;
@@ -704,6 +709,21 @@ char* ACSCGFPGACore::tolowercase(char* capped_string)
   return(capped_string);
 }
 
+int ACSCGFPGACore::fpga_type(void)
+{
+  return(target_type);
+}
+
+
+///////////////////////////////////////////////////
+// Return a handle to a given core's pins
+// NOTE:Retreiver should know what they are doing;)
+///////////////////////////////////////////////////
+Pin* ACSCGFPGACore::get_pin_handle(void)
+{
+  return(pins);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Create a duplicate pin class instance for smart generator developers
 // to create an internal wrapper 
@@ -718,14 +738,83 @@ Pin* ACSCGFPGACore::dup_pins(void)
   return(new_pin);
 }
 
-
-void ACSCGFPGACore::update_resources(int lock_type)
+///////////////////////////////////////////////////////////////////////////
+// Modify batches of pin types given in the pin list.  Pin list should
+// be parsed in pairs, first number is the pin_no, the second entry will be
+// the requested pin type for that pin
+///////////////////////////////////////////////////////////////////////////
+int ACSCGFPGACore::replace_pintype(const int pin,
+				   const int new_type)
 {
-  sg_resources(lock_type);
-  pipe_delay=acs_delay;
+  pins->set_pintype(pin,new_type);
+
+  // Return happy condition
+  return(1);
+}
+int ACSCGFPGACore::replace_pintypes(ACSIntArray* pin_list)
+{
+  for (int loop=0;loop<pin_list->population();loop+=2)
+    {
+      int pin_no=pin_list->query(loop);
+      int pin_type=pin_list->query(loop+1);
+      pins->set_pintype(pin_no,pin_type);
+    }
+
+  // Return happy condition
+  return(1);
 }
 
+////////////////////////////////////////////////////
+// Convert a pin from a given type to a desired type
+// Return pin_no if successfull, otherwise -1
+////////////////////////////////////////////////////
+int ACSCGFPGACore::alter_pintype(const int old_type, 
+				 const int new_type)
+{
+  int old_pin=pins->retrieve_type(old_type);
+  if (old_pin >= 0)
+    pins->set_pintype(old_pin,new_type);
+  return(old_pin);
+}
 
+/////////////////////////////////////////////////////////
+// Core accessor for finding a pin of a given 'hard' type
+/////////////////////////////////////////////////////////
+int ACSCGFPGACore::find_hardpin(const int pin_type)
+{
+  return(pins->retrieve_type(pin_type));
+}
+int ACSCGFPGACore::find_hardpin(const int pin_type,
+				const int priority)
+{
+  return(pins->retrieve_type(pin_type,priority));
+}
+
+///////////////////////////////////////////////////////
+// Core accessor for modifying a given pin's precisions
+///////////////////////////////////////////////////////
+int ACSCGFPGACore::set_precision(const int pin_no,
+				 const int major_bit,
+				 const int bitlength,
+				 const int lock_state)
+{
+  pins->set_precision(pin_no,major_bit,bitlength,lock_state);
+  
+  // Return happy condition...at least from this level;)
+  return(1);
+}
+
+//////////////////////////////////////////////////////
+// Core accessor for modifying a given's pins priority
+//////////////////////////////////////////////////////
+int ACSCGFPGACore::set_pinpriority(const int pin_no,
+				   const int priority)
+{
+  pins->set_pinpriority(pin_no,priority);
+  
+  // Return happy condition...at least from this level;)
+  return(1);
+}
 
 //JR
 //Add definitions for virtuals declared in ACSCGCore
