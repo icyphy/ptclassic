@@ -94,15 +94,23 @@ public:
 
 	// The following isn't all that efficient but...
 	StringList operator+(char* s) { StringList r(*this); r += s; return r;}
+
 private:
 	char* consolidate();
 	int totalSize;
 };
 
+// print a StringList on a UserOutput
 inline UserOutput& operator << (UserOutput& o, StringList& sl) {
 	char* s = sl;		// cast
 	o << s;
 	return o;
 }
+
+// print a StringList on a stream (don't give function here so we
+// don't have to include stream.h)
+
+class ostream;
+ostream& operator << (ostream& o,StringList& sl);
 
 #endif

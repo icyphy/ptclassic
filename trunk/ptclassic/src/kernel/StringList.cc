@@ -1,12 +1,8 @@
 #include <std.h>
-#include <stdio.h>		// temp
+#include <stream.h>
 #include "StringList.h"
 
 #define SMALL_STRING 20
-#define LIMIT 100000
-static hey() {
-	fprintf (stderr, "Huge string!!!\n");
-}
 
 // SCCS version identification
 // $Id$
@@ -28,7 +24,6 @@ StringList :: operator += (StringList& l) {
 	strcpy(n,s);
 	put(n);
 	totalSize += l.totalSize;
-	if (totalSize > LIMIT) hey();
 	return *this;
 }
 
@@ -40,7 +35,6 @@ StringList :: operator += (const char* s) {
 	strcpy(n,s);
 	put(n);
 	totalSize+=nadd;
-	if (totalSize > LIMIT) hey();
 	return *this;
 }
 
@@ -101,3 +95,9 @@ StringList::~StringList() {
 		delete next();
 }
 
+// print a StringList on a stream
+
+ostream& operator << (ostream&o, StringList& sl) {
+	o << (char*)sl;
+	return o;
+}
