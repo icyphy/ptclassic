@@ -67,6 +67,8 @@ $label(rev)
 
         codeblock(one) {
 	lmmr	ar1,#$addr(input)
+	nop
+	nop
 	smmr	ar1,#$addr(output)
 	}
 

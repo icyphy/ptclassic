@@ -76,6 +76,8 @@ The parameter \fIrotation\fR must be smaller than the parameter
 
 	codeblock(one) {
 	lmmr	ar1,#$addr(input)
+        nop
+        nop
 	smmr	ar1,#$addr(output)
 	} 
 

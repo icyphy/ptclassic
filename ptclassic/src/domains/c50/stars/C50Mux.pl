@@ -91,9 +91,7 @@ This is not currently handled.
 	lar	ar1,#$addr(ptrarray)
 	mar	*,ar1
 	mar	*0+
-	nop
-	lacc	*,0,ar2
-	samm	ar2		; ar2 -> start of current input
+	lar	ar2,*,ar2
 	}
 	
 	codeblock(moveInput,""){
@@ -102,9 +100,7 @@ This is not currently handled.
 	}
 	
 	codeblock(moveOne){
-	lacl	*,0
-	lar	ar2,#$addr(output)			
-	sacl	*,0
+	bldd	*,#$addr(output)
 	}
 	
 	method {
