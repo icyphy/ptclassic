@@ -64,6 +64,7 @@ PL_SRCS= \
  SDFAddInt.pl \
  SDFAverage.pl \
  SDFAverageCx.pl \
+ SDFBinary.pl \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
  SDFBusFork.pl \
@@ -117,8 +118,10 @@ PL_SRCS= \
  SDFMpyCx.pl \
  SDFMpyFix.pl \
  SDFMpyInt.pl \
+ SDFMPNeuron.pl \
  SDFMultiple.pl \
  SDFMux.pl \
+ SDFNeuron.pl \
  SDFNumToBus.pl \
  SDFOrderTwoInt.pl \
  SDFPack.pl \
@@ -145,6 +148,7 @@ PL_SRCS= \
  SDFReverse.pl \
  SDFScrambler.pl \
  SDFSgn.pl \
+ SDFSigmoid.pl \
  SDFSin.pl \
  SDFSqrt.pl \
  SDFSpheToCart.pl \
