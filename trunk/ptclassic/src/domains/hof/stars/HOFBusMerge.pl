@@ -1,7 +1,7 @@
 defstar {
 	name {BusMerge}
 	domain {HOF}
-	derivedfrom {BaseHiOrdFn}
+	derivedfrom {Base}
 	desc {
 Bridge inputs to outputs and then self-destruct.
 This star is used to merge two input busses into a single bus.
@@ -10,7 +10,7 @@ This star is used to merge two input busses into a single bus.
 The total number of input connections (the sum of the
 two input bus widths) must equal the number of output connections.
 	}
-	version {$Id$}
+	version {$Id$ }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -33,11 +33,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	ccinclude {"Galaxy.h"}
 	ccinclude {"InterpGalaxy.h"}
-	constructor {
-	  blockname.clearAttributes(A_SETTABLE);
-	  where_defined.clearAttributes(A_SETTABLE);
-	  parameter_map.clearAttributes(A_SETTABLE);
-	}
 	setup {
 
 	  MPHIter nexttop(top);

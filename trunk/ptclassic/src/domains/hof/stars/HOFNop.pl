@@ -1,7 +1,7 @@
 defstar {
 	name {Nop}
 	domain {HOF}
-	derivedfrom {BaseHiOrdFn}
+	derivedfrom {Base}
 	desc {
 Bridge inputs to outputs and then self-destruct.
 This star is used to split a bus into individual
@@ -43,9 +43,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	constructor {
 	  initFlag = 0;
-	  blockname.clearAttributes(A_SETTABLE);
-	  where_defined.clearAttributes(A_SETTABLE);
-	  parameter_map.clearAttributes(A_SETTABLE);
 	}
 	setup {
 	  if (!initFlag) reconnect();
