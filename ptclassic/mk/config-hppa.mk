@@ -43,8 +43,12 @@ LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -x -static
 #
 # Directories to use
 #
-X11_INCSPEC =	-I$(ROOT)/src/compat
-X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
+X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R6/include
+X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
+
+# Use -lSM -lICE for X11R6, don't use then for X11R5
+X11EXT_LIBSPEC=-lXext -lSM -lICE
+#X11EXT_LIBSPEC=-lXext
 
 # S56 directory is only used on sun4.
 S56DIR =
@@ -53,11 +57,16 @@ S56DIR =
 # Variables for miscellaneous programs
 #
 # Used by xv
-XV_RAND =	RAND="-DNO_RANDOM -Drandom=rand"
+# -DXLIB_ILLEGAL_ACCESS is need for X11R6 to compile xv.c:rd_str_cl()
+XV_CC =		gcc -traditional $(X11_INCSPEC) $(X11_LIBSPEC) \
+		-DXLIB_ILLEGAL_ACCESS
+XV_RAND =	"-DNO_RANDOM -Drandom=rand"
+# hppa has no isntall, bsdinst is part of X11
 XV_INSTALL =	bsdinst
+XMKMF =		xmkmf
 
 # Used by tcltk to build the X pixmap extension
-XPM_DEFINES =	-DZPIPE
+XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 FLUSH_CACHE =	flush_cache.o
