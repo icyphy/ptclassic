@@ -29,8 +29,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Definitions of domain-specific PortHole classes.
 */
 
-#ifndef _MTDFPortHole_h
-#define _MTDFPortHole_h
+#ifndef _PNPortHole_h
+#define _PNPortHole_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -38,21 +38,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SDFPortHole.h"
 
-class MTDFGeodesic;
+const bitWord PB_DYNAMIC = 0x20;
+extern const Attribute P_DYNAMIC;
+extern const Attribute P_STATIC;
 
-class MTDFPortHole : public DFPortHole
+class PNGeodesic;
+
+class PNPortHole : public DFPortHole
 {
 public:
     // Class identification.
     /*virtual*/ int isA(const char* className) const;
-
-    /*virtual*/ void initialize();
-
-    // Allocate and return a MTDFGeodesic.
-    /*virtual*/ Geodesic* allocateGeodesic();
+    /*virtual*/ int isDynamic() const;
 };
 
-class InMTDFPort : public MTDFPortHole
+class InPNPort : public PNPortHole
 {
 public:
     // Input/output identification.
@@ -63,7 +63,7 @@ public:
 };
 
 
-class OutMTDFPort : public MTDFPortHole
+class OutPNPort : public PNPortHole
 {
 public:
     // Input/output identification.
@@ -76,10 +76,10 @@ public:
     /*virtual*/ void sendData();
 };
 
-// MultiMTDFPort is identical to MultiDFPort.
-typedef MultiDFPort MultiMTDFPort;
+// MultiPNPort is identical to MultiDFPort.
+typedef MultiDFPort MultiPNPort;
 
-class MultiInMTDFPort : public MultiMTDFPort
+class MultiInPNPort : public MultiPNPort
 {
 public:
     // Input/output identification.
@@ -89,7 +89,7 @@ public:
     /*virtual*/ PortHole& newPort();
 };
  
-class MultiOutMTDFPort : public MultiMTDFPort
+class MultiOutPNPort : public MultiPNPort
 {     
 public:
     // Input/output identification.

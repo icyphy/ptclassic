@@ -35,95 +35,80 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFMonitor.h"
-#include "MTDFPortHole.h"
-#include "MTDFGeodesic.h"
+#include "PNMonitor.h"
+#include "PNPortHole.h"
+#include "PNGeodesic.h"
 #include "CircularBuffer.h"
 #include "Plasma.h"
 #include "Error.h"
 #include <strstream.h>
 
+extern const Attribute P_DYNAMIC = {PB_DYNAMIC,0};
+extern const Attribute P_STATIC = {0,PB_DYNAMIC};
+
 // Prototype PtGate.
-static MTDFMonitor prototype;
+static PNMonitor prototype;
 
 // Class identification.
-ISA_FUNC(MTDFPortHole,DFPortHole);
+ISA_FUNC(PNPortHole,DFPortHole);
 
-// Allocate and return a MTDFGeodesic.
-Geodesic* MTDFPortHole::allocateGeodesic()
+int PNPortHole::isDynamic() const
 {
-    // Construct name for new Geodesic.
-    StringList nm;
-    nm << "Node_" << name();
-
-    LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
-    g->setNameParent(hashstring(nm), parent());
-
-    return g;
-}
-
-void MTDFPortHole::initialize()
-{
-    DFPortHole::initialize();
-    // Remove any locks left over from a previous run.
-    // Threads blocked on these locks will be deleted at this point.
-    disableLocking();
-    // Create new locks for the current run.
-    enableLocking(prototype);
+    return attributes() & PB_DYNAMIC;
 }
 
 // Input/output identification.
-int InMTDFPort::isItInput() const
+int InPNPort::isItInput() const
 {
     return TRUE;
 }
 
 // Get data from the Geodesic.
-void InMTDFPort::receiveData()
+void InPNPort::receiveData()
 {
     getParticle();
 }
 
 // Input/output identification.
-int OutMTDFPort::isItOutput() const
+int OutPNPort::isItOutput() const
 {
     return TRUE;
 }
 
 // Update buffer pointer (for % operator) and clear old Particles.
-void OutMTDFPort::receiveData()
+void OutPNPort::receiveData()
 {
     clearParticle();
 }
 
 // Put data into the Geodesic.
-void OutMTDFPort::sendData()
+void OutPNPort::sendData()
 {
     putParticle();
 }
 
 // Input/output identification.
-int MultiInMTDFPort::isItInput() const
+int MultiInPNPort::isItInput() const
 {
     return TRUE;
 }
 
 // Add a new physical port to the MultiPortHole list.
-PortHole& MultiInMTDFPort::newPort()
+PortHole& MultiInPNPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new InMTDFPort;
+	LOG_NEW; PortHole& p = *new InPNPort;
 	return installPort(p);
 }
 
 // Input/output identification.
-int MultiOutMTDFPort::isItOutput() const
+int MultiOutPNPort::isItOutput() const
 {
     return TRUE;
 }
 
 // Add a new physical port to the MultiPortHole list.
-PortHole& MultiOutMTDFPort::newPort()
+PortHole& MultiOutPNPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new OutMTDFPort;
+	LOG_NEW; PortHole& p = *new OutPNPort;
 	return installPort(p);
 }
