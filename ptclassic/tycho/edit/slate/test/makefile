@@ -65,6 +65,7 @@ GRAPHICAL_TESTS = \
 	testIncrCanvas.itcl \
 	testSlate.itcl \
 	testShape.itcl \
+	testPolygon.itcl \
 	testRectangle.itcl \
 	testLine.itcl \
 	testTute.itcl
