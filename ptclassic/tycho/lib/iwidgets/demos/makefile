@@ -65,5 +65,5 @@ all:  $(MISC_SRCS)
 
 install: all
 
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+# We have an all rule, so include tycommon.mk.
+include $(ROOT)/mk/tycommon.mk
