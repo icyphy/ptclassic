@@ -92,7 +92,7 @@ after processing the input is sent to the \fIsize\fR output.
 		// Create or initialize the Queues
 		for(int i=(inData.numberPorts()-1); i>=0; i--) {
 		    if (queue[i]) queue[i]->initialize();
-		    else queue[i] = new ParticleQueue(capacity);
+		    else queue[i] = new ParticleQueue(int(capacity));
 		}
 	   }
 	   demand.dataNew = TRUE;
