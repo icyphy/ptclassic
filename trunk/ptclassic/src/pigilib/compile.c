@@ -559,8 +559,8 @@ octObject *facetPtr;
     }
     octFreeGenerator(&netGen);
 /* free up the terms */
-    for (i = 0; i < inN; i++) FreeOctMembers(in[i]);
-    for (i = 0; i < outN; i++) FreeOctMembers(out[i]);
+    for (i = 0; i < inN; i++) FreeOctMembers(&in[i]);
+    for (i = 0; i < outN; i++) FreeOctMembers(&out[i]);
     return errMsg ? FALSE : TRUE;
 }
 
