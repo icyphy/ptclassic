@@ -71,6 +71,7 @@ PL_SRCS= \
  CGCCommutator.pl \
  CGCConst.pl \
  CGCConstCx.pl \
+ CGCConstFix.pl \
  CGCConstInt.pl \
  CGCCos.pl \
  CGCCxToFix.pl \
