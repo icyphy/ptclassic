@@ -55,12 +55,12 @@ LIB=libddf.$(LIBSUFFIX)
 HDRS = \
  DDFPortHole.h \
  DDFScheduler.h \
+ DDFClustSched.h \
  DDFStar.h \
- DDFTarget.h \
- DDFWormhole.h
+ DDFTarget.h
 
 # Library sources
-SRCS= $(HDRS:.h=.cc) DDFDomain.cc
+SRCS= $(HDRS:.h=.cc) DDFDomain.cc 
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
