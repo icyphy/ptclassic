@@ -112,10 +112,11 @@ XColor *color;			/* Returned color */
 int funny_evt(evt)
 XEvent *evt;
 {
-    (void) printf("Funny event: type is %lx\n", evt->xany.type);
+    (void) printf("Funny event: type is %lx\n", (unsigned long)evt->xany.type);
     return 1;
 }
 
+int
 main()
 /* Posts moded menu */
 {
@@ -189,4 +190,5 @@ main()
 	    (void) printf("Unknown non-simple event\n");
 	}
     }
+    return 0;
 }
