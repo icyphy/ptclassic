@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Map one or more instances of the named block to the input stream(s)
 to produce the output stream(s).
 This is implemented by replacing the Map star with the named block at
-setup time.
+preinitialization time.
 The replacement block(s) are connected as specified by "input_map"
 and "output_map", using the existing connections to the Map star.
 Their parameters are determined by "parameter_map".
@@ -24,8 +24,8 @@ Their parameters are determined by "parameter_map".
 See the documentation for the
 <tt>BaseHiOrdFn</tt>
 star, from which this is derived, for background information.
-The star is replaced by one or more instances of the block with
-name given by <i>blockname</i> at setup time, before the scheduler is invoked.
+The star is replaced by one or more instances of the block with name given
+by <i>blockname</i> at preinitialization time, before the scheduler is invoked.
 <h3>Number of replacement blocks</h3>
 <p>
 The number of instances of the replacement block
@@ -72,21 +72,6 @@ If we want the replacement block(s) to have two inputs,
 then <i>input_map</i> should be "input input".
 If we want three inputs in each replacement block, then
 <i>input_map</i> should be "input input input".
-<h3>A note about data types</h3>
-<p>
-In this star, the output data type is ANYTYPE, and the type
-will be derived from the type of the input(s).
-This creates a problem when there are no inputs.
-Thus, the zero-input version of this star is implemented as a
-family of derived stars called
-<tt>ParSource</tt>
-stars, each with a particular type of output.
-There are other problems as well with this mechanism, in that
-when type resolution is done, before the block substitution occurs,
-there is no information about the substitution block.
-It is best, therefore, when using the
-<tt>Map</tt>
-star, to make all type conversions explicit.
 <h3>Bugs</h3>
 <p>
 Repeated names in the <i>input_map</i> or <i>output_map</i>
@@ -95,19 +80,18 @@ However, this is not detected.
 Results could be unexpected.
 	}
         hinclude { "Galaxy.h" }
-	ccinclude { "Geodesic.h" }
 	ccinclude { "SimControl.h" }
 	inmulti {
 		name {input}
 		type {anytype}
 		desc {
-Whatever is connected to these inputs will  be connected
+Whatever is connected to these inputs will be connected
 to the named block inputs according to input_map.
 		}
 	}
 	outmulti {
 		name {output}
-		type {=input}
+		type {anytype}
 		desc {
 Whatever is connected to these outputs will be connected
 to the named block outputs according to output_map.
@@ -125,10 +109,12 @@ to the named block outputs according to output_map.
 		default {"output"}
 		desc {The mapping of outputs}
 	}
-        ccinclude { "InterpGalaxy.h" }
-	setup {
-            HOFBaseHiOrdFn::setup();
 
+	method {
+	  name { preinitialize }
+	  access { public }
+	  code {
+	    HOFBaseHiOrdFn::preinitialize();
 	    // Check that either an input_map or output_map is given
 	    if (input_map.size() == 0 && output_map.size() == 0) {
 		Error::abortRun(*this,
@@ -138,8 +124,8 @@ to the named block outputs according to output_map.
 	    Galaxy* mom = idParent();
 	    if(!mom) return;
 
-	    // Any HOF star has to call this method for all multiPortHoles
-	    // to be sure that HOFNop stars are dealt with properly.
+	    // Make sure we know the number of connections on the
+	    // input and output multiPortHoles.
 	    initConnections(input);
 	    initConnections(output);
 
@@ -149,6 +135,7 @@ to the named block outputs according to output_map.
 	    if (!iterateOverPorts(nexti,nexto,mom,1)) return;
 
 	    mom->deleteBlockAfterInit(*this);
+	  }
 	}
 
 	// The following method is separated out so that MapGr stars
@@ -234,8 +221,6 @@ to the named block outputs according to output_map.
 		if(!connectOutput(po,source)) return 0;
 	      }
 	      if(!setParams(block, instanceno++)) return 0;
-	      block->setTarget(target());
-	      block->initialize();
 	    }
 	    return 1;
 	  }
