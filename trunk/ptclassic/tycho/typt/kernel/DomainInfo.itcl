@@ -92,9 +92,6 @@ class ::tycho::DomainInfo {
     # Return a list of all the domains.
     public proc domains {}
 
-    # Bring up ListBox with all the domains, return the user's choice.
-    public proc domainBrowser { {msg "Choose a Domain:"} {default {}} } {}
-
     # Compare two domainInfo objects.
     public proc diffDomains {domainA domainB}
 
@@ -103,6 +100,9 @@ class ::tycho::DomainInfo {
 
     # Return the 'print' output for starName in domain.
     method print {starName domain}
+
+    # Bring up ListBox with all the domains, return the user's choice.
+    public proc queryDomain { {msg "Choose a Domain:"} {default {}} } {}
 
     ###################################################################
     ####                   protected procs                         ####
@@ -240,23 +240,6 @@ body ::tycho::DomainInfo::domains {} {
 }
 
 #######################################################################
-#### domainBrowser
-# Bring up ListBox with all the domains, return the user's choice.
-# This public proc is very similar to ::tycho::queryfilename.
-#
-body ::tycho::DomainInfo::domainBrowser { {msg "Choose a Domain:"} \
-        {default {}} } {
-    set nm [::tycho::autoName .domainBrowser]
-    uplevel #0 ::tycho::ListBrowser $nm \
-            -text [list $msg] \
-            -items [list [::tycho::DomainInfo::domains]]
-    if {$default != {} } {
-        $nm configure -default $default
-    }
-    return [::tycho::Dialog::wait $nm]
-}
-
-#######################################################################
 #### diffDomains
 # Compare two domains, passed in as strings.
 # Return a list consisting of five sublists:
@@ -300,6 +283,23 @@ body ::tycho::DomainInfo::print {starName domain} {
         ::domain $domain
         return [::print $starName]
     }
+}
+
+#######################################################################
+#### queryDomain
+# Bring up ListBox with all the domains, return the user's choice.
+# This public proc is very similar to ::tycho::queryfilename.
+#
+body ::tycho::DomainInfo::queryDomain { {msg "Choose a Domain:"} \
+        {default {}} } {
+    set nm [::tycho::autoName .queryDomain]
+    uplevel #0 ::tycho::ListBrowser $nm \
+            -text [list $msg] \
+            -items [list [::tycho::DomainInfo::domains]]
+    if {$default != {} } {
+        $nm configure -default $default
+    }
+    return [::tycho::Dialog::wait $nm]
 }
 
     ###################################################################
