@@ -112,6 +112,7 @@ PL_SRCS= \
  SDFRaisedCos.pl \
  SDFReadFile.pl \
  SDFReadImage.pl \
+ SDFReadPCM.pl \
  SDFReadRgb.pl \
  SDFRealComplex.pl \
  SDFReciprocal.pl \
@@ -154,6 +155,10 @@ install:	all $(LIBDIR)/$(LIB)
 
 EXTRA_SRCS=sdfstars.mk $(PL_SRCS)
 
+# rule for making star list for makefile inclusion.
+# The definition is extracted from the PL_SRCS definition above.
+sdfstars.mk:	make.template
+		genStarList SDF > sdfstars.mk
 
 # include common definitions, rules
 include $(ROOT)/common.mk
