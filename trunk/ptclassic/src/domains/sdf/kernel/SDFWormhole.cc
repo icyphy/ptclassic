@@ -29,7 +29,7 @@ Version identification:
 
 void SDFWormhole :: go() {
 	// set the currentTime of the inner domain.
-	scheduler->setCurrentTime(arrivalTime);
+	target->setCurrentTime(arrivalTime);
 
 	// run
 	run();
@@ -60,7 +60,7 @@ float SDFWormhole :: getArrivalTime() {
 }
 
 // Constructor
-SDFWormhole :: SDFWormhole(Galaxy& g) : Wormhole(*this,g)
+SDFWormhole :: SDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t)
 {
 	buildEventHorizons ();
 }
@@ -76,6 +76,6 @@ StringList SDFWormhole :: printRecursive() const {
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* SDFWormhole :: clone() const {
-	return new SDFWormhole(gal.clone()->asGalaxy());
+	return new SDFWormhole(gal.clone()->asGalaxy(),target->cloneTarget());
 }
 
