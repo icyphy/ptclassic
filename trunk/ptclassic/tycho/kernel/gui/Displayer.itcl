@@ -332,12 +332,15 @@ body ::tycho::Displayer::destructor {} {
 	if $alreadyexiting {return}
 	set alreadyexiting 1
 	if {$itk_option(-master) != 0} {
-	    if {![::tycho::TopLevel::exitProgram]} {
-		# If exitProgram returns 0, the exit was canceled.
-		set alreadyexiting 0
-                ::tycho::silentError
-		# error "Exit cancelled"
-	    }
+            # We want to exit the entire program, not just this object.
+            # In order to get the proper safety checks and confirmation,
+            # we cancel the current destruction with silentError and
+            # then at the top-level, invoke exitProgram.
+            # Calling exitProgram from here directly is not good because
+            # it tries to delete the current object, and we are already
+            # in the middle of deleting it.
+            after idle ::tycho::TopLevel::exitProgram
+            ::tycho::silentError
 	}
 	set alreadyexiting 0
     }
