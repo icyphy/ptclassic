@@ -22,39 +22,27 @@
 #
 ##############################################################################
 # Change the following line to point to the Ptolemy top-level directory
-PTOLEMY = /usr/users/ptolemy
+ROOT = /usr/users/ptolemy
 #############################################################################
 # DON'T EDIT THIS STUFF.
-# Where the kernel is
-K = $(PTOLEMY)/src/kernel
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
 
 # Root of domain-specific object files
-DOBJ = $(PTOLEMY)/obj.$(ARCH)/domains
+DOBJ = $(ROOT)/obj.$(ARCH)/domains
 # Root of domain-specific header files
-DHDR = $(PTOLEMY)/src/domains
+DHDR = $(ROOT)/src/domains
 
-# Ptolemy library directory
-LIBDIR=$(PTOLEMY)/lib.$(ARCH)
-
-# Oct tools library directory
-OCTLIB=$(PTOLEMY)/octtools/lib.$(ARCH)
-# Which copy of g++ to use
-GNU = g++
-
-# The g++ include directory
-GNUINCLUDE = /usr/gnu/lib/g++-include
 # libraries to link with that we always need
-LIBS =	-lpigi -lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
-	-lerrtrap -luprintf -lport -lX11 -lm
+LIBS =	-lpigi -lptolemy -loh -lrpc -llist -ltr -lutility -lst \
+	-lerrtrap -luprintf -lport -lX11 $(SYSLIBS)
 
 # main library name
 LIBFILE=$(LIBDIR)/libptolemy.a
 
 ##############################################################################
 # START YOUR EDITING HERE!!!!
-
-# g++ options (other choices: -O, -Wall, etc)
-GPPFLAGS = -g
 
 # Star objects in this directory.  Add your own here.
 # You probably don't want the toy SDFSayDigit star.
@@ -72,9 +60,9 @@ PLSRCS=SDFSayDigit.pl
 SDF=$(DOBJ)/sdf/stars
 DDF=$(DOBJ)/ddf/stars
 DE=$(DOBJ)/de/stars
-SDFSRC=$(PTOLEMY)/src/domains/sdf/stars
-DDFSRC=$(PTOLEMY)/src/domains/ddf/stars
-DESRC =$(PTOLEMY)/src/domains/de/stars
+SDFSRC=$(ROOT)/src/domains/sdf/stars
+DDFSRC=$(ROOT)/src/domains/ddf/stars
+DESRC =$(ROOT)/src/domains/de/stars
 
 # this defines the SDFSTARS variable.
 include $(SDFSRC)/sdfstars.mk
@@ -108,31 +96,25 @@ DOMINC = -I$(DHDR)/sdf/kernel -I$(DHDR)/de/kernel -I$(DHDR)/ddf/kernel
 SRCS=$(OBJS:.o=.cc)
 HDRS=$(OBJS:.o=.h)
 
-# Linker variables
-LINKER        = $(GNULIB)/gcc-ld
-LINKOPTS      = -S
-LDFLAGS	      = $(LINKOPTS) -e start -dc -dp -Bstatic /lib/crt0.o \
-		-L$(OCTTOOLS)/lib.$(ARCH) -L$(LIBDIR) -u_UserMain
-
 # Rule for compiling with g++
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) $(DOMINC) -I$(K) -c $<
+	$(GNU) $(GPPFLAGS) $(DOMINC) -I$(KERNDIR) -c $<
 
 .pl.cc:
 	ptlang $<
 
 pigiRpc:	makefile $(SRCS) $(MAIN) $(OBJS) $(OTHERS) $(LIBFILE) \
-	$(DOMLIBFILES) $(PIGILIB) defpalettes.o
-	$(LINKER) $(LDFLAGS) \
+	$(DOMLIBFILES) $(PIGILIB) defpalettes.o pigiMain.o
+	$(LINKER) $(LDFLAGS) -L$(OCTLIBDIR) pigiMain.o \
 	defpalettes.o $(OBJS) $(OTHERS) $(DOMLIBS) $(LIBS) -o pigiRpc
 
 depend:	
-		makedepend $(DOMINC) -I$(K) -I$(GNUINCLUDE) $(SRCS)
+		$(DEPEND) $(DOMINC) -I$(K) $(SRCS) |\
+			 cat make.template - > makefile.n
+		mv -f makefile.n makefile
 
 makefile:	make.template
-		rm -f makefile
-		cp make.template makefile
 		make -f make.template sources depend # use new SRCS list
 		@echo makefile remade -- you must rerun make.
 		exit 1
