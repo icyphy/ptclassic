@@ -1,7 +1,7 @@
 # Makefile for Ptolemy utilities.
 
 # Version Identification:
-# @(#)$Id$
+# $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -32,7 +32,8 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-
+# libexttools must come before libptmatlab below because libexttools
+# generates files on which libptmatlab depends
 DIRS = libexttools libgslider libptdsp libptmatlab libptmathematica \
        ptplay ptvhdlsim rman-2.5a6 tkman-1.8b5
 
