@@ -65,7 +65,7 @@ RunUniverse(name)
 char* name;
 {
 	octObject facet = {OCT_UNDEFINED_OBJECT};
-        char facetHandle[POCT_FACET_HANDLE_LEN];
+	char facetHandle[POCT_FACET_HANDLE_LEN];
 
 	ViInit(name);
 	ErrClear();
@@ -80,11 +80,11 @@ char* name;
 	    /* Create a Tk window to handle editing and then do run command */
 	    ptkOctObj2Handle(&facet, facetHandle);
 	    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
-                   " \"Run universe with the following parameters\" ",
-                   " \"ptkSetRunUniverse ", facetHandle, " {%s} \" ",
-                   " \"[lindex [ptkGetParams ", facetHandle, " NIL] 1]\" ",
-                   " Params ",
-                   (char *)NULL) );
+	           " \"Run universe with the following parameters\" ",
+	           " \"ptkSetRunUniverse ", facetHandle, " {%s} \" ",
+	           " \"[lindex [ptkGetParams ", facetHandle, " NIL] 1]\" ",
+	           " Params ",
+	           (char *)NULL) );
 	}
 
 	ViDone();
@@ -115,7 +115,7 @@ boolean now;
 
     if (now) {
 	/* Run the universe right away */
-        TCL_CATCH_ERR1(
+	TCL_CATCH_ERR1(
 	    Tcl_VarEval(ptkInterp, "ptkGo ", name, " ", octHandle,
 	    (char *)NULL));
     }
@@ -179,6 +179,7 @@ char *objName;
 {
     FindAndMark(&lastFacet, objName,1);
 }
+
 /* mark stars with a pattern given the full name and the color to mark */
 void
 PigiMarkColor(objName,color)
@@ -190,54 +191,57 @@ char *color;
 
 /*=====================================================================*/
 /* Asawaree Kalavade 7/19/94, 10/16/94 11/22/95 */
-/* Bring up a panel to run the DesignMakER */
+/* Bring up a panel to run the DesignMaker */
 int
 RpcRunDesignMaker(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-        /* modeled after RpcRun in exec.c */
-        octObject facet;
-        char* name;
-	char* domainName;
-        char octHandle[16];
-        ViInit("run-DesignMaker");
-        ErrClear();
-        facet.objectId = spot->facet;
-        if (octGetById(&facet) != OCT_OK) {
-                PrintErr(octErrorString());
-                ViDone();
-        }
+	/* modeled after RpcRun in exec.c */
+	octObject facet = {OCT_UNDEFINED_OBJECT};
+	char* name;
+	const char* domainName;
+	char octHandle[POCT_FACET_HANDLE_LEN];
 
+	ViInit("run-DesignMaker");
+	ErrClear();
+	FindClear();
+	facet.objectId = spot->facet;
+	if (octGetById(&facet) != OCT_OK) {
+		PrintErr(octErrorString());
+		ViDone();
+	}
 
         if (!IsUnivFacet(&facet))
         {
-                PrintErr("Schematic is not a universe, can't run DesignMaker");
-                ViDone();
+		PrintErr("Schematic is not a universe, can't run DesignMaker");
+		FreeOctMembers(&facet);
         }
 	/* check if DMM domain, else prompt user to use R */
-	if(!GOCDomainProp(&facet,&domainName,DEFAULT_DOMAIN))
+	else if (!GOCDomainProp(&facet, &domainName, DEFAULT_DOMAIN))
         {
-                PrintErr("Domain error in facet");
-                ViDone();
+		PrintErr("Domain error in facet");
+		FreeOctMembers(&facet);
         }
-        if(strcmp(domainName,"DMM")!= 0)
+        else if (strcmp(domainName,"DMM")!= 0)
         {
-                PrintErr("Domain is not DMM, use regular run control (R)");
-                ViDone();
-        }
-
+		PrintErr("Domain is not DMM, use regular run control (R)");
+		FreeOctMembers(&facet);
+	}
         /* set the lastFacet to be this facet */
-        lastFacet = facet;
-        /* the foll. reflects what is done in ptkRun() */
-        name = BaseName(facet.contents.facet.cell);
-        ptkOctObj2Handle(&facet, octHandle);
-        /* call ptkRunDesignMaker,
-                which executes the function to bring up panel */
-        TCL_CATCH_ERR1(
-        Tcl_VarEval(ptkInterp, "ptkRunDesignMaker ", name, " ", octHandle,
-        (char *) NULL));
-        return TRUE;
-}
+	else
+	{
+		FreeOctMembers(&lastFacet);
+		lastFacet = facet;
+		/* reflect what is done in ptkRun() */
+		name = BaseName(facet.contents.facet.cell);
+		ptkOctObj2Handle(&facet, octHandle);
+		/* call ptkRunDesignMaker, which brings up panel */
+		TCL_CATCH_ERR1(
+			Tcl_VarEval(ptkInterp, "ptkRunDesignMaker ",
+				    name, " ", octHandle, 0));
+	}
 
+        ViDone();
+}
