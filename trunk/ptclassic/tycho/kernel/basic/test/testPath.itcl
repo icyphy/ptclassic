@@ -303,7 +303,7 @@ foreach _name {
 	.bar
 	/users/ptolemy/foo.bar
 	absolute
-	file:
+	file
 	file:/users/ptolemy/foo
 	{}
 	{file: {} users ptolemy foo.bar}
@@ -314,7 +314,7 @@ foreach _name {
 	{}
 	/
 	absolute
-	http:
+	http
 	http://ptolemy.eecs
 	ptolemy.eecs
 	{http: ptolemy.eecs}
@@ -325,7 +325,7 @@ foreach _name {
 	{}
 	/~ptdesign
 	absolute
-	http:
+	http
 	http://ptolemy.eecs/~ptdesign
 	ptolemy.eecs
 	{http: ptolemy.eecs ~ptdesign}
@@ -336,7 +336,7 @@ foreach _name {
 	.html
 	/~ptdesign/index.html
 	absolute
-	http:
+	http
 	http://ptolemy.eecs/~ptdesign/index
 	ptolemy.eecs
 	{http: ptolemy.eecs ~ptdesign index.html}
