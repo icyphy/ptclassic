@@ -1820,9 +1820,17 @@ body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
 	set comment $explTag
     }
 
-    # Blank lines are a new paragraph
-    # FIXME: we don't want this inside <pre> ... </pre>!
+    # Blank lines are a new paragraph, so insert <p> tags.
+    # However, we don't want to do this inside a <pre></pre>
+    # tag. First, escape newlines inside <pre></pre>:
+    while { [regexp -nocase "<pre>.*\n.*</pre>" $comment pre] } {
+        regsub -all \n $pre {\!n!} pre
+        regsub -nocase "<pre>.*\n.*</pre>" $comment $pre comment
+    }
+    # Add <p> to blank lines
     regsub -all "\n\[ \t\]*\n" $comment "\n<p>" comment
+    # Restore text inside <pre></pre>
+    regsub -all {\\!n!} $comment "\n" comment
 
     # Underscores delimit italicized text. Because of the way regsub
     # works, we have to do it twice to catch eg "_x_ _y_." We also
