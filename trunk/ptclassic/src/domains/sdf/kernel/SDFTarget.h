@@ -58,9 +58,10 @@ protected:
 	FloatState schedulePeriod;
 
 public:
-	SDFTarget();
+	SDFTarget(const char* nam, const char* desc);
 	void setup();
 	Block* makeNew() const;
 	~SDFTarget();
+private:
 };
 #endif
