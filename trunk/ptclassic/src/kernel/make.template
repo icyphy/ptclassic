@@ -45,7 +45,7 @@ include $(CONFIG)
 # Build a non-shared libptolemy.a for faster startup time
 # It would be nice if we built both
 #LIB=libptolemy.$(LIBSUFFIX)
-LIBNONSHARED=	libptolemy.a
+LIBNONSHARED=	libptolemy.$(LIBNONSHAREDSUFFIX)
 
 # No extra directories to include
 INCL = $(PTCOMPAT_INCSPEC)
