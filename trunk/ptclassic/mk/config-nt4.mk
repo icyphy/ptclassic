@@ -50,6 +50,7 @@ include $(ROOT)/mk/config-g++.mk
 # Programs to use
 #
 RANLIB = true
+YACC= byacc
 # Use gcc everywhere including in octtools
 CC =		gcc
 
