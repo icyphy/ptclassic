@@ -300,7 +300,7 @@ body ::tycho::Monitor::destructor {} {
         $itk_component(text) markUnmodified
     }
     catch {unset ::tycho::Monitor::$statusVariableName}
-b
+
     # Deregister this window
     ::tycho::deregister window Monitor $this
 }
