@@ -136,7 +136,9 @@ public:
 	Block *clone() const;
 
 // "register" the galaxy (add it to the known list)
-	void addToKnownList(const char* domain,Target* t = 0);
+	void addToKnownList(const char* definitionSource,
+			    const char* outerDomain,
+			    Target* innerTarget = 0);
 
 // return a contained star/galaxy (this is protected in Galaxy)
 	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}
