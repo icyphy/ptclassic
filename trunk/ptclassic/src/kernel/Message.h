@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 #include "Particle.h"
 #include "StringList.h"
+#include "Fix.h"
 #include "isa.h"
 
 extern const DataType MESSAGE;
@@ -68,6 +69,7 @@ public:
 	virtual int asInt() const;
 	virtual double asFloat() const;
 	virtual Complex asComplex() const;
+	virtual Fix asFix() const;
 
 	// type of the Message.  When overriding, be SURE
 	// that the prototype matches (don't forget the const keywords)
@@ -148,6 +150,7 @@ public:
 	int asInt() const { return d->asInt();}
 	double asFloat() const { return d->asFloat();}
 	Complex asComplex() const { return d->asComplex();}
+	Fix asFix() const { return d->asFix();}
 	StringList print() const { return d->print();}
 
 	// we can get a pointer to the Message.  It's a const
@@ -186,6 +189,7 @@ public:
 	operator float () const;
 	operator double () const;
 	operator Complex () const;
+	operator Fix () const;
 	StringList print() const;
 
 	void getMessage (Envelope& p);
@@ -202,6 +206,7 @@ public:
 	void operator << (int i);
 	void operator << (double f);
 	void operator << (const Complex& c);
+	void operator << (const Fix& c);
 	void operator << (const Envelope& p);
 
 	// particle copy
