@@ -54,6 +54,7 @@ class CircularBuffer;
 class Geodesic;
 class Plasma;
 class Block;
+class Galaxy;
 
 	//////////////////////////////////////////
 	// class GenericPort
@@ -87,7 +88,7 @@ public:
 	// Translate aliases, if any.
 	GenericPort& realPort() const {
 		const GenericPort* p = this;
-		while (p->alias()) p = alias();
+		while (p->aliasedTo) p = p->aliasedTo;
 		return *p;
 	}
 
@@ -154,6 +155,7 @@ private:
 class PortHole : public GenericPort
 {
 	friend class Geodesic;	// allow Geodesic to access myPlasma
+	friend setPortIndices(Galaxy&);
 public:
 
         // Every PortHole must be initialized with the setPort function
@@ -222,6 +224,9 @@ public:
 	
 	// Destructor
 	~PortHole ();
+
+	// index value
+	int index() const { return indexValue;}
 protected:
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
@@ -252,6 +257,8 @@ private:
 	// Allocate new buffer
 	void allocateBuffer();
 
+	// index value, for making scheduler tables
+	int indexValue;
 };
 
 // The following generic types are good enough to use in galaxies.
