@@ -36,6 +36,24 @@ Programmer: Jose Luis Pino
 #endif
 
 #include "MultiScheduler.h"
+#include "Scope.h"
+#include "CGCluster.h"
+
+/*virtual*/double MultiScheduler::getStopTime() {
+    return topCluster->getStopTime();
+}	
+
+/*virtual*/ void MultiScheduler::setStopTime(double limit) {
+    topCluster->setStopTime(limit);
+}
+
+/*virtual*/ StringList MultiScheduler::displaySchedule(){
+    StringList schedule;
+    if (topCluster) schedule << topCluster->displaySchedule();
+    return schedule;
+}   
+
+/*virtual*/ int MultiScheduler::run() { return topCluster->run(); }
 
 int MultiScheduler::dagNodes() const {
     return topScheduler.dagNodes();
@@ -46,12 +64,16 @@ void MultiScheduler :: setup () {
 	Error::abortRun("MultiScheduler: no galaxy!");
 	return;
     }
+
+    Scope::createScope(*galaxy());
     
     if (!checkConnectivity()) return;
 
     // Need to initialize galaxy BEFORE constructing the Clusters.
     // If not, the porthole parameters are not properly propigated.
     galaxy()->initialize();
+
+    if (SimControl::haltRequested()) return;
     
     // Need to set repetitions of the master galaxy
     repetitions();
@@ -85,12 +107,13 @@ void MultiScheduler :: setup () {
     // Set all looping levels for child targets > 0.  Targets might
     // have to do different style buffering (ie. CGC)
     int childNum = 0;
-    {
-      CGTarget* child;
-      while ( (child = mtarget->cgChild(childNum++)) ) {
-	child->loopingLevel = 3;
-      }
+    { 
+    CGTarget* child;
+    while ((child = mtarget->cgChild(childNum++))) {
+      child->loopingLevel = 3;
     }
+    }
+    mtarget->requestReset();
     return;
 }
 
@@ -106,4 +129,8 @@ void MultiScheduler :: prepareCodeGen() {
     // prepare code generation for each processing element:
     // galaxy initialize, copy schedule, and simulate the schedule.
     ParScheduler::prepareCodeGen();
+}
+
+MultiScheduler::~MultiScheduler() {
+    delete topCluster;
 }
