@@ -145,10 +145,10 @@ class ::tycho::Slate {
     ####                            options                        ####
 
     # The color of the highlight box
-    itk_option define -highlightcolor highlightColor HighlightColor "cyan2"
+    itk_option define -highlightcolor highlightColor HighlightColor "black"
 
     # The width of the highlight box
-    itk_option define -highlightwidth highlightWidth HighlightWidth 3
+    itk_option define -highlightwidth highlightWidth HighlightWidth 1
 
     # Export the selection if this flag is true
     itk_option define -exportselection exportSelection ExportSelection 1
