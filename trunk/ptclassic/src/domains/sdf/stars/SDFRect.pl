@@ -44,6 +44,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Internal counting state. }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
+	setup {
+		count = 0;
+	}
 	go {
 		double t = 0.0;
 		if (int(count) < int(width)) t = height;
@@ -52,4 +55,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		if (int(period) > 0 && int(count) >= int(period)) count = 0;
 	}
 }
-
