@@ -55,14 +55,13 @@
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
 ifeq ("$(MATLABDIR)","")
 MATLABDIR= 		$(ROOT)/src/compat/matlab
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlabstars.$(LIBSUFFIX) 
-MATLABSTAR_LIB=		-lsdfnomatlabstars
-MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
+MATLABEXT_LIB = 	-lptmatlab
 else
 MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
-MATLABSTAR_LIB=		-lsdfmatlabstars
-MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
 endif
-MATLAB_INCSPEC = -I$(MATLABDIR)/extern/include
+
+MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
+MATLABSTAR_LIBFILE =	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
+MATLABSTAR_LIB =	-lsdfmatlabstars
+MATLABSTARS_DOT_O =	$(LIBDIR)/sdfmatlabstars.o
 
