@@ -51,7 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
   Description [ This function zig-zag scans a matrix representing an
                 image stored in inImg and returns the result in outImg.
 		This is useful before quantizing a DCT transformed image. ]
-  SideEffects []
+  SideEffects [ The double array outImg is modified. ]
   SeeAlso     [ Ptdsp_ZigZagInverse ]
 ******************************************************************************/
 void 
@@ -107,7 +107,7 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   Description [ This function inverse zig-zag scans an image, stored
                 in inImg as a double array, and outputs the result in
 		outImg ]
-  SideEffects []
+  SideEffects [ The double array outImg is modified. ]
   SeeAlso     [ Ptdsp_ZigZagScan ]
 ******************************************************************************/
 void
