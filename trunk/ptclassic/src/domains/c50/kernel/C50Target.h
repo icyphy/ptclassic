@@ -60,6 +60,9 @@ public:
 	// return a new copy of itself
 	/*virtual*/ Block* makeNew() const;
 
+	// return the domain of the galaxy if it exists and "C50" otherwise
+	/*virtual*/ const char* domain();
+
 	/*virtual*/ int isA(const char*) const;
 	void headerCode();
 	const char* className() const;

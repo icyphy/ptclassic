@@ -43,6 +43,9 @@ Base target for TI 320C5x assembly code generation.
 #include "C50Star.h"
 #include "FixState.h"
 
+// Defined in C50Domain.cc
+extern const char C50domainName[];
+
 int C50Target :: compileCode() {
       StringList assembleCmds;
       assembleCmds << "assembl " << filePrefix << ".asm";
@@ -93,6 +96,10 @@ void C50Target::writeFloat(double val) {
 	myCode << "* WARNING: the TMS320C5x does not support floating point!\n";
 	myCode << "* perhaps this state was meant to be type FIX?\n";
 	TITarget::writeFloat(val);
+}
+
+const char* C50Target::domain() {
+	return galaxy() ? galaxy()->domain() : C50domainName;
 }
 
 const char* C50Target::className() const { return "C50Target"; }
