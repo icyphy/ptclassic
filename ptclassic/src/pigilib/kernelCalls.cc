@@ -351,6 +351,7 @@ extern "C" boolean
 KcRun(int n) {
  	LOG << "run " << n << "\nwrapup\n";
 	LOG.flush();
+	SimControl::clearHalt();
 	if (!universe->initSched())
 		return FALSE;
 	universe->setStopTime(n);
