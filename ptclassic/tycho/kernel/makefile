@@ -85,7 +85,6 @@ ITCL_SRCS = \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
-	Singleton.itcl \
 	Stack.itcl \
 	StatusBar.itcl \
 	Subpanel.itcl \
@@ -94,6 +93,7 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	TWidget.itcl \
 	Tycho.tcl \
+	Uninstantiable.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
 	YesNoCancel.itcl \
