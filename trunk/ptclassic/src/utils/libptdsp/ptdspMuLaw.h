@@ -1,5 +1,5 @@
-#ifndef _PTDSPMuLaw_h
-#define _PTDSPMuLaw_h 1
+#ifndef _ptdspMuLaw_h
+#define _ptdspMuLaw_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -35,7 +35,7 @@ Version: $Id$
 extern "C" {
 #endif
 
-unsigned char PTDSPMuLaw( int sample );
+unsigned char Ptdsp_MuLaw( int sample );
 
 #ifdef __cplusplus
 }
