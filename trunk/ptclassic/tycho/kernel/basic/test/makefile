@@ -47,8 +47,10 @@ DIRS =
 TCL_SRCS = 
 
 SIMPLE_TESTS = \
+	testCircularList.itcl \
 	testPath.itcl \
 	testResource.itcl \
+        testStack.itcl \
 	testURLPath.itcl
 
 GRAPHICAL_TESTS = \
