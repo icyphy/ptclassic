@@ -90,7 +90,7 @@ CGMacroClusterGal::CGMacroClusterGal(Galaxy* gal, ostream* log)
 		out->connect(*in,delay);
 		out->initGeo();
 	}
-	LOG_DEL; delete ptable;
+	LOG_DEL; delete [] ptable;
 
 	// data structure initialization
         targetGalList.initialize();
