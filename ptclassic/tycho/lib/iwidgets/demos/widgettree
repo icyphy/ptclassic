@@ -4,7 +4,7 @@
 # @(#)widgettree	1.1 07/30/97
 # ----------------------------------------------------------------------
 #\
-exec itkwish -f "$0" ${1+"$@"}
+	exec itkwish -f "$0" ${1+"$@"}
 
 source widgettree.itk
 
@@ -34,18 +34,18 @@ grid $w -sticky nw
 pack .f -fill both -expand on
 
 # The second widget illustrates how arbitrary widgets
-# can be included as leaves of the tree. The expand
-# command is set to call a proc that creates a preference
-# setting panel.
+# can be included as leaves of the tree. The create command
+# of is set to call a proc that creates the appropriate
+# preference setting panel.
 
-proc mkPref {win tag} {
+proc createPanel {win tag} {
     switch -exact $tag {
 	"size" {
-	    $win create radiobox size -options {
+	    $win add radiobox size.s {
 		rename -labelfont -font font Font
 	    }
-	    set r [$win component $tag]
-
+	    set r [$win component size.s]
+	    
 	    $r add small -text "Small"
 	    $r add med -text "Medium"
 	    $r add large -text "Large"
@@ -53,8 +53,9 @@ proc mkPref {win tag} {
 	    $r select med
 	}
 	"address" {
-	    set f [$win create frame address]
-
+	    $win add frame address.a
+	    set f [$win component address.a]
+	    
 	    foreach {name text} {
 		name "Name" addr "Street" city "City, State" email "E-mail"
 	    } {
@@ -71,14 +72,11 @@ iwidgets::scrolledframe .g \
         -height 200 -width 150
 
 set v [.g childsite].w
-iwidgets::widgettree $v -createcommand "mkPref $v"
+iwidgets::widgettree $v -createcommand "createPanel $v"
 $v add node size -text Size
 $v add node address -text Address
 grid $v -sticky nw
 
 pack .g -fill both -expand on
 
-
-
 wm deiconify .
-
