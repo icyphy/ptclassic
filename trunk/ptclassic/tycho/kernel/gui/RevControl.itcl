@@ -381,12 +381,17 @@ body ::tycho::RevControl::compareVersion {} {
 body ::tycho::RevControl::checkRecent {text} {
     # Clear up all the buttons
     resetDiff
-    if {[isCheckedOut]} {
-        $text.[lindex $filelist 0] invoke
-        $text.[lindex $filelist 1] invoke
-    } else {
-        $text.[lindex $filelist 1] invoke
-        $text.[lindex $filelist 2] invoke
+    # The following will generate error if we open up a file
+    # with only 0 or 1 revisions, and then we try to invoke
+    # a check button that doesn't exist.
+    catch {
+        if {[isCheckedOut]} {
+            $text.[lindex $filelist 0] invoke
+            $text.[lindex $filelist 1] invoke
+        } else {
+            $text.[lindex $filelist 1] invoke
+            $text.[lindex $filelist 2] invoke
+        }
     }
 }
 
