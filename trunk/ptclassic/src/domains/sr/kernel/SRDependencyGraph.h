@@ -49,8 +49,20 @@ public:
   SRDependencyGraph( Galaxy & );
   ~SRDependencyGraph();
 
-  // Return the destination vertex of an edge
+  // Return the number of vertices
+  int vertices() const { return numvertices; }
+
+  // Return the number of forward edges from a vertex
+  int forwardEdges(int v) const { return fEdgeCount[v]; }
+
+  // Return the destination vertex of a forward edge
   int destination(int v, int e) const { return fEdge[v][e]; }
+
+  // Return the number of backward edges into a vertex
+  int backwardEdges(int v) const { return bEdgeCount[v]; }
+
+  // Return the source vertex of a backward edge
+  int source(int v, int e) const { return bEdge[v][e]; }
 
   StringList displayGraph() const;
 
@@ -75,11 +87,17 @@ private:
   // to the stars in stars.  Use doAliases() on those to get back.
   OutSRPort ** ports;
 
-  // Forward edge counts
+  // Number of forward edges on each vertex
   int * fEdgeCount;
+
+  // Number of backward edges on each vertex
+  int * bEdgeCount;
 
   // Array of forward edge lists
   int ** fEdge;
+
+  // Array of backward edge lists
+  int ** bEdge;
 
   int vertexOfStarPort( SRStar *, OutSRPort * ) const;
 

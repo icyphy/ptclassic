@@ -30,29 +30,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 #include "Set.h"
+#include "StringList.h"
+#include <stream.h>
 
-// Allocate an empty set of the given size
+// Allocate an empty set of the given size with given initial value
 //
 // @Description If this is a Set(i), then the indices of its contents
-// are 0,1,...,i-1
+// are 0,1,...,i-1.
 
-Set::Set(int s)
+Set::Set(int s /* number of elements in the set */,
+	 int f = 0 /* zero = empty set, non-zero = full set */ )
 {
   mysize = s;
-  words = new int[word(s-1)];
+  words = new int[numwords()];
   for ( int i = numwords() ; --i >= 0 ; ) {
-    words[i] = 0;
+    words[i] = f ? ~0 : 0;
   }
 }
 
-// Make a copy of the set
+// Make a copy of a set
 
-Set & Set::operator = (const Set & s) {
-  Set * newset = new Set( s.size() );
-  for ( int i = newset->numwords() ; --i >= 0 ; ) {
-    newset->words[i] = s.words[i];
-  }
-  return *newset;
+void Set::setequal(Set & s) {
+  delete [] words;
+  mysize = s.mysize;
+  words = new int[numwords()];
+  for ( int i = numwords() ; --i >= 0 ; ) {
+    words[i] = s.words[i];
+  }  
 }
 
 // Destroy the set
@@ -93,5 +97,24 @@ Set & Set::operator -= (Set & s) {
     words[i] &= ~(s.words[i]);
   }
   return *this;
+}
+
+// Return a printed representation of a set
+StringList Set::print() const
+{
+  StringList out;
+
+  int addSpace = 0;
+
+  int i;
+  SetIter next(*this);
+  while ( (i = next++) >= 0 ) {
+    if ( addSpace ) { out << " "; }
+    out << i;
+    addSpace = 1; 
+  }
+
+  return out;
+  
 }
 

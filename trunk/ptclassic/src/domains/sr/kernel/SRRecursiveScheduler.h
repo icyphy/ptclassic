@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scheduler.h"
 
 class SRDependencyGraph;
+class Set;
 
 /**********************************************************************
 
@@ -81,5 +82,10 @@ private:
 
   // The dependency graph of the galaxy
   SRDependencyGraph * dgraph;
+
+  SequentialList & SCCsOf(Set &);
+
+  void fDFSVisit( int, Set &, int &, int * );
+  void bDFSVisit( int, Set &, Set &);
 
 };

@@ -1,4 +1,6 @@
-/* Version $Id$
+/* -*- C++ -*-
+
+Version $Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -27,6 +29,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  */
 
+class StringList;
+
 /**********************************************************************
 
  A set of integers
@@ -40,7 +44,7 @@ class Set {
 
 public:
 
-  Set(int);
+  Set(int, int = 0);
   ~Set();
 
   // Return one more than the largest allowed index
@@ -67,9 +71,11 @@ public:
 
   Set & operator -= (Set &);
 
-  Set & operator = (const Set &);
+  void setequal(Set &);
 
   int cardinality();
+
+  StringList print() const;
 
 protected:
 
@@ -88,4 +94,35 @@ protected:
   // Array of integers used to store the bitmask
   int * words;
 
+};
+
+/**********************************************************************
+
+  An iterator for the set class
+
+  @Description The iterator returns the integer members, or -1 if beyond
+  the end.
+
+**********************************************************************/
+class SetIter {
+public:
+  SetIter(const Set & s) { index = -1; myset = &s; }
+
+  // Return the next element in the set, or -1 if no more
+  int operator++(int) {
+    while ( index < (myset->size())-1 ) {
+      if ( (*myset)[++index] ) { return index; }
+    }
+    return -1;
+  }
+
+  // Reset the iterator to the first element in the set
+  void reset() { index = -1; }
+
+private:
+  // Index of the current element, -1 to begin with
+  int index;
+
+  // The set over which we are iterating
+  const Set * myset;
 };
