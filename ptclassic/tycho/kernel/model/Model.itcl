@@ -129,11 +129,10 @@ ensemble ::tycho::model {
 # This class is the abstract superclass of Tycho's implementation of 
 # the _model_ component of the model-view user interface architecture.  
 # (The corresponding view class in Tycho is named _View_.) Sub-classes 
-# of Model implement application-specific (or application-related, at 
-# least), information models.  Model-view is a derivation of the 
-# well-known model-view-controller (MVC) architecture of Smalltalk; 
-# the model-view derivation combines MVC's view and controller into a 
-# single abstraction.  The key forces driving this change are the 
+# of Model implement application-specific information models. Model-view
+# is a derivation of the model-view-controller (MVC) architecture of
+# Smalltalk; the model-view derivation combines MVC's view and controller
+# into a single abstraction.  The key forces driving this change are the 
 # increased control functionality provided these days by widgets in UI 
 # frameworks (including Tk) and the increased amount of direct 
 # manipulation and feedback, making the functionality of the view and 
@@ -141,24 +140,23 @@ ensemble ::tycho::model {
 # Object-oriented User Interfaces</i> by Dave Collins, 1995.
 #
 # _Model_ supports multiple views using a "publish-and-subscribe" 
-# mechanism (known as the "Observer" pattern in books such as Gamma 
-# _et al's_ <i>Design Patterns</i>). Multiple views can subscribe
-# to the same model; when any view changes the data in the model,
-# the other subscribed views are notified of the change. Views can 
-# specify whether they are interested in data with a particular name,
-# or in changes to all data. Notification uses what is known as 
+# mechanism (called the "Observer" pattern in Gamma _et al's_ <i>Design
+# Patterns</i> book). Multiple views can subscribe to the same model; when
+# any view changes the data in the model, the other subscribed views are
+# notified of the change. Notification uses what is known as 
 # the "push" model: when data is changed, the subscribers are informed 
-# of the type of the change _and_ the changed data. The subscribe{}, 
+# of the type of the change _and_ the changed data. The <b>subscribe</b>, 
 # <b>unsubscribe</b>, <b>publish</b>, and <b>notify</b> methods
 # implement this mechanism.
 #
 # Because user interfaces typically allow a user to undo and redo 
-# operations, _Model_ implements a reasonably flexible, unbounded, 
+# operations, _Model_ implements a flexible, unbounded, 
 # undo and redo mechanism.  The command history is linear -- an 
 # interesting extension of the history mechanism would to make it 
 # tree-structured.  To implement undo and redo correctly, every 
-# method that changes model data must return an undo command, which
-# is recorded in the command history. Once recorded, commands can
+# method that changes data in the model must check the protected variable
+# <b>recording</b>, and, if it is set, append appropriate commands to
+# the command history. Once recorded, commands can
 # be undone and redone, and subscribers will be notified as the model
 # changes. The history mechanism is implemented by the <b>history</b>,
 # <b>mark</b>, <b>record</b>, <b>redo</b>, and <b>undo</b> methods.
@@ -197,28 +195,28 @@ class ::tycho::Model {
     method mark {mode args}
 
     # Execute a command and don't record it in ths history
-    method norecord {command index args}
+    method norecord {command args}
 
     # Notify subscribers of a data change or an event
     method notify {type command args}
 
     # Change model data, record, and publish it
-    method publish {command index args}
+    method publish {command args}
 
     # Execute a command and record it in ths history
-    method record {command index args}
+    method record {command args}
 
     # Execute redo commands
     method redo {{distance 1}}
 
     # Subscribe to this model
-    method subscribe {type {subscriber {}} {name {}} {command {}}}
+    method subscribe {mode {subscriber {}} {command {}}}
 
     # Execute undo commands
     method undo {{distance 1}}
 
     # Unsubscribe from this model
-    method unsubscribe {type subscriber {name {}}}
+    method unsubscribe {mode subscriber}
 
     #################################################################
     ####                protected methods                        ####
@@ -236,7 +234,7 @@ class ::tycho::Model {
     protected variable recording 0
 
     # The most-specific class (saves calling [info class] repeatedly)
-    protected variable scope 0
+    protected variable scope ""
 
     #################################################################
     ####                  private methods                        ####
@@ -256,10 +254,11 @@ class ::tycho::Model {
     # The marks in the redo/command history
     private variable _mark
     
-    # The array of subscriptions. Each array index is a triple
-    # of the type (event or data), data or event name, and the
-    # notification script.
-    private variable _subs
+    # The array of data subscribers
+    private variable _datasubs
+    
+    # The array of event subscribers
+    private variable _eventsubs
     
     # The array of redo commands
     private variable _redo
@@ -326,15 +325,15 @@ body ::tycho::Model::constructor {args} {
 # Clear the command history from the mark _from_ to the mark
 # _to_. If these arguments are omitted, they default to
 # <b>first</b> and <b>last</b> respectively. The commands in
-# the history are deleted from the one _after_ the _from_ mark up
+# the history are deleted from the one after the _from_ mark up
 # to and including the _to_ mark. (The command marked by
 # <b>first</b> command is a null command, so it doesn't matter
 # that it cannot be deleted.)
 #
-# If the _from_ mark is not earlier than the _to_ mark, no erro
+# If the _from_ mark is not earlier than the _to_ mark, no error
 # will be reaised, but no commands will be cleared either.
 # If either mark does not exist, then an error will be raised.
-# Any other marks that point to a deleted command will be changed to point
+# Any other marks that point to a deleted command will be set
 # to the _from_ mark. _from_ and _to_ can also be raw integer
 # indexes into the command history, but this is intended for internal
 # use only.
@@ -353,7 +352,7 @@ body ::tycho::Model::constructor {args} {
 # <dt><b>get</b>
 # <dd>
 # Return a representation of the command history, so that it
-# can be saved to file. Do not assume anything about the format
+# can be saved to a file. Do not assume anything about the format
 # of the returned string.
 #
 # <dt><b>set</b> _data_
@@ -363,14 +362,14 @@ body ::tycho::Model::constructor {args} {
 #
 # <dt><b>at</b> _mark_
 # <dd>
-# Return the redo and undo commands at the given mark. This
-# option should be used very carefully. An error is raised if
+# Return the redo and undo commands at the given mark. Use
+# this option very carefully. An error is raised if
 # _mark_ does not exist.
 #
 # <dt><b>replace</b> _mark_ _redo_ _undo_
 # <dd>
 # Replace the redo and undo commands at the given mark with the
-# supplied commands.  This option should be used very carefully.
+# supplied commands.  Use this option very carefully.
 # An error is raised if _mark_ does not exist.
 #
 # </dl>
@@ -448,17 +447,17 @@ body ::tycho::Model::history {mode args} {
 ########################################################################
 #### mark
 #
-# Place a mark in the command history.
+# Manipulate the command history.
 # This command has several forms, depending on the _mode_ argument:
 #
 # <dl>
 # <dt><b>compare</b> _mark_ _operator_ _mark_
 # <dd>Compare two marks, where _operator_ is a relational operator such
-# as &amp;. This is most often used to compare a mark with _current_.
-# For example, to test whether the model has been modified since
-# it was last saved, execute
+# as <b>></b>. This is most often used to compare a mark with _current_.
+# For example, to test if there are commands available for redo-ing,
+# execute
 # <pre>
-#     $model mark compare current > saved
+#     $model mark compare last > current
 # </pre>
 #
 # <dt><b>delete</b> _mark_
@@ -473,7 +472,7 @@ body ::tycho::Model::history {mode args} {
 # of the mark to set; if the mark doesn't exist, create it. The
 # second argument is the name of the mark to set it to. An error
 # is flagged if this mark does not exist. If omitted, the new mark
-# is set to the "current" mark.
+# is set to "current."
 #
 # </dl>
 #
@@ -488,12 +487,11 @@ body ::tycho::Model::history {mode args} {
 # <li><b>current</b>: The most recent command executed.
 # <li><b>first</b>: The first command in the history.
 # <li><b>last</b>: The last command in the history.
-# <li><b>published</b>: The most recently published command.
 # </ul>
 #
 # Other marks can be defined by clients, and subclasses of Model
 # may also add additional marks. A mark marks exactly one position
-# in the history: it is the last one executed to get to the state
+# in the history: it is the last ocommandne executed to get to the state
 # represented by the given mark. Thus, the "current" mark marks
 # the most recently-executed command.
 # 
@@ -557,13 +555,13 @@ body ::tycho::Model::mark {mode args} {
 # the history. Note that, by default, commands are only recorded
 # if called via the <b>record</b> command. This method is for
 # use by methods that have been called via <b>record</b> that
-# need to prevent recording temporarily.
+# need to temporarily prevent recording.
 #
-body ::tycho::Model::norecord {method args} {
+body ::tycho::Model::norecord {command args} {
     set saved $recording
     set recording 0
     if [catch {
-        @scope $scope eval $this $method $args
+        @scope $scope eval $this $command $args
     } msg] {
         set recording $saved
         error $msg $errorInfo
@@ -575,33 +573,31 @@ body ::tycho::Model::norecord {method args} {
 #### notify
 #
 # Notify subscribers of a change to the model. This command has two
-# forms, according to the _mode_ argument:
+# forms, depending on the _mode_ argument:
 #
 # <dl>
-# <dt><b>data</b> ?<b>-except</b> widget? _command_ _name_ ?_arg_ ...?
+# <dt><b>data</b> ?<b>-except</b> widget? _command_ ?_arg_ ...?
 # <dd>
-# Notify the subscribers of a change in named data. Any subscriber
-# that has subscribed to the data named _name_ will be notified
-# as will any subscribers that are subscribed to all data changes.
+# Notify subscribers of a data change. Any subscriber
+# that has subscribed to the model's data will be notified.
 # The default notification mechanism is to call the subscribers'
-# <b>notify</b> method with _command_, _name_, and remaining arguments
+# <b>notify</b> method with _command_ and following arguments
 # appended. If the subscriber supplied a command when subscribing,
-# then these arguments are appended to that command and the
-# result evaluated in the global scope. If the <b>-except</b>
-# option is specified, then _widget_ will not be notified -- this is
+# then _command_ and following arguments are appended to that command
+# and the result evaluated in the global scope. If <b>-except</b>
+# is given, then _widget_ will not be notified -- this is
 # generally used when a view needs to update views other than itself.
 # If _command_ is <b>_compound</b>, then all following arguments
-# are taken to be conmmands themselves and this method is
+# are taken to be commands themselves and this method is
 # called recursively on each -- this is needed for compound
 # commands built by the history mechanism.
 #
 # <dt><b>event</b> ?<b>-except</b> widget? _event_ ?_arg_ ...?
 # <dd>
-# Notify the subscribers of an event. Any subscriber that has
-# subscribed to the event named _event_ will be notified,
-# as will any subscribers that are subscribed to all events.
+# Notify subscribers of an event. Any subscriber that has
+# subscribed to the model's events will be notified.
 # The default notification mechanism is to call the subscribers'
-# <b>notify</b> method with _event_ and remaining arguments
+# <b>notify</b> method with the _event_ and remaining arguments
 # appended. If the subscriber supplied a command when subscribing,
 # then these arguments are appended to that command and the
 # result evaluated in the global scope. If the <b>-except</b>
@@ -627,9 +623,8 @@ body ::tycho::Model::notify {mode args} {
                 error "wrong # args: should be "notify \
                         data command name ?arg ...?\""
             }
-            set command [lindex $args 0]
-
             # Test for the command "_compound", and recursively call if so
+            set command [lindex $args 0]
             if { $command == "_compound" } {
                 foreach cmd [lreplace $args 0 0] {
                     if { $except == "" } {
@@ -640,31 +635,18 @@ body ::tycho::Model::notify {mode args} {
                 }
                 return
             }
-            set name [lindex $args 1]
         }
         "event" {
             if { [llength $args] == 0 } {
                 error "wrong # args: should be "notify event event ?arg ...?\""
             }
-            set name [lindex $args 0]
         }
         default {
             error "bad option \"$mode\": should be data or event"
         }
     }
-    # Now perform common operations. First find the subscribers.
-    # Note that if a subscriber matches for "all" and for the
-    # data or event name, and has different scripts for both, only
-    # the one for the data name will be executed.
-    foreach {ix cmd} [array get _subs [list $mode all *]] {
-        set subs([lindex $ix 2]) $cmd
-    }
-    foreach {ix cmd} [array get _subs [list $mode $name *]] {
-        set subs([lindex $ix 2]) $cmd
-    }
-
     # Process each subscriber
-    foreach {sub cmd} [array get subs] {
+    foreach {sub cmd} [array get _[set mode]subs] {
         # Don't notify the -except subscriber
         if { $sub == $except } {
             continue
@@ -674,14 +656,9 @@ body ::tycho::Model::notify {mode args} {
             unsubscribe $mode $sub
             continue
         }
-        if { $cmd != "" } {
-            # Override default notification
-            uplevel \#0 $cmd $args
-        } else {
-            # By default, call the subscriber's notify{} method
-            uplevel \#0 $sub notify $args
-        }
-    }
+        # Execute the command
+        uplevel \#0 $cmd $args
+	}
 }
 
 ########################################################################
@@ -691,33 +668,31 @@ body ::tycho::Model::notify {mode args} {
 # calling <b>record</b>, followed by <b>notify data</b>. It is
 # provided as a separate method because it is the most common
 # (and recommended, unless doing something tricky) way in
-# in which commands are recorded and published. The _command_
-# argument must be the name of a method present in the most
-# specific class, which must return the corresponding undo
-# command. The command and args and undo command will be
-# recorded in the command history, and all relevent subscribers
-# will be notified of the data change.
+# which commands are recorded and published. The _command_
+# argument must be the name of a method valid for this model.
+# This method must record the command and the undo command in
+# the command history. All relevent subscribers will be notified
+# of the data change.
 #
-body ::tycho::Model::publish {command index args} {
-    eval [list record $command $index] $args
-    eval [list notify data $command $index] $args
+body ::tycho::Model::publish {command args} {
+    eval [list record $command] $args
+    eval [list notify data $command] $args
 }
 
 ########################################################################
 #### record
 #
 # Set the "recording" flag and clear any future history, then execute
-# the command given by _method_ and following arguments. All subclasses
-# that implements methods that change data must:
+# the command given by _command_ and following arguments. All subclass
+# methods that change data must:
 # <ul>
-# <li>Check the protected variable "recording," flag and if
+# <li>Check the protected variable "recording" and, if
 # it is set, use <b>history append</b> to add to the history.
-# <li>Make sure that any errors that may occur are _before_
-# the history is appended to, so that the history is not
-# corrupted.
+# <li>Make sure that any errors that may occur will occur _before_
+# the history is appended to, so that the history is not corrupted.
 # </ul>
 #
-body ::tycho::Model::record {method args} {
+body ::tycho::Model::record {command args} {
     # Clear the redo future if needed
     if { $_mark(current) < $_mark(last) } {
         time {_clearhistory current last}
@@ -728,7 +703,7 @@ body ::tycho::Model::record {method args} {
     # Execute the command. This is in a catch so we can recover
     # by returning the recording flag to its proper state.
     if [catch {
-        @scope $scope eval $this $method $args
+        @scope $scope eval $this $command $args
     } msg] {
         # Reset the recording flag
         set recording 0
@@ -745,13 +720,13 @@ body ::tycho::Model::record {method args} {
 ########################################################################
 #### redo
 #
-# Execute redo commands. If an argument is given and it is an integer,
+# Redo commands. If _distance_ is given and it is an integer,
 # redo that many steps, or until the end of the command history if the
 # number of steps goes that far. If not an integer, the argument must be
 # a mark, and commands are undone up to and including the
 # command with that mark. If the mark is not later in the history
 # than the current position, do nothing. If the mark does not exist,
-# flag an error. If the argument is not supplied, redo one step, or
+# flag an error. If _distance_ is not supplied, redo one step, or
 # do nothing if already at the end of the history. As each command
 # is redone, the change is published to all subscribers.
 # The returned result is the number of commands redone.
@@ -792,38 +767,31 @@ body ::tycho::Model::redo {{distance 1}} {
 #
 # Subscribe to this model. This command has two forms, depending
 # on the value of the _mode_ argument. The _subscriber_ is
-# usually the name of the widget that is subscribing to this model,
-# but remaining arguments differ according to the mode. If
-# _subscriber_ is an object or Tk window, then is is converted 
+# the name of the subscriber -- usually but not always a widget. If
+# _subscriber_ is an object or Tk window, then it is converted 
 # into its access command (for example, <code>.foo</code> will be
 # converted into <code>::.foo</code>. If it is not, then the given
 # string will be used as-is -- this string is arbitrary, but care
 # should be taken to avoid clashing with object or widget names.
 #
 # <dl>
-# <dt><b>data</b> _subscriber_ ?_name_? ?_command_?
+# <dt><b>data</b> _subscriber_ ?_command_?
 # <dd>
-# Subscribe to a change in data. This mode assumes that changes in
-# data as recorded or published by a model always access the data
-# via a name, which is specified by the _name_ argument. The subscriber
-# will be notified of any change to the data with that name. If _name_
-# is omitted, the _name_ argument defaults to the special name "all",
-# which specified that the subscriber be notified of changes to
-# all data in the model. By default, the subscriber will be notified
-# by a call to a method called <b>notify</b> (see the notify{}
-# method). This default behavior can be overridden by supplying
-# the _command_ argument.
+# Subscribe to a change in data. The subscriber will be notified when
+# any change is made to the model's data. By default, the subscriber
+# will be notified by a call to a method called <b>notify</b> (see
+# the notify{} method). This default behavior can be overridden by
+# supplying the _command_ argument.
 #
-# <dt><b>event</b> _subscriber_ _event_ ?_command_?
+# <dt><b>event</b> _subscriber_ ?_command_?
 # <dd>
-# Subscribe to a an "event" on the model. An event is something
-# that happens to the model that is not simply manipulation of
-# its data. Notification of events is generally activated
-# by subclasses, and will typically include events such
-# as <b>load</b>, <b>save</b>, <b>select</b>, and so on.
-# The _event_ argument is the event name (as supplied to the
-# notify{} method). By default, event notification will take
-# place by calling the subscriber's <b>notify</b> method --
+# Subscribe to an "event" on the model. An event is something that
+# happens to the model that is not simply manipulation of its data.
+# Notification of events is generally activated by subclasses, and
+# will typically include events such as <b>load</b>, <b>save</b>,
+# <b>select</b>, and so on. The _event_ argument is the event name (as
+# supplied to the <b>notify</b> method). By default, event notification
+# will take place by calling the subscriber's <b>notify</b> method --
 # this can be overridden by supplying the _command_ argument.
 #
 # <dt><b>info</b> ?_subscriber_?
@@ -835,26 +803,23 @@ body ::tycho::Model::redo {{distance 1}} {
 #
 # </dl>
 #
-body ::tycho::Model::subscribe {mode {subscriber {}} {name {}} {command {}}} {
+body ::tycho::Model::subscribe {mode {subscriber {}} {command {}}} {
     # Get subscriber command
     set s [::info which -command $subscriber]
     if { $s != "" } {
         set subscriber $s
     }
-
+    # Generate default notification command
+    if { $command == "" } {
+    	set command "$subscriber notify"
+    }
     # Process by mode
     switch -exact $mode {
 	"data" {
-	    if { $name == "" } {
-		set name "all"
-	    }
-	    set _subs([list data $name $subscriber]) $command
+	    set _datasubs($subscriber) $command
 	}
 	"event" {
-	    if { $name == "" } {
-		error "Event argument must have a value"
-	    }
-	    set _subs([list event $name $subscriber]) $command
+	    set _eventsubs($subscriber) $command
 	}
         "info" {
             set string ""
@@ -877,18 +842,19 @@ body ::tycho::Model::subscribe {mode {subscriber {}} {name {}} {command {}}} {
 	    error "bad option \"$mode\": should be data or event"
 	}
     }
+    return
 }
 
 ########################################################################
 #### undo
 #
-# Execute undo commands. If an argument is given and it is an integer,
+# Undo commands. If _distance_ is given and it is an integer,
 # undo that many steps, or until the start of the command history if the
 # number of steps goes that far. If not an integer, the argument must be
 # a mark, and commands are undone back to but not including the
 # command with that mark. If the mark is not earlier in the history
 # than the current position, do nothing. If the mark does not exist,
-# flag an error. If the argument is not supplied, undo one step, or
+# flag an error. If _distance_ is not supplied, undo one step, or
 # no nothing if already at the start of the history. As each command
 # is undone, the change is published to all subscribers.
 # The returned result is the number of commands undone.
@@ -931,30 +897,21 @@ body ::tycho::Model::undo {{distance 1}} {
 #### unsubscribe
 #
 # Unsubscribe from this model. This command has two forms, depending
-# on the value of the _mode_ argument. The _subscriber_ is
-# either the name of the widget that is being unsubscribed from this
-# model, or some special key given to <b>subscribe</b>. Remaining
-# arguments differ according to the mode.
+# on the the _mode_ argument. The _subscriber_ is a widget name or
+# other key previously supplied to <b>subscribe</b>.
 #
 # <dl>
-# <dt><b>data</b> _subscriber_ ?_name_?
+# <dt><b>data</b> _subscriber_
 # <dd>
-# Unsubscribe from data changes. If _name_ is supplied, unsubscribe
-# from all data to which the subscriber has subscribed; otherwise
-# unsubscribe only from the named data. In this case, do nothing
-# if the subscriber has not subscribed to the named data.
+# Unsubscribe from all data changes.
 #
-# <dt><b>event</b> _subscriber_ ?_event_?
+# <dt><b>event</b> _subscriber_
 # <dd>
-# Unsubscribe from an "event" on the model. If _event_ is supplied,
-# unsubscribe from all events to which this subscriber is
-# subscribed; otherwise unsubscribe only from the named event.
-# In this case, do nothing if the subscriber has not subscribed to
-# the named event.
+# Unsubscribe from events on the model.
 #
 # </dl>
 #
-body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
+body ::tycho::Model::unsubscribe {mode subscriber} {
     if ![regexp {^(data|event)$} $mode] {
 	error "bad option \"$mode\": should be data or event"
     }
@@ -965,14 +922,8 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
         set subscriber $s
     }
     # Unsubscribe it
-    if { $name != "" } {
-        if [::info exists _subs([list $mode $name $subscriber])] {
-            unset _subs([list $mode $name $subscriber])
-        }
-    } else {
-        foreach index [array names _subs [list $mode * $subscriber]] {
-            unset _subs($index)
-        }
+    if [::info exists _[set mode]subs($subscriber)] {
+        unset _[set mode]subs($subscriber)
     }
 }
 
@@ -983,7 +934,7 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
 ########################################################################
 #### _compound
 #
-# Execute a sequence of commands and return the inverse command.
+# Execute a sequence of commands.
 # Each argument is a single command. This method's main purpose is
 # for constructing complex commands for the undo and redo history.
 #
