@@ -2,8 +2,7 @@ defstar
 {
     name { Arbitrate }
     domain { DE }
-    descriptor
-    {
+    descriptor {
 This star acts as a non-preemptive arbitrator, granting requests for
 exclusive control.  If simultaneous requests arrive, priority is
 given to port A.  When control is released, any pending requests on
@@ -12,53 +11,46 @@ connections allow interconnection of multiple arbitration stars for
 more intricate control structures.
     }
     version { $Id$ }
-    author { T.M. Parks }
-	copyright {
+    author { T. M. Parks }
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { DE main library }
 
-    input
-    {
+    input {
 	name { requestA }
 	type { int }
     }
 
-    input
-    {
+    input {
 	name { requestB }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { requestOut }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { grantA }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { grantB }
 	type { int }
     }
 
-    input
-    {
+    input {
 	name { grantIn }
 	type { int }
     }
 
-    protected
-    {
+    protected {
 	InDEPort *request;	// request for current port
 	OutDEPort *grant;	// grant for current port
 
@@ -74,15 +66,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	grantIn.triggers(grantB);
 	grantIn.before(requestA);
     }
-	setup
-    {
+
+    setup {
 	idle = TRUE;
 	req = rel = FALSE;
     }
 
-
-    go
-    {
+    go {
 	if (grantIn.dataNew)	// response to earlier "requestOut" output
 	{
 	    if (req && int(grantIn.get()))	// grant request
