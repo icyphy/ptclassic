@@ -65,13 +65,17 @@ int MotorolaSimTarget::compileCode() {
 
 int MotorolaSimTarget::loadCode() {
 	const char* file = plotFile;
-	if (*file != 0) unlink(fullFileName(file));
+	if (*file != 0) {
+		StringList deleteFile;
+		deleteFile << expandPathName(destDirectory) << "/" << file;
+		unlink((const char*)deleteFile);
+	}
 	StringList cmdFile;
 	cmdFile << "load " << filePrefix << ".lod\n" << simulatorCmds
 		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
 		<< "\n";
 	if (!interactiveFlag) cmdFile << "quit\n";
-	return genFile(cmdFile, filePrefix,".cmd");
+	return writeFile(cmdFile,".cmd");
 }
 
 int MotorolaSimTarget::runCode() {
@@ -84,7 +88,9 @@ int MotorolaSimTarget::runCode() {
 	downloadCmds << dspType << " " << filePrefix << ".cmd" << " > /dev/null)";
 	if (systemCall(downloadCmds,"Errors in starting up the simulator")) 
 		return FALSE;
-	if (*file != 0 && access(fullFileName(file),0)==0) {
+	StringList fullPlotFile;
+	fullPlotFile << expandPathName(destDirectory) << "/" << file;
+	if (*file != 0 && access((const char*)fullPlotFile,0)==0) {
 		StringList plotCmds;
  		plotCmds << "awk '{print ++n, $1}' " << file
 		  << " | xgraph -t '" << (const char*)plotTitle << "' "
