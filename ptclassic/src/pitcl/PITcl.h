@@ -252,6 +252,7 @@ public:
 	int link(int argc,char** argv);
 	int listobjs(int argc,char** argv);
 	int matlab(int argc,char** argv);
+	int mathematica(int argc,char** argv);
 
 	// added to support tycho - eal
 	int monitorOff(int argc,char** argv);
