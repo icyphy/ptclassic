@@ -472,7 +472,9 @@ body ::tycho::File::destructor {} {
 	}
     }
 
-    windowMenuRemoveAll $completeFilePath
+    if { $completeFilePath != "NoName" } {
+        windowMenuRemoveAll $completeFilePath
+    }
 
     # If an error occurred in construction, this may not exist.
     if [info exists fileObjects($this)] {
