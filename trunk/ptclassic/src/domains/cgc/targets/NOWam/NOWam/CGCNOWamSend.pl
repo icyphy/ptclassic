@@ -63,6 +63,12 @@ Produce code for inter-process communication (send-side)
 		numData = input.numXfer();
 	}
 
+        codeblock (converttype) {
+typedef union ints_or_double {
+        int asInt[2];
+        double asDouble;
+} convert;
+        } 
         codeblock (timeincludes) {
 #ifdef TIME_INFO
 #include <sys/fcntl.h>
@@ -212,6 +218,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		hostAddr.initialize();
 
 		// code generation.
+		addCode(converttype, "global", "convert");
 		addGlobal("#define HARDPORT 61114\n", "hardPort");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
@@ -235,7 +242,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		
 	codeblock (block) {
 	int i, pos, check;
-	double myData;
+	convert myData;
 	
 #ifdef TIME_INFO
 	if (fd == -1) {
@@ -248,8 +255,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
-		myData = $ref(input,pos);
-                check = AM_RequestI4($starSymbol(endpoint), $val(hostAddr), 2, (void *)&myData, sizeof(double), 0, 0, 0, 0);      
+		myData.asDouble = $ref(input,pos);
+                check = AM_Request4($starSymbol(endpoint), $val(hostAddr), 2, myData.asInt[0], myData.asInt[1], 0, 0);      
 		if (check == -1) {
 			printf("Error in sending data\n");
 		}
