@@ -48,6 +48,7 @@
 # TCL_SRCS	.tcl files
 # HDRS		.h files.
 # JSRCS		.java files
+# OPTIONAL_JSRCS derived .java files (i.e. created by javacc)
 # JCLASS	.c
 # OBJS		.o files
 # LIBR		The name of the library being created.  We can't just call
@@ -322,13 +323,13 @@ jclass1_1: $(JSRCS1_1) $(JCLASS1_1)
 # Build the Java documentation.
 javadocs: doc/codeDoc/tree.html
 jhtml: doc/codeDoc/tree.html
-doc/codeDoc/tree.html:	$(JSRCS) 
+doc/codeDoc/tree.html:	$(JSRCS) $(OPTIONAL_JSRCS)
 	@if [ "$(JSRCS)" = "" ]; then \
 		echo "No java sources, so we don't run javadoc";\
 	else \
 	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi; \
 	rm -f doc/codeDoc/*.html; \
-	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS); \
+	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS) $(OPTIONAL_JSRCS); \
 	for x in doc/codeDoc/*.html; do \
 		echo "Fixing paths in $$x"; \
 		sed -e 's|<a href="java|<a href="$(JAVAHTMLDIR)/java|g' \
