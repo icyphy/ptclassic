@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
+ Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code. '
  
 *******************************************************************/
 
@@ -21,8 +21,15 @@ $Id$
 // EGNode methods //
 ////////////////////
 
-EGNode :: EGNode(SDFStar* s, int n = 1) : pStar(s), invocation(n), next(0) {
+EGNode :: EGNode(SDFStar* s, int n) : pStar(s), invocation(n), next(0) {
 	if (n == 1) s->setMaster(this);
+}
+
+EGNode :: ~EGNode() {}
+
+void EGNode :: deleteInvocChain() {
+	if (next) next->deleteInvocChain();
+	LOG_DEL; delete this;
 }
 
 StringList EGNode :: printMe() {

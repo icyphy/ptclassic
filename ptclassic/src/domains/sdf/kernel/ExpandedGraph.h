@@ -133,7 +133,7 @@ public:
 
 class EGMasterIter : public EGNodeListIter {
 public:
-	EGMasterIter(ExpandedGraph& eg) : EGNodeListIter(eg.masters) {};
+	EGMasterIter(ExpandedGraph& eg) : EGNodeListIter(eg.masters) {}
 
   	// Return the next cluster in the masters list.
 	void reconnect(ExpandedGraph& eg) 
