@@ -92,13 +92,14 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 // Main clustering routine.  Alternate merge passes and loop passes
 // until no more can be done.
 int SDFClusterGal::cluster() {
-	if (numberClusts() <= 1) return FALSE;
+	if (numberClusts() <= 1) return TRUE;
 
-	int urate, changes = FALSE;
+	int urate, change = FALSE;
 	while ((urate = uniformRate()) == FALSE) {
-		if (!mergePass()) break;
-		changes = TRUE;
-		if (!loopPass()) break;
+                int status = mergePass();
+                status |= loopPass();
+                if (status) change = TRUE;
+                else break;
 	}
 	if (numberClusts() == 1) {
 		if (logstrm)
@@ -110,7 +111,7 @@ int SDFClusterGal::cluster() {
 			*logstrm << "Uniform rate achieved: one extra merge pass now\n";
 		mergePass();
 	}
-	return changes;
+	return change;
 }
 
 int SDFClusterGal::genSubScheds() {
@@ -264,6 +265,39 @@ int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
 	return FALSE;
 }
 
+// This routine removes all feed-forward delays on a clusterGal to
+// enhance the looping capability without hazard of dead-lock condition.
+// We suggest that this method is called after the initial clustering is 
+// completed for efficiency.
+
+int SDFClusterGal :: removeDelay() {
+	if (logstrm)
+		*logstrm << "starting removeDelay()\n";
+	if (numberClusts() <= 1) return FALSE;
+	int changes = FALSE;
+	SDFClusterGalIter nextClust(*this);
+	SDFCluster* c;
+
+	while ((c = nextClust++) != 0) {
+		SDFClustPortIter nextP(*c);
+		SDFClustPort* p;
+		while ((p = nextP++) != 0) {
+			if (p->isItInput()) continue;
+			if (p->numTokens() == 0) continue;
+			// this port has a delay on the arc.
+			stopList.initialize();
+			SDFCluster* peer = p->far()->parentClust();
+			if (!findPath(peer,c))  {
+				// if no feedback path, remove delay
+				p->setDelay(0);
+				p->initGeo();
+				changes = TRUE;
+			}
+		}
+	}
+	return changes;
+}			
+	
 // This is the loop pass.  It loops any cluster for which loopFactor
 // returns a value greater than 1.
 
