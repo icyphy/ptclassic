@@ -23,6 +23,11 @@ black-and-white televisions [1].
 Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).
 The YUV format is based on how the eyes perceive color.
+The U axis has yellow at its minimum point and blue at its maximum point,
+whereas the V axis has turquoise at its minimum point and red at its
+maximum point.
+In this implementation, each of the RGB values and each of the YUV values
+are integer values in the range from 0 to 255 (inclusive).
 .Id "format conversion, RGB to YUV"
 .Id "image format conversion, RGB to YUV"
 .Ir "image format, red-green-blue (RGB)"
@@ -44,7 +49,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	output { name { output2 } type { message } }
 	output { name { output3 } type { message } }
 
-	inline method {
+	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
 		arglist { "(const float inval)" }
@@ -52,7 +57,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		code {
 			if (inval < 0.5) return ((unsigned char) 0);
 			else if (inval > 254.5) return ((unsigned char) 255);
-			else return ((unsigned char) int(inval+0.5));
+			else return ((unsigned char) int(inval + 0.5));
 		}
 	} // end quant()
 
@@ -105,13 +110,13 @@ Wiley & Sons: New York.  1991.  2nd ed.
 				temp2 = j + temp1;
 				yyy = quant(0.298981 * rptr[temp2]
 						+ 0.586997 * gptr[temp2]
-						+ 0.114022 * bptr[temp2] + 0.5);
+						+ 0.114022 * bptr[temp2]);
 				uuu = quant(-0.16863 * rptr[temp2]
 						- 0.331075 * gptr[temp2]
-						+ 0.499705 * bptr[temp2] + 128.5);
+						+ 0.499705 * bptr[temp2] + 128);
 				vvv = quant(0.4998 * rptr[temp2]
 						- 0.418506 * gptr[temp2]
-						- 0.0812936 * bptr[temp2] + 128.5);
+						- 0.0812936 * bptr[temp2] + 128);
 				rptr[temp2] = yyy;
 				gptr[temp2] = uuu;
 				bptr[temp2] = vvv;
