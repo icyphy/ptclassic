@@ -1,8 +1,9 @@
 /* transport.h:  Macros for transport.c
 /******************************************************************
 Version identification:
+$Id$
 
-Copyright (c) 1995-1996  The Regents of the University of California.
+Copyright (c) 1995-%Q%  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
