@@ -41,7 +41,10 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	Retarget.itcl
+	Retarget.itcl \
+	EditPalette.itcl \
+	EditPtcl.itcl \
+	EditPtlang.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
