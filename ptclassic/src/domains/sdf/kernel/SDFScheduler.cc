@@ -30,7 +30,6 @@ $Id$
 #include "Error.h"
 #include "StringList.h"
 #include "FloatState.h"
-#include "Geodesic.h"
 #include "GalIter.h"
 #include <std.h>
 
@@ -158,52 +157,52 @@ int SDFScheduler :: setup (Block& block) {
 
 int SDFScheduler::prepareGalaxy(Galaxy& galaxy)
 {
-  galaxy.initialize();
-  return TRUE;
+	galaxy.initialize();
+	return TRUE;
 }
 
 
 
 int SDFScheduler::checkConnectivity(Galaxy& galaxy)
 {
-  if (warnIfNotConnected (galaxy)) {
+	if (warnIfNotConnected (galaxy)) {
                 invalid = TRUE;
                 return FALSE;
-  }
- return TRUE; 
+	}
+	return TRUE; 
 }
 
-// Check that all stars in "galaxy" are SDF stars.
+// Check that all stars in "galaxy" are SDF stars or are derived from SDF.
 int SDFScheduler::checkStars(Galaxy& galaxy)
 {
-  GalStarIter nextStar(galaxy);
-  Star* s;
-  while ((s = nextStar++) != 0) {
-    if (!isDomainSupported(s->domain())) {
-        Error::abortRun(*s, " is not an SDF star");
-        invalid = TRUE;
-        return FALSE;
-    }
-  }
-  return TRUE;
+	GalStarIter nextStar(galaxy);
+	Star* s;
+	while ((s = nextStar++) != 0) {
+		if (!s->isA("SDFStar")) {
+			Error::abortRun(*s, " is not an SDF star");
+			invalid = TRUE;
+			return FALSE;
+		}
+	}
+	return TRUE;
 }
 
 
 
 int SDFScheduler::prepareStars(Galaxy& galaxy)
 {
-  GalStarIter nextStar(galaxy);
-  Star* s;
-  while ((s = nextStar++) != 0) 
-    s->prepareForScheduling();
-  return TRUE;
+	GalStarIter nextStar(galaxy);
+	Star* s;
+	while ((s = nextStar++) != 0) 
+		s->prepareForScheduling();
+	return TRUE;
 }
 
 
 int SDFScheduler::computeSchedule(Galaxy& galaxy)
 {
-   GalStarIter nextStar(galaxy);
-   Star* s;
+	GalStarIter nextStar(galaxy);
+	Star* s;
 
 	mySchedule.initialize();
 
@@ -216,7 +215,7 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
         //      0 - more passes are required
 
 
-  do {
+	do {
                 passValue = 2;
                 numDeferredBlocks = 0;
 
@@ -238,11 +237,11 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
                         addIfWeCan (atom);
                 }
 
-  } while (passValue == 0);
-  // END OF MAIN LOOP
+	} while (passValue == 0);
+	// END OF MAIN LOOP
 
-  if (passValue == 1) reportDeadlock(nextStar);
-  return !invalid;
+	if (passValue == 1) reportDeadlock(nextStar);
+	return !invalid;
 }
 
 // function to report deadlock.
@@ -269,22 +268,11 @@ int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
 		mySchedule.append(star);
 		passValue = 0;
 	}
-	else if (runRes == 1 && passValue != 0) {
+	else if (runRes == 1 && passValue != 0 && numDeferredBlocks == 0) {
 		passValue = 1;
 		dead = &star;
 	}
 	return runRes;
-}
-
-// This method checks to see whether the domain is supported.
-// It is included so that domains that are not called SDF can
-// use the SDF scheduler.  They have to redefine this method.
-
-int SDFScheduler::isDomainSupported(const char* dom) {
-        if(strcmp (dom, SDFdomainName) == 0)
-                return TRUE;
-        else
-                return FALSE;
 }
 
 /*******************************************************************
@@ -459,7 +447,7 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 
 	// An important optimization for code generation:
 	// Postpone any execution of a star feeding data to another
-	// star that is runnable.  Also postpone if each output Geodesic
+	// star that is runnable.  Also postpone if each output port
 	// has enough data on it to satisfy destination stars.
 	// This is optional because it slows down the scheduling.
 
@@ -467,7 +455,7 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 		return 1;
 
 	// Iterate over the ports again to adjust
-	// the numInitialParticles member of the geodesic.
+	// the number of tokens on each arc.
 	// Note that this should work equally well if there are no inputs.
 
 	SDFStarPortIter nextp(atom);
@@ -481,14 +469,12 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 			continue;
 
 		if( port->isItInput() )
-			// OK to update numInitialParticles for input PortHole
-			port->myGeodesic->numInitialParticles -=
-				port->numberTokens;
+			// OK to update size for input PortHole
+			port->decCount(port->numberTokens);
 
 		else if (updateOutputs)
-			// OK to update numInitialParticles for output PortHole
-			port->myGeodesic->numInitialParticles +=
-				port->numberTokens;
+			// OK to update size for output PortHole
+			port->incCount(port->numberTokens);
 	}
 
 	// Increment noTimes
@@ -498,13 +484,27 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 	return 0;
 }
 
+void SDFScheduler :: defer (Block* b) {
+	// If possible, store a pointer to the block
+	// (If the list of deferredBlocks is full, then
+	// the block effectively gets deferred until a
+	// future pass.  This is harmless).  But at least
+	// one deferred block must go on the list, or the
+	// scheduler can deadlock.
+
+	if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
+		deferredBlocks[numDeferredBlocks] = b;
+		numDeferredBlocks += 1;
+	}
+}
+
 	///////////////////////////
 	// deferIfWeCan
 	///////////////////////////
 
 // return TRUE if we defer atom, FALSE if we don't.
 // Postpone any execution of a star feeding data to another
-// star that is runnable.  Also postpone if each output Geodesic
+// star that is runnable.  Also postpone if each output port
 // has enough data on it to satisfy destination stars.
 
 int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
@@ -533,26 +533,15 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 		if(!port->isItOutput() || notRunnable(dest) != 0)
 			continue;
 		
-		// It is runnable.
+		// It is runnable, but can be postponed.
+		defer(port->parent());
 
-		// If possible, store a pointer to the block
-		// (If the list of deferredBlocks is full, then
-		// the block effectively gets deferred until a
-		// future pass.  This is harmless).  But at least
-		// one deferred block must go on the list, or the
-		// scheduler can deadlock.
-
-		if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
-			deferredBlocks[numDeferredBlocks] =
-				port->parent();
-			numDeferredBlocks += 1;
-		}
 		// Give up on this star -- it has been deferred
 		return TRUE;
 	}
 
 	// Alternatively, the block might be deferred if its output
-	// Geodesics all have enough data to satisfy destination
+	// ports all have enough data to satisfy destination
 	// stars, even if the destination stars are not runnable.
 
 	// We must detect the case that there are no output ports
@@ -571,7 +560,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 		// The farside port is an input.  Check Particle supply
 		// if not enough, atom cannot be deferred.
-		if(port->myGeodesic->numInitialParticles < port->numberTokens)
+		if(port->numTokens() < port->numberTokens)
 			return FALSE;
 			
 		// Since the farside port is an input, the nearside is
@@ -581,6 +570,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 	// If we get here, all destinations have enough data,
 	// and the block can be deferred, assuming there are output ports.
+	if(outputPorts) defer(&atom);
 	return outputPorts;
 }
 
@@ -612,7 +602,7 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 
 		if(port.isItInput() && port.far()->isItOutput()) {
 		   // If not in the interface of Wormhole
-		   if(port.myGeodesic->numInitialParticles<port.numberTokens){ 
+		   if(port.numTokens() < port.numberTokens){ 
 			// not enough data
 			v = 1;
 			break;
