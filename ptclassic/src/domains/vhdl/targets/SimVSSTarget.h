@@ -79,8 +79,9 @@ public:
 
 protected:
 	// States.
-	StringState simarch;
 	StringState synopsys;
+	StringState arch;
+	StringState simarch;
 	IntState analyze;
 	IntState startup;
 	IntState simulate;
