@@ -100,6 +100,9 @@ SIGNAL_FN die()
     while(getchar() != '\n');
     IOinit();
     errRaise(optProgName, 0, "return from interrupt");
-    /* Quiet warnings down */
-    return (SIGNAL_FN)0;
+
+    /* If SIGNAL_FN is defined in port.h to be void, then sol2.cfront
+     * will barf because a void function cannot return anything.
+     */
+    /* return (SIGNAL_FN)0;*/
 }
