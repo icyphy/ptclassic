@@ -37,30 +37,23 @@
 # build Tycho documentation files and indexes.
 #
 # FIXME: There should be a way to stop a build.
-# FIXME: The way we view the doc files is ugly, perhaps we
-# should use a widget with a menubar?
-
+#
 # <tcl><pre>
-# set bd [::tycho::autoName .builderDialog]
-# ::tycho::BuilderDialog $bd
-# $bd centerOnScreen
+# ::tycho::view BuilderDialog
 # </pre></tcl>
 #
 # BuilderDialog is a graphical front end for the Builder class.
 #
 class ::tycho::BuilderDialog {
-    inherit ::tycho::Query
+    inherit ::tycho::View
 
     constructor {args} {}
     
     ###################################################################
     ####                         public methods                    ####
 
-    # Run what ever Builder proc the user asked for.
-    method _runBuilder {}
-
-    # Bring up a dialog that allows the user to display Tycho documents
-    method _showDocs  {}
+    # Bring up the help file for this widget.
+    method help {}
 
     ###################################################################
     ####                         public procs                      ####
@@ -72,75 +65,116 @@ class ::tycho::BuilderDialog {
 #### constructor
 #
 body ::tycho::BuilderDialog::constructor {args} {
-    configure -text "Tycho Build Manager" \
-            -title "Tycho Build Manager"
-    radio builderchoice {Build Operation: } \
-            { {Full (10 Minutes)} \
-	    {Glimpse Only} \
-	    {Itcl HTML Only (4 Minutes)} \
-            {Indices Only} \
-            {Class Diagram Only} \
-        } {Full (10 Minutes)}
+    global TYCHO
+    displayer configure -title "Tycho Build Manager"
 
-    addButton Build -text "Build" \
-            -command "$this execCommand -okcommand"
+    $myMenubar addMenu Build -underline 0
+    $myMenubar add {Full (10 Minutes)} Build -underline 0 \
+	    -command ::tycho::Builder::build
 
-    #addButton Stop -text "Stop" \
-    #        -command "::tycho::silentError"
+    $myMenubar addSeparator Build
 
-    addButton Stop -text "View Docs" \
-            -command "$this _showDocs"
+    $myMenubar add {Class Diagram Only} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::classDiagram"
+
+    $myMenubar add {Glimpse} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::glimpse"
+
+    $myMenubar add {Itcl HTML Only (4 Minutes)} Build -underline 6 \
+	    -command "$this busy ::tycho::Builder::itcldocs"
+
+    $myMenubar add {Indices Only} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::indices"
 
 
-    addButton help -text "Help" \
-            -command "::tycho::File::openContext \
-            [file join \$TYCHO kernel doc usersGuides BuilderDialogHelp.html]"
+    $myMenubar addMenu Test -underline 0
 
-    configure -okcommand "$this _runBuilder"
-}
+    $myMenubar add {All Tests} Test -underline 0 \
+	    -command "$this busy ::tycho::Builder::testAll"
 
-#######################################################################
-#### _runBuilder
-# Run what ever Builder proc the user asked for
-#
-body ::tycho::BuilderDialog::_runBuilder {} {
-    switch [get builderchoice] {
-	{Full (10 Minutes)} { ::tycho::Builder::build }
-	{Glimpse Only} { ::tycho::Builder::glimpse }
-	{Itcl HTML Only (4 Minutes)} { ::tycho::Builder::itcldocs }
-	{Indices Only} { ::tycho::Builder::indices }
-	{Class Diagram Only} { ::tycho::Builder::classDiagram }
-        default {error "Internal Error: ::tycho::BuilderDialog::_runBuilder \
-                got `[get builderchoice]', don't know what to do."}
+    $myMenubar addSeparator Test
+
+    $myMenubar add {Kernel Tests} Test -underline 0 \
+	    -command "$this busy ::tycho::Builder::testDir \
+            [file join $TYCHO kernel test]"
+
+    $myMenubar add {Text Editor Tests} Test -underline 0 \
+	    -command "$this busy ::tycho::Builder::testDir \
+            [file join $TYCHO editors textedit test]"
+
+    $myMenubar add {Slate Tests} Test -underline 0 \
+	    -command "$this busy ::tycho::Builder::testDir \
+            [file join $TYCHO editors slate test]"
+
+    $myMenubar add {Visual Editor Tests} Test -underline 0 \
+	    -command "$this busy ::tycho::Builder::testDir \
+            [file join $TYCHO editors visedit test]"
+
+    # If Ptolemy is present, the we can run some tests.
+    global ptolemyfeature
+    if { $ptolemyfeature(pitcl) || $ptolemyfeature(ptcl) } {
+        $myMenubar addSeparator Test
+        $myMenubar add {Tycho/Ptolemy Kernel Tests} Test -underline 0 \
+                -command "$this busy ::tycho::Builder::testDir \
+                [file join $TYCHO typt kernel test]"
+
+        $myMenubar add {Tycho/Ptolemy Editor Tests} Test -underline 0 \
+                -command "$this busy ::tycho::Builder::testDir \
+                [file join $TYCHO typt editors test]"
+
     }
-}
 
+    # FIXME: Should this be a preference?
+    if [file isdirectory [ file join $TYCHO adm ]] {
+        $myMenubar addMenu Distribute -underline 0
 
-#######################################################################
-#### _showDocs
-# Bring up a dialog that allows the user to display a document.
-#
-body ::tycho::BuilderDialog::_showDocs {} {
-    set choice [::tycho::query {Open a document} {
-        {radio docChoice {Document to open} { \
-                {Tycho Concept Index} \
-                {Tycho Code Index} \
-                {Tycho Class Diagram}} \
-            {Tycho Class Diagram}}}]
+        $myMenubar add {Full Distribution} Distribute -underline 0 \
+                -command "$this busy ::tycho::Builder::distFull"
 
-    switch [lindex $choice 1] {
-	{Tycho Concept Index} {
-	    ::tycho::File::openContext [file join \$TYCHO lib idx tycho.idx]
-        }
-        {Tycho Code Index} {
-	    ::tycho::File::openContext [file join \$TYCHO lib idx codeDoc.idx]
-	}
-	{Tycho Class Diagram} {
-	    ::tycho::File::openContext \
-		    [file join \$TYCHO doc tychoClasses.dag]
-
-        }
     }
+
+#### Start FIXME
+# FIXME: this code was duplicated from File, we need to rehack view
+# so that it has a help menu.    
+    $myMenubar addMenu Help -side right -underline 0
+
+    # Help menu contents
+    
+    $myMenubar command "About Tycho" Help -underline 0 -command \
+	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
+    
+    global ::TYCHO
+    $myMenubar command "Tycho Home Page" Help -underline 0 -command \
+	    {::tycho::File::openContext \
+	    [file join $TYCHO doc index.html]}
+
+    $myMenubar command "Guide to [info class] widget" Help -underline 0 \
+	    -command "$this help"
+    
+    $myMenubar command "Concept Index..." Help -underline 8 \
+	    -command {::tycho::File::openContext \
+	    [file join \$TYCHO lib idx tycho.idx]}
+    
+    $myMenubar command "Code Index..." Help -underline 0 \
+	    -command {set _nmBogosity [::tycho::autoName .index]; \
+            ::tycho::IndexBrowser $_nmBogosity \
+	    -file [file join \$TYCHO lib idx codeDoc.idx] \
+	    -width 80; $_nmBogosity centerOnScreen}
+    
+    $myMenubar command "Class Diagram" Help -underline 6 -command \
+	    {::tycho::File::openContext \
+	    [file join \$TYCHO doc tychoClasses.dag]}
+
+    $myMenubar command "Itcl man pages" Help -underline 0 \
+	    -command "$this ::tycho::File::openItclHTMLPage"
+
+    # Add the Preferences menu. This is probably the wrong place
+    # for it, but it will do until we figure out a good menu to
+    # put it in that doesn't keep disappearing...
+    $myMenubar command "Preferences..." Help -underline 0 \
+	    -command { ::tycho::preferencedialog }
+####end FIXME
+
 }
 
 
@@ -189,4 +223,18 @@ body ::tycho::BuilderDialog::checkFiles {} {
 	}
     }
 }
+
+#########################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::BuilderDialog::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+            [file join \$TYCHO kernel doc usersGuides BuilderDialogHelp.html]
+
+}
+
+
+
 
