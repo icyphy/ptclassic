@@ -118,12 +118,18 @@ bin_make:
 # We pass CC down in case we are trying to avoid using /usr/bin/cc under
 # Solaris.
 bin_gcc:
-	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make CC=$(CC) bootstrap)
+	(cd $(GNU_OBJ)/gcc; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(CC) bootstrap)
 
 install_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
 install_gcc: $(BINDIR) install_make
-	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+	(cd $(GNU_OBJ)/gcc; \
+		$(GNU_OBJ)/make/make 
+			MAKE=$(GNU_OBJ)/make/make \
+			install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 
 install_gcc_links: $(BINDIR)
 	#@echo "Install c++filt, the g++ name demangler"
@@ -138,8 +144,9 @@ bin_libg++:
 		PATH=$(GNU_OBJ)/binutils/gas:$(GNU_OBJ)/gcc:$(PATH); \
 		echo $$PATH; \
 		$(GNU_OBJ)/make/make \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+			LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
 install: install_make install_egcs install_gcc_links
 
@@ -186,10 +193,16 @@ $(FSF_OBJ):
 bin_fsf: bin_make bin_fsf_gcc install_fsf_gcc bin_fsf_libg++
 
 bin_fsf_gcc:
-	(cd $(FSF_OBJ)/gcc; $(GNU_OBJ)/make/make CC=$(CC) bootstrap)
+	(cd $(FSF_OBJ)/gcc; \
+		 $(GNU_OBJ)/make/make 
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(CC) bootstrap)
 
 install_fsf_gcc: $(BINDIR) install_make
-	(cd $(FSF_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+	(cd $(FSF_OBJ)/gcc; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 
 
 bin_fsf_libg++:
@@ -197,8 +210,9 @@ bin_fsf_libg++:
 		PATH=$(GNU_OBJ)/binutils/gas:$(FSF_OBJ)/gcc:$(PATH); \
 		echo $$PATH; \
 		$(GNU_OBJ)/make/make \
-		CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
-		LDFLAGS=-B$(FSF_OBJ)/gcc/ )
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
+			LDFLAGS=-B$(FSF_OBJ)/gcc/ )
 
 
 install_fsf: $(BINDIR) 
@@ -206,8 +220,9 @@ install_fsf: $(BINDIR)
 		PATH=$(FSF_OBJ)/binutils/gas:$(FSF_OBJ)/gcc:$(PATH); \
 		echo $$PATH; \
 		$(GNU_OBJ)/make/make \
-		CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
-		LDFLAGS=-B$(FSF_OBJ)/gcc/ install)
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
+			LDFLAGS=-B$(FSF_OBJ)/gcc/ install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); \
 	  rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
@@ -223,7 +238,9 @@ install_fsf: $(BINDIR)
 	#	ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
 	#-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
 	#	ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
-	-(cd $(FSF_OBJ)/libg++; $(FSF_OBJ)/make/make info install-info)
+	-(cd $(FSF_OBJ)/libg++; \
+			MAKE=$(GNU_OBJ)/make/make \
+			$(FSF_OBJ)/make/make info install-info)
 
 ############################################################
 # Build the GNU tools and egcs for HP machines
@@ -273,13 +290,22 @@ hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 hp_bin: bin_make hp_bin_binutils hp_install_gas bin_egcs
 
 hp_bin_bison:
-	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make)
+	(cd $(GNU_OBJ)/bison; 
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			)
 
 hp_bin_binutils:
-	(cd $(GNU_OBJ)/binutils; $(GNU_OBJ)/make/make BISON="$(GNU_OBJ)/bison/bison -y")
+	(cd $(GNU_OBJ)/binutils; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			BISON="$(GNU_OBJ)/bison/bison -y")
 
 hp_install_gas:
-	(cd $(GNU_OBJ)/binutils/gas; $(GNU_OBJ)/make/make install)
+	(cd $(GNU_OBJ)/binutils/gas; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			install)
 
 hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
@@ -290,14 +316,23 @@ hp_bin_flex:
 		$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
-		CC=$(BINDIR)/gcc; \
-		YACC="$(GNU_OBJ)/bison/bison -y")
+	# Adding  MAKE=$(GNU_OBJ)/make/make to the command below causes
+	# problems
+	(cd $(GNU_OBJ)/flex; 
+		$(GNU_OBJ)/make/make \
+			MAKE=make \
+			CC=$(BINDIR)/gcc; \
+			YACC="$(GNU_OBJ)/bison/bison -y")
 
 hp_postgcc_install:
-	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make install)
-	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
-		YACC="$(GNU_OBJ)/bison/bison -y" install)
+	(cd $(GNU_OBJ)/bison; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			install)
+	(cd $(GNU_OBJ)/flex; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			YACC="$(GNU_OBJ)/bison/bison -y" install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 
 # Binaries to be renamed after installation
@@ -361,9 +396,15 @@ configure_egcs: $(EGCS_OBJ)
 		--prefix=$(EGCS_PREFIX) --exec-prefix=$(EGCS_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS))
 bin_egcs:
-	(cd $(EGCS_OBJ); $(GNU_OBJ)/make/make bootstrap)
+	(cd $(EGCS_OBJ); \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			bootstrap)
 install_egcs: $(EGCS_DEST) $(EGCS_PREFIX) $(EGCS_EXEC_PREFIX)
-	(cd $(EGCS_OBJ);  $(GNU_OBJ)/make/make install)
+	(cd $(EGCS_OBJ); \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make \
+			install)
 
 $(EGCS_OBJ): $(GNU_OBJ) 
 	-mkdir "$(EGCS_OBJ)"
