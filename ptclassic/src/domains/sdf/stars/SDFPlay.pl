@@ -93,7 +93,8 @@ be a parameter.
 		unsigned char ulawbyte;
 
 		/* Get the sample into sign-magnitude. */
-		sign = (sample < 0);
+		/* this code assumes a twos complement representation */
+		sign = (sample >> 8) & 0x80;
 		if ( sign != 0 ) sample = -sample;
 		if ( sample > CLIP ) sample = CLIP;
 
