@@ -30,7 +30,6 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 		attributes { A_SETTABLE }
 	}
 	state {
-	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
@@ -70,7 +69,7 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	codeblock (sendsample) {
 	move	$ref(input),x0
-	move	x0,$ref(output)
+	move	x0,$ref2(output,phase)
 	}
 	go {
 		gencode(sendsample);

@@ -30,7 +30,6 @@ default.
 		attributes { A_SETTABLE }
 	}
 	state {
-	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
@@ -43,7 +42,7 @@ default.
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	codeblock (sendsample) {
-	move	$ref(input),x0
+	move	$ref2(input,phase),x0
 	move	x0,$ref(output)
 	}
 	go {
