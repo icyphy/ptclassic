@@ -253,16 +253,16 @@ _stdmenubar
 test MenuBar-unpost-1 {Unpost top-level} {
     .m unpost ducati
     list \
-            [winfo ismapped .m.ducati.menu] \
-            [winfo ismapped .m.ducati.menu.hypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {0 0}
 update
 
 test MenuBar-post-1 {Post top-level menu} {
     .m post ducati
     list \
-            [winfo ismapped .m.ducati.menu] \
-            [winfo ismapped .m.ducati.menu.hypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {1 0}
 update
 
@@ -270,8 +270,8 @@ test MenuBar-post-2 {Post cascade menu} {
     .m unpost ducati
     .m post hypersport
     list \
-            [winfo ismapped .m.ducati.menu] \
-            [winfo ismapped .m.ducati.menu.hypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {1 1}
 update
 
@@ -280,8 +280,8 @@ update
 test MenuBar-unpost-2 {Unpost bottom-level menu} {
     .m unpost hypersport
     list \
-            [winfo ismapped .m.ducati.menu] \
-            [winfo ismapped .m.ducati.menu.hypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {0 0}
 update
 
