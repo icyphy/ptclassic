@@ -115,14 +115,16 @@ VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
 	-lTgl -lutility -lport -lerrtrap -luprintf -lst \
 	$(X11_LIBSPEC) -lXaw -lXmu -lXt $(X11EXT_LIBSPEC) -lX11 $(CSYSLIBS)
 
-all: vem vem.debug
-vem: include $(VEMOBJECTS)
+BINARY = 	vem$(BINARY_EXT)
+BINARY_DEBUG = 	vem.debug$(BINARY_EXT)
+all: $(BINARY) $(BINARY_DEBUG)
+$(BINARY): include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/main version.o)
 	$(CLINKER) $(LINKFLAGS) -o $@ main/version.o $(OBJECTS) $(VEMLIBS)
 
-vem.debug: include $(VEMOBJECTS)
+$(BINARY_DEBUG): include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/main version.o)
@@ -192,24 +194,24 @@ _vem:
 	done
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(PTARCH)
-DESTBIN =	$(OCTBINDIR)/vem
-DESTBIN_D =	$(OCTBINDIR)/vem.debug
+DESTBIN =	$(OCTBINDIR)/$(BINARY)
+DESTBIN_D =	$(OCTBINDIR)/$(BINARY_DEBUG)
 
 $(OCTBINDIR):
 	mkdir $@
 
-$(DESTBIN):	vem $(OCTBINDIR)
-		@echo Installing vem
+$(DESTBIN):	$(BINARY) $(OCTBINDIR)
+		@echo Installing $(BINARY)
 		rm -f $(DESTBIN)
-		ln vem $(DESTBIN)
+		ln $(BINARY) $(DESTBIN)
 		-strip $(DESTBIN)
 
-$(DESTBIN_D):	vem.debug $(OCTBINDIR)
-		@echo Installing vem
+$(DESTBIN_D):	$(BINARY_DEBUG) $(OCTBINDIR)
+		@echo Installing $(BINARY)
 		rm -f $(DESTBIN_D)
-		ln vem.debug $(DESTBIN_D)
+		ln $(BINARY_DEBUG) $(DESTBIN_D)
 
-install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem \
+install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/$(BINARY) \
 		$(BINDIR)/../octtools/bin.$(PTARCH)/debug/vem
 	@for x in $(DIRS); do \
 		cd $$x ; \
@@ -220,16 +222,16 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem \
 
 # These should rely on OCTBINDIR etc, but the relative paths make life
 # difficult.
-$(BINDIR)/vem:
-	(cd $(BINDIR); rm -f vem; ln -s ../octtools/bin.$(PTARCH)/vem .)
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 $(BINDIR)/../octtools/bin.$(PTARCH)/debug/vem:
 	if [ ! -d $(BINDIR)/../octtools/bin.$(PTARCH)/debug ]; then \
 		mkdir $(BINDIR)/../octtools/bin.$(PTARCH)/debug; fi
-	(cd $(BINDIR)/../octtools/bin.$(PTARCH)/debug; ln -s ../vem.debug vem)
+	(cd $(BINDIR)/../octtools/bin.$(PTARCH)/debug; ln -s ../$(BINARY_DEBUG) vem)
 
 clean::
-	rm -f vem vem.debug
+	rm -f $(BINARY) $(BINARY_DEBUG)
 
 # cleaner than clean
 realclean:	clean
