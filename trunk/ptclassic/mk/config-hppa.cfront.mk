@@ -36,7 +36,8 @@ include $(ROOT)/mk/config-default.mk
 #
 RANLIB =	ranlib
 # C++ compiler to use.
-CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
+# pigilib/POct.cc needs +a1 to initialize automatic aggregates.
+CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront +a1
 
 # If you turn on debugging (-g) with cfront, expect ptcl and pigiRpc to be
 # about 70Mb each.
