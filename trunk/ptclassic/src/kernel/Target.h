@@ -71,7 +71,7 @@ protected:
 	// if it cannot find or create the directory.
 	// It is up to the user to delete the string memory when
 	// no longer needed.
-	char* writeDirectoryName(char* dirName = 0);
+	char* writeDirectoryName(const char* dirName = 0);
 
 	// Method to set a file name for writing.
 	// Prepends dirFullName to fileName with "/" between.
@@ -79,7 +79,7 @@ protected:
 	// It is up to the user to delete the memory when no longer needed.
 	// If dirFullName or fileName is NULL then it returns a
 	// pointer to a new copy of the string "/dev/null"
-	char* writeFileName(char* fileName = 0);
+	char* writeFileName(const char* fileName = 0);
 
 	// Store a directory name for writing
 	char* dirFullName;
