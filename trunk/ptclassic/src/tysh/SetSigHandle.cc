@@ -67,48 +67,20 @@ int setSignalHandlers(void)
 #endif
 
     int returnValue = 0;
-// setCoreLimit();
-    if (setHandlers((SIG_PT) signalHandler) != 0)
-	returnValue = 1;
+    // FIXME: ptSignal returns the value of the previous function
+    // function pointer that handled the signal we are setting our
+    // function to handle. What we really want is a return value that
+    // lets us know if the handler was set successfully, and then 
+    // base our return value (nonzero if failed to set) on this.
+    // Unforunately this requires a change to the current implementation
+    // of ptSignal, or a another function.
+    setHandlers((SIG_PT) signalHandler);	
     setStrings();
 
     return returnValue;
 
 }
 
-// setCoreLimit
-//
-// This function sets the value of the maximum size of core file 
-// allowed.                                                      
-
-int setCoreLimit(void) 
-{
-
-#if !defined(PTHPPA)
-
-    struct rlimit coreLimit;
-
-    // getrlimit gets information about RLIMIT (max size of core files)
-    // and places it in a rlimit struct.  Returns 0 on failure.
-    if (getrlimit(RLIMIT_CORE, &coreLimit) != 0) {
-        return 1;
-    }
-
-    // Set RLIMIT to max allowable value to insure that core file is generated.
-    // If this were set to zero, it would prevent a core file from being made.
-    coreLimit.rlim_cur = coreLimit.rlim_max;
-    coreLimit.rlim_max = coreLimit.rlim_max;
-
-    // setrlimit sets system values to the information in rlimit struct
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
-        return 1;
-    }
-
-#endif // PTHPPA
-
-    return 0;  
-  
-}
 
 
 
