@@ -325,7 +325,12 @@ if ( ! $?selectPtolemy && $?selectJava) then
 		endif
 	endif
 
-	set prog = (java -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
+	if ( ! $?tychodebug) then
+		set javabinary = jdb
+	else
+		set javabinary = java
+	endif
+	set prog = (jdb -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
 
 	echo "Starting: $prog"
 endif
@@ -344,11 +349,12 @@ if ( ! $?tychodebug) then
 	if ( $?noconsole ) set prog = ($prog -noconsole)
 	if ( $tclscript != "") set prog = ($prog -e $tclscript)
 else 
-	# Have gdb echo the contents of the command file
-	set cmdfile=`cat $debugcmdfile`
-	echo "echo gdb commands:\n" >> $debugcmdfile
-	echo "echo $cmdfile\n" >> $debugcmdfile
-
+	if ( ! $?selectJava) then
+		# Have gdb echo the contents of the command file
+		set cmdfile=`cat $debugcmdfile`
+		echo "echo gdb commands:\n" >> $debugcmdfile
+		echo "echo $cmdfile\n" >> $debugcmdfile
+	endif
 endif
 
 # If selectPtolemy is set then we are just running itkwish
