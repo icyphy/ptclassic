@@ -1954,6 +1954,94 @@ proc HMtag_/font {win param text} {
 }
 
 #######################################################################
+#### HMtag_img
+# Like the original HMtag_img, but we don't barf on align=right
+# 
+#           Inline Images
+# This interface is subject to change
+# Most of the work is getting around a limitation of TK that prevents
+# setting the size of a label to a widthxheight in pixels
+#
+# Images have the following parameters:
+#    align:  top,middle,bottom
+#    alt:    alternate text
+#    ismap:  A clickable image map
+#    src:    The URL link
+# Netscape supports (and so do we)
+#    width:  A width hint (in pixels)
+#    height:  A height hint (in pixels)
+#    border: The size of the window border
+#
+proc HMtag_img {win param text} {
+	upvar #0 HM$win var
+
+	# get alignment
+	array set align_map {top top    middle center    bottom bottom}
+	set align bottom		;# The spec isn't clear what the default should be
+	HMextract_param $param align
+	catch {set align $align_map([string tolower $align])}
+
+	# FIXME: we can't handle right alignment of images.
+	if {[string tolower $align] == "right" } {
+	    set align bottom
+	}
+
+	# get alternate text
+	set alt "<image>"
+	HMextract_param $param alt
+	set alt [HMmap_esc $alt]
+
+	# get the border width
+	set border 1
+	HMextract_param $param border
+
+	# see if we have an image size hint
+	# If so, make a frame the "hint" size to put the label in
+	# otherwise just make the label
+	set item $win.$var(tags)
+	# catch {destroy $item}
+	if {[HMextract_param $param width] && [HMextract_param $param height]} {
+		frame $item -width $width -height $height
+		pack propagate $item 0
+		set label $item.label
+		label $label
+		pack $label -expand 1 -fill both
+	} else {
+		set label $item
+		label $label 
+	}
+
+	$label configure -relief ridge -fg orange -text $alt
+	catch {$label configure -bd $border}
+	$win window create $var(S_insert) -align $align -window $item -pady 2 -padx 2
+
+	# add in all the current tags (this is overkill)
+	set tags [HMcurrent_tags $win]
+	foreach tag $tags {
+		$win tag add $tag $item
+	}
+
+	# set imagemap callbacks
+	if {[HMextract_param $param ismap]} {
+		# regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} link
+		set link [lindex $tags [lsearch -glob $tags L:*]]
+		regsub L: $link {} link
+		global HMevents
+		regsub -all {%} $link {%%} link2
+		foreach i [array names HMevents] {
+			bind $label <$i> "catch \{%W configure $HMevents($i)\}"
+		}
+		bind $label <1> "+HMlink_callback $win $link2?%x,%y"
+	} 
+
+	# now callback to the application
+	set src ""
+	HMextract_param $param src
+	HMset_image $win $label $src
+	return $label	;# used by the forms package for input_image types
+}
+
+#######################################################################
 #### HMtag_menu
 # Use a simple "-" rather than "->".
 #
