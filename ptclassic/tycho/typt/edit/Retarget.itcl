@@ -127,9 +127,10 @@ body ::tycho::Retarget::constructor {args} {
         # Call the domains method of the Ptcl editor to get the list of domains
         set domainA [lindex [$editor domains] 0]
         if { [lsearch $domainList $domainA] == -1 } {
-            error "Sorry, the Universe contains $domainA, which is not present \
-                    in this version of Tycho.\nThis version of Tycho contains \
-                    the following domains: $domainList.\nTo run a version of \
+            ::tycho::warn "Sorry, the Universe contains '$domainA',\
+                    which is not present\
+                    in this version of Tycho.\nThis version of Tycho contains\
+                    the following domains: $domainList.\nTo run a version of\
                     Tycho that has all the domains, run 'tycho -pigi'."
         }
     } else {
