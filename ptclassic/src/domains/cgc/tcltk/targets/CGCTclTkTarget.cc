@@ -3,7 +3,7 @@ static const char file_id[] = "CGCTclTkTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -52,7 +52,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 		  "-I$PTOLEMY/src/ptklib";
 	// There is no point in including X11 directories here,
 	// since they will be different for each platform.
-	compileOptions.setInitValue(compOpts);
+	compileOptions.setInitValue(hashstring(compOpts));
 
 	// Note that as a last resort, a guess at the X11 library is given
 	StringList linkOpts =
@@ -62,7 +62,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L/usr/X11/lib "
 		  "-ltk -ltcl -lptk -lXpm -lX11 -lm";
-	linkOptions.setInitValue(linkOpts);
+	linkOptions.setInitValue(hashstring(linkOpts));
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
