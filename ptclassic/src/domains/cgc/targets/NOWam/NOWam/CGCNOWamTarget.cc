@@ -62,7 +62,7 @@ CGCNOWamTarget::CGCNOWamTarget(const char* name,const char* starclass,
 		   const char* desc) : CGMultiTarget (name,starclass,desc) {
 
 	// specify machine names
-	addState(machineNames.setState("machineNames",this,"localhost, localhost", "machine names (separated by a comma)"));
+	addState(machineNames.setState("machineNames",this,"lucky, babbage", "machine names (separated by a comma)"));
 	addState(nameSuffix.setState("nameSuffix",this,"",
 		"common suffix of machine names(e.g. .berkeley.edu)"));
 
