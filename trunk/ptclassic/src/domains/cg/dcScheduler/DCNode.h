@@ -8,7 +8,7 @@
 #include "StringList.h"
 
 class DCGraph;
-class Cluster;
+class DCCluster;
 
 /*****************************************************************
 Version identification:
@@ -37,7 +37,7 @@ public:
 		{ return (DCNode*) EGNodeList :: takeFromFront(); }
 
 	DCNode* headNode() { 
-		return head() ? ((DCNode*) ((EGNodeLink*) head())->myNode()) : 0; }
+		return head()? ((DCNode*) ((EGNodeLink*) head())->node()) : 0;}
 	int member(DCNode* n);
 
 	void removeNodes();
@@ -49,26 +49,9 @@ public:
 
 class DCNode : public ParNode {
 friend class DCGraph;
-
-private:
-	// set of merge nodes reachable through directed path is, which
-	// keeps compact information on the transitive closure.
-	DCNodeList TClosure;
-
-	// Transitive Closure in reverse direction
-	DCNodeList RTClosure;
-
-	// temporary processor assignment
-	int tempProcId;
-
-	// The time the node starts and finishes execution
-	int bestStart;
-	int bestFinish;
-
 public: 
 	// Constructor declaration
 	DCNode(DataFlowStar* s, int invoc_no);
-
 	// Constructor used for communication nodes
 	DCNode(int type);
 
@@ -83,10 +66,10 @@ public:
 	StringList print();	// Prints star name and invocation
 
 	// The elementary cluster this node belongs to
-	Cluster *elemCluster;
+	DCCluster *elemDCCluster;
 
         // The highest-level cluster the node currently belongs to
-        Cluster *cluster;
+        DCCluster *cluster;
 
 	// get and set the temporary processor id.
 	void assignProc(int n) { tempProcId = n; }
@@ -103,6 +86,22 @@ public:
 	// return an adjacent node in the given node list.
 	// if direction = 1, look at the ancestors, if -1, descendants.
 	DCNode* adjacentNode(DCNodeList&, int direction);
+
+private:
+	// set of merge nodes reachable through directed path is, which
+	// keeps compact information on the transitive closure.
+	DCNodeList TClosure;
+
+	// Transitive Closure in reverse direction
+	DCNodeList RTClosure;
+
+	// temporary processor assignment
+	int tempProcId;
+
+	// The time the node starts and finishes execution
+	int bestStart;
+	int bestFinish;
+
 };
 
 class DCNodeListIter : public EGNodeListIter

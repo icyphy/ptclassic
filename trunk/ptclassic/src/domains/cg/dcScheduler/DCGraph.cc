@@ -397,24 +397,24 @@ int isMember(DCNodeList& nlist, EGNode* n) {
 }
 
 			//////////////////////
-			///  genClustName  ///
+			///  genDCClustName  ///
 			//////////////////////
-const char* DCGraph :: genClustName(int type) {
+const char* DCGraph :: genDCClustName(int type) {
 	char buf[20];
 	if (type == 0) {
-		sprintf (buf, "ElemClust%d", clustNumber++);
+		sprintf (buf, "ElemDCClust%d", clustNumber++);
 	} else { 
-		sprintf (buf, "MacroClust%d", clustNumber++);
+		sprintf (buf, "MacroDCClust%d", clustNumber++);
 	}
 	return hashstring(buf);
 }
 
 			//////////////////////////
-			///  formElemClusters  ///
+			///  formElemDCClusters  ///
 			//////////////////////////
 
 // from the cutArc information, form elementary clusters
-void DCGraph :: formElemClusters(ClusterList& EClusts) {
+void DCGraph :: formElemDCClusters(DCClusterList& EClusts) {
 
 	// removeCutArcs will fill this list with initially runnable nodes.
 	DCNodeList starters;
@@ -430,11 +430,11 @@ void DCGraph :: formElemClusters(ClusterList& EClusts) {
 	while ((startNode = startList++) != 0) {
 		if (startNode->alreadyVisited() == 0) {
 			LOG_NEW; cnodes = new DCNodeList;
-			addToCluster(startNode, cnodes);
+			addToDCCluster(startNode, cnodes);
 		
 			// make clusters
-			LOG_NEW; Cluster* newC = new Cluster(cnodes);
-			newC->setName(genClustName(0));
+			LOG_NEW; DCCluster* newC = new DCCluster(cnodes);
+			newC->setName(genDCClustName(0));
 			EClusts.insertSorted(newC);
 		}
 	}
@@ -444,9 +444,9 @@ void DCGraph :: formElemClusters(ClusterList& EClusts) {
 }
 
                         //////////////////////
-                        ///  addToCluster  ///
+                        ///  addToDCCluster  ///
                         //////////////////////
-void DCGraph :: addToCluster(DCNode* n, DCNodeList* nlist) {
+void DCGraph :: addToDCCluster(DCNode* n, DCNodeList* nlist) {
 	if (n->alreadyVisited()) return;
 
 	// mark visit flag.
@@ -459,11 +459,11 @@ void DCGraph :: addToCluster(DCNode* n, DCNodeList* nlist) {
 	DCDescendantIter diter(n);
 	DCNode* en;
 	while ((en = diter++) != 0)
-		addToCluster(en, nlist);
+		addToDCCluster(en, nlist);
 
 	DCAncestorIter aiter(n);
 	while ((en = aiter++) != 0)
-		addToCluster(en, nlist);
+		addToDCCluster(en, nlist);
 }
 
                         ///////////////////////
@@ -504,9 +504,9 @@ void DCGraph::setInterclusterArcs() {
 
 	while ((arc = iter++) != 0) {
 		DCNode* src = arc->getSrc();
-		Cluster* srcC = src->elemCluster;
+		DCCluster* srcC = src->elemDCCluster;
 		DCNode* sink = arc->getSink();
-		Cluster* sinkC = sink->elemCluster;
+		DCCluster* sinkC = sink->elemDCCluster;
 		if (srcC != sinkC) {    // Intercluster arcs
 			int num = src->getSamples(sink);
 			sinkC->addArc(srcC,num);
@@ -522,7 +522,7 @@ void DCGraph::setInterclusterArcs() {
 //      cluster is for switching onto another processor.
 // Returns integer (#samples passed offproc) - (#samples passed onproc)
 // The cluster property of each node was set to the proper level in the
-//      hierarchy by routine setClusters, which was called in scheduleAnalysis.
+//      hierarchy by routine setDCClusters, which was called in scheduleAnalysis.
 
 void DCGraph::computeScore() {
 	// set the score.
@@ -532,8 +532,8 @@ void DCGraph::computeScore() {
         while ((arc = iter++) != 0) {
                 DCNode* n1 = arc->getSrc();
                 DCNode* n2 = arc->getSink();
-                Cluster* sclust = n1->cluster;
-                Cluster* dclust = n2->cluster;
+                DCCluster* sclust = n1->cluster;
+                DCCluster* dclust = n2->cluster;
 		if (sclust == dclust) continue;	// in the same cluster? ignore.
 
 		int num = n1->getSamples(n2);
@@ -552,7 +552,7 @@ void DCGraph::computeScore() {
 			///////////////////
 // find the procs that clust communicates with
 
-void DCGraph::commProcs(Cluster *clust, int* procs) {
+void DCGraph::commProcs(DCCluster *clust, int* procs) {
 
 	DCArcIter iter(cutArcs);
 	DCArc *arc;
@@ -561,8 +561,8 @@ void DCGraph::commProcs(Cluster *clust, int* procs) {
 	while ((arc = iter++) != 0) {
 		DCNode* n1 = arc->getSrc();
 		DCNode* n2 = arc->getSink();
-		Cluster* sclust = n1->cluster;
-		Cluster* dclust = n2->cluster;
+		DCCluster* sclust = n1->cluster;
+		DCCluster* dclust = n2->cluster;
 		if (sclust == dclust) continue;
 
 		if (sclust == clust) procs[dclust->getProc()] = 1;
