@@ -73,16 +73,16 @@ int DDFScheduler :: setup (Block& b) {
 		return FALSE;
 	}
 
-	// star initialize
+	// star initialize.  We allow any domain ending in "DF"
+	// (for example, SDF, DDF)
 	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
 		Star& s = alanShepard.nextStar();
-		char* dom = s.domain();
+		const char* dom = s.domain();
 		int l = strlen(dom) - 2;
-		char* tail = &(dom[l]);
-		if (strcmp(tail, "DF") != 0) {
+		if (strcmp(dom + l, "DF") != 0) {
 			StringList msg = s.readFullName();
 			msg += " is not a DDF star: domain = ";
-			msg += s.domain();
+			msg += dom;
 		 	errorHandler.error(msg);
 			return FALSE;
 		}
