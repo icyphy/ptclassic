@@ -214,6 +214,11 @@ $label(loop1)
         org     p:
         }
         setup {
+		// FIXME: Parameters are not always resolved properly
+		// before setup but should be.  For now, check parameters
+		// in initCode method.
+		// CheckParameterValues();
+
 		coefLen = coef.size();
 		delayLineSize = int(errorDelay) - 1;
 		delayLineSize = int(coefLen) +
@@ -234,12 +239,11 @@ $label(loop1)
 	    }
 	}
         initCode  {
+		CheckParameterValues();
 	        addCode(makeblock);
                 addCode(delaystart);
         }
         go { 
-		CheckParameterValues();
-
                 Y = int(errorDelay)-1;
                 Y = int(coefLen) - 1 + int(decimation)*int(Y);
 

@@ -109,7 +109,11 @@ first-order feedback coefficient which is a function of k and N }
 	}
 
 	setup {
-		// Guard against division by N = 0
+		// FIXME: Parameters are not always resolved properly
+		// before setup but should be.  For now, check parameters
+		// in go method and guard against division by N = 0
+		// CheckParameterValues();
+		// double Nd = double(int(N));
 		double Nd = double(int(N) ? int(N) : 1);
 		double kd = double(int(k));
 		theta = -2.0 * M_PI * kd / Nd;

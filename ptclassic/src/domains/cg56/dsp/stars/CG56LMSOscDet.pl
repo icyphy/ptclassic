@@ -49,7 +49,7 @@ of the LMS star upon which this star derived.
 	}
 	seealso {FIR, LMS}
 
-	// FIXME: Remove the error port when CG56LMS is derived from CG56FIR
+	// Since we're not derived from CG56LMS, declare an error port
         input {
 		name { error }
 		type { fix }
@@ -115,6 +115,10 @@ The initial guess at the angle being estimated in radians.
 	    }
 	}
 	setup {
+                // FIXME: Parameters are not always resolved properly
+		// before setup but should be.  For now, check parameters
+		// in go method.
+		// CheckParameterValues();
 
 		// we don't support decimation: make sure that it's 1
 		decimation = 1;
