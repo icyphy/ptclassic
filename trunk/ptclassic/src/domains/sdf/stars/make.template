@@ -1,5 +1,5 @@
 # Makefile for Ptolemy SDF stars
-# @(#)make.template	1.23 9/19/90
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
