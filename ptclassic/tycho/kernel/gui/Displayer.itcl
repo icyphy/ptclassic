@@ -274,6 +274,8 @@ body ::tycho::Displayer::constructor {args} {
     } {
         # NOTE: keep more options?
 	keep -background -cursor -font
+	rename -padx -menupadx menuPadX MenuPadX
+	rename -pady -menupady menuPadY MenuPadY
     }
 
     # Add  a File menu with a close command so that when there are 
@@ -282,17 +284,6 @@ body ::tycho::Displayer::constructor {args} {
     $itk_component(menubar) add Close File \
 	    -command "$this nextWindow; delete object $this" \
             -underline 0
-
-    eval itk_initialize $args
-    eval preference exclude $this $args
-    preference subscribe $this \
-	    -font menuFont
-
-    if $itk_option(-master) {
-        set closetxt "Quit"
-    } {
-        set closetxt "Close"
-    }
 
     # Create the default status bar at the global scope.
     itk_component add status {
@@ -303,10 +294,26 @@ body ::tycho::Displayer::constructor {args} {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
 		-foreground -highlightcolor -highlightbackground
+	rename -padx -buttonpadx buttonPadX ButtonPadX
+	rename -pady -buttonpady buttonPadY ButtonPadY
     }
-    
     pack $itk_component(status) -fill x -expand 0 -side bottom
     
+    eval itk_initialize $args
+    eval preference exclude $this $args
+    preference subscribe $this \
+	    -font menuFont \
+	    -buttonpadx buttonPadX \
+	    -buttonpady buttonPadY \
+	    -menupadx menuPadX \
+	    -menupady menuPadY
+
+    if $itk_option(-master) {
+        $itk_component(status) configure -closetext "Quit"
+    } {
+        $itk_component(status) configure -closetext "Close"
+    }
+
     setCurrentView
 
     wm protocol $prefix WM_SAVE_YOURSELF "$this saveCrash"
@@ -379,6 +386,8 @@ body ::tycho::Displayer::attachView {window viewName} {
     } {
         # NOTE: Should we keep more options here?
         keep -background -cursor -font
+	rename -padx -menupadx menuPadX MenuPadX
+	rename -pady -menupady menuPadY MenuPadY
     }
 
     # Create the status bar
@@ -391,6 +400,8 @@ body ::tycho::Displayer::attachView {window viewName} {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
 		-foreground -highlightcolor -highlightbackground
+	rename -padx -buttonpadx buttonPadX ButtonPadX
+	rename -pady -buttonpady buttonPadY ButtonPadY
     }
     
     # Create the tool bar.
@@ -401,6 +412,8 @@ body ::tycho::Displayer::attachView {window viewName} {
     } {
         # NOTE: Should we keep more options here?
         keep -background -cursor -font
+	rename -padx -buttonpadx buttonPadX ButtonPadX
+	rename -pady -buttonpady buttonPadY ButtonPadY
     }
 
     return [list $itk_component(menubar$viewName) \
