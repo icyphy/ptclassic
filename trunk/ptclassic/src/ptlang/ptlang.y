@@ -80,7 +80,9 @@ char consCalls[BIGBUFSIZE];
 #define T_INTARRAY 4
 #define T_FLOATARRAY 5
 #define T_COMPLEXARRAY 6
-#define NSTATECLASSES 7
+#define T_FIX 7
+#define T_FIXARRAY 8
+#define NSTATECLASSES 9
 
 #define M_PURE 1
 #define M_VIRTUAL 2
@@ -89,7 +91,8 @@ char consCalls[BIGBUFSIZE];
 /* note: names must match order of symbols above */
 char* stateClasses[] = {
 "IntState", "FloatState", "ComplexState", "StringState",
-"IntArrayState", "FloatArrayState", "ComplexArrayState"
+"IntArrayState", "FloatArrayState", "ComplexArrayState",
+"FixState", "FixArrayState"
 };
 
 /* bookkeeping for state include files */
@@ -156,16 +159,19 @@ char* galPortName;		/* name of galaxy port */
 #define C_START 2
 #define C_GO 3
 #define C_WRAPUP 4
-#define C_DEST 5
+#define C_INITCODE 5
+#define C_DEST 6
 
-#define N_FORMS 6
+
+#define N_FORMS 7
 char* codeBody[N_FORMS];		/* code bodies for each entity */
 int inlineFlag[N_FORMS];		/* marks which are to be inline */
 char destNameBuf[MEDBUFSIZE];		/* storage for destructor name */
 
 /* types and names of standard member funcs */
-char* codeType[] = {"","int ","void ","void ","void ",""};
-char* codeFuncName[] = {"","myExecTime","start","go","wrapup",destNameBuf};
+char* codeType[] = {"","int ","void ","void ","void ","void ",""};
+char* codeFuncName[] = {"","myExecTime","start","go","wrapup",
+	"initCode",destNameBuf};
 int methKey;			/* signals which of the standard funcs */
 
 #define consCode codeBody[C_CONS]	/* extra constructor code */
@@ -191,7 +197,7 @@ typedef char * STRINGVAL;
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
-%token EXECTIME PURE INLINE HEADER
+%token EXECTIME PURE INLINE HEADER INITCODE
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -310,6 +316,7 @@ stdkey2:
 |	START				{ methKey = C_START;}
 |	GO				{ methKey = C_GO;}
 |	WRAPUP				{ methKey = C_WRAPUP;}
+|	INITCODE			{ methKey = C_INITCODE;}
 |	EXECTIME			{ methKey = C_EXECTIME;}
 ;
 
@@ -553,7 +560,7 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
-|SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER
+|SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE
 ;
 %%
 /* Reset for a new star or galaxy class definition.  If arg is TRUE
@@ -634,6 +641,10 @@ char* nameArg;
 		return T_FLOATARRAY;
 	if (strcmp (name, "complexarray") == 0)
 		return T_COMPLEXARRAY;
+	if (strcmp (name, "fix") == 0)
+		return T_FIX;
+	if (strcmp (name, "fixarray") == 0)
+		return T_FIXARRAY;
 	fprintf (stderr, "state class %s\n", name);
 	yyerror ("bad state class: assuming int");
 		return T_INT;
@@ -1168,6 +1179,8 @@ struct tentry keyTable[] = {
 	"header", HEADER,
 	"hinclude", HINCLUDE,
 	"ident", ID,
+	"initCode", INITCODE,
+	"initcode", INITCODE,
 	"inmulti", INMULTI,
 	"inline", INLINE,
 	"input", INPUT,
