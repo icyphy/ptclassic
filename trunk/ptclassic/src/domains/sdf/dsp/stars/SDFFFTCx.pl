@@ -108,7 +108,7 @@ static void fft_rif(float *data, int nn, int isign)
 	mmax = 2;
 	while (n > mmax) {
 		istep = 2*mmax;
-		theta = 6.28318530717959/(isign*mmax);
+		theta = -6.28318530717959/(isign*mmax);
 		wtemp = sin(0.5*theta);
 		wpr = -2.0*wtemp*wtemp;
 		wpi = sin(theta);
