@@ -34,7 +34,16 @@
 
 
 ##########################################################################
-##### lhead
+#
+# Common list utility functions.
+#
+# Many of these are modelled after functions found in functional
+# languages.
+#
+
+
+## lhead list
+#
 # Return the first item in the list, or the item itself if it is not a 
 # list.
 # 
@@ -45,8 +54,9 @@ proc lhead {list} {
     return [lindex $list 0]
 }
 
-##########################################################################
-##### ltail
+
+## ltail list
+#
 # Return a list composed of all elements in the supplied list, except the 
 # first item. 
 # 
@@ -174,26 +184,6 @@ proc lcopy {n item} {
 }
 
 
-## interval x y
-#
-# Return list of integers in the range _x_ to _y_. For example,
-#
-#    interval 2 5
-#
-# returns {2 3 4 5}.
-#
-proc interval {x y} {
-    set result {}
-
-    while { $x <= $y } {
-	lappend result $x
-	incr x +1
-    }
-
-    return $result
-}
-
-
 ## ldistl item list
 #
 # A left list distribution, as in Backus' FP. Note carefully
@@ -234,6 +224,70 @@ proc ldistr {list item} {
 }
 
 
+## zip list list [{list}]
+#
+# ``Zip'' two or more lists into a list of sub-lists. If the lists
+# are not all the same length, then the returned list is only as
+# long as the shortest list. For example,
+#
+#     zip {1 2 3 4} {5 6 7}
+#
+# returns {{1 5} {2 6} {3 7}}.
+#
+# Note that zip is almost its own inverse:
+#
+#     zip {1 5} {2 6} {3 7}
+#
+# returns {{1 2 3} {5 6 7}}. Use ltranspose{} for proper inverses.
+#
+proc zip {l1 l2 args} {
+
+    set result [apply* x $l1 y $l2 {
+	list $x $y
+    }]
+
+    while { ! [lnull $args] } {
+	behead list args
+
+	set result [apply* x $result y $list {
+	    concat $x [list $y]
+	}]
+    }
+    return $result
+}
+
+
+## ltranspose listlist
+#
+# Transpose a list of lists. If each sub-list is not the same length,
+# then the result list is only as long as the shortest sub-list.
+#
+#     ltranspose {{1 2 3 4} {5 6 7}}
+#
+# returns {{1 5} {2 6} {3 7}}.
+#
+# Caveats: this procedure may behave a little strangely if
+# given a list with only one sub-list, or a list with no
+# sub-lists (as in {{1 2 3}} or {1 2 3}).
+#
+proc ltranspose {listlist} {
+
+    set result [lcopy [llength [lindex $listlist 0]] {}]
+
+    # Add a space to work around the bug in apply*
+    lappend result " "
+
+    while { ! [lnull $listlist] } {
+	behead list listlist
+
+	set result [apply* x $result y $list {
+	    concat $x [list $y]
+	}]
+    }
+    return $result
+}
+
+
 ## lmember list item
 #
 # Test whether an item is in a list
@@ -241,6 +295,30 @@ proc ldistr {list item} {
 proc lmember {list item} {
     return [expr [lsearch -exact $list $item] != -1]
 }
+
+
+## ldelete list item
+#
+# Remove an item from a list
+#
+proc ldelete {list item} {
+    set i [lsearch -exact $list $item]
+
+    if { $i != -1 } {
+	return [lreplace $list $i $i]
+    }
+
+    return $list
+}
+
+
+##########################################################################
+#
+# Sorting and set-related functions.
+#
+# These functions are more complex list operations, such as functions
+# to sort lists, and functions for using lists as sets.
+#
 
 
 ## lorder list order
@@ -321,21 +399,6 @@ proc subsets {list} {
 }
 
 
-## ldelete list item
-#
-# Remove an item from a list
-#
-proc ldelete {list item} {
-    set i [lsearch -exact $list $item]
-
-    if { $i != -1 } {
-	return [lreplace $list $i $i]
-    }
-
-    return $list
-}
-
-
 ## lsubst list item value
 #
 # Replace an element of a list with another. If _list_ contains
@@ -353,7 +416,7 @@ proc lsubst {list item value} {
 }
 
 
-## ldifference l1 l2
+## lsubtract l2
 #
 # Return the difference of two lists: l1 - l2
 #
@@ -372,6 +435,35 @@ proc lsubtract {l1 l2} {
 
     return $result
 }
+
+
+
+## lunion l1 l2
+#
+# Return the union of two lists. If the two lists are not
+# proper sets, the union is anyway.
+#
+proc lunion {l1 l2} {
+    return [lnub [concat $l1 $l2]]
+}
+
+
+## lintersection l1 l2
+#
+# Return the intersection of two lists.
+#
+proc lintersection {l1 l2} {
+    set result {}
+
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] != -1} {
+	    lappend result $i
+	}
+    }
+
+    return $result
+}
+
 
 ## lsubset l1 l2
 #
@@ -407,6 +499,118 @@ proc ldisjoint {l1 l2} {
     return 1
 }
 
+
+
+
+##########################################################################
+#
+# Association list functions.
+#
+# An association list is normally (in say Lisp and functional languages)
+# as a list of pairs. Because this is Tcl, however, I'm implementing
+# them as a list of lists, where the first element of each list is
+# the element name and the rest of them are the element value. (In
+# other words, if there is more than one, the value is a list.)
+#
+
+
+## assocSplit
+#
+# ``Unzip'' a list of lists into an association list. This is used to
+# make association lists. For example,
+#
+#     assocSplit {{a 1} {b 2 3}}
+#
+# returns {{a 1} {b {2 3}}. Note that if the list is already an
+# association list, this function has no effect.
+#
+proc assocSplit {list} {
+    apply sublist $list {
+	behead item sublist
+	list $item $sublist
+    }
+}
+
+
+## assocAppend listname name value [{value}]
+#
+# Add a new value to the association list. This is a ``destructive''
+# update, like lappend. This function is straightforward, and this`
+# and the other assocation list functions guarantee that
+#
+#     lappend list {fred 42}
+#
+# will have the same effect as
+#
+#     assocAppend list fred 42
+#
+proc assocAppend {list name value args} {
+    set value [concat [list $value] $args]
+    upvar $list l
+    lappend l [list $name $value]
+}
+
+
+## assocReplace listname name value [{value}]
+#
+# Replace a value in an association list. This is a ``destructive''
+# update. If no value with the given name exists, then it is added.
+#
+proc assocReplace {list name value args} {
+    set value [concat [list $value] $args]
+    upvar $list l
+
+    assign names values [ltranspose $l]
+    set index [lsearch -exact $names $name]
+    if { $index != -1 } {
+	set l [lreplace $l $index $index [list $name $value]]
+    } else {
+	lappend l [list $name $value]
+    }
+}
+
+
+## assocRemove listname name
+#
+# Remove the value with the specified name from the association
+# list. This is a destructive delete: that is, the list is modified
+# ``in place.''
+#
+# (Is it such a good idea to do a destructive delete?)
+#
+proc assocRemove {listname name} {
+    upvar $listname l
+
+    assign names values [ltranspose $l]
+    set index [lsearch -exact $names $name]
+    if { $index != -1 } {
+	set l [lreplace $l $index $index]
+    }
+}
+
+
+## assocLookup list name
+#
+# Return the value associated with the given name. Returns the
+# null string if there is none.
+#
+# Note: Unlike assocAppend{} and assocRemove{}, assocLookup{} expects
+# the list itself as an argument, not its name.
+#
+# Known bugs: Well, not really a bug, but the fact that this function
+# expects a list value whereas all the other association list functions
+# expect a list name is confusing. But then again, this kind of
+# inconsistency is nothing new to Tcl ...
+#
+proc assocLookup {list name} {
+    assign names values [ltranspose $list]
+    set index [lsearch -exact $names $name]
+    if { $index != -1 } {
+	return [lindex $values $index]
+    } else {
+	return ""
+    }
+}
 
 
 
