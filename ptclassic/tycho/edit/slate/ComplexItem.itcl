@@ -77,6 +77,12 @@ class ::tycho::Picture {
     # Create a "ghost" of the item for moving and resizing
     proc ghost {id canvas slate}
     
+    # Get a configuration option of an item
+    proc itemcget {id canvas slate scope option}
+
+    # Configure an item
+    proc itemconfigure {id canvas slate scope args}
+
     ###################################################################
     ####                         picture components                ####
 
@@ -97,12 +103,9 @@ class ::tycho::Picture {
     # its own copy of this array, and fill it with methods names and
     # procedures. For example, the Picture class has an
     # entry named "coords" which contains "::tycho::Picture::coords".
-    # This array implements "inheritance": if a method is not implements
+    # This array implements "inheritance": if a method is not implemented
     # in a given class, then the array contains the name of a procedure
-    # in one of its superclasses. For example, the Frame class has an
-    # entry called "ghost" with the value "::tycho::Picture::ghost": if
-    # the Slate calls "ghost" in a Frame item, it will execute the
-    # procedure defined in the Picture class.
+    # in one of its superclasses.
     common methodtable
 
     # Default values of this item's options. Every class must create
@@ -120,10 +123,11 @@ class ::tycho::Picture {
     ####                       class initialization                ####
 
     #### Set method table
-    set methodtable(construct) ::tycho::Picture::construct
-    set methodtable(destruct)  ::tycho::Picture::destruct
-    set methodtable(coords)    ::tycho::Picture::coords
-    set methodtable(ghost)     ::tycho::Picture::ghost
+    set methodtable(construct)     ::tycho::Picture::construct
+    set methodtable(destruct)      ::tycho::Picture::destruct
+    set methodtable(coords)        ::tycho::Picture::coords
+    set methodtable(itemcget)      ::tycho::Picture::itemcget
+    set methodtable(itemconfigure) ::tycho::Picture::itemconfigure
 }
 
 
@@ -182,7 +186,7 @@ body ::tycho::Picture::destruct {id canvas slate} {
 #
 # Note that the scaling of all components is uniform -- subclasses will
 # want to override this behavior if non-uniform scaling is required. 
-# (For example, the _Frame_ class scales so that its border's remain
+# (For example, the _Frame_ class scales so that its borders remain
 # the same width.)
 #
 body ::tycho::Picture::coords {id canvas slate args} {
@@ -217,7 +221,6 @@ body ::tycho::Picture::coords {id canvas slate args} {
     set xscale [expr double($a1-$a0)/($x1-$x0)]
     set yscale [expr double($b1-$b0)/($y1-$y0)]
 
-    set slate [canvasslate $canvas]
     # Move and scale each of the components
     foreach pict [$slate picture children $id] {
 	$slate move  $pict $xdelta $ydelta
@@ -234,14 +237,102 @@ body ::tycho::Picture::coords {id canvas slate args} {
     }
 }
 
+
 ##########################################################################
-## ghost
+#### itemcget
 #
-# Create and return a "ghost" of the item. This is used when moving 
-# and deforming the item. The default implementation creates a
-# grey item with the coordinates of the primary component.
+body ::tycho::Picture::itemcget {id canvas slate scope option} {
+    # Process -tags specially
+    if { ! [string compare $option -tags] } {
+	# Return the tags
+	$slate gettags $id
+    } elseif { [@scope $scope [list ::info exists optiondefault($option)]] } {
+	# Read the value directly from the class
+	return [@scope $scope [list set _[string trimleft $option -]($id)]]
+    } else {
+	error "unknown option $option"
+    }
+}
+
+#######################################################################
+#### itemconfigure
 #
-body ::tycho::Picture::ghost {id canvas slate} {
-    eval $canvas create rectangle [$canvas coords $primary($id)] \
-	    -outline grey
+body ::tycho::Picture::itemconfigure {id canvas slate scope args} {
+    if { [llength $args] == 0 } {
+	# We've been asked for all configuration values. Use
+	# the defaultoptions array to get the names of all options,
+	# and read their values.
+	set result {}
+	foreach option [@scope $scope {array names optiondefault}] {
+	    # Read its value
+	    set value [@scope $scope \
+		    [list set _[string trimleft $option -]($id)]]
+	    # Read default value
+	    set default [@scope $scope [list set optiondefault($option)]]
+	    # Add to result
+	    lappend result [list $option {} {} $default $value]
+	}
+	# Add the tags
+	lappend result [list -tags {} {} {} [$slate gettags $id]]
+	return $result
+
+    } elseif { [llength $args] == 1 } {
+	set option [lindex $args 0]
+	if { $option == "-tags" } {
+	    return [list {} {} {} [$slate gettags $id]]
+	} elseif { [@scope $scope \
+		[list ::info exists optiondefault($option)]] } {
+	    # Read its value
+	    set value [@scope $scope \
+		    [list set _[string trimleft $option -]($id)]]
+	    # Read default value
+	    set default [@scope $scope [list set optiondefault($option)]]
+	    
+	    return [list $option {} {} $default $value]
+	    
+	} else {
+	    error "unknown option \"$option\""
+	}
+    } else {
+	foreach {option value} $args {
+	    if { ! [string compare $option -tags] } {
+		# Set the tags of the complex item. Figure out the differences.
+		set tags [lsort [$canvas gettags $primary($id)]]
+		
+		# Filter out hierarchy tags.
+		set t [lsearch $tags {[^!_]*}]
+		if { $t != -1 } {
+		    set tags [lrange $tags $t end]
+		    set new [lsubtract $value $tags]
+		    set old [lsubtract $tags $value]
+		} else {
+		    set tags {}
+		    set old {}
+		    set new $value
+		}
+		
+		# Delete old tags, add new tags
+		foreach t $old {
+		    $slate dtag $id $t
+		}
+		foreach t $new {
+		    $slate addtag $t withtag $id
+		}
+	    } else {
+		# Call the proc on the class to set the option
+		if { [@scope $scope \
+			[list ::info exists optiondefault($option)]] } {
+#		    $scope::_[string trimleft $option -] \
+#			    $id $canvas $slate $value
+
+                    @scope $scope [list eval \
+                        \[set methodtable(_[string trimleft $option -])\] \
+                        $id $canvas $slate [list $value]]
+
+		} else {
+		    error "unknown option \"$option\""
+		}
+	    }
+	}
+    }
 }
