@@ -138,7 +138,8 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		myCode << comment(pmsg);
                 orgDirective(p->memory()->name(), p->baseAddr());
 		for (int i=0 ; i < p->bufSize() ; i++ ) {
-			DataType pType = p->resolvedType();
+			DataType pType = p->setResolvedType();
+			if (!pType) return;
 			if (strcmp(pType,INT)==0)  writeInt(0);
 			else if (strcmp(pType,FIX)==0) writeFix(0);
 			else writeFloat(0);
