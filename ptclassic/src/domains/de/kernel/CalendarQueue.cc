@@ -35,12 +35,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CalendarQueue.h"
 
 // Set the properties of the LevelLink class.
-LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, LevelLink* n,
+LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, Star* d,
+			  LevelLink* n,
 			  LevelLink* b) 
 {
 	e = a;
 	level = v;
 	fineLevel = fv;
+	dest = d;
 	next = n;
 	before = b;
 	return this;
@@ -68,23 +70,6 @@ void CalendarQueue :: putFreeLink(LevelLink* p)
 	freeLinkHead = p;
 	numFreeLinks++;
 }
-
-
-
-// If it ends up with the last link of the queue, it rounds up the head of
-// the queue.
-LevelLink* CalendarQueue :: next()
-{
-        LevelLink* temp, nextInSame, firstOfNext;
-        nextInSame = lastReference->next;
-	firstOfNext = cq_bucket[(lastReferenceBucket+1) % FIXMEnum_buckets];
-	// We dont know where the limits of the bucket array are
-	// ask hui to finish for us
-
-
-        return temp;
-}
-
 
 
 
@@ -153,23 +138,16 @@ double lastTime)
 
     
 
-// constructor
-// FIXME
-CalendarQueue :: CalendarQueue() :
-	freeLinkHead(0), numberNodes(0), numFreeLinks(0), cq_resizeEnabled(1)
-{
-    LocalInit(0, 2, 1.0, 0.0);
-}
 
 // lowest level first, lowest fineLevel first.
 
 // FIXME
-LevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv)
+LevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv, Star* dest)
 {
     numberNodes++;
     LevelLink* newLink = getFreeLink();
 
-    newLink->setLink(a, v, fv, 0, 0);
+    newLink->setLink(a, v, fv, dest, 0, 0);
     int i = v / cq_interval;	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
     InsertEventInBucket(&cq_bucket[i], newLink);
@@ -179,9 +157,9 @@ LevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv)
 
 
 
-void CalendarQueue :: InsertEventInBucket(LevelLink **bucket, LevelLink *event)
+void CalendarQueue :: InsertEventInBucket(LevelLink **bucket, LevelLink *link)
 {
-    register LevelLink *current, *least_event = NULL;
+    register LevelLink *current, *least_link = NULL;
     int i, save_resizeEnabled, virtualBucket;
     double year;
 
@@ -193,51 +171,84 @@ void CalendarQueue :: InsertEventInBucket(LevelLink **bucket, LevelLink *event)
     if (cq_eventNum) {
 	save_resizeEnabled = cq_resizeEnabled;
 	cq_resizeEnabled = 0;
-	least_event = NextEvent();
-	i = least_event->level/cq_interval;
+	least_link = NextEvent();
+	i = least_link->level/cq_interval;
 	i = i% cq_bucketNum;
 	if (cq_bucket[i]) {
-	    least_event->next = cq_bucket[i];
-	    least_event->before = NULL;
-	    cq_bucket[i]->before = least_event;
+	    least_link->next = cq_bucket[i];
+	    least_link->before = NULL;
+	    cq_bucket[i]->before = least_link;
 	} else 
-	    least_event->next = least_event->before = NULL;
-	cq_bucket[i]= least_event;
+	    least_link->next = least_link->before = NULL;
+	cq_bucket[i]= least_link;
 	cq_resizeEnabled = save_resizeEnabled;
 	cq_eventNum++;
     }
-    if (least_event && event->level < least_event->level) {
-	cq_lastTime = event->level;
+    if (least_link && link->level < least_link->level) {
+	cq_lastTime = link->level;
 	virtualBucket = cq_lastTime/cq_interval;
 	cq_lastBucket = virtualBucket%cq_bucketNum;
 	cq_bucketTop = (virtualBucket+1.5)*cq_interval;
     }
     if (*bucket) {
 	current = *bucket;
-	while (current->level < event->level)
+	// Now we are going to look for the first element
+	// such that ((current->level > link->level) or
+	//            (level == level) and (finer_level > link->finer_level) or
+	//            (l == l) and (fl == fl) and (dest >= dest))
+	while (current->level < link->level) 
 	    if (current->next)
 		current = current->next;
 	    else {
-		current->next = event;
-		event->before = current;
-		event->next = NULL;
+		current->next = link;
+		link->before = current;
+		link->next = NULL;
 		cq_eventNum++;
 		return;
 	    }
+	assert(current->level >= link->level);
+	// Moreover it is the first such element
+	while ((current->level == link->level) && 
+	        (current->fineLevel < link->fineLevel))
+	    if (current->next)
+		current = current->next;
+	    else {
+		current->next = link;
+		link->before = current;
+		link->next = NULL;
+		cq_eventNum++;
+		return;
+	    }
+	assert((current->level > link->level) || ((current->level == link->level) && (current->fineLevel >= link->fineLevel)));
+	// Moreover it is the first such element
+	while  ((current->level == link->level) &&
+		(current->fineLevel == link->fineLevel) &&
+		(current->dest < link->dest))
+	    if (current->next)
+		current = current->next;
+	    else {
+		current->next = link;
+		link->before = current;
+		link->next = NULL;
+		cq_eventNum++;
+		return;
+	    }
+	assert((current->level > link->level) || ((current->level == link->level) && (current->fineLevel > link->fineLevel)) || ((current->level == link->level) && (current->fineLevel == link->fineLevel) && (current->dest >= link->dest)));
+	// Moreover it is the first such element
 	if (current->before) {
-	    event->before = current->before;
-	    event->next = current;
-	    current->before->next = event;
-	    current->before = event;
+	    link->before = current->before;
+	    link->next = current;
+	    current->before->next = link;
+	    current->before = link;
 	}  else {
-	    event->before = NULL;
-	    event->next = current;
-	    current->before = event;
-	    *bucket = event;
+	    link->before = NULL;
+	    link->next = current;
+	    current->before = link;
+	    *bucket = link;
 	}
     } else { /* empty bucket */
-	event->before = event->next = NULL;
-	*bucket = event;
+	link->before = link->next = NULL;
+	*bucket = link;
     }
     cq_eventNum++;
     return;
@@ -341,7 +352,7 @@ void CalendarQueue :: Resize(int newSize)
 	    int virtualBucket;
 	    virtualBucket = currentEvent->level/cq_interval;
 	    virtualBucket = virtualBucket% cq_bucketNum; 
-	    InsertEvent(&cq_bucket[virtualBucket], currentEvent);
+	    InsertEventInBucket(&cq_bucket[virtualBucket], currentEvent);
 	    currentEvent = nextEvent;
 	}
     }
@@ -408,7 +419,7 @@ double CalendarQueue :: NewInterval()
 	int temp;
 	temp = sampledEvent[i]->level/cq_interval; /* find virtual bucket */
 	temp = temp % cq_bucketNum;      /* find actual bucket  */
-	InsertEvent(&cq_bucket[temp], sampledEvent[i]);
+	InsertEventInBucket(&cq_bucket[temp], sampledEvent[i]);
     }	
 
 /* save important dynamic values */    
@@ -435,87 +446,84 @@ double CalendarQueue :: NewInterval()
 	return((double)cq_interval);
 }
     
-    
 
-
-// FIXME
 void CalendarQueue :: pushBack(LevelLink* a) {
-	if (!lastNode) {
-		lastNode = a;
-	} else {
-		a->next = lastNode->next;
-		lastNode->next->before = a;
-	}
-	a->before = lastNode;
-	lastNode->next = a;
-	lastReference = lastNode;
-	numberNodes++;
+  
+    numberNodes++;
+
+    int i = a->level / cq_interval;	// find virtual bucket
+    i = i % cq_bucketNum;	// find actual bucket
+    InsertEventInBucket(&cq_bucket[i], newLink);
+    if ((cq_resizeEnabled) &&
+	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
+	    Resize(2 * cq_bucketNum);
 }
 
-// FIXME
+int CalendarQueue :: fetchEvent(InDEPort* p, double timeVal)
+{
+	LevelLink *store = NULL;
+	cq_resizeEnabled = 0;
+	while (true)
+	{
+		LevelLink *h = NextEvent();
+		if ((h == NULL) || (h->level > timeVal)) {
+			Error :: abortRun (*p, " has no more data.");
+			return FALSE;
+		}
+		InDEPort* tl = 0;
+                if (h->fineLevel != 0) {
+                        Event* ent = (Event*) h->e;
+                        tl = (InDEPort*) ent->dest;
+
+                        // if same destination star with same time stamp..
+                        if (tl == p) {
+                                if (tl->getFromQueue(ent->p))
+					putFreeLink(h);
+				else
+					pushBack(h);
+				for (;store != NULL;
+				      temp = store,
+				      store = store->next,
+				      pushBack(temp));
+
+				cq_resizeEnabled = 1;
+                                return TRUE;
+                        }
+                }
+		store->next->before = h;
+		h->next = store;
+		h->before = NULL;
+		store = h;
+	}
+	Error :: abortRun (*p, " has no more data.");
+	return FALSE;
+}
+
 void CalendarQueue :: initialize()
-// FIXME
 {
-	if (lastNode == 0) return;		// Queue already empty
+	if (cq_eventNum == 0) return;		// Queue already empty
 
-	// Point to the first element of the list
-	LevelLink *l = lastNode->next;
+	for (int i = cq_bucketNum - 1; i>=0; i--) {
+		// Point to the first element of the list
+		LevelLink *l = cq_bucket[i];
 
-	// Put all Links into the free List.
-	while (l != lastNode) {
-		LevelLink *ll = l;
-		l = l->next;
-		putFreeLink(ll);
+		// Put all Links into the free List.
+		for (LevelLink *l = cq_bucket[i]; l != NULL; ) {
+			LevelLink *ll = l;
+			l = l->next;
+			putFreeLink(ll);
+		}
+
+		// Delete the last node in the queue
+		putFreeLink(l);
+
+		// and mark the queue empty
+		cq_bucket[i] = 0;
 	}
 
-	// Delete the last node in the queue
-	putFreeLink(lastNode);
-
-	// and mark the queue empty
-	lastNode = 0;
-	numberNodes = 0;
+	cq_eventNum = 0;
 }
 
-// FIXME
-// "get() and putFreeLink()"
-Pointer CalendarQueue :: getFirstElem()
-{
-	LevelLink *f = get();
-	putFreeLink(f);
-	return f->e;
-}
-
-// FIXME
-LevelLink* CalendarQueue :: get()
-{
-	LevelLink *f = lastNode->next;	// Head of list
-
-	if (f == lastNode) lastNode = 0;	// List now empty
-	else {
-		lastNode->next = f->next;
-		f->next->before = lastNode;
-	}
-	numberNodes--;
-	return f;
-}
-
-
-// FIXME
-void CalendarQueue :: extract(LevelLink* a)
-{
-	a->before->next = a->next;
-	a->next->before = a->before;
-	numberNodes--;
-
-	if (a == lastNode) lastNode = a->before;
-	if (numberNodes == 0) lastNode = 0;	// List now empty
-	lastReference = a->before;
-
-	// put it into free List.
-	putFreeLink(a);
-}
-
-// FIXME
 // Destructor -- delete all Links 
 CalendarQueue :: ~CalendarQueue () {
 	initialize();
