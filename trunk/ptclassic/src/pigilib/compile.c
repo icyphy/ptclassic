@@ -804,11 +804,11 @@ octObject *facetPtr;
     char* target;
     
     name = BaseName(facetPtr->contents.facet.cell);
-    domain = getDomainF(facetPtr);
-    if(!domain) {
+    if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
+	PrintErr(ErrGet());
 	sprintf(msg, "Domain error in facet %s", name);
-        PrintErr(msg);
-        return (FALSE);
+	PrintErr(msg);
+	return FALSE;
     }
     TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "reset; domain ",
 		   domain, (char*) NULL));
@@ -827,7 +827,7 @@ octObject *facetPtr;
 		   domain, (char*) NULL));
 
     /* get the target */
-    if (!GOCTargetProp(facetPtr, &target, KcDefTarget())) {
+    if (!GOCTargetProp(facetPtr, &target, KcDefTarget(domain))) {
         PrintErr(ErrGet());
         return (FALSE);
     }
