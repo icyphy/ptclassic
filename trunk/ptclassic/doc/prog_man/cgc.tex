@@ -77,6 +77,10 @@ and \code{wrapup} methods of \code{CGCStar}.  Refer to \nxref{Writing
 code generation stars} for documentation on \code{addCode}, including
 context sensitive actions and conditional code generation.  There are
 several additional code-generation methods defined in the CGC domain.
+The \code{addInclude} method is used to generate \samp{#include
+\var{file}} directives.  The \code{addDeclaration} method is used to
+declare local variables within the main function.  The \code{addGlobal}
+method is used to declare global variables outside the main function.
 As with \code{addCode}, these methods return \samp{TRUE} if code was
 generated for the appropriate stream and \samp{FALSE} otherwise.  These
 methods are member functions of the \code{CGCStar}\tindex{CGCStar
