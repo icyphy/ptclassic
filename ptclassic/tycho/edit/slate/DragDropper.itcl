@@ -63,10 +63,14 @@
 # option, the second argument is that item; if not, the second argument
 # is null).
 #
-# <dt><b>-targethalo</b>
-# <dd>The distance from a target item needed for the item to be
-# considered under the mouse. This is mainly used for thin items
-# like lines. By default, this is zero.
+# <dt><b>-startwhen</b>
+# <dd>The mode that controls the way the drag-dropper starts the
+# drag-drop sequence. If <b>outside</b>, then the drag-drop
+# sequence starts when the cursor moves <b>-sourcehalo</b>
+# pixels outside the bounding box of a source item. If
+# <b>distance</b>, the drag-drop sequence starts when the
+# cursor moves that distance in either axis. The default is
+# <b>outside</b>.
 #
 # <dt><b>-sourcehalo</b>
 # <dd>The distance from a source item needed for the mouse to be
@@ -80,6 +84,11 @@
 # zero, the DragDropper does nothing. This can be used to provide
 # dynamic control over what the DragDropper considers a suitable
 # source item.
+#
+# <dt><b>-targethalo</b>
+# <dd>The distance from a target item needed for the item to be
+# considered under the mouse. This is mainly used for thin items
+# like lines. By default, this is zero.
 #
 # <dt><b>-targetpredicate</b>
 # <dd>If not null, this script that is executed when the mouse moves
@@ -129,11 +138,14 @@ class ::tycho::DragDropper {
     # The distance from the mouse to be considered no longer over it
     public variable sourcehalo 0
 
-   # The distance from the mouse to be considered under it
-    public variable targethalo 0
-
     # The source item predicate
     public variable sourcepredicate {}
+
+    # The starting mode
+    public variable startwhen "outside"
+
+   # The distance from the mouse to be considered under it
+    public variable targethalo 0
 
     # The target item predicate
     public variable targetpredicate {}
@@ -172,7 +184,7 @@ class ::tycho::DragDropper {
     method release {}
 
     ###################################################################
-    ####                   protected variables                     ####
+    ####                     private variables                     ####
 
     # A flag that disables the drag-drop sequence
     private variable _disabled 0
@@ -182,6 +194,12 @@ class ::tycho::DragDropper {
 
     # The target item
     private variable _droptarget ""
+
+    # The start x coordinate
+    private variable _startx
+
+    # The start y coordinate
+    private variable _starty
 }
 
 #######################################################################
@@ -222,6 +240,10 @@ body ::tycho::DragDropper::bind {t args} {
 body ::tycho::DragDropper::click {x y args} {
     # Set state indicating no movement
     set _moving 0
+
+    # Remember starting position
+    set _startx $x
+    set _starty $y
 }
 
 #######################################################################
@@ -236,11 +258,17 @@ body ::tycho::DragDropper::click {x y args} {
 body ::tycho::DragDropper::drag {x y} {
     # See if we have starting moving yet
     if !$_moving {
-        if [overcurrent $x $y] {
-            return
-        } else {
-            set _moving 1
-        }
+	if { $startwhen == "outside" } {
+	    if [overcurrent $x $y] {
+		return
+	    }
+	} else {
+	    if { abs($x-$_startx) > $sourcehalo \
+		    || abs($y-$_starty) > $sourcehalo } {
+		return
+	    }
+	}
+	set _moving 1
     }
 
     # See if we overlap any suitable target items
