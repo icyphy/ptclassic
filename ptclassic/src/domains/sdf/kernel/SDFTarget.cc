@@ -44,6 +44,7 @@ static const char file_id[] = "SDFTarget.cc";
 #include "SDFScheduler.h"
 #include "SDFCluster.h"
 #include "pt_fstream.h"
+#include "SDFMultiScheduler.h"
 
 SDFTarget::SDFTarget() :
 Target("default-SDF","SDFStar",
@@ -69,10 +70,19 @@ SDFTarget::~SDFTarget() {
 void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
-	if (int(loopScheduler)) {
-		LOG_NEW; s = new SDFClustSched(logFile);
-	} else {
+	switch(int(loopScheduler)) {
+	case 0:
 		LOG_NEW; s = new SDFScheduler;
+		break;
+	case 1:
+		LOG_NEW; s = new SDFClustSched(logFile);
+		break;
+	case 2:
+		LOG_NEW; s = new SDFMultiScheduler;
+		break;
+	default:
+		Error::abortRun(*this,"Unknown scheduler");
+		return;
 	}
 	s->schedulePeriod = schedulePeriod;
 	s->setGalaxy(*galaxy());
