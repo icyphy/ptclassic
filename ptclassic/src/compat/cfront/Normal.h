@@ -28,6 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef _Normal_h
 #define _Normal_h 1
 
+#include <math.h>               //SGI Irix6 needs this for sqrt
 #include "Random.h"
 // This version substitutes for libg++ random-number classes.
 // return a normally-distributed r.v. with given mean and variance.
