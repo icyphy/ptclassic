@@ -140,7 +140,12 @@ char* whichMembers();
 char* checkArgs();
 char* stripQuotes();
 char* portDataType();
-int   stateTypeClass();
+int   stateTypeClass(), lookup(), yyparse(), yylex(), unescape();
+void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
+     initPort(), genPort(), describePort(), clearMethodDefs(), wrapMethod(),
+     genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
+     cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
+     yywarn(), mismatch();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
@@ -661,7 +666,7 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 /* Reset for a new star or galaxy class definition.  If arg is TRUE
    we are defining a galaxy.
  */
-clearDefs (g)
+void clearDefs (g)
 int g;
 {
 	int i;
@@ -682,7 +687,7 @@ int g;
 }
 
 /* Generate a state definition */
-clearStateDefs ()
+void clearStateDefs ()
 {
 	stateName = stateClass = stateDef = stateDesc = stateAttrib = NULL;
 }
@@ -735,7 +740,7 @@ char* type;
 }
 
 /* add declarations of extra members to the class definition */
-addMembers (type, defs)
+void addMembers (type, defs)
 char* type;
 char* defs;
 {
@@ -778,7 +783,7 @@ char* nameArg;
 }
 
 /* generate code for a state defn */
-genState ()
+void genState ()
 {
 	char* stateDescriptor;
 	char* stateDefault;
@@ -812,7 +817,7 @@ genState ()
 }
 
 /* describe the states */
-describeState ()
+void describeState ()
 {
 	char descriptString[MEDBUFSIZE];
 
@@ -832,7 +837,7 @@ describeState ()
 }
 
 /* set up for port definition */
-initPort (dir, multi)
+void initPort (dir, multi)
 int dir, multi;
 {
 	portDir = dir;
@@ -848,7 +853,7 @@ char* name;
 	return save(name);
 }
 
-genPort ()
+void genPort ()
 {
 	/* test that all fields are known */
 	char* dir = portDir==2 ? "InOut" : (portDir==1?"Out" : "In");
@@ -877,7 +882,7 @@ genPort ()
 	}
 }
 
-describePort ()
+void describePort ()
 {
 	char *dest;
 	char descriptString[MEDBUFSIZE];
@@ -900,7 +905,7 @@ describePort ()
 }
 
 /* set up for user-supplied method */
-clearMethodDefs (mode)
+void clearMethodDefs (mode)
 int mode;
 {
 	methodName = NULL;
@@ -912,7 +917,7 @@ int mode;
 }
 
 /* generate code for user-defined method */
-wrapMethod ()
+void wrapMethod ()
 {
 	char * p = whichMembers (methodAccess);
 	char * mkey = "";
@@ -954,7 +959,7 @@ wrapMethod ()
 }
 
 /* generate an instance of a block within a galaxy */
-genInstance ()
+void genInstance ()
 {
 	sprintf (str1, "\t%s %s;\n", instClass, instName);
 	strcat (protectedMembers, str1);
@@ -963,18 +968,18 @@ genInstance ()
 }
 
 
-genAlias () {
+void genAlias () {
 	/* FILL IN */
 }
 
-genConnect () {
+void genConnect () {
 	/* FILL IN */
 }
 
 
 
 /* fn to write out standard methods in the header */
-genStdProto(fp,i)
+void genStdProto(fp,i)
 FILE* fp;
 int i;
 {
@@ -985,6 +990,7 @@ int i;
 		fprintf (fp, "%s\n\t}\n", codeBody[i]);
 }
 
+/* return true if the n characters beginning at s are whitespace. */
 static int
 isStrnSpace( s, n)
     char	*s;
@@ -993,6 +999,7 @@ isStrnSpace( s, n)
     int		c;
 
     for (; n > 0; n--, s++) {
+	c = *s;
 	if ( c!=' ' && c!='\t' )
 	    return 0;
     }
@@ -1002,7 +1009,7 @@ isStrnSpace( s, n)
 }
 
 
-cvtCodeBlockExpr( src, src_len, pDst)
+void cvtCodeBlockExpr( src, src_len, pDst)
     char *src, **pDst;
     int src_len;
 {
@@ -1043,7 +1050,7 @@ cvtCodeBlockExpr( src, src_len, pDst)
 
     The above list is prob. out of date.
 **/
-cvtCodeBlock( src_in, dst_in, extendB)
+void cvtCodeBlock( src_in, dst_in, extendB)
     char *src_in, *dst_in;
     int extendB;
 {
@@ -1116,7 +1123,7 @@ cvtCodeBlock( src_in, dst_in, extendB)
 }
 
 
-genCodeBlock( fp, src, extendB)
+void genCodeBlock( fp, src, extendB)
     FILE *fp;
     char *src;
     int extendB;
@@ -1135,7 +1142,7 @@ genCodeBlock( fp, src, extendB)
     and the remainder of the line processed by cvtCodeBlock(),
     with the result added to the default code stream.
 **/
-cvtMethod( src_in, dst_in)
+void cvtMethod( src_in, dst_in)
     char *src_in, *dst_in;
 {
     char	*src = src_in, *dst = dst_in;
@@ -1159,7 +1166,7 @@ cvtMethod( src_in, dst_in)
 	        strcpy(dst, "\t{ StringList _str_; _str_ << \n");
 		dst+=strlen(dst);
 	    }
-	    cvtCodeBlock( src, dst, 1, 1);		dst+=strlen(dst);
+	    cvtCodeBlock( src, dst, 1);		dst+=strlen(dst);
 	    *dst++ = NEWLINE;
 	} else {
 	    if ( codeblockB ) {
@@ -1174,7 +1181,7 @@ cvtMethod( src_in, dst_in)
     *dst = '\0';
 }
 
-genMethod( fp, src)
+void genMethod( fp, src)
     FILE *fp;
     char *src;
 {
@@ -1185,7 +1192,7 @@ genMethod( fp, src)
 }
 
 /* This is the main guy!  It outputs the complete class definition. */
-genDef ()
+void genDef ()
 {
 	FILE *fp;
 	int i;
@@ -1981,7 +1988,7 @@ yylexNormal(pCurChar)
 /* #define input() ((c = getc(yyin))==10?(yyline++,c):c) */
 
 /* The lexical analyzer */
-yylex () {
+int yylex () {
     static int	c = 0;
     if (c == EOF) return 0;
 
@@ -2103,7 +2110,8 @@ int dsize;
 }
 
 /* main program, just calls parser */
-main (argc, argv)
+int main (argc, argv)
+int argc;
 char **argv;
 {
 	if (argc != 2) {
@@ -2119,7 +2127,7 @@ char **argv;
 	return nerrs;
 }
 
-yyerr2 (x, y)
+void yyerr2 (x, y)
 char *x, *y;
 {
 	strcpy (str1, x);
@@ -2127,7 +2135,7 @@ char *x, *y;
 	yyerror (str1);
 }
 
-yyerror(s)
+void yyerror(s)
 char *s;
 {
 	/* ugly: figure out if yacc is reporting syntax error at EOF */
@@ -2138,14 +2146,14 @@ char *s;
 	return;
 }
 
-yywarn(s)
+void yywarn(s)
 char *s;
 {
 	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
 	return;
 }
 
-mismatch(s)
+void mismatch(s)
 char *s;
 {
 	yyerr2 ("Extra token appears after valid input: ", s);
