@@ -1,61 +1,150 @@
-<!-- $Id$  -->
+<!-- @(#)release0.7.2devel.html	1.2 01/26/99  -->
 <html>
 <head>
-<title>Ptolemy 0.7.1 Release Notes</title>
+<title>Ptolemy 0.7.2devel Release Notes</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1>Ptolemy 0.7.1 Release Notes</h1>
+<h1>Ptolemy 0.7.2devel Release Notes</h1>
 
 <menu>
 
-<li> <a href="release0.7.1p2.html">Ptolemy 0.7.1p2 Release Notes</a>
+<li> <a href="index.html">Main Ptolemy 0.7.2 Page</a>
 
-<li> <a href="index.html">Main Ptolemy 0.7.1 Page</a>
-
-<li> <a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/</CODE></a>
+<li> <a href="http://ptolemy.eecs.berkeley.edu/pt0.7.2/ptolemy0.7.2/html/"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.2/ptolemy0.7.2/html/</CODE></a>
 contains a list of bugs and other issues found after the release.
 
 </menu>
 
 <h2>Release notes</h2>
-Below are some common problems that you might run across with 0.7.1.
 
 <menu>
-<li> <a href="#compatibility">0.7 and 0.7.1 Compatbility</a>
+
+<li> <a href="#changes">Changes between 0.7.1p1 and 0.7.2devel</a>
+<li> <a href="#compatibility">0.7.1 and 0.7.2devel Compatibility</a>
 <li> <a href="#egcs">EGCS and GCC-2.8</a>
 <li> <a href="#pxgraph">Pxgraph</a>
-<li> <a href="#vem">Vem</a>
+<li> <a href="#ptclwithtk">Ptcl with Tk</a>
+<li> <a href="#detailedchanges">Detailed list of changes</a>
 </menu>
 
-<h3><a name="compatibility">0.7 and 0.7.1 Compatibility</a></h3>
+<h3><a name="changes">Changes between 0.7.1p1 and 0.7.2devel</a></h3>
+
+The 0.7.2devel release includes changes for the Adaptive Computing
+System domain developed by Eric Pauer's group at Sanders, A
+Lockheed-Martin Corporatio.
+
+ <p>This release also provides support for
+Itcl3.0.1/Tcl8.0.4/Tk8.0.4.  Ptolemy 0.7.1p1 used Itcl2.2/Tcl7.6/Tk4.2.
+	
+ <p>Most of the Itcl 3.0 changes are in Tycho.  
+
+ <p>In addition, Ptolemy 0.7.2devel provides better support for the NT
+platform.
+
 <menu>
-<li> A Ptolemy 0.7 vem will not work with a Ptolemy 0.7.1 pigiRpc.
+<li> Changes to the FSM domain to support the valued FSM syntax (Bilung Lee)
 
-<li> In theory, the Itcl2.2 binaries from Ptolemy 0.7 should work
-with Ptolemy 0.7.1.  However, if you are upgrading the compiler,
-you should probably recompile Itcl.
+<li> Pxgraph has been upgraded to Ptplot 2.0, which includes support
+  for the AWT 1.1 event model and many code cleanups.
+	
 
-<li> In general, <CODE>.o</CODE> files built under Ptolemy 0.7
-will need to be recompiled for use with Ptolemy 0.7.1
+<li> The GNU tools have been upgraded to
+	 <br>gcc-2.95.1
+	 <br>make-3.77
+
+
+<li> The HP only GNU tools have been upgraded to:
+         <br>binutils-2.9.1
+	 <br>bison-1.28
+	 <br>flex-2.5.4
+
+<li> Windows NT4.0 support is more complete, 0.7.2devel support building under
+  Cygwin32 b20.1
+  See <a href="nt"><CODE>$PTOLEMY/doc/html/nt</CODE></a> or
+  <a href="http://ptolemy.eecs.berkeley.edu/~cxh/ptpub/nt/index.html"><CODE>http://ptolemy.eecs.berkeley.edu/~cxh/ptpub/nt/index.html</CODE></a>
+
+
+<li> Microsoft Visual C++ 6.0 can be used to compile ptcl.ptiny, which
+  includes most of the SDF and DE domains.  This port is included for
+  demonstration purposes only.  In theory, it should be possible to
+  compile all of Ptolemy under MSVC++ 6.0, though we have not tried.
+  See $PTOLEMY/mk/config-nt4.vc.mk.vc
+
 </menu>
 
-<h3><a name="egcs">EGCS and GCC-2.8</a></h3>
+<h3><a name="compatibility">0.7.1 and 0.7.2devel Compatibility</a></h3>
+<menu>
+<li> The NT platform has problems with filenames that contain
+<CODE>%</CODE> and files or directories named <CODE>con</CODE>.
+As a result, we had to rename several directories under
+<CODE>$PTOLEMY/lib</CODE> and then run <CODE>ptfixtree</CODE>
+on the entire Ptolemy tree to adjust for these changes.
+If you have any custom Ptolemy facets, you will need to run
+<CODE>$PTOLEMY/bin/ptfixtree</CODE> on your facets so that
+your facets will be able to find the newly renamed files.
 
-Ptolemy 0.7.1 should compile with gcc-2.7.2.2, but the default
-compiler we build the binaries with is egcs-1.0.2.  egcs is a new
-compiler effort that builds on the gcc compiler.  The egcs sources are
-made available to the gcc maintainers, so egcs changes eventually
-should be in egcs.  It seems like egcs is much more active than gcc,
-and that egcs-1.0.2 is more stable than gcc-2.8.2.  Under gcc-2.8.2,
+ <br>The script <CODE>$PTOLEMY/bin/fixntpaths</CODE> is what we used
+to rename the files.  <CODE>$PTOLEMY/bin/ptfixtree.tcl</CODE>
+was modifies so that the changes we made are automatically loaded.
+
+<li> A major feature of Ptolemy 0.7.2devel is that Itcl was upgraded from
+Itcl 2.2 to Itcl3.0.  Any stars that use Tcl or Tk will definitely need to
+be recompiled.  
+
+ <br>We are not that confident of the Tycho part of the port to Tcl8.0.  The
+main problem seems to be in menu traversals, though there are problems
+with search and replace as well.  It is usable with Ptolemy, but it is
+not very polished.  This could present a problem to you, depending on
+how much you are using Tycho in your product.  You might be better off
+sticking with Itcl2.2
+
+ <br>Between Itcl2.2 and Itcl3.0, the directory structure changed, so I've
+made changes to 0.7.2devel to reflect that change.  The biggest changes
+are that
+ <br>$PTOLEMY/tcltk/itcl is now $PTOLEMY/tcltk/tcl
+$PTOLEMY/tcltk/tcl.$PTARCH is now $PTOLEMY/tcltk/tcl.$PTARCH
+
+ <br>The location of the libraries in the subdirectories has also changed. 
+
+ <br>As a result, many of the scripts in $PTOLEMY/bin and the makefiles in 
+$PTOLEMY/mk have changed.
+
+ <br>We could have probably forced Itcl3.0 to install in the same
+directories as Itcl2.2, but it would have required rewriting some
+of the makefiles that ship with Itcl/Tcl/Tk.
+
+ <br>There were a few changes in the code itself, but we left those #defined
+so that Itcl2.2 should be usable without too many changes.
+
+ <br>The version of Tycho that is shipped with 0.7.2devel is 
+not at all backward compatible with Itcl2.2.  To use Itcl2.2, it would
+be best to drop in the version of Tycho that shipped with 
+Ptolemy 0.7.1p1
+
+<li> Ptolemy 0.7.2devel also includes
+an upgrade of the compiler from egcs-1.0.2 to gcc-2.95.1
+In general, <CODE>.o</CODE> files built under Ptolemy 0.7
+will need to be recompiled for use with Ptolemy 0.7.2deel
+
+
+<li> The Synchronous Reactive Itcl stars have been removed in 0.7.2devel.
+The problem is that the changes to Itcl are sufficiently complex that
+a complete rewrite of these stars would be necessary.
+
+</menu>
+
+<h3><a name="egcs">gcc-2.8 and gcc-2.95.1</a></h3>
+
+Ptolemy 0.7.2devel should compile with gcc-2.7.2.2, but the default
+compiler we build the binaries with is gcc-2.95.1  
+
+ <p> Note that under gcc-2.8.2,
 compiling with -O -fPIC causes an internal compiler error when
-compiling <CODE>Block.cc</CODE>, so we are shipping with egcs.
+compiling <CODE>Block.cc</CODE>, so we are shipping with gcc-2.95.1
+
 
  <p>For more information about egcs, see
-<A HREF="http://www.cygnus.com/egcs/"><CODE>http://www.cygnus.com</CODE></A>.
-
- <p> EGCS has a few mailing lists, <CODE>egcs-bugs</CODE> is
-archived at:
-<a href="http://www.findmail.com/listsaver/egcs-bugs"><CODE>http://www.findmail.com/listsaver/egcs-bugs</CODE></a>
+<A HREF="http://egcs.com/egcs/"><CODE>http:/egcs.cygnus.com</CODE></A>.
 
  <p>The most common problem with using egcs is that
 <CODE>libg++</CODE> is no longer used, so certain include files, such
@@ -73,15 +162,61 @@ in the <CODE>config-<I>$PTARCH</I>.mk</CODE> file instead of
 <CODE>SYSLIBS</CODE> makefile variable is set to not include
 <CODE>-lg++</CODE>
 
+<h3><a name="ptclwithtk">Ptcl with Tk</a></h3>
+Olaf Lenzmann provided patches to Ptolemy that allow ptcl to be used
+with Tk. This functionality is experimental, and primarily for use
+with the Microsoft Visual C++ port.
+<ol>
+<li> Recompile <CODE>src/kernel/Star.cc</CODE> so that the Tk
+event loop is called from within Star::run()
+
+<pre>
+cd $PTOLEMY/obj.$PTARCH/kernel
+rm -f Star.o
+make USERFLAGS="-DPT_PTCL_WITH_TK -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include" install
+</pre>
+
+
+<li> Create the following <CODE>override.mk</CODE> file
+as <CODE>$PTOLEMY/obj.$PTARCH/ptcl/override.mk</CODE>
+ <br>
+<pre>
+# Override.mk file to create a Ptcl with Tk binary.
+# You may need to modify the /usr/openwin/include path
+# to point to your X11 include files
+GPP_FLAGS += -DPT_PTCL_WITH_TK -I../../src/ptklib -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include"
+PTCL_WITH_TK = 1
+TK = 1
+# If you are building under Unix,
+# copy src/tcltk/tk8.0.5pt/generic/tkConsole.c to src/ptcl and then
+# uncomment the next two lines:
+#LIBS += tkConsole.o
+#LIBFILES += tkConsole.o
+</pre>
+
+
+<li> Rebuild ptcl
+<pre>
+cd $PTOLEMY/obj.$PTARCH/ptcl
+make clean
+make
+</pre>
+
+</ol>
+
+
+
+
+
 <h3><a name="pxgraph">Pxgraph</a></h3>
 Pxgraph has been converted to Java.  See
 the troubleshooting guide at.
-<a href="http://ptolemy.eecs.berkeley.edu/java/ptplot/doc/internals/troubleshooting.html"><CODE>$PTOLEMY/tycho/java/ptplot/doc/internals/troubleshooting.html</CODE></a>
+<a href="http://ptolemy.eecs.berkeley.edu/java/ptolemy.plot2.0/ptolemy/plot/doc/internals/troubleshooting.html"><CODE>$PTOLEMY/tycho/java/ptolemy/plot/doc/internals/troubleshooting.html</CODE></a>
 
 If you don't have Java, see
 <a href="ftp://ptolemy.eecs.berkeley.edu/pub/misc/xgraph/index.html"><CODE>ftp://ptolemy.eecs.berkeley.edu/pub/misc/xgraph/index.html</CODE></a>
 for pxgraph X11 binaries and sources.  See
-<a href="pxgraph.README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a> for details
+<a href="pxgraph.README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a> for details.
 
  <p>To run the Java version of pxgraph, you must do one of the following:
 <ol>
@@ -89,7 +224,7 @@ for pxgraph X11 binaries and sources.  See
 to the directory where the Java Development Kit is installed.
 For example, your <CODE>.cshrc</CODE> might contain
 <pre>
-setenv JAVAHOME /opt/jdk1.1.5
+setenv JAVAHOME /opt/jdk1.1.7B
 </pre>
 
 <li> If you do not set <CODE>JAVAHOME</CODE>, then the pxgraph
@@ -102,32 +237,459 @@ and adjust the <CODE>JAVADEFAULT</CODE> variable.
 </ol>
 
 
-<h3><a name="vem">Vem</a></h3>
-The <CODE>vem</CODE> binary shipped with Ptolemy 0.7 <B>will not</B>
-work with Ptolemy 0.7.1.  The reason is that Tom Lane fixed a long
-standing vem bug that occured when pigiRpc and vem try to send
-each other commands at the same time.  For example, the bug appears
-when the user does a 'edit paramters' or 'look inside' in a vem window
-while pigiRpc is compiling a facet.
- <p>If you do not upgrade vem to the version shipped with 0.7.1,
-then the error message you will see is:
-<pre>
-    vem> illegal VEM function number (4)
-        RPC Error: server: bad VEM request
-</pre>
-The number '4' in the error message is a dead giveaway, the patch
-says <CODE>rcpInternal.h</CODE> had the following <CODE>#define</CODE>
-added:
-<pre>
-#define VEM_LOCKING_FUNCTION                    (long) 4
-</pre>
-If you get this error message, get the <CODE>other.src</CODE> tar file
-and octtools.
 
+<h2><a name="detailedchanges">Detailed list of changes</a></h2>
+Below we discuss the various changes that were made between
+0.7.1p1 and 0.7.2devel before 2/6/99.
+For changes after 2/6/99, see $PTOLEMY/ChangeLog.
+
+<h3>Changes present in the 0.7.2devel src tar file made before 2/6/99</h3>
+
+<pre>
+	* .cshrc
+	* ptolemy.faq:
+	Updated for this patch
+	
+	* makefile:
+	Added ntbuild rule that builds everything but xv and the GNU tools
+
+	* bin/checkextra:
+	Fix for long files.
+	
+	* bin/fixntpaths:
+	Script to fix % chars and other problems in pathnames so
+	that Ptolemy works under NT.
+
+	* bin/g++-setup
+	egcs version change and Itcl3.0 upgrade.
+	
+	* bin/mkarch
+	Removed this /bin/csh script which was only called from
+	MAKEARCH
+
+	* bin/ptarch
+	Return sol7 if we are on a Solaris 7 machine (untested)
+
+	* bin/ptfixtree.tcl
+	Added catch around calls to octls.
+	Added pftPreLoadMap proc that preloads the conversion map
+
+	* bin/mkPtolemyTree:
+	Fixed itclsh path (Brian Evans)
+
+	* bin/installColors
+	bin/optfir
+	bin/masters
+	bin/pattache
+	bin/ptgdb
+	bin/ptcl
+	bin/xwdtogif
+	bin/wfir
+	bin/ptfixtree
+	bin/esterel2pl
+	nt4: Converted from /bin/csh to /bin/sh scripts
+
+	* mk/compile.mk:
+	Updated optimization error message
+	Added .obj .dll .lib to files removed by make clean
+		
+	* mk/config-alpha.mk:
+	Don't include Matlab and Mathematica
+	
+	* mk/config-default.mk:
+	Itcl3.0 upgrade
+	Added OBJSUFFIX variable for use with nt4.vc
+	
+	* mk/config-g++.shared.mk:
+	* mk/config-hppa.cfront.mk:
+	* mk/config-irix5.cfront.mk:
+	* mk/config-irix6.cfront.mk:
+	* mk/config-sol2.cfront.mk:
+	* mk/config-sun4.mk:
+	Itcl3.0 upgrade
+	
+	* mk/config-linux.debug.mk:
+	Now debug version will be built with
+	DLLs otherwise statically linked debug binaries produced with
+	egcs will occupy 1.2GB (!) disk space. This is ten (!) times
+	more than with good old gcc-2.7.2.3. I regard this as an egcs
+	bug. (Wolfgang Reimer)
+
+	* mk/config-linux.mk:
+	Lots of changes (Wolfgang Reimer)
+		
+	* mk/config-sol7.mk:
+	Untested initial cut at Support for Solaris 7.
+	
+	* mk/config-nt4.mk:
+	Support for Itcl3.0 and Cygwin b20 (Christopher Hylands)
+
+	* mk/config-nt4.vc.mk.vc:
+	* mk/matlab.mk.vc
+	* mk/common.mk.vc
+	* mk/compile.mk.vc
+	* mk/config-default.mk.vc
+	* mk/stars.mk.vc
+	Support for Itcl3.0 and MSVC++ 6.0
+	Currently, only ptcl.ptiny compiles.  (Christopher Hylands)
+	
+	* mk/ptbin.mk:
+	* mk/ptbin.mk.vc:
+	Set version number to 0.7.2devel
+	
+	* mk/stars.mk:
+	Added SiP (SPIN in Ptolemy), which is a protocol simulator
+	by Shang-Pin Chang
+	Fixes for ptclInvokeInterp
+
+	* mk/tycho.mk:
+	Itcl3.0 changes		
+
+	* mk/tycho.mk:
+	Various minor Java changes
+
+	* mk/tydir.mk:
+	Added rules to run Java code coverage tools		
+	
+	* mk/scratch-srcs.mk:
+	xv_install:  HPUX strip will fail if we have already stripped
+	
+	* src/domains/bdf/stars/BNFNot.pl:
+	nt4.vc: Modified << statement to avoid
+	ambigous << operator complaints (Olaf Lenzmann)
+
+	* src/domains/cgc/tcltk/lib/ptolemy-cgc.tcl:
+	* src/domains/sdf/targets/CompileTarget.cc
+	Updated for Tcl8.0/Tk8.0/Itcl3.0
+
+	* src/domains/cgc/tcltk/lib/CGCTychoTarget.cc:
+	Itcl3.0: frameCode should call initProcedure such that the new
+	tcl proc we are registering ends up in the ::tycho namespace
+	
+	* demo/whats_new/whats_new0.7.1/newwork.html:
+	minor C50 text change
+	
+	* lib/Vem
+	* lib/Vem-8.1
+	* lib/Vem-8.2
+	These files are not shipped with 0.7.2devel because the
+	lib/Vem file was interfering with the lib/vem directory
+	when extracting under NT.		
+
+	* lib/makefile:
+	Split SCRIPT_SRCS off EXTRA_SRCS
+	If tech and technology do not exist, then create them by linking
+
+	* lib/oct2ps.pro:
+	Added 0 setgray in two places
+	
+	* lib/tcl/pigilib.tcl:
+	Itcl3.0
+	
+	* lib/tcl/ptk.rc:
+	New file for Ptcl with Tk. (Olaf Lenzmann)
+
+	* lib/tcl/ptkParams.tcl: (FIXME: check the log)
+	Fixed copyright
+	
+	* src/compat/ptolemy/compat.h
+	sol7: don't declare bind
+
+	* src/compat/cfront/ACG.h:
+	Added #defined(linux)
+	
+	* src/compat/cfront/Random.h:
+	Added #defined(linux)
+	nt4.vc: Include stdlib.h appropriately
+	nt4.vc: The problem was that the great MSVC's rand() function seems to
+	produce 16bit random numbers: this in turn produces an endless loop in
+	Normal.h:line 62. (Olaf Lenzmann)
+
+	* src/compat/nt.vc/sys/time.h:
+	nt4.vc: Problems compiling DERealTimeStar.cc
+	The fix is to redefine far as ptfar here.
+		
+	* src/domains/c50/dsp/stars/C50LMS.pl:
+	Added int i inside for loop
+
+	* src/domains/c50/dsp/stars/C50IIR.pl:
+	Declare int i outside for loop
+	
+        * src/domains/c50/stars/C50ACos.pl:
+	src/domains/c50/stars/C50ASin.pl:
+	Generalized the star so that it can work with either the C50 DSK
+	or the C50 EVM (Brian Evans)
+
+	* src/domains/c50/stars/C50ReadFile.pl
+        Removed the A_NOINIT attribute for the inVal state (Brian Evans)
+
+        * src/domains/c50/stars/C50WrtFile.pl
+	Removed the A_NOINIT attribute for the outVal state (Brian Evans)
+
+        src/domains/c50/dsp/stars/C50RaisedCosine.pl
+	Minor change: cast excessBW to double (Brian Evans)
+
+	* src/domains/fsm/kernel/FSMTarget.cc:
+	hppa.cfront: Moved 'int i' to top of initCode. Error was:
+	line 82: error: two declarations of i (1031)
+	
+	* src/domains/ddf/kernel/DDFWormhole.h:
+	* src/domains/ddf/kernel/DDFWormhole.cc:
+	New files (Bilung Lee)
+	
+	* src/domains/ddf/kernel/DDFDomain.cc:
+	include DDFWormhole.h, refer to DDFWormhole everywhere
+	
+	* src/domains/ddf/kernel/make.template:
+	Added DDFWormhole.cc
+	
+	* src/domains/de/contrib/stars/make.template:
+	Workaround EGCS optimizer error
+	
+	* src/domains/de/contrib/stars/DECIR_uldl.pl
+	hppa.cfront: Include iostream.h before iomanip.h
+
+	* src/domains/sdf/matrix/stars/SDFUnPkInt_M.pl
+	addStopSymbol and stopSymbol params added
+	
+	* src/domains/sdf/contrib/stars/SDFPipeOpen.pl:
+	nt4.vc: call _popen() and _pclose()
+	(Olaf Lenzmann)
+
+	* src/domains/sdf/kernel/SDFCluster.cc:
+	nt4.vc: near and far are reserved keywords
+	
+	* src/domains/sdf/kernel/make.template:
+	* src/domains/sdf/stars/make.template:	
+	* src/domains/sdf/dsp/stars/make.template:	
+	nt4.vc: Added DLLDEPS makefile variable so that we
+	can build .dlls		
+	
+	* src/domains/sr/kernel:
+	removed SRItclStar.h, it does not compile with Itcl3.0
+	* src/domains/sr/stars/make.template:
+	Removed SRItcl*.pl files and *.itcl files
+	* src/demos/rolodex:
+	Removed this Itcl demo, SRItcl stars don't work with Itcl3.0
+	
+	* src/domains/sr/stars/SRConst.pl:
+	Add functionality to emit constant in every "interval" instants. 
+	(Bilung Lee)
+	
+	* src/kernel/Display.cc:
+	If the system() call returns non-zero, print an error message
+	
+	* src/kernel/Display.cc:
+	#include stdio
+	
+	* src/kernel/PortHole.h
+	setPortIndices returns an int
+	
+	* src/kernel/Star.h
+	setStarIndices returns an int
+	
+	* src/kernel/State.h:
+	If PTNT is defined, then include errno.h
+	various methods are not void, they actually return an int
+	
+	* src/kernel/Linker.sysdep.h:
+	If PT_NT4VC is defined, then don't include dlcfn etc.
+	
+	* src/kernel/Message.cc
+	Add #include <stdio.h>
+	
+	* src/kernel/Star.cc
+	If PT_PTCL_WITH_TK is defined, then we call Tcl_DoOneEvent()
+	everytime a star is fired.  This is currently only used by the nt4.vc
+	port (Olaf Lenzmann)
+
+	* src/kernel/isa.h:
+	nt4.vc: ptcl starts up, but there are no commands
+	The fix is to edit isa.h and modify the quote macro to 
+	use the ansi cpp syntax:
+
+	* src/kernel/miscFuncs.h
+	nt4.vc: DERealTimeStar.cc fails to compile, the fix
+	The fix is to modify miscFuncs.h so that when we include
+	stdlib.h, we undef min and max
+
+	* src/kernel/miscFuncs.cc
+	Increase the size of the tempFileName buffer
+	nt4vc: Read the TEMP variable to determine what directory to use
+	(Olaf Lenzmann)
+
+        * src/kernel/paths.cc:
+	ptcl.ptiny fails to start with messages about not being able
+	to find the binary.
+	The fix is to modify kernel/paths.cc so it searches for backslashes
+	under nt4.vc
+	However, a problem persists unless we call ptcl.ptiny.exe.
+	This is because pathSearch does not look for .exe files
+
+	* src/pxgraph/README.txt:
+	Added message about running the X11 pxgraph from the Java version
+	
+ 	* src/pxgraph/makefile:
+	Location of ptplot changed
+	
+	* src/pxgraph/pxgraph/configure.in:
+	nt4: Added /usr/X11R6.4 in two places.
+	
+	* src/pxgraph/pxgraph/install-sh
+	nt4: If the .exe file exists, use that instead. 
+
+	* src/pxgraph/pxgraph/makefile.in:
+	added rule for config.status
+
+
+	* src/pigilib/pigiMain.cc
+	If we are compiling under TK 8, then call Tcl_FindExecutable()
+	
+	* src/pigilib/POct.cc:
+	* src/pigilib/PVem.cc:
+	* src/pitcl/PITcl.cc:
+	* src/ptcl/PTcl.cc:
+	redefine #define ENTRY and #define ENTRY2 to fix warnings
+	(Wolfgang Reimer)
+	
+	* src/pigilib/local.h:
+	Mention OCT_EXTERN in comment
+	nt4: Fixes for % in pathnames.
+
+	* src/pigilib/octIfc.c
+	* src/pigilib/mkIcon.c
+	nt4: Fixes for % in pathnames.
+
+	* src/pigilib/pigiLoader.cc:
+	de stars may need sip files
+	
+	* src/pigilib/ptkConsoleWindow.cc:
+	Tcl8: deal with channels properly
+	
+	* src/pigilib/ptkTkSetup.c:
+	Itcl3: do the proper package initializations and import namespaces
+	
+	* src/pitcl/displayFile.c:
+	* src/ptcl/displayFile.c:
+	If Tk is not present, start up Tycho as a separate process
+	
+	* src/ptcl/PTcl.h
+	* src/ptcl/PTcl.cc
+	* src/ptcl/ptclAppInit.cc:
+	nt4.vc: Various changes for building ptcl with TK (Olaf Lenzmann)
+
+	* src/ptcl/ptclInit.cc:
+	* src/pitcl/ptclInit.cc:
+	Include unistd.h to pick ups isatty()
+	
+	* src/pitcl/make.template:
+	Use ITCLSH, moved ptclInvokeInterp.cc
+	
+	* src/ptcl/make.template:
+	Added ptclInvokeInterp.cc
+	
+	* src/ptklib/ptkPicture.c:
+	* src/ptklib/ptkPlot.c
+	Tk8.0 changes
+	
+	* src/ptklib/ptk.h:
+	nt4.vc: avoid unresolved symbol ptkInterp in HOFBaseHiOrderFun
+	(Olaf Lenzmann)
+
+	* src/ptlang/makefile:
+	Use $(YACC) instead of yacc.
+	Reported by Olaf Lenzmann <o.lenzmann@bned.com>
+
+	* src/ptlang/ptlang.y: (FIXME: check log)
+	Added # line 1 "Foo.pl" directive after pragma code. (James Lindblad)
+	Don't read the PWD variable, not all shells have it set.
+	Use getcwd instead. (Wolfgang Reimer)
+	
+	* src/tysh/SigHandle.cc:
+	nt4: If SIGIOT is not defined, then use SIGABRT
+	* src/tysh/TyTcl.cc:
+	Tcl8.0 font change
+	redefine #define ENTRY and #define ENTRY2 to fix warnings
+</pre>
+
+	
+<h3>Changes present in the pt0.7.devel other.src tar file</h3>
+<pre>
+	* src/octtools/include/ansi.h:
+	* src/octtools/include/errtrap.h:
+	* src/octtools/include/fang.h:
+	* src/octtools/include/harpoon.h:
+	* src/octtools/include/oct.h:
+	* src/octtools/include/oh.h:
+	* src/octtools/include/options.h:
+	* src/octtools/include/pep.h:
+	* src/octtools/include/rpc.h:
+	* src/octtools/include/st.h:
+	* src/octtools/include/symbolic.h:
+	* src/octtools/include/symlib.h:
+	* src/octtools/include/tap.h:
+	* src/octtools/include/th.h:
+	* src/octtools/include/timer.h:
+	* src/octtools/include/tr.h:
+	* src/octtools/include/uprintf.h:
+	* src/octtools/include/vov.h:
+	* src/octtools/Packages/oct/oct-big-id.h 
+	* src/octtools/Packages/oct/oct.h
+	* src/octtools/Packages/pep/pepint.h
+	* src/octtools/Packages/tr/tr.h
+	* src/octtools/Packages/utility/csystem.c
+	* src/octtools/Packages/utility/utility.h
+	* src/octtools/Xpackages/rpc/appNet.c
+	* src/octtools/vem/main/ansi.h
+	* src/octtools/vem/rpc/rpc.c
+	Change define of EXTERN to OCT_EXTERN for Tcl8.x
+	
+	* src/octtools/tkoct/top/tclMain.c:
+	Tcl8.0
+	* src/octtools/tkoct/top/memCore.c:
+	nt4: Added extern for end
+	
+	* src/octtools/tkoct/oct2ptcl/make.template:
+	nt4: use BINARY_EXT
+
+	* src/octtools/tkoct/oct2ptcl/oct2ptcl.c:
+	In Ptolemy 0.7.1 and earlier, some of the facets in
+	$PTOLEMY/lib/ptolemy had the % character in their names, which
+	causes no end of trouble under NT4.0 with Cygwin 20.1.
+	In Ptolemy 0.7.1 and later, we changed the name of these
+	files and substituted in the string "percent" for the character
+	"%".
+
+	* src/octtools/vem/utility/colors.c:
+	vuWhite(): Don't call WhitePixel here, instead, get the color
+	by name. The value for WhitePixel apparently is the value for
+	the default colormap.  If we have a TrueColor map, then the
+	value of WhitePixel will be out of range if we use it with
+	a PseudoColor map
+
+	* src/octtools/lib/make.template:
+	Don't install the 'Vem' file, we don't use it anyway, and it
+	causes problems when extracting the tar files under NT
+
+</pre>
+
+<h3>Changes to the pt0.7.2devel gnu.src tar file</h3>
+<pre>
+	* Upgrades
+	binutils-2.8.1 -> binutils-2.9.1 (Used only under HPUX)
+	egcs-1.0.2 -> egcs-1.1.1
+	make-3.76.1 -> make-3.77
+	
+	* src/gnu/README:
+	Updated version numbers
+	
+	* src/gnu/makefile:
+	GCC_VERSION updated for egcs1.1		
+</pre>
 <p>
 <hr>
 <address>
-Last updated $Date$,
+Last updated 10/26/99,
 Send comments to <a href="mailto:www@ptolemy.eecs.berkeley.edu">
 www@ptolemy.eecs.berkeley.edu</a>.
 </address>
