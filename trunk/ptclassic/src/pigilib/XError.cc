@@ -49,19 +49,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include <stream.h>
 
+#include "StringList.h"
 #include "Error.h"
 #include "Scheduler.h"
 #include "miscFuncs.h"
 #include "NamedObj.h"
 #include "PtGate.h"
-#include "StringList.h"
 
 extern "C" {
 #define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
-#include "vemInterface.h"		/* define PrintErr */
+#include "vemInterface.h"		/* define PrintErr, PrintCon, ViXXX */
 #include "exec.h"			/* define PigiErrorMark */
 #include "ganttIfc.h"			/* define FindClear */
 #include "ptk.h"
+#include "xfunctions.h"			/* define win_msg */
 #undef Pointer
 }
 
@@ -79,7 +80,7 @@ static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
 	if ( m1 ) buf << m1;
 	if ( m2 ) buf << m2;
 	if ( m3 ) buf << m3;
-	PrintErr (buf);
+	PrintErr(buf);
 }
 
 void
@@ -94,17 +95,19 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.fullName();
-	PigiErrorMark(nam);
-	outMsg(nam, 0, m1, m2, m3);
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	outMsg(objname, 0, m1, m2, m3);
+	delete [] objname;
 }
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.fullName();
-	PigiErrorMark(nam);
-	outMsg(nam, 1, m1, m2, m3);
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	outMsg(objname, 1, m1, m2, m3);
 	FindClear();
+	delete [] objname;
 }
 
 void
@@ -118,13 +121,6 @@ Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
 	Scheduler::requestHalt();
 }
-
-// information messages.
-extern "C" {
-	void win_msg (const char*);
-	int ViGetErrWindows();
-	void PrintCon (const char*);
-};
 
 static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 	CriticalSection region(gate);
@@ -143,8 +139,9 @@ static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.fullName();
-	info(nam, m1, m2, m3);
+	char* objname = savestring(o.fullName());
+	info(objname, m1, m2, m3);
+	delete [] objname;
 }
 
 void
@@ -156,6 +153,7 @@ Error :: message (cc* m1, cc* m2, cc* m3) {
 int Error :: canMark() { return 1;}
 
 void Error :: mark(const NamedObj& o) {
-	StringList n = o.fullName();
-	PigiErrorMark(n);
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	delete [] objname;
 }
