@@ -122,7 +122,7 @@ body ::tycho::Retarget::constructor {args} {
     }
 
     eval itk_initialize $args
-
+puts "Editor: $editor"
     if { $editor != "" && [$editor info commands domains] == "domains"} {
         # Call the domains method of the Ptcl editor to get the list of domains
         set domainA [lindex [$editor domains] 0]
@@ -138,15 +138,22 @@ body ::tycho::Retarget::constructor {args} {
     }
     set domainB [lindex $domainList end]
 
-    toolbar button newDomains {Compare Domains} \
-            -text {Compare Domains} -command "$this compareDomains"
-    toolbar button domainAButton "Change Domain A: $domainA" \
-            -text "Change DomainA: $domainA" -command "$this changeDomainA"
-    toolbar button domainBButton "Change Domain B: $domainB" \
-            -text "Change Domain B: $domainB" -command "$this changeDomainB"
-
-    toolbar button checkUniverse {Check Universe} \
-	    -text {Check Universe} -command "$this checkUniverse"
+    toolbar button newDomains \
+            -text {Compare Domains} \
+            -description {Compare Domains} \
+	    -command "$this busy $this compareDomains"
+    toolbar button domainAButton \
+            -text "Change Domain A: $domainA" \
+            -description "Change DomainA: $domainA" \
+	    -command "$this changeDomainA"
+    toolbar button domainBButton \
+            -text "Change Domain B: $domainB" \
+            -description "Change Domain B: $domainB" \
+	    -command "$this changeDomainB"
+    toolbar button checkUniverse \
+            -text {Check Universe} \
+	    -description {Check Universe} \
+	    -command "$this checkUniverse"
 
     modifyAfterDomainChange
 }
@@ -160,18 +167,14 @@ body ::tycho::Retarget::constructor {args} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainA {} {
-    set tmpDomain [lindex [::tycho::query "Domain A" \
-            [list \
-            [list radio domainName {Domain A} \
-            [::tycho::DomainInfo::domains] \
-            $domainA]]] 1 ]
+    set tmpDomain [::tycho::DomainInfo::domainBrowser "Domain A" "$domainA"]
     if {$tmpDomain != ""} {
         set domainA $tmpDomain
     }
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
-    toolbar insert domainAButton "Change Domain A: $domainA" 
+    toolbar buttonconfigure domainAButton -text "Change Domain A: $domainA" 
     modifyAfterDomainChange
 }
 
@@ -180,18 +183,14 @@ body ::tycho::Retarget::changeDomainA {} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainB {} {
-    set tmpDomain [lindex [::tycho::query "Domain B" \
-            [list \
-            [list radio domainName {Domain B} \
-            [::tycho::DomainInfo::domains] \
-            $domainB]]] 1 ]
+    set tmpDomain [::tycho::DomainInfo::domainBrowser "Domain B" "$domainB"]
     if {$tmpDomain != ""} {
         set domainB $tmpDomain
     }
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
-    toolbar insert domainBButton "Change Domain B: $domainB" 
+    toolbar buttonconfigure domainBButton -text "Change Domain B: $domainB" 
     modifyAfterDomainChange
 }
 
@@ -207,8 +206,10 @@ body ::tycho::Retarget::checkUniverse {} {
     set starList [$editor stars]
     if {$dirtyCompareDomains} {
 	putStatus "Regenerating Domain Information, please wait."
-	compareDomains [$editor universeName] $starList
+        update idletasks
+	busy $this compareDomains [$editor universeName] $starList
 	putStatus ""
+        ::tycho::safeUpdate $this
     }
     
 }
@@ -294,8 +295,8 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             [llength [lindex $clashList 4]] \
             [llength [lindex $clashList 5]] \
             [llength [lindex $clashList 0]] \
-            [llength [knownlist $domainB]] \
-            [llength [knownlist $domainA]]
+            [llength [::pitcl::knownBlocks $domainB]] \
+            [llength [::pitcl::knownBlocks $domainA]]
 
     #[graph] redrawGraph
     set dirtyCompareDomains 0
@@ -320,12 +321,10 @@ body ::tycho::Retarget::help {} {
 # Print the same star from two different domains
 # This procedure is called when the user double clicks on a star name
 body ::tycho::Retarget::printStars { starName relation domainA domainB} {
-    domain $domainA
-    if [catch {set domainAPrint [::print $starName]}] {
+    if [catch {set domainAPrint [::pitcl::print $starName $domainA]}] {
         set domainAPrint "Star $starName is not present in domain $domainA"
     }
-    domain $domainB
-    if [catch {set domainBPrint [::print $starName]}] {
+    if [catch {set domainBPrint [::pitcl::print $starName $domainB]}] {
         set domainBPrint "Star $starName is not present in domain $domainB"
     }
     
@@ -370,10 +369,12 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
         <H1>$starName star in domains $domainA and $domainB</H1>
         $relationMessage
 
-        <tcl><pre>
+        <tcl quiet><pre>
+        # Click here to see the sources for $domainA $starName
         ::tycho::view EditPtlang -star {$domainA $starName}
         </pre></tcl>
-        <tcl><pre>
+        <tcl quiet><pre>
+        # Click here to see the sources for $domainB $starName
         ::tycho::view EditPtlang -star {$domainB $starName}
         </pre></tcl>
         <H2>$domainA Domain</H2>
