@@ -42,6 +42,7 @@ static const char file_id[] = "FSMTarget.cc";
 #include "Galaxy.h"
 #include "FSMTarget.h"
 #include "FSMScheduler.h"
+#include "MixedScheduler.h"
 
 FSMTarget::FSMTarget() :
 Target("default-FSM", "FSMStar", "default FSM target")
@@ -50,6 +51,8 @@ Target("default-FSM", "FSMStar", "default FSM target")
 	   "Assign the name for each PortHole in the input MultiPortHole. Each name should be embraced in a pair of double quotes."));
   addState(outputNameMap.setState("outputNameMap", this, "",
 	   "Assign the name for each PortHole in the output MultiPortHole. Each name should be embraced in a pair of double quotes."));
+  addState(internalNameMap.setState("internalNameMap", this, "",
+	   "Assign the name for each internal event. Each name should be embraced in a pair of double quotes."));
   addState(machineType.setState("machineType", this, "Moore",
 	   "Moore or Mealy machine."));
   addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
@@ -63,17 +66,30 @@ Block* FSMTarget::makeNew() const {
 FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
-  FSMScheduler* fsmSched = new FSMScheduler;
+  FSMScheduler* fsmSched;
+  if (!strcmp(machineType,"Mixed")) {
+    fsmSched = new MixedScheduler;
+  } else if (!strcmp(machineType,"Moore") || !strcmp(machineType,"Mealy")) {
+    fsmSched = new BasicScheduler;
+  } else {
+      Error::abortRun("FSMTarget: ", 
+		      "Unregconized machine type!");
+      return; 
+  }
 
   // setSched deletes the old scheduler.
   setSched(fsmSched);
+
   delete [] fsmSched->inputNameMap;
-  fsmSched->inputNameMap = savestring((const char*)inputNameMap);
+  fsmSched->inputNameMap = savestring(inputNameMap);
   delete [] fsmSched->outputNameMap;
-  fsmSched->outputNameMap = savestring((const char*)outputNameMap);
+  fsmSched->outputNameMap = savestring(outputNameMap);
+  delete [] fsmSched->internalNameMap;
+  fsmSched->internalNameMap = savestring(internalNameMap);
   delete [] fsmSched->machineType;
-  fsmSched->machineType = savestring((const char*)machineType);
+  fsmSched->machineType = savestring(machineType);
 //	fsmSched->schedulePeriod = schedulePeriod;
+
   if (galaxy()) fsmSched->setGalaxy(*galaxy());
 
   Target::setup();

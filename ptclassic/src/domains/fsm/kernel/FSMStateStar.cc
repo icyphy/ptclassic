@@ -46,7 +46,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Wormhole.h"
 #include "KnownBlock.h"
 #include "InfString.h"
+#include "utilities.h"
 #include "ptk.h"
+
 
 ISA_FUNC(FSMStateStar,FSMStar);
 
@@ -69,7 +71,7 @@ FSMStateStar::~FSMStateStar() {
 void FSMStateStar::setup() {
     // Parse the conditions.
     delete [] parsedCond;
-    if (!(parsedCond = strParser((const char*)conditions,numConds)))
+    if (!(parsedCond = strParser(conditions, numConds, "double-quote")))
       return;
     if (numConds != stateOut.numberPorts()) {
       InfString buf  = "The number of specified conditions ";
@@ -88,7 +90,7 @@ void FSMStateStar::setup() {
 // Return (1) "condNum", condition #, which is TRUE at this transition,
 // and (2) the corresponding connected state.
 // If no condition is TRUE, return (1) condNum = -1 and (2) "this" state.
-FSMStateStar * FSMStateStar::nextState (int& condNum) {
+FSMStateStar * FSMStateStar::nextState (int& condNum, int) {
     InfString buf;
 
     int* result = new int[numConds];
@@ -139,7 +141,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
     buf = "Transition conflict. Conditions ";
     for (i = 0; i < numConds; i++) {
       if (result[i] == 1) {
-	buf << i+1 << ", ";
+	buf << i << ", ";
       }
     }
     buf << "are all satisfied at the same time.";
@@ -249,6 +251,8 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	buf << where_defined;
 	buf << "/";
 	buf << galname;
+	buf << ". The error message in Tcl : ";
+	buf << myInterp->result;
 	Error::abortRun(*this,(const char*)buf);
 	return 0;
       }
@@ -265,6 +269,8 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	buf << where_defined;
 	buf << "/";
 	buf << galname;
+	buf << ". The error message in Tcl : ";
+	buf << myInterp->result;
 	Error::abortRun(*this,(const char*)buf);
 	return NULL;
       }
@@ -274,145 +280,118 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     }
 }
 
-Geodesic** FSMStateStar::setupGeodesic (Star* worm, MultiPortHole& mph) {
-    Geodesic** myGeoArray = (Geodesic**) new (Geodesic*) [mph.numberPorts()];
-
-    MPHIter nextp(mph);
+int FSMStateStar::ioNmLists(StringList& inNmList, StringList& outNmList, Star* worm) {
+    // Find the input/output port names of the worm, 
+    // and put them into inNmList/outNmList.
+    
+    // Check the PortHoles in the worm.
+    BlockPortIter nextp(*worm);
     PortHole* p;
-    int index = 0;
     while ((p = nextp++) != 0) {
-      PortHole* ph = worm->portWithName(p->name());
-      if (!ph) {
-	Error::abortRun(*this, "Cannot find porthole named ", p->name(),
-			" in the replacement block.");
-	delete [] myGeoArray;
-	return 0;
-      }
-
-      // Create a geodesic to send data to the wormhole.
-      Geodesic* geo = ph->allocateGeodesic();
-      if (!geo) {
-	Error::abortRun(*this, "Failed to allocate geodesic for ",
-			"the porthole named ", ph->name());
-	delete [] myGeoArray;
-	return 0;
-      }
-
-      // Dummy output port used to fool the geodesic into thinking it
-      // is fully connected.
-      PortHole* dummyPort = new PortHole;
-
-      // Set the desination port for the geodesic.
-      // We also have to set a source port, although we don't use it.
-      dummyPort->setPort("dummyPort",(Block*)0,FLOAT);
-      if (mph.isItInput()) {
-	geo->setSourcePort(*dummyPort, 0, "");
-	geo->setDestPort(*ph);
-	geo->initialize();
-      }
-      else {
-	geo->setSourcePort(*ph,0,"");
-	geo->setDestPort(*dummyPort);
-	geo->initialize();
-      }
-
-      myGeoArray[index] = geo;
-      index++;
+      if (p->isItInput())  inNmList << p->name();
+      else  outNmList << p->name();
     }
+
+     // Check the MultiPortHoles in the worm.
+    BlockMPHIter nextmp(*worm);
+    MultiPortHole* mp;
+    while ((mp = nextmp++) != 0) {
+      if (mp->isItInput())   inNmList << mp->name();
+      else  outNmList << mp->name();
+    }
+
+    return TRUE;
+}
+
+Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Star* worm, StringList& pNmList) {
+    // Set up the Geodesics for the portholes of the worm with the names 
+    // in the pNmList. In addition, it collects all the corresponding 
+    // portholes in mph and puts them into pList.
+
+    if (pNmList.numPieces() != mph->numberPorts()) {
+      InfString buf = "The number of ";
+      buf << mph->isItInput() ? "input" : "output";
+      buf << " PortHoles in the Wormhole \"";
+      buf << worm->name();
+      buf << "\" does not match the number in this FSM.";
+      Error::abortRun(*this,buf);
+      return NULL;
+    }
+
+    Geodesic** myGeoArray = new (Geodesic*) [pNmList.numPieces()];
+
+    int index = 0;
+    StringListIter nextNm(pNmList);
+    const char* pNm;
+    while ((pNm = nextNm++) != 0) {
+	MPHIter nextp(*mph);
+	PortHole* p;
+	while ((p = nextp++) != 0) {
+	  if (!strcmp(p->name(),pNm))  break;
+	}
+	if (p == 0) {
+	  Error::abortRun(*this, "There does not exist a matched Porthole in ",
+			  "this FSM corresponding to the name: ", pNm);
+	  delete [] myGeoArray;
+	  return NULL;
+	}
+	pList.put(*p);
+
+        PortHole* wp = worm->portWithName(pNm);
+	if (!wp) {
+	  Error::abortRun(*this, "There is no PortHole named \"",pNm,
+			  "\" in the wormhole.");
+	  return NULL;
+	}
+	// Create a geodesic to send data to the wormhole.
+	Geodesic* geo = wp->allocateGeodesic();
+	if (!geo) {
+	  Error::abortRun(*this, "Failed to allocate geodesic for ",
+			  "the porthole named ", pNm);
+	  delete [] myGeoArray;
+	  return NULL;
+	}
+
+	// Dummy output port used to fool the geodesic into thinking it
+	// is fully connected.
+	PortHole* dummyPort = new PortHole;
+
+	// Set the desination port for the geodesic.
+	// We also have to set a source port, although we don't use it.
+	dummyPort->setPort("dummyPort",(Block*)0,FLOAT);
+	if (mph->isItInput()) {
+	  geo->setSourcePort(*dummyPort, 0, "");
+	  geo->setDestPort(*wp);
+	  geo->initialize();
+	}
+	else {
+	  geo->setSourcePort(*wp,0,"");
+	  geo->setDestPort(*dummyPort);
+	  geo->initialize();
+	}
+	
+	myGeoArray[index] = geo;
+	index++;
+    }   // end of while ((pNm = nextNm++) != 0) 
 
     return myGeoArray;
-}
-
-char** FSMStateStar::strParser(const char* strings,int& numStr) {
-    char** parsedStr = 0;
-    int numQuote = 0;
-    int start = 0;
-    int end = 0;
-
-    while (strings[start] != '\0') {
-      if (strings[start] == '\"') numQuote++;
-      start++;
-    }
-    if (numQuote%2 != 0) {
-      Error::abortRun(*this, "Cannot parse the strings. ",
-		      "Unmatched double-quote.");
-      return 0;	      
-    }
-    parsedStr = (char **) new (char *)[numQuote/2];
-    
-    start = 0;
-    end = 0;
-    numStr = 0;
-    while (1) {
-      // Skip all the prefix spaces.
-      while (strings[start] == ' ') start++;
-      
-      if (strings[start] == '\0') break ; // Hit end of string.
-      
-      // Find the left-side quote.
-      if (strings[start] != '\"') {
-	Error::abortRun(*this, "Cannot parse the strings. ",
-		"Each string must be surrounded by a pair of double-quotes.");
-	return 0;
-      }
-      start++;
-      end = start;
-      
-      // Find the right-side quote.
-      while (strings[end]!='\"') end++;
-	
-      parsedStr[numStr] = (char *) new char[end-start+1];
-      for (int i = 0; i<end-start; i++) {
-	parsedStr[numStr][i] = strings[start+i];
-      }
-      parsedStr[numStr][i] = '\0'; 
-	
-      numStr++;
-	
-      start = end+1;
-    }
-    return parsedStr;
-}
-
-double* FSMStateStar::str2values(const char* string,int& numValues) {
-    int start = 0;
-    int index;
-
-    numValues = 0;
-    while (1) {
-      // Skip all the prefix spaces.
-      while (string[start] == ' ') start++;
-
-      if (string[start] == '\0') break ; // Hit end of string.
-      else numValues++;
-
-      while (string[start] != ' ' && string[start] != '\0') start++;
-    }
-    double* values = new double[numValues];
-
-    start = 0;
-    for (index=0; index<numValues; index++) {
-      while (string[start] == ' ') start++;
-
-      InfString buf ="";
-      while (string[start] != ' ' && string[start] != '\0') {
-	buf << string[start];
-	start++;
-      }
-
-      if (Tcl_ExprDouble(myInterp, (char*)buf, &(values[index])) != TCL_OK) {
-	Error::abortRun(*this,"Cannot convert the string into a float array.");
-	delete [] values;
-	return 0;
-      }
-    }
-
-    return values;
 }
 
 int FSMStateStar::doAction (int) {
     Error::abortRun(*this, "doAction() is virtual and needs to be ",
 		    "redefined in derived class.");
+    return FALSE;
+}
+
+int FSMStateStar::doInMach (int) {
+    Error::abortRun(*this, "There is no internal machine in this type ",
+		    "of machine.");
+    return FALSE;
+}
+
+int FSMStateStar::getEntryType (int) {
+    Error::abortRun(*this, "There is no entry type for each transition ",
+		    "in this type of machine.");
     return FALSE;
 }
 

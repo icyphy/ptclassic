@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -63,11 +63,14 @@ public:
 	/*virtual*/ const char* domain();
 
 protected:
-	// Input name map
+	// Input name maps
         StringState inputNameMap;         
 
-	// Output name map
+	// Output name maps
 	StringState outputNameMap;   
+
+	// Internal event name maps
+	StringState internalNameMap;   
 
         // type of this finite state machine.
 	StringState machineType;
