@@ -43,18 +43,19 @@ extern const char ACSdomainName[];
 const char* ACSCorona :: domain () const { return ACSdomainName;}
 
 // isA
-ISA_FUNC(ACSCorona, CGStar);
+ISA_FUNC(ACSCorona, ACSStar);
 
 // select Core to be used
 int ACSCorona::setCore(const char *coreName)
 {
-    // iterate through list until Core is found, if not return null
-    return 0;
+  ListIter iterator(coreList);
+  // iterate through list until Core is found, if not return null
+  return 0;
 }
 
 // register Core in the list
 int ACSCorona::registerCore(ACSCore &core, const char* implementationName)
 {
-    // store pointer to core in the CoreList
-    return 0;
+  // store pointer to core in the CoreList
+  return 0;
 }
