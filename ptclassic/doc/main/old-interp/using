@@ -67,10 +67,12 @@ and connections among them.
 .IE "domain command"
 \*(PT supports multiple simulation domains, and so does the \*(PT
 interpreter.  Before creating a simulation environment and running
-it, it is necessary to establish the domain.  Currently, three domains
+it, it is necessary to establish the domain.  Currently, five domains
 are linked into the standard interpreter:
 synchronous data flow (SDF), discrete event (DE), and
-dynamic data flow (DDF).
+dynamic data flow (DDF), together with two experimental domains;
+the Thor digital logic simulator (Thor), and a dummy code generation
+domain (CG).
 The interpreter has a
 .i "current domain" ;
 this is initially
@@ -223,16 +225,11 @@ An example is:
 .(c
 (input galaxyin (mystar starin))
 .)c
-Note: this will not work if
+This also works if
 .c starin
 is a
 .c MultiPortHole
-(see the
-.c numports
-command if you need to connect a
-.c "Galaxy PortHole"
-to a 
-.c MultiPortHole ).
+(the galaxy will then appear to have a multiporthole as well).
 .pp
 The
 .c output
@@ -243,6 +240,17 @@ except that it's for output portholes.  Example:
 .(c
 (output galaxyout (mystar galaxyout))
 .)c
+.pp
+The
+.c alias
+.IE "alias command"
+command can be used instead of either
+.c input
+or
+.c output ;
+it figures out whether an input or output
+.c Galaxy
+porthole is needed based on the type of the star's porthole.
 .H3 "Defining States for a Galaxy
 .pp
 A
@@ -324,6 +332,9 @@ FALSE have value 0; PI has the value 3.14159... .  Example:
 .(c
 (state angularFreq "2*PI*freq")
 .)c
+.pp
+The full syntax of state initial value strings is explained in the
+manual section for the graphical interface (pigi).
 .H3 "Setting the Value of States
 .pp
 The
@@ -478,10 +489,8 @@ are created, they may be referred to by appending
 where
 .i n
 is an integer, to the multiporthole name, and enclosing the
-resulting name in quotes.  There are two reasons to use this command:
-to connect the portholes in random order, or if one of the portholes
-is to be aliased to a
-.c "Galaxy PortHole" .
+resulting name in quotes.  The main reason to use this command is
+to allow the portholes to be connected in random order.
 Here is an example:
 .(c
 (star summer FloatSum)
@@ -807,6 +816,52 @@ command removes a node from the current galaxy.  Syntax:
 .(c
 (delnode \fInode\fP)
 .)c
+.H2 "Targets"
+.IE "targets"
+.pp
+\*(PT uses a structure called a \fItarget\fP to control the execution
+of a simulation, or, in code generation, to specify the target architecture
+for code generation.  There is always a target; by default (if you issue
+no target commands), your target will have the name
+.c default-XXX ,
+where
+.c XXX
+is replaced by the name of the current domain.  Alternate targets for
+simulation can be used to specify different behavior (for example, to
+use a different scheduler).  For code generation, the target contains
+information about the target of compilation, has methods for downloading
+code and starting execution, etc.
+.H3 "What Targets are Available?"
+.pp
+.IE "targets command"
+The command
+.(c
+(targets)
+.)c
+displays the list of targets available for the current domain.
+.H3 "Changing the Target"
+.pp
+.IE "target command"
+The command
+.(c
+(target)
+.)c
+displays the target for the universe or current galaxy, together with
+its parameters.  Specifying an argument, e.g.
+.(c
+(target \fInew-target-name\fP)
+.)c
+changes the target to \fInew-target-name\fP.
+.H3 "Changing Target Parameters"
+.pp
+.IE "targetparam command"
+.IE "target parameters"
+Target parameters may be changed with the
+.c targetparam
+command.  The syntax is
+.(c
+(targetparam \fIparam-name\fP "\fInew-value\fP")
+.)c
 .H2 "Miscellaneous Commands
 .pp
 This section describes the remaining interpreter commands.
@@ -842,7 +897,7 @@ meant to be read by the load command end in ".pt".  Example:
 The tilde notation for users' home directories is allowed; for
 example, try
 .(c
-(load "~ptolemy/demo/figure.pt")
+(load "~ptolemy/demo/interp/sdf/liss.pt")
 .)c
 .H3 "Changing the seed of random number generation
 The
@@ -855,7 +910,7 @@ value is 1.  The syntax is
 .)c
 where 
 .i n
-is a long integer.
+is an unsigned integer.
 .H3 "Changing the current directory"
 .pp
 The
@@ -878,7 +933,7 @@ The interpreter has the ability to extend itself by linking in outside
 object files; the object files in question must define single stars
 (they will have the right format if they are produced from preprocessor
 input).  Unlike Pigi, the graphical interface, the interpreter will not
-automatically run the preprocessor and linker; it expects to be given
+automatically run the preprocessor and compiler; it expects to be given
 object files that have already been compiled.  The syntax is
 .(c
 (link "\fIobject-file-name\fP")
@@ -911,6 +966,7 @@ command executes a Unix shell command.  Example:
 .(c
 (exec "ls *.pt")
 .)c
+The command must be quoted.
 .H3 "Giving Up
 .pp
 The
@@ -937,11 +993,6 @@ The syntax is
 .)c
 .H2 "Limitations of the Interpreter"
 .pp
-There is currently no way to add a
-.c MultiPortHole
-to a
-.c Galaxy.
-.pp
 The
 .c dump
 command should pipe through
@@ -955,6 +1006,8 @@ The problem with redefining galaxies has been solved.
 It is no longer a fatal error to run a disconnected universe; you
 get an error message and you may then add the missing connections
 and run again.
+.pp
+Galaxies can now have multiportholes.
 .H2 "A Wormhole example"
 .pp
 .IE "wormholes in the interpreter"
