@@ -722,10 +722,13 @@ MultiPortHole :: newName () {
 
 PortHole& MultiPortHole :: installPort(PortHole& p) {
 	ports.put(p);
-	parent()->addPort(p.setPort(newName(), parent(), type()));
+
+	p.setPort(newName(), parent(), type());
+
+	if (parent()) parent()->addPort(p);
+	
 // for ANYTYPE multiportholes, all ports are resolved to be the same type.
-	if (type() == ANYTYPE)
-		p.inheritTypeFrom(*this);
+	if (type() == ANYTYPE) p.inheritTypeFrom(*this);
 	// we can do the following as a friend function
 	letMeKnownToChild(p);
 	return p;
