@@ -730,7 +730,7 @@ body ::tycho::Slate::dtag {tag {delete {}}} {
 # <li><b>below</b> _id_: Return the picture or item immediately below
 # _id_. Currently, this will not work if _id_ is a tag.
 #
-# <li><b>closest _x y ?halo? ?start?_: Return the picture or item
+# <li><b>closest</b> _x y ?halo? ?start?_: Return the picture or item
 # closest to the point _(x,y)_. Currently, this mode is not
 # working correctly.
 #
