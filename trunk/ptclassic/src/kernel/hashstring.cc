@@ -20,13 +20,17 @@ extern "C" char *strcpy(char*,const char*);
 struct hent {
 	char *txt;
 	struct hent *link;
-	hent() : txt(0), link(0) {}
+	// null constructor: we rely on static variables starting at zero,
+	// since hashstring may get called before table is constructed.
+	hent() {}
+	// this one is used to initialize extra hash entries on chains.
+	hent(char* c) : txt(c), link(0) {}
 	~hent();
 };
 
 // destructor: recursive
 hent::~hent() {
-	LOG_DEL; delete txt;
+	LOG_DEL; delete [] txt;
 	LOG_DEL; delete link;
 }
 
@@ -62,7 +66,7 @@ const char * hashstring (const char* text) {
 		len = s - text;
 		LOG_NEW; p->txt = new char[len+1];
 		strcpy (p->txt, text);
-		LOG_NEW; p->link = new hent;
+		LOG_NEW; p->link = new hent(0);
 		hs_entries++;
 	}
 	return p->txt;
