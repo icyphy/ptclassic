@@ -48,7 +48,7 @@ EXTRA_SRCS =	\
 	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
-	TclConsoleHelp.html \
+	TclShellHelp.html \
 	contents.html
 
 MISC_FILES =
