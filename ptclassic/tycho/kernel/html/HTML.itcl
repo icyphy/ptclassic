@@ -544,7 +544,7 @@ body ::tycho::HTML::raiseWindow {} {
     if [sourcewinIsMine] {
 	$sourcewin raiseWindow
     }
-    ::tycho::View::raiseWindow
+    ::tycho::TWidget::raiseWindow
 }
 
 #####################################################################
