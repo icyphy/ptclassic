@@ -56,17 +56,7 @@ class ::tycho::EditCpp {
 ###################################################################
 #
 body ::tycho::EditCpp::constructor {args} {
-    
     eval itk_initialize $args
-
-    # Read contents from the specified file, unless the name is "NoName".
-    # This needs to be repeated from the baseclass because the -file
-    # option will not have been processed by the time the base class
-    # constructor is executed.
-    if {$file != {NoName}} {
-	$itk_component(text) initFile $file
-	markUnmodified
-    }
 }
 
 ###################################################################
