@@ -347,9 +347,16 @@ _xpSeqDataLegendCalc( XPSeqData *pSeqData) {
       None, None, NULL, wantX, wantY, 0, NULL) != TCL_OK )
 	return TCL_ERROR;
     pSeqData->legendPixmapWin = pSeqWdg->tkwin;
+#if TK_MAJOR_VERSION == 4
+    /* TK4.0b2 has Tk_GetPixmap */
+    if ( (pSeqData->legendPixmap = Tk_GetPixmap( pSeqWdg->ip, pSeqWdg->tkwin,
+      wantX, wantY, 0)) == None )
+	return TCL_ERROR;
+#else
     if ( (pSeqData->legendPixmap = Tk_GetPixmap( pSeqWdg->ip, pSeqWdg->tkwin,
       pSeqData->fullName)) == None )
 	return TCL_ERROR;
+#endif
     return TCL_OK;
 }
 
