@@ -46,7 +46,8 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	newslate.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
