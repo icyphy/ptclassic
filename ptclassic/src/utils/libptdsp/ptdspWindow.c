@@ -41,8 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* Returns the window identification number of a window name.
    The window name is passed in as a char string, and this function
-   returns the window indentification number as defined in
-   ptdspWindow.h. 
+   returns the window identification number as defined in ptdspWindow.h. 
    The possible windows are Rectangle, Bartlett, Hanning, Hamming,
    Blackman, SteepBlackman, and Kaiser.
 */
