@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+    Author:	T.M. Parks
+    Created:	6 February 1992
 
     Code for domain-specific PortHole classes.
 */
@@ -43,7 +43,7 @@ static const char file_id[] = "$RCSfile$";
 #include <strstream.h>
 
 // Class identification.
-ISA_FUNC(MTDFPortHole,PortHole);
+ISA_FUNC(MTDFPortHole,DFPortHole);
 
 // Allocate and return a MTDFGeodesic.
 Geodesic* MTDFPortHole::allocateGeodesic()
@@ -60,6 +60,11 @@ Geodesic* MTDFPortHole::allocateGeodesic()
     return g;
 }
 
+void InMTDFPort::wait()
+{
+    receiveData();
+}
+
 /* Because MTDFGeodsic::get() may block, care must be taken to keep the buffer
    and Plasma consistent.
 */
@@ -68,7 +73,7 @@ void MTDFPortHole::getParticle()
     Particle **pOld, *pNew;
 
     // Avoid thrashing by waiting until the Geodesic is full.
-    myGeodesic->wait(numberTokens);
+    myGeodesic->wait();
 
     // Transfer numberTokens Particles from the Geodesic to the buffer.
     for(int i = numberTokens; i>0; i--)
@@ -87,7 +92,7 @@ void MTDFPortHole::getParticle()
     }
 }
 
-/* Redefining PortHole::putParticle() is necessary only because
+/* Redefining DFPortHole::putParticle() is necessary only because
    Geodesic::put() is not virtual.
 */
 void MTDFPortHole::putParticle()
@@ -120,6 +125,13 @@ void MTDFPortHole::putParticle()
 	// Replace the used-up Particle with one recycled from the Plasma.
 	*p = myPlasma->get();
     }
+}
+
+PortHole& MTDFPortHole::setPort(const char* name, Block* parent, DataType type,
+    int num, int delay)
+{
+    if (dynamic = (num < 0)) num = -num;
+    return DFPortHole::setPort(name, parent, type, num, delay);
 }
 
 // Input/output identification.
