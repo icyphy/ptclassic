@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Soonhoi Ha and E. A. Lee
+ Programmer: Soonhoi Ha, E. A. Lee, and T. M. Parks
 
  Basic target for C code generation.
 
@@ -50,12 +50,16 @@ class SDFScheduler;
 class CGCTarget : public HLLTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
-	Block* makeNew() const;
-	void headerCode();
-	void setup();
-	void wrapup();
-	/* virtual */ void beginIteration(int repetitions, int depth);
-	/* virtual */ void endIteration(int repetitions, int depth);
+	/*virtual*/ Block* makeNew() const;
+
+	/*virtual*/ int compileCode();
+	/*virtual*/ int runCode();
+
+	/*virtual*/ StringList comment(const char*, const char*,
+	    const char*, const char*);
+
+	/*virtual*/ void beginIteration(int repetitions, int depth);
+	/*virtual*/ void endIteration(int repetitions, int depth);
 
 	// name the offset-pointer of portholes
 	StringList offsetName(const CGCPortHole* p); 
@@ -71,10 +75,6 @@ public:
 	void setHostName(const char* s) { hostMachine = s; }
 	const char* hostName() { return (const char*) hostMachine; }
 
-	// compile and run the code
-	int compileCode();
-	int runCode();
-
 	// redefine writeCode: default file is "code.c"
 	void writeCode(const char* name = NULL);
 
@@ -83,10 +83,10 @@ public:
 	int useStaticBuffering() { return int(staticBuffering); }
 
 	// incrementally add a star to the code
-	/* virtual */ int incrementalAdd(CGStar* s, int flag = 1);
+	/*virtual*/ int incrementalAdd(CGStar* s, int flag = 1);
 
 	// incremental addition of a Galaxy code
-	/* virtual */ int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
+	/*virtual*/ int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
 
 	// have these methods for CGCDDFTarget.
 	// Later, CGCDDFTarget will be merged into this CGCTarget. Then,
@@ -102,6 +102,9 @@ public:
 	int makingFunc() { return (getStream("mainInit") != &mainInit); }
 
 protected:
+
+	/*virtual*/ void setup();
+
 	char *schedFileName;
 
 	// code strings
@@ -132,7 +135,7 @@ protected:
 	virtual void initCodeStrings();
 
 	// Splice in stars.
-	/* virtual */ int modifyGalaxy();
+	/*virtual*/ int modifyGalaxy();
 
 	// buffer size determination
 	int allocateMemory();
@@ -140,22 +143,22 @@ protected:
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit();
 
-	// redefine frameCode() method
-	/* virtual */ void frameCode();
+	// Initial stage of code generation.
+	/*virtual*/ void headerCode();
+
+	// Combine all sections of code;
+	/*virtual*/ void frameCode();
 
 	// redefine compileRun() method to switch the code streams stars refer
 	// to.
-	/* virtual */ void compileRun(SDFScheduler*);
-
-	// redefine, compile and run code
-	/* virtual */ int wormLoadCode();
+	/*virtual*/ void compileRun(SDFScheduler*);
 
 	// Redefine:
 	// Add wormInputCode after iteration declaration and before the
 	// iteration body, and wormOutputCode just before the closure of
 	// the iteration.
-	/* virtual */ void wormInputCode(PortHole&);
-	/* virtual */ void wormOutputCode(PortHole&);
+	/*virtual*/ void wormInputCode(PortHole&);
+	/*virtual*/ void wormOutputCode(PortHole&);
 
 	// return a name that can be used as C identifier, derived from
 	// the actual name
@@ -165,7 +168,6 @@ protected:
 
 	// states
 	IntState staticBuffering;
-	IntState doCompile;
 	StringState hostMachine;
 	StringState funcName;
 	StringState compileCommand;
@@ -181,9 +183,6 @@ protected:
 	// define the data structure of the galaxy and star
 	virtual void galDataStruct(Galaxy& galaxy, int level=0);
 	virtual void starDataStruct(CGCStar* block, int level=0);
-
-	// make a comment explaining the following code.
-	StringList sectionComment(const char* s);
 
 	// splice copy stars or type conversion stars if necessary.
 	void addSpliceStars();
