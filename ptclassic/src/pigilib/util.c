@@ -453,19 +453,26 @@ octObject *instPtr;
     octObject mFacet = {OCT_UNDEFINED_OBJECT};
     static char domain[32];
     char srcName[512], *fullName;
+    char* retval = 0;
+
     if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr)) {
-	    return setCurDomainF(instPtr);
+	return setCurDomainF(instPtr);
     }
     if (!MyOpenMaster(&mFacet, instPtr, "interface", "r")) {
-	    PrintErr(ErrGet());
-	    return NULL;
+	PrintErr(ErrGet());
+	return NULL;
     }
+
     octFullName(&mFacet, &fullName);
     if (!IconFileToSourceFile(fullName, srcName, domain)) {
-	    PrintErr(ErrGet());
-	    return NULL;
+	PrintErr(ErrGet());
     }
-    return domain;
+    else {
+	retval = domain;
+    }
+    free(fullName);
+    FreeOctMembers(&mFacet);
+    return(retval);
 }
 
 /* Set the domain to correspond to an instance. */
