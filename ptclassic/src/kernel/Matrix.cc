@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 #include "Error.h"
 
-#define SMALL_STRING 32   // should be same as for StringList.cc
+#define SMALL_STRING 32
 
 /**************************************************************************
  Global operators, not members of the various Matrix classes.
