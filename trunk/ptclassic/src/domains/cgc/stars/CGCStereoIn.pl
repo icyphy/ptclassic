@@ -118,7 +118,7 @@ provisions.
 			  << "1);\n";
 	addCode(controlParameters);
       }
-    addCode("$starSymbol(counter) = 0;\n");
+    
 
   }
   go {

@@ -119,7 +119,7 @@ provisions.
 			  << "0);\n";
 	addCode(controlParameters);
       }
-    addCode("$starSymbol(counter) = 0;\n");
+
 
   }
 
