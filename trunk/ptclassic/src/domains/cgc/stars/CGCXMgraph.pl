@@ -95,7 +95,7 @@ for a complete explanation of the options.
                 StringList s;
 		s << "    FILE* $starSymbol(fp)[";
 		s << input.numberPorts() << "];";
-                addDeclaration(processCode(s));
+                addDeclaration(s);
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
