@@ -250,39 +250,58 @@ StringList CGCTarget::pragma (const char* parentname,
 }
 
 static char* complexDecl =
-"\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
-"\n typedef struct complex_data { double real; double imag; } complex; \n"
+"\n/* Define a complex data type if one has not been defined */\n"
+"#if !defined(COMPLEX_DATA)\n"
+"#define COMPLEX_DATA 1\n"
+"typedef struct complex_data { double real; double imag; } complex;\n"
 "#endif\n";
 
-static char* setargHead =					
-"void set_arg_val(char *arg[]) {\n"				
-"\tint i;\n"							
-"\tfor(i = 1; arg[i]; i++) {\n"					
-"\t\tif((!strcmp(arg[i], \"-help\")) \\\n|| (!strcmp(arg[i], \"-HELP\")) "
-"\\\n|| (!strcmp(arg[i], \"-h\"))) {\n"				
-"\t\t\tprintf(\"Settable states are :\\\n\\n";			
+static char* prototypeDecl =
+"\n/* Define macro for prototyping functions on ANSI & non-ANSI compilers */\n"
+"#ifndef ARGS\n"
+"#if defined(__STDC__) || defined(__cplusplus)\n"
+"#define ARGS(args) args\n"
+"#else\n"
+"#define ARGS(args) ()\n"
+"#endif\n"
+"#endif\n\n";
 
+static char* trueFalseDecl =
+"\n/* Define constants TRUE and FALSE for portability */\n"
+"#ifndef TRUE\n"
+"#define TRUE 1\n"
+"#endif\n"
+"#ifndef FALSE\n"
+"#define FALSE 0\n"
+"#endif\n";
+
+static char* setargHead =
+"void set_arg_val(char *arg[]) {\n"
+"\tint i;\n"
+"\tfor(i = 1; arg[i]; i++) {\n"
+"\t\tif((!strcmp(arg[i], \"-help\")) \\\n|| (!strcmp(arg[i], \"-HELP\")) "
+"\\\n|| (!strcmp(arg[i], \"-h\"))) {\n"
+"\t\t\tprintf(\"Settable states are :\\\n\\n";
+
+// Initial stage of code generation.
+void CGCTarget::headerCode() {
+    include << prototypeDecl;
+}
 
 void CGCTarget::trailerCode()
 {
-    include << complexDecl;		
+    include << trueFalseDecl << complexDecl;
 
     if (galaxy() && !SimControl::haltRequested()) {
-        declareGalaxy(*galaxy());
+	declareGalaxy(*galaxy());
 	HLLTarget::trailerCode();
     }
-}
-
-// Initial stage of code generation.
-void CGCTarget::headerCode()
-{
-    // Do nothing.
 }
 
 CodeStream CGCTarget::mainLoopBody() {
     CodeStream body;
     defaultStream = &body;
-    int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+    int iterations = inWormHole() ? -1 : (int)scheduler()->getStopTime();
     beginIteration(iterations,0);
     body << wormIn;
     body << mainLoop;
@@ -310,22 +329,24 @@ void CGCTarget :: frameCode () {
     // main function, declarations must appear before any code.
 
     StringList functionDeclaration = "int ";
-    functionDeclaration << (const char*)funcName << "(int argc, char *argv[])";
+    const char* funcArgs = "(int argc, char *argv[])";
+    functionDeclaration << (const char*)funcName << funcArgs;
 
     myCode << headerComment() << include
-	   << "\nextern " << functionDeclaration << ";\n\n"
+	   << "\nextern " << (const char*) funcName
+			  << " ARGS(" << funcArgs << ");\n\n"
 	   << globalDecls << procedures;
 
     // If there are command-line settable states in the target,
     // add the supporting code.
     if ((cmdargStruct.length() != 0)) {				
       myCode << "\nstruct {\n" << cmdargStruct			
-	     << "} arg_store = {" << cmdargStructInit		
-    	   << "};\n\n"						
-    	   << setargHead << setargFuncHelp			
-    	   << "\");\n\t\t\texit(0);\n\t\t}\n"			
-    	   << setargFunc << "\t}\n}\n\n";			
-    }								
+	     << "} arg_store = {" << cmdargStructInit
+	     << "};\n\n"
+	     << setargHead << setargFuncHelp
+	     << "\");\n\t\t\texit(0);\n\t\t}\n"
+	     << setargFunc << "\t}\n}\n\n";			
+    }
 
     myCode << comment("main function")
 	   << functionDeclaration << " {\n"
