@@ -68,6 +68,8 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
     Error::error(*this, "Connecting newSignal is NULL");
   }
 
+  mapping = newSignal->name;
+
   // If this is an OUT port, set the signal's source.
   if (!strcmp(direction,"OUT")) {
     // Make sure there isn't already a source for the signal.
