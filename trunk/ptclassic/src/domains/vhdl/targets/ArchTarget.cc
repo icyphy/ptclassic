@@ -107,7 +107,7 @@ int ArchTarget :: runIt(VHDLStar* s) {
   StringList tempName = s->fullName();
 
   StringList clsName = s->className();
-  if (!strcmp(clsName,"VHDLCReceive") || !strcmp(clsName,"VHDLCSend")) {
+  if (!strcmp(clsName,"VHDLCSend") || !strcmp(clsName,"VHDLCReceive")) {
     fi->noSensitivities = TRUE;
     fi->noOutclocking = TRUE;
     // Do not tack on the firing number to the name.
