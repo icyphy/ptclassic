@@ -120,7 +120,11 @@ COLLECTOR =
 
 PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
 PURIFY =	purify
-QUANTIFY =	quantify
+
+# Use beta version under gcc-2.7.2
+#QUANTIFY =	quantify
+QUANTIFY =	/usr/sww/pure/quantify-2.1-proto-L2-sunos5/quantify
+
 PURECOV = 	purecov
 
 #
