@@ -106,6 +106,10 @@ class ::tycho::IncrCanvas {
     constructor {args} {}
     destructor {}
 
+    method debug {args} {
+	eval $args
+    }
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -235,6 +239,30 @@ class ::tycho::IncrCanvas {
     method yview {args}
 
     ###################################################################
+    ####                    protected methods                      ####
+
+    # Find the item above the given one
+    protected method findabove {tag}
+
+    # Find all items on the canvas
+    protected method findall {}
+
+    # Find the item below the given one
+    protected method findbelow {tag}
+
+    # Find the closest item
+    protected method findclosest {args}
+
+    # Find items enclosed by the given region
+    protected method findenclosed {x0 y0 x1 y1}
+    
+    # Find items overlapping the given region
+    protected method findoverlapping {x0 y0 x1 y1}
+
+    # Find items with the given tag
+    protected method findwithtag {tag}
+
+    ###################################################################
     ####                   protected variables                     ####
 
     # The canvas on which I draw
@@ -242,9 +270,6 @@ class ::tycho::IncrCanvas {
 
     # An array storing items and tags
     private variable taggedItems
-
-    ###################################################################
-    ####                   protected variables                     ####
 
     # Remember the class of each complex item
     protected variable itemclass
@@ -302,7 +327,7 @@ body ::tycho::IncrCanvas::constructor {args} {
 #
 body ::tycho::IncrCanvas::addtag {add mode args} {
     # Find all items using find{}, and then
-    # add the tag to them according to their type
+    # add the tag to each
     foreach id [eval find $mode $args] {
 	if { [string match {[0-9]*} $id] } {
 	    # Top-level canvas item: just add the tag
@@ -674,150 +699,6 @@ body ::tycho::IncrCanvas::dtag {tag {delete {}}} {
 }
 
 #######################################################################
-#### search
-#
-# An incremental search mechanism for items within or overlapping a
-# region of the canvas. _mode_ is the search type: it can be either
-# <b>overlapping</b> or <b>enclosed</b>, with the same meaning as
-# for the find{} method. _tag_ is the tag with which found items will
-# tagged, and the remaining arguments are the coordinates of the region
-# to search in.
-#
-# The method assumes that previously some (zero or more) items were
-# tagged with _tag_. It find items overlapping or enclosed by the
-# given coordinates, and returns two lists: the first is the items
-# in the region that were not already tagged, and the second is the
-# items that were previously tagged and are no longer in the region.
-# After it completes, only items within or overlapping the region
-# still have _tag_, so the next call with different coordinates
-# will again return items that have been uncovered or newly covered.
-#
-# This is useful for applications such as drag-selecting items
-# on the canvas. After a drag-select, a client will usually remove
-# the tag from all items with dtag{}.
-#
-# Because the items returned will often be further processed based
-# on their tags, each returned list is in fact a flat list of
-# item id and tags, which can be processed easily by foreach{}.
-#
-body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
-    # There are two sets of items: previously covered and newly covered.
-    # Use the tags "temp.uncovered" and "temp.covered" to mark them
-    #
-    # x0,y0              x1
-    # +-------------+----+
-    # |XXXXXtagXXXXX|\\\\|<- covered
-    # |XXXXXtagXXXXX|\\\\|
-    # +-------------+----+ y1
-    # |/////tag/////|<-uncovered
-    # +-------------+
-    #
-    $canvas addtag temp.covered $mode $x0 $y0 $x1 $y1
-    $canvas addtag temp.uncovered withtag $tag
-
-    # Take the differences of the sets by using tags
-    $canvas dtag temp.covered temp.uncovered
-    $canvas dtag $tag temp.covered
-
-    # Remove invisible and highlight items from both sets
-    $canvas dtag "#" temp.covered
-    $canvas dtag "highlight" temp.covered
-    $canvas dtag "#" temp.uncovered
-    $canvas dtag "highlight" temp.uncovered
-
-    # Process according to mode
-    if { $mode == "overlapping" } {
-	# Newly covered items
-	foreach i [$canvas find withtag temp.covered] {
-	    set tags [$canvas gettags $i]
-
-	    # Test for the root tag
-	    set t [lsearch $tags {!*}]
-	    if { $t == -1 } {
-		# This simple item is a root, so add to result and tag it
-		set covered($i) $tags
-		$canvas addtag $tag withtag $i
-	    } else {
-		# Use the tag to extract the root item ID
-		set root [string range [lindex $tags $t] 1 end]
-
-		# Only process if not already in the result
-		if { ! [::info exists covered($root)] } {
-		    set covered($root) $tags
-		    # Add the tag to the complex item
-		    $canvas addtag $tag withtag $root
-		    set taggedItems($tag,$root) $root
-		}
-	    }
-	}
-
-	# Uncovered items
-	foreach i [$canvas find withtag temp.uncovered] {
-	    set tags [$canvas gettags $i]
-	    set t [lsearch $tags {!*}]
-	    if { $t == -1 } {
-		set uncovered($i) $tags
-		$canvas dtag $i $tag
-	    } else {
-		set root [string range [lindex $tags $t] 1 end]
-		if { ! [::info exists uncovered($root)] } {
-		    # Only add the item to the result if _all_ simple items
-		    # in the complex item are outside the region. Test for
-		    # this using the bounding box.
-		    if { ! [eval rectOverlap \
-			    $x0 $y0 $x1 $y1 [$canvas bbox $root]] } {
-			set uncovered($root) $tags
-			$canvas dtag $root $tag
-			unset taggedItems($tag,$root)
-		    }
-		}
-	    }
-	}
-    } elseif { $mode == "enclosed" } {
-	# For comments, see the "overlapping" mode
-	foreach i [$canvas find withtag temp.covered] {
-	    set tags [$canvas gettags $i]
-	    set t [lsearch $tags {!*}]
-	    if { $t == -1 } {
-		set covered($i) $tags
-		$canvas addtag $tag withtag $i
-	    } else {
-		set root [string range [lindex $tags $t] 1 end]
-		if { ! [::info exists covered($root)] } {
-		    if { [eval rectInside \
-			    [$canvas bbox $root] $x0 $y0 $x1 $y1] } {
-			set covered($root) $tags
-			$canvas addtag $tag withtag $root
-			set taggedItems($tag,$root) $root
-		    }
-		}
-	    }
-	}
-	foreach i [$canvas find withtag temp.uncovered] {
-	    set tags [$canvas gettags $i]
-	    set t [lsearch $tags {!*}]
-	    if { $t == -1 } {
-		set uncovered($i) $tags
-		$canvas dtag $i $tag
-	    } else {
-		set root [string range [lindex $tags $t] 1 end]
-		if { ! [::info exists uncovered($root)] } {
-		    set uncovered($root) $tags
-		    $canvas dtag $root $tag
-		    unset taggedItems($tag,$root)
-		}
-	    }
-	}
-    }
-    # Delete temporary tags
-    $canvas dtag temp.covered
-    $canvas dtag temp.uncovered
-
-    # Return a pair of lists
-    return [list [array get covered] [array get uncovered]]
-}
-
-#######################################################################
 #### find
 #
 # Find items as given by _searchSpec_. The argument
@@ -850,147 +731,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 # </ul>
 #
 body ::tycho::IncrCanvas::find {mode args} {
-    switch -exact $mode {
-        "above" {
-            root [$canvas find above [find withtag [lindex $args 0]]]
-        }
-        "all" {
-            # In order to make the case where there are a lot of simple
-            # items fast, we have used this approach: find all root
-            # items and then remove a marker tag from each of those.
-            # Remaining items with the marker tag are simple roots.
-            
-            # Find complex roots
-            set found {}
-            foreach id [array names itemclass] {
-                set tags [$canvas gettags \
-                        [@scope ::tycho::Picture [list set primary($id)]]]
-                set root [string range \
-                        [lindex $tags [lsearch $tags {!*}]] 1 end]
-                # If the item is not invisible, mark as found
-                if { [lsearch $tags {#}] == -1 } {
-                    lappend found [string range \
-                            [lindex $tags [lsearch $tags {!*}]] 1 end]
-                }
-            }
-
-            # Tag all items and remove tag from complex items
-            $canvas addtag temp.find all
-            foreach i [lnub $found] {
-                $canvas dtag $i temp.find
-            }
-            
-            # Remove invisible items
-            $canvas dtag "#" temp.find
-            
-            # Return all roots
-            eval lappend found [$canvas find withtag temp.find]
-            $canvas dtag temp.find
-            return $found
-        }
-        "below" {
-            root [$canvas find below [find withtag [lindex $args 0]]]
-        }
-        "closest" {
-            root [eval $canvas find closest $args]
-        }
-        "enclosed" {
-            # Mark enclosed items
-            eval $canvas addtag temp.find enclosed $args
-            
-            # Remove invisible items
-            $canvas dtag "#" temp.find
-            
-            # Find the set of roots of each item and add to the result
-            # if it's either a top-level item or if it's a complex
-            # item and its region is entirely enclosed.
-            set found {}
-            foreach i [eval $canvas find withtag temp.find] {
-                set tags [$canvas gettags $i]
-
-                # Test for the root tag
-                set t [lsearch $tags {!*}]
-                if { $t == -1 } {
-                    # The simple item is a root
-                    lappend found $i
-                } else {
-                    # Use the tag to extract the root item ID
-                    set root [string range [lindex $tags $t] 1 end]
-                    
-                    # See if its bounding box is inside the bounding
-                    # region. To avoid calculating this twice, keep a
-                    # cache of already-added items.
-                    if { ! [::info exists temp.find($root)] } {
-                        if { [eval rectInside [bbox $root] $args] } {
-                            lappend found $root
-                            set temp.find($root) 1
-                        }
-                    }
-                }
-            }
-            # Return the found items -- there are no duplicates
-            return $found
-        }
-        "overlapping" {
-            # Mark overlapping items
-            eval $canvas addtag temp.find overlapping $args
-
-            # Remove invisible items
-            $canvas dtag "#" temp.find
-
-            # Find the set of roots of each item and add to the result
-            set found {}
-            foreach i [$canvas find withtag temp.find] {
-                set tags [$canvas gettags $i]
-                
-                # Test for the root tag
-                set t [lsearch $tags {!*}]
-                if { $t == -1 } {
-                    # The simple item is a root
-                    lappend found $i
-                } else {
-                    # Use the tag to extract the root item ID
-                    lappend found [string range [lindex $tags $t] 1 end]
-                }
-            }
-            # Remove duplicates and return
-	    $canvas dtag temp.find
-            return [lnub $found]
-        }
-        "withtag" {
-            set tag [lindex $args 0]
-            
-            if { $tag == "" } {
-                # This may happen, so take care of it
-                return ""
-            } elseif { $tag == "all" } {
-                # Return all items
-                return [find all]
-            } elseif { $tag == "current" } {
-                # Return the root of the "current" item
-                return [root [$canvas find withtag current]]
-            } elseif { [string match {[_0-9]*} $tag] } {
-                # An item ID -- just return it. NOTE: if you want to get
-                # the root of an item, use the root{} method.
-                return $tag
-            } else {
-                # This is a proper tag. Add a marker tag to all simple items
-                $canvas addtag temp.find withtag $tag
-                
-                # Find matching complex items and remove the marker
-                set found {}
-                foreach {_ id} [array get taggedItems $tag,*] {
-                    $canvas dtag $id temp.find
-                    lappend found $id
-                }
-                
-                # Add root simple items and return
-                eval lappend found [$canvas find withtag temp.find]
-                $canvas dtag temp.find
-                return $found
-            }
-        }
-    }
+    eval find$mode $args
 }
 
 #######################################################################
@@ -1015,14 +756,19 @@ body ::tycho::IncrCanvas::focusin {} {
 #######################################################################
 #### gettags
 #
-# Get the tags of an item. This method returns the tags present
-# on an item, less the hierarchy tags. Note, however, that tags
-# inherited from a parent item will still be in the result
-# list, whether they are explicitly added to the item or not.
-# If the argument is a tag, perform this operation on the first
+# Get the tags of an item. This method returns the tags explicitly given
+# to an item -- that is, tags used by IncrCanvas to manage complex
+# items and tags inherited from a parent item will not (by
+# default) be included in the result. To get all tags without
+# this filtering, supply the additional argument *-raw*.
+#
+# Note that this routine works properly only if called with
+# a root simple item or a complex item as argument. If a simple
+# item is supplied which is contained in a complex item, then
+# the returned tags will include all inherited tags.
+#
+# If the first argument is a tag, perform this operation on the first
 # item on the icanvas returned by `find withtag'.
-# If the *-hierarchy* flag is given, the returned result includes
-# all hierarchy tags.
 #
 body ::tycho::IncrCanvas::gettags {tag args} {
     # If a tag, get the first matching item
@@ -1035,29 +781,26 @@ body ::tycho::IncrCanvas::gettags {tag args} {
     } else {
 	set id $tag
     }
-    
-    # Get the tags from the primary component
-    if { [string match {_*} $id] } {
-    	set id [@scope ::tycho::Picture [list set primary($id)]]
-    }
-    
-    # Get the sorted tags
-    set tags [lsort [$canvas gettags $id]]
 
-    # Filter out hierarchy tags
-    # FIXME: This depends on no tags starting with a character that is
-    # lexically before "_" (asking for bugs later on...)
-    getflag hierarchy args
-    if { ! $hierarchy } {
-	set t [lsearch $tags {[^!_]*}]
-	if { $t == -1 } {
-	    return $tags
+    if { [string match {_*} $id] } {
+	getflag raw args
+	# Complex item
+	if { ! $raw } {
+	    # Get the tags from the taggedItems array
+	    set tags {}
+	    foreach tagid [array names taggedItems *,$id] {
+		lappend tags [lindex [split $tagid ,] 0]
+	    }
 	} else {
-	    return [lrange $tags $t end]
-    	}
+	    # Get the tags from the primary component
+	    set tags [$canvas gettags \
+		    [@scope ::tycho::Picture [list set primary($id)]]]
+	}
     } else {
-    	return $tags
+	# Simple item: get the tags from the canvas
+	set tags [$canvas gettags $id]
     }
+    return $tags
 }
 
 ##########################################################################
@@ -1281,6 +1024,150 @@ body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
 }
 
 #######################################################################
+#### search
+#
+# An incremental search mechanism for items within or overlapping a
+# region of the canvas. _mode_ is the search type: it can be either
+# <b>overlapping</b> or <b>enclosed</b>, with the same meaning as
+# for the find{} method. _tag_ is the tag with which found items will
+# tagged, and the remaining arguments are the coordinates of the region
+# to search in.
+#
+# The method assumes that previously some (zero or more) items were
+# tagged with _tag_. It find items overlapping or enclosed by the
+# given coordinates, and returns two lists: the first is the items
+# in the region that were not already tagged, and the second is the
+# items that were previously tagged and are no longer in the region.
+# After it completes, only items within or overlapping the region
+# still have _tag_, so the next call with different coordinates
+# will again return items that have been uncovered or newly covered.
+#
+# This is useful for applications such as drag-selecting items
+# on the canvas. After a drag-select, a client will usually remove
+# the tag from all items with dtag{}.
+#
+# Because the items returned will often be further processed based
+# on their tags, each returned list is in fact a flat list of
+# item id and tags, which can be processed easily by foreach{}.
+#
+body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
+    # There are two sets of items: previously covered and newly covered.
+    # Use the tags "temp.uncovered" and "temp.covered" to mark them
+    #
+    # x0,y0              x1
+    # +-------------+----+
+    # |XXXXXtagXXXXX|\\\\|<- covered
+    # |XXXXXtagXXXXX|\\\\|
+    # +-------------+----+ y1
+    # |/////tag/////|<-uncovered
+    # +-------------+
+    #
+    $canvas addtag temp.covered $mode $x0 $y0 $x1 $y1
+    $canvas addtag temp.uncovered withtag $tag
+
+    # Take the differences of the sets by using tags
+    $canvas dtag temp.covered temp.uncovered
+    $canvas dtag $tag temp.covered
+
+    # Remove invisible and highlight items from both sets
+    $canvas dtag "#" temp.covered
+    $canvas dtag "highlight" temp.covered
+    $canvas dtag "#" temp.uncovered
+    $canvas dtag "highlight" temp.uncovered
+
+    # Process according to mode
+    if { $mode == "overlapping" } {
+	# Newly covered items
+	foreach i [$canvas find withtag temp.covered] {
+	    set tags [$canvas gettags $i]
+
+	    # Test for the root tag
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		# This simple item is a root, so add to result and tag it
+		set covered($i) $tags
+		$canvas addtag $tag withtag $i
+	    } else {
+		# Use the tag to extract the root item ID
+		set root [string range [lindex $tags $t] 1 end]
+
+		# Only process if not already in the result
+		if { ! [::info exists covered($root)] } {
+		    set covered($root) $tags
+		    # Add the tag to the complex item
+		    $canvas addtag $tag withtag $root
+		    set taggedItems($tag,$root) $root
+		}
+	    }
+	}
+
+	# Uncovered items
+	foreach i [$canvas find withtag temp.uncovered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set uncovered($i) $tags
+		$canvas dtag $i $tag
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists uncovered($root)] } {
+		    # Only add the item to the result if _all_ simple items
+		    # in the complex item are outside the region. Test for
+		    # this using the bounding box.
+		    if { ! [eval rectOverlap \
+			    $x0 $y0 $x1 $y1 [$canvas bbox $root]] } {
+			set uncovered($root) $tags
+			$canvas dtag $root $tag
+			unset taggedItems($tag,$root)
+		    }
+		}
+	    }
+	}
+    } elseif { $mode == "enclosed" } {
+	# For comments, see the "overlapping" mode
+	foreach i [$canvas find withtag temp.covered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set covered($i) $tags
+		$canvas addtag $tag withtag $i
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists covered($root)] } {
+		    if { [eval rectInside \
+			    [$canvas bbox $root] $x0 $y0 $x1 $y1] } {
+			set covered($root) $tags
+			$canvas addtag $tag withtag $root
+			set taggedItems($tag,$root) $root
+		    }
+		}
+	    }
+	}
+	foreach i [$canvas find withtag temp.uncovered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set uncovered($i) $tags
+		$canvas dtag $i $tag
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists uncovered($root)] } {
+		    set uncovered($root) $tags
+		    $canvas dtag $root $tag
+		    unset taggedItems($tag,$root)
+		}
+	    }
+	}
+    }
+    # Delete temporary tags
+    $canvas dtag temp.covered
+    $canvas dtag temp.uncovered
+
+    # Return a pair of lists
+    return [list [array get covered] [array get uncovered]]
+}
+
+#######################################################################
 #### type
 #
 # Return the type of an item. Note that types are case-sensitive.
@@ -1305,4 +1192,177 @@ body ::tycho::IncrCanvas::xview {args} {
 #
 body ::tycho::IncrCanvas::yview {args} {
     eval $canvas yview $args
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+
+#######################################################################
+#### findabove
+#
+body ::tycho::IncrCanvas::findabove {tag} {
+    root [$canvas find above [findwithtag $tag]]
+}
+
+#######################################################################
+#### findall
+#
+body ::tycho::IncrCanvas::findall {} {
+    # In order to make the case where there are a lot of simple
+    # items fast, we have used this approach: find all root
+    # items and then remove a marker tag from each of those.
+    # Remaining items with the marker tag are simple roots.
+            
+    # Find complex roots
+    set found {}
+    foreach id [array names itemclass] {
+	set tags [$canvas gettags \
+		[@scope ::tycho::Picture [list set primary($id)]]]
+	set root [string range \
+		[lindex $tags [lsearch $tags {!*}]] 1 end]
+	# If the item is not invisible, mark as found
+	if { [lsearch $tags {#}] == -1 } {
+	    lappend found [string range \
+		    [lindex $tags [lsearch $tags {!*}]] 1 end]
+	}
+    }
+
+    # Tag all items and remove tag from complex items
+    $canvas addtag temp.find all
+    foreach i [lnub $found] {
+	$canvas dtag $i temp.find
+    }
+            
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+            
+    # Return all roots
+    eval lappend found [$canvas find withtag temp.find]
+    $canvas dtag temp.find
+    return $found
+}
+
+#######################################################################
+#### findbelow
+#
+body ::tycho::IncrCanvas::findbelow {tag} {
+    root [$canvas find below [findwithtag $tag]]
+}
+
+#######################################################################
+#### findclosest
+#
+body ::tycho::IncrCanvas::findclosest {args} {
+    root [eval $canvas find closest $args]
+}
+
+#######################################################################
+#### findenclosed
+#
+body ::tycho::IncrCanvas::findenclosed {x0 y0 x1 y1} {
+    # Mark enclosed items
+    $canvas addtag temp.find enclosed $x0 $y0 $x1 $y1
+    
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+    
+    # Find the set of roots of each item and add to the result
+    # if it's either a top-level item or if it's a complex
+    # item and its region is entirely enclosed.
+    set found {}
+    foreach i [eval $canvas find withtag temp.find] {
+	set tags [$canvas gettags $i]
+
+	# Test for the root tag
+	set t [lsearch $tags {!*}]
+	if { $t == -1 } {
+	    # The simple item is a root
+	    lappend found $i
+	} else {
+	    # Use the tag to extract the root item ID
+	    set root [string range [lindex $tags $t] 1 end]
+	    
+	    # See if its bounding box is inside the bounding
+	    # region. To avoid calculating this twice, keep a
+	    # cache of already-added items.
+	    if { ! [::info exists temp.find($root)] } {
+		if { [eval rectInside [bbox $root] $x0 $y0 $x1 $y1] } {
+		    lappend found $root
+		    set temp.find($root) 1
+		}
+	    }
+	}
+    }
+    # Return the found items -- there are no duplicates
+    return $found
+}
+
+#######################################################################
+#### findoverlapping
+#
+body ::tycho::IncrCanvas::findoverlapping {x0 y0 x1 y1} {
+    # Mark overlapping items
+    eval $canvas addtag temp.find overlapping $x0 $y0 $x1 $y1
+
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+
+    # Find the set of roots of each item and add to the result
+    set found {}
+    foreach i [$canvas find withtag temp.find] {
+	set tags [$canvas gettags $i]
+	
+	# Test for the root tag
+	set t [lsearch $tags {!*}]
+	if { $t == -1 } {
+	    # The simple item is a root
+	    lappend found $i
+	} else {
+	    # Use the tag to extract the root item ID
+	    lappend found [string range [lindex $tags $t] 1 end]
+	}
+    }
+    # Remove duplicates and return
+    $canvas dtag temp.find
+    return [lnub $found]
+}
+
+#######################################################################
+#### findwithtag
+#
+body ::tycho::IncrCanvas::findwithtag {tag} {
+    # Test for special tags
+    if { [lsearch -exact {"" current all} $tag] >= 0 } {
+	if { $tag == "" } {
+	    # This may happen, so take care of it
+	    return ""
+	} elseif { $tag == "all" } {
+	    # Return all items
+	    return [find all]
+	} elseif { $tag == "current" } {
+	    # Return the root of the "current" item
+	    return [root [$canvas find withtag current]]
+	}
+    } elseif { [string match {[_0-9]*} $tag] } {
+	# An item ID -- just return it. NOTE: if you want to get
+	# the root of an item, use the root{} method.
+	return $tag
+    } else {
+	# This is a proper tag. Add a marker tag to all simple items
+	$canvas addtag temp.find withtag $tag
+
+	# Find matching complex items and remove the marker
+	set found {}
+	foreach {_ id} [array get taggedItems $tag,*] {
+	    $canvas dtag $id temp.find
+	    lappend found $id
+	}
+	
+	# Add root simple items and return
+	eval lappend found [$canvas find withtag temp.find]
+	$canvas dtag temp.find
+	return $found
+    }
 }
