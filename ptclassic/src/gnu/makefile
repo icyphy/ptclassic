@@ -26,6 +26,10 @@
 # 						COPYRIGHTENDKEY
 #
 
+# This makefile will install the GNU tools for non-hp and hp platforms.
+# hp's need GNU gas for -g to work, and they don't come with lex or yacc,
+# so we need some additional rules to build the GNU tools for hp.
+
 # Destination of the GNU binaries, libraries and include files.
 GNU_DEST=$(PTOLEMY)/gnu
 
@@ -47,6 +51,11 @@ GNU_OBJ=$(OBJ_DIR)/gnu
 # Machine independent files
 GNU_PREFIX=$(GNU_DEST)/common
 
+# If you change gcc versions, you should look at the defines in
+# $PTOLEMY/.cshrc and $PTOLEMY/bin/g++-setup make sure that they
+# refer to the right version.  Also, $PTOLEMY/src/gnu/makefile contains
+# references to the current version, along with
+# $PTOLEMY/src/gnu/README and $PTOLEMY/src/gnu/INSTALL.
 GCC_VERSION=2.7.2
 
 # Machine dependent files
@@ -110,6 +119,11 @@ bin_gcc:
 install_gcc:
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+	@echo "Install c++filt, the g++ name demangler"
+	(cd $(GNU_OBJ)/gcc; cp c++filt $(REL_GNU_BINDIR))
+	@echo "Set up some links so we can move the compiler"
+	(cd $(GNU_DEST)/$(PTARCH); ln -s $(MACH) $(PTARCH) )
+	(cd $(GNU_DEST)/$(PTARCH)/lib/gcc-lib; ln -s $(MACH) $(PTARCH) )
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 
 bin_libg++:
@@ -137,10 +151,7 @@ install: $(BINDIR)
 # GNU assembler so the the -g flag will work.
 # Also, we need to install gcc before trying to build libg++
 
-# We use this to variable to setup for GNU gas.
-# See $PTOLEMY/src/gnu/src.hp/gcc/INSTALL for more info.
-#HP_MACH=`$(GNU_SRC)/gcc/config.guess`
-HP_MACH=hppa1.1-hp-hpux10.01
+
 
 hp_all: hp_configure hp_pregcc_install hp_bin hp_postgcc_install install hp_post_install
 
@@ -150,32 +161,32 @@ hp_configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ)/binutils; \
 	$(GNU_SRC)/binutils/configure --srcdir=$(GNU_SRC)/binutils \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	@echo "hpux10 does not include yacc, so we include bison"
 	-mkdir $(GNU_OBJ)/bison
 	(cd $(GNU_OBJ)/bison; \
 	$(GNU_SRC)/bison/configure --srcdir=$(GNU_SRC)/bison \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	@echo "wait to configure flex until we have gcc installed
 	-mkdir $(GNU_OBJ)/make
 	(cd $(GNU_OBJ)/make; \
 	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	@echo "Now configure gcc with -with-gnu-as"
 	-mkdir $(GNU_OBJ)/gcc
 	(cd $(GNU_OBJ)/gcc; \
 	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		--with-gnu-as $(HP_MACH) )
+		--with-gnu-as $(MACH) )
 	@echo "Now configure libg++"
 	-mkdir $(GNU_OBJ)/libg++
 	(cd $(GNU_OBJ)/libg++; \
 	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
@@ -183,7 +194,7 @@ hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/binutils/gas/as
 	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/gcc/as
 	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
-	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
+	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
 hp_bin: bin_make hp_bin_binutils bin_gcc install_gcc hp_install_gas hp_bin_others bin_libg++
 
@@ -201,7 +212,7 @@ hp_bin_others:
 	CC=$(BINDIR)/gcc; \
 	$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make YACC="$(GNU_OBJ)/bison/bison -y")
 
 hp_postgcc_install:
