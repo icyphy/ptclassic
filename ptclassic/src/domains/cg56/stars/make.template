@@ -85,6 +85,7 @@ PL_SRCS= \
  CG56Pulse.pl \
  CG56Quantizer.pl \
  CG56QuasarChgPd.pl \
+ CG56RaisedCos.pl \
  CG56ReadFile.pl \
  CG56Reciprocal.pl \
  CG56Repeat.pl \
