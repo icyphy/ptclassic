@@ -5,7 +5,7 @@ defstar {
 Decomposes an integer matrix S into a Smith form S = U D V, where
 U, D, and V are integer matrices.
 The Smith form decomposition for integer matrices is analogous to
-Singular Value Decomposition for floating-point matrices.
+eigendecomposition for floating-point matrices.
 	}
 	version { $Id$ }
 	author { Brian Evans }
@@ -23,8 +23,7 @@ multidimensional non-uniform filter bank design [3-4].
 This function returns the Smith form of an integer matrix S [5].
 The matrix $S$ is factored into three simpler integer matrices such that
 $S = U D V$.
-Here, $D$ is diagonal and
-$U$ and $V$ have determinant of $+1$ or $-1$
+Here, $D$ is diagonal and $U$ and $V$ have determinant of $+1$ or $-1$
 (and are called regular unimodular).
 Therefore, $|det S| = |det D|$.
 Note that $S$ is m x n, so $U$ is m x m, $D$ is m x n, and $V$ is n x n.
