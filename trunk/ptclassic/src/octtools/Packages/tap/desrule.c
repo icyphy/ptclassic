@@ -30,6 +30,7 @@ static char SccsId[]="$Id$";
 #include "errtrap.h"
 #include "oct.h"
 #include "oh.h"
+#include "desrule.h"
 #include "tap_int.h"
 
 #define MIN_RULE	0
@@ -55,8 +56,8 @@ static void checkEdgesParallel();
 
 static int (*ruleEvaluators[2][4]) () = {
 	/* WIDTH */	/* SPACING */	/* OVERLAP */	/* UNDERLAP */
-	minWidthRule,	minSpacingRule,	minOverlapRule,	((int (*)())0),
-	maxWidthRule,	((int (*)())0),	((int (*)())0),	((int (*)())0)
+	{minWidthRule,	minSpacingRule,	minOverlapRule,	((int (*)())0)},
+	{maxWidthRule,	((int (*)())0),	((int (*)())0),	((int (*)())0)}
 };
 
 /*LINTLIBRARY*/
@@ -187,6 +188,7 @@ octObject *layer;
     return(layerS);
 }
 
+void
 tapFreeDesRuleInfo(layerS)
 struct tapLayer *layerS;
 {
@@ -416,6 +418,8 @@ struct tapLayer *layerS1, *layerS2;
 				layerS1->desRulePtr->minWidth < distance) {
 	layerS1->desRulePtr->minWidth = distance;
     }
+    return 1;			/* We pass this func around as a func.
+				   ptr to a func that returns an int */
 }
 
 static int maxWidthRule(distance, layerS1, layerS2)
@@ -430,6 +434,8 @@ struct tapLayer *layerS1, *layerS2;
 				layerS1->desRulePtr->maxWidth > distance) {
 	layerS1->desRulePtr->maxWidth = distance;
     }
+    return 1;			/* We pass this func around as a func.
+				   ptr to a func that returns an int */
 }
 
 static int minSpacingRule(distance, layerS1, layerS2)
@@ -441,6 +447,8 @@ struct tapLayer *layerS1, *layerS2;
 	layerS1->desRulePtr->minSpacing[layerS2->layerIndex] = distance;
 	layerS2->desRulePtr->minSpacing[layerS1->layerIndex] = distance;
     }
+    return 1;			/* We pass this func around as a func.
+				   ptr to a func that returns an int */
 }
 
 static int minOverlapRule(distance, layerS1, layerS2)
@@ -451,4 +459,6 @@ struct tapLayer *layerS1, *layerS2;
 	    layerS1->desRulePtr->minOverlap[layerS2->layerIndex] < distance) {
 	layerS1->desRulePtr->minOverlap[layerS2->layerIndex] = distance;
     }
+    return 1;			/* We pass this func around as a func.
+				   ptr to a func that returns an int */
 }
