@@ -44,7 +44,7 @@ provisions.
 	/* Take data from Input and put it in buffer */
 	/* Data in buffer is alternate left and right channels */
 	for (i = 0; i < ($val(blockSize)/2); i ++) {
-	  $starSymbol(buf)[i] = ceil($ref(leftright,i)*32768.0);	
+	  $starSymbol(buf)[i] = ceil($ref(leftright,$val(blockSize)/2-1-i)*32768.0);	
 	}
     }
 
