@@ -156,11 +156,14 @@ class ::tycho::DataModel {
     # Return a description of the children of an item
     protected method _describechildren {name {prefix {}}}
     
+    # Get the type of an item
+    protected method _type {name}
+
     # Update the cache if it's out of date
-    protected method _update
+    protected method _update {}
 
     # Do a cache update
-    protected method _updatecache
+    protected method _updatecache {}
 
     # Manipulate the data cache
     protected method cache {mode args}
@@ -295,7 +298,7 @@ body ::tycho::DataModel::add {type name args} {
 
     # Add to history
     if $recording {
-        history append "add $name $args" "delete $name"
+        history append "add \{$name\} $args" "delete \{$name\}"
     }
 
     # Extract contents
@@ -934,10 +937,9 @@ body ::tycho::DataModel::search {mode defaults args} {
 # This command has several forms, depending on the _mode_ argument:
 #
 # <dl>
-# <dt><b>configure</b> ?_type_? ?_name_? ?_value_? ?_name_ _value_ ...? 
+# <dt><b>configure</b> _type_ ?_name_? ?_value_? ?_name_ _value_ ...? 
 # <dd>
-# Set or get a type property or a type default. If no arguments
-# are supplied, return a list of defined types. If only the _type_
+# Set or get a type property or a type default. If only the _type_
 # argument is supplied, return a list of type properties and
 # type defaults. If a single _name_ is supplied, return
 # the value of that type property or type default. If additional
@@ -973,14 +975,15 @@ body ::tycho::DataModel::search {mode defaults args} {
 # Return the type of _item_. This will raise an obscure error if the
 # item doesn't exist.
 #
+# <dt><b>names</b>
+# <dd>
+# Return a list of defined types.
+#
 # </dl>
 #
 body ::tycho::DataModel::type {mode {type {}} args} {
     switch -exact $mode {
 	"configure" {
-	    if { $type == "" } {
-		return $_types($scope)
-	    }
             if ![::info exists _defaults($type)] {
                 error "Unknown type: \"$type\""
             }
@@ -1072,9 +1075,12 @@ body ::tycho::DataModel::type {mode {type {}} args} {
             _verify $name
             @scope $scope set [set _dataname].type($name)
         }
+	"names" {
+            return $_types($scope)
+        }
 	default {
 	    error "unknown option: must be one of \
-		    \"configure, define, or exists\""
+		    \"configure, define, exists, get, or names\""
         }
     }
 }
@@ -1140,6 +1146,16 @@ body ::tycho::DataModel::_describechildren {name {prefix {}}} {
         }
     }
     return $string
+}
+
+########################################################################
+#### _type
+#
+# Get the type of an item. This is a fast version of <b>type get</b>
+# for use by subclasses. The item is assumed to be know to exist.
+#
+body ::tycho::DataModel::_type {name} {
+    @scope $scope set [set _dataname].type($name)
 }
 
 ########################################################################
