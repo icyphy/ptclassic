@@ -151,8 +151,14 @@ Message* Envelope::writableCopy() {
 
 static MessageParticle pproto;
 static Plasma messagePlasma(pproto);
+static PlasmaGate messageGate(messagePlasma);
 
 // MessageParticle methods
+
+// constructors
+MessageParticle::MessageParticle(const Envelope& p) : data(p) {}
+
+MessageParticle::MessageParticle() {}
 
 DataType MessageParticle::type() const { return MESSAGE;}
 
@@ -192,7 +198,7 @@ void MessageParticle::getMessage (Envelope& p) {
 	data = dummy;
 }
 
-void MessageParticle::initialize() { data = dummy;}
+Particle& MessageParticle::initialize() { data = dummy; return *this;}
 
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
