@@ -15,6 +15,13 @@ $Id$
 #include "BDFPortHole.h"
 #include "SimControl.h"
 
+// an aid for debugging: make animation behavior look like DDF stars
+// in which partial evaluation occurs.  Problem: this file now "knows"
+// the format of the animation info.
+
+#include "textAnimate.h"
+#include <iostream.h>
+
 /*******************************************************************
 
 	class BDFStar methods
@@ -41,6 +48,7 @@ void BDFStar :: initialize() {
 		BDFPortHole *p;
 
 		while ((p = nextp++) != 0) {
+			p->clearReadFlag();
 			if (p->isDynamic() && p->isItInput()) {
 				waitFor(*p->assoc());
 			}
@@ -67,6 +75,10 @@ ISA_FUNC(BDFStar,DynDFStar);
 
 int BDFStar :: handleWait(BDFPortHole& p) {
 	if (dynamicExec()) {
+		if (textAnimationState()) {
+			cout << "PARTIAL: " << fullName() << ": wait on "
+			     << p.name() << "\n";
+		}
 		waitFor(p,p.numXfer());
 		return TRUE;
 	}
