@@ -102,7 +102,7 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 int DDFScheduler :: setup (Block& b) {
-	haltRequestFlag = 0;
+	clearHalt();
 
 	Galaxy& galaxy = b.asGalaxy();
 
@@ -190,7 +190,7 @@ int DDFScheduler :: setup (Block& b) {
 	}
 			
 		
-	return !haltRequestFlag;
+	return !haltRequested();
 }
 
 
@@ -210,7 +210,7 @@ DDFScheduler :: run (Block& block) {
 
 	msg.initialize();
 
-	if (haltRequestFlag) {
+	if (haltRequested()) {
 		Error::abortRun(block, ": Can't continue after run-time error");
 		return FALSE;
 	}
@@ -239,7 +239,7 @@ DDFScheduler :: run (Block& block) {
 	int scanSize = galSize;		// how many not-runnable stars scanned
 	int deadlock = TRUE;		// deadlock detection.
 
-	while (numFiring < stopTime && !haltRequestFlag) {
+	while (numFiring < stopTime && !haltRequested()) {
 
 	   int numStop;
 	   
@@ -256,7 +256,7 @@ DDFScheduler :: run (Block& block) {
 		Star& s = *(Star*)nextb++;
 		fireSource(s, numStop);
 		deadlock = FALSE;
-		if (haltRequestFlag) break;
+		if (haltRequested()) break;
 	   }
 
 	   scanSize = galSize;
@@ -276,7 +276,7 @@ DDFScheduler :: run (Block& block) {
 			// run the star
 			do {
 				s->fire();
-				if (haltRequestFlag) exit(1);
+				if (haltRequested()) exit(1);
 				deadlock = FALSE;
 			} while (isRunnable(*s));
 
