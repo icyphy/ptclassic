@@ -18,10 +18,8 @@ are laid out; no code is required.
 		name {output}
 		type {=input}
 	}
-	ccinclude { "CGCGeodesic.h" }
-	constructor {
-		output.setForkBuf(input);
-		isaFork();
+	start {
+		forkInit(input,output);
 	}
 	exectime {
 		return 0;
