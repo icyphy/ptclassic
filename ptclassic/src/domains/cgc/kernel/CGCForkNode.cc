@@ -45,8 +45,9 @@ int CGCForkNode::isItPersistent () const {
 }
 
 // make a new source connection
-PortHole* CGCForkNode::setSourcePort (GenericPort &sp, int delay) {
-	return af.setSource(sp, delay);
+PortHole* CGCForkNode::setSourcePort (GenericPort &sp, int numDelays,
+				      const char* initDelayValues) {
+	return af.setSource(sp, numDelays, initDelayValues);
 }
 
 // make a new destination connection.  We always make a fork star.
