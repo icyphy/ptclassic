@@ -177,6 +177,14 @@ extern vemStatus bufModified
 void bufMarkActive
     ARGS((octId id));
 
+/*
+ * Make _bufFindBuffer externally visible so that rpc/serverVem.c
+ * can call it.  Note that we do not return a value.
+ * The real fix would be to check out serverVem.c and see if this call
+ * is really necessary, but that would be non-trivial
+ */
+void bufFindBuffer
+    ARGS((octId id));
 
 #endif
 
