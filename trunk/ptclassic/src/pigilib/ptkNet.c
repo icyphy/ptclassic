@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define PTKCODE
 
 
+#include "pthreadsCompat.h"	/* Must be first for hpux10 */
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"

@@ -40,6 +40,7 @@ a Tcl interpreter.
 #pragma implementation
 #endif
 
+#include "pthreadsCompat.h"     // Must be first under HPUX10
 // Include standard include files to prevent conflict with
 // the type definition Pointer used by "rpc.h". BLE
 #include <stdio.h>

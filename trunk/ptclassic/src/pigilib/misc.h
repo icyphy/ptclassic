@@ -33,9 +33,12 @@ Version identification:
 $Id$
 */
 
-/* Define lsList and RPCSpot data types, respectively */
+/* Define RPCSpot and lsList data types, respectively */
+#include "rpc.h"               /* Must be first so pthreads.h is
+                                * included first under hpux10
+                                */
+
 #include "list.h"
-#include "rpc.h"
 
 extern int ManPage ARGS((char *starName));
 extern int Man ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));

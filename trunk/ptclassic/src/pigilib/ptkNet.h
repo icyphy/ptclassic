@@ -30,6 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Version: $Id$
 */
 
+#include "pthreadsCompat.h"	/* Must be first for hpux10 */
 #include "rpcApp.h"
 
 extern rpcStatus ptkRPCFileHandler ARGS((RPCFunction funcArray[], long size));

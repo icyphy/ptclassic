@@ -31,6 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
+#include "pthreadsCompat.h"	/* Must be first for hpux10 */
 
 #if (defined(sun) && (defined(__svr4__) || defined(SVR4) || defined(SYSV))) && !defined(PTSOL2_4) || defined(PTSVR4)
 /* Solaris2.3 defines type boolean as an enum, which is a no no
