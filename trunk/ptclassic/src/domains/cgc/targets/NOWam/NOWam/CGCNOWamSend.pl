@@ -5,11 +5,9 @@ defstar {
 Send star between NOWam processors.
 	}
 	version { $Id$ }
-	author { Patrick Warner }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California
-        }
-	location { CGC NOW target library }
+	author { Patrick O. Warner }
+	copyright { 1994 The Regents of the University of California }
+	location { CGC target library }
 	explanation {
 Produce code for inter-process communication (send-side)
 	}
@@ -49,7 +47,41 @@ Produce code for inter-process communication (send-side)
 		numData = input.numXfer();
 	}
 
+        codeblock (timeincludes) {
+#ifdef TIME_INFO
+#include <sys/fcntl.h>
+#include <sys/resource.h>
+#include <sys/procfs.h>
+#endif
+        }
+        codeblock (timedecls) {
+#ifdef TIME_INFO
+int fd;
+char proc[BUFSIZ];
+double timeRun;
+prusage_t beginRun;
+prusage_t endRun;
+#endif
+        }
+        codeblock (stardecls) {
+#ifdef TIME_INFO
+double $starSymbol(timeSend);
+prusage_t $starSymbol(beginSend);
+prusage_t $starSymbol(endSend);
+#endif
+        }
+        codeblock (timeinit) {
+#ifdef TIME_INFO
+timeRun = 0.0;
+#endif
+        }
+        codeblock (starinit) {
+#ifdef TIME_INFO
+$starSymbol(timeSend) = 0.0;
+#endif
+        }
         codeblock (openfd) {
+#ifdef TIME_INFO
 sprintf(proc,"/proc/%d", (int)getpid());
 if ((fd = open(proc, O_RDONLY)) == -1)
         printf("error opening proc\n");
@@ -57,6 +89,7 @@ if (fd == -1)
         printf("couldn't open proc\n");
 else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
         printf("error getting time\n");
+#endif
         }
 
 	initCode {
@@ -69,19 +102,11 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		// code generation.
 		addInclude("<stdio.h>");
 		addInclude("<am.h>");
-		addInclude("<sys/fcntl.h>");
-		addInclude("<sys/resource.h>");
-                addInclude("<sys/procfs.h>");
-                addDeclaration("int fd;\n");
-                addDeclaration("char proc[BUFSIZ];\n");
-		addDeclaration("double timeRun;\n");
-		addDeclaration("prusage_t beginRun;\n");
-		addDeclaration("prusage_t endRun;\n");
-		addDeclaration("double $starSymbol(timeSend);\n");
-		addDeclaration("prusage_t $starSymbol(beginSend);\n");
-		addDeclaration("prusage_t $starSymbol(endSend);\n");
-                addCode("timeRun = 0.0;\n", "mainInit", "timeRun");
-		addCode("$starSymbol(timeSend) = 0.0;\n");
+                addCode(timeincludes, "include", "timeIncludes");
+                addCode(timedecls, "mainDecls", "timeDecls");
+                addCode(stardecls, "mainDecls");
+                addCode(timeinit, "mainInit", "timeInit");
+                addCode(starinit, "mainInit");
                 addCode(openfd, "mainInit", "openFd");
                 addCode("am_enable();\n", "mainInit", "amEnable");
 	}
@@ -90,12 +115,14 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos, check;
 	double myData;
 	
+	#ifdef TIME_INFO
 	if (fd == -1) {
 		printf("couldn't open proc\n");
 	}
 	else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginSend)) == -1) {
 		printf("error getting time\n");
 	}
+	#endif
 
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
@@ -105,6 +132,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 			printf("Error in sending data\n");
 		}
 	}
+
+	#ifdef TIME_INFO
 	if (fd == -1) {
 		printf("couldn't open proc\n");
 	}
@@ -117,6 +146,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                              $starSymbol(beginSend).pr_rtime.tv_nsec)) /
                              1000000000.0; 
 	printf("Cumulative time to send %lf seconds\n", $starSymbol(timeSend));
+	#endif
 
 	}
 	go {
@@ -124,6 +154,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	}
 
         codeblock (runtime) {
+#ifdef TIME_INFO
 if (fd == -1)
        printf("couldn't open proc\n");
 else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
@@ -132,6 +163,7 @@ timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
            ((double)(endRun.pr_rtime.tv_nsec -
                      beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
 printf("Time to run %lf seconds\n", timeRun);
+#endif
         }
 
 	wrapup {
