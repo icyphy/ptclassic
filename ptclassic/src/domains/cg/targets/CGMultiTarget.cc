@@ -374,7 +374,7 @@ void CGMultiTarget::writeSchedule() {
 			displayGanttChart(gname);
 			unlink(gname);
 		}
-		LOG_DEL; delete gname;
+		LOG_DEL; delete [] gname;
         }
 }
 
