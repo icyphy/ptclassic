@@ -4,7 +4,6 @@
 Demonstrate the
 .c Synchronize
 star to generate a beeping sound with a real-time rhythm.
-.DE
 .EQ
 delim off
 .EN

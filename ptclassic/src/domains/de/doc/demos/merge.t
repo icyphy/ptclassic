@@ -8,7 +8,6 @@ It is fed two streams of regular arrivals,
 one is a ramp beginning at 10.0, and one is a ramp beginning at 0.0.
 The two streams are merged into one, in chronological order,
 with simultaneous events appearing in arbitrary order.
-.DE
 .EQ
 delim off
 .EN

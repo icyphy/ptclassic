@@ -3,7 +3,6 @@
 .SD
 Randomly route an irregular but monotonic signal (a Poisson counting process)
 through two channels with random delay, and merge the channel outputs.
-.DE
 .EQ
 delim off
 .EN

@@ -5,7 +5,6 @@ This demo is very similar to the distortion demo.
 The only difference is in the
 .c reorderQ
 wormhole, which introduces queueing.
-.DE
 .EQ
 delim off
 .EN

@@ -4,7 +4,6 @@
 Simulate a queue with "input flushing" during overflow.
 If the queue reaches capacity, all new arrivals are discarded
 until all items in the queue have been served.
-.DE
 .EQ
 delim off
 .EN

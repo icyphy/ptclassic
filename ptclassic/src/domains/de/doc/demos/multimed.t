@@ -8,7 +8,6 @@ Data losses may occur within the network and reduce the final quality
 of the presented video and audio streams.
 The video display requires that the Utah Raster Toolkit be installed
 and available in the user's path.
-.DE
 .EQ
 delim off
 .EN

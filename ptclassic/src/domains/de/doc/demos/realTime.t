@@ -21,7 +21,6 @@ The closer the resulting plot is to a straight line with a slope of
 one, the more precise the timing of the
 .c Synchronize
 outputs are.
-.DE
 .EQ
 delim off
 .EN

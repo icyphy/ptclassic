@@ -9,7 +9,6 @@ A
 counting process is sent to one output
 of the switch for the first 10 time units, and to the other
 output of the switch for the remaining time.
-.DE
 .EQ
 delim off
 .EN

@@ -2,7 +2,6 @@
 .NA VClock
 .SD
 Model a network with four inputs and virtual clock buffer service.
-.DE
 .EQ
 delim off
 .EN

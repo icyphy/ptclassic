@@ -9,7 +9,6 @@ stops.
 This action is triggered by an event produced by the
 .c StopTimer
 star.
-.DE
 .EQ
 delim off
 .EN

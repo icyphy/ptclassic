@@ -8,7 +8,6 @@ compare the values of input events with floating-point values.
 The input test signal is a pair of ramps, with each event repeated once after
 some delay.
 Since the ramps have different steps, they will cross.
-.DE
 .EQ
 delim off
 .EN

@@ -4,7 +4,6 @@
 This demonstration implements a voice-cell recovery technique.
 Cells which have been dropped are replaced by samples determined
 through a complicated pattern matching technique.
-.SE
 .EQ
 delim off
 .EN

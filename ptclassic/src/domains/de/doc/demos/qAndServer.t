@@ -17,7 +17,6 @@ star is set with a larger capacity than the
 star.
 so it overflows second.
 Overflow events are displayed.
-.DE
 .EQ
 delim off
 .EN

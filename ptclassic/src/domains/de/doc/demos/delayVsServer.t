@@ -13,7 +13,6 @@ The
 .c Server
 accepts inputs only after the previous inputs have been served,
 and then holds that input for a fixed offset.
-.DE
 .EQ
 delim off
 .EN
