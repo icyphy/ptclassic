@@ -46,6 +46,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownBlock.h"
 #include "Galaxy.h"
 
+AutoFork::AutoFork(Geodesic& g)
+: geo(g), forkStar(0), forkInput(0), forkOutput(0) {}
+
 PortHole* AutoFork::setSource (GenericPort &sp, int delay) {
 	if (geo.originatingPort) {
 		Error::abortRun(geo, 
@@ -93,7 +96,6 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 	else {
 		Galaxy& parentGal = geo.parent()->asGalaxy();
 		const char* dom = parentGal.domain();
-		PortHole * forkInput;
 
 		// create the Fork star
 		if ((forkStar = KnownBlock::makeNew("Fork", dom)) == 0 ||
@@ -132,8 +134,19 @@ const char* AutoFork::autoForkName() {
 
 // destructor: remove fork star if present.  Otherwise the normal
 // Geodesic destructor will clean up properly.
+
+// it is possible that restructuring (such as removal of wormholes by
+// DDFAutoWorm) has eliminated use of this Geodesic, so that
+// geo.originatingPort is no longer valid (it might be an EventHorizon
+// that has been deleted).  If this has *not* happened,
+// then my geodesic will be connected to forkInput.  This is the reason
+// for testing of forkInput's Geodesic.
+
 AutoFork::~AutoFork() {
 	if (forkStar) {
+		if (forkInput->geo() != &geo) {
+			geo.originatingPort = geo.destinationPort = 0;
+		}
 		forkStar->parent()->asGalaxy().removeBlock(*forkStar);
 		LOG_DEL; delete forkStar;
 		if (geo.originatingPort)
