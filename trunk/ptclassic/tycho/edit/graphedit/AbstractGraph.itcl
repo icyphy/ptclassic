@@ -260,9 +260,6 @@ class ::tycho::AbstractGraph {
 #### constructor
 #
 body ::tycho::AbstractGraph::constructor {args} {
-    # Set the separator to null since graphs by default have no hierarchy
-    configure -separator ""
-    
     # Evaluate options
     eval configure $args
 
