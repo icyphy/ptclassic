@@ -127,6 +127,7 @@ class ::tycho::Shortcuts {
             SelectAll    {<Control-a> Ctrl+A          <Control-slash> {C-/}                     <Control-A> Ctrl+Shift+A} \
             Spelling     {{} {}                       <Meta-dollar> {M-\$}                      {} {}} \
             Spelling2    {{} {}                       <Escape><dollar> {Esc-\$}                 {} {}} \
+            Tab          {<Shift-Tab> Shift+Tab       <Control-q><Tab> {C-q Tab}                <Shift-Tab> Shift+Tab} \
             ToggleReadOnly {{} {}                       <Control-x><Control-q> {C-x C-q}        {} {}} \
             Top          {<Control-Home> {Ctrl+Home}  <Escape><less> {Esc-<}                    <Control-Home> {Ctrl+Home}} \
             Undo         {<Control-z> Ctrl+Z          <Control-x><u> {C-x u}                    <Control-z> Ctrl+Z} \
