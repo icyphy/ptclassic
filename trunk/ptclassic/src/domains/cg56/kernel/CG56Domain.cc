@@ -19,7 +19,7 @@ $Id$
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
 #include "CG56Connect.h"
-#include "CG56WormConnect.h"
+#include "SDFWormConnect.h"
 #include "AsmForkNode.h"
 
 // for error messages (temporary, until wormholes exist):
@@ -49,12 +49,12 @@ public:
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		LOG_NEW; return *new CG56fromUniversal;
+		LOG_NEW; return *new SDFfromUniversal;
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		LOG_NEW; return *new CG56toUniversal;
+		LOG_NEW; return *new SDFtoUniversal;
 	}
 
 	// new node (geodesic)
