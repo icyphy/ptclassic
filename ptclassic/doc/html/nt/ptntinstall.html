@@ -261,6 +261,12 @@ make -k everything &gt;&amp; make.out
 
 <li> You can safely ignore the following warnings and errors:
 	<menu>
+	<li> Ignore the warning:
+<pre>
+touch: /users/ptolemy/obj.nt4: Permission denied
+</pre>
+
+
 	<li> While building Itcl, you may see warnings like:
 <pre>
 checking host system type... Invalid configuration
@@ -273,10 +279,12 @@ checking host system type... Invalid configuration
 type defaults to `int' in declaration
 </pre>
 	
-	<li> Ignore the warning:
-<pre>
-touch: /users/ptolemy/obj.nt4: Permission denied
-</pre>
+	<li> <a href="ptntbugs.html#xpackages"><CODE>octtools/Xpackages/iv</CODE> fails to compile</a>
+	You can ignore this error.
+
+
+	<li> <a href="ptntbugs.html#xv">xv fails to build</a>
+	In the short term, you can ignore this error.
 
 	</menu>
 
