@@ -106,6 +106,12 @@ DEDynMap.o: DEDynMap.cc
 DEpropag_uldl.o: DEpropag_uldl.cc
 	$(UNOPTIMIZED_WARNING_MESSAGE)
 	$(UNOPTIMIZED_COMPILE_RULE) $<
+ifeq ($(PT_EGCS_OPT_ERROR),yes)
+DEWiNeS_Tcl_Animation.o: DEWiNeS_Tcl_Animation.cc
+	@echo "DANGER: No optimizing to avoid egcs 1.0.x internal compiler error here."
+	$(UNOPTIMIZED_COMPILE_RULE) $<
++endif
+
 endif
 
 # Don't add anything after the next line; makedepend will zap it.
