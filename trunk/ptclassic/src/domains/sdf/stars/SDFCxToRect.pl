@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexReal}
+	name {CxToRect}
 	domain {SDF}
 	desc { Convert complex data to real and imaginary parts. }
 	version {$Id$}

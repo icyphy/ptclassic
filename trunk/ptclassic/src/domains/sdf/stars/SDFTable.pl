@@ -1,5 +1,5 @@
 defstar {
-	name { FloatTable }
+	name { Table }
 	domain { SDF }
 	desc {
 Implements a real-valued lookup table.  The "values" state contains the

@@ -1,5 +1,5 @@
 defstar {
-	name { FloatThresh }
+	name { Thresh }
 	domain { SDF }
 	desc {
 NOTE:  THIS STAR SHOULD BE REPLACED BY Quantizer.

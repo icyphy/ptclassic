@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexSum}
+	name {AddCx}
 	domain {SDF}
 	desc {Output the sum of the inputs, as a complex value.  }
 	version {$Id$}

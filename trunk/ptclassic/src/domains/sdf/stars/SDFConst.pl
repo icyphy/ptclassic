@@ -1,5 +1,5 @@
 defstar {
-	name {FloatDC}
+	name {Const}
 	domain {SDF}
 	desc { Output a constant signal with value level (default 0.0).  }
 	version {$Id$}

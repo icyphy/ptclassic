@@ -1,5 +1,5 @@
 defstar {
-	name { CxTable }
+	name { TableCx }
 	domain { SDF }
 	desc {
 Implements a complex-valued lookup table.  The "values" state contains

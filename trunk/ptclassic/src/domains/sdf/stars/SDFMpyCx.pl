@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexProduct}
+	name {MpyCx}
 	domain {SDF}
 	desc { Output the product of the inputs, as a complex value.  }
 	version {$Id$}

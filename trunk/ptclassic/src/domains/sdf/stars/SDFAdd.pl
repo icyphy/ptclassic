@@ -1,5 +1,5 @@
 defstar {
-	name {FloatSum}
+	name {Add}
 	domain {SDF}
 	desc { Output the sum of the inputs, as a floating value.  }
 	version {$Id$}

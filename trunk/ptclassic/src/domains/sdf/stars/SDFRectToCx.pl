@@ -1,5 +1,5 @@
 defstar {
-	name { RealComplex }
+	name { RectToCx }
 	domain { SDF }
 	desc {Convert real and imaginary parts to a complex output.}
 	version {$Id$}

@@ -1,5 +1,5 @@
 defstar {
-	name { FloatGain }
+	name { Gain }
 	domain { SDF }
 	desc { Amplifier: output is input times "gain" (default 1.0). }
 	version {$Id$}

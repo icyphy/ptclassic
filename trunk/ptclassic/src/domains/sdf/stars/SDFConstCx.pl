@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexDC}
+	name {ConstCx}
 	domain {SDF}
 	version {$Id$}
 	desc {

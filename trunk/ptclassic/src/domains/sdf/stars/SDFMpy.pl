@@ -1,5 +1,5 @@
 defstar {
-	name {FloatProduct}
+	name {Mpy}
 	domain {SDF}
 	desc { Output the product of the inputs, as a float value. }
 	version {$Id$}

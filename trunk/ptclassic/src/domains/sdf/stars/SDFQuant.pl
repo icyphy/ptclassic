@@ -1,5 +1,5 @@
 defstar {
-	name { Quantizer }
+	name { Quant }
 	domain { SDF }
 	desc {
 Quantizes input to one of N+1 possible output levels using N thresholds.

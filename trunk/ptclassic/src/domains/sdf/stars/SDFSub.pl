@@ -1,5 +1,5 @@
 defstar {
-	name { FloatDiff }
+	name { Sub }
 	domain { SDF }
 	desc { Output the "pos" input minus all "neg" inputs. }
 	version {$Id$}

@@ -1,5 +1,5 @@
 defstar {
-	name { NewQuant }
+	name { LinQuantIdx }
 	domain { SDF }
 	desc {
 The input is quantized to "levels" number of levels for a specified

@@ -25,125 +25,74 @@ LIB=libsdfstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
- SDFAddMvecs.pl \
- SDFAutocor.pl \
  SDFAverage.pl \
- SDFBiQuad.pl \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
- SDFBlockAllPole.pl \
- SDFBlockFIR.pl \
- SDFBlockLattice.pl \
- SDFBlockRLattice.pl \
- SDFBurg.pl \
  SDFBusToNum.pl \
  SDFCommutator.pl \
- SDFComplexAverage.pl \
- SDFComplexDC.pl \
- SDFComplexFFT.pl \
- SDFComplexFIR.pl \
- SDFComplexProduct.pl \
- SDFComplexReal.pl \
- SDFComplexSum.pl \
- SDFCompress.pl \
- SDFConvolve.pl \
+ SDFAverageCx.pl \
+ SDFConstCx.pl \
+ SDFMpyCx.pl \
+ SDFCxToRect.pl \
+ SDFAddCx.pl \
  SDFCos.pl \
  SDFCut.pl \
- SDFCxDiff.pl \
- SDFCxGain.pl \
- SDFCxLMS.pl \
- SDFCxLMSPlot.pl \
- SDFCxRaisedCos.pl \
- SDFCxTable.pl \
- SDFCxWaveForm.pl \
+ SDFSubCx.pl \
+ SDFGainCx.pl \
+ SDFTableCx.pl \
+ SDFWaveFormCx.pl \
  SDFDB.pl \
- SDFDTFT.pl \
- SDFDct.pl \
- SDFDctCode.pl \
- SDFDctCodeInv.pl \
- SDFDctInv.pl \
  SDFDeMux.pl \
- SDFDiffImage.pl \
- SDFDisplayImage.pl \
- SDFDisplayRgb.pl \
- SDFDisplaySeq.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
- SDFDpcm.pl \
- SDFDpcmInv.pl \
  SDFExp.pl \
- SDFFIR.pl \
- SDFFloatDC.pl \
- SDFFloatDiff.pl \
- SDFFloatGain.pl \
- SDFFloatImpulse.pl \
- SDFFloatPad.pl \
- SDFFloatProduct.pl \
- SDFFloatRamp.pl \
- SDFFloatRect.pl \
- SDFFloatSum.pl \
- SDFFloatTable.pl \
- SDFFloatThresh.pl \
+ SDFConst.pl \
+ SDFSub.pl \
+ SDFGain.pl \
+ SDFImpulse.pl \
+ SDFPad.pl \
+ SDFMpy.pl \
+ SDFRamp.pl \
+ SDFRect.pl \
+ SDFAdd.pl \
+ SDFTable.pl \
+ SDFThresh.pl \
  SDFFloor.pl \
  SDFFork.pl \
- SDFHilbert.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
- SDFIIR.pl \
- SDFImageToPix.pl \
- SDFIntRamp.pl \
- SDFIntTable.pl \
+ SDFRampInt.pl \
+ SDFTableInt.pl \
  SDFIntToBits.pl \
  SDFIntegrator.pl \
- SDFLMS.pl \
- SDFLMSLeak.pl \
- SDFLMSPlot.pl \
- SDFLattice.pl \
- SDFLevDur.pl \
  SDFLimit.pl \
  SDFLog.pl \
- SDFMedianImage.pl \
- SDFMotionCmp.pl \
- SDFMotionCmpInv.pl \
  SDFMux.pl \
- SDFNewQuant.pl \
+ SDFLinQuantIdx.pl \
  SDFNumToBus.pl \
- SDFPixToImage.pl \
  SDFPlay.pl \
- SDFPolarRect.pl \
+ SDFPolarToRect.pl \
  SDFPrinter.pl \
- SDFQuantizer.pl \
- SDFRLattice.pl \
- SDFRaisedCos.pl \
+ SDFQuant.pl \
  SDFReadFile.pl \
- SDFReadImage.pl \
  SDFReadPCM.pl \
- SDFReadRgb.pl \
- SDFRealComplex.pl \
+ SDFRectToCx.pl \
  SDFReciprocal.pl \
- SDFRectPolar.pl \
+ SDFRectToPolar.pl \
  SDFRepeat.pl \
  SDFReverse.pl \
- SDFRgb2Yuv.pl \
- SDFRunLen.pl \
- SDFRunLenInv.pl \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
  SDFTrainer.pl \
- SDFUnwrap.pl \
  SDFUpSample.pl \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
- SDFWindow.pl \
  SDFXMgraph.pl \
  SDFXYgraph.pl \
  SDFXgraph.pl \
  SDFXhistogram.pl \
- SDFXscope.pl \
- SDFYuv2Rgb.pl \
- SDFZigZag.pl \
- SDFZigZagInv.pl
+ SDFXscope.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

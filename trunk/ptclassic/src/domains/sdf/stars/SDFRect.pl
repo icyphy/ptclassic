@@ -1,5 +1,5 @@
 defstar {
-	name { FloatRect }
+	name { Rect }
 	domain { SDF }
 	desc {
 Generates a rectangular pulse of height "height" (default 1.0).

@@ -1,5 +1,5 @@
 defstar {
-	name { IntRamp }
+	name { RampInt }
 	domain { SDF }
 	desc {
 Generates an integer ramp signal, starting at value (default 0)
