@@ -3,7 +3,6 @@
 #
 CC          = gcc
 CFLAGS      = -D_REENTRANT
-INCLUDES    = -I../include
 SHELL       = /bin/sh
 RM          = /bin/rm
 AR          = ar
@@ -124,15 +123,15 @@ libudpamsol25myridebug.a:
  
 # UDPAM source files
 management.o: management.c
-        ${CC} ${CFLAGS} ${AUX_CFLAGS} ${INCLUDES} -c management.c
+        ${CC} ${CFLAGS} ${AUX_CFLAGS} -c management.c
 transport.o: transport.c
-        ${CC} ${CFLAGS} ${AUX_CFLAGS} ${INCLUDES} -c transport.c
+        ${CC} ${CFLAGS} ${AUX_CFLAGS} -c transport.c
 misc.o: misc.c
-        ${CC} ${CFLAGS} ${AUX_CFLAGS} ${INCLUDES} -c misc.c
+        ${CC} ${CFLAGS} ${AUX_CFLAGS} -c misc.c
 lint:
-        ${LINT} ${CFLAGS} ${AUX_CFLAGS} ${INCLUDES} ${UDPAMCFILES}
+        ${LINT} ${CFLAGS} ${AUX_CFLAGS} ${UDPAMCFILES}
 depend:
-clean:  makedepend ${CFLAGS} ${AUX_CFLAGS} ${INCLUDES} ${UDPAMCFILES}
+clean:  makedepend ${CFLAGS} ${AUX_CFLAGS} ${UDPAMCFILES}
         ${RM} -f ${UDPAMOFILES} ../lib/lib*.a
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
