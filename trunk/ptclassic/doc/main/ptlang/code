@@ -405,6 +405,10 @@ method, so a star that writes particles to a file can
 also accept ANYTYPE.
 .H3 "PortHoles in the DE domain"
 .pp
+For convenience, we give here a brief description of how data
+is accessed in the DE domain.  More details are given in the DE domain
+section of the Almagest.
+.pp
 In the DE domain, there is a time associated with each event;
 .IE "DE timestamps"
 this time is set in the star's
@@ -444,7 +448,7 @@ but the user need not use it; it is initialized to zero at the
 start of execution.  By convention,
 .c completionTime
 is used
-to compute the timestamp to be used for output Particles; doing
+to compute the timestamp to be used for output particles; doing
 this in a data member allows it to be remembered across executions.
 However, the star writer is not required to use
 .c completionTime
@@ -486,7 +490,6 @@ for timing control (as a clock input) and you don't care about the
 data value at all; in that case, code typically just resets the
 .c dataNew
 flag of the porthole.
-.c
 A
 .c DEStar
 must have at least one input porthole to work correctly.
@@ -559,7 +562,9 @@ go {
 		oport->put(completionTime) = pp;
 }
 .)c
-Here is the go() function from DEMerge.  Here, we use the dataNew flag
+Here is the go() function from
+.c DEMerge .
+Here, we use the dataNew flag
 to see which input(s) contain(s) new data:
 .(c
 go {
