@@ -680,12 +680,13 @@ const char* VHDLTarget :: sanitizeType(const char* ctyp) {
   
   if ((hashtype == hashREAL) || (hashtype == hashreal))
     type = hashREAL;
-  else if ((hashtype == hashINT) || (hashtype == hashint))
+  else if ((hashtype == hashINTEGER) ||
+	   (hashtype == hashINT) || (hashtype == hashint))
     type = hashINTEGER;
   else if ((hashtype == hashCOMPLEX) || (hashtype == hashcomplex))
     type = hashREAL;
   else
-    type = hashREAL;
+    type = hashstring("UNRECOGNIZED_TYPE");
 
   return type;
 }
