@@ -36,6 +36,7 @@ extern char *AkoName();
 #ifdef __cplusplus
 extern char *AkoName();
 
+extern boolean GetStarName(octObject *instPtr, char** namePtr);
 extern boolean SetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
 extern boolean GetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
 extern boolean SetSogParams(octObject *sog,ParamListType *plist);
