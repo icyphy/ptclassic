@@ -1,0 +1,181 @@
+-*-Mode: text-*- -[Mon Aug 22 16:16:58 2005 by cxh]-
+Version: @(#)README	1.2 7/1/94
+
+octtools/README
+
+This directory contains the source to the subset of octtools used by
+Ptolemy.  Primarily, Ptolemy uses vem.  A few tools that handle
+Octtools facets are also included.
+
+The source was taken from Octtools 8.2 and converted over to Ptolemy
+Style makefiles.
+
+The main differences between vem from 8.1 and vem from 8.2:
+	* vem-8.2 does not use rsh, so pigi need not be able to rsh.
+	This saves a lot of grief with .rhosts files.
+	* vem-8.2 is somewhat more distributable than 8.1, 8.2 is not
+        encumbered by a restrictive distribution policy.  See
+        COPYRIGHT for more information
+
+How to debug Ptolemy/vem problems
+---------------------------------
+
+    $PTOLEMY/octtools/bin.$ARCH should contain two binaries, vem and
+    vem.debug.
+
+    I've modified the pigiEnv.csh script so that you can determinie
+    which vem is run by setting an environment variable, VEMBINARY.
+
+    Usually pigiEnv.csh will run $PTOLEMY/bin.$ARCH/vem.  
+    To run a debug version of vem, set the VEMBINARY variable with:
+
+	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem.debug
+    
+    And then start up pigi.
+
+    Formerly a binary had to be named 'vem' to get the proper
+    bindings.  I believe that this is no longer a problem.  If you do
+    have problems with bindings, try making a private link from
+    from vem to vem.debug:
+	cd ~/bin
+	ln -s $PTOLEMY/octtools/bin.$ARCH/vem.debug vem
+    
+    The vem 8.1 binaries are available as:
+    	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem-8.1
+    and
+	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem-8.1.debug
+
+    Looking at core files
+    ---------------------
+    If you create a core file with vem.debug, use gdb to get a
+    backtrace:
+
+	gdb $PTOLEMY/octtools/bin.$ARCH/vem.debug core
+
+    You may find it helpful to use the 'dir' command inside gdb to set
+    the path that gdb looks for sources with:
+
+	dir ~ptdesign/src/octtools/vem
+	
+    vem bug reports
+    ---------------
+    Currently there is no one person responsible for tracking down vem
+    bugs.
+
+    	1) You should try to replicate the bug in the ptuser
+        environment.  
+
+	2) You should try to replicate the bug in the older, released
+        version of ptolemy (~ptolemy).
+
+	3) You should try and include a gdb stack backtrace in your
+	message to ptdesign.   
+
+	4) You should include step-by-step instructions about how to
+	reproduce the bug.  Don't be afraid of including to much
+	information.  Your instructions should include:
+		what user you were running as
+		what binaries you were running
+		what directory you started from
+		EXACTLY what you typed and moused on.
+	Bugs that can be reproduced quickly are much more likely to be
+	fixed.
+    
+Vem and gcc
+----------- 
+	
+	The mm octtools library is a replacement for malloc.  Don't
+	use it with gcc.  Under gcc, it causes bus errors due to
+	alignment problems in vem.  (libst.a gets a bus error).
+ 
+	In Ptolemy0.5, the wildColors demo run on a vem built with gcc
+	with out the -lmm library seems to cause the following error:
+	
+		fatal error detected by kd (code 0):
+	        in regInit:
+	        out of memory (0)
+		RPC Error: fread of long failed
+		RPC Error: function end failure
+		RPC connection to VEM closed.
+
+	The way to tell if a vem binary includes -lmm is to run 'what'
+	on it and look for the file mm.c.  If mm.c is present, then
+	the vem binary was compiled with -lmm.
+
+	The way to tell if a binary was compiled with gcc or cc is to
+	use nm:
+		 nm a.out | egrep 'gcc|GCC|gnu|GNU'
+
+	In Ptolemy0.5, we did not build octtools with gcc.  In
+	Ptolemy0.5.1 and later, we are building octtools with gcc.
+	Between 0.5 and 0.5.1 some changes were made to Packages/kd to
+	fix the above bug.
+	
+	Building a vem with gcc
+	-----------------------
+	Part of the vem build process updates the octtools libraries
+	in $PTOLEMY/octtools/lib.$ARCH.
+
+	If you do a clean rebuild of vem with gcc, then those
+	libraries will be updated.  
+
+	You should either build gcc versions of vem in a private tree,
+	or be sure to rebuild with cc, so that the octtools libraries
+	are left as they were.  I believe that there are some
+	differences between cc and gcc in the way that arguments are
+	passed.  In theory all of Ptolemy should be built with cc, but
+	that is not the case.
+
+	If you build vem with gcc, then you should specify the
+	-fwritable-strings and -traditional flags and specify a null
+	OCTTOOLS_MM_LIB makefile variable.  In Ptolemy0.5.1, this is
+	done for you.
+	
+	make CC="gcc -traditional -fwritable-strings" OCTTOOLS_MM_LIB= 
+
+	The OCTTOOLS_MM_LIB variable defaults to -lmm in
+	src/octtool/vem/makefile, so if it is null, then the Octtools mm
+	library will not be linked in.
+	
+Miscellaneous Notes
+-------------------
+*This version of vem requires the bindings and bitmaps files in
+ $OCTTOOLS/lib/vem 
+
+*The include directory exists for bootstrapping the creation of the
+ makefiles.  In Ptolemy, makefiles are created from make.templates.
+ Part of the makefile creation process is to run make depend in the
+ current directory.  If the .h files are not available, then the make
+ depend will not create the proper dependencies.
+
+ To actually build a vem binary, you must install the libraries in
+ Packages/* and Xpackages/* into $OCTTOOLS/lib.$ARCH.
+
+*$OCTTOOLS/include should be an exact copy of the include directory.
+ $OCTTOOLS/include would be used if you were going to link the
+ Octtools libraries in a binary.
+
+*Once vem is installed, you can remove this directory.
+
+*The file vem-lib.mk is a makefile that is included in
+ Packages/*/makefile and Xpackages/*/makefile.
+
+*The file vem-bin.mk is a makefile that is included in
+ vem/*makefile
+
+*Packages/options/options.c:optAddUnivOptions()
+ gcc-2.5.6 was dumping core here.  Looks like there is some sort of
+ compiler bug with the |= operation
+
+*The include file 'port.h' is included by many different files.
+ port.h is in three places:
+	$PTOLEMY/src/octtools/Packages/port/port.h	The source file
+	
+	$PTOLEMY/src/octtools/include/port.h		Used when
+							compiling octtools.
+	
+	$PTOLEMY/octtools/include/port.h		Included by other
+							Ptolemy files.
+	
+ If you need to make changes to port.h, make your changes in
+ $PTOLEMY/src/octtools/Packages/port/port.h, and do a make all.
