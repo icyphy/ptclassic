@@ -68,21 +68,17 @@ is set to an integer that does not represent a DTMF digit.
         	}
 	}
 	codeblock(postTest){
-
-	clr	a	$ref(valid),b		; b = valid	
-	move	b,x0	$ref(secondToLast),y0	; x0 = valid, y0=secondToLast	
+	clr	a	$ref(valid),b		; b = valid
+	move	b,x0	$ref(secondToLast),y0		; x0 = valid, y0 = secondToLast
 	move	$ref(input),a	a,y1		; y1 = 0, a = input
 	cmp	y0,a	$ref(last),x1		; x1 = last
 	teq	y1,b				; input must != secondToLast
-	cmp	x1,a	#$val(initialLastInput),y0	; y0=initialLastInput
-	tne	y1,b				; input must = last
-	mpy	x0,x0,b		b,$ref(output)	
-; output result and check if valid = TRUE
-	move	x1,b				; b = last
-	teq	y0,a				; if valid == FALSE set last=
-	teq	y0,b				; secondToLast=initialLastValue
-	move	a,$ref(last)			; store last and 
-	move	b,$ref(secondToLast)		; secondToLast
+	cmp	x1,a	#$val(initialLastInput),y0	; y0 = initialLastInput
+	tne	y1,b				; input must == last
+	mpy	x0,x0,b		b,$ref(output)		; test valid, output = b
+	teq	y0,a				; if !valid, a = bad digit
+	move	a,$ref(last)			; last = a
+	move	x1,$ref(secondToLast)		; secondToLast = x1 = last
 	}
 	setup {
 		secondToLast = int(initialLastInput);
@@ -94,7 +90,7 @@ is set to an integer that does not represent a DTMF digit.
 	}
 
 	// Return an execution estimate in pairs of cycles
-	exectime{ return 13; }
+	exectime{ return 11; }
 }
 
 
