@@ -146,6 +146,55 @@ proc assign {args} {
 }
 
 ##########################################################################
+#### behead varname listname
+#
+# Assign the first element of a list to the specified variable,
+# and remove the head from that list. Note that the list is
+# passed by _name_, so that it is destructively altered in place.
+# For example, suppose that fred equal {1 2 3 4}. Then
+# <pre>
+#     behead x fred
+# </pre>
+#
+# <i>This proc will be deleted soon: do not use it.</i>
+#
+proc behead {varname listname} {
+    upvar $varname  v
+    upvar $listname l
+
+    set v [lindex   $l 0]      ;# lhead
+    set l [lreplace $l 0 0]    ;# ltail
+}
+
+##########################################################################
+#### getalloptions varname listname
+#
+# Get all options from an argument list into the specified
+# variable. This assumes that all arguments from the first
+# option onwards are options.
+#
+# This is very handy for processing non-option arguments in
+# a uniform way: co-ordinates are the example for which this
+# procedure was originally written.
+#
+proc getalloptions {varname listname} {
+
+    upvar $listname l
+    upvar $varname  v
+
+    set v {}
+    set t [lsearch -glob $l {-[a-z]*}]
+    if { $t != -1 } {
+	set v [lrange $l $t end]
+	set l [lrange $l 0 [expr $t-1]]
+
+	return 1
+    }
+
+    return 0
+}
+
+##########################################################################
 #### getopt option listname
 #
 # A handy proc for reading option arguments fram an argument
