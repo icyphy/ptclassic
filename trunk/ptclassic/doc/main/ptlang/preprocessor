@@ -10,7 +10,7 @@ the user can concentrate on writing the action code for a star
 and let the preprocessor generate the standard initialization code
 for portholes, states, etc.
 The preprocessor also generates standardized documentation
-which can be included in the manual.
+to be included in the manual.
 .pp
 The Ptolemy preprocessor reads class definitions from an input file,
 and generates one
@@ -44,7 +44,7 @@ It also makes no attempt to parse information in the
 directive, so arbitrary troff formatting commands can be inserted.
 .pp
 To make things clearer, let's
-start with an example, the file
+start with an example, a rectangular pulse star in the file
 .c SDFFloatRect.pl :
 .(d
 ident {
