@@ -146,7 +146,7 @@ inline int hasCirc(PortHole* p) {
 inline int wormEdge(PortHole& p) {
 	PortHole* f = p.far();
 	if (!f) return TRUE;
-	else return (p.isItInput() == f->isItInput());
+	else return p.atBoundary();
 }
 
 extern int warnIfNotConnected (Galaxy&);

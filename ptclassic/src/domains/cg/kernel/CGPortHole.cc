@@ -77,13 +77,13 @@ static int parentReps(const PortHole* p) {
 }
 
 int CGPortHole :: bufSize() const {
-	if (isItInput() == far()->isItInput())
+	if (atBoundary())
 		return parentReps(this)*numberTokens;
 	else return cgGeo().bufSize();
 }
 
 int CGPortHole :: localBufSize() const {
-	if (isItInput() == far()->isItInput())
+	if (atBoundary())
 		return parentReps(this)*numberTokens;
 	else return cgGeo().localBufSize();
 }
