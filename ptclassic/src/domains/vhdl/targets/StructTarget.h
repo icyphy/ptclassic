@@ -223,12 +223,6 @@ private:
 	// Return the condition indicating if sources are needed.
         int sources() { return sorsUsed; }
 
-	// Add in generic refs here from genericList.
-	void addGenericRefs(VHDLCluster*, int);
-
-	// Add in port refs here from portList.
-	void addPortRefs(VHDLCluster*, int);
-
 	// Add in sensitivity list of input ports.
 	// Do this explicitly for sake of synthesis.
 	void addSensitivities(VHDLCluster*, int);

@@ -725,3 +725,71 @@ void VHDLTarget :: initVHDLObjLists() {
   arcList.initialize();
   variableList.initialize();
 }
+
+// Return a generic clause based on genList.
+StringList VHDLTarget :: addGenericRefs(VHDLGenericList* genList, int level/*=0*/) {
+  StringList all;
+  if (genList->head()) {
+    StringList opener, body, closer;
+
+    level++;
+    opener << indent(level) << "generic(\n";
+
+    int genCount = 0;
+    VHDLGenericListIter nextGeneric(*genList);
+    VHDLGeneric* ngen;
+    while ((ngen = nextGeneric++) != 0) {
+      level++;
+      if (genCount) {
+	body << ";\n";
+      }
+      body << indent(level) << ngen->name << ": " << ngen->type;
+      if (strlen(ngen->defaultVal) > 0) {
+	body << " := " << ngen->defaultVal;
+      }
+      genCount++;
+      level--;
+    }
+    closer << "\n";
+    closer << indent(level) << ");\n";
+    level--;
+
+    if (genCount) {
+      all << opener << body << closer;
+    }
+  }
+  return all;
+}
+
+// Return a port clause based on portList.
+StringList VHDLTarget :: addPortRefs(VHDLPortList* portList, int level/*=0*/) {
+  StringList all;
+  if (portList->head()) {
+    StringList opener, body, closer;
+
+    level++;
+    opener << indent(level) << "port(\n";
+
+    int portCount = 0;
+    VHDLPortListIter nextPort(*portList);
+    VHDLPort* nport;
+    while ((nport = nextPort++) != 0) {
+      level++;
+      if (portCount) {
+	body << ";\n";
+      }
+      body << indent(level) << nport->name << ": " << nport->direction
+	   << " " << nport->type;
+      portCount++;
+      level--;
+    }
+    closer << "\n";
+    closer << indent(level) << ");\n";
+    level--;
+
+    if (portCount) {
+      all << opener << body << closer;
+    }
+  }
+  return all;
+}

@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLStar.h"
 #include "VHDLVariable.h"
 #include "VHDLArc.h"
+#include "VHDLGeneric.h"
+#include "VHDLPort.h"
 #include "FloatArrayState.h"
 #include "IntArrayState.h"
 #include "ComplexArrayState.h"
@@ -171,6 +173,12 @@ protected:
         const char* hashCHARACTER;
         const char* hashIN;
         const char* hashOUT;
+
+	// Return a generic clause based on genList.
+	StringList addGenericRefs(VHDLGenericList*, int level=0);
+
+	// Return a port clause based on portList.
+	StringList addPortRefs(VHDLPortList*, int level=0);
 
 private:
 	VHDLVariableList variableList;

@@ -363,69 +363,6 @@ int SimVSSTarget :: runCode() {
 
 ISA_FUNC(SimVSSTarget,VHDLTarget);
 
-
-// Add in generic refs here from genList.
-StringList SimVSSTarget :: addGenericRefs(VHDLGenericList* genList) {
-  StringList all, opener, body, closer;
-  int level = 0;
-  level++;
-  opener << indent(level) << "generic(\n";
-
-  int genCount = 0;
-  VHDLGenericListIter nextGeneric(*genList);
-  VHDLGeneric* ngen;
-  while ((ngen = nextGeneric++) != 0) {
-    level++;
-    if (genCount) {
-      body << ";\n";
-    }
-    body << indent(level) << ngen->name << ": " << ngen->type;
-    if (strlen(ngen->defaultVal) > 0) {
-      body << " := " << ngen->defaultVal;
-    }
-    genCount++;
-    level--;
-  }
-  closer << "\n";
-  closer << indent(level) << ");\n";
-  level--;
-
-  if (genCount) {
-    all << opener << body << closer;
-  }
-  return all;
-}
-
-// Add in port refs here from portList.
-StringList SimVSSTarget :: addPortRefs(VHDLPortList* portList) {
-  StringList all, opener, body, closer;
-  int level = 0;
-  level++;
-  opener << indent(level) << "port(\n";
-
-  int portCount = 0;
-  VHDLPortListIter nextPort(*portList);
-  VHDLPort* nport;
-  while ((nport = nextPort++) != 0) {
-    level++;
-    if (portCount) {
-      body << ";\n";
-    }
-    body << indent(level) << nport->name << ": " << nport->direction
-	 << " " << nport->type;
-    portCount++;
-    level--;
-  }
-  closer << "\n";
-  closer << indent(level) << ");\n";
-  level--;
-
-  if (portCount) {
-    all << opener << body << closer;
-  }
-  return all;
-}
-
 // Add in signal declarations here from signalList.
 StringList SimVSSTarget :: addSignalDeclarations(VHDLSignalList* signalList) {
   StringList all;
