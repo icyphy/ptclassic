@@ -174,6 +174,42 @@ void Geodesic :: initialize()
 	}
 }
 
+// Similar to initialize() but still keep its infrastructure.
+void Geodesic::resetBufferValues() {
+	// Remove any Particles residing on the Geodesic,
+	// and put them in Plasma
+	pstack.freeup();
+
+	// Initialize the buffer if initDelays has values.
+	// Note: need to check for non-empty strings, empty strings
+	// are returned from the oct database.
+        if(initValues && *initValues != 0 && *initValues != '*') { 
+          // get one particle of the right type to generate the rest
+          Particle* p = originatingPort->myPlasma->get();
+    
+          // call particle specific function to generate the other initial
+          // particles and automatically put them on the pstack.
+          numInitialParticles = p->initParticleStack(parent(),pstack,
+                                                     originatingPort->myPlasma,
+                                                     initValues);
+
+          // finally, put this particle at the head of the pstack
+          if(numInitialParticles > 0)
+            pstack.put(p);
+          else originatingPort->myPlasma->put(p);
+
+        } else {
+          // old code: initialize the buffer to the number of Particles
+          // specified in the connection; note that these Particles
+          // are initialized by Plasma
+          for(int i=numInitialParticles; i>0; i--) {
+            Particle* p = originatingPort->myPlasma->get();
+            pstack.putTail(p);
+          }
+
+	}
+}
+
 // Functions for determining maximum buffer size during a simulated run.
 void Geodesic :: incCount(int n) {
 	CriticalSection region(gate);
