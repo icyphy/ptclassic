@@ -118,6 +118,7 @@ void PTcl::newUniv(const char* name, const char* dom) {
 	LOG_NEW; universe = new InterpUniverse(name, dom);
 	currentGalaxy = universe;
 	curDomain = universe->domain();
+	currentTarget = universe->myTarget();
 	univs.put(*universe);
 }
 
@@ -362,7 +363,7 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 int PTcl::computeSchedule() {
 	SimControl::clearHalt();
 	universe->initTarget();
-	if (SimControl::haltRequested()) {
+	if (SimControl::flagValues() & SimControl::error) {
 		Error::error("Error setting up the schedule.");
 		return FALSE;
 	}
@@ -402,14 +403,16 @@ int PTcl::cont(int argc,char ** argv) {
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
 	universe->run();
-	return SimControl::haltRequested() ? TCL_ERROR : TCL_OK;
+	return (SimControl::flagValues() & SimControl::error) ?
+		TCL_ERROR : TCL_OK;
 }
 
 int PTcl::wrapup(int argc,char **) {
 	if (argc > 1)
 		return usage("wrapup");
 	universe->wrapup();
-	return SimControl::haltRequested() ? TCL_ERROR : TCL_OK;
+	return (SimControl::flagValues() & SimControl::error) ?
+		TCL_ERROR : TCL_OK;
 }
 
 // domains: list domains
@@ -530,6 +533,7 @@ int PTcl::curuniverse(int argc,char** argv) {
 			universe = u;
 			currentGalaxy = u;
 			curDomain = u->domain();
+			currentTarget = u->myTarget();
 			return TCL_OK;
 		}
 		else {
@@ -674,6 +678,12 @@ int PTcl::exit(int argc,char ** argv) {
 	return TCL_ERROR;	// should not get here
 }
 
+// Request a halt of a running universe
+int PTcl::halt(int argc,char ** argv) {
+	SimControl::requestHalt();
+	return TCL_OK;
+}
+
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -709,6 +719,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(domain),
 	ENTRY(domains),
 	ENTRY(exit),
+	ENTRY(halt),
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(multilink),
