@@ -96,10 +96,10 @@ public:
 
 	// The setup function computes an DDF schedule
 	// and initializes all the blocks.
-	int setup(Block& galaxy);
+	int setup(Galaxy& galaxy);
 
 	// The run function resumes the run where it was left off.
-	int run(Block& galaxy);
+	int run(Galaxy& galaxy);
 
 	StringList displaySchedule() ;
 
