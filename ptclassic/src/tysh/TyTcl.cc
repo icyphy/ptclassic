@@ -41,7 +41,7 @@ static const char file_id[] = "TyTcl.cc";
 
 #include "TyTcl.h"
 #include "tk.h"
-
+#include <string.h>		// sol2.cfront wants this for strcpy()
 // FIXME: This include is only needed for the "quote" macro
 //        Seems silly to include so much extra baggage - aok
 #include "isa.h"
