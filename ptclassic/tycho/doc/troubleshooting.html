@@ -36,13 +36,12 @@ background #ffe4c4 disabledForeground #b0b0b0 foreground black \
 highlightBackground ..."
 </PRE>
 
-the you are probably running itcl2.0, but the <CODE>tclIndex</CODE> 
-files were prepared with itcl2.1.  The workaround is to	regenerate the
-<CODE>tclIndex</CODE> files by doing:
-<PRE>
-cd $TYCHO
-make sources
-</PRE>
+then you are probably running Iintcl2.0, but the <CODE>tclIndex</CODE>
+files were prepared with Itcl2.1 or later.  Tycho0.1.1 will not work
+with Itcl2.0, you must upgrade to Itcl2.1 or later.  See the <A
+HREF="install.html">Installation guide</A> for more information.
+
+
 <H3><A NAME="file join error message">file join error message</A></H3>
 If you are starting up Tycho0.1.1 or later and you see a message about
 <PRE>
@@ -55,14 +54,14 @@ If you are starting up Tycho0.1.1 or later and you see a message about
 </PRE>
 
 then the problem is that you are running an
-itcl2.0<CODE>itkwish</CODE>, and Tycho0.1.1 requires itcl2.1, which
+itcl2.0 <CODE>itkwish</CODE>, and Tycho0.1.1 requires itcl2.1, which
 includes the tcl7.5 <CODE>file join</CODE> command.  The way to tell
 is to start <CODE>itkwish</CODE> by hand and type
 
 <PRE>
 set itcl::version
 </PRE>
-you should get back <CODE>2.0</CODE>if you are running itcl2.0 and
+you should get back <CODE>2.0</CODE> if you are running itcl2.0 and
 <CODE>2.1</CODE> if you are running itcl2.1.
 
 <H3><A NAME="Problems creating indexes">Problems creating indexes</A></H3>
@@ -94,10 +93,8 @@ links to a master Tycho tree, destroy your private tree and use
 to create a new one.  <CODE>tylndir</CODE> is documented in <A
 HREF="coding/directories.html#tylndir and private trees"><CODE>$TYCHO/doc/coding/directories.html</CODE></A>
 
-
 </OL>
 
--Christopher
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="install.html">Installation</A> -
