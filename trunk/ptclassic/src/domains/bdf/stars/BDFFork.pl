@@ -24,8 +24,11 @@ interface, or when the "nodeconnect" command is used in the interpreter.
 		name{output}
 		type{= input}
 	}
-	constructor {
-		output.setBDFParams (1, input, BDF_SAME);
+	start {
+		MPHIter nextp(output);
+		BDFPortHole* p;
+		while ((p = (BDFPortHole*)nextp++) != 0)
+			p->setRelation(BDF_SAME,&input);
 	}
 	go {
 		// note that explicit grabData and sendData are needed
