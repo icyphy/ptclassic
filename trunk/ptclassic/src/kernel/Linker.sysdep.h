@@ -61,6 +61,7 @@ const int linkingNotSupported =
 // star that has undefined symbols, pigiRpc or ptcl will exit.
 
 #if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4)
+#define PTSVR4_STYLE_LINKING
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
