@@ -22,7 +22,7 @@ $Id$
 
 class CGCGeodesic : public CGGeodesic {
 public:
-	CGCGeodesic() : bufName(0) {}
+	CGCGeodesic() : bufName(0), myWaste(2.0) {}
 	~CGCGeodesic() {LOG_DEL; delete bufName; }
 
 	// class identification
@@ -31,9 +31,19 @@ public:
 	void setBufName(char* n) {bufName = n;}
 	char* getBufName() const;
 
+	// make large the wasteFactor
+	void preferLinearBuf(int i) { if (i) myWaste = 1e9; }
+
+protected:
+	// Redefine: decide the wasteFactor for linear buffering.
+	// Look at the comment in CGGeodesic class.
+	double wasteFactor() const;
+
 private:
 	// Name of the C object used as a buffer
 	char* bufName;
+	// wasteFactor
+	double myWaste;
 };
 
 #endif

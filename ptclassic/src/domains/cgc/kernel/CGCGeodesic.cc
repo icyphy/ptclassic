@@ -28,3 +28,7 @@ char* CGCGeodesic::getBufName() const {
 	const CGCPortHole* p = (const CGCPortHole*)src();
 	return p ? p->geo().getBufName() : bufName;
 }
+
+// allocation control heuristic
+double CGCGeodesic :: wasteFactor() const { return myWaste; }
+
