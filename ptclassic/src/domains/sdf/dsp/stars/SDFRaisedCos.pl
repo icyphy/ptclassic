@@ -52,9 +52,6 @@ of raised cosine pulses in communications systems.
 		default { 1.0 }
 		desc { Excess bandwidth, between 0 and 1 }
 	}
-	protected {
-		char ivbuf[20];
-	}	
 	constructor {
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
@@ -65,9 +62,7 @@ of raised cosine pulses in communications systems.
 		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	start {
-		sprintf (ivbuf, "0 [%d]", int(N));
-		taps.setValue (ivbuf);
-		taps.initialize ();
+		taps.resize (N);
 		int center = int(N)/2;
 		for (int i = 0; i < int(N); i++)
 			taps[i] = rcos (i - center, P, excessBW);
