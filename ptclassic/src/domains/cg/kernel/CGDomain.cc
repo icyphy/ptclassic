@@ -69,9 +69,6 @@ public:
                 LOG_NEW; return *new CGtoUniversal;
         }
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
-
 	// constructor
 	CGDomain() : Domain("CG") {}
 
