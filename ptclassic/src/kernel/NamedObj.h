@@ -50,11 +50,6 @@ public:
 	// return the full name
 	StringList readFullName() const;
 
-	// return a name that can be used as C++ identifiers, derived
-	// from the actual name.
-	StringList sanitizedName() const;
-	StringList sanitizedFullName() const;
-
 	// set the name and parent
 	void setNameParent (const char* my_name,Block* my_parent) {
 		name = my_name;
