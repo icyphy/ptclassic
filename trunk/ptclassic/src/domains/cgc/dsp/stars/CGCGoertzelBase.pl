@@ -64,7 +64,11 @@ first-order feedback coefficient which is a function of k and N }
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
-	setup {
+        method {
+            name {CheckParameterValues}
+            arglist { "()" }
+            type { void }
+            code {
 		if ( int(k) < 0 ) {
 		  Error::abortRun(*this,
 			"The value for state k must be nonnegative.");
@@ -92,8 +96,16 @@ first-order feedback coefficient which is a function of k and N }
 			"number of data samples read, given by state size.");
 		   return;
 		}
+	    }
+	}
+	setup {
+                // FIXME: Parameters are not always resolved properly
+                // before setup but should be.  For now, check parameters
+                // in go method and guard against division by N = 0
+                // CheckParameterValues();
+                // double Nd = double(int(N));
+		double Nd = double(int(N) ? int(N) : 1);
 		double kd = int(k);
-		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
 		d1 = 2.0 * cos(theta);
 		input.setSDFParams(int(size), int(size)-1);
@@ -121,7 +133,11 @@ first-order feedback coefficient which is a function of k and N }
 		}
 	}
 	go {
+		CheckParameterValues();
 		addCode(decl);
 		addCode(filter);
+	}
+	exectime {
+		return (3 + 3 + 7*int(N));
 	}
 }
