@@ -260,7 +260,7 @@ proc ptkHighlightStar { star } {
 # Procedure to turn on or off textual animation
 #
 proc ptkTxAnimation { on} {
-    global ptkTxAnimationAction
+    global ptkTxAnimationFlag ptkTxAnimationAction
     if [info exists ptkTxAnimationAction] {
  	cancelAction $ptkTxAnimationAction
  	unset ptkTxAnimationAction
@@ -280,14 +280,14 @@ proc ptkTxAnimation { on} {
             scrollbar $win.text.s -relief flat -command "$win.text.t yview"
             pack append $win.text $win.text.s {right filly} \
                 $win.text.t {expand fill}
-	    button $win.ok -text "DISMISS" -command "ptkTxAnimation off"
+	    button $win.ok -text "DISMISS" -command "ptkTxAnimation 0"
             pack append $win $win.msg {top fill} $win.text {top fill expand} \
 		$win.ok {bottom fillx}
 	}
 	set ptkTxAnimationAction \
 	    [registerAction pre "ptkPrintStarName"]
     } {
-	set ptkTxAnmiationFlag 0
+	set ptkTxAnimationFlag 0
 	catch {destroy $win}
     }
 }
