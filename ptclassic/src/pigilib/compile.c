@@ -299,22 +299,31 @@ char *propname;
     return(TRUE);
 }
 
-/* This function is called recursively if there's hierarchy */
-/* Upon premature exit, do not free inst */
+/* ProcessInsts
+ * This function is called recursively if there's hierarchy
+ * Don't free octObject inst using FreeOctMembers because it would be
+ * freed again during recursion.
+ * Don't free ParamListType pList because its members may contain
+ * non-dynamic memory.
+ * It is okay to free the octGenerator. -BLE
+ */
 static boolean
 ProcessInsts(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT};
-    char *name, *parentname;
     ParamListType pList = {0, 0};
-    char *akoName, *oldInstName;
+    char *name, *oldInstName, *akoName, *parentname;
     char instanceHandle[POCT_FACET_HANDLE_LEN];
     char facetHandle[POCT_FACET_HANDLE_LEN];
 
     DetachDelaysFromNets(facetPtr);
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
+
+    /* Iterate over all oct objects, overwriting inst at each iteration */
+    /* This one line accounts for most of the memory leaks in pigilib */
+    /* but you cannot deallocate inst using FreeOctMembers */
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
@@ -342,7 +351,8 @@ octObject *facetPtr;
 		return FALSE;
 	    }
 	    akoName = BaseName(inst.contents.instance.master); 
-	    if ((name = UniqNameGet(akoName)) == NULL) {
+	    name = UniqNameGet(akoName);
+	    if (name == NULL) {
 		octFreeGenerator(&genInst);
 		return FALSE;
 	    }
@@ -351,14 +361,12 @@ octObject *facetPtr;
 	     */
 	    oldInstName = inst.contents.instance.name;
 	    if (!oldInstName || strcmp(name, oldInstName) != 0) {
+		if (oldInstName) free(oldInstName);
 		inst.contents.instance.name = name;
-		if (oldInstName) {
-		    free(oldInstName);
-		}
 		if (octModify(&inst) != OCT_OK) {
 		    octFreeGenerator(&genInst);
 		    ErrAdd(octErrorString());
-		    FreeOctMembers(&inst);
+		    FreeOctMembers(&inst);		/* also frees name */
 		    return FALSE;
 		}
 	    }
@@ -378,8 +386,8 @@ octObject *facetPtr;
 			instanceHandle, " ",
 			name, " ",
 			(char*)NULL);
+	    free(name);
 	}
-	FreeOctMembers(&inst);
     }
     octFreeGenerator(&genInst);
     return(TRUE);
@@ -398,38 +406,35 @@ boolean *result;
 	      master = {OCT_UNDEFINED_OBJECT},
 	      fTerm  = {OCT_UNDEFINED_OBJECT},
 	      prop  = {OCT_UNDEFINED_OBJECT};
+    int retval = TRUE;
 
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
     ERR_IF1(!MyOpenMaster(&master, &inst, "interface", "r"));
     ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name) !=
 	OCT_OK, octErrorString());
+
     if (GetByPropName(&fTerm, &prop, "input") != OCT_NOT_FOUND) {
 	*result = TRUE;
-	FreeOctMembers(&prop);
-	FreeOctMembers(&fTerm);
-	FreeOctMembers(&inst);
-	FreeOctMembers(&master);
-	return (TRUE);
+	retval = TRUE;
     }
-    if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
+    else if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
 	*result = FALSE;
-	FreeOctMembers(&prop);
-	FreeOctMembers(&fTerm);
-	FreeOctMembers(&inst);
-	FreeOctMembers(&master);
-	return (TRUE);
+	retval = TRUE;
     }
-    *result = FALSE;
-    sprintf(msg, "IsInputTerm: terminal is of unknown type, '(%s %s)'",
-	inst.contents.instance.name, aTermPtr->contents.term.name);
-    ErrAdd(msg);
-    EssAddObj(aTermPtr);
+    else {
+	*result = FALSE;
+	retval = FALSE;
+	sprintf(msg, "IsInputTerm: terminal is of unknown type, '(%s %s)'",
+		inst.contents.instance.name, aTermPtr->contents.term.name);
+	ErrAdd(msg);
+	EssAddObj(aTermPtr);
+    }
     FreeOctMembers(&prop);
     FreeOctMembers(&fTerm);
     FreeOctMembers(&inst);
     FreeOctMembers(&master);
-    return (FALSE);
+    return (retval);
 }
 
 /* 6/13/89
@@ -479,11 +484,11 @@ int *inN, *outN;
     octFreeGenerator(&termGen);
     if ( ! retval ) {
 	for (i = 0; i < *inN; i++) {
-	    FreeOctMembers( in[i] );
+	    FreeOctMembers( &in[i] );
 	}
 	*inN = 0;
 	for (i = 0; i < *outN; i++) {
-	    FreeOctMembers( out[i] );
+	    FreeOctMembers( &out[i] );
 	}
 	*outN = 0;
     }
@@ -605,7 +610,7 @@ octObject *facetPtr;
 	    return FALSE;
 	}
 	totalN = inN + outN;
-	if(GetStringizedProp(&net, "delay", delay, BLEN))
+	if (GetStringizedProp(&net, "delay", delay, BLEN))
 	    /* old type delay, mark it */
 	    sprintf(initDelayValues, "*%s",delay);
 	else
@@ -976,8 +981,8 @@ octObject *facetPtr;
     char *name;
     boolean xferedBool;
     char *domain;
-    char* target;
-    
+    char *target;
+
     name = BaseName(facetPtr->contents.facet.cell);
     if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
 	PrintErr(ErrGet());
@@ -1165,7 +1170,7 @@ octObject *facetPtr;
 	    /* nothing */;
 	}
 	else if (IsUnivFacet(&univFacet)) {
-	    char * name = BaseName(univFacet.contents.facet.cell);
+	    char *name = BaseName(univFacet.contents.facet.cell);
 	    char octHandle[16];
 
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
