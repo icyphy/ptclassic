@@ -67,7 +67,6 @@ extern boolean FindNameSet();
 extern boolean GanttRun();
 extern boolean GanttInit();
 extern void FindClear();
-extern int RpcFindName();
 void FindAndMark(/* octObject facetP, char *name, int pattern */);
 #endif /* __cplusplus */
 
