@@ -46,52 +46,55 @@ main (int argc, char** argv) {
 	// streams would be better than stdio.
 
 	char* cmd;
-	Tcl_CmdBuf buffer = Tcl_CreateCmdBuf();
 	int result;
 	char line[200];
 	Tcl_Interp* interp = Tcl_CreateInterp();
 	PTcl ptcl(interp);
 	int gotPartial = 0;
+	int status = 0;		// return status.
 	if (argc == 2) {
 		result = Tcl_EvalFile(interp, argv[1]);
 		if (result != TCL_OK) {
 			// print error info if it exists
 			char* info = Tcl_GetVar(interp, "errorInfo", 0);
 			if (info) fprintf (stderr, "%s\n", info);
-			return 1;
+			status = 1;
 		}
-		return 0;
 	}
-	prompt(tty);
-	while (fgets (line, 200, stdin) != NULL) {
-		cmd = Tcl_AssembleCmd(buffer, line);
-		if (cmd) {
-			gotPartial = 0;
-			result = Tcl_Eval(interp, cmd, 0, 0);
-			if (interp->result[0])
+	else {
+		Tcl_CmdBuf buffer = Tcl_CreateCmdBuf();
+		prompt(tty);
+		while (fgets (line, 200, stdin) != NULL) {
+			cmd = Tcl_AssembleCmd(buffer, line);
+			if (cmd) {
+				gotPartial = 0;
+				result = Tcl_Eval(interp, cmd, 0, 0);
+				if (interp->result[0])
+					printf ("%s\n", interp->result);
+				prompt(tty);
+			}
+			else {
+				gotPartial = 1;
+			}
+		}
+		if (gotPartial) {
+			line[0] = 0;
+			cmd = Tcl_AssembleCmd(buffer, line);
+			if (cmd) {
+				result = Tcl_Eval(interp, cmd, 0, 0);
 				printf ("%s\n", interp->result);
-			prompt(tty);
+			}
 		}
-		else {
-			gotPartial = 1;
-		}
+		Tcl_DeleteCmdBuf(buffer);
 	}
-	if (gotPartial) {
-		line[0] = 0;
-		cmd = Tcl_AssembleCmd(buffer, line);
-		if (cmd) {
-			result = Tcl_Eval(interp, cmd, 0, 0);
-			printf ("%s\n", interp->result);
-		}
-	}
-	Tcl_DeleteCmdBuf(buffer);
-	return 0;
+	Tcl_DeleteInterp(interp);
+	return status;
 }
 
 // the following stub is here until we support the Gantt chart
 // under the interpreter.
 
 extern "C" int displayGanttChart(const char*) {
-	Error::error("Gantt chart display not implemented for the interpreter");
+	Error::error("Gantt chart display not implemented in ptcl");
 	return 0;
 }
