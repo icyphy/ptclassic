@@ -375,16 +375,7 @@ delete [] fulldirname;\n";
     myCode += "SimControl::setPollAction(runEventsOnTimer);\n";
 
     myCode += "\n// Mimic a Ptolemy run control panel\n";
-    myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlInit ";
-    myCode += universeName;
-    myCode += " .run_";
-    myCode += universeName;
-    myCode += " ";
-    myCode += universeName;
-    myCode += " \\\"Standalone version of ";
-    myCode += universeName;
-    myCode += "\\\"\");\n";
-    myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlStandalone .run_";
+    myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlStandalone ";
     myCode += universeName;
     myCode += "\");\n";
 
