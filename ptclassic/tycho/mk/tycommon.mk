@@ -84,7 +84,7 @@
 # JFLAGS	Flags to pass to javac.
 # JAVADOC	The 'javadoc' program
 # JDOCFLAGS	Flags to pass to javadoc.
-# JZIP		Zip file of classes to be produced.
+# TYZIP		Zip file of classes to be produced.
 # JARFILE	Jar file of classes to be produced.
 # JBEANCLASSES  Classes that are included in the jar file as Java Beans.
 # JDIST		The name and version of the tar.gz and zip files of the sources
@@ -347,8 +347,8 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 
 # Create a zip file of the .class files
 # We cd up one level so that the zip file has the proper package name
-jzip: $(JZIP)
-$(JZIP): $(JSRCS) $(JCLASS)
+tyzip: $(TYZIP)
+$(TYZIP): $(JSRCS) $(JCLASS)
 	(cd $(CLASSPATH); $(JAR) -c0Mf $@ $(TYPACKAGE_DIR)/*.class)
 
 jars: $(JARFILE) 
