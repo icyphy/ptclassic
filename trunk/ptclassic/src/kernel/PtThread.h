@@ -55,14 +55,11 @@ public:
 class PtThread
 {
 public:
-    // Constructor.
-    // Every thread must be registered with a scheduler.
-    PtThread(ThreadScheduler& s) { s.add(this); }
+    // Create a thread.
+    virtual void initialize() = 0;
 
-    // Destructor.
-    // The thread must terminate when it is deleted
-    // if it has not done so already.
-    virtual ~PtThread() {}
+    // Terminate the thread.
+    virtual void terminate() = 0;
 
 protected:
     // Main function of the thread.
