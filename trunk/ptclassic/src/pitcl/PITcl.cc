@@ -485,6 +485,14 @@ int PTcl::cont(int argc,char ** argv) {
 int PTcl::wrapup(int argc,char **) {
 	if (argc > 1)
 		return usage("wrapup");
+
+	// If an error has occurred, do not proceed.
+	if (SimControl::flagValues() & SimControl::error)
+		return TCL_ERROR;
+
+	// Clear the halt bit, because the run may have been terminated
+	// prematurely by a halt request, and we still want to wrap up.
+	SimControl::clearHalt();
 	universe->wrapup();
 	return (SimControl::flagValues() & SimControl::error) ?
 		TCL_ERROR : TCL_OK;
