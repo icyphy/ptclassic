@@ -310,17 +310,27 @@ GraphPointer Graph;
     fprintf(CFD, "%s_ST", Graph->Name);
 }
 
-GenDelayStructInits(GraphList)
+GenDelayStructInits(GraphList,pl_flag)
 GraphPointer GraphList;
+bool pl_flag;
 {
     GraphPointer Graph;
 
     fprintf (CFD, "/* Initializing Delay structure */\n\n");
     for (Graph = GraphList; Graph != NULL; Graph = Graph->Next) {
 	if (IsFunc(Graph) && GE(Graph)->HasDelay) {
+	    if(pl_flag == true) 
+	    {	
+     	    fprintf (CFD, "void Init_%s ( ", Graph->Name);
+            GenDelayStructName(Graph);
+	    fprintf(CFD, "* pST)\n");
+	    }
+	    else
+	    {
 	    fprintf (CFD, "Init_%s (pST)\n    ", Graph->Name);
             GenDelayStructName(Graph);
 	    fprintf(CFD, " *pST;\n");
+	    }
      	    fprintf(CFD, "{\n");
             if ((GE(Graph)->ListOfDelays != NULL) || 
 			(GE(Graph)->ListOfFuncApps != NULL)) {

@@ -16,6 +16,7 @@ extern GraphPointer Root;
 extern int indexlevel;
 extern st_table *Edgetable[];
 extern ListPointer ListOfParams;
+extern bool pl_flag;
 
 GenStatements(Graph)
 GraphPointer Graph;
@@ -217,8 +218,9 @@ NodePointer node;
     fprintf(CFD, "while (1);\n");
 }
 
-GenSingleNode(Node)
+GenSingleNode(Node,pl_flag)
 NodePointer Node;
+bool pl_flag;
 {
     STRINGSWITCH(Node->Master->Name)
         FIRSTCASE(CONST) { 
@@ -231,7 +233,7 @@ NodePointer Node;
             if (HasAttribute(edge->Attributes, "InFile") &&
               (!((int)GetAttribute(edge->Attributes, "IsConstant")))) {
 	        Indent();
-                GenNextInputsOfEdge(edge);
+                GenNextInputsOfEdge(edge,pl_flag);
             }
         }
         CASE(SIN) { 
@@ -466,8 +468,9 @@ NodePointer Node;
     ENDSWITCH
 }
 
-GenNextInputsOfEdge(edge)
+GenNextInputsOfEdge(edge,pl_flag)
 EdgePointer edge;
+bool pl_flag;
 {
 /* For inputs which are NOT constants, we have to read once every sample */
 
@@ -483,6 +486,12 @@ EdgePointer edge;
     } else {
         fprintf(CFD,"(&");
         GenSingleEdgeDeref(edge);
+    }
+    if(pl_flag)
+    {
+	fprintf(CFD,",*r_%s_",Root->Name);
+/* NEED & HERE? */
+    	GenEdgeName(edge);
     }
     fprintf(CFD, ");\n");
 }
