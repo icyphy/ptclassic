@@ -42,5 +42,5 @@ panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 # Temporarily notify allenh about changes to php:
 php /home/allenh/bin/cvs-log $CVSROOT/CVSROOT/commitlog $USER %{sVv}
 
-reap/.* mailx -s "%s" reap-cvs@chess.eecs.berkeley.edu
+reap/.* mailx -s \"%s\" reap-cvs@chess.eecs.berkeley.edu
 
