@@ -50,45 +50,47 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	// class DESiPStar
 	////////////////////////////////////
 
-class DESiPStar : public DERepeatStar {
+class DESiPStar:public DERepeatStar {
 
-protected:
-	int sipID;
-        int SPINReady;
-        double NxtFireDur;
-        RunList *run_Proc;
-        double RunSpin(RunList *, double);
-        void outputPML(int, const char *, const char *,
-                const char *, const char *, const char *);
-        void setNextFiring(void);
-        void GlobalUpdate(void);
-        void registerPXPStar(void);
-        void unregisterPXPStar(void);
-	virtual const char* getScope(void) { return NULL; }
-public:
-	// SPIN call C-function via func()
-	virtual int func(int,int) { return 0; }
-	int arglist[256];
+  protected:
+  int sipID;
+  int SPINReady;
+  double NxtFireDur;
+  RunList *run_Proc;
+  double RunSpin(RunList *, double);
+  void outputPML(int, const char *, const char *,
+		 const char *, const char *, const char *);
+  void setNextFiring(void);
+  void GlobalUpdate(void);
+  void registerPXPStar(void);
+  void unregisterPXPStar(void);
+  virtual const char *getScope(void) {
+    return NULL;
+  } public:
+  // SPIN call C-function via func()
+    virtual int func(int, int) {
+    return 0;
+  } int arglist[256];
 
-	// constructor
-	DESiPStar();
+  // constructor
+    DESiPStar();
 
-	// destructor
-	~DESiPStar();
+  // destructor
+   ~DESiPStar();
 
-        // class identification
-        /* virtual */ int isA(const char*) const;
+  // class identification
+  /* virtual */ int isA(const char *) const;
 
 };
 
 typedef struct PXPStarList {
-        DESiPStar* entry;
-        struct PXPStarList* next;
+  DESiPStar *entry;
+  struct PXPStarList *next;
 } PXPStarList;
 
 typedef struct varList {
-        char *entry;
-        struct varList *next;
+  char *entry;
+  struct varList *next;
 } varList;
 
 #endif
