@@ -86,9 +86,9 @@ public:
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
 
-    // Reset current state to be the initial state.
-    // This needs to be invoked while hierarchical entry is initial entry.
-    void resetInitState();
+    // Setup current state to be the initial state. This needs to be invoked
+    // while hierarchical entry is initial entry, i.e. in FSMTarget::begin.
+    int setupInitState();
 
     // Let outside domain know whether to refire.
     /*virtual*/ int selfFiringRequested();
@@ -115,7 +115,7 @@ protected:
     Tcl_Interp* myInterp;
 
     // Initial state of this FSM.
-    FSMStateStar* initialState;
+    FSMStateStar* initState;
 
     // Current state of this FSM.
     FSMStateStar* curState;

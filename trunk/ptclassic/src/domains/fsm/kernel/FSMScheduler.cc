@@ -83,7 +83,7 @@ int FSMScheduler::checkStars() {
       if (bl->isA("FSMStateStar")) {
 	  s = (FSMStateStar *)bl;
 	  if (s->isInit()) {
-	    initialState = s;
+	    initState = s;
 	    check++;
 	  }
 
@@ -144,13 +144,6 @@ int FSMScheduler::receiveData() {
       }
         
     return TRUE;
-}
-
-void FSMScheduler::resetInitState() {
-    // Reset current state to be the initial state.
-    // This needs to be invoked while hierarchical entry is initial entry. 
-    curState = initialState;
-    curEntryType = 1; // By "Initial" entry.
 }
 
 // Run (or continue) the simulation.
@@ -261,9 +254,8 @@ void FSMScheduler::setup() {
     // After galaxy()->initialize(), check all stars.
     if (!checkStars()) return;
 
-    curState = initialState;
-    curEntryType = 1;
-    preState = NULL;
+    // After galaxy()->initialize(), set up the initial state.
+    // if (!setupInitState()) return; // Invoked in FSMTarget::begin instead
 
     // Set the outerDomain.
     // galaxy() points to FSM galaxy;
@@ -272,6 +264,25 @@ void FSMScheduler::setup() {
     outerDomain = galaxy()->parent()->parent()->domain();
     if (!outerDomain) return;
 // printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
+}
+
+int FSMScheduler::setupInitState() {
+    preState = NULL;
+    
+    if (!initState->evalInitGuard()) {
+	Error::abortRun("FSMScheduler: No initial state whose guard of ",
+			"initial transition is satisfied");
+	return FALSE;
+    }
+
+    // Set current state to be the initial state.
+    curState = initState;
+    curEntryType = 1; // By "Initial" entry.
+
+    // Execute the acion of the initial transition in initial state.
+    if (!curState->execInitAction()) return FALSE;
+
+    return TRUE;
 }
 
 // (1) Create a Tcl interpreter 
@@ -318,25 +329,47 @@ int FSMScheduler::setupTclInterp() {
 }
 
 void FSMScheduler::printTclVar() {
+    InfString buf;
+
+  /*
+    // Print inputs/outputs in Tcl
     PortHole* p;
     BlockPortIter next(*galaxy());
     while ((p = next++) != NULL) {
       p = (PortHole *)p->alias();
       if (p->isItInput()) {
-	printf("input port name = %s\n",p->name());
+	printf("\ninput port name=%s, ",p->name());
       } else {
-	printf("output port name = %s\n",p->name());
+	printf("\noutput port name=%s, ",p->name());
       }
 
-      InfString buf = p->name();
+      buf = p->name();
       buf << "(s)";
       InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
       buf = p->name();
       buf << "(v)";
       InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
-      printf("statusStr = %s, valueStr = %s\n",
+      printf("statusStr=%s, valueStr=%s",
 	     (char*)statusStr,(char*)valueStr);
+    
     }
+  */
+
+  // Print internal events in Tcl
+  StringListIter nextEvent(intlEventNames);
+  const char* event;
+  while ((event=nextEvent++) != NULL) {
+      printf ("\nintl event name=%s, ",event);
+      buf = event;
+      buf << "(s)";
+      InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+      buf = event;
+      buf << "(v)";
+      InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+      printf("statusStr=%s, valueStr=%s",
+	     (char*)statusStr,(char*)valueStr);
+
+  }
 }
 
 // isA
