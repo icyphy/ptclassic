@@ -44,18 +44,28 @@ a universe.
 #endif
 
 #include "CompileTarget.h"
+
+// Ptolemy kernel files
 #include "miscFuncs.h"
 #include "Scope.h"
-#include "AcyLoopScheduler.h"
-#include "LoopScheduler.h"
-#include "KnownTarget.h"
 #include "Galaxy.h"
+#include "Target.h"
+#include "KnownTarget.h"
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
-#include <ctype.h>
+
+// Ptolemy domain includes
+#include "AcyLoopScheduler.h"
+#include "LoopScheduler.h"
 #include "pt_fstream.h"
 #include "SDFCluster.h"
+
+// Standard includes
+#include <ctype.h>			// define isalnum macro
+
+// Defined in SDFDomain.cc
+extern const char SDFdomainName[];
 
 // Constructor
 CompileTarget::CompileTarget(const char* nam,
@@ -63,7 +73,8 @@ CompileTarget::CompileTarget(const char* nam,
 			     const char* desc)
 : HLLTarget(nam,stype,desc)
 {
-	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/SDF");
+	destDirName = destDirectoryName(SDFdomainName);
+	destDirectory.setInitValue(destDirName);
 }
 
 Block* CompileTarget::makeNew() const {
@@ -71,28 +82,25 @@ Block* CompileTarget::makeNew() const {
 }
 
 void CompileTarget::setup() {
-	char* schedFileName = 0;
-	SDFScheduler *s;
-	writeDirectoryName(destDirectory);
-	int lv = int(loopingLevel);
-	switch(lv) {
-	case 0:
+	SDFScheduler* s = 0;
+	switch(int(loopingLevel)) {
+	    case 0:
 		LOG_NEW; s = new SDFScheduler;
 		break;
-	case 1:
-		schedFileName = writeFileName("schedule.log");
-		LOG_NEW; s = new SDFClustSched(schedFileName);
+	    case 1:
+		logPath = logFilePathName(destDirectory, "schedule.log");
+		LOG_NEW; s = new SDFClustSched(logPath);
 		break;
-	case 2:
-		schedFileName = writeFileName("schedule.log");
-		LOG_NEW; s = new LoopScheduler(schedFileName);
+	    case 2:
+		logPath = logFilePathName(destDirectory, "schedule.log");
+		LOG_NEW; s = new LoopScheduler(logPath);
 		break;
-	case 3:
-		schedFileName = writeFileName("schedule.log");
-		LOG_NEW; s = new AcyLoopScheduler(schedFileName);
+	    case 3:
+		logPath = logFilePathName(destDirectory, "schedule.log");
+		LOG_NEW; s = new AcyLoopScheduler(logPath);
 		break;
-	default:
-		Error::abortRun(*this,"Unknown scheduler");
+	    default:
+		Error::abortRun(*this, "Unknown scheduler");
 		return;
 	}
 	setSched(s);
@@ -101,7 +109,6 @@ void CompileTarget::setup() {
 	// the portholes to CGPortHole.  These casts are no good for
 	// this target, which has SDFPortHole types.
 	Target::setup();
-	LOG_DEL; delete [] schedFileName;
 }
 
 // do not call the begin methods
@@ -325,6 +332,9 @@ void CompileTarget::writeFiring(Star& s, int depth) {
     myCode << indent(depth) << sanitizedStarName(s) << ".run();\n";
 }
 
+// Method to return a pointer to the MultiPortHole that spawned a
+// given PortHole, if there is such a thing.  If not, the pointer
+// to the PortHole is returned as pointer to a GenericPort.
 const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
 	const GenericPort* g = p->getMyMultiPortHole();
 	if (!g) g = p;
@@ -689,7 +699,11 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     return myCode;
 }
 
-static CompileTarget compileTargetProto("compile-SDF", "SDFStar",
-	"Generate and compile stanalone C++ code");
-static KnownTarget entry(compileTargetProto,"compile-SDF");
+// Return the domain of the galaxy if it is defined and "SDF" otherwise
+const char* CompileTarget::domain() {
+      return galaxy() ? galaxy()->domain() : SDFdomainName;
+}
 
+static CompileTarget compileTargetProto("compile-SDF", "SDFStar",
+	"Generate and compile standalone C++ code");
+static KnownTarget entry(compileTargetProto,"compile-SDF");
