@@ -48,7 +48,6 @@ Your <CODE>PATH</CODE> should include
 
 <li> In a bash shell, do
 <pre>
-unset LIB
 cd $PTOLEMY
 make -k ntbuild &gt;&amp; make.out &amp;
 </pre>
@@ -279,18 +278,6 @@ the Cygwin32 version does.
 <CODE>//<I>UnixHost</I>/ptolemy</CODE>, but if you do, you will
 have problems with configuring Itcl. Instead use the <CODE>mount</CODE>
 command as above.
-
-<li> To build Octtools, you will need to unset the <CODE>LIB</CODE>
-environment variable:
-<pre>
-unset LIB
-</pre>
-If you don't do <CODE>unset LIB</CODE>, then you will see errors
-like
-<pre>
-making install in kernel
-../../mk/compile.mk:95: *** missing separator.  Stop.
-</pre>
 
 <li> To do the actual build, do
 <pre>
