@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Wed Sep  4 16:50:36 1996 by cxh]-
+-*-Mode:text-*- -[Sun Feb 23 15:27:29 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,14 +17,14 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	gcc-2.7.2.1
+	gcc-2.7.2.2
 	libg++-2.7.2
 	make-3.75
 
 If you obtained the hp GNU tar file, then you should also have:
 	binutils-2.7
 	bison-1.25
-	flex-2.5.3
+	flex-2.5.4
 
 makeinfo, the GNU documentation program is not currently part of the
 Ptolemy GNU binary distribution.
@@ -132,6 +132,24 @@ checking whether setvbuf arguments are reversed... configure: error: can not run
 	If you don't have gcc, then you can try getting a prebuilt binary
 	from ftp://ptolemy.eecs.berkeley.edu/pub/gnu.  You can then rebuild
 	if necessary.
+
+SunOS4.1.3
+----------
+	While trying to install libg++-2.7.2:
+		gcc -fpic -shared -o libstdc++.so.2.7.2 `cat piclist` 
+		collect2: ld returned 4 exit status
+		ld: ../libiberty/pic/strtoul.o: can't mix pic and PIC .o
+	The fix we did in the sources was to edit libg++/config/mh-sparcpic
+	and change -fpic to -fPIC.
+
+	libg++/config/ChangeLog says:
+	> Thu Feb 15 13:07:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+	> [...]
+	> * mh-sparcpic (PICFLAG): Set to -fPIC, not -fpic.
+
+	This problem is new in libg++-2.7.2.  Ptolemy0.6 was shipped with
+	libg++-2.7.1
+
 
 Linux
 -----
