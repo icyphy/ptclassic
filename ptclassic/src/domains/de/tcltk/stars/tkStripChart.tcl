@@ -616,8 +616,6 @@ tkStripChartInit $starID
 # Second argument is the stopTime of the current control panel.
 #
 tkStripChartMkWindow $ptkControlPanel.stripChart_${starID} \
-    [$ptkControlPanel.iter.entry get] \
-    $starID \
-    [curuniverse]
+    [stoptime] $starID [curuniverse]
 
 focus $ptkControlPanel.stripChart_${starID}.pf
