@@ -85,7 +85,7 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
-	# libio is not present in libg++-2.7.1
+	# libio dir is not present in libg++-2.7.1 until later
 	#-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
@@ -105,8 +105,8 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.h .)
 	# In libg++-2.7.1, librx is not standalone
 	#-(cd $(GNU_OBJ)/librx; ln -s $(GNU_SRC)/librx/*.c .)
-	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
 	# No longer necessary in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
 	#-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
 
 
@@ -209,11 +209,13 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/make; ln -s $(HP_GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.c .)
-	-(cd $(GNU_OBJ)/libio; ln -s $(HP_GNU_SRC)/libio/*.c* .)
+	# libio dir is not present in libg++-2.7.1 until later
+	#-(cd $(GNU_OBJ)/libio; ln -s $(HP_GNU_SRC)/libio/*.c* .)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(HP_GNU_SRC)/libiberty/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(HP_GNU_SRC)/libg++/gperf/src/*.c* .)
+	# Looks like we need not make these links either in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
+	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
+	#-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(HP_GNU_SRC)/libg++/gperf/src/*.c* .)
 	# Don't need gprof for Ptolemy.  BTW - gprof on hppa needs -lm
 	#-(cd $(GNU_OBJ)/libg++/gprof/src; \
 	#	ln -s $(HP_GNU_SRC)/libg++/gprof/src/*.c* .)
@@ -229,9 +231,11 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
 	-(cd $(GNU_OBJ)/gcc; ln -s ../gas/as.new as)
-	-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
-	-(cd $(GNU_OBJ)/libstdc++; ln -s $(HP_GNU_SRC)/libstdc++/*.cc .)
-	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(HP_GNU_SRC)/libstdc++/stl/*.cc .)
+	# In libg++-2.7.1, librx is not standalone
+	#-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
+	# No longer necessary in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libstdc++; ln -s $(HP_GNU_SRC)/libstdc++/*.cc .)
+	#-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(HP_GNU_SRC)/libstdc++/stl/*.cc .)
 
 # Set up links for GNU as.
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
