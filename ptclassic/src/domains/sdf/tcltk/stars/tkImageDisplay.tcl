@@ -29,68 +29,78 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-proc goTcl_$dispStarID {dispStarID frameID} {
-    
-    global ptkControlPanel
-    set dispWin $ptkControlPanel.img$dispStarID$frameID
+# Define the window to hold the image
+set s $ptkControlPanel.image_$starID
 
-    if {![winfo exists $dispWin]} {
+# If a window with the right name already exists, we assume it was
+# created by a previous run of the very same star, and hence can be
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-        catch { destroy $dispWin }
-        toplevel $dispWin
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
 
-        set dispB $dispWin.dispButton
+if {!$window_previously_existed} {
+    toplevel $s
+    wm title $s "Tk Image Display"
+    wm iconname $s "PtTkImage"
+    frame $s.f
+    message $s.msg -width 12c
+    pack append $s $s.msg {top expand} $s.f top
+
+    proc ptkImageName {starID} {
+	return ptkImageData_$starID
+    }
+
+    proc ptkImageWindow {dispWin imageName} {
+	set dispB $dispWin.dispButton
 	set saveB $dispWin.saveButton
 	set dismissB $dispWin.dismissButton
-        button $dispB -image Img_$dispStarID$frameID 
-        button $saveB -text Save -command \
-			      [list ShowEntry $saveB $dispStarID $frameID] 
-        button $dismissB -text Dismiss -command \
-				 [list DestroyWin $dispStarID $frameID] 
-
-        pack $dispB -side top -fill both
-        pack $saveB -side top -fill x 
-        pack $dismissB -side bottom -fill x 
-
-	set winTitle [format "%s%s" $dispStarID $frameID]
-	wm title $dispWin $winTitle
-	wm iconname $dispWin $winTitle 
+	button $dispB -image $imageName
+	button $saveB -text Save \
+		-command "destroy $saveButton; ptkImageShow $dispWin"
+	button $dismissB -text "DISMISS" \
+		-command "ptkStop [curuniverse]; destroy $s"
+	pack $dispB -side top -fill both
+	pack $saveB -side top -fill x 
+	pack $dismissB -side bottom -fill x 
     }
-}
 
-proc ShowEntry {sb dispStarID frameID} {
+    proc ptkImageShow {dispWin} {
+	global ptkImage_FileName
+	frame $dispWin.fm
+	label $dispWin.fm.l -text "File Name:"
+	entry $dispWin.fm.e -width 20 -relief sunken -bd 2 \
+		-textvariable ptkImage_FileName 
+	button $dispWin.fm.ok -text "OK" \
+		-command "destroy $dispWin.fm; ptkImageSave $dispWin"
+	pack $dispWin.fm -side top -fill x 
+	pack $dispWin.fm.l $dispWin.fm.e $dispWin.fm.ok -side left 
+	pack $dispWin.fm.ok -side left -expand y -fill x
+    }
 
-    global ptkControlPanel 
-    global foolfname
-    set dispWin $ptkControlPanel.img$dispStarID$frameID
-    destroy $sb
-    frame $dispWin.fm
-    label $dispWin.fm.l -text "File Name:"
-    entry $dispWin.fm.e -width 20 -relief sunken -bd 2 \
-			               -textvariable foolfname 
-    button $dispWin.fm.ok -text Ok -command \
-			[list SaveImage $dispWin.fm $dispStarID $frameID] 
-    pack $dispWin.fm -side top -fill x 
-    pack $dispWin.fm.l $dispWin.fm.e $dispWin.fm.ok -side left 
-    pack $dispWin.fm.ok -side left -expand y -fill x
-}
+    proc ptkImageSave {dispWin} {
+	global ptkImage_FileName
+	$dispWin write $ptkImage_FileName 
+	button $dispWin.saveButton -text Save \
+		-command "destroy $dispWin.saveButton; ptkImageShow $dispWin"
+	pack $dispWin.saveButton -side top -fill x 
+    }
 
-proc SaveImage {fm dispStarID frameID} {
+    proc goTcl_$starID { starID } {
+	set s $ptkControlPanel.image_$starID
+	set i [ptkImageName $starID]
+	$s.dispButton configure -image $i
+    }
 
-    global ptkControlPanel 
-    global foolfname
-    destroy $fm
-    Img_$dispStarID$frameID write $foolfname 
-    set dispWin $ptkControlPanel.img$dispStarID$frameID
-    button $dispWin.saveButton -text Save -command \
-		      [list ShowEntry $dispWin.saveButton $dispStarID $frameID]
-    pack $dispWin.saveButton -side top -fill x 
-}
+    # Allocate space for an image
+    set i [ptkImageName $starID]
+    if { ! [info exists $i] } {
+      image create ptimage $i
+    }
 
-proc DestroyWin {dispStarID frameID} {
-
-    global ptkControlPanel
-    global foolfname
-    set foolfname ""
-    destroy $ptkControlPanel.img$dispStarID$frameID
+    ptkImageWindow $s $i
 }
