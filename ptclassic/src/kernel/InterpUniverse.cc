@@ -1,3 +1,4 @@
+static const char file_id[] = "InterpUniverse.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -29,7 +30,7 @@ const char* InterpUniverse :: targetName() const {
 
 int InterpUniverse :: newTarget(const char* newTargName) {
 	if (target) {
-		delete target;
+		LOG_DEL; delete target;
 		target = 0;
 	}
 	type = KnownBlock::domain();
@@ -42,5 +43,9 @@ Scheduler* InterpUniverse :: mySched() const {
 	return target->mySched();
 }
 
+InterpUniverse :: ~InterpUniverse() {
+	if (!target) return;
+	LOG_DEL; delete target; target = 0;
+}
 // isa
 ISA_FUNC(InterpUniverse,Galaxy);
