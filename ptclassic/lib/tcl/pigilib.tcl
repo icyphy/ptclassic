@@ -57,9 +57,10 @@ proc pigilib_init_env {} {
 	uplevel #0 {
 	    source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
 	    source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/itcl.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itk/itk.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/iwidgets/iwidgets.tcl
+	#  Don't source these with Itcl3.0
+	#    source $PTOLEMY/tcltk/itcl/lib/itcl/itcl.tcl
+	#    source $PTOLEMY/tcltk/itcl/lib/itk/itk.tcl
+	#    source $PTOLEMY/tcltk/itcl/lib/iwidgets/iwidgets.tcl
 	}
     } else {
 	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
