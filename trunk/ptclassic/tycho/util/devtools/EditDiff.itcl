@@ -318,18 +318,20 @@ body ::tycho::EditDiff::compareFile {} {
         set tag l1[llength $differenceList]
         set tag l2[llength $differenceList]
         $text tag configure l1$tag -foreground [lindex $linecolor1 0]
-        $text tag bind l1$tag <Enter> "$text config -cursor dot"
-        $text tag bind l1$tag <Leave> "$text config -cursor left_ptr"
-        $text tag bind l1$tag <Button-1> \
-                "$this jumpDifference {} [llength $differenceList]"
+        $text tag bind l1$tag <Enter> "$text config -cursor dot;\
+                $this putStatus \"Diff #[expr [llength $differenceList]+1]\";\
+                $this jumpDifference {} [llength $differenceList]"
+        $text tag bind l1$tag <Leave> "$text config -cursor left_ptr;\
+                $this putStatus \"\""
         $text tag bind l1$tag <Double-Button-1> \
                 "$this jumpToLine $filename1 $fileLineCount1"
 
         $text tag configure l2$tag -foreground [lindex $linecolor2 0]
-        $text tag bind l2$tag <Enter> "$text config -cursor circle"
-        $text tag bind l2$tag <Leave> "$text config -cursor left_ptr"
-        $text tag bind l2$tag <Button-1> \
-                "$this jumpDifference {} [llength $differenceList]"
+        $text tag bind l2$tag <Enter> "$text config -cursor circle;\
+                $this putStatus \"Diff #[expr [llength $differenceList]+1]\";\
+                $this jumpDifference {} [llength $differenceList]"
+        $text tag bind l2$tag <Leave> "$text config -cursor left_ptr;\
+                $this putStatus \"\""
         $text tag bind l2$tag <Double-Button-1> \
                 "$this jumpToLine $filename2 $fileLineCount2"
         # Setup coloring
