@@ -30,27 +30,15 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 		default {0}
 		desc { Where to put the input in the output block. }
 	}
-	state {
-		name {fill}
-		type {FLOAT}
-		default {0.0}
-		desc { Value to fill the output block. }
-	}
 	start {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
-	}
-	codeblock (initfill) {
-; initialization code for star $fullname() - class CG56UpSample
 	}
 	codeblock (sendsample) {
 	$ref2(output,phase) = $ref(input);
 	}
 	go {
 		gencode(sendsample);
-	}
-	execTime {
-		return 1;
 	}
 }

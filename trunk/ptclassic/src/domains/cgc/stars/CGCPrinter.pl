@@ -19,11 +19,18 @@ the same line, separated by tabs.
 		name { input }
 		type { ANYTYPE }
 	}
-	defstate {
+	state {
 		name { fileName }
 		type { string }
 		default { "cout" }
 		desc { Filename for output. }
+	}
+	state {
+		name { index }
+		type { int }
+		default { "1" }
+		desc { index for multi input trace. }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	private {
 		int fileOutput;
@@ -35,30 +42,35 @@ the same line, separated by tabs.
 		StringList s =
 			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
 		addDeclaration(s);
-		addInclude("#include <stdio.h>\n");
+		addInclude("<stdio.h>");
 		gencode(openfile);
 	    }
 	}
 codeblock (openfile) {
-    if(!($starSymbol(fp)=fopen("$val(fileName)","w")))
+    if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) 
 	fprintf(stderr,"ERROR: cannot open output file for Printer star.\n");
-/* second if temporarily necessary: can't use brackets */
+    /* second if temporarily necessary: can't use brackets */
     if(!$starSymbol(fp)) exit(1);
 }
 	go {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
-		char buf[80];
+		index = i;
 		if(fileOutput) {
-		    sprintf(buf,
-"\tfprintf($starSymbol(fp),\"%%f\\n\", $ref(input#%d));\n", i);
+			gencode(CodeBlock(
+"\tfprintf($starSymbol(fp),\"%f\\t\", $ref(input#index));\n"));
 		} else {
-		    sprintf(buf, "\tprintf(\"%%f\\n\", $ref(input#%d));\n", i);
+			gencode(CodeBlock( 
+"\tprintf(\"%f\\t\", $ref(input#index));\n"));
 		}
-		gencode(CodeBlock(buf));
 	    }
+	    if (fileOutput) {
+		gencode(CodeBlock("\tfprintf($starSymbol(fp),\"\\n\");\n"));
+	    } else {
+		gencode(CodeBlock("\tprintf(\"\\n\");\n"));
+	   }
 	}
 	wrapup {
 	    if(fileOutput)
-		gencode(CodeBlock("    fclose($starSymbol(fp));\n"));
+		gencode(CodeBlock("\tfclose($starSymbol(fp));\n"));
 	}
 }
