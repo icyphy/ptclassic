@@ -31,12 +31,6 @@ static void p3(cc* m1, cc* m2, cc* m3) {
 	cerr << m1 << " " << m2 << " " << m3 << "\n";
 }
 
-// procedure for Tcl to use to free allocated strings.  Used as
-// the "freeProc" argument for Tcl_SetResult.
-static void deleteString(char* s) {
-	LOG_DEL; delete s;
-}
-
 void
 Error :: error(cc* m1, cc* m2, cc* m3) {
 	if (PTcl::activeInterp == 0) {
@@ -49,7 +43,8 @@ Error :: error(cc* m1, cc* m2, cc* m3) {
 	int l = strlen(m1)+strlen(m2)+strlen(m3)+8;
 	LOG_NEW; char* msg = new char[l];
 	sprintf (msg, "ERROR: %s%s%s", m1, m2, m3);
-	Tcl_SetResult(PTcl::activeInterp, msg, deleteString);
+	Tcl_SetResult(PTcl::activeInterp, msg, TCL_VOLATILE);
+	LOG_DEL; delete msg;
 }
 
 void
@@ -70,7 +65,8 @@ Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	int l = strlen(name) + strlen(m1) + strlen(m2) + strlen(m3) + 10;
 	LOG_NEW; char* msg = new char[l];
 	sprintf (msg, "ERROR: %s: %s%s%s", name, m1, m2, m3);
-	Tcl_SetResult(PTcl::activeInterp, msg, deleteString);
+	Tcl_SetResult(PTcl::activeInterp, msg, TCL_VOLATILE);
+	LOG_DEL; delete msg;
 }
 
 void
