@@ -38,15 +38,11 @@
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #
 # The Matlab include files are located in $(MATLABDIR)/extern/include
-# At compile time, either
-# (a) sdfnomatlabstars.o and libsdfnomatlabstars.a are created if
-#     Matlab is not installed, or
-# (b) sdfmatlabstars.o and libsdfmatlabstars.a are created if
-#     Matlab is installed
-#
-# At link time, either
-# (a) libsdfnomatlabstars.a is linked if Matlab is not installed, or
-# (b) libmat.a is linked if Matlab is installed.
+# At compile time, sdfmatlabstars.o and libsdfmatlabstars.a are created
+# At link time, Ptolemy is linked against libexttools.a (MatlabIfc class)
+# and either
+# (a) libptmatlab.a if Matlab is not installed, or
+# (b) libmat.a if Matlab is installed.
 #
 # If Matlab is installed, the old way to determine the Matlab architecture is
 # MATARCH := $(shell $(ROOT)/bin/matlabArch $(PTARCH))
