@@ -126,6 +126,10 @@ endif
 
 include $(ROOT)/mk/stars.mk
 
+# matlab.mk and mathematica.mk check these vars before traversing the path
+NEED_MATLABDIR = 	1
+NEED_MATHEMATICADIR = 	1
+
 PIGI_OBJS += $(STARS) $(TARGETS) $(MISC_OBJS)
 
 PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \

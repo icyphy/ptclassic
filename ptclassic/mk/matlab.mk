@@ -48,14 +48,20 @@
 # MATARCH := $(shell $(ROOT)/bin/matlabArch $(PTARCH))
 # Now, MATARCH is set by the config makefiles.
 #
-MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-ifeq ("$(MATLABDIR)","")
-MATLABDIR= 		$(ROOT)/src/compat/matlab
-MATLABEXT_LIB = 	-lptmatlab
-else
-MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+
+# matlabRootDir traverses the user's path, so we only run it when
+# we really need it.
+ifdef NEED_MATLABDIR
+	MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+
+	ifeq ("$(MATLABDIR)","")
+	MATLABDIR= 		$(ROOT)/src/compat/matlab
+	MATLABEXT_LIB = 	-lptmatlab
+	else
+	MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+	endif
+	MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
 endif
-MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
 
 # Ptolemy interface directories
 EXTTOOLSLIB = $(ROOT)/src/utils/libexttools

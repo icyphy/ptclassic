@@ -44,14 +44,19 @@
 # (a) libptmathematica.a if Mathematica is not installed, or
 # (b) libMLelf.a if Mathematica is installed.
 #
-MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
-ifeq ("$(MATHEMATICADIR)","")
-MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
-MATHEMATICAEXT_LIB = 	-lptmathematica
-else
-MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMLelf
+
+# matlabRootDir traverses the user's path, so we only run it when
+# we really need it.
+ifdef NEED_MATHEMATICADIR
+	MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+	ifeq ("$(MATHEMATICADIR)","")
+	MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
+	MATHEMATICAEXT_LIB = 	-lptmathematica
+	else
+	MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMLelf
+	endif
+	MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 endif
-MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 
 # Ptolemy interface directories
 EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
