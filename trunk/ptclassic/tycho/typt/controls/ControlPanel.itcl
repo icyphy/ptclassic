@@ -186,8 +186,10 @@ class ::tycho::ControlPanel {
     # A flag to enable debugging
     protected common debug 0
 
-    # The common array of iteration counters
-    protected common iterationcounter
+    # The common array of iteration counters. FIXME: we are
+    # currently using a global variable here so that C packages
+    # can update the iteration counter.
+    # protected common iterationcounter
 
     # The common array of widgets, indexed by task name
     protected common widgetnames
@@ -244,6 +246,7 @@ body ::tycho::ControlPanel::constructor {args} {
     pack $itk_component(bbox) -side right -expand no -padx 2 -pady 4
 
     # Initialize the iteration counter and add a trace to it
+    global iterationcounter
     set iterationcounter($this) 0
     trace variable iterationcounter($this) "w" "$this _counttrace"
 
@@ -362,6 +365,9 @@ body ::tycho::ControlPanel::pause {} {
     # $bbox buttonconfigure pause  -relief sunken -state disabled 
     # $bbox buttonconfigure resume -relief raised -state normal
     # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Paused"
+    update idletasks
 }
 
 #######################################################################
@@ -379,6 +385,9 @@ body ::tycho::ControlPanel::resume {} {
     # $bbox buttonconfigure pause  -relief raised -state normal 
     # $bbox buttonconfigure resume -relief sunken -state disabled
     # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+    update idletasks
 }
 
 #######################################################################
@@ -388,7 +397,9 @@ body ::tycho::ControlPanel::resume {} {
 #
 body ::tycho::ControlPanel::start {} {
     # Call the scheduler
-    ::tycho::Scheduler::startC ::tycho::$itk_option(-taskname)
+    ::tycho::Scheduler::startC \
+	    ::tycho::$itk_option(-taskname) \
+	    iterationcounter($this)
 
     # Change button states -- doesn't work!
     # set bbox $itk_component(bbox)
@@ -396,6 +407,9 @@ body ::tycho::ControlPanel::start {} {
     # $bbox buttonconfigure pause  -relief raised -state normal 
     # $bbox buttonconfigure resume -relief raised -state disabled
     # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+    update idletasks
 }
 
 #######################################################################
@@ -413,6 +427,9 @@ body ::tycho::ControlPanel::stop {} {
     # $bbox buttonconfigure pause  -relief raised -state disabled 
     # $bbox buttonconfigure resume -relief raised -state disabled
     # $bbox buttonconfigure stop   -relief sunken -state disabled
+
+    putStatus "Stopped"
+    update idletasks
 }
 
 #######################################################################
@@ -422,7 +439,8 @@ body ::tycho::ControlPanel::stop {} {
 # Not for general use.
 #
 body ::tycho::ControlPanel::_counttrace {args} {
-    putStatus $iterationcounter($this)
+    global iterationcounter
+    putStatus "Running: $iterationcounter($this)"
 }
 
 #######################################################################
