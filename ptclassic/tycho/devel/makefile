@@ -40,7 +40,8 @@ VPATH =		$(ROOT)/devel
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS = \
+	tychoSend.tcl
   
 ITCL_SRCS = \
 	GanttView.itcl \
