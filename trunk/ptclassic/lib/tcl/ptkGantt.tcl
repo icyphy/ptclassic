@@ -95,43 +95,42 @@ proc ptkGanttExit {} {
 proc ptkGantt_PrintChart { chartName } {
     global env
     set universe [string trimleft $chartName .gantt_]
-    if [winfo exists .print] {
-	.print.msg configure -text "You have requested to print $universe \
-		to $env(PRINTER). Is this OK?"
+    if {![info exists env(PRINTER)]} {
+	set ptkGantt_Printer "lp"
     } else {
-	if {![info exists env(PRINTER)]} { 
-	    set env(PRINTER) "lp"
-	}
-	toplevel .print
-	message .print.msg  -width 10c -relief sunken -pady 2m -padx 1m \
-		-text "You have requested to print $universe to  \
-		$env(PRINTER). Is this OK?"
-	pack .print.msg
-	button .print.ok -text OK -command "ptkGantt_Print $chartName; \
-		destroy .print"
-	button .print.cancel -text Cancel -command {destroy .print}
-	button .print.change -text "Change Printer" -command \
-		"ptkGantt_ChangePrinter $chartName"
-	pack .print.ok .print.cancel .print.change -side left -fill x -expand 1
+	set ptkGantt_Printer $env(PRINTER)
+    }
+    if ![winfo exists $chartName.print] {
+	# create a toplevel window
+	toplevel $chartName.print
+	wm title $chartName.print "Print Gantt Chart"
+	# top label for window
+	message $chartName.print.msg -width 10c -pady 2m -padx 1m \
+		-text "Print $universe:"
+	pack $chartName.print.msg -fill x
+	# label for entry window
+	label $chartName.print.label -text "Printer:"
+	# create entry widget for printer name
+	entry $chartName.print.entry -relief sunken -bd 2
+	# place default of lp or env var in entry
+	$chartName.print.entry insert 0 $ptkGantt_Printer
+	pack $chartName.print.label $chartName.print.entry -fill x 
+	button $chartName.print.ok -text Print -command \
+		"ptkGantt_Print $chartName {[$chartName.print.entry get]}; \
+		destroy $chartName.print"
+	button $chartName.print.cancel -text Cancel -command \
+		"destroy $chartName.print"
+	pack $chartName.print.ok $chartName.print.cancel -side left -fill x \
+		-expand 1 -after $chartName.print.entry
+	# set up binding for return to print
+	bind $chartName.print.entry <Return> "ptkGantt_Print $chartName \
+		{[$chartName.print.entry get]}; destroy $chartName.print"
     }
 }
 
-proc ptkGantt_ChangePrinter { chartName } {
-    global env
-    toplevel .printer
-    label .printer.label -text "Output printer:"
-    entry .printer.entry -relief sunken -bd 2 -textvariable env(PRINTER)
-    pack .printer.label .printer.entry -side left -expand 1 -fill x
-    button .printer.ok -text OK -command "destroy .printer; \
-	    ptkGantt_PrintChart $chartName"
-    pack .printer.ok -fill x -expand 1 -side bottom -after .printer.entry
-    focus .printer.entry
-}
-
-proc ptkGantt_Print { chartName } {
-    global env
-    set OUTPUT [open "|lpr -P$env(PRINTER)" w]
-    puts $OUTPUT [${chartName}.chart.graph postscript -colormode gray \
+proc ptkGantt_Print { chartName printer } {
+    set OUTPUT [open "|lpr -P$printer" w]
+    puts $OUTPUT [${chartName}.canvas postscript -colormode gray \
 	    -pageheight 10i -pagewidth 8i -rotate 1]
     close $OUTPUT
 }
@@ -142,10 +141,12 @@ proc ptkGantt_SaveChart { chartName } {
     # check to make sure that Tycho.tcl has been sourced
     if {"" == [info classes ::tycho::File]} {
 	# this sourcing wants to bring up tycho so we supress console and 
-	# welcome windows
+	# welcome windows and ensure that tycho does not exit after browser
+	# exits
 	set tychoWelcomeWindow 0
 	set tychoConsoleWindow 0
 	set tychoExitWhenNoMoreWindows 0
+	set tychoShouldWeDoRegularExit 0
 	source $PTOLEMY/tycho/kernel/Tycho.tcl
     }
 
@@ -177,7 +178,7 @@ proc ptkGantt_SaveFile {chartName filename} {
     puts $FILEOUT "period $ptkGantt_Layout($chartName.period)"
 
     # throw in an extra return
-    puts $FILEOUT "\n"
+    puts -nonewline $FILEOUT "\n"
 
     # now with a foreach loop write each of the processors
     for {set i 1} { $i <= $ptkGantt_Layout($chartName.numprocs)} { incr i} {
