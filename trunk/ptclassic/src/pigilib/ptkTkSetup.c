@@ -60,7 +60,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptkRegisterCmds.h"		/* define ptkRegisterCmds */
 #include "ptkNet.h"			/* define ptkRPCFileHandler */
 #include "err.h"			/* define ErrAdd */
-#include "ptkImage.h"			/* define the new ptimage types */
 
 
 /* Used to pass the funcArray through Tk */
