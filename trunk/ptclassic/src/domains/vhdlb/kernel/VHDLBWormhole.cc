@@ -44,14 +44,16 @@ void VHDLBToUniversal :: receiveData()
 	if (VHDLBToUniversal::isItInput()) 
 	{
 		// VHDLB domain on outside
+/*
 		Error::abortRun(*this, "lies in input port",
-				"(there is no VHDLB wormhole, sorry)");
+				"(there is no VHDLB wormhole, sorry1)");
+*/
 	} 
 	else 
 	{
 		// VHDLB is on the inside of the other (SDF?) domain
 		Error::abortRun(*this, "lies in output port",
-				"(there is no VHDLB wormhole, sorry)");
+				"(there is no VHDLB wormhole, sorry2)");
 	}
 }
 
@@ -110,14 +112,16 @@ void VHDLBFromUniversal :: sendData()
 
 	if (VHDLBFromUniversal::isItOutput()) {
 	        // VHDLB is on the inside of the other (SDF?) domain
+/*
 		Error::abortRun(*this, "lies in output port",
-				"(there is no VHDLB wormhole, sorry)");
+				"(there is no VHDLB wormhole, sorry3)");
+*/
 	}
 	else 
 	{
-	        // VHDLB domain on inside
+	        // VHDLB domain on outside
 		Error::abortRun(*this, "lies in input port",
-				"(there is no VHDLB wormhole, sorry)");
+				"(there is no VHDLB wormhole, sorry4)");
 	}
 }
 
