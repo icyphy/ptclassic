@@ -25,7 +25,8 @@ CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
 	-I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL)
 
-PL_SRCS = CGCVSynchComm.pl CGCVSend.pl CGCVReceive.pl
+PL_SRCS = CGCVSynchComm.pl CGCVSend.pl CGCVReceive.pl \
+	VHDLCSend.pl VHDLCReceive.pl
 EXTRA_SRCS = $(PL_SRCS)
 
 SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc SimMTTarget.cc \
