@@ -46,25 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-void CGCWormhole :: setup() {
-	profile = myProfile;
-
-	// get the number of processors.
-	setOuterTarget(target());
-
-	// main setup routine.
-	CGWormBase :: setup();
-}
-
-void CGCWormhole :: go() {
-	downLoadCode(0, 0);
-}
-
 CGWormBase* CGCWormhole :: myWormhole() { return selfWorm; }
-
-Profile* CGCWormhole :: getProfile(int pNum) {
-	return CGWormBase :: getProfile(pNum);
-}
 
 // Constructor
 CGCWormhole :: CGCWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
