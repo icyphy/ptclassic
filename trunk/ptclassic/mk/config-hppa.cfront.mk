@@ -110,9 +110,6 @@ X11EXT_LIBSPEC=	-L/usr/sww/X11R6/lib -lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 
-# Ptolemy will not build the s56dsp files under sun cfront or on the hppa
-S56DIR =
-
 #
 # Variables for miscellaneous programs
 #

@@ -121,10 +121,6 @@ PURELINK =
 PURIFY =	$(COLLECTOR) purify
 QUANTIFY =
 
-# Ptolemy will not build the s56dsp files under cfront 
-#S56DIR= $(ROOT)/vendors/s56dsp
-S56DIR=
-
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE -DSYSV $(X11_INCSPEC)
 

@@ -76,9 +76,6 @@ LINKFLAGS_D =	-L$(LIBDIR) -G 0
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -L/usr/X11/lib -lX11
 
-# S56 directory is only used on sun4.
-S56DIR =
-
 # Variables for local Matlab installation
 # -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
 #    and MATLABLIBDIR points to the directory containing the Matlab libraries
