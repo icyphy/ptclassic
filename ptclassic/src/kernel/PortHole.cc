@@ -358,7 +358,9 @@ PortHole& GalMultiPort :: newPort() {
 }
 
 // return number of tokens waiting on Geodesic
-int PortHole :: numTokens() const { return myGeodesic->size();}
+int PortHole :: numTokens() const {
+        return myGeodesic?myGeodesic->size():-1;
+}
 
 // return the number of initial delays on the Geodesic
 int PortHole :: numInitDelays() const {
