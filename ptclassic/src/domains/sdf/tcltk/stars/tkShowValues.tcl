@@ -76,7 +76,7 @@ if {![winfo exists $s]} {
     proc tkShowValueWait {flag uniqueSymbol numInputs win} {
 	if {$flag} {
 	    for {set i 0} {$i < $numInputs} {incr i} {
-	        $win.f.m$i configure -bg {orange}
+	        $win.f.m$i configure -bg {orange1}
 	        $win.f.m$i configure -activebackground {tan3}
 	    }
 	    global tkShowValueWaitTrig

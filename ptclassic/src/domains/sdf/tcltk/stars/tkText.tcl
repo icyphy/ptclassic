@@ -88,7 +88,7 @@ if {![winfo exists $s]} {
 
     proc tkTextWait {flag uniqueSymbol numInputs win} {
 	if {$flag} {
-	    $win.cont configure -bg {orange}
+	    $win.cont configure -bg {orange1}
 	    $win.cont configure -activebackground {tan3}
 	    global tkTextWaitTrig
 	    set tkTextWaitTrig 0
