@@ -1,3 +1,4 @@
+static const char file_id[] = "CGConnect.cc";
 #include "Block.h"
 #include "CGConnect.h"
 #include "CircularBuffer.h"
@@ -29,13 +30,13 @@ int MultiInCGPort :: isItInput () const { return TRUE;}
 int MultiOutCGPort :: isItOutput () const { return TRUE;}
 
 PortHole& MultiInCGPort :: newPort () {
-	PortHole& p = *new InCGPort;
+	LOG_NEW; PortHole& p = *new InCGPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }
  
 PortHole& MultiOutCGPort :: newPort () {
-	PortHole& p = *new OutCGPort;
+	LOG_NEW; PortHole& p = *new OutCGPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }

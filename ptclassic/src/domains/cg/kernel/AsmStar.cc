@@ -1,3 +1,4 @@
+static const char file_id[] = "AsmStar.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -200,7 +201,7 @@ class StateAddrEntry {
 
 // add a new state to the table.
 void AsmStar::addEntry(const State& s,ProcMemory& m, unsigned a) {
-	addrList = new StateAddrEntry(s.readName(),m,a,addrList);
+	LOG_NEW; addrList = new StateAddrEntry(s.readName(),m,a,addrList);
 }
 
 // look up a state in the table.
@@ -220,7 +221,7 @@ void AsmStar :: zapStateEntries() {
 	while (addrList) {
 		p = addrList;
 		addrList = p->link;
-		delete p;
+		LOG_DEL; delete p;
 	}
 }
 

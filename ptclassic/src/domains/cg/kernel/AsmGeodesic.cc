@@ -1,3 +1,4 @@
+static const char file_id[] = "AsmGeodesic.cc";
 /******************************************************************
 Version identification:
 $Id$
