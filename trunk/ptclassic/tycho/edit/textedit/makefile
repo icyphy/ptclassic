@@ -60,12 +60,8 @@ ITCL_SRCS = \
 	EditProgramText.itcl \
 	EditPtlang.itcl \
 	EditPtlangText.itcl \
-	EditSpice.itcl \
-	EditSpiceText.itcl \
 	EditTcl.itcl \
 	EditTclText.itcl \
-	EditVHDL.itcl \
-	EditVHDLText.itcl \
 	Matlab.itcl \
 	MatlabText.itcl \
 	Mathematica.itcl \
