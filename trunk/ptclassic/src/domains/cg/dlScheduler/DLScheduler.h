@@ -53,7 +53,7 @@ public:
 
 	// Need to redefine this function for now.
 	// Will be removed later.
-	void createSubGals();
+	int createSubGals();
 };
 
 #endif
