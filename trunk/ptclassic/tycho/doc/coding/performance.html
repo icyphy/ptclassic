@@ -53,7 +53,7 @@ on a Sparc20/100.
 
 <LI> Iterating through large data structures in Tcl is often slow.
 For each iteration, Tcl reparses the body of the loop or procedure.
-Brent Welch suggests the following hand tuning methods:
+Brent Welch suggests the following hand-tuning methods:
 
 <MENU>
 <LI> Inside a loop, shorter variable and procedure names can help.
@@ -87,8 +87,7 @@ See the <A HREF="../../kernel/doc/internals/exec.html">Tycho Exec Internals Guid
 
 </OL>
 
-<LI> If your application is taking a long time to start up, try the following
-things.
+<LI> If your application is taking a long time to start up, try the following:
 <OL>
 <LI> Use the 
 <A
@@ -98,12 +97,12 @@ Tcl Profiler</A> to look for bottlenecks.  Look for lots of calls to <CODE>unkno
 <LI> Autoloading Itcl files takes more time than just sourcing them.
 If you source the files necessary before creating your first widget,
 you might see a speedup.  You might find it interesting to put
-<CODE>puts</CODE> statements.  at the top of the <CODE>unknown</CODE>,
+<CODE>puts</CODE> statements at the top of the <CODE>unknown</CODE>,
 <CODE>tcl_unknown</CODE> and <CODE>auto_load</CODE> procs in
-<CODE>lib/itcl/tcl/init.tcl</CODE> (If you are using Tycho from within
+<CODE>lib/itcl/tcl/init.tcl</CODE> (if you are using Tycho from within
 Ptolemy, then this file would be at <A
 HREF="../../../../tcltk/itcl/lib/itcl/tcl/init.tcl"><CODE>$PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl</CODE></A>.
-However, this link may not work for you)
+However, this link may not work for you.
 
 
 
