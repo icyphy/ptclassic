@@ -138,7 +138,12 @@ if ( ! $?nocmdfile ) then
         echo "TAILARGS=-console"			>> $cmdfile
     endif
     if ( $?pigidebug ) then
-	echo "COMMAND=$PTOLEMY/lib/pigiRpcDebug"	>> $cmdfile
+	if ( $ARCH == "hppa.cfront")
+	then
+		echo "COMMAND=$PTOLEMY/lib/pigiRpcDebug.xdb" >> $cmdfile
+	else
+		echo "COMMAND=$PTOLEMY/lib/pigiRpcDebug" >> $cmdfile
+	endif
     else if ( $?pigiconsole ) then
 	echo "COMMAND=$PTOLEMY/lib/pigiRpcConsole"	>> $cmdfile
     endif
