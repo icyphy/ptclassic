@@ -40,6 +40,9 @@ private:
 	// account for communication cost in list scheduling.
 	void findCommNodes(DCGraph*);
 
+	// find out the partner send node of a given receive node.
+	DCNode* backComm(DCNode*);
+
 	// schedules
 	DCUniProc* schedules;
 

@@ -234,14 +234,14 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 		// backtrack slp until to meet a comm node
 		DCNode* node, *commNode;
 		while ((node = slp->headNode()) != 0) {
-			if (node->getType() >= 0) { // non-comm node
+			if (node->getType() >= -1) { // non-receive node
 				slp->takeFromFront(); // cut off node
 				continue;
 			}
 
 			// Ask topology dependent section if a communication
 			// reservation is constraining the SLP.
-			commNode = (DCNode*) mtarget->backComm(node);
+			commNode = backComm(node);
 	
 			if ((commNode == 0) || commNode->alreadyVisited()) {
 				// No comm node is constraining or already 
@@ -271,6 +271,15 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 	return TRUE;
 }
 
+			//////////////////
+			///  backComm  ///
+			//////////////////
+// In case of receive node, take out the partner send node
+DCNode* DCParProcs :: backComm(DCNode* rNode) {
+	DCAncestorIter iter(rNode);
+	DCNode* n = iter++;
+	return n;
+}
 			
 			/////////////////////////
 			///  categorizeLoads  ///
