@@ -42,7 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =  \
 	index.html
 
-MISC_FILES = codeDoc internals usersGuides
+MISC_FILES = codeDoc internals tutorial usersGuides
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
