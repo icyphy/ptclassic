@@ -194,7 +194,7 @@ X11DIR = 	/usr/local/X11R6
 # -isystem is necessary for gcc-2.95.1 and Openwindows, otherwise we get:
 # /usr/openwin/include/X11/Xlib.h:1894: ANSI C++ forbids declaration
 #       `XSetTransientForHint' with no type
-X11_INCSPEC =	-isystem -I$(ROOT)/src/compat -I$(X11DIR)/include
+X11_INCSPEC =	-isystem $(X11DIR)/include
 X11_LIBSPEC =	-L$(X11DIR)/lib -lX11
 # X11_LIBDIR is used in the SHARED_LIBRARY_PATH
 X11_LIBDIR =	$(X11DIR)/lib
