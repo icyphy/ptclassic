@@ -75,15 +75,17 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
       sprintf(num, "%d", d);
       int len = strlen(num);
 
-      char* q = expandedName;
+      const char* q = expandedName;
       char* p = outstr;
-      while (*q != '\000') { // Replace '#' with 'num's value.
+      // Replace '#' with 'num's value.
+      while (*q != '\000') {
 	if (*q == '#') {
 	  strcpy(p, num);
 	  p += len;
 	  q++;
-	} else {
-	  *p = *q; p++; q++;
+	}
+	else {
+	  *p++ = *q++;
 	}
       }
       *p = '\000';
@@ -94,7 +96,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 ////// Read data into an GrayImage object...
   go {
 // Open file containing the image.
-    char fullName[256];
+    char fullName[512];
     genFileName(fullName, fileName, int(frameId));
     FILE* fp = fopen(fullName, "r");
     if (fp == (FILE*) NULL) {
