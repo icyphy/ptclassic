@@ -47,7 +47,9 @@ there is the facet component which can either be ``contents'' or
 .IE contents
 .IE interface
 The former is used for block diagrams, and the latter for icons.
-Note here that the term ``facet'' can
+Note that all three facet component names may not contain any spaces.
+.pp
+Note also that the term ``facet'' can
 refer to two different things.  It can mean the Oct object called a
 facet, or it can refer to the name of the last component of a facet's
 name.  The intended meaning is usually clear from context.
