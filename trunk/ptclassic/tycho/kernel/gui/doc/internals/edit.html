@@ -15,7 +15,7 @@ saving files, etc.  The <a href="../usersGuides/EditHelp.html">help window</a>
 gives additional information.
 <p>
 You may create an instance of the Edit class as follows:
-<tcl><pre>
+<tcl quiet><pre>
 set e [::tycho::view Edit]
 </pre></tcl>
 To read a file into the text widget, try
@@ -39,13 +39,13 @@ To delete the above example:
 delete object [$e displayer windowName]
 </pre></tcl>
 Edit has a number of options.  For example:
-<tcl><pre>
+<tcl quiet><pre>
 set ee [::tycho::view Edit &#92
-	[list -text "Initial text in the text widget" &#92
+	 -text "Initial text in the text widget" &#92
 	 -readonly 1 &#92
 	 -textwidth 60 &#92
 	 -scrollbar 0 &#92
-	 -textheight 20]]
+	 -textheight 20]
 </pre></tcl>
 Notice that because of the <CODE>-readonly</CODE> option, you cannot modify
 the text.  You can change this, and insert more text as follows:

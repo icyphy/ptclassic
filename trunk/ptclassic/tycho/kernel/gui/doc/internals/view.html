@@ -17,7 +17,7 @@ more than one View; some Views can themselves contain other Views.
 <p><b>Note:</b> Although the Displayer-View architecture is
 designed to support multiple view of data within the one
 top-level window, this functionality is not yet used anywhere
-within Tycho. The rest of this description will onyl place a single
+within Tycho. The rest of this description will only place a single
 view into each displayer.
 
 <p>Creating a new Displayer is the same as creating any other
@@ -30,18 +30,17 @@ widget:
 You will see an empty displayer containing a
 <a href="decorators.html#StatusBar class">status bar</a>.
 A view is created as a child of the displayer; for example,
-we can create a text editor and it will place itself into its
-displayer:
-<tcl><pre>
-::tycho::Edit .d.e -name aView
-set bogus ""
+we can create a text editor and place it into its displayer:
+<tcl quiet><pre>
+::tycho::Edit .d.e
+.d showView .d.e
 </pre></tcl>
 
 The Edit widget has placed itself into the Displayer and
 configured its menubar. To better illustrate this, we'll
 just use an empty View. First delete the Edit view:
 <tcl><pre>
-.d destroyView aView
+.d destroyView .d.e
 </pre></tcl>
 
 

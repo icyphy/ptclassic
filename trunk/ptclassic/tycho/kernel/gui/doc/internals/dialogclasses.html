@@ -26,6 +26,7 @@ labeled "Yes" and "No".  For example:
 ::tycho::YesNoQuery .y -text {Are you awake?} &#92
     -yescommand {::tycho::inform {You said yes!}} &#92
     -nocommand {::tycho::inform {Then how did you click on the No button?}}
+wm deiconify .y
 </pre></tcl>
 The options <a name="yescommand option"><CODE>-yescommand</CODE></a> and
 <a name="nocommand option"><CODE>-nocommand</CODE></a>
@@ -117,6 +118,7 @@ Text entry boxes can be created using the
 ::tycho::Query .bb -okcommand {::tycho::inform [.bb get]}
 .bb line month {Enter Month} Jan
 .bb line day {Enter Day} Mon
+wm deiconify .bb
 </pre></tcl>
 <p>
 Here, a non-modal dialog is created, and the result of the dialog
@@ -279,6 +281,7 @@ Here is an example that creates one of each of the types of queries:
      } &#92
     -okcommand {::tycho::inform "Result of a get:\n[.z get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
+wm deiconify .z
 </pre></tcl>
 <p>
 The <a name="disable query"><code>disable</code></a> method
@@ -335,6 +338,7 @@ For example,
     -title "Query Widget" &#92
     -okcommand {::tycho::inform "Result of a get: [.aa get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
+wm deiconify .aa
 </pre></tcl>
 <p>
 The order of the <CODE>-bitmap</CODE> and <CODE>-text</CODE> options
@@ -343,7 +347,7 @@ option is important.  In most circumstances, you will want them first.
 <p>
 You also have access to the "new" method of the base class.
 For example,
-<tcl><pre>
+<tcl quiet><pre>
 ::tycho::Dialog::new &#92
     Query .z -queries {{line n {Enter value} {default}}}
 </pre></tcl>

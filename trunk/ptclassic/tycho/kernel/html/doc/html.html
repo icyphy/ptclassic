@@ -30,14 +30,14 @@ clicks on a script, the Tcl script is executed in the global
 namespace.
 <p>
 You may create an instance of the HTML class as follows:
-<tcl><pre>
+<tcl quiet><pre>
 ::tycho::view HTML -file $TYCHO/doc/introduction.html
 </pre></tcl>
 There are many public methods associated with this class.
 See the class documentation for details.
 <p>
 HTML has a number of options.  For example:
-<tcl><pre>
+<tcl quiet><pre>
 set h [::tycho::view HTML &#92
 	-data "&lt;h1&gt;Initial header in the HTML widget&lt;/h1&gt;" &#92
 	-textwidth 60 &#92
@@ -47,7 +47,7 @@ set h [::tycho::view HTML &#92
 By default, an HTML widget is read only, so
 you cannot modify its contents.
 You can change this, and read in a file as follows:
-<tcl><pre>
+<tcl quiet><pre>
 $h configure -readonly no
 $h insertData " Some &lt;b&gt;More&lt;/b&gt; html"
 </pre></tcl>
