@@ -69,6 +69,12 @@ public:
 
 	// destructor
 	~DERepeatStar();
+
+        // class identification
+        /* virtual */ int isA(const char*) const;
+
+        // we need this function for an initial event to another time than 0.0
+        void start(double);
 };
 
 #endif

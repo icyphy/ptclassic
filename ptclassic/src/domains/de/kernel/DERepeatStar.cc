@@ -106,3 +106,10 @@ void DERepeatStar :: begin() {
 	feedbackOut->put(mysched->now()) << 0.0;
 }
 
+// isA function
+ISA_FUNC(DERepeatStar,DEStar);
+ 
+void DERepeatStar::start(double time) {
+       feedbackOut->put(time) << 1.0;
+       feedbackOut->sendData();
+}
