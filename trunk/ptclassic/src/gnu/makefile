@@ -319,8 +319,9 @@ $(EGCS_DEST):
 	-mkdir "$(EGCS_DEST)"
 $(EGCS_PREFIX): $(EGCS_DEST)
 	-mkdir "$(EGCS_PREFIX)"
-$(EGCS_EXEC_PREFIX):  $(EGCS_DEST)
-	-mkdir "$(EGCS_EXEC_PREFIX)"
+# Use the $(GNU_DEST)/$(PTARCH) rule above
+#$(EGCS_EXEC_PREFIX):  $(EGCS_DEST)
+#	-mkdir "$(EGCS_EXEC_PREFIX)"
 
 ############################################################
 # dejaGNU
