@@ -61,6 +61,7 @@
 # $axis coords 10 100
 # # Change the length
 # $axis configure -length 50
+# </pre><tcl>
 #
 class ::tycho::Axis {
     inherit ::tycho::Picture
