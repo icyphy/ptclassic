@@ -21,8 +21,8 @@ $Id$
 #include "miscFuncs.h"
 
 // attributes
-extern const Attribute P_CIRC(PB_CIRC,0);
-extern const Attribute P_SYMMETRIC(PB_SYMMETRIC,0);
+extern const Attribute P_CIRC = {PB_CIRC,0};
+extern const Attribute P_SYMMETRIC = {PB_SYMMETRIC,0};
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
