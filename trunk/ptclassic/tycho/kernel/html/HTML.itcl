@@ -396,7 +396,7 @@ body ::tycho::HTML::constructor {args} {
     # links stacked on top of each other horizontally, the status bar
     # is not updated as we move the mouse from link to link (see tynt.html).
     $text tag bind link <Motion> "$this linkEnter %x %y"
-    $text tag bind link <Leave> "$this statusbar puts {}"
+    $text tag bind link <Leave> "$this statusbar putMessage {}"
 
     # Additions:
     $text tag configure subscript -offset -6
@@ -917,7 +917,7 @@ body ::tycho::HTML::linkEnter {xpos ypos {subwindow {}} } {
     set link [lindex $tags [lsearch -glob $tags L:*]]
     # regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} link
     regsub L: $link {} link
-    statusbar puts $link
+    statusbar putMessage $link
 }
 
 #####################################################################
@@ -2370,7 +2370,7 @@ proc HMtag_img {win param text} {
             # horizontally, the status bar
             # is not updated as we move the mouse from link to link
             bind $label <Motion> "$HTML linkEnter {} {} $item"
-            bind $label <Leave> "$HTML statusbar puts {}"
+            bind $label <Leave> "$HTML statusbar putMessage {}"
             bind $label <1> "$HTML linkHitSubWindow $item"
         }
 
