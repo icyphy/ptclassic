@@ -54,6 +54,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
   <P> Rather than using farSidePort, the far() function looks at
   myGeodesic->source() to find the port that drives the geodesic (and
   hence the port).  When a port is an output, its far port is itself.
+  This is a problem, since some things in the kernel use the non-virtual
+  far() method (e.g., multiPorts).
 
  **********************************************************************/
 class SRPortHole : public PortHole {
@@ -163,6 +165,8 @@ public:
  
   // Add a new physical port to the MultiPortHole list.
   virtual PortHole& newPort();
+
+  PortHole & newConnection();
 };
 
 class MultiOutSRPort : public MultiPortHole {     
