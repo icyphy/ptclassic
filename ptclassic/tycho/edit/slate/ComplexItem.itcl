@@ -161,13 +161,6 @@ class ::tycho::ComplexItem {
     # copy of this variable.
     protected common primary
 
-    # The "shape" of items of this type. Every ComplexItem class
-    # that has a shape different to its superclass must create its
-    # own copy of this variable and set it to a type that indicates
-    # what shape the complex item is: point, line, polygon, rectangle,
-    # or oval.
-    protected common shape "rectangle"
-
     # The instance variables of each item. Each subclass should place
     # all local variables into this array, instead of creating
     # their own common arrays. This makes it much easier to build
