@@ -69,14 +69,13 @@ SDFSchedule :: printVerbose () const {
 	////////////////////////////
 
 // runs the number of times indicated by numIters.
-int SDFScheduler :: run (Block& galaxy) {
+int SDFScheduler :: run (Galaxy& g) {
 	if (invalid) {
-		Error::abortRun(galaxy, ": SDF schedule is invalid; can't run");
+		Error::abortRun(g, "SDF schedule is invalid; can't run");
 		return FALSE;
 	}
 	if (haltRequested()) {
-		Error::abortRun(galaxy,
-				": Can't continue after run-time error");
+		Error::abortRun(g, "Can't continue after run-time error");
 		return FALSE;
 	}
 	while (numItersSoFar < numIters && !haltRequested()) {
@@ -112,9 +111,8 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int SDFScheduler :: setup (Block& block) {
+int SDFScheduler :: setup (Galaxy& galaxy) {
 
-	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
