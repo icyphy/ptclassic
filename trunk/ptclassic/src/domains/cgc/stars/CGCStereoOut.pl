@@ -39,6 +39,8 @@ provisions.
     encodingType.setInitValue("linear16");
     channels.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     channels.setInitValue(2);
+    portType.setInitValue("line_out");
+
   }
 
   codeblock (convert) {
