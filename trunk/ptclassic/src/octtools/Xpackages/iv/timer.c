@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -73,6 +73,33 @@ void  ignoreAlarm()
     return ;
 }
 
+#ifdef SYSV
+/* This is a fairly accurate timer routine */
+void Timer( val )
+    int  val;			/* microseconds */
+{
+    struct itimerval value, ovalue;
+    struct sigaction sig, osig;
+
+    sig.sa_handler = ignoreAlarm;
+    sigemptyset(&sig.sa_mask);
+    sig.sa_flags = 0;
+
+    sigaction(SIGALRM, &sig, &osig);
+
+    value.it_interval.tv_sec = 0;
+    value.it_interval.tv_usec = 0;
+    value.it_value.tv_sec = 0;
+    value.it_value.tv_usec = val;
+    setitimer(ITIMER_REAL, &value, &ovalue);
+    sigpause(0);		/* Wait for alarm to come */
+    
+    sigaction(SIGALRM, &osig, 0); /* restore previous status */
+
+    return;
+}
+#else
+
 /* This is a fairly accurate timer routine */
 void Timer( val )
     int  val;			/* microseconds */
@@ -107,4 +134,5 @@ void Timer( val )
     return;
 }
 
-#endif
+#endif /*SYSV*/
+#endif /*sewuent*/
