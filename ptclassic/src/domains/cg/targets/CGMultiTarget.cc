@@ -109,6 +109,7 @@ void CGMultiTarget::setup() {
 	if (!inherited()) {
 		writeSchedule();
 		if (inWormHole()) {
+		   adjustSampleRates();
 			generateCode();
 			wormLoadCode();
 		}
@@ -235,6 +236,8 @@ int CGMultiTarget :: run() {
 }
 
 int CGMultiTarget :: sendWormData() {
+	if (nChildrenAlloc == 1) 
+		return CGTarget :: sendWormData();
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -256,6 +259,9 @@ int CGMultiTarget :: sendWormData() {
 }
 
 int CGMultiTarget :: receiveWormData() {
+	if (nChildrenAlloc == 1) 
+		return CGTarget :: receiveWormData();
+
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
