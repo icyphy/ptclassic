@@ -32,8 +32,14 @@
 
 #######################################################################
 #### EditBubbleAndArc
-# This class define a basic graphical editor for editing bubble and arc graph,
-# which can be used as a base class.
+# This class define a basic graphical editor for editing bubble-and-arc
+# diagrams. It is designed to be a base class for application-specific
+# editors. For an example of a subclass, see the EditSTD class.
+#
+# When a node is selected, its outline becomes red.  When it's
+# un-selected, its outline is black.  Click mouse button 1 over
+# a node to select it.  Click mouse button 1 in the empty area
+# to un-select the selected node, if there is any.
 #
 class ::tycho::EditBubbleAndArc {
     inherit ::tycho::Graphics
@@ -68,33 +74,61 @@ class ::tycho::EditBubbleAndArc {
     method newNode {} 
     method newArc {} 
 
-    # Canvas-wide bindings
+    # Canvas-wide binding for button-1 click
     method bind_B1 {x y} 
+
+    # Canvas-wide binding for button-1 drag
     method bind_B1_Motion {x y} 
+
+    # Canvas-wide binding for button-1 release
     method bind_BR1 {x y} 
+
+    # Canvas-wide binding for mouse motion
     method bind_Motion {x y} 
 
-    # Folowing methods are handlers for <Button-1> on the "node"/"arc" tag.
+    # Handle button-1 click on items with the "node" tag
     method bind_node_B1 {x y}
+
+    # Handle button-1 click on items with the "arc" tag
     method bind_arc_B1 {x y} 
 
-    # Following methods are handlers for events on the "selected" tag.
+    ## Following methods are handlers for events on the "selected" tag.
+
+    # Binding for entering a selected item
     method bind_selected_Enter {x y} 
+
+    # Binding for leaving a selected item
     method bind_selected_Leave {} 
+
+    # Binding for dragging a selected item
     method bind_selected_B1_Motion {x y} 
+
+    # Binding for dragging a selected node
     method bind_selected_node_B1_Motion {x y}
+
+    # Binding for releasing a selected item
     method bind_selected_BR1 {x y}
 
-    # Following methods are handlers for events on the "selectedpoint" tag.
+    ## Following methods are handlers for events on the "selectedpoint" tag.
+
+    # Binding for hendling click on an item with the tag "selectedpoint"
     method bind_selectedpoint_B1 {x y}
+
+    # Binding for hendling drag on an item with the tag "selectedpoint"
     method bind_selectedpoint_B1_Motion {x y} 
 
-    # Following methods are handlers for events on the "selarclabel" tag.
+    ## Following methods are handlers for events on the "selarclabel" tag.
+
+    # Binding for hendling click on an item with the tag "selarclabel"
     method bind_selarclabel_B1 {x y} 
+
+    # Binding for handling drag on an item with the tag "selarclabel"
     method bind_selarclabel_B1_Motion {x y} 
+
+    # Binding for handling release on an item with the tag "selarclabel"
     method bind_selarclabel_BR1 {} 
 
-    # Following are utility functions.
+    # Utility function
     method chooseCursor {x y} 
 
     ##########################################################################
@@ -328,6 +362,8 @@ body ::tycho::EditBubbleAndArc::getInfo {} {
 ################################################################
 #### newNode
 #
+# Create a new node.
+#
 body ::tycho::EditBubbleAndArc::newNode {} {
     $this unselect
     # In item creation mode, cursor is crosshair.
@@ -337,6 +373,8 @@ body ::tycho::EditBubbleAndArc::newNode {} {
 
 ################################################################
 #### newArc
+#
+# Create a new arc.
 #
 body ::tycho::EditBubbleAndArc::newArc {} {
     $this unselect
@@ -422,13 +460,7 @@ body ::tycho::EditBubbleAndArc::bind_Motion {x y} {
 
 ###############################################################
 #### bind_node_B1 and bind_arc_B1
-# These methods are handlers for events <Button-1> on the "node"/"arc" tag.
-
-# Select and un-select
-# When a node is selected, its outline becomes red.  When it's
-# un-selected, its outline is black.  Click mouse button 1 over
-# a node to select it.  Click mouse button 1 in the empty area
-# to un-select the selected node, if there is any.
+#
 body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
     set x [$slate canvasx $x]
     set y [$slate canvasy $y]
@@ -489,7 +521,6 @@ body ::tycho::EditBubbleAndArc::bind_arc_B1 {x y} {
 ###############################################################
 #### bind_selected_Enter, bind_selected_Leave, bind_selected_B1_Motion,
 #### bind_selected_node_B1_Motion and bind_selected_BR1
-# These methods are handlers for events on the "selected" tag.
 #
 body ::tycho::EditBubbleAndArc::bind_selected_Enter {x y} {
     set over_selected 1
@@ -1208,6 +1239,8 @@ body ::tycho::EditBubbleAndArc::snap_to_oval {oval x y} {
 #################################################################
 #### unselect
 #
+# Unselect all selected items.
+#
 body ::tycho::EditBubbleAndArc::unselect {} {
     # Different items have different options for specifying their colors.
     set sel_item [$slate find withtag selected]
@@ -1232,6 +1265,13 @@ body ::tycho::EditBubbleAndArc::unselect {} {
     $slate dtag selected
 }
 
+
+#################################################################
+#### close_enough
+#
+# A utility procedure to test if the two points
+# given by (x1,y1) and (x2,y2) are "close enough."
+#
 proc close_enough {x1 y1 x2 y2} {
     if {abs($x1-$x2) < 5 && abs($y1-$y2) < 5} {
 	return 1
