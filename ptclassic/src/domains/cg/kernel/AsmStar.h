@@ -56,7 +56,7 @@ public:
 	virtual void addCode(char*);
 
 	// add state entry after memory allocation
-	void addEntry(State&,ProcMemory&,unsigned);
+	void addEntry(const State&,ProcMemory&,unsigned);
 protected:
 	// turn a codeblock into code
 	void gencode(CodeBlock&);

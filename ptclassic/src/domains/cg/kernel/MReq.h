@@ -39,7 +39,7 @@ class MReqList {
 public:
 	MReqList() : first(0), last(0) {}
 	// warning! does delete on all the MReq objects!
-	zero();
+	void zero();
 	~MReqList() {zero();}
 	int empty() const { return first == 0;}
 	void append(MReq& m);
@@ -57,9 +57,9 @@ public:
 };
 
 class MStateReq : public MReq {
-	State& state;
+	const State& state;
 public:
-	MStateReq(State& s) : state(s) {}
+	MStateReq(const State& s) : state(s) {}
 	void assign(ProcMemory& proc, unsigned addr) {
 		((AsmStar*)(state.parent()))->addEntry(state,proc,addr);
 	}
@@ -71,7 +71,7 @@ class MConsecStateReq : public MReq {
 	int sz;
 public:
 	MConsecStateReq() : sz(0) {}
-	void append(State& s) {
+	void append(const State& s) {
 		lis.append(*new MStateReq(s));
 		sz += s.size();
 	}

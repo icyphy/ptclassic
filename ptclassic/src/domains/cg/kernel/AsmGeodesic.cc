@@ -32,18 +32,19 @@ int AsmGeodesic :: internalBufSize() const {
 		return maxNumParticles;
 	case F_DEST:
 		return 0;
-	default:
+	default:{
 		ListIter next(dests);
 		int omax = 0;
 		AsmGeodesic *d;
 		while ((d = (AsmGeodesic*)next++) != 0)
 			omax = max(omax,d->internalBufSize());
 		return omax + maxNumParticles;
+		}
 	}
 }
 
 int AsmGeodesic :: bufSize() const {
-	if (forkType == F_DEST|F_SRC) return 0;
+	if (forkType == (F_DEST|F_SRC)) return 0;
 	else return internalBufSize();
 }
 
