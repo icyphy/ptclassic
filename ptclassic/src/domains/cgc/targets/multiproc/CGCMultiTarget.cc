@@ -19,7 +19,6 @@ $Id$
 #include "pt_fstream.h"
 #include "Error.h"
 #include "CGDisplay.h"
-#include "CGUtilities.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
 #include "CGCMultiTarget.h"
@@ -148,6 +147,12 @@ void CGCMultiTarget :: setup() {
 	if (identifyMachines() == FALSE) return;
 
 	CGMultiTarget :: setup();
+
+	// machine name setup
+	for (int i = 0; i < nChildrenAlloc; i++) {
+		CGCTarget* t = (CGCTarget*) child(i);
+		t->setHostName(machineInfo[i].nm);
+	}
 }
 
 int CGCMultiTarget :: identifyMachines() {
@@ -171,10 +176,9 @@ int CGCMultiTarget :: identifyMachines() {
 		StringList mname = (const char*) buf;
 		mname << (const char*) nameSuffix;
 		machineInfo[i].nm = hashstring((const char*) mname);
-		machineInfo[i].localFlag = 0;
 		// internet address calculation
 		struct hostent* hp;
-		if ((hp = gethostbyname(machineInfo[i].nm)) == NULL) {
+		if ((hp = gethostbyname((const char*) mname)) == NULL) {
 			StringList errMsg;
 			errMsg << "host name error: " << mname;
 			Error :: abortRun(errMsg);
@@ -185,7 +189,7 @@ int CGCMultiTarget :: identifyMachines() {
 
 		// monitoring.
 		feedback << "machine(" << i << ") = ";
-		feedback << machineInfo[i].nm << ": ";
+		feedback << mname << ": ";
 		feedback << machineInfo[i].inetAddr << "\n";
 		feedback.flush();
 
@@ -198,26 +202,6 @@ int CGCMultiTarget :: identifyMachines() {
 			" the number of machine names are not equal.");
 		return FALSE;
 	}
-
-	// host machine identify
-	FILE* fp = popen("/bin/hostname", "r");
-	if (fp == NULL) {
-		Error::warn("popen error");
-	} else {
-		char line[40];
-		if (fgets(line, 40, fp) != NULL) {
-			char* myHost = makeLower(line);
-			for (i = 0; i < pnum; i++) {
-				char* temp = makeLower(machineInfo[i].nm);
-				if (strncmp(myHost, temp, strlen(temp)) == 0) {
-					machineInfo[i].localFlag = TRUE;
-				} 
-				LOG_DEL; delete temp;
-			}
-			LOG_DEL; delete myHost;
-		}
-	}
-	
 	return TRUE;
 }
 
@@ -232,8 +216,8 @@ void CGCMultiTarget :: wrapup() {
 void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 	StringList code = s;
 	StringList fileName;
-	fileName << i << (const char*) filePrefix;
-	fileName << i << ".c";
+	Target* t = child(i);
+	fileName << t->name() << ".c";
 	char* codeFileName = writeFileName((const char*) fileName);
 	display(code,codeFileName);
 }
@@ -259,55 +243,10 @@ int CGCMultiTarget::wormLoadCode() {
 // ship the codes and run them.
 int CGCMultiTarget :: compileCode() {
 	for (int i = 0; i < nChildrenAlloc; i++) {
-		int flag = machineInfo[i].localFlag;
-		StringList fName;
-		fName << i << (const char*) filePrefix;
-		fName << i << ".c";
-		char* tempName = writeFileName((const char*) fName);
-		
-		// remove file in the remove machine if any
-		StringList cmd;
-		if (!flag) { 
-			cmd << "rsh " << machineInfo[i].nm << " ";
-		}
-		cmd << "rm -f " << fName;
-
-		if (system(cmd)) {
-			reportError(i,"can not remove file", fName);
-			return FALSE;
-		}
-	
-		// move the file
-		cmd.initialize();
-		cmd << "/bin/cat " << tempName;
-		if (!flag) {
-			cmd << " | rsh " << machineInfo[i].nm << " /bin/cat -";
-		}
-		cmd << " > " << fName;
-
-		if (system(cmd)) {
-			reportError(i,"can not write file", fName);
-			return FALSE;
-		}
-
-		// compile code
-		cmd.initialize();
-		StringList oName;
-		oName << i << (const char*) filePrefix << i;
-		if (!flag) {
-			cmd << "rsh " << machineInfo[i].nm << " ";
-		}
 		CGCTarget* t = (CGCTarget*) child(i);
-		cmd << (const char*) t->compileLine((const char*) fName);
-		cmd << " -o " << oName;
-
-		if (system(cmd)) {
-			reportError(i,"can not compile file", fName);
-			return FALSE;
-		}
-
-		feedback << "compile " << machineInfo[i].nm << ": "
-		         << fName << " is done!\n";
+		if (t->compileCode() == FALSE) return FALSE;
+		feedback << "compile " << t->hostName() << ": "
+		         << t->name() << ".c is done!\n";
 		feedback.flush();
 	}
 	return TRUE;
@@ -316,37 +255,14 @@ int CGCMultiTarget :: compileCode() {
 // -----------------------------------------------------------------------------
 int CGCMultiTarget :: runCode() {
 	for (int i = 0; i < nChildrenAlloc; i++) {
-		StringList fName;
-		fName << i << (const char*) filePrefix << i << " &";
-		
-		// run the code
-		StringList cmd;
-		if (machineInfo[i].localFlag == 0) {
-			// use rshSystem method to preserve x environ.
-			if (rshSystem(machineInfo[i].nm, (const char*) fName, 
-			    0)) {
-				reportError(i,"can not run file", fName);
-				return FALSE;
-			}
-		} else {
-			cmd << fName;
-			if (system(cmd)) {
-				reportError(i,"can not run file", fName);
-				return FALSE;
-			}
-		}
+		CGCTarget* t = (CGCTarget*) child(i);
+		if (t->runCode() == FALSE) return FALSE;
 
-		feedback << "run " << machineInfo[i].nm << ": "
-		         << fName << " is done!\n";
+		feedback << "run " << t->hostName() << ": "
+		         << t->name() << " is done!\n";
 		feedback.flush();
 	}
 	return TRUE;
-}
-
-void CGCMultiTarget :: reportError(int i, const char* msg, const char* fName) {
-	StringList errMsg = machineInfo[i].nm;
-	errMsg << ": " << msg << " " << fName;
-	Error :: abortRun(errMsg);
 }
 
 // -----------------------------------------------------------------------------

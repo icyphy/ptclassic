@@ -28,11 +28,10 @@ class CGCTarget;
 
 class MachineInfo {
 friend class CGCMultiTarget;
-	const char* nm;	// machine name
 	const char* inetAddr;	// internet address
-	int localFlag;	// if it is the localhost.
+	const char* nm;		// machine name
 public:
-	MachineInfo(): nm(0), inetAddr(0), localFlag(0) {}
+	MachineInfo(): inetAddr(0), nm(0) {}
 };
 
 class CGCMultiTarget : public CGSharedBus {
@@ -95,9 +94,6 @@ private:
 
 	// return the machine_id of the given target.
 	int machineId(Target*);
-
-	// generate error message
-	void reportError(int, const char*, const char*);
 };
 
 #endif
