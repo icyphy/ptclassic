@@ -9,14 +9,25 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = lwp
+DIRS =
+
+ifeq ($(ARCH),sun4)
+DIRS = Awesime awe lwp
+endif
+
+ifeq ($(ARCH),mips)
+DIRS = Awesime awe
+endif
 
 MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo making $@ in thread/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/thread/$$x $@ ;\
-		cd .. ; \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo making $@ in thread/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+		      VPATH=../../../src/thread/$$x $@ ;\
+		) \
+	    fi ; \
 	done
