@@ -85,7 +85,8 @@ CCS_WITH_H_FILES=\
 # The complete list of .cc files used in the library
 LIBCCSRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
- expandPath.cc
+ expandPath.cc \
+ hashstring.cc
 
 # .c sources used in the library.
 # (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
