@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "StringList.h"
 #include "CGUtilities.h"
 #include "MotorolaSimTarget.h"
