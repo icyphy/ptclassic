@@ -29,7 +29,9 @@
 
 EXTRA_SRCS = tkMain.c
 
-MISC_FILES = ptolemy-cgc.tcl
+MISC_FILES = \
+	ptolemy-cgc.tcl \
+	init.tcl
 
 include ../../../../../mk/no-compile.mk
 
