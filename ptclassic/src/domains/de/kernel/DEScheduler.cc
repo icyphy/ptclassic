@@ -78,9 +78,7 @@ int DEScheduler :: setup (Block& b) {
 		p->eventQ = &eventQ;
 
 		// reset data members
-		p->arrivalTime = 0.0;
-		p->completionTime = 0.0;
-
+		p->prepareForScheduling();
 	}
 
 	galaxy.initialize();
@@ -152,14 +150,9 @@ DEScheduler :: run (Block& galaxy) {
 		} // end of inside while
 
  		// fire the star.
- L1 :		s->go();
-		if (haltRequestFlag) break;
+ L1 :		s->fire();
 
-		// generate events after star execution.
-  		for (int k = s->numberPorts(); k > 0; k--) {
-			DEPortHole& p = (DEPortHole&) s->nextPort();
-			p.sendData();
-		}
+		if (haltRequestFlag) return FALSE;
 
 	} // end of while
 	return TRUE;
