@@ -44,7 +44,7 @@ void XGraph :: zapFiles () {
 		const char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
-			delete name;
+			delete (char*)name;
 		}
 	}
 }
