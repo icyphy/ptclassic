@@ -137,7 +137,7 @@ const int linkingNotSupported =
 // As of 4/95 the linker patch was PHSS_5083* for hpux9.x
 // gcc-2.7.2 under HPUX10.01 cannot create shared libraries, so this
 // might not work.
-#define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
+#define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -Xlinker +s -lg++ -lstdc++ -o"
 #include <dl.h>
 #include <errno.h>
 #endif
