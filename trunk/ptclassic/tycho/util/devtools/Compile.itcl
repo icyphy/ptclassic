@@ -51,8 +51,6 @@ proc ::tycho::compileC { args } {
         set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
     }
 
-    puts "Compiler name $compiler"
-
     if [catch {eval $compiler compile $args} msg] {
         # The command failed.  It would be nice to check to see
         # whether the program exists, and generate a suitable message,
@@ -100,8 +98,12 @@ class ::tycho::Compile {
     public method compileAndRun { filenames}
 
     # If the editor widget exists, then jump to the next error
-    public method jumpToLine {line}
+    public method jumpToLine {cLineNum eLineNum fname}
+
+    # Jump to the next error when the "Next Error" button is clicked
     public method jumpNextError {} 
+
+    # Set the error count so that jumpNextError will jump correctly.
     public method setErrorCount {num}
     
     # Compile the file.
@@ -237,8 +239,6 @@ body ::tycho::Compile::compileAndRun {filenames} {
 # file_name:line_number: Error message here
 #
 body ::tycho::Compile::parseError {results} {
-    puts "Results: $results"
-
     # Default is that we don't have an error
     set errorCount -1
 
@@ -273,12 +273,12 @@ body ::tycho::Compile::parseError {results} {
             # This ensures only one line per many lines of error output
             set eLineNum $tmpeLineNum
             if {[regexp {(warning): (.+)} $msg]} {
-                #Default as warning message
+                #FIXME: Change me to preference
                 set color {purple}
             } else {
-                #Default as error message
+                #FIXME: Change me to preference
                 set color {red}
-                lappend errorList [list $cLineNum $eLineNum]
+                lappend errorList [list $cLineNum $eLineNum $fname]
             }
             $text tag add error$errorCount $cLineNum.0 $cLineNum.end
             $text tag configure error$errorCount -foreground $color -underline 0
@@ -286,7 +286,7 @@ body ::tycho::Compile::parseError {results} {
             # 1) jump to the lines (and highlight)
             # 2) update internal count, so Next button will know where to jump
             $text tag bind error$errorCount <Double-Button-1> \
-                    "$this jumpToLine \{$cLineNum $eLineNum\} ;\
+                    "$this jumpToLine $cLineNum $eLineNum $fname ;\
                     $this setErrorCount $errorCount"
         }
     }
@@ -308,8 +308,13 @@ body ::tycho::Compile::setErrorCount {count} {
 body ::tycho::Compile::jumpNextError {} {
     # NOTE: errorCount=$errorCount   errorList=$errorList
     if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
+        # Find out where in the list my information is located.
+        # This has the format {{1 2 asdf.cc} {5 10 fdsa.cc} ...}
         set entry [lindex $errorList $errorCount]
-        jumpToLine $entry
+        set cLineNum [lindex $entry 0]
+        set eLineNum [lindex $entry 1]
+        set fname [lindex $entry 2]
+        jumpToLine $cLineNum $eLineNum $fname
         incr errorCount
     } else {
         set errorCount 0
@@ -317,22 +322,24 @@ body ::tycho::Compile::jumpNextError {} {
 
 }
 
-body ::tycho::Compile::jumpToLine {entry} {
+# This will open file context, and jump to entry number.
+# eLineNum = editor's line number (where error occured)
+# cLineNum = compiler's line number (where error reported)
+# fname = filename of the error source code.
+body ::tycho::Compile::jumpToLine {cLineNum eLineNum fname} {
     # Name of our editor/viewer
-    set editorName [$this cget -view]
+    #set editorName [$this cget -view]
+
+    set editorName [::tycho::File::openContext $fname]
+    set editorName [string trim $editorName :]
 
     # Jump to the line in editor
-    if {[winfo exists $editorName]} {
-        $editorName seeFragment "line [lindex $entry 1]"
-        $editorName raiseWindow
-    } else {
-        error "Editor doesn't exist."
-    }
+    $editorName seeFragment "line $eLineNum"
 
     # Jump to the line in the compile/exec widget
     set history $compileWidget.history
     if {[winfo exists $history]} {
-        $history seeFragment "line [lindex $entry 0]"
+        $history seeFragment "line $cLineNum"
     } else {
         error "Compile/Exec widget doesn't exist."
     }
@@ -363,7 +370,6 @@ body ::tycho::Compile::compileFiles {} {
 
     # Compile.  If we already have a compileWidget, reuse it. 
     if {![winfo exists $compileWidget]} {
-        putStatus "Compile window created. Compile again to start execution."
         #set compileWidget [$this cget -view].compile
         #set retList [::tycho::execModal $compileString $dirname]
 
