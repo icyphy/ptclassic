@@ -85,7 +85,7 @@ void DDFClustSched :: setup () {
 
   // FIXME: Issue a warning message, since the scheduler does not
   // completely work yet.
-  Error::warn("The DDFClustSched scheduler is still under development.\n"
+  Error::warn("The DDF clustering scheduler is still under development.\n"
 	      "It currently fails to work with wormholes.\n"
 	      "Turn off 'restructure' to avoid using it.");
 
@@ -471,8 +471,8 @@ int DDFClustSched :: run() {
       // (4) If we still have not fired a star, we are deadlocked.
       if (!firedOne) {
 	if (numFiring < stopTime && !runUntilDeadlock) {
-	  Error :: abortRun("deadlock detected: check for  ",
-			    "insufficient initial tokens on feedback arcs");
+	  Error::abortRun("The DDF clustering schedule has detected deadlock: ",
+		"check for insufficient initial tokens on feedback arcs");
 	  return FALSE;
 	}
       }
