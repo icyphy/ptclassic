@@ -35,10 +35,13 @@
 # less of a drain on the computation time if the star is set to
 # operate asynchronously.
 
+# It is assumed that the global symbol ptkControlPanel is the name
+# of the control panel used to control the operation of the system.
+
 # The run control window will be the parent window with the following
 # choice of name.  The effect of this is that when the control window
 # is deleted, so are all the children windows.
-set s .run_[curuniverse].${uniqueSymbol}field
+set s $ptkControlPanel.${uniqueSymbol}field
 
 # If the window doesn't already exist, create it.
 # If the window does exist, assume it was created by a previous run
@@ -53,7 +56,7 @@ if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
     wm iconname $s "Playing Field"
 
     frame $s.f -bd 10
-    canvas $s.f.pad -relief sunken -bg AntiqueWhite3 -height 5c -width 10c
+    canvas $s.f.pad -relief sunken -bg tan -height 5c -width 10c
     scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
 	-sliderforeground bisque1 -fg bisque1 -length 10c \
         -command ${uniqueSymbol}setOut -showvalue 0
@@ -70,7 +73,7 @@ if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
     set y2 [expr 2.5+$ballRadius]
 
     set ${uniqueSymbol}ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-        -outline white -fill firebrick4 ]
+        -outline black -fill tan3 ]
 
     # Conditionally define procedures, only if they haven't been defined before
     proc ${uniqueSymbol}setOut {value} "
@@ -79,7 +82,8 @@ if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
 
     proc ${uniqueSymbol}callTcl {} "
         global ${uniqueSymbol}ballId
-        set s .run_[curuniverse].${uniqueSymbol}field
+	global ptkControlPanel
+        set s $ptkControlPanel.${uniqueSymbol}field
         set c \$s.f.pad
         set ballRadius 0.5
         set inputVals \[${uniqueSymbol}grabInputs]

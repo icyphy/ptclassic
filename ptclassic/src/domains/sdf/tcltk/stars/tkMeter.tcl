@@ -12,6 +12,7 @@
 # variables have been set:
 #	uniqueSymbol
 #	numInputs
+#	ptkControlPanel
 #	label
 #	low
 #	high
@@ -20,8 +21,8 @@
 if {![info exists putInCntrPan]} {set putInCntrPan 1}
 
 if {$putInCntrPan} \
-   { set s .run_[curuniverse].low.${uniqueSymbol}meter } \
-   { set s .run_[curuniverse].${uniqueSymbol}meter }
+   { set s $ptkControlPanel.low.${uniqueSymbol}meter } \
+   { set s $ptkControlPanel.${uniqueSymbol}meter }
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -31,7 +32,7 @@ if {![winfo exists $s]} {
 
     if {$putInCntrPan} {
 	frame $s
-	pack append .run_[curuniverse].low $s top
+	pack append $ptkControlPanel.low $s top
     } {
         toplevel $s
         wm title $s "Bar Meters"
@@ -48,7 +49,7 @@ if {![winfo exists $s]} {
 
     if {!$putInCntrPan} {
         button $s.ok -text "DISMISS" -command \
-	    "ptkStop [curuniverse]; destroy $s"
+		"ptkStop [curuniverse]; destroy $s"
         pack append $s $s.ok {top fillx}
     }
 
