@@ -187,11 +187,10 @@ The input particles are only cast to this precision if the parameter
                 phaseLength = taps.size() / i;
                 if ((taps.size() % i) != 0) phaseLength++;
 
-		if ( ! int(ArrivingPrecision) ) {
-		  fixIn = Fix( ((const char *) InputPrecision) );
-		  if ( fixIn.invalid() )
-		    Error::abortRun( *this, "Invalid InputPrecision" );
-		}
+		// Set the precision on the fixed-point variables
+		fixIn = Fix( ((const char *) InputPrecision) );
+		if ( fixIn.invalid() )
+		  Error::abortRun( *this, "Invalid InputPrecision" );
 
 		tap = Fix( ((const char *) TapPrecision) );
 		if ( tap.invalid() )
@@ -200,11 +199,24 @@ The input particles are only cast to this precision if the parameter
 		Accum = Fix( ((const char *) AccumulationPrecision) );
 		if ( Accum.invalid() )
 		  Error::abortRun( *this, "Invalid AccumulationPrecision" );
-		Accum.set_ovflow( ((const char *) OverflowHandler) );
-		if ( Accum.invalid() )
-		  Error::abortRun( *this, "Invalid overflow handler" );
 
 		out = Fix( ((const char *) OutputPrecision) );
+		if ( out.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
+
+		// Set the overflow handlers for assignments/computations
+		fixIn.set_ovflow( ((const char *) OverflowHandler) );
+		if ( fixIn.invalid() )
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
+		tap.set_ovflow( ((const char *) OverflowHandler) );
+		Accum.set_ovflow( ((const char *) OverflowHandler) );
+		out.set_ovflow( ((const char *) OverflowHandler) );
+
+		// Set all fixed-point assignments/computations to use rounding
+		fixIn.set_rounding(TRUE);
+		tap.set_rounding(TRUE);
+		Accum.set_rounding(TRUE);
+		out.set_rounding(TRUE);
         }
         go {
             int phase, tapsIndex;
@@ -219,7 +231,7 @@ The input particles are only cast to this precision if the parameter
             // Interpolate once for each input consumed
             for (int inC = 1; inC <= Decim; inC++) {
                 // Produce however many outputs are required
-                // for each input consumed
+		// for each input consumed
                 while (phase < Interp) {
                    Accum = 0.0;
                    // Compute the inner product.
@@ -245,6 +257,6 @@ The input particles are only cast to this precision if the parameter
                 phase -= Interp;
             }
         }
-        // a wrap-up method is inherited from SDFFix
-        // if you defined your own, you should call SDFFix::wrapup()
+        // A wrap-up method is inherited from SDFFix
+        // If you defined your own, you should call SDFFix::wrapup()
 }
