@@ -59,7 +59,7 @@ DERepeatStar :: DERepeatStar() {
 
 	// make a feedback connection
 	feedbackOut.connect(feedbackIn, 0);
-	feedbackIn.depth = -1;
+	feedbackIn.triggers();
 }
 
 void DERepeatStar :: refireAtTime(float when) {
