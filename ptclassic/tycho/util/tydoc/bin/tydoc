@@ -5,6 +5,9 @@
 # $Id$
 # Author: John Reekie
 
+# Create the tycho namespace
+namespace ::tycho
+
 # If the TYDOC_LIBRARY variable is set, add it to the auto_path
 if [info exists env(TYDOC_LIBRARY)] {
     if { [lsearch -exact $auto_path $env(TYDOC_LIBRARY)] }  {
@@ -29,6 +32,7 @@ if [catch {package require tycho.util.tydoc}] {
 }
 
 # If that didn't work, try the TYCHO environment variable.
+set err ""
 if !$ok {
     if ![info exists env(TYCHO)] {
 	if [info exists env(PTOLEMY)] {
@@ -40,16 +44,21 @@ if !$ok {
     }
     if [info exists env(TYCHO)] {
 	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
-	    lappend auto_path [file join $env(TYCHO) util tydoc]
-	    puts "TYCHO = $env(TYCHO) $auto_path"
-	    if ![catch {package require tycho.util.tydoc}] {
+	    lappend auto_path [file join $env(TYCHO) util tydoc] \
+		[file join $env(TYCHO) kernel basic] \
+		[file join $env(TYCHO) kernel model]
+	    if ![catch {package require tycho.util.tydoc} err ] {
 		set ok 1
 	    }
 	}
     }
 }
 if !$ok {
-    puts "Cannot find \"tycho.util.tydoc\". You can\n\
+    puts "Cannot find \"tycho.util.tydoc\"\
+	    Error was:\n--start--\n$errorInfo\n--end--\n\
+	    The auto_path variable lists the directories that were searched.\n\
+	    auto_path = $auto_path\n\
+	    You can:\n\
 	    1. Install tycho.util.tydoc in a subdirectory of your Tcl library\n\
 	    2. Install tycho.util.tydoc in the directory given by the TCL_PACKAGES \
 	    variable.\n\
