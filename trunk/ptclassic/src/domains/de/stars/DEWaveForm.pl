@@ -7,8 +7,8 @@ array parameter "value" (default "1 -1"). This array can periodically
 repeat with any period, and you can halt a simulation when the end of
 the array is reached. The following table summarizes the capabilities:
 <pre>
-<b>haltAtEnd    periodic    period      operation
------------------------------------------------------------------------</b>
+haltAtEnd    periodic    period      operation
+-----------------------------------------------------------------------
     NO          YES        0         The period is the length of the array 
     NO          YES        N>0       The period is N 
     NO          NO         anything  Output the array once, then zeros 
