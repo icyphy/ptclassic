@@ -896,7 +896,7 @@ body ::tycho::HTML::configureContextMenu {} {
 	set link [file split $itk_option(-file)]
 	set path [lrange $link 0 [expr [llength $link] - 4]]
 	set fname [join [concat \
-		[linit [split [lindex $link end] .]] "itcl"] .]
+		[lreplace [split [lindex $link end] .] end end] "itcl"] .]
 	set link [eval file join $path $fname]
 
 	if { [file exists $link] } {
