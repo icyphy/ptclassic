@@ -2,7 +2,7 @@ defstar {
   name { VSynchComm }
   domain { CGC }
   desc { Base class for CGC-VHDL synchronous communication }
-  version { @(#)CGCVSynchComm.pl	1.7 3/7/96 }
+  version { $Id$ }
   author { Michael C. Williamson, Jose Luis Pino }
   copyright { 
     Copyright (c) 1993-1996 The Regents of the University of California.
@@ -46,6 +46,15 @@ defstar {
     type {string}
     default {"%"}
   }
+
+  code {
+/* IMPORTANT:  The following #defines must match
+   the ones in $(ROOT)/src/utils/ptvhdlsim/CLISocket.h
+   in order for the sockets to communicate with one another
+   */
+#define	SOCK_BASE_NAME "/tmp/PTVHDLSIM"
+  }
+  
   setup {
   }
 
@@ -61,7 +70,7 @@ defstar {
   }
 
   codeblock (secondDecl) {
-  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
+  struct sockaddr_un $starSymbol(nearaddr), $starSymbol(xmitaddr);
   int $starSymbol(nearnamelen);
   int $starSymbol(xmitaddrlen);
   int $starSymbol(nearaddrlen);
@@ -87,16 +96,22 @@ defstar {
   if ($starSymbol(nearsock) == -1) {
     perror($starSymbol(dummy));
   }
-  $starSymbol(nearaddr).sa_family = AF_UNIX;
-  (void) strncpy($starSymbol(nearaddr).sa_data, $starSymbol(nearstring), $starSymbol(nearnamelen)+1);
-  (void) unlink($starSymbol(nearaddr).sa_data);
-  if(bind($starSymbol(nearsock), &$starSymbol(nearaddr), $starSymbol(nearaddrlen)) == -1) {
+  $starSymbol(nearaddr).sun_family = AF_UNIX;
+  (void) strcpy($starSymbol(nearaddr).sun_path,
+		$starSymbol(nearstring));
+  (void) unlink($starSymbol(nearaddr).sun_path);
+  if(bind($starSymbol(nearsock),
+	  (struct sockaddr *) &$starSymbol(nearaddr),
+	  (strlen($starSymbol(nearaddr).sun_path) +
+	   sizeof($starSymbol(nearaddr).sun_family))) == -1) {
     perror($starSymbol(dummy));
   }
   if(listen($starSymbol(nearsock), 5) == -1) {
     perror($starSymbol(dummy));
   }
-  $starSymbol(xmitsock) = accept($starSymbol(nearsock), &$starSymbol(xmitaddr), &$starSymbol(xmitaddrlen));
+  $starSymbol(xmitsock) = accept($starSymbol(nearsock),
+				 (struct sockaddr *) &$starSymbol(xmitaddr),
+				 &$starSymbol(xmitaddrlen));
   if($starSymbol(xmitsock) < 0) {
     perror($starSymbol(dummy));
   }
@@ -106,10 +121,10 @@ defstar {
   /* Wrapup */
   (void) shutdown($starSymbol(xmitsock),2);
   (void) close($starSymbol(xmitsock));
-  (void) unlink($starSymbol(xmitaddr).sa_data);
+  (void) unlink($starSymbol(xmitaddr).sun_path);
   (void) shutdown($starSymbol(nearsock),2);
   (void) close($starSymbol(nearsock));
-  (void) unlink($starSymbol(nearaddr).sa_data);
+  (void) unlink($starSymbol(nearaddr).sun_path);
   }
 
   initCode {
@@ -151,9 +166,10 @@ defstar {
     oneLine << " socket error\";";
     addCode(oneLine);
 
-    oneLine = "  $starSymbol(nearstring) = \"/tmp/";
+    oneLine = "  $starSymbol(nearstring) = \"";
+    oneLine << SOCK_BASE_NAME;
     oneLine << sndrcv;
-    oneLine << "$val(pairNumber)\\0\";";
+    oneLine << "$val(pairNumber)\";";
     addCode(oneLine);
 
     addCode(body);

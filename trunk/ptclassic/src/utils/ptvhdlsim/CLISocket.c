@@ -21,13 +21,13 @@ void create_socket(idata)
     {
       perror(idata->dummy);
     }
-  idata->nearaddr.sa_family = AF_UNIX;
-  idata->faraddr.sa_family = AF_UNIX;
-  (void) strncpy(idata->nearaddr.sa_data, idata->nearstring,
-	  idata->nearnamelen+1);
-  (void) strncpy(idata->faraddr.sa_data, idata->farstring,
-	  idata->farnamelen+1);
-  (void) unlink(idata->nearaddr.sa_data);
+
+  idata->nearaddr.sun_family = AF_UNIX;
+  idata->faraddr.sun_family = AF_UNIX;
+  (void) strcpy(idata->nearaddr.sun_path, idata->nearstring);
+  (void) strcpy(idata->faraddr.sun_path, idata->farstring);
+  (void) unlink(idata->nearaddr.sun_path);
+
   return;
 }
 
@@ -40,8 +40,10 @@ int connect_socket(idata)
   int printflag = 1;
   int status = 0;
 
-  status = connect(idata->nearsock, &idata->faraddr,
-	  idata->faraddrlen);
+  status = connect(idata->nearsock,
+		   (struct sockaddr *) &idata->faraddr,
+		   (strlen(idata->faraddr.sun_path) +
+		    sizeof(idata->faraddr.sun_family)));
 /*
   delay(1000000000);
 */
@@ -132,6 +134,6 @@ void close_socket(idata)
 {
   (void) shutdown(idata->nearsock,2);
   (void) close(idata->nearsock);
-  (void) unlink(idata->nearaddr.sa_data);
+  (void) unlink(idata->nearaddr.sun_path);
   return;
 }

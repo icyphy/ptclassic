@@ -71,8 +71,11 @@ void v2creal_open(did,iid)
   CHECK_ERRNO;
   idata->pairid = gvPairid.value.integer;
   idata->numxfer = gvNumxfer.value.integer;
-  (void) sprintf(idata->nearstring, "/tmp/snd%d\0", idata->pairid);
-  (void) sprintf(idata->farstring, "/tmp/rcv%d\0", idata->pairid);
+
+  (void) sprintf(idata->nearstring, "%s%s%d", SOCK_BASE_NAME,
+		 "snd", idata->pairid);
+  (void) sprintf(idata->farstring, "%s%s%d", SOCK_BASE_NAME,
+		 "rcv", idata->pairid);
   (void) sprintf(idata->format, "%%lf\0");
 
   idata->nearnamelen = strlen(idata->nearstring);
