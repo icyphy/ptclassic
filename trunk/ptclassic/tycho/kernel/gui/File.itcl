@@ -150,6 +150,9 @@ class ::tycho::File {
     # implementation is an error.
     method seeName {name}
 
+    # Toggle the read-only status of a file (maybe invoking revision control).
+    method toggleReadOnly {}
+
     # Append a file editor to the window menu.
     method windowMenuAppend {obj label}
 
@@ -445,12 +448,18 @@ body ::tycho::File::constructor {args} {
     
     $itk_component(fileMenu) add command \
 	    -label Reload \
-	    -underline 1 \
+	    -underline 0 \
 	    -command "$this reload"
     
     $itk_component(fileMenu) add command \
-	    -label "Revision Control..." \
+	    -label "Toggle read-only" \
 	    -underline 0 \
+	    -accelerator "C-x C-q" \
+	    -command "$this toggleReadOnly"
+
+    $itk_component(fileMenu) add command \
+	    -label "Revision Control..." \
+	    -underline 2 \
 	    -accelerator "C-x v" \
 	    -command "$this revisionControl"
 
@@ -564,8 +573,8 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Key-i> "$this insertFile; break"
     bind $prefix <Control-x><Key-p> "$this print; break"
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
-    bind $prefix <Control-x><v> \
-	    "$this revisionControl; break"
+    bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
+    bind $prefix <Control-x><v> "$this revisionControl; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -857,6 +866,39 @@ body ::tycho::File::seeName {name} {
 }
 
 #####################################################################
+#### toggleReadOnly
+# Toggle the read-only status of the file.  If the file is under
+# revision control (e.g. SCCS or RCS), then check in or check out
+# the file.
+#
+body ::tycho::File::toggleReadOnly {} {
+    set revclass [::tycho::RevControl::whichRevClass $this]
+    if {$revclass != {}} {
+        if [getReadonly] {
+            $revclass::checkOut $this
+        } {
+            $revclass::checkIn $this
+        }
+    } {
+        # NOTE: Unix-only implementation here.
+        if [getReadonly] {
+            exec chmod +w [filename]
+            configure -readonly 0
+        } {
+            if {$modified} {
+                if [::tycho::askuser \
+                        "Save modifications before making file read-only?"] {
+                    # update changes since last save
+                    save
+                }
+            }
+            exec chmod -w [filename]
+            configure -readonly 1
+        }
+    }
+}
+
+#####################################################################
 #### windowMenuAppend
 # Append the name of an open file editor to the Window menu.
 # The second argument, normally a filename, gives the menu label.
@@ -1138,6 +1180,7 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 #
 body ::tycho::File::removeBackupFiles {} {
     set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
+    # NOTE: Unix-only implementation here.
     exec rm -f $savefile
     set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
     exec rm -f $savefile
