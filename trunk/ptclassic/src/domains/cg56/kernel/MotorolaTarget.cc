@@ -74,8 +74,8 @@ void MotorolaTarget::endIteration(int repetitions, int) {
 	if (repetitions == -1)		// iterate infinitely
 		myCode << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
 	else 				// iterate finitely
-		myCode << targetNestedSymbol.pop() 
-		       << "\n\tnop\t\t; prevent two endloops in a row\n";
+		myCode << "\tnop\n; prevent two endloops in a row\n"
+		       << targetNestedSymbol.pop() << "\n";
 }
 
 void MotorolaTarget::codeSection() {
