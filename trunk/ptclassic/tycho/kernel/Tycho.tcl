@@ -129,6 +129,7 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 $tychoeditors/textedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/slate ]
+    set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
 }
 
 if {![info exists tychoWelcomeWindow]} {
