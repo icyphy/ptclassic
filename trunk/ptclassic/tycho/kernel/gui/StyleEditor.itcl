@@ -39,7 +39,7 @@
 #
 proc ::tycho::styleeditor {stylesheet {style {}}} {
     if { $style == "" } {
-        set style [::tycho::profile getstyle $stylesheet]
+        set style [::tycho::userprofile getstyle $stylesheet]
     }
     if { [::info which -command .styles.$stylesheet] != "" } {
         if [winfo ismapped .styles.$stylesheet] {

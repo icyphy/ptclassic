@@ -30,7 +30,7 @@
 
 
 #####################################################################
-#### profile
+#### userprofile
 # Perform operations on the user profile. The user profile is a
 # persistent store of information specific to a particular user
 # of Tycho, and includes information such as widget style preferences,
@@ -65,7 +65,7 @@
 #
 # </dl>
 #
-ensemble ::tycho::profile {
+ensemble ::tycho::userprofile {
     # Register a user profile
     option register {filename} {
 	set filename [::tycho::expandPath $filename]
