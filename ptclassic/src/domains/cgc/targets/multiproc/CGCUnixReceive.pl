@@ -6,7 +6,12 @@ Receive star between Unix processors.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+        copyright {
+Copyright (c) 1991-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { CGC local library }
 	htmldoc {
 Produce code for inter-process communication (receive-side)

@@ -6,7 +6,12 @@ Send star between UNIX processors.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+        copyright {
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { CGC target library }
 	htmldoc {
 Produce code for inter-process communication (send-side)
