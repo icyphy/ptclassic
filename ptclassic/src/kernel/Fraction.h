@@ -1,7 +1,6 @@
 #ifndef _Fraction_h
 #define _Fraction_h 1
 
-
 // SCCS version identification
 // $Id$
 
@@ -100,10 +99,10 @@ public:
 
 	// binary operators that need friendship
 
-	friend int operator == (const Fraction&,const Fraction&);
-	friend int operator != (const Fraction&,const Fraction&);
-	friend Fraction operator * (const Fraction&,const Fraction&);
-	friend Fraction operator / (const Fraction&,const Fraction&);
+	friend inline int operator == (const Fraction&,const Fraction&);
+	friend inline int operator != (const Fraction&,const Fraction&);
+	friend inline Fraction operator * (const Fraction&,const Fraction&);
+	friend inline Fraction operator / (const Fraction&,const Fraction&);
 
 	// Simplify the fraction (compute an equivalent fraction with
 	// myNum and myDen relatively prime).
