@@ -31,7 +31,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 /* Includes */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/param.h>
@@ -39,10 +41,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <pwd.h>
 #include <unistd.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "icon.h"
+/* Octtools includes */
+#include "oct.h"		/* define octObject */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define RPC data structures */
+#include "utility.h"		/* pick up util_csystem() */
 
+/* Pigilib includes */
+#include "icon.h"
 #include "util.h"
 #include "err.h"
 #include "vemInterface.h"
@@ -53,7 +59,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "kernelCalls.h"	/* define callParseClass and KcDomainOf */
 #include "pigiLoader.h"
 #include "handle.h"
-#include "utility.h"		/* pick up util_csystem() */
 
 #define DM_WIDTH 80		/* dialog entry width */
 #define EDIT_ICON_SNAP 5	/* snap size of vem window for edit-icon */
@@ -107,16 +112,17 @@ char *codeDir, **iconDir;
 
 /* generate a command line to edit a file */
 extern char* getenv();
+
 static char defaultDisplay[] = "xedit -name ptolemy_code %s";
 
-static void genDispCommand(buf,file,background)
+static void genDispCommand(buf, file, background)
 char* buf;
-char* file;
+const char* file;
 int background;
 {
     char* dispCmd = getenv("PT_DISPLAY");
     if (dispCmd == 0) dispCmd = defaultDisplay;
-    sprintf (buf, dispCmd, file);
+    sprintf(buf, dispCmd, file);
     if (background) strcat(buf, "&");
 }
 
@@ -126,10 +132,10 @@ Runs in the background and returns immediately.
 */
 boolean
 LookAtFile(fileName)
-char *fileName;
+const char* fileName;
 {
     char buf[512];
-    genDispCommand(buf, fileName, 1);
+    genDispCommand(buf, fileName, TRUE);
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
@@ -162,7 +168,7 @@ char *name, *domain, *dir, *palette;
 /* if we don't know about the star we try to load it.  Get the
  * corresponding class name.
  */
-	char * base = callParseClass(name);
+	const char *base = callParseClass(name);
 	if(!base) return FALSE;
 	PrintDebug("Star not known, trying to load it");
 	if (!KcCompileAndLink (base, domain, dir, FALSE, NULL)) return FALSE;
@@ -495,13 +501,13 @@ long userOptionWord;
    the string "domain" gets the domain.
 */
 
-char* nthDomainName();
-
 int
 IconFileToSourceFile (iconFile, sourceFile, domain)
 char* iconFile, *sourceFile, *domain;
 {
-	char dir[512], *base, *dom = 0;
+	char dir[512];
+	const char *dom = 0;
+	const char *base;
 	int i, n;
 
 	strcpy (dir, iconFile);
