@@ -121,16 +121,150 @@ public:
 class PortList : SequentialList
 {
         friend class Block;
-
-        // Add PortHole to list
-        void put(PortHole& p) {SequentialList::put(&p);}
+        friend class MultiPortHole;
  
         // Return size of list
         int size() {return SequentialList::size();}
  
         // Return next PortHole on list
         PortHole& operator ++ () {return *(PortHole*)next();}
+
+// Make the following public or a rather large number of MultiPortHoles
+// have to be made friends.  This is due to another c++ "feature" that
+// derived classes do not inherit friendships.
+public:
+        // Add PortHole to list
+        void put(PortHole& p) {SequentialList::put(&p);}
 };
+
+
+
+
+	//////////////////////////////////////////
+	// class MultiPortHole
+	//////////////////////////////////////////
+
+// A MultiPortHole is a collection of an indeterminate number of
+// PortHoles that have no particular ordering.  Because ordering
+// is indeterminate, MultiPortHoles should only be used for commutative
+// functions.  The only output MultiPortHole that makes any sense,
+// therefore, is one that outputs the same data on all connections.
+// Examples of reasonable input MultiPortHoles are summing junctions,
+// or an input where all data samples are multiplied together.
+
+// This is its own class for two reasons:  (1) The differences between
+// it and ordinary PortHoles are substantial, and (2) this makes it
+// easier to overload the connect() function of the Galaxy class to
+// properly handle these.  The way the connect function works is that
+// every connection to a MultiPortHole causes a new PortHole to be
+// created and connected.
+
+class MultiPortHole
+{
+public:
+
+	// Every MultiPortHole must be initialized with the setPort function
+	// Arguments are the name and type (see type.h for supported types).
+	MultiPortHole& setPort(char* portName,
+			  Block* parent,		// parent block pointer
+		          dataType type = FLOAT);	// defaults to FLOAT
+
+	// Name is private (below) so that it can't be changed.
+	char* readName() { return name;}
+
+	// In order to trace through the topology graph, we need
+	// a pointer to the block to which the PortHole belongs.
+	Block* blockIamIn;	// The block I am in.
+
+	// The PortHole supports only one type of particle at a time
+	dataType type;
+
+	// Print a description of the PortHole
+	operator char* ();
+
+	// The MultiPortHole can be aliased to another MultiPortHole.
+	MultiPortHole* alias;
+
+	// Find the eventual MultiPortHole to which this is aliased
+	MultiPortHole& realPort() {
+		if (alias == NULL) return *this;
+		else return alias->realPort();
+	}
+
+	// Determine whether the port is an input or output.
+	// For class PortHole, it is unspecified, so both
+	// functions return FALSE.
+	virtual int isItInput () {return FALSE; }
+	virtual int isItOutput () {return FALSE; }
+
+	// Return the number of physical port currently allocated
+	int numberPorts() {return ports.size();}
+
+	// return the next port in the list
+	PortHole& operator ++ () {return ports++;}
+	
+	// Add a new physical port to the MultiPortHole list
+	virtual PortHole& newPort();
+	
+protected:
+	// List of ports allocated
+	PortList ports;
+private:
+	char* name;		// Name of this PortHole
+};
+
+
+	//////////////////////////////////////////
+	// class MultiSDFPort
+	//////////////////////////////////////////
+
+// Synchronous dataflow MultiPortHole
+
+class MultiSDFPort : public MultiPortHole {
+public:
+	// The number of tokens consumed
+	unsigned numberTokens;
+
+	// The setPort function is redefined to take one more optional
+	// argument, the number of tokens produced.
+	MultiPortHole& setPort(char* portName,
+			  Block* parent,
+		          dataType type = FLOAT,	// defaults to FLOAT
+		          unsigned numTokens = 1);	// defaults to 1
+};
+
+
+	//////////////////////////////////////////
+	// class MultiInPortHole
+	//////////////////////////////////////////
+
+// MultiInPortHole is an SDF input MultiPortHole
+
+class MultiInPortHole : public MultiSDFPort {
+public:
+	virtual int isItInput () {return TRUE; }
+
+	// Add a new physical port to the MultiPortHole list
+	virtual PortHole& newPort();
+};
+
+
+	//////////////////////////////////////////
+	// class MultiOutPortHole
+	//////////////////////////////////////////
+
+// MultiOutPortHole is an SDF output MultiPortHole
+
+class MultiOutPortHole : public MultiSDFPort {
+public:
+	virtual int isItOutput () {return TRUE; }
+
+	// Add a new physical port to the MultiPortHole list
+	virtual PortHole& newPort();
+};
+
+
+
 
 
 	//////////////////////////////////////////
@@ -142,7 +276,7 @@ class Geodesic
 private:
 	// For now, the number of Particles on the Geodesic is simply
 	// stored as an integer.  Note that the SDFScheduler manipulates
-	// this number using the public methods below without actually
+	// this number directly without actually
 	// putting any Particles on the geodesic.  The SDFScheduler
 	// guarantees that when it is done, the noParticles value will
 	// be the same as when it started, or the run will have been aborted
