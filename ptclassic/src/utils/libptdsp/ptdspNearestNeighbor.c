@@ -51,12 +51,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
   Description [ Find the index of nearest neighbor in the codebook for
 		the training vector, and find the squared error (squared 
 		distance) between the training vector and its nearest
-		neighbor.
+		neighbor. </p>
 		Let X=input vector and Yi=i_th codeword.  Find the nearest
 		neighbor codeword Yi to maximize X'*Yi-Ai (' means transpose),
 		where Ai=||Yi||^2/2 and should have already been stored in
 		the array halfCodewordPower(numCodewords). ]
-  SideEffects []
+  SideEffects [ Sets values at addresses theindex and thedistance. ]
 ******************************************************************************/
 void 
 Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
