@@ -113,12 +113,12 @@ static void ptSafeSig( int SigNum ) {};
 
 
 /*
- * Ty_TimerElapsed
+ * timerElapsed
  *
  * This flag is set when the timer elapses
  */
 static volatile int
-Ty_TimerElapsed = 1;
+timerElapsed = 1;
 
 /*
  * Ty_TickPeriod
@@ -126,7 +126,7 @@ Ty_TimerElapsed = 1;
  * The period of the timer, in microseconds.
  */
 static int
-Ty_TimerPeriod = 20000;
+timerPeriod = 20000;
 
 
 /*
@@ -136,7 +136,7 @@ Ty_TimerPeriod = 20000;
  */
 static void
 Ty_TimerDone() {
-  Ty_TimerElapsed = 1;
+  timerElapsed = 1;
 }
 
 /*
@@ -153,7 +153,7 @@ Ty_TimerPeriod( int ms ) {
     ms = 1;
   }
 
-  Ty_TimerPeriod = ms * 1000;
+  timerPeriod = ms * 1000;
 }
 
 /*
@@ -163,14 +163,15 @@ Ty_TimerPeriod( int ms ) {
 */
 void
 Ty_TimerStart( ) {
+  struct itimerval i;
+
   /* Reset the elapsed flag */
-  Ty_TimerElapsed = 0;
+  timerElapsed = 0;
 
   /* reset the timer - this cancels any current timing in progress */
-  struct itimerval i;
   i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
   i.it_value.tv_sec = 0;
-  i.it_value.tv_usec = Ty_TimerPeriod;
+  i.it_value.tv_usec = timerPeriod;
 
   /* Call the handler function when the timer expires */
   signal(SIGALRM, Ty_TimerDone);
@@ -206,7 +207,7 @@ Ty_TimerStop()
   ptBlockSig(SIGALRM);
 
   /* Reset the timer elapsed flag */
-  Ty_TimerElapsed = 0;
+  timerElapsed = 0;
 }
 
 /*
@@ -227,7 +228,7 @@ Ty_TimerElapsed() {
   ptBlockSig(SIGALRM);
 
   /* Return the flag */
-  return Ty_TimerElapsed;
+  return timerElapsed;
 }
 
 /*
@@ -247,13 +248,13 @@ Ty_DoAllEvents() {
   ptBlockSig(SIGALRM);
 
   /* Process events only if the timer has elapsed */
-  if (Ty_TimerElapsed) {
+  if (timerElapsed) {
 
     /* Process all pending Tk events */
     while (Tcl_DoOneEvent(TK_DONT_WAIT | TK_ALL_EVENTS));
 
     /* Reset the timer elapsed flag */
-    tyevent_TimerElapsed = 0;
+    timerElapsed = 0;
 
     /* Restart the timer */
     Ty_TimerStart();
@@ -282,7 +283,7 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
     int period;
 
     /* If the timer is already running, generate an error */
-    if ( ! Ty_TimerElapsed ) {
+    if ( ! timerElapsed ) {
       interp->result = "Timer is already running";
       return TCL_ERROR;
     }
@@ -293,10 +294,10 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 	sprintf(interp->result, "Integer period expected: %s", argv[2]);
 	return TCL_ERROR;
       }
-      periodcopy = Ty_TimerPeriod;
-      Ty_TimerPeriod = period;
+      periodcopy = timerPeriod;
+      timerPeriod = period;
       Ty_TimerStart();
-      Ty_TimerPeriod = periodcopy;
+      timerPeriod = periodcopy;
     } else {
       Ty_TimerStart();
     }
@@ -304,14 +305,14 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
   } else if ( ! strcmp(argv[1], "stop") ) {
     /* Stop the timer */
-    if ( ! Ty_TimerElapsed ) {
+    if ( ! timerElapsed ) {
       Ty_TimerStop();
     }
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "elapsed") ) {
     /* Test if the timer has elapsed */
-    interp->result = Ty_TimerElapsed() ? 1 : 0;
+    interp->result = timerElapsed ? "1" : "0";
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "period") ) {
@@ -324,7 +325,7 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
       }
       Ty_TimerPeriod(period);
     }
-    sprintf(interp->result, "%d", Ty_TimerPeriod / 1000);
+    sprintf(interp->result, "%d", timerPeriod / 1000);
     return TCL_OK;
 
   } else {
