@@ -276,3 +276,7 @@ PortHole& WormMultiPort :: newPort() {
         }
 }
 
+PortHole& WormMultiPort :: newConnection() {
+	// always make a new connection.
+	return newPort();
+}
