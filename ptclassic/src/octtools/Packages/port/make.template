@@ -88,6 +88,13 @@ DRVROBJ =	tester.o
 
 DRVRLIBS =	
 
+# common makefile file for vem libraries
+VEMLIBCONFIG=../../vem-lib.mk
+include $(VEMLIBCONFIG)
+
+tests::	$(DRIVER) 
+	-$(DRIVER) 
+
 # pigilib needs the octtools copyright.h and ansi.h
 header:: $(OCTTOOLS)/include/copyright.h $(OCTTOOLS)/include/ansi.h \
 	../../include/copyright.h 	../../include/ansi.h
@@ -111,13 +118,6 @@ $(OCTTOOLS)/include/ansi.h: ansi.h
 	if [ ! -d $(OCTTOOLS)/include ]; then mkdir $(OCTTOOLS)/include ; fi
 	rm -f $@
 	cp $< $@
-
-# common makefile file for vem libraries
-VEMLIBCONFIG=../../vem-lib.mk
-include $(VEMLIBCONFIG)
-
-tests::	$(DRIVER) 
-	-$(DRIVER) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
