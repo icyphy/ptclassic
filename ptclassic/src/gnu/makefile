@@ -169,11 +169,12 @@ hp_configure: $(GNU_OBJ)
 	@echo "The top level configure does not pass things down properly"
 	(cd $(GNU_OBJ); \
 	$(GNU_SRC)/configure hppa1.1-hp-hpux --srcdir=$(GNU_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --gas)
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --with-gnu-as)
 	@echo "Now reconfigure gcc with -gas"
 	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure hppa1.1-hp-hpux --srcdir=$(GNU_SRC)/gcc \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --gas)
+	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		--with-gnu-as hppa1.1-hp-hpux)
 	@echo "Make links for the source files.  Some makes are not smart"
 	@echo " enough to handle vpath"
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
