@@ -41,7 +41,7 @@ endif # USE_OCTTOOLS_SHARED_LIBS
 endif
 
 CC =	$(OCT_CC)
-all:	makefile $(LIB) ../../include/${EXPHDR}
+all:	makefile $(CLIB) ../../include/${EXPHDR}
 
 #clean::
 #	rm -f *.a
@@ -56,11 +56,11 @@ ${OCTTOOLS}/include/${EXPHDR} ../../include/${EXPHDR}: $(EXPHDR)
 	rm -f $@
 	cp $< $@
 
-$(OCTLIBDIR)/$(LIB):	$(LIB)
-		rm -f $(OCTLIBDIR)/$(LIB)
-		ln $(LIB) $(OCTLIBDIR)
+$(OCTLIBDIR)/$(CLIB):	$(CLIB)
+		rm -f $(OCTLIBDIR)/$(CLIB)
+		ln $(CLIB) $(OCTLIBDIR)
 
-install: makefile $(OCTLIBDIR)/$(LIB) ${OCTTOOLS}/include/${EXPHDR}
+install: makefile $(OCTLIBDIR)/$(CLIB) ${OCTTOOLS}/include/${EXPHDR}
 
 # Not all libraries have tests
 tests::
@@ -68,7 +68,7 @@ tests::
 C_INCL= -I../../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
-	lint -C$(basename $(LIB) ) -u -I$(OCTTOOLS)/include $^ > lint
+	lint -C$(basename $(CLIB) ) -u -I$(OCTTOOLS)/include $^ > lint
 	lint -u -I$(OCTTOOLS)/include $^ > lint
 
 LINTDIR=$(OCTTOOLS)/lib.$(PTARCH)/lint
