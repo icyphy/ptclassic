@@ -107,6 +107,38 @@ proc lnull {list} {
 }
 
 
+## lequal list1 list2
+#
+# Test if two lists are equal. This tests individual elements
+# of the list, rather than just testing the two strings representing
+# the lists. To see what I mean, note that
+#
+#     puts [expr {{1 2} == { 1 2}}]
+#
+# returns 0, whereas
+#
+#     lequal {1 2} { 1 2}
+#
+# returns 1.
+#
+# NB This function does use foreach* because foreach* does not currently
+# handle *return* correctly.
+#
+proc lequal {list1 list2} {
+    if { [llength $list1] != [llength $list2] } {
+	return 0
+    }
+
+    foreach xy [zip $list1 $list2] {
+	assign x y $xy
+	if { $x != $y } {
+	    return 0
+	}
+    }
+    return 1
+}
+
+
 ## ltake, ldrop list n
 #
 # Take or drop list elements.
@@ -578,10 +610,10 @@ proc assocSplit {list} {
 }
 
 
-## assocAppend listname name value [{value}]
+## assocAppend listname name value
 #
 # Add a new value to the association list. This is a ``destructive''
-# update, like lappend. This function is straightforward, and this`
+# update, like lappend. This function is straightforward, and this
 # and the other assocation list functions guarantee that
 #
 #     lappend list {fred 42}
@@ -590,20 +622,18 @@ proc assocSplit {list} {
 #
 #     assocAppend list fred 42
 #
-proc assocAppend {list name value args} {
-    set value [concat [list $value] $args]
+proc assocAppend {list name value} {
     upvar $list l
     lappend l [list $name $value]
 }
 
 
-## assocReplace listname name value [{value}]
+## assocReplace listname name value
 #
 # Replace a value in an association list. This is a ``destructive''
 # update. If no value with the given name exists, then it is added.
 #
-proc assocReplace {list name value args} {
-    set value [concat [list $value] $args]
+proc assocReplace {list name value} {
     upvar $list l
 
     assign names values [ltranspose $l]
