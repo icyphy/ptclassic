@@ -63,8 +63,8 @@ CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 # system libraries (libraries from the environment)
 SYSLIBS=-lg++ -lm
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x #-static
-LINKFLAGS_D=-L$(LIBDIR) -g #-static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
+LINKFLAGS_D=-L$(LIBDIR) -g -static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
