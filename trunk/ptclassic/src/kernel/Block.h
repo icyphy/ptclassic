@@ -104,6 +104,9 @@ public:
 	void addPort(MultiPortHole& p) {multiports.put(p);}
 
 	// Retrieve the PortHole with the given name
+	// The first method returns a generic port, the second returns
+	// a real PortHole with all aliases resolved
+	GenericPort *genPortWithName (const char* name);
 	PortHole *portWithName(const char* name);
 
 	// Retrieve the MultiPortHole with the given name
