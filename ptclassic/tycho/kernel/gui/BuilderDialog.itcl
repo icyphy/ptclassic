@@ -32,18 +32,23 @@
 
 
 #######################################################################
-#### BuildDialog
-# The BuildDialog brings up a Dialog box that allows the user to
+#### BuilderDialog
+# The BuilderDialog brings up a Dialog box that allows the user to
 # build Tycho documentation files and indexes.
 #
+# FIXME: There should be a way to stop a build.
+# FIXME: The way we view the doc files is ugly, perhaps we
+# should use a widget with a menubar?
+
 # <tcl><pre>
-# set bd [::tycho::autoName .buildDialog]
-# ::tycho::BuildDialog $bd
+# set bd [::tycho::autoName .builderDialog]
+# ::tycho::BuilderDialog $bd
 # $bd centerOnScreen
 # </pre></tcl>
-# BuildDialog is a graphical front end for the Build class.
 #
-class ::tycho::BuildDialog {
+# BuilderDialog is a graphical front end for the Builder class.
+#
+class ::tycho::BuilderDialog {
     inherit ::tycho::Query
 
     constructor {args} {}
@@ -51,8 +56,8 @@ class ::tycho::BuildDialog {
     ###################################################################
     ####                         public methods                    ####
 
-    # Run what ever Build proc the user asked for.
-    method _runBuild {}
+    # Run what ever Builder proc the user asked for.
+    method _runBuilder {}
 
     # Bring up a dialog that allows the user to display Tycho documents
     method _showDocs  {}
@@ -66,12 +71,12 @@ class ::tycho::BuildDialog {
 #######################################################################
 #### constructor
 #
-body ::tycho::BuildDialog::constructor {args} {
+body ::tycho::BuilderDialog::constructor {args} {
     configure -text "Tycho Build Manager" \
             -title "Tycho Build Manager"
-    radio buildchoice {Build Operation} \
+    radio builderchoice {Build Operation: } \
             { {Full (10 Minutes)}\
-	    {Itcl HTML Only(9 Min)} \
+	    {Itcl HTML Only (9 Minutes)} \
             {Indices Only} \
             {Class Diagram Only} \
         } {Full (10 Minutes)}
@@ -88,21 +93,21 @@ body ::tycho::BuildDialog::constructor {args} {
 
     addButton help -text "Help" \
             -command "::tycho::File::openContext \
-            [file join \$TYCHO kernel doc usersGuides BuildDialogHelp.html]"
+            [file join \$TYCHO kernel doc usersGuides BuilderDialogHelp.html]"
 
-    configure -okcommand "$this _runBuild"
+    configure -okcommand "$this _runBuilder"
 }
 
 #######################################################################
-#### _runBuild
-# Run what ever Build proc the user asked for
+#### _runBuilder
+# Run what ever Builder proc the user asked for
 #
-body ::tycho::BuildDialog::_runBuild {} {
-    switch [get buildchoice] {
-	{Full (10 Minutes)} { ::tycho::Build::build }
-	{Itcl HTML Only (9 min)} { ::tycho::Build::itcldocs }
-	{Indices Only} { ::tycho::Build::indices }
-	{Class Diagram Only} { ::tycho::Build::classDiagram }
+body ::tycho::BuilderDialog::_runBuilder {} {
+    switch [get builderchoice] {
+	{Full (10 Minutes)} { ::tycho::Builder::build }
+	{Itcl HTML Only (9 min)} { ::tycho::Builder::itcldocs }
+	{Indices Only} { ::tycho::Builder::indices }
+	{Class Diagram Only} { ::tycho::Builder::classDiagram }
     }
 }
 
@@ -111,7 +116,7 @@ body ::tycho::BuildDialog::_runBuild {} {
 #### _showDocs
 # Bring up a dialog that allows the user to display a document.
 #
-body ::tycho::BuildDialog::_showDocs {} {
+body ::tycho::BuilderDialog::_showDocs {} {
     set choice [::tycho::query {Open a document} {
         {radio docChoice {Document to open} { \
                 {Tycho Concept Index} \
@@ -144,7 +149,7 @@ body ::tycho::BuildDialog::_showDocs {} {
 # Check to see what files need to be built and bring up a dialog asking
 # the user if they want to build.
 # 
-body ::tycho::BuildDialog::checkFiles {} {
+body ::tycho::BuilderDialog::checkFiles {} {
     global TYCHO
     set origmsg "The following Tycho files do not exist:" 
     set msg $origmsg
@@ -172,8 +177,8 @@ body ::tycho::BuildDialog::checkFiles {} {
 	set msg "$msg\n\nBring up Build Dialog to build these files?"
 
 	if [::tycho::askuser $msg] {
-	    set bd [::tycho::autoName .buildDialog]
-	    ::tycho::BuildDialog $bd
+	    set bd [::tycho::autoName .builderDialog]
+	    ::tycho::BuilderDialog $bd
 	    $bd centerOnScreen
 	    # Return the name of the window so the test suite can get at it.
 	    return $bd
