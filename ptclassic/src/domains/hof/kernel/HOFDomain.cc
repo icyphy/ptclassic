@@ -1,6 +1,6 @@
 static const char file_id[] = "HOFDomain.cc";
 /**********************************************************************
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,11 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
- Version: @(#)XDomain.ccP	1.15	7/30/96
-
- WARNING -- XDomain.ccP is a template file that is used to generate
- domain description modules.  If the name of this file is not XDomain.ccP,
- DO NOT EDIT IT!!!
+ Based on Version: @(#)XDomain.ccP	1.15	7/30/96
+ HOFDomains.cc Version: $Id$ G%
 
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the HOF domain so the interpreter can generate them dynamically.
