@@ -111,6 +111,7 @@ TK_LIBSPEC=-L$(TCL_ROOT)/lib -ltk8.0vc.lib
 #ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 ITCL_INCDIR=$(TCL_ROOT)/include
 #ITCL_LIBSPEC= c:/Itcl2.2/itcl/win/Itcl22.lib 
+ITCL_LIBSPEC=
 
 #
 # Variables for the linker
