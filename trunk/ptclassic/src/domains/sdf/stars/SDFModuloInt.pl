@@ -2,7 +2,7 @@ defstar {
 	name {ModuloInt}
 	domain {SDF}
 	desc { 
-The output is equal to the remainder after dividing the
+The output is equal to the integer remainder after dividing the
 integer input by the integer "modulo" parameter.
 	}
 	version {$Id$}

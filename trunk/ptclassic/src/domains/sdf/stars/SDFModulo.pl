@@ -3,7 +3,7 @@ defstar {
 	domain {SDF}
 	desc { 
 The output is equal to the remainder after dividing
-the input by the modulo the "modulo" parameter.
+the input by the "modulo" parameter.
 	}
 	version {$Id$}
 	author { E. A. Lee }
