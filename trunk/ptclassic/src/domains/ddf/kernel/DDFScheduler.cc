@@ -46,17 +46,19 @@ static SDFScheduler sdfSched;
  error messages for inconsistent graphs
 *******************************************************************/
 
-static char* err0 = " lies in an inconsistent DDF system : \n";
-static char* err1_1 = "First check DELAY-FREE LOOP or ";
-static char* err1_2 = "The auto-wormholization procedure may create an "
+typedef const char* MESSAGE;
+
+static MESSAGE err0 = " lies in an inconsistent DDF system : \n";
+static MESSAGE err1_1 = "First check DELAY-FREE LOOP or ";
+static MESSAGE err1_2 = "The auto-wormholization procedure may create an "
 "artificial deadlock.\n";
-static char* err1_3 = "You can disable the procedure by defining a IntState "
+static MESSAGE err1_3 = "You can disable the procedure by defining a IntState "
 "(restructure) and \nsetting 0 in the DDF galaxy.";
-static char* err2_1 = " needs too large input buffer size (>";
-static char* err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
-static char* err2_3 = "other semantic errors \n... (sorry for poor hints) \n";
-static char* err2_4 = "You may increase the max buffer size by defining a ";
-static char* err2_5 = "IntState (maxBufferSize) \nin the DDF galaxy.";
+static MESSAGE err2_1 = " needs too large input buffer size (>";
+static MESSAGE err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
+static MESSAGE err2_3 = "other semantic errors \n... (sorry for poor hints) \n";
+static MESSAGE err2_4 = "You may increase the max buffer size by defining a ";
+static MESSAGE err2_5 = "IntState (maxBufferSize) \nin the DDF galaxy.";
 	
 #define MAXTOKEN 1024
 static int maxToken;
