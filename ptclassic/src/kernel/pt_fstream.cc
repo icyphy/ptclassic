@@ -2,7 +2,7 @@ static const char file_id[] = "pt_fstream.cc";
 
 // Copyright (c) 1992 The Regents of the University of California.
 //                       All Rights Reserved.
-// Programmer:  J. Buck
+// Programmer:  J. Buck, Kennard
 // $Id$
 
 // This defines derived types of ifstream and ofstream that do the following:
@@ -45,19 +45,23 @@ static void reportError(const char* op) {
 // check for special file names
 // This uses the hardcoded descriptors 0,1,2.  These are appropriate
 // for UNIX only.
-static int check_special(const char *name) {
-	int	fd;
+static int check_special(const char *name, int *pNobufB) {
+	int	fd = -1, bufB = TRUE;
 
 	/*IF*/ if ( strcmp(name,"<cin>")==0 || strcmp(name,"<stdin>")==0 ) {
-	    return 0;
+	    fd = 0;
 	} else if ( strcmp(name,"<cout>")==0 || strcmp(name,"<stdout>")==0 ) {
-	    return 1;
+	    fd = 1;
+	    bufB = FALSE;
 	} else if ( strcmp(name,"<cerr>")==0 || strcmp(name,"<stderr>")==0 ) {
-	    return 2;
+	    fd = 2;
+	    bufB = FALSE;
 	} else if ( strcmp(name,"<clog>")==0 || strcmp(name,"<stdlog>")==0 ) {
-	    return 2;
+	    fd = 2;
 	}
-	return -1;
+	if ( pNobufB )
+	    *pNobufB = ! bufB;
+	return fd;
 }
 
 pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
@@ -65,10 +69,12 @@ pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
 }
 
 void pt_ifstream::open(const char* name, int mode, int prot) {
-	int	fd = check_special(name);
+	int	nobufB;
+	int	fd = check_special(name, &nobufB);
 	if ( fd >= 0 )		rdbuf()->attach(fd);
 	else			ifstream::open(expand(name),mode,prot);
-	if (!*this) reportError("reading");
+	if (!*this)	reportError("reading");
+	if (nobufB)	rdbuf()->unbuffered(TRUE);
 }
 
 pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
@@ -76,8 +82,10 @@ pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
 }
 
 void pt_ofstream::open(const char* name, int mode, int prot) {
-	int	fd = check_special(name);
+	int	nobufB;
+	int	fd = check_special(name, &nobufB);
 	if ( fd >= 0 )		rdbuf()->attach(fd);
 	else			ofstream::open(expand(name),mode,prot);
 	if (!*this) reportError("writing");
+	if (nobufB)	rdbuf()->unbuffered(TRUE);
 }
