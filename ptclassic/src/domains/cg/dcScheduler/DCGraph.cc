@@ -20,7 +20,7 @@ Date of last revision: 5/92
 #include "streamCompat.h"
 #include "Error.h"
 
-EGNode *DCGraph::newNode(SDFStar *s, int i)
+EGNode *DCGraph::newNode(DataFlowStar *s, int i)
 	{ LOG_NEW; return new DCNode(s,i); }
 
                         /////////////////////////

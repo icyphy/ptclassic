@@ -20,7 +20,7 @@ Date of last revision:
 #include "EGConnect.h"
 
 // redefine the virtual methods
-EGNode *DLGraph :: newNode(SDFStar* s, int i)
+EGNode *DLGraph :: newNode(DataFlowStar* s, int i)
 	{ LOG_NEW; return new DLNode(s,i); }
 
                         ////////////////////

@@ -67,7 +67,7 @@ private:
 
 public: 
 	// Constructor declaration
-	DCNode(SDFStar* s, int invoc_no);
+	DCNode(DataFlowStar* s, int invoc_no);
 
 	// Constructor used for communication nodes
 	DCNode(int type);

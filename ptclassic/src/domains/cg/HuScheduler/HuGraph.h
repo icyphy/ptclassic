@@ -43,7 +43,7 @@ public:
 	int getMinWork() { return minWork; }
 
 	// redefine these virtual allocator to allocate DL Nodes.
-	EGNode *newNode(SDFStar*, int);
+	EGNode *newNode(DataFlowStar*, int);
 
 private:
 	// Minimum execution time among all runnable nodes.

@@ -21,7 +21,7 @@ Date of last revision:
                         ///  *Constructor*  ///
                         ///////////////////////
 
-QSNode::QSNode(SDFStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
+QSNode::QSNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 {
 	assignedFlag = 0;
 	preferredProc = 0;

@@ -30,7 +30,7 @@ class QSNode : public ParNode {
 
 public: 
 	// Constructor declaration
-	QSNode(SDFStar* Mas, int invoc_no);
+	QSNode(DataFlowStar* Mas, int invoc_no);
 
 	// Constructor used for idle nodes or communication nodes
 	QSNode(int type);

@@ -20,7 +20,7 @@ Date of last revision:
 #include "QSNode.h"
 
 // redefine the virtual methods
-EGNode *QSGraph :: newNode(SDFStar* s, int i)
+EGNode *QSGraph :: newNode(DataFlowStar* s, int i)
 	{ LOG_NEW; return new QSNode(s,i); }
 
 void QSGraph :: resetGraph() {
