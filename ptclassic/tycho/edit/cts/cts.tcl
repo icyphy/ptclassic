@@ -48,8 +48,8 @@ if { [lsearch -exact $auto_path $env(CTS_LIBRARY)] == -1 } {
 
 ### MODES
 ::tycho::register mode "cts" \
-	-command {::tycho::view EditCTS -file {%s}} \
-	-viewclass ::tycho::EditCTS \
+	-command {::tycho::view CTEdit -file {%s}} \
+	-viewclass ::tycho::CTEdit \
 	-label {Continuous Time Simulation}  \
 	-category "graphics" \
 	-underline 0
