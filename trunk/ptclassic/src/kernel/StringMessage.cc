@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Edward A. Lee, John Reekie
  Date of creation: 1/13/96
 
- This file defines the implementation of the StringMessage class and
+ This file defines the implementation of the StringMessage class.
 
 **************************************************************************/
 #ifdef __GNUG__
