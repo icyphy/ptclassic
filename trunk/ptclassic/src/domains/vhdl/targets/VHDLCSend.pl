@@ -30,23 +30,9 @@ limitation of liability, and disclaimer	of warranty provisions.
   }
 
   codeblock (V2CintegerComp) {
-component V2Cinteger
-  generic ( pairid  : INTEGER ;
-	    numxfer : INTEGER );
-  port ( go   : in  STD_LOGIC ;
-	 data : in  INTEGER   ;
-	 done : out STD_LOGIC );
-end component;
   }
 
   codeblock (V2CrealComp) {
-component V2Creal
-  generic ( pairid  : INTEGER ;
-	    numxfer : INTEGER );
-  port ( go   : in  STD_LOGIC ;
-	 data : in  REAL      ;
-	 done : out STD_LOGIC );
-end component;
   }
 
   codeblock (V2CintegerConfig) {
