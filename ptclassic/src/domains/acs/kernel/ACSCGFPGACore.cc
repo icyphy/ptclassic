@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)ACSCGFPGACore.cc	1.2 09/08/99
 ***********************************************************************/
 
 #ifdef __GNUG__
