@@ -441,19 +441,30 @@ EXTERN void octTransformPoints
 EXTERN octStatus octPrintObject
 	ARGS((FILE *outfile, octObject *object, int));
 
+EXTERN octStatus octUnDetach
+	ARGS((struct octObject *container, struct octObject *object));
 EXTERN octStatus octAttach
 	ARGS((octObject *container, octObject *object));
 EXTERN octStatus octAttachOnce
 	ARGS((octObject *container, octObject *object));
+EXTERN octStatus octUnattach
+	ARGS((struct octObject *container, struct octObject *object));
 EXTERN octStatus octDetach
 	ARGS((octObject *container, octObject *object));
 EXTERN octStatus octIsAttached
 	ARGS((octObject *container, octObject *object));
 EXTERN octStatus octCreate
 	ARGS((octObject *container, octObject *object));
+EXTERN octStatus octUnCreate
+	ARGS((octObject *object));
+EXTERN int oct_do_undelete
+	ARGS((octObject *container, octObject *object, int32 old_xid,
+	      int32 old_id));
 EXTERN octStatus octDelete
 	ARGS((octObject *object));
 EXTERN octStatus octModify
+	ARGS((octObject *object));
+EXTERN octStatus octUnModify
 	ARGS((octObject *object));
 
 EXTERN octStatus octGenFirstContainer
@@ -473,8 +484,13 @@ EXTERN octStatus octGetByExternalId
 	ARGS((octObject *container, int32 xid, octObject *object));
 EXTERN void octExternalId
 	ARGS((octObject *object, int32 *xid));
+EXTERN octStatus octInitGenContents
+	ARGS((octObject *object, octObjectMask mask, octGenerator *generator));
 EXTERN octStatus octInitUserGen
         ARGS((char *user_state,octStatus (*gen_func)(),octStatus (*free_func)(),octGenerator *gen));
+EXTERN octStatus octInitBackwardsGenContents
+	ARGS((octObject *object, octGenerator *generator));
+
 EXTERN void octWriteStats
 	ARGS((octObject *object, FILE *file));
 EXTERN octStatus octGetFacetInfo
@@ -508,4 +524,5 @@ EXTERN int octIdHash
 EXTERN octStatus oct_make_change_record_marker
 	ARGS((octId clid));
 
+/* From gen.c */
 #endif /* OCT_H */
