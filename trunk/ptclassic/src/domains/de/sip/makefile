@@ -4,9 +4,9 @@
 #		       
 # $Id$
 #
-# Important!  Do not run this makefile while in ~ptolemy/src/domains/mq.
-# Instead run in from ~ptolemy/obj.$PTARCH/domains/mq (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# Important!  Do not run this makefile while in ~ptolemy/src/domains/de/sip.
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/de/sip (through the symbolic
+# link) -- that way a separate directory containing, say, Solaris and HP
 # objects can be maintained.
 
 include ../../../../mk/subdomain.mk
