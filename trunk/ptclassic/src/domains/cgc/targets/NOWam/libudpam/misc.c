@@ -1,31 +1,35 @@
-/*
- * misc.c:  Miscellaneous Functions to Manage Data Structs in UDPAM
- *
- * "Copyright (c) 1995 by Brent N. Chun and The Regents of the University 
- * of California.  All rights reserved."
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice and the following
- * two paragraphs appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
- * Author:              Brent N. Chun
- * Version:             $Revision$
- * Creation Date:       Sat Nov  4 17:25:01 PST 1995
- * Filename:            misc.c
- */
-static char rcsid[] = "@(#)$Id$";
+/******************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1995-%Q%  The Regents of the University of California.
+All Rights Reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Brent Chun 
+ Creation Date: Sat Nov  4 17:25:01 PST 1995
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,9 +48,22 @@ static char rcsid[] = "@(#)$Id$";
 #include <udpam.h>
 #include <am.h>
 #include <misc.h>
+
 #ifdef SOLARIS 
 #include <thread.h>
+int gettimeofday(struct timeval *, void *);
 #endif /* SOLARIS */
+
+/* Forward declarations */
+extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
+extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id,
+		       int seq_num, tag_t tag, ea_t dest_ep);
+void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint, 
+		   int reply_endpoint, Token *token, handler_t handler, 
+		   void *source_addr, void *dest_addr, int nbytes, 
+		   int dest_offset, int source_offset,
+		   int arg0, int arg1, int arg2, int arg3, int arg4,
+		   int arg5, int arg6, int arg7, int buf_id, int seq_num);
 
 /*
  * Walk through endpoint's timeout list and resend messages that have 
@@ -65,7 +82,7 @@ void ScanTimeoutList(ea_t ea)
 
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
-  gettimeofday(&curr_time);
+  gettimeofday(&curr_time, (void *)NULL);
   while (num_elements-- > 0) {
     if ((curr_time.tv_sec - timeout_elem->timestamp.tv_sec) >
 	(1 << (timeout_elem->num_tries - 1))*QUANTA) {
@@ -525,7 +542,7 @@ int AM_PostSvar(eb_t eb)
       exit(-1);
     }
     DPRINTF(("Posted Semaphore.  Count is now %d\n",
-	     eb->synch_var.count));
+	     (int)eb->synch_var.count));
   }
   return(AM_OK);
 }
@@ -539,7 +556,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
   list = &(endpoint->txtimeout);
   timeout_elem->num_tries++;  
   if ((list->num_elements == 1) || (timeout_elem == list->tail)) {
-    gettimeofday(&(timeout_elem->timestamp));
+    gettimeofday(&(timeout_elem->timestamp), (void *)NULL);
     return;
   }
   if (timeout_elem == list->head) {
@@ -550,7 +567,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
     timeout_elem->prev->next = timeout_elem->next;
     timeout_elem->next->prev = timeout_elem->prev;
   }
-  gettimeofday(&(timeout_elem->timestamp));
+  gettimeofday(&(timeout_elem->timestamp), (void *)NULL);
   list->tail->next = timeout_elem;
   timeout_elem->prev = list->tail;
   timeout_elem->next = (struct timeout_elem *)NULL;
@@ -608,7 +625,7 @@ void AddTimeout(ea_t endpoint, UDPAM_Buf *buf, int req_buf_id,
   list->unackmessages[i].message = buf;
   list->unackmessages[i].req_buf_id = req_buf_id;    /* BufID of Request */
   list->unackmessages[i].req_seq_num = req_seq_num;  /* SeqNum of Request */
-  gettimeofday(&(list->unackmessages[i].timestamp));
+  gettimeofday(&(list->unackmessages[i].timestamp), (void *)NULL);
   list->unackmessages[i].destination.sin_port = destination->sin_port;
   list->unackmessages[i].destination.sin_addr.s_addr = 
     destination->sin_addr.s_addr;
@@ -730,7 +747,7 @@ void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint,
  */
 void *TimeoutThread(void *voidbundle)
 {
-  int              num_eps, err, n, flag = 0;
+  int              num_eps, err = 0, n, flag = 0;
   struct ep_elem   *ep_elem_ptr;
   eb_t             bundle;
   fd_set           temp_fdset;
