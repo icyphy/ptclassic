@@ -67,9 +67,11 @@ extern RAW_PTR malloc ARGS((size_t));
 extern char *getcwd ARGS((char *,size_t));
 #endif /* PTHPUX10 */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
-#else
+#else /* PTHPPA */
+#ifndef PTALPHA 
 extern char *getwd ARGS((char *));
-#endif
+#endif /* PTALPHA */
+#endif /* PTHPPA */
 
 /* buffer length for messages */
 #define MSG_BUF_MAX 512
