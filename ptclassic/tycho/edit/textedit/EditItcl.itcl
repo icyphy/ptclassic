@@ -486,7 +486,9 @@ body ::tycho::EditItcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 # Initialize the menu bar.  Adds entries specific to this class.
 #
 body ::tycho::EditItcl::initializeMenubar {menubar} {
- 
+
+    $menubar separator specialsep1 special
+
     $menubar command bodytemplate special \
 	    -label "Body Template" -underline 0 \
             -command "$this bodyTemplate"
@@ -501,7 +503,7 @@ body ::tycho::EditItcl::initializeMenubar {menubar} {
             -command "$this fileTemplate $itk_option(-testtemplate) \
             \[$this getClassName\]"
 
-    $menubar add separator specialsep1 special
+    $menubar add separator specialsep2 special
     
     $menubar command generatedoc special \
 	    -label "Generate HTML Documentation" -underline 0 \
