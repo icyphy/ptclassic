@@ -33,21 +33,6 @@
 
 ########################################################################
 
-### Global Class Bindings
-#
-bind Entry <Control-u> {
-    clipboard clear -displayof %W
-    clipboard append -displayof %W [%W get]
-    %W delete 0 end
-}
-
-bind Entry <Control-k> {
-    clipboard clear -displayof %W
-    clipboard append -displayof %W \
-	    [string range [%W get] [%W index insert] [%W index end]]
-    %W delete insert end
-}
-
 ### PROTOCOLS
 ::tycho::register protocol "file" \
 	-class ::tycho::ResourceFile \
@@ -134,12 +119,56 @@ bind Entry <Control-k> {
 	[file join ~ .Tycho styles tydoc.style]
 
 
+### SHORTCUTS, BINDINGS
+# FIXME: Need a way to have this set when the preference changes.
+set tycho_bindings [::tycho::Shortcuts::choose \
+        [::tycho::stylesheet get interaction shortcuts]]
+
+if {$tycho_bindings == {unix}} {
+    # To prevent handled characters from appearing in Entry windows,
+    bind Entry <Control-x><o> { }
+    bind Entry <Control-x><k> { }
+    # Remove Control-X from the <<Cut>> event 
+    # In Itcl2.2, we have virtual events, so Control-Key-x is bound to
+    #<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
+    # bound to reload.
+    if {[namespace ::itcl {set version}] > 2.1 } {
+	::event delete <<Cut>> <Control-Key-x>
+    }
+}
+
+### Global Class Bindings
+#
+bind Entry <<ClearToStart>> {
+    clipboard clear -displayof %W
+    clipboard append -displayof %W [%W get]
+    %W delete 0 insert
+}
+
+bind Entry <<ClearToEnd>> {
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \
+	    [string range [%W get] [%W index insert] [%W index end]]
+    %W delete insert end
+}
+
+# There are a few bindings that we want to work everywhere
+bind Entry <<Open>> {::tycho::File::openWin %W; break}
+
+# The following totally silly emacs binding interferes with our
+# search mechanism.
+bind Entry <Control-t> {}
+
+# A binding in the Text widget to transpose characters
+# conflicts with using C-t for search, and is bogus anyway, so remove it.
+bind text <Control-t> "break"
+
 ### CATEGORIES
 ::tycho::register category new "text" -label "Text Editors" -underline 0
-::tycho::register category new "html" -label "HTML Viewers" -underline 0
+::tycho::register category new "html" -label "HTML Viewers" -underline 5
 ::tycho::register category new "graphics" -label "Graphics Editors" -underline 0
 ::tycho::register category new "tool" -label "Tools" -underline 3
-::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 0
+::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 6
 
 ::tycho::register category open "text" -label "Open Text Editors"
 ::tycho::register category open "html" -label "Open HTML Viewers"
@@ -246,7 +275,7 @@ bind Entry <Control-k> {
 	-viewclass ::tycho::HTML \
 	-label {HTML Viewer}  \
 	-category "html" \
-	-underline 0
+	-underline 5
 
 # Itcl
 ::tycho::register mode "itcl" \
@@ -553,7 +582,7 @@ if { $ptolemyfeature(ptolemy)} {
 # FIXME: Make openItclHTMLPage a proc!!!
 ::tycho::register help itclmanpages \
 	-label "Itcl Man Pages" \
-	-underline 0 \
+	-underline 5 \
 	-command "%Q ::tycho::File::openItclHTMLPage"
 
 # The Preferences menu
