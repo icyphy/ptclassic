@@ -116,10 +116,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    int i;
 	    
 	    Wscale = 0.0;
-	    for( i = 0; i < NumberElements; i++)
-	       Wscale+= abs(Complex(steering%(i)));
-	    for( i = 0; i < NumberElements; i++)
-	       ScaledSteering[i]=Complex(steering%(NumberElements-i-1))/Complex(Wscale,0.0);
+	    for( i = 0; i < NumberElements; i++) {
+	       // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	       Complex tmp = steering%(i);	
+	       Wscale+= abs(tmp);
+	    }
+	    for( i = 0; i < NumberElements; i++) {
+	       // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	       Complex tmp = steering%(NumberElements-i-1);
+	       ScaledSteering[i]=tmp/Complex(Wscale,0.0);
+            }
 
 	    p=dirvectors;
 	    for (int w = 0; w < AngRes ; w++)

@@ -56,8 +56,11 @@ limitation of liability, and disclaimer of warranty provisions.
     }
   }
   go {
-    for( int i = int(BlockSize) - 1; i >= 0; i-- )
-      Sum = Sum * FeedbackGain + norm(Complex(in%i));
+    for( int i = int(BlockSize) - 1; i >= 0; i-- ) {
+      // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+      Complex tmp = in%i;
+      Sum = Sum * FeedbackGain + norm(tmp);
+    }
     double output = Sum / double( TimeConstant );
     out%0 << ( int( dB ) ? TodB( output ) : output );
   }

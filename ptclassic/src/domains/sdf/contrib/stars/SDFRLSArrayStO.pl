@@ -142,8 +142,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		PortHole *p;
 		int i = 0;
 		while ((p = nexti++) != 0)  {
-			x_vector[i] = Complex((*p)%index);
-			x_vector_new[i++] = Complex((*p)%0);
+			// We use a temporary variable to 
+		        // avoid gcc2.7.2/2.8 problems
+			Complex tmp1 = (*p)%index;
+			x_vector[i] = tmp1;
+			Complex tmp2 = (*p)%0;
+			x_vector_new[i++] = tmp2;
 		}
 		int i1, j;
 
@@ -162,8 +166,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		   k_vector[i]=t1_vector[i]*t2;
 
 		// w=w+k*conj(e)
-		for (i=0; i<NumberElements; i++)
-		   steering[i]+=k_vector[i]*conj(Complex(error%0));
+		for (i=0; i<NumberElements; i++) {
+		   // We use a temporary variable to 
+	 	   // avoid gcc2.7.2/2.8 problems
+		   Complex tmp = error%0;
+		   steering[i]+=k_vector[i]*conj(tmp);
+		}
 
 		// y=w'*x (calculate the output signal, use the actual input)
 		Complex y = Complex(0.0,0.0);
