@@ -51,7 +51,7 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # The subpanel can be initially in an open or closed state.
 # The <i>-childwidget</i> option specifies the widget to pack into the 
 # subpanel when the drawer is opened.
-# Note that one childwidget cannnot be packed into two 
+# Note that one childwidget cannot be packed into two 
 # different subpanels.  The <i>-text</i> option specifies the text that is to 
 # be inserted into the label portion of the subpanel.
 # The <i>-state</i> option specifies the state that the user would like the 
