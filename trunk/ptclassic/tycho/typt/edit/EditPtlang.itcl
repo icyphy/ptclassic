@@ -113,8 +113,6 @@ body ::tycho::EditPtlang::constructor {args} {
     global PTOLEMY
     eval itk_initialize $args
 
-    menubar addMenu Special -underline 0
-
     # Stuff for the special menu
     menubar add "Stars" Special -underline 0 \
             -command "::tycho::File::openContext \
