@@ -37,11 +37,6 @@ limitation of liability, and disclaimer of warranty provisions.
     protected {
         double hx[3][3], hy[3][3];
     }
-    code {
-	extern "C" {
-	    extern int strcasecmp(const char*,const char*);
-	}
-    }
     ccinclude { <string.h>, "Matrix.h"}
     setup {
 	const char *dn = detectorName;
