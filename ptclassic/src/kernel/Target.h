@@ -130,9 +130,6 @@ public:
 	// set the current time
 	virtual void setCurrentTime(float);
 
-	// initialize data structures
-	virtual void initialize();
-
 	// run
 	virtual int run();
 

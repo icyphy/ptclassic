@@ -118,10 +118,6 @@ StringList Target::printVerbose() const {
 	return out;
 }
 
-void Target::initialize() {
-	Block::initialize();
-}
-
 // method for copying states during cloning.  It is designed for use
 // by clone methods, and it assumes that the src argument has the same
 // state list as me.  The idea is to write clone methods as
