@@ -57,6 +57,7 @@ ITCL_SRCS = \
 	Dismiss.itcl \
 	Edit.itcl \
 	EditText.itcl \
+	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
 	FileBrowser.itcl \
