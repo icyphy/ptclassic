@@ -43,13 +43,11 @@ INCL = -I$(KERNDIR)
 # Library name
 LIB=libxxx.$(LIBSUFFIX)
 
-# Library sources
-SRCS= \
- XXXPortHole.cc XXXScheduler.cc XXXStar.cc XXXWormhole.cc \
- XXXDomain.cc
-
 # Header files
 HDRS= XXXPortHole.h XXXScheduler.h XXXStar.h XXXWormhole.h
+
+# Library sources
+SRCS= $(HDRS:.h=.cc) XXXDomain.cc
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
