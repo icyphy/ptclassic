@@ -21,7 +21,7 @@ int InSDFPort :: isItInput () { return TRUE;}
 
 void InSDFPort :: beforeGo () { getParticle();}
 
-int OutSDFPort :: isItOutput () { return FALSE;}
+int OutSDFPort :: isItOutput () { return TRUE;}
 
 void OutSDFPort :: beforeGo () { clearParticle();}
 
