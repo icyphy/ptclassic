@@ -966,7 +966,7 @@ FixMatrix::FixMatrix(const ComplexMatrix& src, int ln, int ib, int round) {
 
   for(int i = 0; i < totalDataSize; i++) {
     data[i].set_rounding(round);
-    data[i] = (double)abs(src.entry(i));
+    data[i] = Fix(ln,ib,(double)abs(src.entry(i)));
   }
 }
 
@@ -978,7 +978,7 @@ FixMatrix::FixMatrix(const FloatMatrix& src, int ln, int ib, int round) {
 
   for(int i = 0; i < totalDataSize; i++) {
     data[i].set_rounding(round);
-    data[i] = src.entry(i);
+    data[i] = Fix(ln,ib,src.entry(i));
   }
 }
 
@@ -990,7 +990,7 @@ FixMatrix::FixMatrix(const IntMatrix& src, int ln, int ib, int round) {
 
   for(int i = 0; i < totalDataSize; i++) {
     data[i].set_rounding(round);
-    data[i] = (double)src.entry(i);
+    data[i] = Fix(ln,ib,(double)src.entry(i));
   }
 }
 
