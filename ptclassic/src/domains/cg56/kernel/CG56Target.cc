@@ -45,6 +45,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Star.h"
 #include "ConversionTable.h"
 
+// Defined in CG56Domain.cc
+extern const char CG56domainName[];
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -131,6 +134,10 @@ void CG56Target::writeFloat(double val) {
     myCode << "; WARNING: the M56000 does not support floating point!\n";
     myCode << "; perhaps this state was meant to be type FIX?\n";
     MotorolaTarget::writeFloat(val);
+}
+
+const char* CG56Target::domain() {
+    return galaxy() ? galaxy()->domain() : CG56domainName;
 }
 
 const char* CG56Target::className() const { return "CG56Target"; }
