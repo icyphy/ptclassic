@@ -198,6 +198,36 @@ if {$tychostartfile != {} && \
 }
 unset tychostartfile
 
+# If tycho was started with -e tclscript, then we open up all the files
+# and then source tclscript
+set sawDashE 0
+set tclscripttosource {} 
+
+# Check this in case we are being sourced within a interpreter where
+# argv has been unset.
+if {[info exists argv]} {
+    foreach file $argv {
+	if {$file == {-nowelcome}} {
+	    set tychoWelcomeWindow 0
+	} elseif {$file == {-noconsole}} {
+	    set tychoConsoleWindow 0
+	} elseif {$file == {-e}} {
+	    set sawDashE 1
+	} elseif {$sawDashE == 1} {
+	    # Ok, we saw the -e argument, now eat up the tclscript to source
+	    set sawDashE 0
+	    set tclscripttosource $file
+	} else {
+	    set tychoOpenFiles 1
+	    ::tycho::File::openContext $file
+	}
+    }
+}
+if {$tclscripttosource!={} } {
+    uplevel #0 {source $tclscripttosource}
+}
+unset tclscripttosource sawDashE
+
 # Check this in case we are being sourced within a interpreter where
 # argv has been unset.
 if {[info exists argv]} {
