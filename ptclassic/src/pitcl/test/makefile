@@ -54,7 +54,9 @@ SIMPLE_TESTS = \
 	predicates.itcl \
 	remove.itcl
 
-GRAPHICAL_TESTS =
+# We need at least one GRAPHICAL_TEST so that we can generate alltests.itcl
+GRAPHICAL_TESTS = \
+	dummy.itcl
 
 ITCL_SRCS =	$(SIMPLE_TESTS) alltests.itcl all.itcl
 
