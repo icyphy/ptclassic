@@ -1,9 +1,9 @@
 static const char file_id[] = "ParticleVector.cc";
 /**************************************************************************
 Version identification:
-@(#)ParticleVector.cc	1.3	03/19/97
+$Id$
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
