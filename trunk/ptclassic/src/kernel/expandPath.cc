@@ -50,7 +50,7 @@ variable.  Variables are expanded only at the beginning of the string.
 #include "StringList.h"
 #define MAXSTRINGLEN 4096
 
-const char* expandPathName(const char* name) {
+char* expandPathName(const char* name) {
     // Allow file name to expand to an arbitrary length
     StringList expandedPath;
     expandedPath.initialize();
