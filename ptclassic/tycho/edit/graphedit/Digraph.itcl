@@ -141,6 +141,9 @@ class ::tycho::Digraph {
     # Get the parents of a vertex
     method parents {vertex}
 
+    # "Repair" a graph by deleting improperly-connected edges
+    method repair {}
+
     # Get the roots of the graph
     method roots {}
 
@@ -157,7 +160,7 @@ class ::tycho::Digraph {
     ####                   protected methods                     ####
 
     # Edges cannot be nested
-    protected method edgein {context args} {
+    protected method _edge {context args} {
     	_nesterror edge $context [list $vertex1 $vertex2]
     }
     
@@ -169,10 +172,8 @@ class ::tycho::Digraph {
 #### constructor
 #
 body ::tycho::Digraph::constructor {args} {
-    # Define the "edge" link: no name, two links
+    # Define the "edge" link
     defineLinkType edge \
-	    -named 0 \
-	    -lcount 2 \
 	    -description ""
 
     # Evaluate options
@@ -268,18 +269,18 @@ body ::tycho::Digraph::children {vertex} {
 # return the inverse command.
 #
 body ::tycho::Digraph::delete {vertex} {
-    _verify vertex $vertex
+    _verify vertex {} $vertex
 
     # Start inverse command
     set inverse [list sequence]
 
     # Delete outward edges
     foreach {src tgt} [edges $vertex *] {
-		lappend inverse [edgedelete $src $tgt]
+	lappend inverse [edgedelete $src $tgt]
     }
     # Delete inward edges
     foreach {src tgt} [edges * $vertex] {
-		lappend inverse [edgedelete $src $tgt]
+	lappend inverse [edgedelete $src $tgt]
     }
     # Delete the vertex. (NB: This must follow the edge deletion.)
     lappend inverse [vertexdelete $vertex]
@@ -297,10 +298,10 @@ body ::tycho::Digraph::delete {vertex} {
 # already exists, but not if any of the connected vertices do not exist. 
 #
 body ::tycho::Digraph::edge {vertex1 vertex2 args} {
-    _verifynot edge [list $vertex1 $vertex2]
+    _verifynot edge {} [list $vertex1 $vertex2] [list $vertex1 $vertex2]
     
     # Record the edge
-    set inverse [_link edge {} [list $vertex1 $vertex2] $args]
+    set inverse [_addlink edge {} [list $vertex1 $vertex2] {} $args]
 
     # Add links to the adjacency matrix
     _adjacencyadd $vertex1 $vertex2
@@ -320,8 +321,8 @@ body ::tycho::Digraph::edge {vertex1 vertex2 args} {
 # not exist.
 #
 body ::tycho::Digraph::edgeattrs {vertex1 vertex2} {
-    _verify edge [list $vertex1 $vertex2]
-    _attributes edge [list $vertex1 $vertex2]
+    _verify edge {} [list $vertex1 $vertex2]
+    _attributes edge {} [list $vertex1 $vertex2]
 }
 
 ########################################################################
@@ -331,8 +332,8 @@ body ::tycho::Digraph::edgeattrs {vertex1 vertex2} {
 # exist or the attribute does not exist.
 #
 body ::tycho::Digraph::edgecget {vertex1 vertex2 attribute} {
-    _verify edge [list $vertex1 $vertex2]
-    _cget edge [list $vertex1 $vertex2] $attribute
+    _verify edge {} [list $vertex1 $vertex2]
+    _cget edge {} [list $vertex1 $vertex2] $attribute
 }
 
 ########################################################################
@@ -343,8 +344,8 @@ body ::tycho::Digraph::edgecget {vertex1 vertex2 attribute} {
 # is a flat list of attribute-value pairs.
 #
 body ::tycho::Digraph::edgeconfigure {vertex1 vertex2 args} {
-    _verify edge [list $vertex1 $vertex2]
-    _configure edge [list $vertex1 $vertex2] $args
+    _verify edge {} [list $vertex1 $vertex2]
+    _configure edge {} [list $vertex1 $vertex2] $args
 }
 
 ########################################################################
@@ -354,7 +355,7 @@ body ::tycho::Digraph::edgeconfigure {vertex1 vertex2 args} {
 # default method works for simple directed graphs.
 #
 body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
-    _verify edge [list $vertex1 $vertex2]
+    _verify edge {} [list $vertex1 $vertex2]
 
     # Delete it from the adjacency list
     _adjacencydelete $vertex1 $vertex2
@@ -363,7 +364,7 @@ body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
     catch {unset _cache}
 
     # Delete the data and return the inverse command
-    _delete edge [list $vertex1 $vertex2]
+    _delete edge {} [list $vertex1 $vertex2]
 }
 
 ########################################################################
@@ -378,9 +379,9 @@ body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
 #
 body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
     set result {}
-    foreach quad \
-	    [array names _info [list edge * * [list $pattern1 $pattern2]]] {
-	eval lappend result [lindex $quad 3]
+    foreach info \
+	    [array names _info [list edge {} [list $pattern1 $pattern2]]] {
+	eval lappend result [lindex $info 2]
     }
     return $result
 }
@@ -405,6 +406,36 @@ body ::tycho::Digraph::parents {vertex} {
 }
 
 ########################################################################
+#### repair
+#
+# "Repair" a graph by deleting improperly-connected edges. This method
+# provides a default implementation that will remove invalid edges in 
+# most properly-written subclasses; however, subclasses may
+# choose to override it for efficiency, because it doesn't work
+# with the subclass, or to perform additional repairs. This
+# method should be called after building a graph if it is not certain
+# that the graph is correctly constructed.
+# This method cannot be recorded or published.
+#
+body ::tycho::Digraph::repair {} {
+    foreach {src tgt} [$this edges] {
+	if { ! [::info exists _vertices($src)] \
+                || ! [::info exists _vertices($tgt)] } {
+            # Delete it from the adjacency list
+            _adjacencydelete $src $tgt
+
+            # Clear any cached structural information
+            catch {unset _cache}
+
+            # Delete the data and return the inverse command
+            _delete edge {} [list $src $tgt]
+	}
+    }
+    # Return null so record{} or publish{} will complain.
+    return ""
+}
+
+########################################################################
 #### roots
 #
 # Return the roots of the graph.
@@ -425,11 +456,8 @@ body ::tycho::Digraph::subgraphEdges {args} {
     set result {}
     foreach u $args {
         foreach v $args {
-            foreach quad [array names _info [list edge * * [list $u $v]]] {
-                lappend result [lindex $quad 3]
-            }
-            foreach quad [array names _info [list edge * * [list $v $u]]] {
-                lappend result [lindex $quad 3]
+            foreach info [array names _info [list edge {} [list $u $v]]] {
+                lappend result [lindex $info 2]
             }
         }
     }
@@ -448,9 +476,9 @@ body ::tycho::Digraph::subgraphInputs {args} {
     set result {}
     set vertices [array names _vertices]
     foreach v $args {
-        foreach quad [array names _info [list edge * * [list * $v]]] {
-            set edge [lindex $quad 3]
-            if { [lsearch -exact $vertices [lindex $edge 0]] < 0 } {
+        foreach info [array names _info [list edge {} [list * $v]]] {
+            set edge [lindex $info 2]
+            if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
                 lappend result $edge
             }
         }
@@ -470,9 +498,9 @@ body ::tycho::Digraph::subgraphOutputs {args} {
     set result {}
     set vertices [array names _vertices]
     foreach v $args {
-        foreach quad [array names _info [list edge * * [list $v *]]] {
-            set edge [lindex $quad 3]
-            if { [lsearch -exact $vertices [lindex $edge 1]] < 0 } {
+        foreach info [array names _info [list edge {} [list $v *]]] {
+            set edge [lindex $info 2]
+            if { [lsearch -exact $args [lindex $edge 1]] < 0 } {
                 lappend result $edge
             }
         }
