@@ -5,6 +5,7 @@
 #pragma interface
 #endif
 
+#include "InvokeInterp.h"
 #include "DataStruct.h"
 #include "StringList.h"
 #include "Error.h"
@@ -184,8 +185,8 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// send a string to an external interpreter for evaluation
-	const char* externalInterpreter(const char* expression);
+	// an external interpreter for evaluating commands
+	InvokeInterp interp;
 
 protected:
 	// get Token  from  string 
