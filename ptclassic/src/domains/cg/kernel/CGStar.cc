@@ -51,10 +51,94 @@ const int MAXLINELEN = 256;
 const int TOKLEN = 80;
 
 // process a CodeBlock.  This processing just substitutes for
-// macro calls. The processed code is added the target's code.
+// macro calls. The processed code is added the target's code
+// line by line
 void CGStar::gencode(CodeBlock& cb) {
-	StringList c = processCode(cb);
-	addCode((const char*)c);
+	// Reset the local labels
+	resetCodeblockSyms();
+
+	const char* t = cb.getText();
+	// output this text
+	char line[MAXLINELEN], *o = line, c;
+	while ((c = *t++) != 0) {
+		if (c == substChar()) {
+			// two consecutive substChar values give
+			// one on the output.
+			if (*t == substChar()) {
+				*o++ = *t++;
+				continue;
+			}
+			// get the function.
+			char func[TOKLEN], *q = func;
+			while (isalnum(*t)) *q++ = *t++;
+			*q = 0;
+			// skip any whitespace
+			while (isspace(*t)) t++;
+			// must be pointing at a '('
+			if (*t++ != '(') {
+				codeblockError ("expecting '('", " after macro call");
+				return;
+			}
+			// get the identifier
+			char id[TOKLEN], arg2[TOKLEN], *p = id;
+			while (isalnum(*t)||(*t == '_') ) *p++ = *t++;
+			if (*t == '#') {
+				*p++ = *t++;
+				if (isdigit(*t)) {
+					while (isdigit(*t)) *p++ = *t++;
+				}
+				else {
+					char portNum[TOKLEN], *n = portNum;
+					while (isalnum(*t)) *n++ = *t++;
+					*n = 0;
+					const char *v =lookupVal(portNum);
+					while (*v != 0) *p++ = *v++;
+				}
+			}
+			*p = 0;
+			// skip any whitespace
+			while (isspace(*t)) t++;
+			// may be a ',' for 2nd argument
+			if (*t == ',') {
+				t++;
+				p = arg2;
+				while (isalnum(*t) || *t == '#') *p++ = *t++;
+				*p = 0;
+				// skip any whitespace
+				while (isspace(*t)) t++;
+			}
+			else arg2[0] = 0;
+			// must be pointing at a ')'
+			if (*t++ != ')') {
+				codeblockError ("expecting ')'",
+						"after macro call");
+				return;
+			}
+			// Don't know why the following two steps can't
+			// be consolidated, but if they are, the string
+			// becomes null
+			StringList tmp = processMacro(func,id,arg2);
+			const char* value = tmp;
+			if (value != 0) {
+				if (*value == 0) value = "ERROR";
+				// plug result into code.
+				while (*value) *o++ = *value++;
+			}
+		}
+		else {
+			*o++ = c;
+			if (c == '\n') {
+				*o = 0;
+				o = line;
+				addCode(line);
+			}
+		}
+	}
+	if (o > line) {
+		*o++ = '\n';
+		*o = 0;
+		addCode(line);
+	}
 }
 
 // process a CodeBlock.  This processing just substitutes for
