@@ -35,15 +35,12 @@ polar coordinate conversion.
 	defstate {
 		name { CorAngles }
 		type { floatarray }
-//		default { "< $PTOLEMY/src/domains/vhdl/demo/CorAngles" }
-		default { " \
-0.25 \
+		default { "0.25 \
 0.147583618 0.077979130 0.039583424 0.019868524 \
 0.009943948 0.004973187 0.002486745 0.001243392 \
 0.000621698 0.000310849 0.000155425 0.000077712 \
 0.000038856 0.000019428 0.000009714 0.000004857 \
-0.000002429 0.000001214 0.000000607 \
-		" }
+0.000002429 0.000001214 0.000000607" }
 		desc { Angles for the CORDIC algorithm. }
 	}
 
