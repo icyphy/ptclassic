@@ -49,6 +49,9 @@ class VHDLPort : public VHDLObj
  public:
   // Constructors.
   VHDLPort();
+  VHDLPort(const char* n, const char* t, const char* d,
+	   const char* m, VHDLSignal* s)
+    : type(t), direction(d), mapping(m), signal(s) { setName(n); }
 
   // Destructor.
   ~VHDLPort();
@@ -70,7 +73,9 @@ class VHDLPort : public VHDLObj
   VHDLPort* newCopy();
 
   void setType(const char* newType) { type = newType; }
+  StringList getType() { return type; }
   void setDirec(const char* newDirec) { direction = newDirec; }
+  StringList getDirec() { return direction; }
 
   void connect(VHDLSignal*);
 
@@ -109,7 +114,8 @@ class VHDLPortList : public VHDLObjList
   VHDLPortList* newCopy();
 
   // Allocate memory for a new VHDLPort and put it in the list.
-  void put(StringList, StringList, StringList, StringList="");
+  void put(StringList, StringList, StringList, StringList="",
+	   VHDLSignal* =NULL);
 };
 
 class VHDLPortListIter : public VHDLObjListIter {
