@@ -123,12 +123,12 @@ test FileBrowser-1.1 {Test FileBrowser} {
 test ListBrowser-1.1 {Test ListBrowser} {
     global globalReturn 
     set win [::tycho::ListBrowser [::tycho::autoName .lb] \
-	    -command "set globalReturn"]
-    $win appendItems {{1st Item} {2nd Item} {3rd Item}}
+	    -command "set globalReturn" \
+	    -items {{1st Item} {2nd Item} {3rd Item}}]
     # after $duration ::tycho::safeUpdate $win
     after $longDuration removeobj $win
     # Get item #1, which is actually the second item in the list
-    $win clearSelection
+    $win clearselection
     $win goto 1
     $win ok
     set globalReturn
