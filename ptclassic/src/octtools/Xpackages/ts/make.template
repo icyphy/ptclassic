@@ -42,8 +42,9 @@ include $(CONFIG)
 
 HDRS		= ts.h
 
-LIBCSRCS	= ts.c \
-		ts_test.c
+LIBCSRCS	= ts.c
+
+OTHERSRCS	= ts_test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +54,20 @@ LIB = 		libts.$(LIBSUFFIX)
 
 EXPHDR =	ts.h
 
+DRIVER =	ts_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ = 	ts_test.o
+
+DRVRLIBS =	-lst -lport -lerrtrap -luprintf -lXaw -lXt -lXmu -lX11
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "run $(DRIVER)"
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
