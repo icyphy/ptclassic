@@ -36,7 +36,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	  name {truein}
-	  type {=input}
+	  type {ANYTYPE}
 	  desc {input from the true block}
 	}
 	outmulti {
@@ -46,10 +46,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	  name {falsein}
-	  type {=input}
+	  type {ANYTYPE}
 	  desc {input from the false block}
 	}
 	constructor {
+	  // Note that both branches must have the same output type.
+	  output.inheritTypeFrom(truein);
+
 	  // The constructor for IfThenElse hides blockname, where_defined,
 	  // input_map, output_map, and parameter_map.  Here, we need to hide
 	  // the rest.
