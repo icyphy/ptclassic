@@ -145,7 +145,7 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 	graph->replenish(0);
 
 	// find communication nodes and insert them into the graph.
-	findCommNodes(graph, readyNodes);
+	findCommNodes(graph);
 
 	while (readyNodes.size() > 0) {
 		ParNode* node = (ParNode*) readyNodes.takeFromFront();
@@ -227,7 +227,7 @@ void ParProcessors :: scheduleParNode(ParNode* node) {
 // Makes send and receive ParNodes for each interprocessor communication.
 // Want to splice these into tempAncs and tempDescs for list scheduling.
 
-void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& /*readyNodes*/)
+void ParProcessors::findCommNodes(ParGraph* graph)
 {
 	// Make sure the list of communication nodes is clear
 	removeCommNodes();

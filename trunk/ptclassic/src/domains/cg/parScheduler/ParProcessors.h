@@ -115,7 +115,7 @@ protected:
 	void scheduleParNode(ParNode*);
 
 	// makes send and receive nodes for IPC.
-	void findCommNodes(ParGraph*, EGNodeList& );
+	void findCommNodes(ParGraph*);
 
 	// create comm nodes
 	virtual ParNode* createCommNode(int i);
