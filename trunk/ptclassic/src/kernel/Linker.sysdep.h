@@ -422,7 +422,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 #endif
 
-#if defined(PTLINUX) || defined(PTNBSD_386) || define(PTFREEBSD)
+#if defined(PTLINUX) || defined(PTNBSD_386) || defined(PTFREEBSD)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
