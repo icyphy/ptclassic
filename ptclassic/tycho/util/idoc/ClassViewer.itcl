@@ -441,6 +441,18 @@ body ::tycho::IDoc::constructor {args} {
     pack forget $itk_interior.childsite
 }
 
+###################################################################
+#### destructor
+# FIXME: unset the -file option in the HTML widgets. This was set
+# in order to make hyperlinks work. This is the fix of least cost.
+# However, a better fix would be to somehow separate the file=widget 
+# assumption.
+#
+body ::tycho::IDoc::destructor {args} {
+    $myHtmlTop config -file "NoName"
+    $myHtmlBottom config -file "NoName"
+}
+
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
@@ -657,7 +669,7 @@ body ::tycho::IDoc::inheritAll {{redisplay 1}} {
 
             set myClass($parent) [::tycho::Class [::tycho::autoName class]]
             putStatus "Loading $parent"
-            update idletasks
+            ::tycho::safeUpdate $this
             $myClass($parent) read file $parentFile
             
             # Load my parents too.
@@ -669,7 +681,7 @@ body ::tycho::IDoc::inheritAll {{redisplay 1}} {
     }
     if {$redisplay} {
         putStatus "Redisplaying contents."
-        update idletasks
+        ::tycho::safeUpdate $this
         display
     }
     putStatus ""
@@ -951,7 +963,7 @@ body ::tycho::IDoc::display {} {
 
     # clear the contents widget
     $myContents clear
-    update idletasks
+    ::tycho::safeUpdate $this
 
     # insert the class name
     switch $language {
@@ -990,7 +1002,7 @@ body ::tycho::IDoc::display {} {
 
     if [info exists myClass(related)] {
         putStatus "Displaying related information."
-        update idletasks
+        ::tycho::safeUpdate $this
         displayRel
     }
     
@@ -1001,21 +1013,21 @@ body ::tycho::IDoc::display {} {
     }
 
     putStatus "Displaying constructors."
-    update idletasks
+    ::tycho::safeUpdate $this
     displayCon
 
     putStatus "Displaying destructors."
-    update idletasks
+    ::tycho::safeUpdate $this
     displayDes
 
     foreach protection $protections {
         # Variables        
         putStatus "Displaying $protection variables."
-        update idletasks
+        ::tycho::safeUpdate $this
         displayVar $protection   
         # Methods
         putStatus "Displaying $protection methods."
-        update idletasks
+        ::tycho::safeUpdate $this
         displayMeth $protection
     }
     putStatus ""
