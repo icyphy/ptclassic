@@ -431,6 +431,107 @@ changed feature.
 the test and grab the strings actually returned and substitute it back
 into the test file.  Of course, you should write tests that cover any 
 changes reported by <CODE>getJavaInfo</CODE>.
+
+
+<H3><A NAME="JavaScope">JavaScope</A></H3>
+<A HREF="http://www.suntest.com/JavaScope">JavaScope</A> is Sun's
+Java code coverage tool.  
+ <P>Here's how to review the test suite code coverage:
+<OL>
+
+<LI> Run:
+<PRE>
+cd $TYCHO/java/pt/kernel
+make jsall
+</PRE>
+The <CODE>jsall</CODE> makefile rule does the following:
+<MENU>
+<LI> JavaScope uses a program called <CODE>jsinstr</CODE>
+to instrument the Java files.  <CODE>jsinstr</CODE> copies the
+original files to the <CODE>jsoriginal</CODE> directory and then
+adds Java function calls to copies of the files.  These function calls
+increment counters in a database at runtime.
+
+<LI> To compile the instrumented classes the <CODE>JavaScope.zip</CODE> file
+is added to the CLASSPATH and then the classes are recompiled.
+
+<LI> The test suite is run.
+</MENU>
+
+<LI> To views the code coverage run either <CODE>jsreport</CODE>
+or <CODE>javascope</CODE>
+<PRE>
+jsreport -dbsummary
+</PRE>
+
+<LI> To restore the files
+back to the original state, run <CODE>make jsrestore</CODE>.
+<PRE>
+make jsrestore
+</PRE>
+
+</OL>
+<H4>JavaScript Details</H4>
+<MENU>
+<LI> <CODE>jsinstr</CODE> saves the original Java files to the 
+<CODE>jsoriginal</CODE> directory.  The <CODE>jsall</CODE> makefile
+rule checks to see if this directory is present, and if it is not, runs 
+<CODE>jsinstr</CODE>.  The <CODE>jsrestore</CODE> rule runs
+<CODE>jsrestore</CODE> and then attempts to remove the <CODE>jsoriginal</CODE>
+directory so that the next run of the <CODE>jsall</CODE> rule will
+recreate it.  If you are running <CODE>jsinstr</CODE> by hand on files
+that are not in the makefile, then you may find it necessary clean out the
+<CODE>jsoriginal</CODE> directory with:
+<PRE>
+jsrestore *.java
+rm jsoriginal/README
+rmdir jsoriginal
+</PRE>
+
+
+<LI> Javascript writes the code coverage information to
+<CODE>~/jsdatabase</CODE>.  You might find it helpful to remove
+this directory periodically.
+
+</MENU>
+
+
+<H4>Flushing the JavaScope database</H4>
+The JavaScope database must be flushed by hand at the end of a run, or the
+code coverage data of the run will not be dumped out to disk.
+ <P>There are two ways to do this.
+<OL>
+<LI> Use the <CODE>-IFLUSHCLASS=true</CODE> option with
+<CODE>jsintr</CODE>.
+
+<LI> Create a dummy Java method that flushes the database, and call
+that method before exiting. 
+</OL>
+The former method has a high performance hit, the latter method is faster
+faster.  However, with <CODE>TclBlend</CODE>, we were only able to
+use the <CODE>-IFLUSHCLASS=true</CODE> option.  
+
+ <P>Here's how we attempted to flush the database using a dummy Java method.
+ <P>We created <CODE>JavaScopeFlush</CODE> class:
+<PRE>
+public class JavaScopeFlush {
+    /*jsoptions:IFLUSH=true*/
+    public static void flush() {
+    }
+    /*jsoptions:IFLUSH=false*/
+}
+</PRE>
+ <P>Ran <CODE>jsinstr</CODE> on <CODE>JavaScopeFlush.java</CODE>
+
+ <P>We then tried to call this method with:
+<PRE>
+java::call JavaScopeFlush flush
+</PRE>
+
+ <P>For more information, see the 
+<A HREF="http://www.suntest.com/NewJavaScope/faq.html#Q5">JavaScope FAQ</A>.
+
+
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
 
