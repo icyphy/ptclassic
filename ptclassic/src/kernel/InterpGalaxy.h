@@ -72,7 +72,8 @@ public:
 
 // connnect a porthole to a node
 	int
-	nodeConnect(const char* star, const char* port, const char* node);
+	nodeConnect(const char* star, const char* port, const char* node,
+		    int delay = 0);
 
 // add a state
 	int
