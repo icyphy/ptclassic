@@ -53,16 +53,13 @@ TITarget :: TITarget (const char* nam, const char* desc,
 	const char* stype): AsmTarget(nam,desc,stype)
 {
 	initStates();
-	loopCounter = 0;
 }
 
 void TITarget :: initStates() {
 	inProgSection = 0;
  	mem = 0;
 	addState(bMemMap.setState("bMemMap",this,"768-1279","B1 memory map"));
-	// the last 49 word chunk of UD memory is reserved to store
-	// loop counters for nested loops
-	addState(uMemMap.setState("uMemMap",this,"2432-9950","UD memory map"));
+	addState(uMemMap.setState("uMemMap",this,"2432-9999","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
 	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
@@ -71,6 +68,9 @@ void TITarget :: initStates() {
 void TITarget :: setup() {
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new TIMemory(bMemMap,uMemMap);
+
+
+	AsmTarget::setup();
 
 // complex numbers in the C50 will be allocated 2 consecutive words of
 // memory.
@@ -91,8 +91,6 @@ void TITarget :: setup() {
 		
 	}
 
-	AsmTarget::setup();
-
 }
 
 TITarget :: ~TITarget () {
@@ -105,7 +103,6 @@ AsmTarget(src.name(),src.descriptor(),src.starType())
 {
 	initStates();
 	copyStates(src);
-	loopCounter = src.loopCounter;
 }
 
 // makeNew
@@ -118,10 +115,13 @@ void TITarget::beginIteration(int repetitions, int) {
 	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
     else{
       // iterate finitely
-      int loopAddr = 99951 + loopCounter;
-	*defaultStream << "\tlar\tar0,#" << repetitions << "\n"
-	       << targetNestedSymbol.push("LOOP") << "\tsmmr\tar0,#"
-	       << loopAddr <<"\n";
+      // since the stack(8 levels deep) is used to hold the loop
+      // count for nested loops the stack will overflow if 
+      // there are more than 8 levels of nested loops.  Also
+      // using the stack within a codeblock will most likely
+      // break the program.
+	*defaultStream << "\tlacl\t#" << repetitions << "\n"
+	       << targetNestedSymbol.push("LOOP") << "\tpush\n";
     }
 }
 
@@ -130,13 +130,9 @@ void TITarget::endIteration(int repetitions, int) {
 		*defaultStream << "\tb\t"<< targetNestedSymbol.pop() << "\n";
 	else{
 	  // iterate finitely
-	  int loopAddr = 9951 + loopCounter;
-	  loopCounter ++;
-		*defaultStream << "\tnop\n* prevent two endloops in a row\n"
-		       << "\tlmmr\tar0,#"
-		       << loopAddr
-		       << "\n\tlamm\tar0\n\tsub\t#1\n\tsamm\tar0\n"
-		       << "\tbcnd\t" << targetNestedSymbol.pop() << ",GT\n";
+	  *defaultStream << "\tnop\n* prevent two endloops in a row\n"
+		        << "\tpop\n\tsub\t#1\n"
+		        << "\tbcnd\t" << targetNestedSymbol.pop() << ",GT\n";
 	}
 }
 
@@ -222,7 +218,7 @@ const char* end, const char* cont) {
 /* Determine whether or not the star firing can be implemented with
    static code which could be enclosed in a loop or subroutine.
 */
-int staticCode(CGStar& star)
+static int staticCode(CGStar& star)
 {
     BlockPortIter nextPort(star);
     CGPortHole* port;
