@@ -161,7 +161,12 @@ main(int argc, char **argv) {
 	    fprintf(stderr, "%s\n", interp->result);
 	    exitCode = 1;
 	}
-	goto done;
+	/* Cannot use a goto and label here, cfront1.0 fails to compile with:
+	 *  sorry, not implemented: label in block with destructors
+	 */  
+	sprintf(buffer, "exit %d", exitCode);
+	Tcl_Eval(interp, buffer);
+	return 1;
     }
 
     /*
@@ -201,7 +206,6 @@ main(int argc, char **argv) {
 	    promptCmd = Tcl_GetVar(interp,
 		gotPartial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
 	    if (promptCmd == NULL) {
-		defaultPrompt:
 		if (!gotPartial) {
 		    fputs("% ", stdout);
 		}
@@ -211,7 +215,9 @@ main(int argc, char **argv) {
 		    fprintf(stderr, "%s\n", interp->result);
 		    Tcl_AddErrorInfo(interp,
 			    "\n    (script that generates prompt)");
-		    goto defaultPrompt;
+		    if (!gotPartial) {
+		      fputs("% ", stdout);
+		    }
 		}
 	    }
 	    fflush(stdout);
@@ -224,11 +230,15 @@ main(int argc, char **argv) {
 		    }
 		    clearerr(stdin);
 		} else {
-		    goto done;
+		    sprintf(buffer, "exit %d", exitCode);
+ 		    Tcl_Eval(interp, buffer);
+		    return 1;
 		}
 	    } else {
 		if (!gotPartial) {
-		    goto done;
+		    sprintf(buffer, "exit %d", exitCode);
+ 		    Tcl_Eval(interp, buffer);
+		    return 1;
 		}
 	    }
 	    buffer[0] = 0;
@@ -255,7 +265,9 @@ main(int argc, char **argv) {
      * cleanup on exit.  The Tcl_Eval call should never return.
      */
 
-    done:
+    /* Cannot use a goto and label here, cfront1.0 fails to compile with:
+     *  sorry, not implemented: label in block with destructors
+     */  
     sprintf(buffer, "exit %d", exitCode);
     Tcl_Eval(interp, buffer);
     return 1;
@@ -279,7 +291,7 @@ static void loadStartup(Tcl_Interp* interp) {
 	if (!pt) pt = expandPathName("~ptolemy");
 	StringList startup = pt;
 	startup << "/lib/tcl/ptcl.tcl";
-	if (Tcl_EvalFile(interp, startup) != TCL_OK) {
+	if (Tcl_EvalFile(interp, startup.chars()) != TCL_OK) {
 		fprintf(stderr, "ptcl: error in startup file: %s\n",
 		  interp->result);
 	}
