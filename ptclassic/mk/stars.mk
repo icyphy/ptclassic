@@ -162,7 +162,7 @@ CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 #
 
 # PN domain and Awesime supported on sun4 and mips architectures.
-ifneq (,$(filter sun% mips,$(ARCH)))
+ifneq (,$(filter sun4 mips,$(ARCH)))
 PNSTARS = $(LIBDIR)/pnstars.o
 PN_LIBS= -lpnstars -lpn
 PN_LIBFILES= $(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
@@ -172,7 +172,7 @@ AWE_LIBFILES= $(LIBDIR)/libawethread.$(LIBSUFFIX) \
 endif
 
 # CP domain and lwp supported on sun4 architectures.
-ifneq (,$(filter sun% cfront,$(ARCH)))
+ifneq (,$(filter sun4 cfront,$(ARCH)))
 # -laudio is for the Infopad stars in the CP domain
 CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
 CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
