@@ -21,24 +21,130 @@ and
 icon.  Be sure to update your path and the other variables mentioned
 in the Cygnus <CODE>README.txt</CODE>.
 
-<LI> Obtain and Install Tcl8.0.  You have two choices, compile it
-	yourself, or download precompiled binaries.
+ <HR>
+<LI> Obtain and Install Tcl8.0.  You have two choices, patch 
+	yourself, or download a patched version
+	<br> <B>Download patched sources</B>
 	<OL>
-	<LI> FIXME: get Tcl URL
+	<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/tcl8.0.cygwin.tar.gz">tcl8.0.cygwin.tar.gz</A>
+	<LI> Untar it with:
+	<PRE>
+	tar -zxf tcl8.0.cygwin.tar.gz
+	</PRE>
 
-	<LI> FIXME: location of prebuilt binaries
+
+	<LI> Fix the internal paths:
+	<PRE>
+	cd tcl8.0.cygwin/unix
+	sed 's+//d/temp/tcl8.0/+/tmp/tcl8.0.cygwin+' Makefile &gt; Makefile.tmp
+	mv Makefile.tmp Makefile 
+	</PRE>
+
+	<LI> Build and install
+	<PRE>
+	cd tcl8.0.cygwin/unix
+	make
+	mkdir -p /usr/local
+	make install
+	</PRE>
+
 	</OL>
 
-<LI> Download the Ptolemy NT sources
+	<br> <B>Patch the sources yourself </B>
+ <OL>
+	<LI> Download The Tcl
+	8.0 source from
+
+	<A HREF="ftp://ftp.sunlabs.com/pub/tcl/tcl8.0.tar.gz"><CODE>ftp://ftp.sunlabs.com/pub/tcl/tcl8.0.tar.gz</CODE></A>
+	 <br>
+	(<A HREF="http://sunscript.sun.com/TclTkCore/">SunScript Homepage</A>)
+
+
+	<LI> Untar the sources.
+	<LI> Start up bash, cd to the <CODE>tcl8.0/unix</CODE> directory
+	in the <CODE>tcl8.0</CODE> directory and run: 
+	<CODE>configure --enable-gcc --disable-load</CODE>
+	
+	<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/tcl8.0.cygwin.patch">tcl8.0.cygwin.patch</A>
+	<LI> Unfortunately, the Cygwin b18 patch seems to corrupt files,
+	but if it worked, one would: 
+<CODE>cd</CODE> up one level to the <CODE>tcl8.0</CODE>
+	directory and run patch:
+	<PRE>
+	patch -p1 tcl8.0.cygwin.patch
+	</PRE>
+
+	The patch makes the following changes.  Note that this
+	is not the right way to do things, these changes should
+	be in the configure script.  Adding platform dependent
+	ifdefs to the .c files is a bad idea, but I did it
+	for expediency.
+	<OL>
+	<LI>  edit <CODE>generic/TclPort.h</CODE>
+	and comment out the <CODE>_WIN32_</CODE> body
+	
+	<LI>  <CODE>generic/tclInt.h</CODE>:
+	 include <CODE>tclUnixPort.h</CODE> after <CODE>tcl.h</CODE>
+	
+	<LI>  <CODE>generic/tclIOSock.h</CODE>:
+
+<PRE>
+#define SO_SNDBUF 0x1001
+b#define SO_RCVBUF 0x1002
+</PRE>
+	including <CODE>mywinsock.h</CODE> results in lots of duplicate symbols
+	and definitions.
+
+	
+	<LI> <CODE>unix/tclUnixSock.c</CODE>:
+	<CODE>Tcl_GetHostName()</CODE>:
+
+	<CODE>#define NO_UNAME</CODE>
+	
+	<LI>  <CODE>tclUnixFCmd.c</CODE> <CODE>mkfifo()</CODE>
+	not found at link time:
+	return <CODE>TCL_ERROR</CODE>
+	if that code is called.
+	
+	<LI>  Makefile: comment out -lc n LIBS rule
+	
+	<LI> <CODE>tcl8.0b2/unix/tclUnixChan.c</CODE>:
+	<CODE>TclGetDefaultStdChannel()</CODE>:
+	comment out lseek calls that lseek on stdin, stdout and stderr.
+
+	<LI> <CODE>unix/Makefile</CODE>:
+	Remove <CODE>-DHAVE_TIMEZONE_VAR=1</CODE> from AC_FLAGS
+	</OL>
+
+<LI> Build and install
+<PRE>
+cd tcl8.0/unix
+make
+make install
+</PRE>
+
+</OL>
+ <HR>
+<LI> After installing tcl8.0, download the 
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/pt0.7.1devel.ptcl.src.tar.gz"><CODE>pt0.7.1devel.ptcl.src.tar.gz</CODE></A>
+Ptolemy ptcl sources
+
+
+<LI> Ungzip and untar the file
+<PRE>
+tar -ztvf pt0.7.1devel.ptcl.src.tar.gz
+</PRE>
 
 <LI> Set your <CODE>PTOLEMY</CODE> variable to the location
 where you installed the Ptolemy NT sources.  Set <CODE>PTARCH</CODE>
 to <CODE>nt4</CODE>.  
 
+<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/buildnt4"><CODE>buildnt4</CODE></A> bash script
+
 <LI> Run the <CODE>buildnt</CODE> script from a <CODE>bash</CODE>
 window by starting up <CODE>bash</CODE>, and then typing
 <PRE>
-$PTOLEMY/doc/html/nt/buildnt
+source buildnt4
 </PRE>
 
 </OL>
