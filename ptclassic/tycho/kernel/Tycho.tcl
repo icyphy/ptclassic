@@ -113,19 +113,19 @@ uplevel #0 {
     source $tychokernel/Lib.tcl
 }
 
-# If gSlowX11Link is 1, then we don't bring up a graphic
-# FIXME: do we really want a global?
-if {! [info exists gSlowX11Link] } {
-    set gSlowX11Link 0
+# To disable the welcome message, set the global variable
+# tychoWelcomeMessage to zero before sourcing this file.
+if {![info exists tychoWelcomeMessage] || $tychoWelcomeMessage != 0} {
+    ::tycho::welcomeMessage
 }
 
-if [file readable [glob -nocomplain ~/.tycho]] {
-    source [glob ~/.tycho]
+set tychostartfile [glob -nocomplain ~/.tycho]
+if {$tychostartfile != {} && \
+	[file exists $tychostartfile] && \
+	[file readable $tychostartfile]} {
+    source $tychostartfile
 }
-
-# FIXME: We need a way to disable this for loading from within Ptolemy,
-# where this welcome window would be redundant.
-::tycho::welcomeMessage
+unset tychostartfile
 
 foreach file $argv {
     File::openContext $file
