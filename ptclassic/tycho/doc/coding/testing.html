@@ -39,6 +39,22 @@ directory.
 <DT> <CODE>alltests.itcl</CODE>
 <DD> This file sources all of the files that are listed as test files
 in the <CODE>makefile</CODE>.
+
+<DT> <A HREF="../../kernel/tests/alltychotests.tcl"><CODE>$TYCHO/kernel/tests/alltychotests.tcl</CODE></A>
+<DD> <CODE>alltychotests.tcl</CODE> will run all the <CODE>alltests.itcl</CODE>
+files.  <CODE>$TYCHO/makefile</CODE> has two rules:
+	<DL>
+	<DT> <CODE>make alltests</CODE>
+	<DD> Run all the tests in a vanilla <CODE>tycho</CODE>
+
+	<DT> <CODE>make alltests.ptiny</CODE>
+	<DD> Run all the tests in a <CODE>tycho -ptiny</CODE>
+
+	</DL>
+</DL>
+
+
+
 </DL>
 After running <CODE>make sources</CODE>, you can open up either of these files
 and then evaluate it, which will run all the tests in that directory.
