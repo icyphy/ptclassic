@@ -88,9 +88,10 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 : logstrm(log), bagNumber(1)
 {
 	int nports = setPortIndices(gal);
-	LOG_NEW; SDFClustPort** ptable = new SDFClustPort*[nports];
-	for (int i = 0; i < nports; i++)
+	SDFClustPort** ptable = new SDFClustPort*[nports];
+	for (int i = 0; i < nports; i++) {
 		ptable[i] = 0;
+	}
 	DFGalStarIter nextStar(gal);
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
@@ -113,7 +114,8 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 		out->connect(*in,numDelays);
 		out->initGeo();
 	}
-	LOG_DEL; delete ptable;
+	// deallocate ptable
+	delete [] ptable;
 }
 
 // Core clustering routine.  Alternate merge passes and loop passes
