@@ -34,10 +34,23 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.edit.graphedit
 package provide tycho.edit.cts 1.0
+
 global env auto_path
 set env(CTS_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(CTS_LIBRARY)] == -1 } {
     lappend auto_path $env(CTS_LIBRARY)
 }
+
+### MODE MAPPINGS
+::tycho::register extensions "cts" .cts
+
+### MODES
+::tycho::register mode "cts" \
+	-command {::tycho::view EditCTS -file {%s}} \
+	-viewclass ::tycho::EditCTS \
+	-label {Continuous Time Simulation}  \
+	-category "graphics" \
+	-underline 0
 
