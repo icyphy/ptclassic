@@ -39,6 +39,7 @@ Defines and maintains a TK XY Plot.
 #pragma implementation
 #endif
 
+#include "InfString.h"
 #include "XYPlot.h"
 extern "C" {
 #include "ptkPlot.h"
@@ -59,8 +60,7 @@ XYPlot::XYPlot () {
 	// to this class.  We test ptkInterp because some instances of this
 	// class may be created before the Tcl interpreter has started.
 	if (ptkInterp) {
-	  char sourceCmd[100];
-	  strncpy(sourceCmd,"source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl",100);
+	  InfString sourceCmd = "source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl";
 	  if (Tcl_GlobalEval(ptkInterp, sourceCmd) != TCL_OK) {
 	    Error::abortRun("XYPlot constructor: failed to source ptkPlot.tcl");
 	  }
@@ -70,7 +70,7 @@ XYPlot::XYPlot () {
 XYPlot::~XYPlot() {
 	// avoid core dump if interpreter did not set up right
 	if (!ptkInterp) return;
-	ptkFreePlot(ptkInterp,&plot);
+	ptkFreePlot(ptkInterp, &plot);
 }
 
 int XYPlot::windowExists () {
