@@ -41,7 +41,7 @@ Note: all print functions append \n to string before printing.
 /* Controls whether errors get printed out in windows */
 static boolean errorWindows = TRUE;
 
-#define REPORT_TCL_ERRORS 1
+#define REPORT_TCL_ERRORS 0
 
 void
 ViSetErrWindows(state)
