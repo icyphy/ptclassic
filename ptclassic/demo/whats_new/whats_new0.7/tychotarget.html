@@ -5,16 +5,271 @@
 </head>
 <body bgcolor=#faf0e6>
 <H1>Tycho Target</H1>
+
 <A HREF="../../../src/domains/cgc/tcltk/demo/tycho.pal">TychoTarget Palette</A>
 
- <P>The CGC TychoTarget provides a way to create CGC control panels that use
-the functionality in Tycho.  
- <P>For information about the Sun Audio system, see <A HREF="sunaudio.html">the Sun Audio page</A>.
+ <P><B>Contents</B>
+<ul>
+<li><A HREF="#setup">TychoTarget setup</A>
+<li><A HREF="#using">Using TychoTarget</A>
+<li><A HREF="#stars">Modifying stars for use with TychoTarget</A>
+<li><A HREF="#interface">Writing TychoTarget user interface scripts</A>
+<li><A HREF="#bugs">Bugs and caveats</A>
+</ul>
 
+ <P>The CGC TychoTarget is an experimental target that provides a way
+to create CGC control panels that use the functionality in Tycho.  A
+universe that uses TychoTarget must provide a script that creates the
+control panel that the user sees. Currently, all the TychoTarget demos
+implement real-time audio processing demos, and will only work on Sun
+work-stations.
+
+ <P>For information about the Sun Audio system, see <A
+HREF="sunaudio.html">the Sun Audio page</A>.
+
+<a name="setup"></a>
 <H2>TychoTarget setup</H2>
-To use the TychoTarget, you will need to run
-<CODE>cd $PTOLEMY/tycho; make tclexts</CODE>.  TychoTarget uses
-<CODE>$PTOLEMY/tycho/obj.$PTARCH/tcl.mk</CODE> and <CODE>java.mk</CODE>.
+
+<I></I>To use the TychoTarget, you will need to run <CODE>cd
+$PTOLEMY/tycho; make tclexts</CODE>.  TychoTarget uses
+<CODE>$PTOLEMY/tycho/obj.$PTARCH/tcl.mk</CODE> and
+<CODE>java.mk</CODE>.
+
+<a name="using"></a>
+<H2>Using TychoTarget</H2>
+
+<p>To use TychoTarget, simply select TychoTarget from the Targets menu
+in your VEM window. By default, TychoTarget is set to compile the
+generated file, start a separate Tycho process, and load the generated
+system into Tycho. The generated file can also be compiled and loaded
+into a running Tycho "by hand" -- see below.
+
+ <P>The key setting in the TychoTarget parameters window is the name
+of the TychoTarget script file -- this is a Tcl file that is sourced
+by the generated file after it has been loaded into Tycho, and is
+where the control panel that the user sees is created. The scripts for
+the TychoTarget demos are located in <A
+HREF="../../../tycho/typt/demo"><code>$TYCHO/typt/demo</code></A>. By
+convention, the name of the script file is the name of the Ptolemy
+universe with suffix <CODE>.tcl</CODE>. For each script file, there is
+also an HTML help file with suffix <CODE>.html</CODE>.
+
+ <P>Each star in your universe that can be controlled by TychoTarget
+in real-time must have a unique identifier. Currently, this is
+in the Edit Parameters window of the star as the <CODE>starName</CODE>
+state.
+
+<h3>Output file format</h3>
+
+ <P>TychoTarget generates a C file in a format that can be loaded into
+Tycho as a Tcl package. The Tcl package format is the standard one
+(see the book <I>Tcl and the Tk Toolkit</I> by John K. Ousterhout for
+details). Apart from the Tcl package interface, the generated file
+differs from that produced by the TclTkTarget in the following ways:
+
+<ul>
+
+<li> Instead of a single <CODE>main()</CODE> function, TychoTarget
+generates three functions: <CODE>setup()</CODE>,
+<CODE>execute()</CODE>, and <CODE>wrapup()</CODE>. These are called by
+Tycho to manage execution of the program. (In theory, this allows us
+to execute multiple generated systems within the one Tycho, but we
+haven't demonstrated this yet.)
+
+<LI> Because the execution has been split into seperate function,
+variables are now at the file scope and marked <CODE>static</CODE> to
+prevent name collisions with other packages.
+
+<LI> Execution is controlled by Tycho rather than by the geenrated
+code. Each time <CODE>execute()</CODE> is called, it is obliged to
+return start the C timer and return when the timer expires. This is in
+contrast to the TclTkTarget, in which the main loop starts the timer,
+checks it on each iteration, and calls the Tk event loop when it
+expires. (In effect, it's upside-down.)
+
+</ul>
+
+ <P>The Tcl package format consists of two functions: an
+initialization function called
+<CODE><i>universe-name</i>_Init()</CODE>, which adds a new Tcl command
+<CODE>::tycho::<I>universe-name</I></CODE> to Tycho, and a Tcl
+interface function called (surprisingly enough..)
+<CODE>tclinterface()</CODE>. This function is included directly from
+the file <A
+HREF="../../../src/tycgc/tclif.c">$PTOLEMY/tycho/src/tycgc/tclif.c</A>.
+
+
+ <P>The Tcl command <CODE>::tycho::<I>universe-name</I></CODE> is used by the
+Tycho scheduler class to execute the universe. Its first argument
+controls what happens in the (generated) package:
+
+<ul>
+<LI><B>scriptfile</B>: Return the name of the user interface script
+file set in the TychoTarget parameters window in VEM.
+<LI><B>init</B>: Call the <CODE>tychoSetup()</CODE> function,
+causing stars to tell Tycho what to do when controls
+are moved by the user.
+<LI><B>setup</B>: Call the <CODE>setup()</CODE> function. If
+an additional argument is called, it is the name of a Tcl
+variable that is updated with the iteration count after
+each call to <CODE>execute()</CODE>.
+<LI><B>execute</B>: Execute the universe until the C timer
+expires (by default, Tycho sets this to 20 ms).
+Update the Tcl iteration counter if one was specified
+in the setup call.
+<LI><B>wrapup</B>: Call the <CODE>wrapup()</CODE> function.
+</ul>
+
+<h3>What TychoTarget does</h3>
+
+By default, running a TychoTarget universe will:
+
+<ul>
+
+<li>Create files called <CODE><I>universe-name</I>.c</CODE>
+<CODE><I>universe-name</I>_ld.tcl</CODE> in the directory
+<CODE>~/PTOLEMY_SYSTEMS/TYCHO</CODE>.
+
+<LI> Call the <CODE>::tycho::compileC</CODE> procedure within the
+Tycho running in Ptolemy to compile the file, generating
+<CODE>.o</CODE> and <CODE>.so</CODE> files.
+
+<LI> Exec another Tycho process, passing the
+<CODE><I>universe-name</I>_ld.tcl</CODE> filename as an argument that
+Tycho will execute. The <CODE><I>universe-name</I>_ld.tcl</CODE>
+causes Tycho to load the <CODE><I>universe-name</I>.so</CODE> library,
+and then execute the user interface script file. In the process,
+Tycho will load the <A HREF="../../../tycho/src/tytimer">TyTimer</A>
+and <A HREF="../../../tycho/src/tycgc">TyCGC</A> support packages.
+
+</ul>
+
+<h3>Running "by hand"</h3>
+
+Starting a new Tycho propcess every time you run the universe is a
+little tedious. To compile a Tycho-Target generated file from within a
+running Tycho, simply open the file, and then select "Compile" from
+the File menu.  To run a generated application from within a running
+Tycho, simply "open" the shared library: Tycho will load the package
+and source the user interface script.
+
+<a name="stars"></a>
+<h2>Modifying stars for use with TychoTarget</h2>
+
+ <P>Each star that has a state that can be controlled in real-time by
+Tycho needs a unique, user-settable identifier. Currently, those stars
+that support TychoTarget have a state called <CODE>starName</CODE>
+that the user can set from the Edit parameters window.
+
+ <P>Each star that has a state that can be controlled in real-time
+must add code to the <CODE>tychoSetup</CODE> code-block. This
+code-block serves the same purpose as the <CODE>tkSetup</CODE>
+code-block used with the TclTkTarget -- we introduced a new codeblock
+because the interface functions to TychoTarget are different.  Here is
+a sample code-block (from <A
+HREF="../../../src/domains/cgc/tcltk/stars/CGCTkStereoIn.pl">$PTOLEMY/src/domains/cgc/tcltk/stars/CGCTkStereoIn.pl</A>:
+
+<pre>
+codeblock (tychoSetup) {
+    /* Call tycho to connect a control to the volume parameter */
+    connectControl(
+	moduleName,
+	"$val(starName)",
+	"volume",
+        $starSymbol(setVolume));
+}
+</pre>
+
+The arguments are:
+<ol>
+<LI>The name of the universe. Tycho needs this to
+know which control panel will be controlling this parameter.
+<LI> The unique name of this star within this universe.
+Together with the next argument, this is used by Tycho to
+"connect" a user-interface control widget to the callback
+that modifies a state in real-time.
+<LI> The name of the star parameter being controlled. This does not
+have to be the same as the state that actually gets altered at run-time.
+<LI> The call-back that Tycho will call to change the parameter. This
+is in the standard Tcl call-back format, as for
+TclTkTarget. TychoTarget will usually use the same call-backs already
+provided by a star for TclTkTarget.
+</ol>
+
+ <P>Currently, <CODE>connectControl</CODE> is the only interface
+function provided. It is intended for controls that provide input over
+a range, such as 0 to 100. It is implemented in the <A
+HREF="../../../tycho/src/tycgc">TyCGC</A> support package. In future,
+other interface functions will be added for one-of-many selection, so
+that buttons can be added to custom interfaces.
+
+
+<a name="interface"></a>
+<h2>Writing TychoTarget user interface scripts</h2>
+
+ <P>Tycho contains support to make it easy to create custom user
+interfaces for TychoTarget universes. One good source of information,
+of course, is the existing demonstration files, in <A
+HREF="../../../tycho/typt/demo"><code>$TYCHO/typt/demo</code></A>.
+
+ <P>The documentation on the operation of the Tycho portion of
+TychoTarget is in the Tycho documentatation tree:
+
+<ul>
+
+<li><A HREF="../../../tycho/kernel/doc/codeDoc/ControlPanel.html">The
+<CODE>ControlPanel</CODE> class</A>, which is the top-level window
+that control panels are embedded in. This class also manages
+the calling interface between slider and button widgets and the
+underlying C code generated by TychoTarget.
+
+<li><A
+HREF="../../../tycho/kernel/doc/codeDoc/ControlPanel_rel.html">The
+<CODE>::tycho::controlpanel</CODE> procedure</A>, which is responsible
+for loading the compiled TychoTarget package.
+
+<li><A
+HREF="../../../tycho/kernel/doc/codeDoc/ControlSubpanel.html">The
+ControlSubpanel class</A>, which is the superclass for
+application-specific control panels. The current TychoTarget demos use
+a number of these sub-panels, in the directory <A
+HREF="../../../tycho/typt/controls"><code>$PTOLEMY/tycho/typt/controls</CODE></a>.
+
+<li><A HREF="../../../tycho/kernel/doc/codeDoc/Scheduler.html">The
+Scheduler class</A>, which is responsible for executing the
+TychoTarget application.
+
+</ul>
+
+<h2>Bugs and caveats</h2>
+
+<ul>
+
+<LI> Initially, TclTkTarget was intended to generate stand-alone C
+programs. Over the years, it has changed so that many stars now depend
+on header files and libraries in Ptolemy to compile and link.
+TychoTarget, however, was written to use Tycho's compilation
+facilities, which are not supposed to know about Ptolemy. So, stars
+that depend on libraries such as <CODE>ptdsp</CODE> or on header files
+such as those in <CODE>$PTOLEMY/src/ptklib</CODE> will not currently work with TychoTarget.
+
+<LI> Stars that do not contain the <CODE>tychoSetup</CODE> code-block
+will run with TychoTarget but their parameters cannot be accessed from
+Tycho.
+
+<LI> TychoTarget depends on the real-time facilities provided
+in the <A HREF="../../../tycho/src/tytimer">TyTimer</A> package. This
+package is somewhat machine-dependent -- if it does not work on your
+machine then TychoTarget will not either.
+
+<LI> The <A
+HREF="../../../tycho/kernel/doc/codeDoc/Scheduler.html">Scheduler</A>
+class in Tycho that manages execution of universe depends on the way
+that the Tcl <CODE>update</CODE> command works. Anything that deals
+with Tcl <CODE>update</CODE> is inherently flaky. We still need to do
+more work on making the scheduling more robust.
+
+</ul>
 
 
 <HR>
