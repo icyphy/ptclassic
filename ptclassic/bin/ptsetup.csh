@@ -79,7 +79,9 @@ else
 	setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
 endif
 
-setenv PTPWD `pwd`
+# Wrap this in quotes in case we are in a directory that has
+# spaces in its name
+setenv PTPWD "`pwd`"
 
 set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
