@@ -1678,7 +1678,7 @@ body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
 	# We don't print out a table of contents, since we only have procs
 	# Print out the outside constructs
 	# puts $fd "<HR>"
-	foreach construct {outsideProc} {
+	foreach construct {outsideProc outsideEnsemble} {
 	    set printedConstructHeader 0
 	    set constructListList [$class cget -$construct]
 	    foreach constructList $constructListList {
@@ -1689,12 +1689,23 @@ body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
 			puts $fd "<DL>"
 			set printedConstructHeader 1
 		}
-		putsDefinition $fd \
-			" <A NAME=\"[info namespace tail\
-			[getName $constructList]] $shortConstruct\
-			associated with $baseName\(s\)\">" \
-			[getName $constructList] \
-			"\{[getArgs $constructList]\}"
+		# Hack to avoid printing out the entire body of the
+		# ensemble
+		if { $construct == "outsideEnsemble" } {
+		    putsDefinition $fd \
+			    " <A NAME=\"[info namespace tail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $baseName\(s\)\">" \
+			    [getName $constructList] \
+			    ""
+		} else {
+		    putsDefinition $fd \
+			    " <A NAME=\"[info namespace tail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $baseName\(s\)\">" \
+			    [getName $constructList] \
+			    "\{[getArgs $constructList]\}"
+		}
 		putsClassComment $fd $constructList
 	    }
 	    if $printedConstructHeader {
