@@ -385,34 +385,15 @@ body ::tycho::ListBrowser::complete {{case 0}} {
 	set uselastpattern 1
 
         # Set the entry widget to the longest common string among all the
-        # matches. Start with the first match, and then slowly increase the
-        # length of the pattern until we find another match that is different.
-        set firstMatch [lindex $matches 0]
-        set matchFailed 0
-        for {set end [string length [get entry]]} \
-                { $end <= [string length $firstMatch]} \
-                { incr end} {
-            if !$case {
-                set testPattern [string tolower \
-                        [string range $firstMatch 0 $end]]
-            } else {
-                set testPattern [string range $firstMatch 0 $end]
-            }
-            foreach match $matches {
-                if !$case {
-                    set match [string tolower $match]
-                }
-                if  { "$testPattern" != "[string range $match 0 $end]"} {
-                    set matchFailed 1
-                    break
-                }
-            }
-            if { $matchFailed == 1 } {
-                incr end -1
-                break
-            }
+        # matches. If no common initial string (example: *blue), use the 
+        # first match.
+        set compMatch [lsubstring $matches]
+        if {$compMatch != {}} {
+            setEntry $compMatch
+        } else {
+            # if there is no common initial substring, use the first match
+            setEntry [lindex $matches 0]
         }
-        setEntry [string range $firstMatch 0 $end]
 	bell
     }
     # The two commands below attempt to put the entire range in view,
