@@ -323,6 +323,7 @@ void CGCMultiTarget :: setupSocketConnection(CGCTarget* t, int i) {
 	inc->put("#include <netinet/in.h>\n", "<netinet/in.h>");
 	inc->put("#include <arpa/inet.h>\n", "<arpa/inet.h>");
 	inc->put("#include <string.h>\n", "<string.h>");
+	inc->put("#include <unistd.h>\n", "<unistd.h>");
 
 	// add socket connection procedure
 	CodeStream* prCode = t->getStream("procedure");
