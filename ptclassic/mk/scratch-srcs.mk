@@ -57,7 +57,8 @@ XV_DEST= 	$(PTOLEMY)
 OBJARCH=	$(PTOLEMY)/obj.$(ARCH)
 ROOT=		.
 XV_CC=		cc
-
+XMKMF=		/usr/bin/X11/xmkmf
+MKDIRHIER=	/usr/bin/X11/mkdirhier
 include $(ROOT)/mk/config-$(ARCH).mk
 
 all: gnu_all tcltk_all xv_all
@@ -100,13 +101,25 @@ tcltk_all: tcltk_configure tcltk_bin tcltk_install
 
 tcltk_configure: $(OBJARCH)/tcltk
 $(OBJARCH)/tcltk: stats $(OBJARCH) 
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) TCLTK_DEST=$(TCLTK_DEST) configure)
+	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
+		CC=$(CC) \
+		RANLIB=$(RANLIB) \
+		TCLTK_DEST=$(TCLTK_DEST) \
+		configure)
 
 tcltk_bin: stats $(OBJARCH)/tcltk
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) TCLTK_DEST=$(TCLTK_DEST) bin)
+	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
+		CC=$(CC) \
+		RANLIB=$(RANLIB) \
+		TCLTK_DEST=$(TCLTK_DEST) \
+		bin)
 
 tcltk_install: stats $(OBJARCH)/tcltk
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) TCLTK_DEST=$(TCLTK_DEST) install)
+	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
+		CC=$(CC) \
+		RANLIB=$(RANLIB) \
+		TCLTK_DEST=$(TCLTK_DEST) \
+		install)
 tcltk_clean: 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) clean)
 
@@ -122,7 +135,7 @@ xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
 		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
 		$(OBJARCH)/xv/Imakefile
-	(cd $(OBJARCH)/xv; xmkmf)
+	(cd $(OBJARCH)/xv; $(XMKMF) )
 
 $(OBJARCH)/xv:
 	if [ ! -d $(OBJARCH) ]; then mkdir $(OBJARCH); fi
@@ -147,6 +160,7 @@ xv_bin: $(OBJARCH)/xv
 		AR=ar \
 		RANLIB=$(RANLIB) \
 		RAND=$(XV_RAND) \
+		MKDIRHIER=$(MKDIRHIER) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
 xv_install: $(OBJARCH)/xv
@@ -157,12 +171,14 @@ xv_install: $(OBJARCH)/xv
 		AR=ar \
 		RANLIB=$(RANLIB) \
 		INSTALL=$(XV_INSTALL) \
+		MKDIRHIER=$(MKDIRHIER) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
 
 xv_install.man:
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
+		MKDIRHIER=$(MKDIRHIER) \
 		INSTALL=$(XV_INSTALL) \
 		MANDIR=$(XV_DEST)/man/man1  install.man)
 
