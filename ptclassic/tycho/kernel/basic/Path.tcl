@@ -173,13 +173,35 @@ proc ::tycho::invoke { args } {
     }
 }
 
+
+##############################################################################
+#### isRelative
+# Return true if the the pathname is not an absolute pathname, and
+# it does not start with tilde or a dollar sign
+proc ::tycho::isRelative {pathname} {
+    set char [string index $pathname 0]
+    if { [file pathtype $pathname] != "absolute" && \
+	    $char != "~" && $char != "\$"} {
+	return 1
+    }
+    return 0
+}
+
+
 ##############################################################################
 #### mkdir
 # Create a directory
 #
 proc ::tycho::mkdir { args } {
-    # Unix-ism
-    eval exec mkdir $args
+    global ::itcl::version
+    if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
+	eval file mkdir $args
+    } else {
+	if { $tcl_platform(platform) == "unix" } { 
+	    # Unix-ism
+	    eval exec mkdir $args
+	}
+    }
 }
 
 ##############################################################################
@@ -260,10 +282,18 @@ proc ::tycho::relativePath {srcFile dstFile} {
 # FIXME: In tcl7.6, this should go away
 #
 proc ::tycho::rm { args } {
-    global tcl_platform
-    if { $tcl_platform(platform) != "windows" } { 
-	# Unix-ism
-	eval exec rm $args
+    global itcl::version
+    if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
+	if {[lindex $args 0] == "-f"} {
+	    eval file delete -force -- $args
+	} else {
+	    eval file delete -- $args
+	}
+    } else {
+	if { $tcl_platform(platform) == "unix" } { 
+	    # Unix-ism
+	    eval exec rm $args
+	}
     }
 }
 
