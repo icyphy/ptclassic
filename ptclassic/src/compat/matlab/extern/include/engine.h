@@ -1,7 +1,7 @@
 /*
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
-
+ 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
 software and its documentation for any purpose, provided that the
@@ -53,22 +53,29 @@ extern "C" {
 
 typedef char Engine;
 
-extern int engEvalString ARGS((Engine* enginePtr, char* command));
-extern Engine* engOpen ARGS((char* unixCommand));
+extern int engEvalString ARGS((Engine *enginePtr, const char *command));
+extern Engine* engOpen ARGS((const char* startcmd));
 extern int engClose ARGS((Engine* enginePtr));
-extern Matrix* engGetMatrix ARGS((Engine* enginePtr, char* name));
-extern int engPutMatrix ARGS((Engine* enginePtr, Matrix* matrixPtr));
+extern mxArray* engGetArray ARGS((Engine* enginePtr, const char *name));
+extern int engPutArray ARGS((Engine* enginePtr, const mxArray *ap));
+extern int engOutputBuffer ARGS((Engine* enginePtr, char* buffer, int buflen));
+
+#ifdef V4_COMPAT
+extern Engine* engOpenV4 ARGS((const char *startcmd));
 extern int engGetFull ARGS((Engine* enginePtr, char* name,
 			    int* numrows, int* numcols,
 			    Real** realPartPtr, Real** imagePartPtr));
 extern int engPutFull ARGS((Engine* enginePtr, char* name,
 			    int numrows, int numcols,
 			    Real* realPartPtr, Real* imagePartPtr));
-extern int engOutputBuffer ARGS((Engine* enginePtr, char* buffer,
-				 int bufferlen));
+
+#define engGetMatrix engGetArray
+#define engPutMatrix engPutArray
+#define engOpen engOpenV4 
+#endif /* defined(V4_COMPAT) */
 
 #ifdef __cplusplus
-}
+}	/* extern "C" */
 #endif
 
 #endif /* engine_h */
