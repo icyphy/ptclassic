@@ -379,6 +379,9 @@ class ::tycho::File {
 #
 configbody ::tycho::File::file {
     set completeFilePath $itk_option(-file)
+    if { $completeFilePath == "" } {
+	error "File name cannot be null"
+    }
     if {$completeFilePath != $previousfile} {
         if {$itk_option(-file) != {NoName}} {
             set completeFilePath [::tycho::expandPath $completeFilePath]
@@ -572,7 +575,6 @@ body ::tycho::File::autoSave {} {
     # Auto-save only if the file is modified, has a file name,
     # is a local file, and is not itself an auto-save file.
     if { $modified \
-            && $completeFilePath != "" \
             && $completeFilePath != "NoName" \
             && ![::tycho::resource isremote $completeFilePath] \
             && ![regexp {^#auto#} [::tycho::url tail $completeFilePath]] } {
@@ -693,7 +695,7 @@ body ::tycho::File::insertData {data} {
 body ::tycho::File::insertFile {} {
     set filename [safeEval ::tycho::queryfilename {File to insert:}]
 
-    if {$filename != "" && $filename != "NoName"} {
+    if {$filename != "NoName"} {
 	if {[::tycho::resource exists $filename]} {
 	    if {[::tycho::resource readable $filename]} {
 		insertData [::tycho::resource read $filename]
@@ -835,7 +837,7 @@ body ::tycho::File::print {} {
 # reload{}.
 #
 body ::tycho::File::reload {} {
-    if {$completeFilePath == "NoName" || $completeFilePath == ""} {
+    if {$completeFilePath == "NoName"} {
 	return 
     }
     # This call to saveQuery has been commented out because it
@@ -1006,7 +1008,7 @@ body ::tycho::File::saveAsFile {filename} {
 # by prepending the prefix "#crash#".
 #
 body ::tycho::File::saveCrash {} {
-    if {$modified && $completeFilePath != ""} {
+    if {$modified && $completeFilePath != "NoName"} {
 	if ![::tycho::resource isremote $completeFilePath] {
 	    set filename [::tycho::url tail $completeFilePath]
 	    set filename "#crash#$filename"
