@@ -37,44 +37,23 @@
 # class that deals with resources with that path. If the
 # second argument is supplied, call the proc with that name
 # in the resource class, passing any additional arguments
-# to it, and return the proc's result.
-#
-# FIXME: This needs to be extended to use a registration mechanism
-# as we have for file suffixes and the like.
+# to it, and return the proc's result. If no protocol is
+# recognized, assume the "file" protocol.
 #
 proc ::tycho::resourceClass {path {procname {}} args} {
+	# Get the (syntactic) protocol
     set protocol [::tycho::url protocol $path]
-    if {$protocol=={}} {
-	set rclass ::tycho::ResourceFile
-    } else {
-	switch -exact -- $protocol {
-            mailto {
-                set rclass ::tycho::ResourceMail
-            }
-	    http {
-		set rclass ::tycho::ResourceHTTP
-	    }
-	    ftp {
-                set rclass ::tycho::ResourceFTP
-	    }
-	    file {
-		set rclass ::tycho::ResourceFile
-	    }
-	    weld {
-		set rclass ::tycho::ResourceWELD
-	    }
-	    default {
-		error "Unknown protocol \"$protocol\""
-	    }
-	}
+    if { $protocol == "" } {
+    	set protocol "file"
     }
-    if { $procname == "" } {
+    # Get the class registered for it
+    set rclass [::tycho::registry protocolcget $protocol -class]
+ 	# Return the class if no additional arguments are given,
+ 	# otherwise call a procedure on it.
+     if { $procname == "" } {
 	return $rclass
     } else {
-	# ::puts -nonewline "$rclass::$procname $path $args -> "
-	set result [eval [list $rclass::$procname $path] $args]
-	# ::puts $result
-	return $result
+	eval [list $rclass::$procname $path] $args
     }
 }
 
@@ -128,7 +107,7 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # The connect{} method will be called on the new object.
 # <dt><b>read</d> _path_ ?_timeout_?
 # <dd> Return the contents of a resource. An error is signalled if the
-# resurce is not streamable. An error is also signalled if the resource
+# resource is not streamable. An error is also signalled if the resource
 # is remote and access times out on the optional _timeout_ argument.
 # <dt><b>readable</d> _path_
 # <dd> Test if a resource exists and is readable.
