@@ -22,9 +22,16 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     output {
 	name { output }
-	type { output }
+	type { int }
+    }
+    setup {
+	reactive();
     }
     go {
-	output.emit() << int(input1.get()) + int(input2.get());
+	if ( input1.present() && input2.present() ) {
+	    output.emit() << int(input1.get()) + int(input2.get());
+	} else {
+	  Error::abortRun(*this, "One input present, the other absent");
+	}
     }
 }
