@@ -127,6 +127,7 @@ ifndef TK
 	IPUS=
 
 	CGCTK=
+	CGCVISTK=
 	CODESIGN=
 	FSM=
 	HOF=
@@ -236,6 +237,7 @@ ifdef CGCFULL
 	NOWAM = 1
 	ifdef TK
 		CGCTK = 1
+		CGCVISTK = 1
 	endif
 	CGCVIS = 1
 endif
@@ -246,6 +248,7 @@ ifdef CGCVIS
 	# Don't build the CGC VIS subdomain on a non-Solaris machine
 	ifeq ("$(filter sol% ,$(PTARCH))","")
 		CGCVIS =
+		CGCVISTK =
 	endif
 endif
 
@@ -452,6 +455,13 @@ ifdef CGC
 		# CGC VIS target (no shared library version)
 		CUSTOM_DIRS += $(CGCDIR)/vis/targets
 		TARGETS += $(CGCVIST)/CGCVISSimTarget.o
+
+		# CGC VIS TK
+		ifdef CGCVISTK
+			CUSTOM_DIRS += $(CGCDIR)/vis/tcltk/stars
+			LIBS += -lcgcvistcltk
+			LIBFILES += $(LIBDIR)libcgctcltk.$(LIBSUFFIX)
+		endif
 	endif
 	# Tcl/Tk
 	ifdef CGCTK
