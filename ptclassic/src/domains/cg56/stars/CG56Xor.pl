@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
 	explanation {
-This star outputs the bit-wise exclusive-or of input1 and input2.
+This star outputs the bitwise exclusive-or of \fIinput1\fR and \fIinput2\fR.
 	}
 	execTime {
 		return 4;

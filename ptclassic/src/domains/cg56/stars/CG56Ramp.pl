@@ -12,8 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
 	explanation {
-Generates a ramp signal, starting at "value" (default 0.0)
-with step size "step" (default 0.001).
+Generates a ramp signal, starting at \fIvalue\fR (default 0.0)
+with step size \fIstep\fR (default 0.001).
 	}
 	output {
 		name { output }

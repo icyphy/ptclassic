@@ -5,12 +5,12 @@ defstar {
     version { $Id$ }
     author { Kennard White and Chih-Tsung Huang (ported from Gabriel) }
     acknowledge { Gabriel version by Jeff Bier, Phil Lapsley, Eric Guntvedt. }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { CG56 io library }
     explanation {
 .PP
@@ -63,7 +63,7 @@ be left in register y0:
 An interrupt occurred and the receive buffer was full.
 .ip "\fB123063\fR"
 An interrupt occurred and the transmit buffer was empty.
-.UH "INTERUPTS: QUEUES:"
+.UH "INTERRUPTS and QUEUES:"
 .pp
 When using interrupt-based code, the SSI port generates interrupts
 that are handled by an interrupt service routine (ISR).
@@ -79,7 +79,7 @@ in time, a slot is either full (has a valid sample) or is empty.
 If a slot has valid data in it, bit #0 is cleared, otherwise it is set.
 There are two approaches to managing the memory and synchronization of
 these queues; these are described below.
-.UH "INTERUPTS: DUAL-BUFFER QUEUEING:"
+.UH "INTERRUPTS and DUAL-BUFFER QUEUEING:"
 .pp
 Two buffers are maintained:
 .Id "dual-buffer queuing"

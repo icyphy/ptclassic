@@ -1,7 +1,7 @@
 defstar {
 	name { Rotate }
 	domain { CG56 }
-	desc { Rotate a block of input data of N length  }
+	desc { Rotate a block of input data }
 	version { $Id$ }
 	author { Chih-Tsung Huang }
 	copyright {
@@ -13,14 +13,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 control library }
 	explanation {
 .Id "reverse"
-The star reads in an input block of length n and performs  a
-circular  shift  of the input.  If rotation is positive, the
-input is shifted to the left so that output[0] =
-input[rotation],  output[1]  =  input[rotation+1],  etc.  If
-rotation is negative, the input is shifted to the right so
-that output[rotation]  =  input[0],  output[rotation+1]  =
-input[1], etc.  The parameter rotation must be smaller  than
-the parameter length in absolute value.
+The star reads in an input block of length \fIlength\fR and performs a
+circular shift of the input.
+If \fIrotation\fR is positive, then the input is shifted to the left so
+that output[0] = input[\fIrotation\fR], output[1] = input[\fIrotation\fR + 1],
+etc.
+If \fIrotation\fR is negative, then the input is shifted to the right so
+that output[\fIrotation\fR] = input[0], output[\fIrotation\fR + 1] = input[1],
+etc.
+The parameter \fIrotation\fR must be smaller than the parameter
+\fIlength\fR in absolute value.
 	}
 	input {
 		name {input}
