@@ -19,38 +19,13 @@ $Id$
 
 #include "CGStar.h"
 #include "CGCConnect.h"
+#include "CGCTarget.h"
 #define CGCCodeBlock CodeBlock
 
 class CGCStar : public CGStar {
-private:
-	int forkId;
-
-protected:
-	void setForkId() { forkId = TRUE; }
-
-	// Expand State or PortHole reference macros.
-	// If "name" is a state, add it to the list of referenced states.
-	virtual StringList expandRef(const char* name);
-	virtual StringList expandRef(const char* name, const char* offset);
-
-	// If "name" is a state, and is not already on the list
-	// referencedStates, add it.
-	void registerState(const char* name);
-
-	// Add lines to be put at the beginning of the code file
-	void addInclude(const char* decl);
-
-	// Add declarations, to be put at the beginning of the main section
-	void addDeclaration(const char* decl);
-
-	// Add global declarations, to be put ahead of the main section
-	void addGlobal(const char* decl);
-
-	// Add global declarations, to be put ahead of the main section
-	void addMainInit(const char* decl);
-
+friend class CGCTarget;
 public:
-	CGCStar(): forkId(0) {}
+	CGCStar(): emptyFlag(1) {}
 
 	// List of all states pointed to in the code.
 	// This is public so that CGCTarget and other targets can access it.
@@ -67,11 +42,65 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// fork star identification
-	int amIFork() { return forkId; }
+protected:
+	// Virtual functions. Expand State or PortHole reference macros.
+	// If "name" is a state, add it to the list of referenced states.
+	StringList expandRef(const char* name);
+	StringList expandRef(const char* name, const char* offset);
+
+	// If "name" is a state, and is not already on the list
+	// referencedStates, add it.
+	void registerState(const char* name);
+
+	// Add lines to be put at the beginning of the code file
+	void addInclude(const char* decl) {
+		((CGCTarget*)myTarget())->addInclude(decl);
+	}
+
+	// Add declarations, to be put at the beginning of the main section
+	void addDeclaration(const char* decl) {
+		((CGCTarget*)myTarget())->addDeclaration(decl);
+	}
+
+	// Add global declarations, to be put ahead of the main section
+	void addGlobal(const char* decl) {
+		((CGCTarget*)myTarget())->addGlobal(decl);
+	}
+
+	// Add procedures, to be put ahead of the main section
+	void addProcedure(const char* decl) {
+		((CGCTarget*)myTarget())->addProcedure(decl);
+	}
+
+	// Add main initializations, to be put at the beginning of the main 
+	// section
+	void addMainInit(const char* decl) {
+		((CGCTarget*)myTarget())->addMainInit(decl);
+	}
+
+	// After each firing, update the offset pointers
+	virtual void updateOffsets();
+
+private:
+	// define and initialize variables for C program.
+	// Note that CGCTarget is a friend class to access these methods
+	// freely.
+
+	int emptyFlag;
+
+	// declare PortHoles and States
+	virtual StringList declarePortHole(const CGCPortHole* p);
+	virtual StringList declareOffset(const CGCPortHole* p);
+	virtual StringList declareState(const State* p);
+
+	// initialize PortHoles and States
+	virtual StringList initializeBuffer(const CGCPortHole* p);
+	virtual StringList initializeOffset(const CGCPortHole* p);
+	virtual StringList initializeState(const State* p);
 
 	// offset initialize
 	void initBufPointer();
+
 };
 
 #endif
