@@ -1,3 +1,6 @@
+#ifndef _MKTERM_H
+#define _MKTERM_H 1
+
 /* mkTerm.h  edg
 Version identification:
 $Id$
@@ -37,19 +40,33 @@ enum Position_e {
 };
 #define POSITION_MAX 14  /* max number of positions */
 
-extern boolean MkTermInit();
-extern boolean MkTerm();
-
-#define FLOAT_COLOR "blue"
-#define INT_COLOR   "yellow"
-#define COMPLEX_COLOR "white"
-#define ANYTYPE_COLOR "red"
+#define FLOAT_COLOR	"blue"
+#define INT_COLOR	"yellow"
+#define COMPLEX_COLOR	"white"
+#define ANYTYPE_COLOR	"red"
 
 #define SHAPE_MAX 100  /* max number of points in a Shape */
 
 struct Shape_s {
-    int type;  /* OCT_PATH, OCT_POLYGON, OCT_BOX */
+    int type;			/* OCT_PATH, OCT_POLYGON, OCT_BOX */
     struct octPoint *points;
     int points_n;
 };
 typedef struct Shape_s Shape;
+
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
+
+/* Define octObject data structures */
+#include "oct.h"
+
+extern boolean MkTermInit ARGS((octObject *CurrentFacetPtr));
+extern boolean PutShape ARGS((octObject *containPtr, octObject *objPtr,
+			Shape *shapePtr, struct octPoint *translatePtr,
+			boolean thick));
+extern boolean MkTerm ARGS((char *name, boolean input, char *type,
+			    boolean multiple, int position, int totalNumber));
+
+#endif  /* _MKTERM_H */

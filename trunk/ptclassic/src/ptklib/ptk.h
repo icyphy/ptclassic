@@ -1,3 +1,6 @@
+#ifndef _PTK_H
+#define _PTK_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -52,3 +55,4 @@ struct XClassHint;
 extern Tcl_Interp *ptkInterp;
 extern Tk_Window ptkW;
 
+#endif   /* _PTK_H */

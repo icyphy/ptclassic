@@ -33,6 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 This file implements a class that adds Ptolemy-specific Vem commands to
 a Tcl interpreter.  
 
+This is a C++ include file.
+
 **************************************************************************/
 
 #ifndef _PVem_h
@@ -44,21 +46,23 @@ a Tcl interpreter.
 #include "sol2compat.h"
 
 #include <std.h>
+extern "C" {
 #include "tcl.h"
+}
 #include "TclObj.h"
 
 #if defined(hppa)
-/* Include math.h outside of extern "C", other wise we get errors with
-   pow() g++2.5.8 */
+/* Include math.h outside of extern "C" */
+/* Otherwise, we get errors with pow() g++2.5.8 */
 #include <math.h>
 #endif
 
 extern "C" {
-#define Pointer screwed_Pointer
-#include "oct.h"  // Oct Pointer Structure
-#include "rpc.h"  // Oct Pointer Structure
-#include "local.h" // Defines useful items like TRUE and FALSE
-#undef Pointer
+#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "oct.h"			/* octObject & octId data structures */
+#include "rpc.h"			/* remote procedure calls */
+#include "local.h"			/* Define TRUE and FALSE */
+#undef Pointer				/* undefine rpc's Pointer */
 }
 
 #ifdef __GNUG__
@@ -76,15 +80,15 @@ public:
 
 	// the dispatcher is called by Tcl to handle all extension
 	// commands.
-	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
+	static int dispatcher(ClientData, Tcl_Interp*, int, char*[]);
 
         // the following are the Tcl-callable functions.  Each returns TCL_OK
         // or TCL_ERROR, and may set the Tcl result to return a string
-        int pvOpenWindow (int argc,char** argv);
+        int pvOpenWindow (int argc, char** argv);
 
 protected:
 	// helper functions, not callable directly
-	void AdjustScalePan (Window window, octId facetId);
+	void AdjustScalePan(Window window, octId facetId);
 
 private:
         static PVem* findPVem(Tcl_Interp*);
@@ -96,4 +100,3 @@ private:
 };
 
 #endif		// _PVem_h
-

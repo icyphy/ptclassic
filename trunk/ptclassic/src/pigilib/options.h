@@ -1,3 +1,6 @@
+#ifndef _OPTIONS_H
+#define _OPTIONS_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,5 +32,17 @@ Version identification:
 $Id$
 */
 
-extern int Options();
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
+
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
+
+extern int Options ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
 extern boolean OptInit();
+
+#endif  /* _OPTIONS_H */

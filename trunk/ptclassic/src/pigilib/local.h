@@ -1,3 +1,6 @@
+#ifndef _LOCAL_H
+#define _LOCAL_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -24,8 +27,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#ifndef _local_h
-#define _local_h 1
 
 /* local.h  edg
 Version identification:
@@ -35,6 +36,7 @@ This is a local include file for useful macros and definitions.
 
 #include "ansi.h"
 #include "compat.h"
+
 #ifdef HAS_STDARG
 #include <stddef.h>
 #define RAW_PTR void *
@@ -67,7 +69,7 @@ extern char *getcwd ARGS((char *,size_t));
 extern char *getwd ARGS((char *));
 #endif
 
-/* buffer length constants */
-#define MSG_BUF_MAX 512 /* for messages */
+/* buffer length for messages */
+#define MSG_BUF_MAX 512
 
-#endif
+#endif  /* _LOCAL_H */

@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 #define PTKCODE
 
+#include "compat.h"
+
 #ifdef PTKCODE
 #include "ptkTkSetup.h"
 #endif
@@ -61,18 +63,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  */
 
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
+
 #include "rpcApp.h"
 
 #ifdef PTKCODE
 /* This is defined in octtools/Xpackages/rpc/appInit.c */
-octStatus vemInitializeApplication(/* char **display, RPCSpot spot, lsList
-			    cmdList, long userOptionWord */);
+extern octStatus vemInitializeApplication
+	  ARGS((char **display, RPCSpot *spot,
+		lsList *cmdList, long *userOptionWord));
 
 /* This is defined in octtools/Xpackages/rpc/appInit.c */
-octStatus vemSendMenu(/* RPCFunction array, long count */);
+extern octStatus vemSendMenu ARGS((RPCFunction* array, long count));
 
 /* This is defined in octtools/Xpackages/rpc/appNet.c */
-int RPCApplicationFunctionComplete();
+extern rpcStatus RPCApplicationFunctionComplete();
 #endif
 
 extern long UserMain();

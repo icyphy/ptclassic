@@ -1,5 +1,5 @@
-#ifndef PARAMSTRUCTS_H
-#define PARAMSTRUCTS_H 1
+#ifndef _PARAMSTRUCTS_H
+#define _PARAMSTRUCTS_H 1
 
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -48,24 +48,14 @@ typedef struct ParamStruct ParamType;
 
 struct ParamListStruct {
     int length;		/* length of array */
-    ParamType *array;	/* points to first element */
+    ParamType* array;	/* points to first element */
 };
 typedef struct ParamListStruct ParamListType;
 
 /* Function prototypes */
 
-#ifdef __cplusplus
+extern void FreeFlatPList ARGS((ParamListType *pListPtr));
+extern boolean PStrToPList ARGS((char *pStr, ParamListType *pListPtr));
+extern char* PListToPStr ARGS((ParamListType *pListPtr));
 
-extern void FreeFlatPList(ParamListType *pListPtr);
-extern boolean PStrToPList(char *pStr, ParamListType *pListPtr);
-extern char *PListToPStr(ParamListType *pListPtr);
-
-#else
-
-extern void FreeFlatPList();
-extern boolean PStrToPList();
-extern char *PListToPStr();
-
-#endif
-
-#endif /* PARAMSTRUCTS_H */
+#endif  /* _PARAMSTRUCTS_H */

@@ -1,3 +1,5 @@
+static const char file_id[] = "POct.cc";
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -34,48 +36,39 @@ This file implements a class that adds Ptolemy-specific Oct/Vem commands to
 a Tcl interpreter.  
 
 **************************************************************************/
-static const char file_id[] = "POct.cc";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "POct.h"
-
-#include "SimControl.h"
-
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
 #include <stdio.h>
 #include <string.h>
 
+#include "POct.h"
+#include "SimControl.h"
+
 extern "C" {
-#define Pointer screwed_Pointer
-#include "oct.h"  /* Oct Pointer Structure */
-#include <pwd.h> /* Used for Make Star */
-#include "pigidefine.h" /* Constants used by pigi functions */
+#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "oct.h"			/* octObject data structure */
+#include <pwd.h>			/* Used for Make Star */
+#include "pigidefine.h"			/* Constants used by pigi functions */
 #include "octIfc.h" 
 #include "local.h"
 #include "misc.h"
 #include "paramStructs.h"
-#include "palette.h" /* used by MkSchemIcon */
+#include "palette.h"			/* used by MkSchemIcon */
 #include "util.h"
 #include "exec.h"
 #include "err.h"
 #include "ganttIfc.h"
 #include "icon.h"
 #include "compile.h"
-#include "octMacros.h"    // For GetOrCreatePropStr
-//#include "kernelCalls.h"
-void win_msg(const char*);  // for error dialog box.  FIXME: formalize this
-/* Declare the functions in kernelCalls used by ptkGetTargetNames */
-extern int KcDomainTargets(const char* domain, const char** names, int nMax);
-extern const char*KcDefTarget(char *domain);
-/* Declare the functions in kernelCalls used by ptkGetDomainNames */
-extern int numberOfDomains();
-extern const char* nthDomainName(int n);
-/* Declare the functions in kernelCalls used by ptkSetSeed */
-extern void KcEditSeed(int n);
-/* Declare the functions in kernelCalls used by ptkSetRunUniverse */
-extern boolean KcSetKBDomain(const char* domain);
-extern void KcSetEventLoop(int on);
+#include "octMacros.h"			/* For GetOrCreatePropStr */
+#include "xfunctions.h"
+#include "handle.h"
+#include "kernelCalls.h"		/* define functions prefixed by Kc */
 #undef Pointer
 }
 

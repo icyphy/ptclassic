@@ -63,9 +63,9 @@ long size;                      /* number of items in the array */
    Sets up TkLoop Call
 */
 
-void PrintVersion();
-extern void KcSetEventLoop(/*int on*/);
-extern void PrintErr();
+#include "xfunctions.h"         /* define prototype for PrintVersion */
+#include "vemInterface.h"       /* define prototype for PrintErr */
+#include "kernelCalls.h"	/* define prototype for KcSetEventLoop */
 
 static int
 _ptkAppInit( ip, win)

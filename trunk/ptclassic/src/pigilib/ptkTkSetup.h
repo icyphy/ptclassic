@@ -1,3 +1,6 @@
+#ifndef _PTKTKSETUP_H
+#define _PTKTKSETUP_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -30,4 +33,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Version: $Id$
 */
 
-int ptkTkSetup( /*RPCFunction *funcArray, long size*/);
+#include "rpcApp.h"
+
+extern int ptkTkSetup ARGS((RPCFunction *funcArray, long size));
+extern void ptkMainLoop();
+
+#endif  /* _PTKTKSETUP_H */

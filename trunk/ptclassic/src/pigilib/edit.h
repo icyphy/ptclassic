@@ -1,3 +1,6 @@
+#ifndef _EDIT_H
+#define _EDIT_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,34 +32,33 @@ Version identification:
 $Id$
 */
 
-#ifdef __cplusplus
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-/* Define lsList and RPCSpot data types, respectively */
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
 #include "list.h"
+#include "oct.h"
 #include "rpc.h"
 
-extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int EditFormalParams(octObject *galFacetPtr);
-extern int EditParams(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int EditPragmas(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcFindName ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
+extern int EditFormalParams ARGS((octObject *galFacetPtr));
+extern int EditParams ARGS((RPCSpot *spot, lsList cmdList,
+			    long userOptionWord));
+extern int EditPragmas ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
 extern boolean OpenPaletteInit();
-extern int RpcOpenPalette(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcEditComment(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcEditDomain(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcEditSeed(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcEditTarget(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcOpenPalette ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
+extern int RpcEditComment ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
+extern int RpcEditDomain ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
+extern int RpcEditSeed ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
+extern int RpcEditTarget ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
 
-#else
-
-extern int RpcFindName();
-extern int EditFormalParams();
-extern int EditParams();
-extern int EditPragmas();
-extern boolean OpenPaletteInit();
-extern int RpcOpenPalette();
-extern int RpcEditComment();
-extern int RpcEditDomain();
-extern int RpcEditSeed();
-extern int RpcEditTarget();
-
-#endif
+#endif   /* _EDIT_H */

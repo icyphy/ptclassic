@@ -1,3 +1,6 @@
+#ifndef _PTKTCLIFC_H
+#define _PTKTCLIFC_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -28,8 +31,6 @@ $Id$
 */
 
 /* Register various Tcl functions used by pigi */
-#if defined(__cplusplus)
-void registerTclFns(Tcl_Interp *interp);
-#else
-void registerTclFns();
-#endif
+extern void registerTclFns ARGS((Tcl_Interp *interp));
+
+#endif  /* _PTKTCLIFC_H */

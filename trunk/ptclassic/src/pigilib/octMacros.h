@@ -1,3 +1,6 @@
+#ifndef _OCTMACROS_H
+#define _OCTMACROS_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -60,7 +63,7 @@ From: /usr5/octtools/src/octflat/my.h copied 8/7/88
 
 #define GetByPropName(c, t, s)				\
     ((t)->type=OCT_PROP, (t)->contents.prop.name=s, octGetByName(c,t))
-
+
 /*
  *  Macro's to call octCreate()
  *	c = the container
@@ -144,13 +147,13 @@ boolean CreateOrModifyPropReal();
 boolean CreateOrModifyPropStr();
 boolean GetOrCreatePropInt();
 boolean GetOrCreatePropReal();
+
 #ifndef __cplusplus
 /* These are defined in OctIfc.c */
 boolean GetOrCreatePropStr();
 boolean OpenFacet();
 #endif
 
-
 /*
  *  Get object by id
  */
@@ -174,3 +177,5 @@ boolean OpenFacet();
 	ErrAdd(octErrorString()); \
 	return(FALSE); \
     }
+
+#endif  /* _OCTMACROS_H */

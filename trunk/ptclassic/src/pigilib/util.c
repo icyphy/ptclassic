@@ -93,8 +93,6 @@ char *string;
     return(strcpy((char *) calloc(strlen(string)+1, sizeof(char)), string));
 }
 
-extern char* KcExpandPathName();
-
 /*
 Use the ptolemy kernel expansion call -- kennard
 */
@@ -363,8 +361,6 @@ char *item2;
     }
     return(FALSE);
 }
-
-extern char* curDomainName();
 
 /* Given the spot that locates the curson in a facet, set
    the KnownBlocks currentDomain to correspond to the domain

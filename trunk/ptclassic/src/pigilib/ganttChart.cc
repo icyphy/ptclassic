@@ -1,4 +1,5 @@
 static const char file_id[] = "ganttChart.cc";
+
 /* 
 SCCS Version identification :
 $Id$
@@ -34,16 +35,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Routines for talking to the Gantt chart display
 */
 
-/*
- * Do the right thing for sol2 boolean defs.  compat.h must be included
- * first so sys/types.h is included correctly.
- */
+// Do the right thing for sol2 boolean defs.  compat.h must be included
+// first so sys/types.h is included correctly.
+#include "sol2compat.h"
 
 #include "PTcl.h"
 #include "ganttChart.h"
 
-/* functions added to handle PTcl and pigi compatability */
-/* needed to avoid interp calls in cg domain */
+// functions added to handle PTcl and pigi compatability
+// needed to avoid interp calls in cg domain
 
 void
 GanttChart::beginGantt(ostream& /*out*/, char *argstring) {

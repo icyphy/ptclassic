@@ -1,4 +1,5 @@
 static const char file_id[] = "kernelCalls.cc";
+
 /* 
 Version identification:
 $Id$
@@ -35,7 +36,9 @@ Some code borrowed from Interpreter.cc, see this file for more info.
 Programmer: J. Buck, E. Goei, E. A. Lee
 */
 
-#include "kernelCalls.h"
+// The order of include files is very tricky here.
+
+#include "compat.h"
 #include "InterpUniverse.h"
 #include "StringList.h"
 #include "Scheduler.h"
@@ -52,7 +55,16 @@ Programmer: J. Buck, E. Goei, E. A. Lee
 #include <ctype.h>
 
 extern "C" {
+#define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
+#include "err.h"
 #include "ptk.h"
+#include "xfunctions.h"
+#undef Pointer
+}
+
+// Although kernelCalls.cc is a C++ file, kernelCalls.h is a C include file
+extern "C" {
+#include "kernelCalls.h"		/* define functions prefixed by Kc */
 }
 
 // Include the global ptcl object (contains the universe) - aok

@@ -88,10 +88,10 @@ char * omsg;
 
 void
 accum_string(string)
-	char *string;
+const char *string;
 {
-    Tcl_SetVar(ptkInterp,"ptkProfileString",string,
-	TCL_APPEND_VALUE | TCL_GLOBAL_ONLY);
+    Tcl_SetVar(ptkInterp, "ptkProfileString", string,
+	       TCL_APPEND_VALUE | TCL_GLOBAL_ONLY);
 }
 
 

@@ -1,3 +1,5 @@
+static const char file_id[] = "PVem.cc";
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -34,31 +36,31 @@ This file implements a class that adds Ptolemy-specific Vem commands to
 a Tcl interpreter.  
 
 **************************************************************************/
-static const char file_id[] = "PVem.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "PVem.h"
-
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
 #include <stdio.h>
 #include <string.h>
 
+#include "PVem.h"
+
 extern "C" {
-#define Pointer screwed_Pointer
-#include "oct.h"  // Oct Pointer Structure
+#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "oct.h"			/* define octObject data structure */
+#include "rpc.h"			/* define remote procedure calls */
+#include "octIfc.h"
 #include "handle.h"
 #include "vemInterface.h"
 #include "octMacros.h"
-#include "rpc.h"
-#include "octIfc.h"
 #undef Pointer
 }
 
 // FIXME: This include is only needed for the "quote" macro
 //        Seems silly to include so much extra baggage - aok
 #include "isa.h"
-
 
 // we want to be able to map Tcl_interp pointers to PVem objects.
 // this is done with a table storing all the PVem objects.

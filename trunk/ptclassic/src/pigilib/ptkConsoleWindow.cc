@@ -1,4 +1,5 @@
 static const char file_id[] = "ptkConsoleWindow.cc";
+
 /* 
 SCCS Version identification :
 $Id$
@@ -36,12 +37,12 @@ pigi and feeds stdout to that same window.
 
 */
 
-/*
- * Do the right thing for sol2 boolean defs.  compat.h must be included
- * first so sys/types.h is included correctly.
- */
+// Do the right thing for sol2 boolean defs.  compat.h must be included
+// first so sys/types.h is included correctly.
 #include "sol2compat.h"
 
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
 #include <stdio.h>
 #include <stdlib.h>	/* for exit() */
 #include <unistd.h>	/* for read() */
@@ -57,9 +58,7 @@ extern "C" {
 #include "ptk.h"
 }
 
-
 // The following function is taken directly from tkMain.c
-
 
 /*
  *----------------------------------------------------------------------

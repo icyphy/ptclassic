@@ -1,3 +1,6 @@
+#ifndef _XFUNCTIONS_H
+#define _XFUNCTIONS_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -30,6 +33,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
    $Id$
 */
 
-void win_msg(/* char * omsg */);
+extern void win_msg ARGS((char *omsg));
+extern void accum_string ARGS((const char *string));
+extern void clr_accum_string();
+extern void pr_accum_string();
+extern void PrintVersion ();
 
-void PrintVersion ();
+#endif  /* _XFUNCTIONS_H */

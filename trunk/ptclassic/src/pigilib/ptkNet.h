@@ -30,4 +30,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Version: $Id$
 */
 
-int ptkRPCFileHandler (/*RPCFunction funcArray[], long size */);
+#include "rpcApp.h"
+
+extern int ptkRPCFileHandler ARGS((RPCFunction funcArray[], long size));

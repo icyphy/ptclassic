@@ -1,3 +1,6 @@
+#ifndef _VEMINTERFACE_H
+#define _VEMINTERFACE_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -28,45 +31,29 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 */
-#ifdef __cplusplus
-#ifndef OCT_H
+
 /* Do the right thing for sol2 boolean defs.  oct.h must be included
  * first so sys/types.h is included correctly.  See octtools/include/port.h
+ * Also, define the octObject data structure
  */
 #include "oct.h"
-#endif
+#include "rpc.h"
 
+extern void ViSetErrWindows ARGS((boolean state));
+extern boolean ViGetErrWindows();
 extern void PrintCon();
 extern void PrintConLog();
-extern void PrintErr();
-extern void PrintDebug();
-extern void PrintDebugSet();
+extern void PrintErr ARGS((char *s));
+extern void PrintDebug ARGS((char *s));
+extern void PrintDebugSet ARGS((boolean state));
 extern boolean PrintDebugGet();
-extern void ViInit();
+extern void ViInit ARGS((char *name));
 extern void ViTerm();
 extern char *ViGetName();
-extern boolean MyCopyFacet();
-extern boolean ViKillBuf(octObject *facetPtr);
-extern boolean ViGetErrWindows();
-extern void ViSetErrWindows(boolean state);
+extern boolean ViKillBuf ARGS((octObject *facetPtr));
+extern vemStatus dmMultiTextTrim ARGS((char *name, int nItems,
+				       dmTextItem items[]));
 
-#else /* __cplusplus */
+#define ViDone()	ViTerm(); vemPrompt(); return (RPC_OK)
 
-extern void PrintCon();
-extern void PrintConLog();
-extern void PrintErr();
-extern void PrintDebug();
-extern void PrintDebugSet();
-extern boolean PrintDebugGet();
-extern void ViInit();
-extern void ViTerm();
-extern char *ViGetName();
-extern boolean MyCopyFacet();
-extern boolean ViKillBuf(/* octObject *facetPtr */);
-extern boolean ViGetErrWindows();
-extern void ViSetErrWindows(/* boolean state */);
-#define ViDone() \
-    ViTerm(); \
-    vemPrompt(); \
-    return (RPC_OK);
-#endif /* __cplusplus */
+#endif  /* _VEMINTERFACE_H */

@@ -1,5 +1,6 @@
-#ifndef KERNELCALLS_H
-#define KERNELCALLS_H 1
+#ifndef _kernelCalls_h
+#define _kernelCalls_h 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,6 +30,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* kernelCalls.h  edg
 Version identification:
 $Id$
+
+This is a C include file, and NOT a C++ include file.
 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
@@ -36,107 +39,49 @@ $Id$
  */
 #include "sol2compat.h"
 
-#ifdef __cplusplus
-
-#include "InterpGalaxy.h"
-#include "Universe.h"
-
-#ifndef PARAMSTRUCTS_H
 #include "paramStructs.h"
-#endif
-#ifndef MKICON_H
 #include "mkIcon.h"
-#endif
 
-extern "C" {
-extern boolean KcInitLog(const char* file);
-extern void KcLog(const char* str);
+extern boolean KcInitLog ARGS((const char* file));
+extern void KcLog ARGS((const char* str));
 extern void KcFlushLog();
-extern void testParse(const char* name);
-extern const char* callParseClass (char* name);
-extern const char * KcDomainOf(char* name);
-extern void KcClearUniverse(const char* name);
-extern boolean KcInstance(char *name, char *ako, ParamListType* pListPtr);
-extern boolean KcMakeState(char *name, char *type, char *initVal);
-extern boolean KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width);
-extern boolean KcAlias(char *fterm, char *inst, char *aterm);
-extern boolean KcSetKBDomain(const char* domain);
-extern const char*curDomainName();
-extern boolean KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget);
-extern boolean KcEndDefgalaxy(const char* outerDomain);
-extern void KcSetDesc(const char* desc);
+extern void testParse ARGS((const char* name));
+extern const char* callParseClass ARGS((char* name));
+extern const char* KcDomainOf ARGS((char* name));
+extern boolean KcInstance ARGS((char* name, char* ako, ParamListType* pListPtr));
+extern boolean KcMakeState ARGS((char* name, char* type, char* initVal));
+extern boolean KcConnect ARGS((char* inst1, char* t1, char* inst2, char* t2,
+			 char* delay, char* width));
+extern boolean KcAlias ARGS((char* fterm, char* inst, char* aterm));
+extern boolean KcSetKBDomain ARGS((const char* domain));
+extern const char* curDomainName();
+extern boolean KcDefgalaxy ARGS((const char* galname, const char* domain,
+			   const char* innerTarget));
+extern boolean KcEndDefgalaxy ARGS((const char* outerDomain));
+extern void KcSetDesc ARGS((const char* desc));
 extern boolean KcDisplaySchedule();
-extern void KcEditSeed(int n);
-extern boolean KcIsKnown(char *className);
-extern boolean KcIsCompiledInStar(char *className);
-extern boolean KcGetTerms(char* name, TermList* terms);
-extern boolean KcIsMulti(char* blockname, char* portname);
-extern boolean KcGetParams(char* name, ParamListType* pListPtr);
-extern boolean KcGetTargetParams(char* name, ParamListType* pListPtr);
-extern boolean KcModTargetParams(ParamListType* pListPtr);
-extern boolean KcInfo(char* name, char** info);
-extern int KcProfile (char* name);
-extern boolean KcNumPorts (char* starname, char* portname, int numP);
+extern void KcEditSeed ARGS((int n));
+extern boolean KcIsKnown ARGS((char* className));
+extern boolean KcIsCompiledInStar ARGS((char* className));
+extern boolean KcGetTerms ARGS((char* name, TermList* terms));
+extern boolean KcIsMulti ARGS((char* blockname, char* portname));
+extern boolean KcGetParams ARGS((char* name, ParamListType* pListPtr));
+extern boolean KcGetTargetParams ARGS((char* name, ParamListType* pListPtr));
+extern boolean KcModTargetParams ARGS((ParamListType* pListPtr));
+extern boolean KcInfo ARGS((char* name, char** info));
+extern int KcProfile ARGS((char* name));
+extern boolean KcNumPorts ARGS((char* starname, char* portname, int numP));
 extern int numberOfDomains();
-extern const char* nthDomainName(int n);
-extern int KcNode (const char* name);
-extern int KcNodeConnect(const char* inst, const char* term, const char* node);
-extern int KcDomainTargets(const char* domain, const char** names, int nMax);
-extern int KcSetTarget(const char* targetName);
-extern const char* KcDefTarget(const char* domain);
-extern void KcSetAnimationState(int s);
-extern int KcGetAnimationState();
-extern const char* KcExpandPathName(const char* name);
+extern const char* nthDomainName ARGS((int n));
+extern int KcNode ARGS((const char* name));
+extern int KcNodeConnect ARGS((const char* inst, const char* term, const char* node));
+extern int KcDomainTargets ARGS((const char* domain, const char** names, int nMax));
+extern int KcSetTarget ARGS((const char* targetName));
+extern const char* KcDefTarget ARGS((const char* domain));
+extern const char* KcExpandPathName ARGS((const char* name));
 extern void KcCatchSignals();
-
-
-/* from pigiLoader.h */
-extern void KcLoadInit (const char* argv0);
-extern void KcDoStartupLinking();
-extern int FindStarSourceFile(const char* dir,const char* dom,const char* base, char* buf);
-extern int KcCompileAndLink (const char* name, const char* idomain, const char* srcDir, int permB, const char* linkArgs);
-extern int KcLoad (const char* iconName, int permB, const char* linkArgs);
-/* error handling function for pigi */
-extern void ErrAdd(const char*);
-extern	void clr_accum_string();
-extern	void accum_string (const char*);
-extern	void pr_accum_string();
-extern	void FindClear();
-}
-#else /* __cplusplus */
-/* Functions defined in kernelCalls.h */
-extern boolean KcInstance(/*char *name, char *ako, ParamListType* pListPtr*/);
-extern boolean KcMakeState(/*char *name, char *type, char *initVal*/);
-extern boolean KcConnect(/*char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width*/);
-extern boolean KcAlias(/*char *fterm, char *inst, char *aterm*/);
-extern boolean KcSetKBDomain(/*const char* domain*/);
-extern boolean KcDefgalaxy(/*const char *galname, const char *domain, const char* innerTarget*/);
-extern boolean KcEndDefgalaxy(/*const char* outerDomain*/);
-extern boolean KcDisplaySchedule();
-extern boolean KcIsKnown(/* char *className */);
-extern boolean KcIsCompiledInStar(/* char *className */);
-extern boolean KcGetTerms(/* char* name, TermList* terms */);
-extern boolean KcModTargetParams(/* ParamListType* pListPtr */);
-extern boolean KcIsMulti(/* char* blockname, char* portname */);
-extern boolean KcGetParams(/* char* name, ParamListType* pListPtr */);
-extern boolean KcGetTargetParams(/* char* name,
-				    ParamListType* pListPtr */);
-extern int KcProfile(/* char* name */);
-extern int numberOfDomains();
-extern int KcNodeConnect(/* const char* inst, const char* term, const
-			    char* node */); 
-extern int KcNode (/* const char* name */);
-
 extern int KcEventLoopActive();
-extern void KcSetEventLoop(/* int on */);
+extern void KcSetEventLoop ARGS((int on));
+extern const char* HashString ARGS((const char* arg));
 
-/* error handling function for pigi */
-extern void ErrAdd(/* const char* */);
-extern	void clr_accum_string();
-extern	void accum_string (/* const char* */);
-extern	void pr_accum_string();
-extern	void FindClear();
-
-#endif /* __cplusplus */
-
-#endif /* KERNELCALLS_H */
+#endif /* _kernelCalls_h */

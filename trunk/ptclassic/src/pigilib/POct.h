@@ -1,3 +1,6 @@
+#ifndef _POct_h
+#define _POct_h 1
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -33,17 +36,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 This file implements a class that adds Ptolemy-specific Oct/Vem commands to
 a Tcl interpreter.  
 
-**************************************************************************/
+This is a C++ include file.
 
-#ifndef _POct_h
-#define _POct_h 1
+**************************************************************************/
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
 #include "sol2compat.h"
 
+extern "C" {
 #include "tcl.h"
+}
+
 #include "TclObj.h"
 #include "StringList.h"
 
@@ -54,8 +59,8 @@ a Tcl interpreter.
 #endif
 
 extern "C" {
-#define Pointer screwed_Pointer
-#include "oct.h"			/* Oct Pointer Structure */
+#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "oct.h"			/* octObject data structure */
 #include "paramStructs.h"
 #include "ganttIfc.h"
 #undef Pointer
@@ -142,15 +147,15 @@ private:
 	// Sets Bus Parameters in the Oct data base
 	// Works by first getting a prop from the oct data base, then modifying
 	// it and finally sending it back.
-	int SetBusParams( octObject*, ParamListType* );
+	int SetBusParams(octObject*, ParamListType* );
 
 	// Sets Delay Parameters in the Oct data base
 	// Works by first getting a prop from the oct data base, then modifying
 	// it and finally sending it back.
-	int SetDelayParams( octObject *, ParamListType *);
+	int SetDelayParams(octObject *, ParamListType *);
 
 	// Deletes all of the elements of the passed pList
-	void DeletePList( ParamListType* );
+	void DeletePList(ParamListType* );
 
 	// Converts a parameter list string of the form:
 	//  {name1 type1 value1} {name2 type2 value2} ...

@@ -1,5 +1,5 @@
-#ifndef HANDLE_H
-#define HANDLE_H 1
+#ifndef _HANDLE_H
+#define _HANDLE_H 1
 
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -32,13 +32,10 @@ Version identification:
 $Id$
 */
 
-/* functions to convert from Octobjects to string "handles" */
+/* functions to convert from octObjects to string "handles" */
+/* defined in "POct.cc" */
 
-#ifdef __cplusplus
-extern int ptkHandle2OctObj( char *stringValue, octObject *objPtr );
-extern void ptkOctObj2Handle( octObject *objPtr, char *stringValue );
-#else
-extern int ptkHandle2OctObj ();
-extern void ptkOctObj2Handle ();
-#endif
-#endif /* HANDLE_H */
+extern int ptkHandle2OctObj ARGS((char *stringValue, octObject *objPtr));
+extern void ptkOctObj2Handle ARGS((octObject *objPtr, char *stringValue));
+
+#endif /* _HANDLE_H */

@@ -1,4 +1,5 @@
 static const char file_id[] = "XError.cc";
+
 /*******************************************************************
 SCCS Version identification :
 $Id$
@@ -37,25 +38,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
  PrintErr error message handler in pigi.
 
 *******************************************************************/
-extern "C" {
-	void PrintErr(const char*);
-	void PigiErrorMark(const char*);
-	void FindClear();
-}
 
-/* Do the right thing for sol2 boolean defs.  compat.h must be included
- * first so sys/types.h is included correctly.
- */
+// Do the right thing for sol2 boolean defs.  compat.h must be included
+// first so sys/types.h is included correctly.
 #include "sol2compat.h"
 
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
+#include <stdio.h>
+#include <string.h>
 #include <stream.h>
+
 #include "Error.h"
 #include "Scheduler.h"
 #include "miscFuncs.h"
 #include "NamedObj.h"
 #include "PtGate.h"
-#include "ptk.h"
 #include "StringList.h"
+
+extern "C" {
+#define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
+#include "vemInterface.h"		/* define PrintErr */
+#include "exec.h"			/* define PigiErrorMark */
+#include "ganttIfc.h"			/* define FindClear */
+#include "ptk.h"
+#undef Pointer
+}
 
 // the gate object ensures that messages come out in one piece even
 // with multi-threading.
