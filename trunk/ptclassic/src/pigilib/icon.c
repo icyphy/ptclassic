@@ -113,17 +113,30 @@ char *codeDir, **iconDir;
 /* generate a command line to edit a file */
 extern char* getenv();
 
-static char defaultDisplay[] = "tycho %s";
-
 static void genDispCommand(buf, file, background)
 char* buf;
 const char* file;
 int background;
 {
     char* dispCmd = getenv("PT_DISPLAY");
-    if (dispCmd == 0) dispCmd = defaultDisplay;
-    sprintf(buf, dispCmd, file);
-    if (background) strcat(buf, "&");
+    if (dispCmd == 0) {
+	*buf = '\0';
+    } else {
+	sprintf(buf, dispCmd, file);
+	if (background) strcat(buf, "&");
+    }
+}
+
+/* Start Tycho, if it has not already been started. */
+static void startTycho() {
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
+	"if {![info exists TYCHO]} {",
+	"   set argc 1\n",
+	"   set argv {-noconsole}\n",
+	"   source $ptolemy/tycho/kernel/Tycho.tcl",
+	"}\n",
+	"::tycho::TopLevel::exitWhenNoMoreWindows 0\n",
+	(char *)NULL) );
 }
 
 /* 8/3/90
@@ -136,13 +149,27 @@ const char* fileName;
 {
     char buf[512];
     genDispCommand(buf, fileName, TRUE);
-    PrintDebug(buf);
-    if (util_csystem(buf)) {
-	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
-	ErrAdd(buf);
-	return (FALSE);
+    if (*buf == '\0') {
+	PrintDebug("Invoking Tycho editor");
+	startTycho();
+	if (( Tcl_VarEval(ptkInterp,
+		"::tycho::File::openContext ",
+		fileName,
+		(char *)NULL) ) != TCL_OK) {
+	    sprintf(buf, "Cannot invoke Tycho editor for '%s'", fileName);
+	    ErrAdd(buf);
+	    return (FALSE);
+	}
+	return (TRUE);
+    } else {
+	PrintDebug(buf);
+	if (util_csystem(buf)) {
+	    sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
+	    ErrAdd(buf);
+	    return (FALSE);
+	}
+	return (TRUE);
     }
-    return (TRUE);
 }
 
 /*
@@ -435,7 +462,6 @@ long userOptionWord;
     ViDone();
 }
 
-/* Start Tycho, if it has not already been started. */
 int
 RpcTycho(spot, cmdList, userOptionWord)
 RPCSpot *spot;
@@ -445,15 +471,11 @@ long userOptionWord;
     ViInit("Tycho");
     ErrClear();
 
+    startTycho();
+
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
-	"if {![info exists TYCHO]} {",
-	"   set argc 1\n",
-	"   set argv {-noconsole}\n",
-	"   source $ptolemy/tycho/kernel/Tycho.tcl",
-	"}\n",
-	"::tycho::TopLevel::exitWhenNoMoreWindows 0\n",
 	"set tychoconsole [autoName .console]\n",
-	"::tycho::Console $tychoconsole -text {Welcome to Tycho in Pigi\n} -geometry +0-20\n",
+	"::tycho::Console $tychoconsole -text {Welcome to Tycho in Pigi\n} -geometry -10+0\n",
 	"wm deiconify $tychoconsole",
 	(char *)NULL) );
 
