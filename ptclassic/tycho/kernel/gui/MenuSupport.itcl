@@ -211,8 +211,8 @@ body ::tycho::MenuSupport::add {type tag inMenu args} {
     if { $type == "cascade" } {
     # Create a sub-menu
 	set parentmenu($tag) $menupath($inMenu)
-	set menupath($tag) $menupath($inMenu).menu$tag
-	itk_component add $menupath($tag) {
+	set menupath($tag) $menupath($inMenu).$tag
+	itk_component add $tag {
 	    menu $menupath($tag) -tearoff 0
 	} {
 	    keep -background -cursor -font
@@ -408,8 +408,7 @@ body ::tycho::MenuSupport::index {tag} {
 
 #####################################################################
 #### inmenu
-# Return the tag of the menu containing the given menu. This
-# may occasionally be needed.
+# Return the tag of the menu containing the given menu.
 #
 body ::tycho::MenuSupport::inmenu {tag} {
     # Check if the entry exists
@@ -417,7 +416,6 @@ body ::tycho::MenuSupport::inmenu {tag} {
 	error "Menu entry $tag does not exist"
     }
     set parent [lindex [split $parentmenu($tag) "."] end]
-    regsub {^menu} $parent {} parent
     return $parent
 }
 
@@ -443,7 +441,7 @@ body ::tycho::MenuSupport::insert {type tag before args} {
     # Create a sub-menu
     if { $type == "cascade" } {
 	set parentmenu($tag) $parentmenu($before)
-	set menupath($tag) $parentmenu($before).menu$tag
+	set menupath($tag) $parentmenu($before).$tag
 	itk_component add $menupath($tag) {
 	    menu $menupath($tag) -tearoff 0
 	} {
