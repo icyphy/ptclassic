@@ -2,8 +2,8 @@ defstar {
 	name { BusToNum }
 	domain { SDF }
 	desc {
-This will receive as its input, a bus (with 'bits' no of lines ) 
-and then output a signed integer corresponding to the value of this 
+Takes in a bus (with 'bits' no of lines) 
+and outputs a signed integer corresponding to the value of this 
 binary number.
 	}
 	author { Asawaree Kalavade }
