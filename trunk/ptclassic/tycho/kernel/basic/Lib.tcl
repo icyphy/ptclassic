@@ -57,6 +57,9 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {} \
             {::tycho::view EditHTML -file {%s}} \
             {HTML editor} "text"
+    ::tycho::File::registerExtensions {.gif .ppm .pgm .xbm} \
+            {::tycho::view HTML -image {%s} -toolbar 1} \
+            {}
     ::tycho::File::registerExtensions {.html .htm .htl} \
             {::tycho::view HTML -file {%s} -toolbar 1} \
             {}

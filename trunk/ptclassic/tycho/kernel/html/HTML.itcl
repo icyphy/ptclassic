@@ -98,6 +98,9 @@ class ::tycho::HTML {
     # The directory for relative references to images and the like,
     itk_option define -directory directory Directory {}
 
+    # Display an image by wrapping it html and displaying it
+    itk_option define -image image Image {}
+
     # Offset from the nominal 14 points for the font sizes.
     itk_option define -size size Size 2
 
@@ -229,6 +232,16 @@ class ::tycho::HTML {
 #
 configbody ::tycho::HTML::size {
     HMset_state [textWinName] -size $itk_option(-size)
+}
+
+#########################################################################
+#### -image configuration
+# Generate html that will display the image file.
+#
+configbody ::tycho::HTML::image {
+    set image $itk_option(-image)
+    clear
+    insertData "<img src=\"$image\" alt=\"$image\">"
 }
 
 ###################################################################
