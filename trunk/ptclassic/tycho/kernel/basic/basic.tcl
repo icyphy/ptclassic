@@ -47,7 +47,7 @@ if { [lsearch -exact $auto_path $env(BASIC_LIBRARY)] == -1 } {
 
 # Set global variables used by Tycho packages
 # FIXME: why is this here?
-if [info exists env(TYCHO) {
+if [info exists env(TYCHO)] {
     set TYCHO $env(TYCHO)
     set tycho $env(TYCHO)
 }
