@@ -662,6 +662,60 @@ after 1000
 # So we can delete
 .f save
 
+############################################################################
+# toggleReadOnly{}
+#
+# NOTE: These tests will probably fail on Windows and Mac...
+#
+# NOTE: Doesn't test file under revision control.
+#
+test File-toggleReadOnly-1 {Toggle an existing file} {
+    _mkfile $foo {I had a little beetle}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Do it
+    set result [file writable $foo]
+    .f toggleReadOnly
+    lappend result [file writable $foo]
+    .f toggleReadOnly
+    lappend result [file writable $foo]
+} {1 0 1}
+update
+after 1000
+
+test File-toggleReadOnly-2 {Non-existent file} {
+    _rmfile $foo
+    _file
+    # Wait around for a while...
+    update
+    after 1000
+    .f insertData {Alexander was his name}
+    # Script to answer dialog
+    set TY_TEST_MODAL {
+        {
+            # Yes, save changes
+            %0 invoke yes
+        }
+        {
+            %0 clear
+            %0 insert entry $foo
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Do it
+    .f toggleReadOnly
+    set result [file writable $foo]
+    .f toggleReadOnly
+    lappend result [file writable $foo]
+} {0 1}
+update
+after 1000
+
+
 ########################################################################
 ## CLEAN UP
 catch {file delete $foo}
