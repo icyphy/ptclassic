@@ -35,9 +35,13 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 MISC_FILES = \
-	mkcorona \
 	mkallcorona \
+	mkcorona \
 	vhdl_done.tk \
+	wf_sequencer_declaratives.vhd \
+	wf_sequencer_mainbody.vhd \
+	wildforce.arch \
+	wordlength \
 	wordgui_pause.tk
 
 # We don't include common.mk since we don't use the compiler here
