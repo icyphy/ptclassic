@@ -35,14 +35,14 @@
 # of a vertical ``slider'' as used in audio equipment. It also
 # provides a good example of how Tycho's <i>Slate</i> widget can
 # be used to (relatively) quickly create new interactive components.
-#<p>
+# <p>
 # To create a simple slider:
 # <tcl><pre>
 #     ::tycho::Slider .s -text Fred -resolution 0.5 -command puts
 #     pack .s
 #     wm deiconify .
 # </pre></tcl>
-#<p>
+# <p>
 # To move the slider, use the left button on the horizontal ``bar''
 # and click and drag. Clicking the left button anywhere near the vertical
 # ``trough'' but not on the bar will cause the bar to move in increments.
@@ -50,16 +50,16 @@
 # bar to jump to that position; it can then be dragged.
 #
 # Slider uses the following interactor classes:
-#<p>
+# <p>
 # <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
 # <i>Interactor</i></a>: the abstract interactor superclass
-#<br>
+# <br>
 # <a href="../../../../slate/interactors/doc/codeDoc/Alonger.html">
 # <i>Alonger</i></a>: moves the bar vertically
-#<br>
+# <br>
 # <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
 # <i>Stepper</i></a>: moves the bar in discrete steps
-#<br>
+# <br>
 # <a href="../../../../slate/interactors/doc/codeDoc/Repeater.html">
 # <i>Repeater</i></a>: moves the bar in increments while the mouse is pressed.
 #
