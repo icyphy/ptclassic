@@ -45,7 +45,7 @@ class ::tycho::YesNoCancel {
 
     # The command to execute on a yes response.
     itk_option define -cancelcommand cancelcommand CancelCommand \
-	    "DialogWindow::answer -1"
+	    "::tycho::DialogWindow::answer -1"
 
     constructor {args} {}
 }
@@ -57,15 +57,15 @@ body ::tycho::YesNoCancel::constructor {args} {
 
     # Pack the cancel button
     addButton cancel -text "Cancel <Esc>" \
-	    -command "$this execCommand -cancelcommand; \
+	    -command [code "$this execCommand -cancelcommand; \
 	    $this nextWindow;
-	    delete object $this"
+	    delete object $this"]
 
     # Change the keyboard accelerator for the No button.
     $itk_component(bbox) buttonconfigure no -text "No <Del>"
 
-    bind $prefix <Delete> "$this invoke no"
-    bind $prefix <Escape> "$this invoke cancel"
+    bind $prefix <Delete> [code "$this invoke no"]
+    bind $prefix <Escape> [code "$this invoke cancel"]
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
