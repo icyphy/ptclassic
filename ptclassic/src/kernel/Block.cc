@@ -120,7 +120,8 @@ Block :: print(int verbose) const
 	StringList out;
 	return out << "Block: " << fullName() << "\n"
 		   << "Descriptor: " << descriptor() << "\n"
-		   << printPorts("block",verbose);
+		   << printPorts("block",verbose)
+		   << printStates("block",verbose);
 }
 
 void Block :: initialize()
