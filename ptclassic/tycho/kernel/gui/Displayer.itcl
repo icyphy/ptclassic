@@ -445,7 +445,7 @@ body ::tycho::Displayer::destructor {} {
 # there will be a special bar, and default means it will share the
 # default bar. (Note there is no default toolbar. (Should there be?))
 #
-# This method calls the protected method initialize of the view. The
+# This method calls the attachDisplayer method of the view. The
 # view is not displayed -- call <code>showView</code> to do this.
 #
 body ::tycho::Displayer::attachView {view args} {
@@ -531,9 +531,8 @@ body ::tycho::Displayer::attachView {view args} {
         set toolwidget {}
     }
 
-    # Call initialize, a protected method of every view
-    @scope [$view info class] \
-            $view initialize $menuwidget $statuswidget $toolwidget
+    # Call attachDisplayer on the View
+    $view attachDisplayer $this $menuwidget $statuswidget $toolwidget
 }
 
 #######################################################################
