@@ -45,7 +45,17 @@
 # It would be nice if there were an automatic way of getting
 # all buttons the right width, but right now there just isn't...
 #
-# FIXME: Figure out if it's possible to bind to a window mapping
+# Examples:
+# <pre><tcl>
+#    catch {delete object .b}
+#    ::tycho::ButtonBox .b
+#    .b add foo -text Foo -command {puts Foo!}
+#    .b add bar -text Bar -command {puts Bar!}
+#    pack .b
+#    wm deiconify .
+# </tcl></pre>
+#
+# Note: Figure out if it's possible to bind to a window mapping
 # event and adjust the column -minsize option based on the measured
 # button widths.
 #
