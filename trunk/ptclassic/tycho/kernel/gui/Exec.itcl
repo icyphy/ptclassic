@@ -95,6 +95,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
         set execWidget [::tycho::view Monitor -toolbar 1 \
             -dir $dir -command $command -autostart 1 -autodestroy 5]
     } else {
+        [$execWidget displayer] raiseWindow
         if {$command!={}} {
             $execWidget configure -command $command
         }
@@ -373,7 +374,14 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     } else {
 	# There is no NONBLOCK I/O under windows, so we just
 	# run the process and hang the UI while it is running and then
-	# return. 
+	# return.
+
+        # Under Windows, prepend 'command.com /c' if the command is
+        # less than 89 chars.  If the command is more than 89 chars
+        # then either we get no results, or a 'could not execute' string.
+        if {[string length $commandToExec] < 89} {
+            set commandToExec "command.com /c $commandToExec"
+        }
 	if [ catch {eval exec $commandToExec} errMsg] {
 	    set $statusVariableName "abnormal"
 	} else {
