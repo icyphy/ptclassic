@@ -1,4 +1,5 @@
-# -[Mon Mar 21 12:45:51 1994 by cxh]-
+# Makefile for $PTOLEMY/src/gnu, used to compile the GNU tools
+# $Id$
 # Copyright (c) 1994 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -21,7 +22,7 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 # Version:
-# $Id$
+# @(#)makefile	1.1 3/21/94
 
 # src/gnu/Makefile
 # You should not need to edit this file, merely set the
@@ -67,7 +68,7 @@ all: configure bin install
 .PHONY:	configure bin install
 
 # mach-vars is a simple script that returns the 'right' value for a machine
-MACH=`$(GNU_SRC)/../mach-vars MACH`
+MACH=`$(GNU_SRC)/gcc/config.guess`
 
 # Minor fixes to the configure procedure.  These changes
 # are necessary if you are using SunOS make.  If you already have
@@ -108,7 +109,7 @@ $(BINDIR):
 install: $(BINDIR) 
 	(cd $(GNU_OBJ); $(MAKE) MAKEINFO="$(MAKEINFO)" install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
-	-(cd $(BINDIR); rm gperf genclass unprotoize protoize hp* dec* c++ make.old)
+	-(cd $(BINDIR); rm -f gperf genclass unprotoize protoize hp* dec* c++ make.old)
 
 # The bin rule above compiles gcc with cc, which may result in a buggy
 # gcc.  See src/gnu/src/gcc/INSTALL for more info.
@@ -167,6 +168,12 @@ hp_gas_pregcc_install:
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
 	
+# In gcc-2.5.8, collect2 is not automagically installed.  The symptom
+# of this is that ptcl says that there is no SDF domain, and that perhaps
+# constructors are not being called
+install-collect2:	
+	(cd $(GNU_OBJ)/gcc; $(MAKE) install-collect2)
+irix5_all: all install-collect2
 
 clean:
 	(cd $(GNU_OBJ); $(MAKE) clean)
