@@ -54,8 +54,11 @@ extern "C" {
 	}
 
 	constructor {
-		// Reset data type of input port to be floating-point matrix
-		input.setPort("output", this, FLOAT_MATRIX_ENV);
+		// Reset data type of input port to be a floating-point matrix
+		input.setPort("input", this, FLOAT_MATRIX_ENV);
+
+		// Hide the output port
+		output.setAttributes(P_HIDDEN);;
 
 		// Initialize all pointers to zero
 		masterPtr = 0;
