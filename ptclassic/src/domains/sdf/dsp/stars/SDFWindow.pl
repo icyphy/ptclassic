@@ -12,8 +12,8 @@ samples is produced at each firing.
 This star produces on its output values that are samples of a standard
 windowing function.
 The windowing function is determined by the <i>name</i> string parameter.
-Possible values are: <b>Rectangle</i>, <b>Bartlett</i>, <b>Hanning</i>,
-<b>Hamming</i>, <b>Blackman</i>, <b>Kaiser</i> and <b>SteepBlackman</i>.
+Possible values are: <b>Rectangle</b>, <b>Bartlett</b>, <b>Hanning</b>,
+<b>Hamming</b>, <b>Blackman</b>, <b>Kaiser</b> and <b>SteepBlackman</b>.
 Upper- and lower-case characters in the names are equivalent.
 <p>
 The parameter <i>length</i> is the length of the window to produce.

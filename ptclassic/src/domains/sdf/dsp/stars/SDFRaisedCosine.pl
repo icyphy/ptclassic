@@ -49,9 +49,9 @@ if <i>length</i> is even.
 <p>
 For some applications, you may wish to apply a window function to
 this impulse response.  To do this, feed an impulse into this star,
-multiply the output by the output of the <b>Window</i> star, and
+multiply the output by the output of the <b>Window</b> star, and
 store the resulting windowed impulse response in a file. Then, use
-the <b>FIR</i> star to implement the filter.
+the <b>FIR</b> star to implement the filter.
 <p>
 For the ordinary raised cosine response, the
 distance (in number of samples) from the center
