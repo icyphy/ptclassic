@@ -67,7 +67,7 @@ X11_LIBSPEC =	-L/usr/X11/lib -lX11
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.3/ld
 
-PURELINK =	purelink $(COLLECTOR)
+PURELINK =	purelink $(COLLECTOR) -hardlink=yes
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 PURECOV = 	purecov $(COLLECTOR)
