@@ -55,7 +55,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 	compileOptions.setInitValue(hashstring(compOpts));
 
 	StringList linkOpts =
-		  "$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib"
+		  "-L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib"
 		  "$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)";
 
 	linkOptions.setInitValue(hashstring(linkOpts));
