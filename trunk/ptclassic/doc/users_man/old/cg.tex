@@ -3,41 +3,102 @@
 \node CG Domain
 \chapter{CG Domain}
 
-\Author{ J. Buck \\
+\Author{ Joseph Buck \\
 Soonhoi Ha \\
 Edward A. Lee \\
+Praveen K. Murthy \\
 Thomas M. Parks \\
-Jos\'{e} Pino \\
+Jos\'{e} Luis Pino \\
 Kennard White}
 \date{$Date$}
+
+The CG domain and those derived from it generate code from a system
+description instead of interpreting it in a simulation.
+Different code
+generation domains produce code for different computer languages, such
+as \code{C} (\pxref{CGC Domain}),
+\cindex{code generation in C}
+\cindex{C code generation}
+\cindex{CGC domain}
+\code{Silage} (\pxref{Silage Domain}),
+\cindex{code generation in Silage}
+\cindex{Silage domain}
+\cindex{Silage code generation}
+and assembly language(\pxref{CG56 Domain}).
+\cindex{code generation in assembly}
+\cindex{assembly code generation}
+\cindex{CG56 domain}
+Most code
+generation domains support only the SDF model of computation
+(\pxref{SDF Domain}),
+\cindex{synchronous dataflow}
+\cindex{dataflow, synchronous}
+but some also support the BDF model
+(\pxref{BDF Domain}).
+\cindex{Boolean-controlled dataflow}
+\cindex{dataflow, Boolean-controlled}
+The CG domain itself does not generate real code:  it is intended
+for demonstration and testing purposes only.  You can view the
+generated code and display a Gantt chart for parallel
+schedules.  In other code generation domains real code is generated,
+compiled, down loaded, and executed, all under the control of the
+selected target.
 
 \node CG Single-Processor Targets
 \section{Single-Processor Targets}
 
+There are two single-processor targets available in the CG domain:
+\code{default-CG} and \code{bdf-CG}.
+\tpindex{default-CG target}
+\tpindex{bdf-CG target}
+The \code{default-CG} target makes only the \var{directory} and
+\var{Looping Level} parameters available to the user.
+\vrindex{directory parameter}
+\vrindex{Looping Level parameter}
+It uses a SDF scheduling algorithm for a single processor.
+\cindex{synchronous dataflow}
+\cindex{dataflow, synchronous}
+\xref{SDF Domain}, for more details on scheduling.
+The \code{bdf-CG} target makes only the \var{directory} parameter
+available to the user.
+\vrindex{directory parameter}
+It uses a BDF
+scheduling algorithm for a single processor.
+\xref{BDF Domain},
+\cindex{Boolean-controlled dataflow}
+\cindex{dataflow, Boolean-controlled}
+for more details on this scheduling algorithm.
+
 All code is written to and compiled and run on the computer specified
-by the \var{host} parameter.  \vrindex{host parameter} If a remote
+by the \var{host} parameter.
+\vrindex{host parameter}
+If a remote
 computer is specified by \var{host} then \code{rsh} commands are used
-to place files on that compuer and to invoke the compiler.  You should
+to place files on that computer and to invoke the compiler.  You should
 verify that your \file{.rhosts} file is properly configured so that
 \code{rsh} will work.  The code is placed in the directory specified by
-the \var{directory} \vrindex{directory parameter} parameter, in files
-named according to the \var{file} \vrindex{file parameter} parameter.
+the \var{directory}
+\vrindex{directory parameter}
+parameter, in files
+named according to the \var{file}
+\vrindex{file parameter}
+parameter.
 
-The parameters \var{display?}, \var{compile?}, \var{load?},
-and \var{run?} are
+The parameters \var{display?}, \var{compile?}, \var{load?}, and \var{run?}
 \vrindex{display? parameter}
 \vrindex{compile? parameter}
 \vrindex{load? parameter}
 \vrindex{run? parameter}
-provided for debugging and development.  For example, during
+are provided for debugging and development.  For example, during
 development you may want to set \var{display?} to \samp{TRUE} and set
 \var{compile?} to \samp{FALSE}.  This would allow you to view the
 generated code without compiling it.  Later you may want to set
 \var{compile?} back to \samp{TRUE} but set \var{run?} to \samp{FALSE}.
 This would allow you to verify that the generated code compiles
-correctly without attempting to run the program.  (If compilation
+correctly without attempting to run the program, or you could start the
+program manually under the control of a debugger.  If compilation
 fails, then the program will not be run regardless of the state of
-\var{run?}.)  Once everything works, you may want to set \var{display?}
+\var{run?}.  Once everything works, you may want to set \var{display?}
 to \samp{FALSE} to avoid the annoyance of having the code displayed for
 every run.
 
@@ -54,18 +115,17 @@ and run on the same computer where Ptolemy is running.
 
 \state{STRING}{directory}{$HOME/PTOLEMY_SYSTEMS}
 \vrindex{directory parameter}
-The destination directory for files created in the code
-generation process.  If the directory does not already exist,
-it will be created.  All files are written into this directory on the
-\var{host} computer.
+The destination directory for files created in the code generation
+process.  If the directory does not already exist, it will be created.
+All files are written into this directory on the \var{host} computer.
 
 \state{STRING}{file}{}
 \vrindex{file parameter}
-The base name for files created in the code generation process.
-If the name is blank, which is the default, then a suitable name will be
-generated automatically.
-The \file{.c} extension is automatically added to this name to form the
-complete file name.
+The base name for files created in the code generation process.  If the
+name is blank, which is the default, then a suitable name will be
+generated automatically.  File name extensions, such as \file{.c} and
+\file{.asm}, are automatically added to this name to form the complete
+file name and should not be specified as part of \var{file}.
 
 \state{INT}{display?}{TRUE}
 \vrindex{display? parameter}
@@ -77,7 +137,7 @@ Controls the invokation of the compiler after code generation.
 
 \state{INT}{load?}{TRUE}
 \vrindex{load? parameter}
-Controls downloading of the program to the \var{host} computer after
+Controls loading of the program onto the \var{host} computer after
 compilation.  Some targets do not implement separate load and run
 operations and thus do not make \var{load?} available to the user.
 
@@ -93,48 +153,172 @@ conservative loop-generating algorithm is used.  If set to \samp{2},
 then a more exhaustive loop-generating algorithm is used.  The
 loop-generating algorithms generally produce more compact code but may
 take longer to run.
+
 \end{statelist}
-
-\node default-CG
-\subsection{\protect\code{default-CG}}
-
-The default-CG target makes only the \var{directory} and \var{Looping Level}
-parameters available to the user.
-\vrindex{directory parameter}
-\vrindex{Looping Level parameter}
-
-\node bdf-CG
-\subsection{\protect\code{bdf-CG}}
 
 \node CG Multi-Processor Targets
 \section{Multi-Processor Targets}
 
+There are two multi-processor targets included in the CG domain:
+\code{FullyConnected} and \code{SharedBus}.
+\tpindex{FullyConnected target}
+\tpindex{SharedBus target}
+Both use Gil Sih's
+\cindex{Sih, Gil}
+multi-processor scheduling algorithms, but specifiy different
+communication topologies among the processors.  Both have the same
+parameters.
+
+The \var{Looping Level} parameter is not used by multi-processor
+\vindex{Looping Level}
+targets, so it is not available to the user.  All other parameters
+described in \nxref{CG Single Processor Targets}, are defined for
+multi-processor targets.  In addition, the following paramters are
+defined for all multi-processor targets.  Some targets may also define
+additional parameters.
+
 \begin{statelist}
-\state{INT}{nprocs}{}
-\state{INT}{inheritProcessors}{}
-\state{INT}{sendTime}{}
-\state{INT}{oneStarOneProc}{}
-\state{INT}{manualAssignment}{}
-\state{INT}{adjustSchedule}{}
-\state{STRINGARRAY}{childType}{}
+\state{INT}{nprocs}{2}
+\vindex{nprocs parameter}
+The number of processors.
+
+\state{INT}{inheritProcessors}{NO}
+\vindex{inheritProcessors parameter}
+
+\state{INT}{sendTime}{1}
+\vindex{sendTime parameter}
+The time required to transfer one datum.
+
+\state{INT}{oneStarOneProc}{NO}
+\vindex{oneStarOneProc parameter}
+Controls whether or not \emph{all} firings of a star will be mapped to
+a single processor.
+
+\state{INT}{manualAssignment}{NO}
+\vindex{manualAssignment parameter}
+Allows the user to manually specify the assignment of stars to processors.
+
+\state{INT}{adjustSchedule}{NO}
+\vindex{adjustSchedule parameter}
+Allows the user to override the previously obtained schedule by manual
+assignment.
+
+\state{STRINGARRAY}{childType}{default-CG}
+\vindex{childType parameter}
+The target type for child processors.
+
 \state{STRINGARRAY}{resources}{}
-\state{INT}{relTimeScales}{}
-\state{INT}{ganttChart}{}
+\vindex{resources parameter}
+Resourses of the child targets.  Use a \samp{;} to separate the resources of
+the different targets.
+
+\state{INTARRAY}{relTimeScales}{1}
+\vindex{relTimeScales parameter}
+The relative time scales of the child targets.
+
+\state{INT}{ganttChart}{YES}
+\vindex{ganttChart parameter}
+Display a Gantt chart for the parallel schedule.
+
 \state{STRING}{logFile}{}
-\state{INT}{amortizedComm}{}
-\state{INT}{ignoreIPC}{}
-\state{INT}{overlapComm}{}
-\state{INT}{useCluster}{}
+\vindex{logFile parameter}
+Name of log file used by the scheduler.  If left empty, which is the default,
+then no log file will be created.
+
+\state{INT}{amortizedComm}{NO}
+\vindex{amortizedComm parameter}
+
+\state{INT}{ignoreIPC}{NO}
+\vindex{ignoreIPC parameter}
+Force inter-processor communication costs to be ignored when computing the
+schedule.
+
+\state{INT}{overlapComm}{NO}
+\vindex{overalpComm parameter}
+Communication and computation can be overlapped.
+
+\state{INT}{useCluster}{NO}
+\vindex{useCluster parameter}
+Use Gil Sih's declustering scheduling algorithm.
+
 \end{statelist}
-
-\node SharedBus
-\subsection{\protect\code{SharedBus}}
-
-\node FullyConnected
-\subsection{\protect\code{FullyConnected}}
 
 \node CG Star Overview
 \section{An Overview of CG Stars}
 
+\begin{figure}
+\begin{center}
+\ \psfig{figure=/users/ptdesign/src/domains/cg/icons/cg.pal.ps}
+\end{center}
+\caption{Palette of stars available in the CG domain.}
+\label{cg-stars}
+\end{figure}
+
+Figure \ref{cg-stars} shows the palette of stars available in the
+CG domain.  Each star is described briefly below.  Please refer to the
+Almagest Star Atlas for a more detailed description.
+
+\begin{description}
+\item[Source]
+Generic code generator source star.  It produces \var{n} samples on
+\var{output} for each firing.
+
+\item[Sink]
+Swallows input samples.  It consumes \var{n} samples on \var{input} for
+each firing.
+
+\item[Through]
+Generates conditional code, depending on the value of the Boolean state
+\var{control}.  Samples are passed unconditionally from \var{input} to
+\var{output}.
+
+\item[MultiIn]
+Consumes one sample from each \var{input} and produces one sample on
+\var{output}.
+
+\item[MultiOut]
+Consumes one sample from \var{input} and produces one sample on each
+\var{output}.
+
+\item[RateChange]
+Consumes \var{consume} samples from \var{input} and produces
+\var{produce} samples on \var{output}.
+
+\end{description}
+
 \node CG Demo Overview
 \section{An Overview of CG Demos}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=/users/ptdesign/src/domains/cg/demo/init.pal.ps}
+\end{center}
+\caption{Palette of demos available in the CG domain.}
+\label{cg-demos}
+\end{figure}
+
+Figure \ref{cg-demos} shows the palette of demos available in the
+CG domain.  Each demo is described briefly below.  Please refer to the
+Almagest Star Atlas for a more detailed description.
+
+\begin{description}
+\item[useless]
+This is an extremely simple demo which demonstrates
+the most basic code generation capabilities.
+
+\item[schedTest]
+This is a simple multi-processor code generation demo.  By editing the
+parameters of the \code{RateChange} star, you can make the demo a bit more
+interesting.
+
+\item[Sih-4-1]
+This demo illustrates the scheduling problem of Figure 4-1 from Gil Sih's
+dissertation.
+
+\item[pipeline]
+This demo shows how retiming can be used to increase the amount of
+exploitable parallelism through pipelined scheduling.  The \var{retime}
+parameter can be used to turn reiming on and off so that you can see
+the schedule with and without it.
+
+\end{description}
