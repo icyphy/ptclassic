@@ -144,7 +144,7 @@
 # call load{} (see <a href="Model.html">Model</a>):
 # <pre><tcl quiet>
 #     $class read string {
-#        configure -language Itcl -name ::tycho::exampleclass
+#        modelconfigure -language Itcl -name ::tycho::exampleclass
 #        annotation description {An example class.}
 #        annotation explanation {This is a <i>silly</i> class.}
 #        variable foo {
@@ -171,14 +171,16 @@
 #
 # Return the explanation of a method:
 # <pre><tcl>
-#     $class annotationget bar.explanation
+#     $class get annotation bar.explanation
 # </tcl></pre>
 #
-# Return the parameters of a method (<b>FIXME</b>: add ordering
-# to TIM):
+# Return the parameters of a method:
 # <pre><tcl>
 #     $class parameters bar
 # </tcl></pre>
+#
+# <b>Note</b>: At present, this class does not support undo commands.
+# This should be fixed in future.
 #
 class ::tycho::Class {
     inherit ::tycho::Model
@@ -188,18 +190,6 @@ class ::tycho::Class {
     
     #################################################################
     ####                        options                          ####
-
-    # The class name of this class
-    public variable name ""
-
-    # The file containing the source code of this class 
-    public variable source ""
-
-    # The file containing the interface of this class 
-    public variable interface ""
-    
-    # The language this class is written in 
-    public variable language ""
     
     #################################################################
     ####                     public methods                      ####
@@ -207,50 +197,26 @@ class ::tycho::Class {
     # Add a top-level annotation with attributes to the class
     method annotation {name string args}
 
-    # Get an attribute or attributes of an annotation
-    method annotationcget {name option}
+    # Delete an item
+    method delete {type name}
 
-    # Configure the annotation with one or more attributes
-    method annotationconfigure {name args}
-
-    # Remove an annotation to the class
-    method annotationdelete {name}
-
-    # Get the value of an annotation
-    method annotationget {name}
+    # Get the value of an item
+    method get {type name}
     
-    # Add a nested annotation with attributes to the class
-    method annotationin {context name string args}
+    # Get an attribute of an item
+    method itemcget {type name option}
+
+    # Configure attributes of an item
+    method itemconfigure {type name args}
 
     # Add a method with attributes to the class
     method method {name args}
 
-    # Get an attribute or attributes of a method
-    method methodcget {name option}
-
-    # Configure the method with one or more attributes
-    method methodconfigure {name args}
-
-    # Remove a method from the class
-    method methoddelete {name}
-
     # Get the methods with matching attributes
     method methods {args}
 
-    # Add a top-level parameter with attributes to the class
-    method parameter {name args}
-
-    # Get an attribute or attributes of an parameter
-    method parametercget {name option}
-
-    # Configure the parameter with one or more attributes
-    method parameterconfigure {name args}
-
-    # Remove an parameter from the class
-    method parameterdelete {name}
-
-    # Add a nested parameter with attributes to the class
-    method parameterin {context name string args}
+    # Add a parameter with attributes to the class
+    method parameter {method name args}
 
     # Get the parameters of a method
     method parameters {method}
@@ -258,15 +224,6 @@ class ::tycho::Class {
     # Add a top-level variable with attributes to the class
     method variable {name args}
 
-    # Get an attribute or attributes of a variable
-    method variablecget {name option}
-
-    # Configure the variable with one or more attributes
-    method variableconfigure {name args}
-
-    # Remove a variable from the class
-    method variabledelete {name}
-     
     # Get the variables with matching attributes
     method variables {args}
 
@@ -274,40 +231,59 @@ class ::tycho::Class {
     ####                  protected methods                      ####
     
     # Evaluate code in this object's context
-    method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
+
+    # Add a nested annotation with attributes to the class
+    protected method _annotation {context name string args}
 
     # Methods cannot be nested
-    method methodin {context name args} {
+    protected method _method {context name args} {
     	_nesterror method $context $name
     }
 
+    # Add a nested parameter with attributes to the class
+    protected method _parameter {context name string args}
+
     # Variables cannot be nested
-    method variablein {context name args} {
+    protected method _variable {context name args} {
     	_nesterror variable $context $name
     }
-   
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Class::constructor {args} {
+    # Default separator
+    configure -separator "."
+
     # Evaluate options
     eval configure $args
 
+    # Define the attributes of this model. See the class
+    # comment for information.
+    defineAttributes \
+            -interface "" \
+            -name "" \
+            -language "" \
+            -source ""
+
     # Define the "annotation" entity
     defineEntityType annotation \
-	    -valued 1  \
+	    -valued 1 \
+            -leaf 1 \
 	    -format HTML
 
-    # Define the "parent" entity
+    # Define the "parent" entity FIXME not implemented
     defineEntityType parent \
+	    -valued 1 \
             -scope "" \
             -classfile "" \
             -docfile ""
 
     # Define the "method" entity
     defineEntityType method \
+            -ordered 1 \
 	    -protection public \
 	    -modifiers "" \
 	    -type "" \
@@ -341,65 +317,78 @@ body ::tycho::Class::constructor {args} {
 # annotation. Flag an error if the annotation already exists. 
 #
 body ::tycho::Class::annotation {name value args} {
-    _verifynot annotation name
-    _entity annotation {} $name $value $args
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verifynot annotation $cntxt $local $name
+    _addentity annotation $cntxt $local $name $value $args
+    return
 }
 
 ########################################################################
-#### annotationcget
+#### delete
 #
-# Get an attribute of an annotation. Flag an error if the annotation does
+# Delete an item. Flag an error if
+# the item does not exist.
+#
+body ::tycho::Class::delete {type name} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify $type $cntxt $local
+    _delete $type $cntxt $local
+    return
+}
+
+########################################################################
+#### get
+#
+# Get the value of an item. Flag an error if
+# the item does not exist.
+#
+body ::tycho::Class::get {type name} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify $type $cntxt $local
+    _get $type $cntxt $local
+}
+
+########################################################################
+#### itemcget
+#
+# Get an attribute of an item. The first argument is the
+# entity or link type. Flag an error if the item does
 # not exist.
 #
-body ::tycho::Class::annotationcget {name option} {
-    _verify annotation $name
-    _cget annotation $name $option
+body ::tycho::Class::itemcget {type name option} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify $type $cntxt $local
+    _cget $type $cntxt $local $option
 }
 
 ########################################################################
-#### annotationconfigure
+#### itemconfigure
 #
-# Configure the annotation and return the inverse command. The argument list
+# Configure attributes of an item. The first argument is the
+# entity or link type; the optional argument list
 # is a flat list of attribute-value pairs. Flag an error if the
 # annotation does not exist.
 #
-body ::tycho::Class::annotationconfigure {name args} {
-    _verify annotation $name
-    _configure annotation $name $args
-}
+body ::tycho::Class::itemconfigure {type name args} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
 
-########################################################################
-#### annotationdelete
-#
-# Delete a annotation and return the inverse command. Flag an error if
-# the annotation does not exist.
-#
-body ::tycho::Class::annotationdelete {name} {
-    _verify annotation $name
-    _delete annotation $name
-}
-
-########################################################################
-#### annotationget
-#
-# Return the value of a annotation. Flag an error if
-# the annotation does not exist.
-#
-body ::tycho::Class::annotationget {name} {
-    _verify annotation $name
-    _get annotation $name
-}
-
-########################################################################
-#### annotationin
-#
-# Add a nested annotation and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# annotation. Flag an error if the annotation already exists. 
-#
-body ::tycho::Class::annotationin {context name value args} {
-    _verifynotin annotation $context name
-    _entity annotation $context $name $value $args
+    _verify $type $cntxt $local
+    _configure $type $cntxt $local $args
+    return
 }
 
 ########################################################################
@@ -409,43 +398,10 @@ body ::tycho::Class::annotationin {context name value args} {
 # Additional arguments are a flat attribute-value list for the
 # method. Flag an error if the method already exists. 
 #
-body ::tycho::Class::method {name value args} {
-    _verifynot method $name
-    _link method {} $name [concat [list $value] $args]
-}
-
-########################################################################
-#### methodcget
-#
-# Get an attribute of a method. Flag an error if the method does
-# not exist.
-#
-body ::tycho::Class::methodcget {name option} {
-    _verify method $name
-    _cget method $name $option
-}
-
-########################################################################
-#### methodconfigure
-#
-# Configure the method and return the inverse command. The argument list
-# is a flat list of attribute-value pairs. Flag an error if the
-# method does not exist.
-#
-body ::tycho::Class::methodconfigure {name args} {
-    _verify method $name
-    _configure method $name $args
-}
-
-########################################################################
-#### methoddelete
-#
-# Delete a method and return the inverse command. Flag an error if
-# the method does not exist.
-#
-body ::tycho::Class::methoddelete {name} {
-    _verify method $name
-    _delete method $name
+body ::tycho::Class::method {name args} {
+    _verifynot method {} $name $name
+    _addentity method {} $name {} {} $args
+    return
 }
 
 ########################################################################
@@ -476,59 +432,18 @@ body ::tycho::Class::methods {args} {
 ########################################################################
 #### parameter
 #
-# Add a new parameter and return the inverse command.
+# Add a parameter to a method. This method is provided for
+# convenience -- it is not used by the TIM file parser.
 # Additional arguments are a flat attribute-value list for the
 # parameter. Flag an error if the parameter already exists. 
 #
-body ::tycho::Class::parameter {name args} {
-    _verifynot parameter $name
-    _entity parameter {} $name {} $args
-}
-
-########################################################################
-#### parametercget
-#
-# Get an attribute of an parameter. Flag an error if the parameter does
-# not exist.
-#
-body ::tycho::Class::parametercget {name option} {
-    _verify parameter $name
-    _cget parameter $name $option
-}
-
-########################################################################
-#### parameterconfigure
-#
-# Configure the parameter and return the inverse command. The argument list
-# is a flat list of attribute-value pairs. Flag an error if the
-# parameter does not exist.
-#
-body ::tycho::Class::parameterconfigure {name args} {
-    _verify parameter $name
-    _configure parameter $name $args
-}
-
-########################################################################
-#### parameterdelete
-#
-# Delete a parameter and return the inverse command. Flag an error if
-# the parameter does not exist.
-#
-body ::tycho::Class::parameterdelete {name} {
-    _verify parameter $name
-    _delete parameter $name
-}
-
-########################################################################
-#### parameterin
-#
-# Add a nested parameter and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# parameter. Flag an error if the parameter already exists. 
-#
-body ::tycho::Class::parameterin {context name args} {
-    _verifynotin parameter $context $name
-    _entity parameter $context $name {} $args
+body ::tycho::Class::parameter {method name args} {
+    # Just make sure that the method name is top-level
+    if { [llength [split $method $separator]] > 1 } {
+        error "Method $method is not top-level"
+    }
+    _verifynot parameter $method $name
+    _addentity parameter $method $name $method$separator$name $args
 }
 
 ########################################################################
@@ -548,42 +463,8 @@ body ::tycho::Class::parameters {method} {
 # variable. Flag an error if the variable already exists. 
 #
 body ::tycho::Class::variable {name args} {
-    _verifynot variable $name
-    _entity variable {} $name {} $args
-}
-
-########################################################################
-#### variablecget
-#
-# Get an attribute of an variable. Flag an error if the variable does
-# not exist.
-#
-body ::tycho::Class::variablecget {name option} {
-    _verify variable $name
-    _cget variable $name $option
-}
-
-########################################################################
-#### variableconfigure
-#
-# Configure the variable and return the inverse command. The argument list
-# is a flat list of attribute-value pairs. Flag an error if the
-# variable does not exist.
-#
-body ::tycho::Class::variableconfigure {name args} {
-    _verify variable $name
-    _configure variable $name $args
-}
-
-########################################################################
-#### variabledelete
-#
-# Delete a variable and return the inverse command. Flag an error if
-# the variable does not exist.
-#
-body ::tycho::Class::variabledelete {name} {
-    _verify variable $name
-    _delete variable $name
+    _verifynot variable {} $name $name
+    _addentity variable {} $name {} {} $args
 }
 
 ########################################################################
@@ -610,4 +491,36 @@ body ::tycho::Class::variables {args} {
     }
     return $result
 }
+
+
+########################################################################
+########################################################################
+####                       protected methods                        ####
+
+
+########################################################################
+#### _annotation
+#
+# Add a nested annotation and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# annotation. Flag an error if the annotation already exists. 
+#
+body ::tycho::Class::_annotation {context name value args} {
+    _verifynot annotation $context $name $context$separator$name
+    _addentity annotation $context $name $context$separator$name \
+            $value $args
+}
+
+########################################################################
+#### _parameter
+#
+# Add a nested parameter.
+# Additional arguments are a flat attribute-value list for the
+# parameter. Flag an error if the parameter already exists. 
+#
+body ::tycho::Class::_parameter {context name args} {
+    _verifynot parameter $context $name $context$separator$name
+    _addentity parameter $context $name $context$separator$name {} $args
+}
+
 
