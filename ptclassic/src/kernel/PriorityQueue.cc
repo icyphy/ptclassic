@@ -65,7 +65,7 @@ void BasePrioQueue::pushTail(Particle* /*p*/, PortHole* /*port*/,
     Error::abortRun("pushTail() not implemented in base class!");
 }
 
-LevelLink* BasePrioQueue::levelput(Pointer /*a*/, double /*v*, double /*fv*/)
+LevelLink* BasePrioQueue::levelput(Pointer /*a*/, double /*v*/, double /*fv*/)
 {
     Error::abortRun("levelput() not implemented in base class!");
     return 0;
