@@ -6,10 +6,52 @@
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Bugs</H1>
 
+<h2><a name="cygwin32hints">Cygwin32 hints</a></h2>
+If you have problems, try searching the Cygwin32 mailing list archives
+via <a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>.
+The FAQ is also useful.
+<h3>Setup</h3>
+
+<li> If your tree is located on a Unix file system, use Samba.
+See the <a href="ptntinstall.html">Ptolemy NT Installation page</a>
+for details
+
+<li> If you install the Cygwin X11R6 binaries and Exceed, then
+you can telnet to a PC, start up <CODE>bash</CODE>, and then start
+up an xterm with <CODE>xterm -sb -e bash &amp;</CODE>
+
+<li> The NT Resource kit includes a <CODE>shutdown.exe</CODE> binary
+that can be executed from a bash shell.  The following command should reboot:
+<CODE>shutdown /L /R /Y /C</CODE>
+
+<li> To use <CODE>gdb</CODE> remotely without the Tcl interface, 
+start it with <CODE>gdb -nw </CODE>
+
 <h2>Compilation bugs</h2>
 <MENU>
-<LI> Compiling with GNU-win32 is slow.  This is because there is
-a layer of indirection between the 
+
+<li> <CODE>make</CODE> failed with
+<pre>
+c:/tycho0.3.devel/mk/tycommon.mk:276: *** target pattern contains no `%'.
+</pre>
+<p>The problem here was that <CODE>ROOT</CODE> was set to
+<CODE>c:/tycho0.3devel</CODE>.  The colon was being interpreted by
+<CODE>make</CODE>, so setting <CODE>ROOT</CODE> to <CODE>/tycho0.3devel</CODE>
+fixed the problem.
+ <p>
+<li> <CODE>make</CODE> failed with:
+<pre>
+'\\carson\cxh\pt\obj.nt4\pigiRpc' is an invalid current directory
+path.  UNC paths are not supported.  Defaulting to Windows directory.
+The handle could not be duplicated during a pipe operation.
+</pre>
+<p> The fix is to run <CODE>make --unix</CODE>, or do
+<pre>
+MAKE_MODE=unix
+export MAKE_MODE
+</pre>
+
+<LI> Compiling with GNU-win32 is slow.
 
 <li> The Microsoft Visual C++ port (<CODE>PTARCH == nt4.vc</CODE>)
 is unlikely to build and has not been tested.
@@ -20,11 +62,14 @@ is unlikely to build and has not been tested.
 <LI> The Matlab and Mathematica stars do not work.
 </MENU>
 
-<h2>Vem bugs</h2>
+<h2>Running Ptolemy bugs</h2>
 <menu>
-
-<li> The tests in <CODE>$PTOLEMY/src/octtools/Packages/oct</CODE> fail.
-<li> <CODE>pigi</CODE> starts up, but fails to run simulations.
+<li> If you see the following message, then you may need to 
+upgrade to Cygwinb19.1.
+<pre>
+RPC Error: can not fdopen for write in application
+RPC Error: cannot connect to the server
+</pre>
 </menu>
 
 
