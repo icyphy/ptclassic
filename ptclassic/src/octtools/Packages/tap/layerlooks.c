@@ -342,7 +342,7 @@ Purify (bsw): write below stack pointer:
   * Writing 4 bytes to 0xeffeef4c.
 
      */
-    bitArrayLen = strlen(patPtr->bitArray);
+    bitArrayLen = (int)strlen(patPtr->bitArray);
     if (type == TAP_FILL_PATTERN) {
 	patPtr->width = sqrt(bitArrayLen);
 	patPtr->height = patPtr->width;

@@ -290,7 +290,7 @@ octObject *net1, *net2, *keep, *merge;
 	*merge = *net2;
 	return;
     }
-    if (strlen(net1->contents.net.name) < strlen(net2->contents.net.name)) {
+    if ((int)strlen(net1->contents.net.name) < (int)strlen(net2->contents.net.name)) {
 	*keep = *net1;
 	*merge = *net2;
     } else {

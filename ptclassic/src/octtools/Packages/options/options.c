@@ -124,7 +124,7 @@ char *argv[];
     if (scanPtr == NIL(char) || *scanPtr == '\0') {
 	if (		optind >= argc ||
 			argv[optind][0] != '-' ||
-			strlen(argv[optind]) < 2 ||
+			(int)strlen(argv[optind]) < 2 ||
 			strcmp(argv[optind], "--") == 0) {
 	    return(EOF);
 	}

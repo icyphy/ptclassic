@@ -633,10 +633,12 @@ octObject *net;			/* Net to rename */
     int32 xid;
 
     if (net->contents.net.name &&
-	((strlen(net->contents.net.name)+MAX_ID_LEN) > MAX_NET_NAME_LEN)) {
+	(int)(strlen(net->contents.net.name)+MAX_ID_LEN) >
+	 MAX_NET_NAME_LEN))
+      { 
 	errRaise(sym_pkg_name, 0, "Net name too long");
 	/*NOTREACHED*/
-    }
+      }
     octExternalId(net, &xid);
     (void) sprintf(new_name, "%s_%ld", net->contents.net.name, (long)xid);
     net->contents.net.name = new_name;

@@ -654,7 +654,7 @@ pepRes
 	    }
 
 	    res[*numberOfBranches].value = pepResistance(&branch, &nextTerm);
-	    if (strlen(node1Name) + strlen(node1Name) > MAXSTRLEN) {
+	    if ((int)(strlen(node1Name) + strlen(node1Name)) > MAXSTRLEN) {
 		fprintf (stderr, "WARNING: names %s, %s too long. Cutting\n",
 			 node1Name, node2Name);
 		tmp1 = ALLOC (char, (int)(MAXSTRLEN/2));
