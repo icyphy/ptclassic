@@ -54,23 +54,40 @@ class ::tycho::ToolBar {
     # The vertical button padding
     itk_option define -pady padY Pad 4
 
+    # The options used by the entry widgets
+    itk_option define -entryforeground entryForeground EntryForeground black
+    itk_option define -entrybackground entryBackground EntryBackground white
+    itk_option define -entryfont entryFont EntryFont 8x13
+
     ###################################################################
     ####                         public methods                    ####
 
     # Add a button to the toolbar.
-    method addButton {name description args}
+    method button {tag description args}
 
     # Disable a button to the toolbar.
-    method disableButton {name}
+    method buttonDisable {tag}
 
     # Enable a button to the toolbar.
-    method enableButton {name}
+    method buttonEnable {tag}
+
+    # Add an entry widget to the toolbar.
+    method entry {tag label default command args}
 
     ###################################################################
     ####                         protected methods                 ####
 
+    # Access the "dialogs" preference set.
+    protected method preference {mode args}
+
     # Print a message to the status bar.
     protected method putStatus {string}
+
+    ##################################################################
+    ####             protected and private variables              ####
+
+    # Remember the number of entries currently in this widget
+    protected variable numentries 0
 }
 
 #######################################################################
@@ -78,7 +95,7 @@ class ::tycho::ToolBar {
 #
 body ::tycho::ToolBar::constructor {args} {
 
-    # A tiny bit of padding to the left of the toolbar.
+    # A tiny bit of padding to the left of everything
     itk_component add leftpacking {
 	frame $itk_interior.leftpacking -width 2
     } {
@@ -86,9 +103,31 @@ body ::tycho::ToolBar::constructor {args} {
     }
     pack $itk_component(leftpacking) -side left
 
+    # Button site
+    itk_component add buttonsite {
+	frame $itk_interior.buttonsite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(buttonsite) -side top -expand yes -fill both
+
+    # Entry site
+    itk_component add entrysite {
+	frame $itk_interior.entrysite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(entrysite) -side top -expand yes -fill x
+
     # Initialize options
     eval itk_initialize $args
     eval preference exclude $this $args
+
+    # Subscribe to the preference set
+    preference subscribe $this \
+	    -entryforeground entryForeground \
+	    -entrybackground entryBackground \
+	    -entryfont entryFont
 }
 
 #########################################################################
@@ -96,61 +135,136 @@ body ::tycho::ToolBar::constructor {args} {
 ####                      public methods                             ####
 
 #####################################################################
-#### addButton
+#### button
 # Add a button to the toolbar at the top. The required arguments are a
-# name for the button and itk_component and a description. The
+# tag for the button and itk_component and a description. The
 # description will appear in the status bar, if there is one, whenever
 # the mouse is moved into the button. Any additional arguments are
 # passed to the Tk <code>button</code> command.
 # For example,
 # <pre>
-#    addButton foo "a button" -text "Push Me" -command "::tycho::post Thanks"
+#    button foo "a button" -text "Push Me" -command "::tycho::post Thanks"
 # </pre>
 # will create a button with label "Push Me" and the specified command.
 # To use a bitmap instead, something like the following will work:
 # <pre>
 #    global ::TYCHO
-#    addButton foo "a button" -bitmap @$TYCHO/kernel/img/back.xbm -command ...
+#    button foo "a button" -bitmap @$TYCHO/kernel/img/back.xbm -command ...
 # </pre>
 # Note that buttons appear in the order they are added, from left to
-# right.
+# right.  Someday we should add a way to put more buttons on a second row.
+# 
+# Note that this method shadows the Tk <code>button</code> command, so
+# you must use <code>::button</code> if you want the Tk version.
 #
-body ::tycho::ToolBar::addButton {name description args} {
-    itk_component add $name {
-	eval button $itk_interior.$name $args
+body ::tycho::ToolBar::button {tag description args} {
+    itk_component add $tag {
+	eval ::button $itk_component(buttonsite).$tag $args
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
 		-foreground -highlightcolor -highlightbackground \
 		-padx -pady
     }
-    pack $itk_component($name) -side left
+    pack $itk_component($tag) -side left
 
     # Bind description output.
-    bind $itk_component($name) <Enter> [code [list %Q putStatus $description]]
-    bind $itk_component($name) <Leave> [code "%Q putStatus {}"]
+    bind $itk_component($tag) <Enter> [code [list %Q putStatus $description]]
+    bind $itk_component($tag) <Leave> [code "%Q putStatus {}"]
 }
 
 #####################################################################
-#### disableButton
-# Disable a button added with <code>addButton</code, graying out
+#### buttonDisable
+# Disable a button added with <code>button</code, graying out
 # the button.
 #
-body ::tycho::ToolBar::disableButton {name} {
+body ::tycho::ToolBar::buttonDisable {name} {
     component $name configure -state disabled
 }
 
 #####################################################################
-#### enableButton
-# Enable a button added with <code>addButton</code.
+#### buttonEnable
+# Enable a button added with <code>button</code.
 #
-body ::tycho::ToolBar::enableButton {name} {
+body ::tycho::ToolBar::buttonEnable {name} {
     component $name configure -state normal
+}
+
+#####################################################################
+#### entry
+# Add an entry widget to the toolbar.  The arguments are:
+# <ul>
+# <li>a tag (string) to use to name the entry widget,
+# <li>a label to put to the left of the entry widget,
+# <li>a default contents for the entry widget,
+# <li>a command to execute when &lt;Return&gt; is typed in the widget,
+# <li>additional arguments to pass to the Tk entry command.
+# </ul>
+# The entry widget has a "click to focus" model.  When the user types
+# a return in the widget, the contents of the entry box are appended
+# to the specified command, which is then invoked.
+#
+body ::tycho::ToolBar::entry {tag label default command args} {
+    # The label.
+    itk_component add label_$tag {
+        label $itk_component(entrysite).label_$tag -text "$label"
+    } {
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
+    }
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
+    
+    itk_component add tag_$tag {
+        eval ::entry $itk_component(entrysite).tag_$tag \
+                -relief sunken $args
+    } {
+        rename -background -entrybackground \
+                entryBackground EntryBackground
+        rename -foreground -entryforeground \
+                entryForeground EntryForeground
+        rename -font -entryfont entryFont EntryFont
+    }
+    grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
+    # The following ensures that the column takes up available space.
+    grid columnconfigure $itk_component(entrysite) 1 -weight 1.0
+
+    $itk_component(tag_$tag) insert insert $default
+    bind $itk_component(tag_$tag) <Return> \
+            "$command \[$itk_component(tag_$tag) get\]"
+    
+    # Bindings for the Entry box
+    bind $itk_component(tag_$tag) <Control-u> "
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \[%Q get $tag\]
+    %W delete 0 end
+    "
+    
+    bind $itk_component(tag_$tag) <Control-k> "
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \[
+        string range \[%Q get $tag\] \[%W index insert\] \
+            \[%W index end\]]
+    %W delete insert end
+    "
+    
+    incr numentries
 }
 
 #########################################################################
 #########################################################################
 ####                     protected methods                           ####
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. By default,
+# all widgets access the "global" preference set; many widgets will,
+# however, need to access a different preference set, and they
+# must indicate so by overriding this method.  Here, we are overriding
+# it to subscribe to the "dialogs" preference set.
+#
+body ::tycho::ToolBar::preference {mode args} {
+    eval ::preference $mode "dialogs" $args
+}
 
 #######################################################################
 #### putStatus
