@@ -72,6 +72,7 @@ ITCL_SRCS = \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
+	Preferences.itcl \
 	PrintDialog.itcl \
 	PopupMenu.itcl \
 	RevControl.itcl \
