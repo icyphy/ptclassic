@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkTkSetup.c  aok
-    Version: $Id$
+    Version: @(#)ptkTkSetup.c	1.3 6/30/93
 */
 
 
@@ -54,12 +54,15 @@ long size;                      /* number of items in the array */
    Sets up TkLoop Call
 */
 
+void PrintVersion();
+
 int
 ptkTkSetup(funcArray, size)
     RPCFunction *funcArray;
     long size;
 {
     static RPCClientData RPCdata;
+    static char buf[256];
 
     int result;
 
@@ -83,13 +86,16 @@ ptkTkSetup(funcArray, size)
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
        ptkRPCFileProc, (ClientData) &RPCdata);
 
-    if (Tcl_Eval(ptkInterp, "source $tk_library/wish.tcl",
-		0, (char **)NULL) != TCL_OK) {
-        ErrAdd("Tcl_eval failed: ");
+    sprintf(buf, "source %s/tcl/lib/ptkInit.tcl",getenv("PTOLEMY"));
+    if (Tcl_Eval(ptkInterp, buf, 0, (char **)NULL) != TCL_OK) {
+        ErrAdd("Unable to load $PTOLEMY/tcl/lib/ptkInit.tcl file: ");
         ErrAdd(ptkInterp->result);
         PrintErr(ErrGet());
 	exit(1);
     }
+
+    /* pop up the welcome window */
+    PrintVersion();
 
     /* arrange for "processEvents" to be called between stars */
     KcSetEventLoop(1);
