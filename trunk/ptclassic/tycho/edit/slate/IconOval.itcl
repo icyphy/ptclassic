@@ -99,9 +99,6 @@ class ::tycho::IconOval {
     # Create a new item
     proc construct {id canvas slate tags x y args}
 
-    # Draw a highlight around the oval
-    proc highlight {id canvas slate args}
-    
     ###################################################################
     ####                         private variables                 ####
 
@@ -121,7 +118,6 @@ class ::tycho::IconOval {
     set methodtable(_coords)     ::tycho::LabeledOval::coords
 
     set methodtable(construct)   ::tycho::IconOval::construct
-    set methodtable(highlight)   ::tycho::IconOval::highlight
 
     #### Set option defaults
     array set optiondefault [@scope ::tycho::LabeledOval \
@@ -150,16 +146,4 @@ body ::tycho::IconOval::construct {id canvas slate tags x y args} {
 
     # Adjust anchor
     _anchor $id $canvas $slate $anchor
-}
-
-##########################################################################
-#### highlight
-#
-# Draw a highlight around the main icon. This is so the highlight
-# appears around the oval, not around the outside of the terminals,
-# which looks a bit rough.
-#
-body ::tycho::IconOval::highlight {id canvas slate args} {
-    eval $canvas create oval [$canvas bbox $primary($id)] $args
-    $canvas lower highlight.$id $id
 }
