@@ -96,9 +96,6 @@ class ::tycho::File {
     # Specify the name of the file associated with the data being edited.
     itk_option define -file file File "NoName"
 
-    # Path name of Itcl HTML documentation file
-    itk_option define -itclhtmlpage itclHTMLPage ItclHTMLPage {}
-
     # If zero, do not query for saving on exit.
     itk_option define -save save Save 1
 
@@ -441,8 +438,7 @@ body ::tycho::File::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
-	    -autosaveinterval autoSaveInterval \
-	    -itclhtmlpage itclHTMLPage
+	    -autosaveinterval autoSaveInterval
 
     # Identify the object for crash recovery
     set fileObjects($this) $this
@@ -676,11 +672,15 @@ body ::tycho::File::markUnmodified {} {
 # In Tycho, the itclHTMLPage preference controls what file is opened.
 #
 body ::tycho::File::openItclHTMLPage {} {
-
-    if [file exists "$itk_option(-itclhtmlpage)"] {
-        ::tycho::File::openContext "$itk_option(-itclhtmlpage)"
+    set itclhtmlpage [::tycho::preference get misc itclHTMLPage]
+    if { $itclhtmlpage != "" } {
+	set itclhtmlpage [::tycho::expandPath $itclhtmlpage]
+    }
+    
+    if [file exists $itclhtmlpage] {
+        ::tycho::File::openContext "$itclhtmlpage"
     } else {
-	error "Sorry, $itk_option(-itclhtmlpage) does not exist. You can\nuse\
+	error "Sorry, $itclhtmlpage does not exist. You can\nuse\
 	the itclHTMLPage Miscellaneous preference to set the\npath\
 	of the file that is opened by this page.\nThe Itcl2.2 sources\
 	come with html man pages located at\nitcl2.2/html/TclTkMainList.html"
