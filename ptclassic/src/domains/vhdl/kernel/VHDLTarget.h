@@ -173,7 +173,10 @@ protected:
 	// Various hashed strings for quick comparison.
         const char* hashINTEGER;
         const char* hashINT;
+        const char* hashinteger;
         const char* hashint;
+        const char* hashFIX;
+        const char* hashfix;
         const char* hashFLOAT;
         const char* hashfloat;
         const char* hashREAL;
