@@ -7,7 +7,7 @@ defstar {
   version { $Id$ }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -27,14 +27,12 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go {
     completionTime = arrivalTime;
-    if (input.dataNew) {
-      if (!reset.dataNew) {
+    if (input.dataNew && !reset.dataNew) {
 	output.put(completionTime) << double(input.get());
-      } else {
-	output.put(completionTime) << double(reset.get());
-	input.dataNew = FALSE;
-      }
-    }
+    } else {
+        output.put(completionTime) << double(reset.get());
+        input.dataNew = FALSE;
+    } 
   }
 }
 
