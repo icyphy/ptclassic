@@ -183,6 +183,7 @@ public:
 	int domain(int argc,char** argv);
 	int domains(int argc,char** argv);
 	int exit(int argc,char** argv);
+	int halt(int argc,char** argv);
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
 	int multilink(int argc,char** argv);
