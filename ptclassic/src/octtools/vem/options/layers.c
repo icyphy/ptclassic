@@ -64,11 +64,9 @@ static void lyr_apply();
 static void lyr_all();
 static void lyr_clear();
 
-static st_table *get_off_layers();
 static st_table *find_off_layers();
 static int comp();
 static int comp_layers();
-static void destroy_desc();
 
 typedef struct new_lyr_info_defn {
     ddsHandle top;
@@ -393,7 +391,6 @@ ddsHandle item;			/* Control button */
     ddsItemList item_data;
     cb_data *cb;
     wnOpts opts;
-    int i;
 
     dds_get(item, (ddsData) &data);
     cb = (cb_data *) data.user_data;
