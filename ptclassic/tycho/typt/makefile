@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Retargetting tool
+# Makefile for Tycho/Ptolemy directory
 #
 # @Author: Christopher Hylands
 #
@@ -30,33 +30,17 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Tycho directory
-ROOT =		../..
+DIRS = kernel editors
 
-# True source directory
-VPATH =		$(ROOT)/lib/retarg
+makefiles all install clean sources depend realclean checkjunk sccsinfo \
+itcldocs extraclean:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in tycho/typt/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
 
-# Get configuration info
-CONFIG =	$(ROOT)/mk/tycho.mk
-include $(CONFIG)
 
-ITCL_SRCS = \
-	DomainInfo.itcl \
-	RetargEdit.itcl
-
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
-
-MISC_FILES =	tclIndex doc
-
-# 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex *.html
-
-# Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/lib/retarg
-
-DIRS =		test #doc
-
-all install: tclIndex $(MISC_SRCS)
-
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
