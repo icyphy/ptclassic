@@ -44,13 +44,15 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
- -I$(ROOT)/src/utils/libcephes
+ -I$(ROOT)/src/utils/libptdsp
 
 # source files for all stars, using preprocessor
 # put base stars first, i.e., those that other stars are derived from
 PL_SRCS= \
  CGCChop.pl \
  CGCFix.pl \
+ CGCPCM.pl \
+ CGCPCMwrite.pl \
  CGCQuant.pl \
  CGCSGIAudio.pl \
  CGCXgraph.pl \
@@ -118,9 +120,7 @@ PL_SRCS= \
  CGCMpyInt.pl \
  CGCMux.pl \
  CGCOrderTwoInt.pl \
- CGCPCM.pl \
  CGCPCMread.pl \
- CGCPCMwrite.pl \
  CGCPcwzLinear.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
