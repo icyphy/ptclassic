@@ -49,7 +49,7 @@ HDRS		=
 LIBCSRCS	= oct2ps.c \
 		version.c
 
-SRCS = $(LIBCSRCS) $(ROOT)/octtools/lib/oct2ps.pro $(ROOT)/lib/oct2ps.pro
+SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
@@ -57,7 +57,7 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2ps.1 oct2ps.pro sample sample.ps sample2 sample2.ps
 
-all::	 makefile oct2ps 
+all::	 makefile $(ROOT)/octtools/lib/oct2ps.pro $(ROOT)/lib/oct2ps.pro oct2ps
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
