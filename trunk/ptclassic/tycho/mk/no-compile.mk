@@ -105,17 +105,31 @@ tests:: makefile
 		done ; \
 	fi
 
+FORCEIT:
+alltests.itcl: FORCEIT
+	rm -f $@
+	echo "set reallyExit 0" > $@
+	echo "#Do an update so that we are sure tycho is done displaying" >> $@
+	echo "update" >> $@
+	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}}" >> $@
+	for x in $(GRAPHICAL_TESTS); do \
+		echo "puts stderr $$x" >> $@; \
+		echo "source $$x" >> $@; \
+	done
+	echo "set reallyExit 1" >> $@
+	echo "doneTests" >> $@
+
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
 TYDOC=$(ROOT)/lib/tydoc/tydoc
-itcldocs: $(ITCL_SRCS)
+itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(TYDOC) -d $(ITCL_SRCS)"; \
-	 	$(TYDOC) -d $(ITCL_SRCS); \
+		echo "$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
+	 	$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
 	else \
-		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
-		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
+		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
+		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
 
 # We use a GNU make extension here
