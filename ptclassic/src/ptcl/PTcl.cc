@@ -159,15 +159,16 @@ void PTcl::addResult(const char* value) {
 	Tcl_AppendElement(interp,(char*)value);
 }
 
-const Block* PTcl::getBlock(const char* name) {
-// if name is blank or "this", return current galaxy.  "target"
+// If name is blank or "this", return current galaxy.  "target"
 // matches current target.  Otherwise, first search the current galaxy,
-// then the known list, finally known targets.
+// then the known list, finally known targets.  Return null pointer
+// if block not found.
+const Block* PTcl::getBlock(const char* name) {
 
 	if (!name || *name == 0 || strcmp(name,"this") == 0)
 		return currentGalaxy;
 	if (strcmp(name,"target") == 0)
-		return definingGal ? currentTarget : universe->myTarget();
+		return currentTarget;
 	const Block* b = currentGalaxy->blockWithDottedName(name);
 	if (!b) b = KnownBlock::find(name, curDomain);
 	if (!b) b = KnownTarget::find(name);
@@ -176,8 +177,8 @@ const Block* PTcl::getBlock(const char* name) {
 }
 
 // descriptor: print the descriptor of the current galaxy, or of
-// a block in the galaxy or on the known list.
-
+// a block in the galaxy or on the known list, or of the current
+// target or any known target.
 int PTcl::descriptor(int argc,char** argv) {
 	if (argc > 2) return usage("descriptor ?<block-or-classname>?");
 	const Block* b = getBlock(argv[1]);
@@ -192,7 +193,8 @@ int PTcl::print(int argc,char** argv) {
 	return result(b->print(0));
 }
 
-// star: create a new instance of star within galaxy
+// star: create a new instance of star/galaxy/wormhole within the
+// current galaxy.
 int PTcl::star(int argc,char** argv) {
 	if (argc != 3) return usage("star <name> <class>");
 	if (!currentGalaxy->addStar(argv[1], argv[2]))
@@ -200,7 +202,7 @@ int PTcl::star(int argc,char** argv) {
 	return TCL_OK;
 }
 
-// delstar: delete a star from the galaxy
+// delstar: delete a star/galaxy/wormhole from the current galaxy.
 int PTcl::delstar(int argc,char** argv) {
 	if (argc != 2) return usage("delstar <name>");
 	if (! currentGalaxy->delStar(argv[1]))
@@ -314,7 +316,8 @@ static const State* findState(const Block* b, const char* nm) {
 // default is current value
 int PTcl::statevalue(int argc,char ** argv) {
 	if (argc < 3 || argc > 4 ||
-	    (argc == 4 &&argv[3][0] != 'c' && argv[3][0] != 'i'))
+	    (argc == 4 && strcmp(argv[3], "current") != 0
+	     && strcmp(argv[3], "initial") != 0))
 		return usage ("statevalue <block> <state> ?current/initial?");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
@@ -348,10 +351,12 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	int status;  // return value
 	if ((status = Tcl_Eval(interp, argv[2])) != TCL_OK) {
 		LOG_DEL; delete currentGalaxy;
+		LOG_DEL; delete currentTarget;
 		Error::error("Error in defining galaxy ", galname);
 	}
 	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
 	currentGalaxy = universe;
+	currentTarget = universe->myTarget();
 	definingGal = FALSE;
 	curDomain = outerDomain;
 	return status;
@@ -381,7 +386,7 @@ int PTcl::schedule(int argc,char **) {
 // return the current time from the top-level scheduler of the current
 // universe.  If the target has a state named "schedulePeriod", the
 // returned time is divided by this value, unless a second argument
-// with the value "actual" appears.
+// with the value "actual" appears.  Return 0 if there is no scheduler.
 
 int PTcl::schedtime(int argc,char **argv) {
 	int actualFlag = (argc == 2 && strcmp(argv[1], "actual") == 0);
@@ -503,6 +508,7 @@ int PTcl::topblocks (int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("topblocks ?<block-or-classname>?");
 	const Block* b = getBlock(argv[1]);
+	if (!b) return TCL_ERROR;
 	if (!b->isItAtomic()) {
 		CGalTopBlockIter nextb(b->asGalaxy());
 		const Block* b;
@@ -514,13 +520,15 @@ int PTcl::topblocks (int argc,char ** argv) {
 }
 
 // return the list of states, ports, or multiports in the given block.
-// No arg: states in current galaxy.
+// The first argument, specifying states, ports, or multiports, must
+// be given.  If the second argument is not given, block is current galaxy.
 int PTcl::listobjs (int argc,char ** argv) {
 	static char use[] =
 		"listobjs [states|ports|multiports] ?<block-or-classname>?";
 	if (argc > 3 || argc <= 1)
 		return usage (use);
 	const Block* b = getBlock(argv[2]);
+	if (!b) return TCL_ERROR;
 	if (strcmp(argv[1], "states") == 0) {
 		CBlockStateIter nexts(*b);
 		const State* s;
@@ -554,7 +562,7 @@ int PTcl::reset(int argc,char** argv) {
 
 // Create a new, empty universe named <name> (default main) and make it
 // the current  universe with domain <dom> (default current domain).  If
-// there was previously a universe with this name, it is  deleted.
+// there was previously a universe with this name, it is deleted.
 // Whatever universe was previously the current universe is not affected,
 // unless it was named <name>. 
 
@@ -581,6 +589,9 @@ int PTcl::deluniverse(int argc,char** argv) {
 	return TCL_OK;
 }
 
+// Return name of current universe if no argument is given.
+// If one argument (name of a universe) is given, set current
+// universe to this universe.
 int PTcl::curuniverse(int argc,char** argv) {
 	if (argc == 1) {
 		Tcl_AppendResult(interp,universe->name(),(char*)NULL);
@@ -605,6 +616,8 @@ int PTcl::curuniverse(int argc,char** argv) {
 
 // renameuniv <newname>: rename current univ to newname.
 // renameuniv <oldname> <newname>: rename <oldname> to <newname>.
+// Side effect: if there is an existing universe by the new name,
+// it will be destroyed.
 
 int PTcl::renameuniv(int argc,char ** argv) {
 	InterpUniverse* u = universe;
@@ -637,10 +650,10 @@ int PTcl::univlist(int argc,char **) {
 	return TCL_OK;
 }
 
-// return true if Target *t is a legal target for the domain domName.
+// Return true if the target targetName is a legal target for
+// the domain domName.
 
-static int legalTarget(const char* domName, Target* t) {
-	const char* targetName = t->name();
+static int legalTarget(const char* domName, const char* targetName) {
 	const int MAX_NAMES = 40;
 	const char *names[MAX_NAMES];
 	int n = KnownTarget::getList (domName, names, MAX_NAMES);
@@ -672,10 +685,10 @@ int PTcl::domain(int argc,char ** argv) {
 	// check to see if existing target is legal for the new domain,
 	// if not, revert to default target.
 	if (!definingGal) {
-		if (!legalTarget(curDomain, universe->myTarget())) {
-			universe->newTarget ();
-			currentTarget = universe->myTarget();
-		}
+	    if (!legalTarget(curDomain, universe->myTarget()->name())) {
+		universe->newTarget ();
+		currentTarget = universe->myTarget();
+	    }
 	}
 	return TCL_OK;
 }
@@ -683,21 +696,26 @@ int PTcl::domain(int argc,char ** argv) {
 // display or change the target
 int PTcl::target(int argc,char ** argv) {
 	if (argc == 1) {
-		Target* tp = definingGal ? currentTarget : universe->myTarget();
-		return staticResult(tp->name());
+		const char *targName = "No target";
+		if (currentTarget) targName = currentTarget->name();
+		return staticResult(targName);
 	}
 	else if (argc > 2) {
 		return usage("target ?<targetname>?");
 	}
 	else {
 		const char* tname = hashstring(argv[1]);
+		if (!legalTarget(curDomain, tname)) {
+		    Error::error(tname,
+		      " is not a legal target for domain ", curDomain);
+		    return TCL_ERROR;
+		}
 		int status;
 		if (!definingGal) {
 			status = universe->newTarget(tname);
 			currentTarget = universe->myTarget();
 		} else {
-		// shouldn't need this test. Compiler bug?
-			if (currentTarget) { LOG_DEL; delete currentTarget; }
+			LOG_DEL; delete currentTarget;
 			currentTarget = KnownTarget::clone(tname);
 			status = (currentTarget != 0);
 		}
@@ -722,9 +740,11 @@ int PTcl::targets(int argc,char** argv) {
 int PTcl::targetparam(int argc,char ** argv) {
 	if (argc != 2 && argc != 3)
 		return usage("targetparam <name> ?<value>?");
-	Target* t = universe->myTarget();
-	if (definingGal && currentTarget) t = currentTarget;
-	State* s = t->stateWithName(argv[1]);
+	if (!currentTarget) {
+		Error::error("Target has not been created yet.");
+		return TCL_ERROR;
+	}
+	State* s = currentTarget->stateWithName(argv[1]);
 	if (!s) {
 		Error::error("No such target parameter: ", argv[1]);
 		return TCL_ERROR;
