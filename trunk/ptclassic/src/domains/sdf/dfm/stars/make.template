@@ -43,7 +43,7 @@ include $(CONFIG)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 SDFTCLTKDIR = $(ROOT)/src/domains/sdf/tcltk/stars
 TCLDIR = $(ROOT)/tcl/include
-TYCHODIR = $(ROOT)/src/tycho/tysh
+TYCHODIR = $(ROOT)/src/tysh
 PTKLIB = $(ROOT)/src/ptklib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(SDFTCLTKDIR) -I$(TYCHODIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
