@@ -399,22 +399,21 @@ StringList MDSDFScheduler::displaySchedule() {
 
 // display the schedule
 StringList MDSDFSchedule::printVerbose() const  {
-  ostrstream strm;
-  strm << "MDSDF SCHEDULE:\n";
+  StringList strm;
+  strm << "{\n  { scheduler \"MDSDF Scheduler\" }\n";
   MDSDFSchedIter next(*this);
   MDSDFScheduleEntry* entry;
   for (int i = size(); i > 0; i--) {
     entry = next++;
-    strm << entry->star->fullName();
-    strm << ", firing range: ";
-    strm << "(" << entry->startRowIndex << "," << entry->startColIndex << ")";
-    if(entry->startRowIndex != entry->endRowIndex ||
-       entry->startColIndex != entry->endColIndex)
-      strm << " - (" << entry->endRowIndex << "," << entry->endColIndex << ")";
-    strm << "\n";
+    strm << "  { fire " << entry->star->fullName() << "\n"
+	 << "   { start_row " << entry->startRowIndex
+	 << " } { end_row " << entry->endRowIndex << "}\n"
+	 << "   { start_col " << entry->startColIndex
+	 << " } { end_col " << entry->endColIndex << "}\n"
+	 << "  }\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  strm << "}\n";
+  return strm;
 }
 
 // schedule destructor, free the elements of the list, but not the list itself

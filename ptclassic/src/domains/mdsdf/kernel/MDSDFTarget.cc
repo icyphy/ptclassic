@@ -72,6 +72,6 @@ void MDSDFTarget::setup() {
 	// create a file with the schedule in it
 	pt_ofstream o(logFile);
 	if (o) {
-		o << scheduler()->displaySchedule() << "\n";
+		o << scheduler()->displaySchedule();
 	}
 }
