@@ -98,7 +98,7 @@ FALSE inputs separate audio samples through both the left and right inputs.}
       /* audio_control : to set portType, volume and balance */
       StringList controlParameters = "$sharedSymbol(CGCAudioBase,audio_control)";
       controlParameters << "($starSymbol(file), "
-			<< "\"" << portType << ",\" "
+			<< "\"" << portType << "\", "
 			<<  volume << ",\" " 
 			<<  balance << ",\" "
 			<< "0);\n";
