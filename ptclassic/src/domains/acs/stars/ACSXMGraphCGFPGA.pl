@@ -7,7 +7,7 @@ defcore {
 	    Swallows an input sample
 	    Only the first connection is used for hardware
 	}
-        version {1.0    18 June 1999}
+        version {$Id$}
         author { Ken Smith, Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California
