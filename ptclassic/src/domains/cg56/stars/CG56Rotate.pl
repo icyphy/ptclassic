@@ -90,7 +90,7 @@ $label(lab4)
 		rotate = rotation;
 
 		if (rotation < 0)
-			rotate = length + rotation;
+			rotate = (int)length + (int)rotation;
 
 		if (rotate > 0 && length > 1)
 			addCode(greater);
