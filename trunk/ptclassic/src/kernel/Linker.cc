@@ -557,7 +557,7 @@ int Linker::multiLink (int argc, char** argv) {
 
 	if (system (cmd)) {
 	        Error::abortRun("Error linking file, command was\n",
-				command);
+				cmd);
 		return FALSE;
 	}
 
