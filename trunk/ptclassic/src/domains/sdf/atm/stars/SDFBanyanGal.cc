@@ -253,7 +253,6 @@ SDFBanyanGal::wrapup()
 	       removeBlock(stars[i]);
            }
 	   delete [] stars;
-	   delete stars;
 	   stars = NULL;
         }
 
