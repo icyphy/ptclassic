@@ -69,6 +69,9 @@ class ::tycho::RevControl {
     # Diff the most recent files. This is just a macro (quick button)
     method checkRecent {text} {}
 
+    # Help, invoke HTML help
+    method help {} {}
+
     # Check out the most recent version, and delete it from history
     method fixRecentAndUpdate {} {}
 
@@ -214,6 +217,7 @@ body ::tycho::RevControl::constructor {args} {
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
     addButton unedit -text "Unedit <u>" -command "$this unedit"
+    addButton help -text "Help <h>" -command "$this help"
     addButton cancel -text "Close <Esc>" -command \
             "$this nextWindow; delete object $this"
 
@@ -256,7 +260,7 @@ body ::tycho::RevControl::constructor {args} {
 
     itk_component add historypanel {
 	::tycho::Subpanel $itk_component(hull).pan \
-		-text "View History" \
+		-text "View History <v>" \
 		-childwidget $itk_component(historyframe) \
 		-execute "$this viewHistory"
     } {}
@@ -264,7 +268,9 @@ body ::tycho::RevControl::constructor {args} {
 
     bind $itk_component(hull) <i> "$this invoke checkin"
     bind $itk_component(hull) <o> "$this invoke checkout"
+    bind $itk_component(hull) <v> "$itk_component(historypanel) open"
     bind $itk_component(hull) <u> "$this invoke unedit"
+    bind $itk_component(hull) <h> "$this help"
     bind $itk_component(hull) <Escape> "$this invoke cancel"
 }
 
@@ -491,6 +497,18 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
     after 1 $editorWin.revcontrol focusin
     $editorWin.revcontrol focusin
     return $editorWin.revcontrol
+}
+
+
+###################################################################
+#### help
+# Open a help window.
+# This should be redefined in derived classes.
+#
+body ::tycho::RevControl::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+            [file join $TYCHO kernel doc usersGuides RevControlHelp.html]
 }
 
 ###################################################################
