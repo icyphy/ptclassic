@@ -5,7 +5,7 @@ Discrete Wavelet Transform Filter Bank
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "November 18, 1992"
+.SV $Revision$	"November 18, 1992"
 .AL "Alan Peevers"
 .LD
 .pp
@@ -15,10 +15,7 @@ Discrete Wavelet Transform Filter Bank
 .Ie "wavelet transform"
 .Ie "wavelets"
  This universe implements an eight-level perfect reconstruction one-dimensional
-filter bank based on bi-orthogonal wavelet decomposition.
- It is inspired by the paper ``Wavelets and Filter Banks: Theory and Design,''
-\fIIEEE Transactions on Signal Processing\fR, \fB40(9)\fR, September, 1992.
-by M. Vetterli and C. Herley.
+filter bank based on bi-orthogonal wavelet decomposition [1].
 .Ir "M. Vetterli and C. Herley"
  This filter bank is a form of subband coder, in which the sample rate
 decreases by powers of two, thereby forming a dyadic decomposition of the
@@ -34,14 +31,7 @@ with higher resolution at the lower frequencies.
 in which successive representations have progressively better frequency
 resolution at the expense of progressively lower time resolution. 
  Such octave-band frequency decompositions have been studied extensively
-since the early 1970's (e.g., see the 1983 book
-\fIMultirate Digital Signal Processing\fR,
-by R. E. Crochiere and L. R. Rabiner, or the 1984 paper
-``A Procedure for Designing Exact Reconstruction Filter Banks
-for Tree-Structured Subband Coders'' by M. J. T. Smith and T. P. Barnwell
-which appeared in the
-\fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
-pp. 27.1.1--27.1.3).
+since the early 1970's [2-3].
 .Ir "M. J. T. Smith and T. P. Barnwell"
 .pp
  The multi-resolution representation at the analysis bank outputs is actually
@@ -55,21 +45,18 @@ together, yielding a new signal at twice the component signals' sampling rate.
 This then gets combined with the next highest rate signal from the analysis
 bank, and so on, until the original sampling rate is restored. 
 .pp
-For specially designed FIR filters, the reconstructed signal will be an exact
-replica of the input (to within coefficient roundoff error). This property,
-known as the 'perfect reconstruction' property, has been studied in great
-detail in the literature.
- See, for example, ``Quadrature Mirror Filter Banks, M-Band Extensions, and
-Perfect-Reconstruction Techniques,'' \fIIEEE ASSP Magazine \fR, \fB37(12)\fR,
-July, 1987, by P. P. Vaidyanathan.
-.Ir ""P. P. Vaidyanathan"
+ For specially designed FIR filters, the reconstructed signal will be an exact
+replica of the input (to within coefficient round-off error).
+ This property, known as the 'perfect reconstruction' property,
+has been studied in great detail in the literature [4].
+.Ir "P. P. Vaidyanathan"
 .pp
  All analysis stages are identical, as are all synthesis stages.
  There are, in all, only four unique FIR filters used.
  The impulse response of the analysis filters form a pair of bi-orthogonal
 wavelets.
- Bi-orthogonality is not quite as strong as orthogonality, and the reader
-is referred to Vetterli \fIet al.\fR for more details.
+ Bi-orthogonality is not quite as strong of a condition as is orthogonality,
+and the reader is referred to Vetterli \fIet al.\fR for more details [1].
 .pp
  Concerning the schematic layout,
 .c ana
@@ -88,4 +75,26 @@ adjusted to optimize the dynamic range of the image.
  It runs much more quickly.
 .SA
 sfb
+.UH REFERENCES
+.ip [1]
+M. Vetterli and C. Herley,
+``Wavelets and Filter Banks: Theory and Design,''
+\fIIEEE Transactions on Signal Processing\fR,
+Sep., 1992, \fB40(9)\fR, pp. 2207-2232.
+.ip [2]
+R. E. Crochiere and L. R. Rabiner, 
+\fIMultirate Digital Signal Processing\fR,
+Prentice-Hall, Englewood Cliffs, NJ, 1983.
+.ip [3]
+M. J. T. Smith and T. P. Barnwell,
+``A Procedure for Designing Exact Reconstruction Filter Banks
+for Tree-Structured Subband Coders,'' 
+\fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
+Mar., 1984, vol. 2, pp. 27.1/1-4.
+.ip [4]
+P. P. Vaidyanathan,
+``Quadrature Mirror Filter Banks, $M$-Band Extensions, and
+Perfect Reconstruction Techniques,''
+\fIIEEE ASSP Magazine \fR, \fB37(12)\fR,
+July, 1987, \fB4(3)\fR, pp. 652-663.
 .ES
