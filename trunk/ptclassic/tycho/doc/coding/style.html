@@ -85,19 +85,10 @@ the object definition.
 <h2><a name="naming conventions">Naming conventions</a></h2>
 
 All programming languages have a global namespace.  In Itcl, class
-names, global variables, and procedure names are in the global namespace.
-Choose names carefully.  In particular,
-<ul>
-<li> All <a href="#global variables">global variables</a>
-     in Tycho should begin
-     with "ty" and should be documented. The documentation is
-     temporarily being collected in the file "doc"
-     in the main Tycho directory.
-<li> All procedure names should begin with "ty" unless they already
-     existed in pigi, in which case they should begin with "ptk" and
-     should be backward compatible.
-</ul>
-In Itcl, there is no limit to name sizes (as it should be).
+names, and procedure names are in the global namespace.
+Choose names carefully.
+
+<p>In Itcl, there is no limit to name sizes (as it should be).
 Do not hesitate to use long names.
 <p>
 When naming objects, use automatic naming as much as possible.
@@ -112,10 +103,10 @@ If the class defines a top-level window (i.e. it eventually inherits
 the <CODE>TopLevel</CODE> class ), then you should use the syntax
 
 <pre>
-Classname [::tycho::autoname .classname] ?options?
+Classname [::tycho::autoName .classname] ?options?
 </pre>
 
-The <CODE>autoname</CODE> procedure is defined in Tycho and returns a
+The <CODE>autoName</CODE> procedure is defined in Tycho and returns a
 class name that is constructed by appending to the single argument an
 underscore and an integer that ensures that the name will be unique.
 
@@ -127,13 +118,6 @@ Note that at least one instance of the class must have been created
 for the common variable to exist. (Apparently, it can have been
 deleted as well).
 <p>
-There appears to be one circumstance in which global variables
-are needed.  A Tk checkbutton object generally has a global
-variable associated with it.  There appears to be no way to
-use a common variable for this (that I have found).
-The name of the global variable should begin with "ty",
-and its existence should be documented, as explained
-<a href="#naming conventions">above</a>.
 
 <h2><a name="documentation conventions">Documentation conventions</a></h2>
 
@@ -186,29 +170,18 @@ Currently we are using the <CODE>&#37Q&#37</CODE> SCCS
 directive to adjust the copyright dates automatically.  The
 copyright should have <CODE>&#37Q&#37</CODE>
 as the ending date of the copyright:
-<CODE>1990-&#37Q&#37</CODE>
-If you are setting up a new directory, then you should do:
-<pre>
-sccs admin -fq1995 SCCS
-</pre>
-	
-to set the <CODE>Q</CODE> variable in the SCCS directory.  Note that after
-doing the sccs admin command, 'make sources' will check out
-all the files in that directory.  If you are adding a new
-file, you can do:
-	
-<pre>
-sccs admin -fq1995 SCCS mynewfile.cc
-</pre>
+<CODE>1995-&#37Q&#37</CODE>
+The Tycho interface to SCCS takes care of interpreting the
+<CODE>&#37Q&#37</CODE>.
 
-If your file is a rewrite of a previously copyrighted file from UC
+ <P>If your file is a rewrite of a previously copyrighted file from UC
 Berkeley, then you should include the date from that file.
 
 <h3><a name="copyright for Itcl files">Copyright for Itcl files</a></h3>
 
 The <a href="../../editors/textedit/templates/ItclTemplate.itcl">Itcl
 template</a> file contains the appropriate copyright to be used for
-Itcl files at UC Berkeley.  Other sites may want to substitute in
+Itcl files at UC Berkeley.  Other sites may want to substitute
 their own template.  The Itcl editor has a
 <A
 HREF="../../editors/textedit/doc/usersGuides/EditItclHelp.html#Itcl
