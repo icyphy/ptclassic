@@ -64,27 +64,7 @@ $Id$
 
 #define dmWidth 40
 
-/* uses the ptman script to print it out the man page for the given
-   star or galaxy */
-boolean
-ManPage(starName)
-char *starName;
-{
-    char buf[512];
-
-    sprintf(buf, "ptman -x %s &", starName);
-    PrintDebug(buf);
-    if (util_csystem(buf)) {
-        sprintf(buf, "Cannot find man page for Ptolemy code file '%s'", 
-                starName);
-        ErrAdd(buf);
-        return (FALSE);
-    }
-    return (TRUE);
-}
-
-/* print the manual entry of the star the cursor is currently over.
-   written by Alan Kamas.  Based on the "LookInside" code. */
+/* uses Tycho to display the man page for the current star. */
 int 
 Man(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
@@ -130,17 +110,9 @@ long userOptionWord;
                     PrintErr(ErrGet());
                     ViDone();
                 }
-		/* Convert source file name to base name for look up */
-                base = BaseName(codeFile); 
-		/* Only want base part, nothing after the period */
-		if ((period = strchr(base, '.')) != NULL) { *period = '\0'; }
 
-		/* now, call ptman with the base star name. */
-                if (!ManPage(base)){
-                    PrintErr(ErrGet());
-                    ViDone();
-		}
-
+                Tcl_VarEval ("::tycho::EditPtlang::gendoc ",
+                        codeFile, (char*) NULL);
             } else {
                 PrintErr("The Man command is currently only supported for Stars.");
                 ViDone();
