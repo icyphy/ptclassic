@@ -31,6 +31,7 @@ DERepeatStar :: DERepeatStar() {
 	// make a feedback connection
 	feedbackOut.connect(feedbackIn, 0);
 	feedbackIn.triggers();
+	feedbackIn.depth = MINDEPTH;
 
 	// hide the feedback connections from user interfaces
 	feedbackOut.setAttributes(P_HIDDEN);
