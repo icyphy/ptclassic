@@ -48,13 +48,15 @@ public:
         // class identification
         int isA(const char*) const;
 
-	// select core to be used
-	selectCore(const char*);
+	// select Core to be used
+	int setCore(const char*);
 
 	// register Core in list
-	registerCore(Core &);
+	static int registerCore(Core &, const char*);
 
 protected:
 
 	Core *corelist;
+
+	Core *currentCore;
 }
