@@ -36,7 +36,7 @@ void <T>ArrayState  :: initialize() {
 	ParseToken t =evalExpression(lexer, parent()->parent());
 	if(strcmp(t.tok,"ERROR"))
 	if(strcmp(t.tok,"EOF"))
-	{if(!strcmp(t.tok,"<T>")) buf[i++] = t.dval;
+	{if(!strcmp(t.tok,"<T>")) buf[i++] = t.<C>val;
         else if(!strcmp(t.tok,"ID")) buf[i++] = ((<T>State*)t.s)->val;
 	}
 			};
@@ -48,28 +48,28 @@ void <T>ArrayState  :: initialize() {
 }
 
 ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-	
-	<C> signflag = 1;
+        <C> signflag = 1;
         ParseToken t = getParseToken(lexer, blockIAmIn);
 
-	if(!strcmp(t.tok,"EOF")) return t;
-	if(!strcmp(t.tok,"OP"))
-	{
-	if(t.cval == '-')
-		{signflag = -1;
-		t = getParseToken(lexer, blockIAmIn);
-		if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}	
-		}
+        if(!strcmp(t.tok,"EOF")) return t;
+        if(!strcmp(t.tok,"OP"))
+        {
+        if(t.cval == '-')
+                {signflag = -1;
+                t = getParseToken(lexer, blockIAmIn);
+                if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}
+                }
         }
-	if(!strcmp(t.tok,"<T>")) {
-					t.dval = signflag * t.dval;
-					return  t;
-				}
+        if(!strcmp(t.tok,"<T>")) {
+                                        t.<C>val = signflag * t.<C>val;
+                                        return  t;
+                                }
         else if(!strcmp(t.tok,"ID")) {
-		((<T>State*)t.s)->val = signflag * ((<T>State*)t.s)->val;
-					return t;
-				}
+                ((<T>State*)t.s)->val = signflag * ((<T>State*)t.s)->val;
+                                        return t;
+                                }
         else {t.tok = "ERROR"; return t;}
+	
 }
 
 // make knownstate entry
