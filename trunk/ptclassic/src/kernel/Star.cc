@@ -20,11 +20,6 @@ $Id$
 #include "StringList.h"
 #include "GalIter.h"
 #include "Animate.h"
-#include <ACG.h>
-
-// common random number generator for all Star classes.
-// default seed is 1.
-ACG* gen = new ACG(1);		
 
 /*******************************************************************
 
