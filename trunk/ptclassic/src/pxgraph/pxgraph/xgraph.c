@@ -1140,7 +1140,7 @@ int do_it;
 		    /* Limit the X coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						argv[idx]);
-		    if (hi = index(argv[idx+1], ',')) {
+		    if (hi = strchr(argv[idx+1], ',')) {
 			char low[MAXLO];
 		    
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1161,7 +1161,7 @@ int do_it;
 		    /* Limit the Y coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						  argv[idx]);
-		    if (hi = index(argv[idx+1], ',')) {
+		    if (hi = strchr(argv[idx+1], ',')) {
 			char low[MAXLO];
 
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1205,7 +1205,7 @@ int do_it;
 	    idx++;
 	} else {
 	    /* It might be the host:display string */
-	    if (rindex(argv[idx], ':') == (char *) 0) {
+	    if (strrchr(argv[idx], ':') == (char *) 0) {
 		/* Should be an input file */
 		inFileNames[numFiles] = argv[idx];
 		numFiles++;
