@@ -13,40 +13,40 @@
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cg/ddfScheduler
+VPATH = 	$(ROOT)/src/domains/cg/ddfScheduler
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # CG directory
-CGDIR=$(ROOT)/src/domains/cg/kernel
-SDFDIR=$(ROOT)/src/domains/sdf/kernel
-PARDIR=$(ROOT)/src/domains/cg/parScheduler
-DLDIR=$(ROOT)/src/domains/cg/dlScheduler
-MACRODIR=$(ROOT)/src/domains/cg/macroScheduler
+CGDIR =		$(ROOT)/src/domains/cg/kernel
+SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
+PARDIR = 	$(ROOT)/src/domains/cg/parScheduler
+DLDIR = 	$(ROOT)/src/domains/cg/dlScheduler
+MACRODIR = 	$(ROOT)/src/domains/cg/macroScheduler
 
 INCL = -I$(KERNDIR) -I$(SDFDIR) -I$(CGDIR) -I$(PARDIR) -I$(DLDIR) -I$(MACRODIR)
 
 # Library name
-LIB=libcgddf.a
+LIB = 	libcgddf.$(LIBSUFFIX)
 
 # Header files
-HDRS= CGDDFScheduler.h CGDDFCluster.h CGConScheduler.h \
- Distribution.h Case.h DoWhile.h For.h Recur.h DyConstruct.h \
- distributions.h dist_template.h \
- CGCaseScheduler.h CGDoWhileScheduler.h \
- CGForScheduler.h CGRecurScheduler.h	
+HDRS = 	CGDDFScheduler.h CGDDFCluster.h CGConScheduler.h \
+	Distribution.h Case.h DoWhile.h For.h Recur.h DyConstruct.h \
+	distributions.h dist_template.h \
+	CGCaseScheduler.h CGDoWhileScheduler.h \
+	CGForScheduler.h CGRecurScheduler.h	
  
 # Library objects
-OBJS= CGDDFScheduler.o CGDDFCluster.o CGConScheduler.o \
- Distribution.o distributions.o dist_debug.o \
- Case.o DoWhile.o Recur.o For.o DyConstruct.o \
- CGCaseScheduler.o CGForScheduler.o \
- CGDoWhileScheduler.o CGRecurScheduler.o
+OBJS =	CGDDFScheduler.o CGDDFCluster.o CGConScheduler.o \
+	Distribution.o distributions.o dist_debug.o \
+	Case.o DoWhile.o Recur.o For.o DyConstruct.o \
+	CGCaseScheduler.o CGForScheduler.o \
+	CGDoWhileScheduler.o CGRecurScheduler.o
 
 # Library sources
-SRCS= $(OBJS:.o=.cc)
+SRCS =	$(OBJS:.o=.cc)
 
 all:	makefile $(LIB)
 
