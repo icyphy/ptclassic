@@ -372,7 +372,6 @@ ifdef NOWAM
 endif
 
 ifdef CGC
-	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/dsp/stars
 	ifdef CGCTK
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets \
 			$(CGCDIR)/tcltk/lib
@@ -413,11 +412,12 @@ ifdef CGC
 		endif
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
-	STARS += $(LIBDIR)/cgcstars.o
-	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
-	LIBS += -lcgcstars
-	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX)
-	# Window and RaisedCos stars need the Cephes Library
+	STARS += $(LIBDIR)/cgcdspstars.o $(LIBDIR)/cgcstars.o
+	CUSTOM_DIRS += $(CGCDIR)/dsp/stars $(CGCDIR)/stars
+	LIBS += -lcgcdspstars -lcgcstars
+	LIBFILES += $(LIBDIR)/libcgcdspstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcgcstars.$(LIBSUFFIX)
+	# Window and RaisedCos DSP stars need the Cephes Library
 	CEPHESLIB = 1
 endif
 
