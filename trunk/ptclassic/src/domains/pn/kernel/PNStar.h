@@ -15,22 +15,19 @@
 #endif
 
 #include "SDFStar.h"
-#include "MTDFConnect.h"
+#include "MTDFPortHole.h"
 
 class MTDFStar : public DataFlowStar
 {
 public:
     // Class identification.
-    virtual int isA(const char* className) const;
+    /* virtual */ int isA(const char* className) const;
 
     // Domain identification.
-    virtual const char* domain() const;
+    /* virtual */ const char* domain() const;
 
-    // Domain-specific initialization.
-    virtual void prepareForScheduling();
-
-    // Identify Star as a data source.
-    int isItSource() const;
+    // Execute the Star.
+    /* virtual */ int run();
 };
 
 #endif
