@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Block.h"
 #include "SDFConnect.h"
 #include "CircularBuffer.h"

@@ -1,14 +1,3 @@
-#include "type.h"
-#include "SDFScheduler.h"
-#include "SDFStar.h"
-#include "Fraction.h"
-#include "Error.h"
-#include "StringList.h"
-#include "FloatState.h"
-#include "Geodesic.h"
-#include "GalIter.h"
-#include <std.h>
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -29,6 +18,21 @@ $Id$
  SDF Scheduler methods
 
 **************************************************************************/
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "type.h"
+#include "SDFScheduler.h"
+#include "SDFStar.h"
+#include "Fraction.h"
+#include "Error.h"
+#include "StringList.h"
+#include "FloatState.h"
+#include "Geodesic.h"
+#include "GalIter.h"
+#include <std.h>
 
 extern const char SDFdomainName[];
 

@@ -11,6 +11,10 @@ Version identification:
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "SDFWormhole.h"
 #include "SDFScheduler.h"
 #include "StringList.h"

@@ -10,6 +10,10 @@ Version identification:
  Revision : set up the flag (delayType) depending on the scheduler in start().
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "DEWormhole.h"
 #include "DEScheduler.h"
 

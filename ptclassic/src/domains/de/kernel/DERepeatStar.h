@@ -13,6 +13,11 @@ $Id$
 *******************************************************************/
 #ifndef _DERepeatStar_h
 #define _DERepeatStar_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "DEStar.h"
 
 	////////////////////////////////////

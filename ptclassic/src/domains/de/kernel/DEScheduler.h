@@ -1,11 +1,3 @@
-#ifndef _DEScheduler_h
-#define _DEScheduler_h 1
-
-#include "type.h"
-#include "Galaxy.h"
-#include "DEStar.h"
-#include "Scheduler.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -20,6 +12,18 @@ $Id$
 
  ********************************************************************/
  
+#ifndef _DEScheduler_h
+#define _DEScheduler_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
+#include "type.h"
+#include "Galaxy.h"
+#include "DEStar.h"
+#include "Scheduler.h"
+
 
 	////////////////////////////
 	// DEScheduler
