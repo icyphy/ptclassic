@@ -34,7 +34,11 @@
 # See the documentation of the TclScript star for an explanation of
 # how the Tcl/Ptolemy interface works.
 
+set ${uniqueSymbol}Frequency {}
+
 proc ptkPianoKeyboardBinding {key keyid uniqueSymbol octave freq color} {
+    global ${uniqueSymbol}Frequency
+    lappend ${uniqueSymbol}Frequency [expr $octave*$freq]
     $key bind $keyid <ButtonPress-1> \
 	"${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
     $key bind $keyid <ButtonRelease-1> \
@@ -42,9 +46,13 @@ proc ptkPianoKeyboardBinding {key keyid uniqueSymbol octave freq color} {
 # The following two commands, regrettably, do not work in the current
 # version of Tk.
     $key bind $keyid <Button1-Leave> \
-	"puts leave;${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
+	"puts \"leaving $octave*$freq $key $keyid\";${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
     $key bind $keyid <Button1-Enter> \
-	"${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
+	"puts \"entering $octave*$freq $key $keyid\";${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
+
+    $key bind $keyid <Button1-Motion> \
+	"puts \[set ${uniqueSymbol}Frequency \]; set newKey \[$key find closest %x %y\]; set newFreq \[lindex \[set ${uniqueSymbol}Frequency \] \[expr \$newKey-1\]\]; puts \"motion \$newFreq \$newKey\";${uniqueSymbol}setOutputs 1.0 \$newFreq; $key itemconfigure \$newKey -fill gold"
+
 }
 
 proc ${uniqueSymbol}createWindow {} {
@@ -118,3 +126,9 @@ proc ${uniqueSymbol}callTcl {} {
         global uniqueSymbol
         ${uniqueSymbol}setOutputs 0.0 0.0
 }
+
+
+
+
+
+
