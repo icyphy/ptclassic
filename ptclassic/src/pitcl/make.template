@@ -127,6 +127,10 @@ ifeq ($(strip $(LIB)),)
 LIB=dummylib
 endif
 
+ifeq ($(strip $(LIB_DEBUG)),)
+LIB_DEBUG=dummydebuglib
+endif
+
 # Rule for building a C++ library
 # We use a GNU make conditional here
 $(LIB):	$(OBJS)
