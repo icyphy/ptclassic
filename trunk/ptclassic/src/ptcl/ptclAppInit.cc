@@ -81,8 +81,6 @@ Tcl_Interp *ptkInterp;
  * Sun shared libraries to be used for Tcl.
  */
 #if !defined(PT_NT4VC)
-#define matherr _matherr
-
 EXTERN int matherr();
 
 /* This line produces a warning under hppa.cfront:
