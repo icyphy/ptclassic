@@ -29,7 +29,7 @@ EXPDOMAINS = pn
 endif
 
 DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
-          mq mdsdf $(EXPDOMAINS)
+          mq mdsdf ipus $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
