@@ -68,26 +68,30 @@ test addBlock-2 {create a block within a galaxy using relative naming} {
 
 test addBlock-3 {create a block within a galaxy instance using absolute naming} {
     namespace ::pitcl {
-        currentGalaxy .main
+        # Try to confuse absolute naming by changing the current universe.
+        # NOTE: If the domain of this new universe is DE, then SDF master
+        # galaxy "y" is no longer visible.
+        addUniverse .z SDF
         addBlock .x.w y
         blocks -fullname -deep .x
     }
 } {.x.x .x.w.z}
 
-test addBlock-3.1 {try to add a block that already exists} {
+test addBlock-4 {try to add a block that already exists} {
     catch {::pitcl::addBlock .x.x Ramp} msg
     list $msg
 } "{Block x already exists in .x}"
 
-test addBlock-4 {create a block within a master galaxy using absolute naming} {
+test addBlock-5 {create a block within a master galaxy using absolute naming} {
     namespace ::pitcl {
-        currentGalaxy .main
+        # Try to confuse absolute naming by changing the current universe.
+        currentGalaxy .z
         addBlock y.y Xgraph
         blocks -fullname -deep y
     }
 } {y.z y.y}
 
-test addBlock-5 {create a block within a new galaxy using abosolute naming} {
+test addBlock-6 {create a block within a new galaxy using abosolute naming} {
     namespace ::pitcl {
         defGalaxy yy SDF {
             addBlock yy.z Ramp

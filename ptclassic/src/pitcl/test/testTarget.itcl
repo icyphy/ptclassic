@@ -105,7 +105,7 @@ test target-9 {getTarget on a star before a run} {
 } {}
 
 test target-10 {getTarget on a star after a run} {
-    ::pitcl::initBlock .x
+    ::pitcl::init .x
     ::pitcl::getTarget .x.b
 } {default-SDF}
 
@@ -131,13 +131,13 @@ test target-14 {setTarget on a universe} {
 } {loop-SDF}
 
 # NOTE: It is not clear how the setTarget propogates to the internal stars
-# without a call to initBlock, but it seems to.
+# without a call to init, but it seems to.
 test target-15 {getTarget on a star} {
     ::pitcl::getTarget .x.b
 } {loop-SDF}
 
 test target-16 {getTarget on a star after initialize} {
-    ::pitcl::initBlock .x
+    ::pitcl::init .x
     ::pitcl::getTarget .x.b
 } {loop-SDF}
 

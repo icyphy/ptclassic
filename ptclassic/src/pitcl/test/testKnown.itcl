@@ -88,5 +88,20 @@ test known-3 {check knownUniverses} {
     }
 } {OK}
 
+######################################################################
+#### knownTargets
+# The returned list depends on what's linked in, so
+# just check that at least the default SDF target is present.
+
+test known-4 {check knownTargets} {
+    namespace ::pitcl {
+        if {[lsearch -exact [knownTargets] default-SDF] >= 0} {
+            list OK
+        } {
+            list NOT_OK
+        }
+    }
+} {OK}
+
 
 doneTests

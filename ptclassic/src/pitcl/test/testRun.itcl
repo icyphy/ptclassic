@@ -40,6 +40,8 @@ if {[string compare test [info procs test]] == 1} then {
 # Set the following to avoid endless calls to exit.
 set reallyExit 0
 
+# FIXME: Check initializations out of order. e.g. begin, run, init.
+
 ######################################################################
 #### setup
 # Create a simple universe.
@@ -51,7 +53,7 @@ test run-0 {create a test universe} {
         addBlock b Ramp
         addBlock c Add
         # FIXME: Make this a non-graphical test
-        addBlock d Xgraph
+        addBlock d XMgraph
         connect .x.a.output .x.c.input
         connect .x.b.output .x.c.input
         connect .x.c.output .x.d.input
@@ -61,9 +63,69 @@ test run-0 {create a test universe} {
 ######################################################################
 #### run
 
-test run-1 {Check getDomain on the universe} {
+test run-1 {Check the run command} {
     ::pitcl::run .x 10
-    ::pitcl::wrapup
+    ::pitcl::wrapup .x
+} {}
+
+######################################################################
+#### getSchedule
+# NOTE: This test is *extremely* sensitive to the exact format of the
+# returned schedule.
+
+test run-2 {Check the getSchedule command} {
+    ::pitcl::getSchedule
+} {{
+  { scheduler "Simple SDF Scheduler" }
+  { fire x.a }
+  { fire x.b }
+  { fire x.c }
+  { fire x.d }
+}
+}
+
+test run-3 {Check the getSchedule command on an uninitialized universe} {
+    ::pitcl::addUniverse .y SDF
+    catch {::pitcl::getSchedule .y} msg
+    list $msg
+} {{No schedule.  Run init to create a schedule}}
+
+test run-4 {Check the getSchedule command on a star} {
+    catch {::pitcl::getSchedule .x.a} msg
+    list $msg
+} {{getSchedule supported only for universes, and .x.a is not a universe.}}
+
+######################################################################
+#### incremental run
+
+test run-5 {reset the universe, then list blocks} {
+    namespace ::pitcl {
+        reset .x
+        blocks .x
+    }
+} {a b c d}
+
+# NOTE: This test is *extremely* sensitive to the exact format of the
+# returned schedule.
+test run-6 {Check getSchedule after init} {
+    catch {::pitcl::getSchedule} msg
+    list $msg
+} {{No schedule.  Run init to create a schedule}}
+
+test run-7 {Check the init method} {
+    ::pitcl::init .x
+} {}
+
+test run-8 {Check the begin method} {
+    ::pitcl::begin .x
+} {}
+
+test run-9 {Check the cont method} {
+    ::pitcl::cont .x 10
+} {}
+
+test run-10 {Check the wrapup method} {
+    ::pitcl::wrapup .x
 } {}
 
 # FIXME: wormhole test.

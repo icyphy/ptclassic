@@ -78,7 +78,7 @@ test remove-2 {remove a galaxy by relative name} {
 } {c d e}
 
 test remove-3 {remove a galaxy by absolute name} {
-    ::pitcl::currentGalaxy .main
+    ::pitcl::addUniverse .confusion SDF
     ::pitcl::remove .x.e
     ::pitcl::blocks .x
 } {c d}
@@ -90,13 +90,6 @@ test remove-4 {remove a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::remove .x
     list [::pitcl::knownUniverses] [::pitcl::currentGalaxy]
-} [list $newunivlist .main]
-
-test remove-5 {attempt to remove main} {
-    ::pitcl::addUniverse .main SDF
-    ::pitcl::addBlock a Ramp
-    ::pitcl::remove .main
-    ::pitcl::blocks .main
-} {}
+} [list $newunivlist {}]
 
 doneTests

@@ -50,11 +50,11 @@ test onfiring-0 {create a test universe} {
         addBlock a WaveForm
         addBlock b Ramp
         addBlock c Add
-        # FIXME: Make this a non-graphical test
-        addBlock d XMgraph
+        addBlock d BlackHole
         connect .x.a.output .x.c.input
         connect .x.b.output .x.c.input
         connect .x.c.output .x.d.input
+        onFiringCancel all
     }
 } {}
 
@@ -79,6 +79,35 @@ test onfiring-3 {Check the onFiringCancel command} {
     ::pitcl::run .x
     ::pitcl::wrapup .x
     list $testresult
-} {}
+} {{}}
+
+test onfiring-4 {Check onFiring with a specific star} {
+    ::pitcl::onFiring .x.a {lappend testresult}
+    set testresult {}
+    ::pitcl::run .x 3
+    ::pitcl::wrapup .x
+    list $testresult
+} {{.x.a .x.a .x.a}}
+
+test onfiring-5 {Check getData -geo} {
+    ::pitcl::connect -note 0 .x.c.output .x.d.input#1
+    ::pitcl::init .x
+    ::pitcl::getData -geo .x.d.input#1
+} {0.0}
+
+# Procedure that actually monitors the inputs
+proc monitorInput {star} {
+    global ::data
+    # NOTE: Errors here are not handled correctly
+    lappend data [::pitcl::getData $star.input#1]
+}
+
+test onfiring-6 {Check getData} {
+    ::pitcl::onFiring .x.d {monitorInput}
+    set data {}
+    ::pitcl::run .x 5
+    ::pitcl::wrapup .x
+    list $data
+} {{0.0 1.0 0.0 3.0 2.0}}
 
 doneTests
