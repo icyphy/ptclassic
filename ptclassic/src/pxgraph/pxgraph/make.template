@@ -23,9 +23,12 @@ HDRS = copyright.h general.h hard_devices.h params.h plotter.h st.h \
 
 all:	makefile pxgraph
 
+# Use the $(LINKER) so the binary is statically linked for distribution.
+# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
+# here.
 pxgraph:	$(OBJS)
 	rm -f pxgraph
-	$(CC) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) -lm
+	$(LINKER) $(LINKFLAGS) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) -lm
 
 OUT = $(BINDIR)/pxgraph
 
