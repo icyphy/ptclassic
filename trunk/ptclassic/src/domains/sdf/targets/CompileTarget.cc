@@ -69,6 +69,7 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return FALSE;
 
+    myCode = ""; // reinitialize the code stringList
     myCode << "// Galaxy definition file from: " << className << "\n\n";
     myCode << "#ifndef _" << className << "_h\n#define _" << className <<
 	    "_h 1\n";
@@ -93,7 +94,8 @@ int CompileTarget::run() {
     }
 
     // Generate the C++ code file
-    StringList myCode = "// C++ code file generated from universe: ";
+    myCode.initialize();
+    myCode += "// C++ code file generated from universe: ";
     myCode += galaxy()->fullName();
 
     myCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
@@ -132,7 +134,6 @@ int CompileTarget::run() {
     myCode += "while(iterations-- > 0) {\n";
     addCode(myCode);
     scheduler()->compileRun();
-    myCode.initialize();
     myCode += "}\n";
 
     myCode += "// WRAPUP CODE\n";
@@ -229,7 +230,7 @@ StringList CompileTarget::expandedName(const GenericPort* p) const {
 // Define a galaxy
 StringList CompileTarget::galDef(Galaxy* galaxy,
 			StringList className, int level) {
-    StringList myCode = "";
+    myCode.initialize();
     // The following iterator looks only at the current level of the graph
     GalTopBlockIter next(*galaxy);
     Block* b;
