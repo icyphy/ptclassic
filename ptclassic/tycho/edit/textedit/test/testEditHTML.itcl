@@ -134,6 +134,7 @@ plaintext</xmp>
 # This is not really a test, just a quick way to generate documentation.
 #
 test EditHTML-1.2 {Generate HTML documentation for EditHTML bindings} {
+    # FIXME: this will probably break with windows bindings.
     set view [tycho::view EditHTML]
     set win [$view displayer windowName]
     wm deiconify $win
@@ -166,101 +167,101 @@ test EditHTML-1.2 {Generate HTML documentation for EditHTML bindings} {
     $view get 1.0 end
 } {<h2>Bindings for EditHTML chars, fonts and blocks menus</h2>
 <h3>chars</h3>
-<dl><dt><code>C-c &</code>
-<dd>ampersand<dt><code>C-c ></code>
-<dd>greaterthan<dt><code>C-c <</code>
-<dd>lessthan<dt><code>C-c \</code>
+<dl><dt><code></code>
+<dd>ampersand<dt><code></code>
+<dd>greaterthan<dt><code></code>
+<dd>lessthan<dt><code></code>
 <dd>backslash</dl>
 <h3>fonts</h3>
-<dl><dt><code>C-c C-b</code>
+<dl><dt><code></code>
 <dd>bold <code>&lt;b&gt;&lt;/b&gt;</code>
-<dt><code>C-c c</code>
+<dt><code></code>
 <dd>code <code>&lt;code&gt;&lt;/code&gt;</code>
-<dt><code>C-c Tab</code>
+<dt><code></code>
 <dd>italic <code>&lt;i&gt;&lt;/i&gt;</code>
-<dt><code>C-c Ret</code>
+<dt><code></code>
 <dd>sample <code>&lt;samp&gt;&lt;/samp&gt;</code>
-<dt><code>C-c C-c</code>
+<dt><code></code>
 <dd>cite <code>&lt;cite&gt;&lt;/cite&gt;</code>
-<dt><code>C-c C-e</code>
+<dt><code></code>
 <dd>emphasis <code>&lt;em&gt;&lt;/em&gt;</code>
-<dt><code>C-c C-f</code>
+<dt><code></code>
 <dd>fixed <code>&lt;tt&gt;&lt;/tt&gt;</code>
-<dt><code>C-c C-k</code>
+<dt><code></code>
 <dd>keyboard <code>&lt;kbd&gt;&lt;/kbd&gt;</code>
-<dt><code>C-c C-s</code>
+<dt><code></code>
 <dd>strong <code>&lt;strong&gt;&lt;/strong&gt;</code>
-<dt><code>C-c C-v</code>
+<dt><code></code>
 <dd>variable <code>&lt;var&gt;&lt;/var&gt;</code>
 </dl>
 <h3>blocks</h3>
-<dl><dt><code>C-c a</code>
+<dl><dt><code></code>
 <dd>address <code>
 &lt;address&gt;&lt;/address&gt;</code>
-<dt><code>C-c b</code>
+<dt><code></code>
 <dd>blockquote <code>
 &lt;blockquote&gt;&lt;/blockquote&gt;</code>
-<dt><code>C-c d</code>
+<dt><code></code>
 <dd>displaylist <code>
 &lt;dl&gt;
 &lt;dt&gt;
 &lt;dd&gt;
 &lt;/dl&gt;</code>
-<dt><code>C-c e</code>
+<dt><code></code>
 <dd>displayitem <code>
 &lt;dt&gt;
 &lt;dd&gt;</code>
-<dt><code>C-c g</code>
+<dt><code></code>
 <dd>image <code>&lt;img src=""&gt;</code>
-<dt><code>C-c h 1</code>
+<dt><code></code>
 <dd>header1 <code>
 &lt;h1&gt;&lt;/h1&gt;
 </code>
-<dt><code>C-c h 2</code>
+<dt><code></code>
 <dd>header2 <code>
 &lt;h2&gt;&lt;/h2&gt;
 </code>
-<dt><code>C-c h 3</code>
+<dt><code></code>
 <dd>header3 <code>
 &lt;h3&gt;&lt;/h3&gt;
 </code>
-<dt><code>C-c h 4</code>
+<dt><code></code>
 <dd>header4 <code>
 &lt;h4&gt;&lt;/h4&gt;
 </code>
-<dt><code>C-c l</code>
+<dt><code></code>
 <dd>hyperlink <code>&lt;a href=""&gt;&lt;/a&gt;</code>
-<dt><code>C-c m</code>
+<dt><code></code>
 <dd>menu <code>
 &lt;menu&gt;
 &lt;li&gt; 
 &lt;/menu&gt;</code>
-<dt><code>C-c n</code>
+<dt><code></code>
 <dd>numberedlist <code>
 &lt;ol&gt;
 &lt;li&gt; 
 &lt;/ol&gt;</code>
-<dt><code>C-c s</code>
+<dt><code></code>
 <dd>unumberedlist <code>
 &lt;ul&gt;
 &lt;li&gt; 
 &lt;/ul&gt;</code>
-<dt><code>C-c i</code>
+<dt><code></code>
 <dd>listitem <code>
 &lt;li&gt; </code>
-<dt><code>C-c p</code>
+<dt><code></code>
 <dd>paragraph <code>
 &lt;p&gt;</code>
-<dt><code>C-c r</code>
+<dt><code></code>
 <dd>reference <code>&lt;a name=""&gt;&lt;/a&gt;</code>
-<dt><code>C-c C-p</code>
+<dt><code></code>
 <dd>preformatted <code>
 &lt;pre&gt;
 &lt;/pre&gt;</code>
-<dt><code>C-c t</code>
+<dt><code></code>
 <dd>title <code>
 &lt;title&gt;&lt;/title&gt;</code>
-<dt><code>C-c x</code>
+<dt><code></code>
 <dd>plaintext <code>&lt;xmp&gt;
 &lt;/xmp&gt;</code>
 </dl>
