@@ -16,7 +16,7 @@ lsList cmdList;
 long userOptionWord;
 {
 	return RunUniverse(
-		"~ptolemy/src/domains/sdf/utilities/plot", 100000);
+		"$PTOLEMY/src/domains/sdf/utilities/plot", 100000);
 }
 
 /* Invoke a standard facet to plot a signal */
@@ -27,7 +27,7 @@ lsList cmdList;
 long userOptionWord;
 {
 	return RunUniverse(
-		"~ptolemy/src/domains/sdf/utilities/plotCx", 100000);
+		"$PTOLEMY/src/domains/sdf/utilities/plotCx", 100000);
 }
 
 
@@ -38,7 +38,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-	return RunUniverse("~ptolemy/src/domains/sdf/utilities/dft",1);
+	return RunUniverse("$PTOLEMY/src/domains/sdf/utilities/dft",1);
 }
 
 /* Invoke a standard facet to plot a DFT */
@@ -48,5 +48,5 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-	return RunUniverse("~ptolemy/src/domains/sdf/utilities/dftCx",1);
+	return RunUniverse("$PTOLEMY/src/domains/sdf/utilities/dftCx",1);
 }
