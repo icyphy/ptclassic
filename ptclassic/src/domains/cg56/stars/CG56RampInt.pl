@@ -8,7 +8,7 @@ defstar {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, an ddisclaimer of warranty provisions.
+limitation of liability, an disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	htmldoc {
