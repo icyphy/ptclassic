@@ -978,8 +978,9 @@ body ::tycho::File::openContext {filename} {
 	}
 	$name busy
 	$name centerOnScreen
-	update 
-	$name unBusy
+	update
+	# The above update could destroy the object.
+	catch {$name unBusy}
 	return $name
     }
 }
