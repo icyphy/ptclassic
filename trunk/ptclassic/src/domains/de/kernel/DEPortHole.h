@@ -155,7 +155,7 @@ public:
 	virtual void cleanIt(); 
 
 	// constructor and destructor
-	InDEPort() : complete(TRUE), triggerList(0), beforeP(0), inQue(0) {}
+	InDEPort() : complete(TRUE), beforeP(0), triggerList(0), inQue(0) {}
 	~InDEPort();
 };
 
