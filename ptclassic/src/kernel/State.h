@@ -168,10 +168,12 @@ protected:
 	ParseToken evalIntExpression(Tokenizer& lexer);
 	ParseToken evalIntTerm(Tokenizer& lexer);
 	ParseToken evalIntFactor(Tokenizer& lexer);
+	ParseToken evalIntAtom(Tokenizer& lexer);
 
 	ParseToken evalFloatExpression(Tokenizer& lexer);
 	ParseToken evalFloatTerm(Tokenizer& lexer);
 	ParseToken evalFloatFactor(Tokenizer& lexer);
+	ParseToken evalFloatAtom(Tokenizer& lexer);
 
 private:
 	bitWord attributeBits;
