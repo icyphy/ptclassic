@@ -55,6 +55,8 @@ class ::tycho::EditDiff {
     itk_option define -difftype difftype Difftype 0
 
     itk_option define -filename1 filename1 Filename1 ""
+    # When a new instance is created, -filename1 and -filename2 are
+    # passed onto the entry lines.
     itk_option define -filename2 filename2 Filename2 ""
 
     ##########################################################################
@@ -100,6 +102,7 @@ class ::tycho::EditDiff {
     # This keeps a list of diffs, output from UNIX's diff
     public variable diffResult {}
 
+    # Used with diffResult, this is a counter to keep track where in diff
     public variable diffResultLineCount 0
     
     # Keep track of where exactly differences occured.
@@ -112,7 +115,14 @@ class ::tycho::EditDiff {
     ####                     other variables                        ####
     # File names that are being diffed.
 
+    # Used by insertLine-- update for every n number of times
+    # to speed up loading time.
+    private variable okaytoupdate 0
+
+    # File name 1, in sync with -filename1
     public variable filename1
+
+    # File name 2, in sync with -filename2
     public variable filename2
 
     # Color for old and new text. FIXME: This should be in preference!
@@ -120,10 +130,6 @@ class ::tycho::EditDiff {
 
     # Color for old and new text. FIXME: This should be in preference!
     public variable linecolor2 {{} {}}
-
-    # Used by insertLine-- update for every n number of times
-    # to speed up loading time.
-    private variable okaytoupdate 0
 
     # Keep track where we can insert in the text. This is added for
     # concurency with seeFragment during insertion.
@@ -229,9 +235,10 @@ body ::tycho::EditDiff::constructor {args} {
 
 
 ###################################################################
-#
+#### compareFile
 # This is the entry point to comparing files. It first clears up the
 # text buffer, read in UNIX's diff, and then compare.
+#
 body ::tycho::EditDiff::compareFile {} {
     markUnmodified
 
@@ -385,12 +392,14 @@ body ::tycho::EditDiff::configureUpdate {} {
     # most recent file should always in filename1.
     insertFileName 1 $filename1
     insertFileName 2 $filename2
+    configure -file "$filename1"
 }
 
 
 #####################################################################
 #### diffReport
 # parse the output of the UNIX's diff utility
+#
 body ::tycho::EditDiff::diffReport {} {
     #The normal output contains lines of these forms:
     #n1 a n3,n4
@@ -459,8 +468,9 @@ body ::tycho::EditDiff::insertString {index str {status {common}}} {
 }
 
 ###################################################################
-####
+#### insertFileName
 # Put in the file name in the list entry
+#
 body ::tycho::EditDiff::insertFileName {num nameAndPath} {
     $this toolbar clear filename$num
     $this toolbar insert filename$num $nameAndPath
@@ -468,8 +478,9 @@ body ::tycho::EditDiff::insertFileName {num nameAndPath} {
 }
 
 ###################################################################
-####
+#### insertSelectedFileName
 # insert filename into $numth line
+#
 body ::tycho::EditDiff::insertSelectedFileName {num} {
     set nameAndPath [::tycho::queryfilename {File to compare:}]
     # Only change when user explicitly changed. Otherwise, leave as default
@@ -480,8 +491,9 @@ body ::tycho::EditDiff::insertSelectedFileName {num} {
 
 
 ###################################################################
-####
-# Jump to the next difference
+#### jumpDifference
+# Jump to the next difference. This is called by buttons.
+#
 body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
     # No difference, return
     if {[llength $differenceList]==0} {return}
