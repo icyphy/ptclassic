@@ -159,7 +159,7 @@ body ::tycho::Exec::execProcess {} {
     # Set the busy cursor
     set oldCursor [lindex [config -cursor] end]
     config -cursor {watch}
-    ::tycho::safeUpdate $prefix
+    ::tycho::safeUpdate $this
 
     # Open a non-blocking pipe from the command
     set fd [open [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]
