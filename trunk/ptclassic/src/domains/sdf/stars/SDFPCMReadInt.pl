@@ -17,8 +17,7 @@ The file format that is read is the same as the one written by the Play star.
 The simulation can be halted on end-of-file, or the file contents can be
 periodically repeated, or the file contents can be padded with zeros.
 	}
-	hinclude { <fcntl.h> }
-	hinclude { <fstream.h> }
+	hinclude { "pt_fstream.h" }
 	ccinclude { "SimControl.h" }
 
 	output	{
@@ -46,12 +45,10 @@ periodically repeated, or the file contents can be padded with zeros.
 	}
 
 	protected {
-		istream* input;
-		char* expandedFileName;
+		pt_ifstream input;
 	}
 
-	constructor { input = 0; expandedFileName = 0; }
-	destructor  { LOG_DEL; delete input; delete [] expandedFileName; }
+	destructor  { input.close(); }
 
 	code {
 		// This routine is by
@@ -83,19 +80,15 @@ periodically repeated, or the file contents can be padded with zeros.
 			return sample;
 		}
 	}
-	setup
-	{
-		LOG_DEL; delete input; input = 0;
+
+	setup {
+		input.close();
 		// open input file
-		delete [] expandedFileName;
-		expandedFileName = expandPathName(fileName);
-		int fd = open(expandedFileName, O_RDONLY);
-		if (fd < 0) {
-			Error::abortRun(*this, fileName, ": can't open file: ",
-					sys_errlist[errno]);
-			return;
+		input.open(fileName);
+		if (!input) {
+			Error::abortRun(*this, "can't open file ",
+			    fileName);
 		}
-		LOG_NEW; input = new ifstream(fd);
 	}
 
 	go {
@@ -103,31 +96,31 @@ periodically repeated, or the file contents can be padded with zeros.
                 // initialize ch to 0, otherwise we could get garbage
                 // on EOF:sdf/263: SDFReadPCM does an uninitialized memory read
 		unsigned char ch = 0;
-		if (!input) {
-			// nothing
-		}
-		else if (input->eof()) {
-			if (haltAtEnd)		// halt the run
+		if (input.eof()) {
+			if (haltAtEnd) {	// halt the run
 				SimControl::requestHalt();
-			else if (periodic)	// close and re-open file
-			{
-				LOG_DEL; delete input; input = 0;
-				int fd = open(expandedFileName, 0);
-				if (fd < 0) {
-					Error::abortRun(*this, fileName,
-					     ": can't re-open file: ",
-							sys_errlist[errno]);
+				return;
+			} else if (periodic) {	// close and re-open file
+				input.close();
+				input.open(fileName);
+				if (!input) {
+					Error::abortRun(*this,
+					     "can't re-open file ",
+					     fileName);
 					return;
 				}
-				LOG_NEW; input = new ifstream(fd);
-				input->get(ch);
+				input.get(ch);
 				x = ulaw_to_linear(ch);
 			}
-		}
-		else {			// get next value
-			input->get(ch);
+		} else if (input) {		// get next value
+			input.get(ch);
 			x = ulaw_to_linear(ch);
+		} else {
+			Error::abortRun(*this, "error in input file");
+			return;
 		}
 		output%0 << x;
 	}
+
+	wrapup { input.close(); }
 }
