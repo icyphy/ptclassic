@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks, J. Buck
-    Date of creation:	17 January 1992
+    Programmer:		S. A. Edwards
+    Date of creation:	18 April 1996
 */
 
 #ifdef __GNUG__
@@ -33,6 +33,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SRWormhole.h"
+#include "SRScheduler.h"
+#include "CircularBuffer.h"
+
+// #include <stream.h>
+// #include "Geodesic.h"
+
+
 
 /*******************************************************************
 
@@ -40,67 +47,140 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-void SRWormhole :: setup() {
-	Wormhole :: setup();
+void SRWormhole::setup()
+{
+  Wormhole::setup();
 }
 
-void SRWormhole :: go() {
-	// set the currentTime of the inner domain.
-	// (somehow)
+void SRWormhole::go()
+{
 
-	// run
-	Wormhole::run();
+  // Move the contents of all the ports across the Event Horizon
+
+  BlockPortIter nextPort( *((Block *) this) );
+  PortHole * p;
+
+  while ( ( p = nextPort++ ) != 0 ) {
+    if ( p->isItInput() ) {
+      ((SRtoUniversal *) p)->transferParticle();
+    }
+  }
+  
+  // Run the inner (foreign) galaxy
+
+  Wormhole::run();
 }
 
-void SRWormhole :: wrapup() {
-	myTarget()->wrapup();
+void SRWormhole::wrapup()
+{
+  myTarget()->wrapup();
 }
-
-SRWormhole :: ~SRWormhole() { freeContents();}
 
 // Constructor
-SRWormhole :: SRWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t)
+SRWormhole::SRWormhole(Galaxy& g,Target* t)
+  : Wormhole(*this,g,t)
 {
-	buildEventHorizons ();
+  buildEventHorizons();
+}
+
+// Destructor
+SRWormhole::~SRWormhole()
+{
+  freeContents();
 }
 
 // cloner -- clone the inside and make a new wormhole from that.
-Block* SRWormhole :: clone() const {
-	LOG_NEW; return new SRWormhole(gal.clone()->asGalaxy(),
-					myTarget()->cloneTarget());
+Block * SRWormhole::clone() const
+{
+  LOG_NEW; return new SRWormhole(gal.clone()->asGalaxy(),
+				 myTarget()->cloneTarget());
 }
 
-Block* SRWormhole :: makeNew() const {
-	LOG_NEW; return new SRWormhole(gal.makeNew()->asGalaxy(),
-					myTarget()->cloneTarget());
+Block * SRWormhole::makeNew() const
+{
+  LOG_NEW; return new SRWormhole(gal.makeNew()->asGalaxy(),
+				 myTarget()->cloneTarget());
 }
 
 // return stop time
-double SRWormhole :: getStopTime() {
-	// return correct value!
-	return 0.0;
+double SRWormhole :: getStopTime()
+{
+  SRScheduler * sched = (SRScheduler *) outerSched();
+  return sched->now();
 }
 
 /**************************************************************************
 
 	methods for SRtoUniversal
 
+	
+
 **************************************************************************/
 
-void SRtoUniversal :: receiveData ()
+void SRtoUniversal::receiveData()
 {
-	// fill in
+  getData();
+  transferData();
 }
 
-void SRtoUniversal :: initialize() {
-	InSRPort :: initialize();
-	ToEventHorizon :: initialize();		
+void SRtoUniversal::initialize()
+{
+  InSRPort::initialize();
+  ToEventHorizon::initialize();		
 }
 
-int SRtoUniversal :: isItInput() const { return EventHorizon :: isItInput(); }
-int SRtoUniversal :: isItOutput() const {return EventHorizon:: isItOutput();}
+int SRtoUniversal::isItInput() const
+{
+  return EventHorizon::isItInput();
+}
 
-EventHorizon* SRtoUniversal :: asEH() { return this; }
+int SRtoUniversal::isItOutput() const
+{
+  return EventHorizon::isItOutput();
+}
+
+EventHorizon * SRtoUniversal::asEH()
+{
+  return this;
+}
+
+int SRtoUniversal::onlyOne() const
+{
+  return TRUE;
+}
+
+// Transfer data from an outer SR domain to an inner universal event horizon
+void SRtoUniversal::transferParticle()
+{
+  if ( present() ) {
+
+    // Put the particle on this input into myBuffer
+    //  The domain on the other side of the event horizon assumee it owns any
+    //  particle that comes to it through the event horizon, so we clone
+    //  the particle (which the output port owns)
+
+    Particle ** newLocation = myBuffer->next();
+    *newLocation = get().clone();
+
+    // cout << "Just transfered " << (*newLocation)->print() << "\n";
+    
+    // Indicate that there is a new particle in myBuffer
+
+    tokenNew = TRUE;
+
+    // Transfer the token from my myBuffer across the EventHorizon
+
+    transferData();
+
+    // cout << "The particle is now " << (*newLocation)->print() << "\n";
+
+    // cout << "There are " << ghostAsPort()->numTokens() << " tokens on the far Geodesic\n";
+
+    // Particle * p = ghostAsPort()->geo()->get();
+    // ghostAsPort()->geo()->pushBack(p);    
+    // cout << "The first particle is " << p->print() << " " << p << "\n";
+  }
+}
 	
 /**************************************************************************
 
@@ -108,17 +188,33 @@ EventHorizon* SRtoUniversal :: asEH() { return this; }
 
 **************************************************************************/
 
-void SRfromUniversal :: sendData ()
+void SRfromUniversal::sendData ()
 {
 	// fill in
 }
 
-void SRfromUniversal :: initialize() {
-	OutSRPort :: initialize();
-	FromEventHorizon :: initialize();
+void SRfromUniversal::initialize()
+{
+	OutSRPort::initialize();
+	FromEventHorizon::initialize();
 }
 
-int SRfromUniversal :: isItInput() const {return EventHorizon::isItInput();}
-int SRfromUniversal :: isItOutput() const {return EventHorizon::isItOutput();}
+int SRfromUniversal::isItInput() const
+{
+  return EventHorizon::isItInput();
+}
 
-EventHorizon* SRfromUniversal :: asEH() { return this; }
+int SRfromUniversal::isItOutput() const
+{
+  return EventHorizon::isItOutput();
+}
+
+EventHorizon * SRfromUniversal::asEH()
+{
+  return this;
+}
+
+int SRfromUniversal::onlyOne() const
+{
+  return TRUE;
+}
