@@ -1,11 +1,14 @@
 #! /bin/csh -f
 # $Id$
 # print a list of "extra" files.
+# print out the names of any files that are not significant in the first
+# 13 characters.  Linux has this problem with GNU ar.
 
 set res = 0
 set prefix = ""
 if ($#argv >= 1 && "$1" == "-v") then
 	set prefix = "Extra files in ${cwd}: "
+	set toolongprefix = "Files with names that are not differnet in the first 13 chars in${cwd}: "
 	shift argv
 endif
 
@@ -13,6 +16,13 @@ set files = ()
 foreach x ($*)
 	if (-r $x) set files = ($files $x)
 end
+
+
+#gfold is GNU fold
+echo $files | gfold -s | checklen $toolongprefix
+if ($status == 1) then
+	set res = 1
+endif
 
 ls . > /tmp/cj1$$
 
@@ -25,6 +35,7 @@ if ($#files > 0) then
 endif
 
 rm -f /tmp/cj[12]$$
+
 exit $res
 endif
 
