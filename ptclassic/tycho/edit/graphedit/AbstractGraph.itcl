@@ -1,6 +1,6 @@
 # A graph data structure.
 #
-# @Author: Edward A. Lee
+# @Author: Edward A. Lee, John Reekie
 #
 # @Version: $Id$
 #
@@ -32,213 +32,326 @@
 
 
 #######################################################################
-#### Graph
-# A graph is a collection of nodes that may have other nodes as parents
-# or children. This class provides methods to build, browse, and edit
-# such a data structure. The contents of each node can be arbitrary Tcl
-# string. Graphical editors and viewers for this class, however, expect
-# the contents to be a Tcl list with an even number of elements. The
-# even elements (0, 2, 4, ...) are arbitrary keywords, and the odd
-# elements are arbitrary strings or lists. Although certain keywords
-# are understood by certain graphical display widgets, any keywords can
-# be used. A method is provided to describe the data structure as a
-# list, which can, for example, be written to a file. A method is also
-# provided to convert this list back into a graph.
-# <p>
-# Here is an example of how to use the Graph:
-# <tcl><pre>
-#    catch {delete object foo}
-#    ::tycho::Graph foo
-#    foo add a {}
-#    foo add c {} a
-#    foo add d {} a
-#    foo add e {} a
-#    foo add f {} e
-#    foo addArc d e
-#    ::tycho::post [foo describe]
-# </pre></tcl>
-# The description that is posted in the last line will be:
-# "{d {} a} {e {} {a d}} {a {} {}} {f {} e} {c {} a}",
-# or some permutation of these list items. This is a list of nodes in
-# the graph. Each node is a list of three items, the name, contents,
-# and list of parents. In the above example, the contents of each node
-# is an empty list. The <code>verifyAll</code> method can be used to
-# check the graph to make sure that all parents and children that are
-# mentioned are present.
+#### AbstractGraph
+# A graph is a collection of vertices and a collection of edges between
+# vertices. _AbstractGraph_ provides the infrastructure needed to build
+# a number of different types of graph; subclasses extend this class
+# by providing concrete methods for creating, modifying, and accessing
+# specific types of graph.
 #
-class ::tycho::Graph {
+# _AbstractGraph_ is the abstract superclass of Tycho's graph hierarchy.
+# It provides support for vertices and edges and defines the protocol
+# for subclasses; subclasses extend this class by providing concrete
+# methods for creating, modifying, and accessing specific types of graph.
+#
+# Each vertex of a graph has a value and a set of arbitrary options.
+# A set of default options can be specified with the *-vertexoptions*
+# option of this class. (Note: unlike _NamedData_, any option can be added
+# to a vertex, whether in the default list or not.) Each edge of the
+# graph can have a set of arbitrary options; the default options of
+# each edge are specified by the *-edgeoptions* option of this class.
+# (I decided against giving each edge a value -- although it wouldn't be
+# difficult to do and would be useful in certain cases such as weighted
+# graphs, the most common case seems to be that the edge has
+# no value and requiring that a value be specified would clutter the
+# interface. A "value" can always be given as an option.)
+#
+# This abstract class is structured to support what I have dubbed a
+# "weld": a named connection between an edge and a vertex. A weld
+# is a combination of a vertex name and a "key" that uniquely identifies
+# an edge connected to the vertex. Welds are very useful in applications
+# like dataflow and so on. If the concrete subclass supports welds,
+# then edges join two welds rather than two vertices. A weld is
+# assumed to have the syntax _vertex_._key_.
+#
+# The methods in the graph classes are selectively "lenient." For 
+# example, an edge can be added between two vertices that do not
+# exist. (Attempting to add an edge that already exists is, however,
+# considered to be an error.) This approach is taken for two reasons:
+# (i) it simplifies construction of graphs from ill-formed data (for
+# example, when reading a directory of files to create a graph representing
+# relations between data in those files); and (ii) it makes the
+# graph construction method rather more efficient since they perform
+# much less error-checking. If a constructed graph is not _known_ to
+# be correct, there are method to be called that will test for correct
+# construction or "repair" the graph.
+#
+# Tycho's graph hierarchy currently looks like this:
+# <pre>
+#         AbstractGraph
+#            /   \ 
+#           /     \ 
+#        Graph  Digraph
+#                /   \ 
+#               /     \ 
+#     MultiGraph   Forest
+# </pre>
+#
+# _Graph_ and _Digraph_ do not inherit from each other because I decided
+# that the
+# differences in internal representation and interface were enough to 
+# warrant separate branches of the tree. _MultiGraph_ is a directed
+# graph in which edges adjacent to a vertex are located by a "key" -- 
+# this is used for dataflow graphs (a subclass of _MultiGraph_) and
+# similar structures. (Note that keyed _undirected_ graphs are not
+# supported directly here. This type of graph is important for 
+# certain applications, such as circuit simulation. It is not clear yet
+# how best to implement this: whether by subclassing _Graph_ or
+# _MultiGraph_.) There is no special acyclic graph class: the
+# _Digraph_ class has methods for testing for and finding cycles
+# and so on.
+#
+# <i>A note on the implementation of the graph classes</i>: These 
+# classes are intended to be used as an "information model" in
+# applications such as computation models, scheduling, user
+# interfaces, and so on. They will not be useful for building large
+# graphs or performing complex algorithms. For that, interface to
+# code written in some other (faster) language, inheriting from
+# the _Model_ or one of the graph classes if appropriate.
+#
+class ::tycho::AbstractGraph {
     inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
     
+    #################################################################
+    ####                        options                          ####
+    
+    # The default options of each edge
+    public variable edgeoptions {}
+
+    # The default options of each vertex
+    public variable vertexoptions {}
+
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a node to the graph.
-    method add {nodename contents {parents {}}}
+    # Add a vertex with a value and options to the graph
+    method add {vertex value args}
 
-    # Add an arc between existing nodes, if it does not already exist.
+    # Return adjacency edges matching two vertex patterns
+    method adjacency {{pattern1 *} {pattern2 *}}
+
+    # Assign new data to an existing vertex
+    method assign {vertex data}
+    
+    # Add a vertex to the graph.
+    method add {vertexname contents {parents {}}}
+
+    # Add an arc between existing vertices, if it does not already exist.
     method addArc {parent child}
 
-    # Return the value of the specified attribute for the specified node.
-    method attribute {attrname node}
+    # Return the value of the specified attribute for the specified vertex.
+    method attribute {attrname vertex}
 
-    # Set the specified attribute for all nodes to the specified value.
+    # Set the specified attribute for all vertices to the specified value.
     method attributeInit {attrname {initvalue 0}}
 
-    # Set the specified attribute for the specified node to the specified value.
-    method attributeSet {attrname node {value 1}}
+    # Set the specified attribute for the specified vertex to the specified value.
+    method attributeSet {attrname vertex {value 1}}
 
-    # Return the list of children of a node.
-    method children {nodename}
-
-    # Remove all nodes from the graph.
+    # Remove all vertices and edges from the graph
     method clear {}
 
-    # Return the contents of a node in the graph.
-    method contents {nodename}
+    # Add an edge and options to the graph
+    method connect {vertex1 vertex2 args}
 
-    # Delete a node from the graph.
-    method delete {nodename}
+    # Remove a vertex (but not adjacent edges) from the graph
+    method delete {vertex}
 
-    # Delete an arc from the graph.
-    method deleteArc {parent child}
-
-    # Return a list that describes the graph.
+    # Return a description of the graph
     method describe {}
 
-    # Return 1 if the specified node exists, otherwise, return 0.
-    method exists {nodename}
+    # Remove an edge from the graph
+    method disconnect {vertex1 vertex2}
 
-    # Initialize the graph from a description
-    method init {description}
+    # Get an option or options of an edge
+    method edgecget {vertex1 vertex2 option}
 
-    # Return the parents of a node.
-    method parents {nodename}
+    # Configure the edge with one or more options
+    method edgeconfigure {vertex1 vertex2 args}
 
-    # Give the specified node a new name.
-    method rename {nodename newname}
+    # Return all options of an edge
+    method edgeoptions {vertex1 vertex2}
 
-    # Return a list of names of the roots of the graph (nodes with no parents).
-    method roots {}
+    # Return edges matching a pair of connection patterns
+    method edges {pattern1 pattern2}
 
-    # Set a new name and contents for the specified node.
-    method setContents {nodename contents}
+    # Return the value of a vertex
+    method get {vertex}
 
-    # Verify that a node is present.
-    method verify {nodename}
+    # Get the keys at a vertex
+    method keys {vertex}
 
-    # Verify that all parents and children of nodes are present.
-    method verifyAll {{repair {}}}
+    # Add one or more edges to the graph
+    method multiconnect {args}
 
-    ###################################################################
-    ####                   protected methods                       ####
+    # Remove one or more edges from the graph
+    method multidisconnect {args}
 
-    # In listname, remove the olditem and append the newitem.
-    protected method listreplace {listname olditem newitem}
+    # Return the number of edges in the graph
+    method numberofedges {}
 
-    ###################################################################
-    ####                   protected variables                     ####
+    # Return the number of vertices in the graph
+    method numberofvertices {}
 
-    # List of the names of the roots of the trees in the forest.
-    protected variable rootnames {}
+    # "Repair" a graph by deleting improperly-connected edges
+    method repair {}
 
-    # Array storing the contents of each node of the tree.
-    protected variable contentslist
+    # Test whether a graph is correctly constructed
+    method verify {}
 
-    # Array storing the parent name for each node of the tree.
-    protected variable parentnames
+    # Get an option or options of a vertex
+    method vertexcget {vertex option}
 
-    # Array storing the list of children for each node.
-    protected variable childrennames
+    # Configure the vertex with one or more options
+    method vertexconfigure {vertex args}
 
-    ###################################################################
-    ####                   private variables                       ####
+    # Return all options of a vertex
+    method vertexoptions {vertex}
 
-    private variable attributeArray
+    # Return vertices matching a pattern
+    method vertices {{pattern *}}
+
+    # Attach one or more welds to a vertex
+    method weld {vertex args}
+
+    # Get an option or options of a weld
+    method weldcget {weld option}
+
+    # Configure a weld with one or more options
+    method weldconfigure {weld args}
+
+    # Return all options of a weld
+    method weldoptions {weld}
+
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Remove an edge from the adjacency matrix and adjust edges array
+    protected method deleteedge {vertex1 vertex2}
+
+    # Add an edge to the adjacency matrix
+    protected method adjacencyadd {vertex1 vertex2}
+
+    # Delete an edge from the adjacency matrix
+    protected method adjacencydelete {vertex1 vertex2}
+
+    #################################################################
+    ####                  protected variables                    ####
+
+    # The adjacency "matrix." This represents the topology of
+    # the graph independent of complexities associated with 
+    # hyperedges or keyed connections. It is an array indexed as
+    # "vertex1^vertex2" with value {vertex1 vertex2}. In future,
+    # the representation may change to use parent-child lists
+    # instead of adjacency lists, in which case all subclasses
+    # will have to be modified. The parent-child representation
+    # is more efficient for traversing the graph, but rather more
+    # tedious to maintain in the presence of graph alterations.
+    protected variable _adjacency
+    
+    # A general-purpose array for storing structural information.
+    # All subclass methods that add or delete vertices or edges
+    # must do a <code>catch {unset _cache}</code.
+    protected variable _cache
+
+    # The edges of the graph. The format of this structure is
+    # up to the subclass.
+    protected variable _edges
+    
+    # The options of the edges
+    protected variable _edgeoptions
+    
+    # The vertices of the graph. One entry per vertex, with value
+    # equal to the value given in the add{} method.
+    protected variable _vertices
+    
+    # The options of the vertices
+    protected variable _vertexoptions
+
+    # The options associated with each weld
+    protected variable _weldoptions
 }
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
 
-#######################################################################
+########################################################################
 #### add
-# Add a node to the graph with the specified name and contents. If
-# parents are specified (using the optional third argument), then this
-# node is added to the list of children of the parents. Otherwise, it
-# is identified as a root node. It is not verified whether the parents
-# exist (indeed, they frequently will not exist) so when the complete
-# graph has been constructed, <code>verifyAll</code> should be invoked.
-# It is an error if the specified node name already exists in the
-# graph.
 #
-body ::tycho::Graph::add {nodename contents {parents {}}} {
-    if {$nodename == {}} {
-        error "Graph: Blank node name is not allowed."
+# Add a new vertex to the graph, and return the inverse command. Flag an
+# error if the vertex already exists. Additional arguments are a flat
+# option-value list for the vertex.
+#
+body ::tycho::AbstractGraph::add {vertex value args} {
+    if { [::info exists _vertices($vertex)] } {
+	error "Vertex $vertex already exists in $dataname"
     }
-    if [info exists contentslist($nodename)] {
-        error "Graph: Duplicate node name in graph: $nodename"
-    }
-    if {$parents == {}} {
-        lappend rootnames $nodename
-    } {
-        foreach parent $parents {
-            if {$parent != {}} {
-                lappend childrennames($parent) $nodename
-            }
-        }
-    }
-    set parentnames($nodename) $parents
-    set contentslist($nodename) $contents
-    if ![info exists childrennames($nodename)] {
-        set childrennames($nodename) {}
-    }
+    set modified 1
+
+    # set value
+    set _vertices($vertex) $value
+
+    # Set options
+    array set temp [concat $vertexoptions $args]
+    set _vertexoptions($vertex) [array get temp]
+
+    # Clear the cache
+    catch {unset _cache}
+
+    # Return inverse command
+    return [list delete $vertex]
 }
 
-#######################################################################
-#### addArc
-# Add an arc between existing nodes, if it doesn't already exist.
-# If it does exist, ignore.  It is an error if either node does
-# not exist.
+########################################################################
+#### adjacency
 #
-body ::tycho::Graph::addArc {parent child} {
-    verify $parent
-    verify $child
-    if {[lsearch -exact $childrennames($parent) $child] < 0} {
-        # The arc does not exist.
-        lappend childrennames($parent) $child
-        lappend parentnames($child) $parent
+# Return a list containing the edges of the graph as represented in
+# the adjacency matrix with source and target
+# vertex names that match the given patterns. The result is a flat list
+# of source-target pairs. If no arguments are
+# supplied, return all edges.
+#
+# This is different from edges{} only if the edges are not connected
+# from vertex to vertex -- see _MultiGraph_ for an example.
+#
+body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
+    set result {}
+    foreach e [array names _adjacency $pattern1^$pattern2] {
+	eval lappend result [split $e "^"]
     }
+    return $result
 }
 
 #######################################################################
 #### attribute
-# Return the value of the specified attribute for the specified node.
-# It is an error if the attribute has not been set for this node.
+# Return the value of the specified attribute for the specified vertex.
+# It is an error if the attribute has not been set for this vertex.
 # The method <code>attributeInit</code> or <code>attributeSet</code>
 # should be used to set the value of the attribute.
 # Attributes are used by various algorithms that traverse the graph.
-# For example, to keep track of which nodes have beed visited already
+# For example, to keep track of which vertices have beed visited already
 # in some graph traversal algorithm, you could use an attribute with
 # "visited" that takes value 0 or 1.
 #
-body ::tycho::Graph::attribute {attrname node} {
-    return $attributeArray($attrname,$node)
+body ::tycho::AbstractGraph::attribute {attrname vertex} {
+    return $_cache($attrname,$vertex)
 }
 
 #######################################################################
 #### attributeInit
-# Set the specified attribute for all nodes to the specified value.
+# Set the specified attribute for all vertices to the specified value.
 # The attribute name is an arbitrary identifying string, and the value
 # is an arbitrary string.  If the value is not given, it defaults to "0".
 #
-body ::tycho::Graph::attributeInit {attrname {initvalue 0}} {
+body ::tycho::AbstractGraph::attributeInit {attrname {initvalue 0}} {
     if [info exists contentslist] {
         set searchid [array startsearch contentslist]
-        while {[set node [array nextelement contentslist $searchid]] != {}} {
-            set attributeArray($attrname,$node) $initvalue
+        while {[set vertex [array nextelement contentslist $searchid]] != {}} {
+            set _cache($attrname,$vertex) $initvalue
         }
         array donesearch contentslist $searchid
     }
@@ -246,129 +359,189 @@ body ::tycho::Graph::attributeInit {attrname {initvalue 0}} {
 
 #######################################################################
 #### attributeSet
-# Set the specified attribute for the specified node to the specified value.
+# Set the specified attribute for the specified vertex to the specified value.
 # The attribute name and value can be any arbitrary Tcl strings.
 #
-body ::tycho::Graph::attributeSet {attrname node {value 1}} {
-    set attributeArray($attrname,$node) $value
+body ::tycho::AbstractGraph::attributeSet {attrname vertex {value 1}} {
+    set _cache($attrname,$vertex) $value
 }
 
-#######################################################################
-#### children
-# Return the list of children of a node.
+
+########################################################################
+#### connect
 #
-body ::tycho::Graph::children {nodename} {
-    verify $nodename
-    return $childrennames($nodename)
+# Add a new edge to the graph, and return the inverse command.
+# The edge is specified by name -- the name format depends upon
+# the subclass; additional arguments are a
+# flat option-value list for the edge. Flag an error if the edge
+# already exists, but not if any of the connected vertices do not exist. 
+#
+# <i>This is an abstract method.</i>
+#
+body ::tycho::AbstractGraph::connect {vertex1 vertex2 args} {
+    abstractMethod connect
+}
+
+########################################################################
+#### assign
+#
+# Assign new data to an existsing vertex. Flag an error if the vertex
+# does not exist. Return the inverse command.
+#
+body ::tycho::AbstractGraph::assign {vertex data} {
+    if { ! [::info exists _vertices($vertex)] } {
+	error "Vertex $vertex does not exist in $dataname"
+    }
+    set inverse [list assign $vertex $_vertices($vertex)]
+    set _vertices($vertex) $data
+    return $inverse
 }
 
 #######################################################################
 #### clear
-# Remove all nodes from the graph.
+# Remove all nodes from the graph and delete the undo history.
+# This method cannot be undone or redone.
 #
-body ::tycho::Graph::clear {} {
-    set rootnames {}
-    # The catch is in case the forest is already clear
+body ::tycho::AbstractGraph::clear {} {
+    clearHistory
+    # The catch is in case the graph is already clear
     catch {
-        unset contentslist
-        unset parentnames
-        unset childrennames
+        unset _vertices
+        unset _vertexoptions
+        unset _edges
+	unset _edgeoptions
+	unset _weldoptions
+	unset _cache
     }
+    # Return null so record{} or publish{} will complain.
+    return ""
 }
 
-#######################################################################
-#### contents
-# Return the contents of a cell of the forest.
-# The contents can be any arbirary Tcl string or list.
-#
-body ::tycho::Graph::contents {nodename} {
-    verify $nodename
-    return $contentslist($nodename)
-}
-
-#######################################################################
+########################################################################
 #### delete
-# Delete a node from the graph.  If the node has children, then
-# the parents of the node are appended as parents of the children.
 #
-body ::tycho::Graph::delete {nodename} {
-    verify $nodename
-    set parents $parentnames($nodename)
-    if {$parents == {}} {
-        # Remove from the root list
-        set ind [lsearch -exact $rootnames $nodename]
-        set rootnames [lreplace $rootnames $ind $ind]
-    } {
-        # Remove node from the list of children in each parent
-        foreach parent $parents {
-            set ind [lsearch -exact $childrennames($parent) $nodename]
-            set childrennames($parent) \
-                    [lreplace $childrennames($parent) $ind $ind]
-        }
+# Delete a vertex from the graph, and return the inverse command. This
+# method overrides the default to clear any cached information
+# on the graph structure (transitive closure, depth, and so on)
+# so that they will be recalculated for the new structure.
+#
+body ::tycho::AbstractGraph::delete {vertex} {
+    if { ! [::info exists _vertices($vertex)] } {
+	error "Unknown vertex $vertex in $dataname"
     }
-    # Remove me from the parent list of each child, and append my parents.
-    foreach child $childrennames($nodename) {
-        set ind [lsearch -exact $parentnames($child) $nodename]
-        set parentnames($child) [lreplace $parentnames($child) $ind $ind]
-        foreach parent $parents {
-            lappend childrennames($parent) $child
-            lappend parentnames($child) $parent
-        }
-        if {$parentnames($child) == {}} {
-            lappend rootnames $child
-        }
-    }
-    # Finally, remove from the database.
-    unset parentnames($nodename)
-    unset contentslist($nodename)
-    unset childrennames($nodename)
-}
+    set modified 1
 
-#######################################################################
-#### deleteArc
-# Delete an existing arc between existing nodes.
-# If it does not exist, ignore.  It is an error if either node does
-# not exist.
-#
-body ::tycho::Graph::deleteArc {parent child} {
-    verify $parent
-    verify $child
-    set pindex [lsearch -exact $childrennames($parent) $child]
-    set cindex [lsearch -exact $parentnames($child) $parent]
-    if {$pindex >= 0 && $cindex >= 0} {
-        set childrennames($parent) \
-                [lreplace $childrennames($parent) $pindex $pindex]
-        set parentnames($child) \
-                [lreplace $parentnames($child) $cindex $cindex]
-    }
+    set inverse [list add $vertex $_vertices($vertex) $_vertexoptions($vertex)]
+    unset _vertices($vertex)
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    return $inverse
 }
 
 #######################################################################
 #### describe
-# Return a list that describes the graph. The returned list contains
-# one element for each node in the graph, in arbitrary order. Each node
-# is described as a list with three elements: the node name, the
-# contents, and the list of parents.
+# Return a list that describes the graph. The returned list consists
+# of a list of method calls that can be executed to reconstruct
+# the graph.
 #
-body ::tycho::Graph::describe {} {
+body ::tycho::AbstractGraph::describe {} {
     set result {}
-    set searchid [array startsearch contentslist]
-    while {[set node [array nextelement contentslist $searchid]] != {}} {
-        lappend result [list \
-                $node \
-                $contentslist($node) \
-                $parentnames($node)]
+    foreach vertex [array names _vertices] {
+	lappend result [concat add [list $vertex $_vertices($vertex)] \
+		$_vertexoptions($vertex)]
     }
-    array donesearch contentslist $searchid
+    foreach edge [array names _edges] {
+	lappend result [concat connect $_edges($edge) $_edgeoptions($edge)]
+    }
     return $result
 }
 
-#######################################################################
-#### exists
-# Return 1 if the specified node exists, otherwise, return 0.
+########################################################################
+#### disconnect
 #
-body ::tycho::Graph::exists {nodename} {
-    return [info exists contentslist($nodename)]
+# Remove an edge from the graph, and return the inverse command. Flag an
+# error if the edge does not exist.
+#
+# <i>This is an abstract method.</i>
+#
+body ::tycho::AbstractGraph::disconnect {vertex1 vertex2} {
+    abstractMethod disconnect
+}
+
+########################################################################
+#### edgecget
+#
+# Get an option of an edge. An error will occur if the edge does not
+# exist or the option does not exist.
+#
+body ::tycho::AbstractGraph::edgecget {vertex1 vertex2 option} {
+    array set temp $_edgeoptions($vertex1^$vertex2)
+    return $temp($option)
+}
+
+########################################################################
+#### edgeconfigure
+#
+# Configure the edge and return the inverse command. An error will
+# occur if the edge does not exist. The argument list
+# is a flat list of option-value pairs.
+#
+body ::tycho::AbstractGraph::edgeconfigure {vertex1 vertex2 args} {
+    set modified 1
+
+    set inverse [list edgeconfigure $vertex1 $vertex2]
+    array set temp $_edgeoptions($vertex1^$vertex2)
+    foreach {option value} $args {
+	lappend inverse $option $temp($option)
+	set temp($option) $value
+    }
+    set _edgeoptions($vertex1^$vertex2) [array get temp]
+    return $inverse
+}
+
+########################################################################
+#### edgeoptions
+#
+# Return a list containing the options of the edge as a flat
+# option-value list. An error wil result of the edge does
+# not exist.
+#
+body ::tycho::AbstractGraph::edgeoptions {vertex1 vertex2} {
+    return $_edgeoptions($vertex1^$vertex2)
+}
+
+########################################################################
+#### edges
+#
+# Return a list containing the edges of the graph with source and target
+# vertex names that match the given patterns. The result is a flat list
+# of source-target pairs. If no arguments are
+# supplied, return all edges.
+# To test for the presence of a single edge, provide its source and 
+# target vertices as the arguments and compare the result with the empty
+# list.
+#
+body ::tycho::AbstractGraph::edges {{pattern1 *} {pattern2 *}} {
+    set result {}
+    foreach e [array names _edges $pattern1^$pattern2] {
+	eval lappend result [split $e "^"]
+    }
+    return $result
+}
+
+########################################################################
+#### get
+#
+# Get the value of a vertex. Flag an error if the vertex does
+# not exist.
+#
+body ::tycho::AbstractGraph::get {index} {
+    if { ! [::info exists _vertices($vertex)] } {
+	error "Vertex $vertex does not exist in $dataname"
+    }
+    return $_vertices($vertex)
 }
 
 #######################################################################
@@ -376,158 +549,299 @@ body ::tycho::Graph::exists {nodename} {
 # Initialize the graph from a description. The format of the
 # description should be compatible with that produced by the
 # <code>describe</code> method.  The graph should be verified
-# after this using <code>verifyAll</code>.
+# after this using <code>verify</code>.
 #
 body ::tycho::Graph::init {description} {
     clear
-    foreach node $description {
-        eval add $node
+    foreach cmd $description {
+        eval $this $cmd
     }
 }
 
-#######################################################################
-#### parents
-# Return the list of parents of a node.
-# If the node is a root, return an empty string.
+########################################################################
+#### keys
 #
-body ::tycho::Graph::parents {nodename} {
-    verify $nodename
-    return $parentnames($nodename)
+# Return a list of keys on a given vertex. (This was named "welds," but
+# since it does return keys (eg "bar") instead of welds (eg "foo.bar")
+# I thought this name would be more accurate.)
+#
+body ::tycho::AbstractGraph::keys {vertex} {
+    set result {}
+    foreach weld [array names _weldoptions $vertex.*] {
+	lappend result [lindex [split $weld "."] 1]
+    }
+    return $result
 }
 
-#######################################################################
-#### rename
-# Give a node a new name. It is an error if the new name is already the
-# name of another node. It is assumed that the parents and children of
-# the node exist (that the graph has been verified using
-# <code>verifyAll</code>).
+########################################################################
+#### multiconnect
 #
-body ::tycho::Graph::rename {nodename newname} {
-    verify $nodename
-    if [info exists contentslist($newname)] {
-        error "Duplicate node name in graph: $newname"
+# Add one or more new edges to the graph, and return the inverse command.
+# The arguments list is a flat list of source-target pairs; each
+# edge in the list is added to the graph. Edges cannot be given
+# options with this method.
+#
+# Subclasses may choose to override this method if efficiency is
+# a problem. Graphs with complex edge structures may choose to
+# interpret the argument list differently.
+#
+body ::tycho::AbstractGraph::multiconnect {args} {
+    set inverse [list multidisconnect]
+    foreach {vertex1 vertex2} $args {
+	connect $vertex1 $vertex2
+	lappend inverse $vertex1 $vertex2
     }
-    set parents $parentnames($nodename)
-    if {$parents == {}} {
-        listreplace rootnames $nodename $newname
-    } {
-        foreach parent $parents {
-            listreplace childrennames($parent) $nodename $newname
-        }
+    return $inverse
+}
+
+########################################################################
+#### multidisconnect
+#
+# Remove one or more edges from the graph, and return the inverse command.
+# The arguments list is a flat list of source-target pairs; each
+# edge in the list is removed from the graph. Edges cannot be given
+# options with this method. This method is particular useful when
+# deleting a vertex if you want to delete the edges too; for a digraph,
+# you can write:
+# <pre>
+#    eval $graph multidisconnect [edges $vertex *]
+#    eval $graph multidisconnect [edges * $vertex]
+#    $graph delete $vertex
+# </pre>
+#
+# Subclasses may choose to override this method if efficiency is
+# a problem. Graphs with complex edge structures may choose to
+# interpret the argument list differently.
+#
+body ::tycho::AbstractGraph::multidisconnect {args} {
+    set inverse [list execute]
+    foreach {vertex1 vertex2} $args {
+	lappend inverse [disconnect $vertex1 $vertex2]
     }
-    foreach child $childrennames($nodename) {
-        listreplace parentnames($child) $nodename $newname
+    return $inverse
+}
+
+########################################################################
+#### numberofedges
+#
+# Return the number of edges in the graph.
+#
+body ::tycho::AbstractGraph::numberofedges {} {
+    return [array size _edges]
+}
+
+########################################################################
+#### numberofvertices
+#
+# Return the number of vertices in the graph.
+#
+body ::tycho::AbstractGraph::numberofvertices {} {
+    return [array size _vertices]
+}
+
+########################################################################
+#### repair
+#
+# "Repair" a graph by deleting improperly-connected edges. This method
+# provides a default implementation that will remove invalid edges in 
+# properly-written subclasses; however, however,
+# subclasses may choose to override it for efficiency, because it doesn't work
+# with the subclass, or to perform additional repairs. This
+# method should be called after building a graph if it is not certain
+# that the graph is correctly constructed.
+#
+# This method cannot be recorded or published.
+#
+body ::tycho::AbstractGraph::repair {} {
+    set modified 1
+
+    foreach {src tgt} [edges] {
+	if { ! [::info exists _vertices($src)] \
+		|| ! [::info exists _vertices($tgt)] } {
+	    disconnect $src $tgt
+	}
     }
-    set parentnames($newname) $parents
-    set childrennames($newname) $childrennames($nodename)
-    set contentslist($newname) $contentslist($nodename)
-    if {$nodename != $newname} {
-        unset parentnames($nodename)
-        unset childrennames($nodename)
-        unset contentslist($nodename)
+    # Return null so record{} or publish{} will complain.
+    return ""
+}
+
+########################################################################
+#### verify
+#
+# Test whether a graph is properly constructed. This method
+# provides a default implementation that tests for invalid edges; however,
+# subclasses may choose for efficiency, because it doesn't work
+# with the subclass, or to perform additional tests.
+#
+body ::tycho::AbstractGraph::verify {} {
+    foreach {src tgt} [edges] {
+	if { ! [::info exists _vertices($src)] } {
+	    return 0
+	}
+    }
+    return 1
+}
+
+########################################################################
+#### vertexcget
+#
+# Get an option of an vertex. An error will occur if the vertex does not
+# exist or the option does not exist.
+#
+body ::tycho::AbstractGraph::vertexcget {vertex option} {
+    array set temp $_vertexoptions($vertex)
+    return $temp($option)
+}
+
+########################################################################
+#### vertexconfigure
+#
+# Configure the vertex and return the inverse command. An error will
+# occur if the vertex does not exist. The argument list
+# is a flat list of option-value pairs.
+#
+body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
+    set modified 1
+
+    set inverse [list vertexconfigure $vertex]
+    array set temp $_vertexoptions($vertex)
+    foreach {option value} $args {
+	lappend inverse $option $temp($option)
+	set temp($option) $value
+    }
+    set _vertexoptions($vertex) [array get temp]
+    return $inverse
+}
+
+########################################################################
+#### vertexoptions
+#
+# Return a list containing the options of the vertex as a flat
+# option-value list. An error wil result of the vertex does
+# not exist.
+#
+body ::tycho::AbstractGraph::vertexoptions {vertex} {
+    return $_vertexoptions($vertex)
+}
+
+########################################################################
+#### vertices
+#
+# Return a list containing the vertices of the graph whose names match 
+# a pattern. If the pattern is not given, all vertices are returned.
+# To test for the presence of a single vertex, provide its name
+# as the argument and compare the result with the empty list.
+#
+body ::tycho::AbstractGraph::vertices {{pattern *}} {
+    return [array names _vertices $pattern]
+}
+
+########################################################################
+#### weld
+#
+# Attach one or more welds to a vertex. The arguments are a list of
+# keys.
+#
+body ::tycho::AbstractGraph::weld {vertex args} {
+    if { ! [::info exists _vertices($vertex)] } {
+	error "Unknown vertex $vertex in $dataname"
+    }
+
+    foreach key args {
+	set _weldoptions($vertex.$key) $weldoptions
     }
 }
+
+########################################################################
+#### weldcget
+#
+# Get an option of a weld.  An error will occur if the
+# weld does not exist or the option does not exist for that weld.
+#
+body ::tycho::AbstractGraph::weldcget {weld option} {
+    array set temp $_weldoptions($weld)
+    return $temp($option)
+}
+
+########################################################################
+#### weldconfigure
+#
+# Configure the weld and return the inverse command. The argument list
+# is a flat list of option-value pairs. An error will occur if the
+# weld does not exist.
+#
+body ::tycho::AbstractGraph::weldconfigure {weld args} {
+    set inverse [list weldconfigure $weld]
+    array set temp $_weldoptions($weld)
+    foreach {option value} $args {
+	lappend inverse $option $temp($option)
+	set temp($option) $value
+    }
+    set _weldoptions($weld) [array get temp]
+    return $inverse
+}
+
+########################################################################
+#### weldoptions
+#
+# Return a list containing the options of a weld as a flat
+# option-value list. An error will occur if the weld does not exist.
+#
+body ::tycho::AbstractGraph::weldoptions {weld} {
+    return $_weldoptions($weld)
+}
+
 
 #####################################################################
-#### roots
-# Return a list the names of the root nodes (those with no parents).
+#####################################################################
+####                     protected methods                       ####
+
+
+########################################################################
+#### deleteedge
 #
-body ::tycho::Graph::roots {} {
-    return $rootnames
+# Delete an edge from the graph. The edge is specified by the
+# two end vertices. The default method simply calls disconnect;
+# graphs with complex edge structures will need to override
+# the method to adjust the edge structures.
+#
+body ::tycho::AbstractGraph::deleteedge {vertex1 vertex1} {
+    disconnect $vertex1 $vertex2
 }
 
-#######################################################################
-#### setContents
-# Set the contents of a node.
+########################################################################
+#### adjacencyadd
 #
-body ::tycho::Graph::setContents {nodename contents} {
-    verify $nodename
-    set contentslist($nodename) $contents
+# Add an edge to the adjacency matrix. If it already exists,
+# do nothing.
+#
+body ::tycho::AbstractGraph::adjacencyadd {vertex1 vertex2} {
+    set _adjacency($vertex1^$vertex2) [list $vertex1 $vertex2]
 }
 
-#######################################################################
-#### verify
-# Verify that a node exists in the graph with the name given by the
-# argument. Trigger an error if not. In other words, if this method
-# returns, the nodename is valid.  Note that this method does not
-# check the validity of the parents and children of a node.  That
-# is done by <code>verifyAll</code>.
+# body ::tycho::AbstractGraph::adjacencyadd {vertex1 vertex2} {
+#     if { [lsearch -exact _adjacency($vertex1.children) $vertex2] == -1 } {
+# 	lappend _adjacency($vertex1.children) $vertex2
+# 	lappend _adjacency($vertex1.parents)  $vertex1
+#     }
+# }
+
+########################################################################
+#### adjacencydelete
 #
-body ::tycho::Graph::verify {nodename} {
-    if ![::info exists contentslist($nodename)] {
-        error "No node in forest $this with name $nodename"
-    }
+# Delete an edge from the adjacency matrix.
+#
+body ::tycho::AbstractGraph::adjacencydelete {vertex1 vertex2} {
+    unset _adjacency($vertex1^$vertex2)
 }
 
-#######################################################################
-#### verifyAll
-# Verify that all parents and children of all nodes exist as nodes in
-# the graph. If no argument is given, or if the argument is an empty string,
-# then trigger an error on the first invalid one encountered. Otherwise,
-# repair the graph by removing the offending reference to a parent or
-# child.
-#
-body ::tycho::Graph::verifyAll {{repair {}}} {
-    if ![array exists contentslist] {
-        # graph is empty.
-        return
-    }
-    # For some reason, array search cannot be used here.
-    # set id [array startsearch contentslist]
-    # while {[set node [array nextelement contentslist $id]] != {}}
-
-    foreach node [array names contentslist] {
-        set idx 0
-        foreach parent $parentnames($node) {
-            if ![info exists contentslist($parent)] {
-                if {$repair != {}} {
-                    # Remove the offending parent entry.
-                    set parentnames($node) \
-                            [lreplace $parentnames($node) $idx $idx]
-                    if {$parentnames($node) == {}} {
-                        lappend rootnames $node
-                    }
-                } {
-                    error "Missing node referenced as a parent: $parent"
-                }
-            }
-            incr idx
-        }
-        set idx 0
-        foreach child $childrennames($node) {
-            if ![info exists contentslist($child)] {
-                if {$repair != {}} {
-                    # Remove the offending child entry.
-                    set childrennames($node) \
-                            [lreplace $childrennames($node) $idx $idx]
-                } {
-                    error "Missing node referenced as a child: $child"
-                }
-            }
-            incr idx
-        }
-    }
-    # array donesearch contentslist $id
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### listreplace
-# For the list <i>listname</i>, remove the <i>olditem</i> and append
-# the <i>newitem</i>.  The items are strings, and <i>olditem</i> must
-# match exactly a string in the list.
-# Issue a warning <i>olditem</i> is not present in the list.
-#
-body ::tycho::Graph::listreplace {listname olditem newitem} {
-    set idx [lsearch -exact [set $listname] $olditem]
-    if {$idx < 0} {
-        safeEval ::tycho::warn "Missing item in list $listname: $olditem"
-    } {
-        set $listname [lreplace [set $listname] $idx $idx]
-    }
-    lappend $listname $newitem
-}
-
+# body ::tycho::AbstractGraph::adjacencydelete {vertex1 vertex2} {
+#     set pindex [lsearch -exact _adjacency($vertex1.children) $vertex2]
+#     set cindex [lsearch -exact _adjacency($vertex1.parents)  $vertex1]
+#     if {$pindex >= 0 && $cindex >= 0} {
+#         set _adjacency($vertex1.children) \
+#                 [lreplace _adjacency($vertex1.children) $pindex $pindex]
+#         set _adjacency($vertex1.parents) \
+#                 [lreplace _adjacency($vertex1.parents $cindex $cindex]
+#     }
+# }
