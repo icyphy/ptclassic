@@ -65,28 +65,6 @@
 #
 #   </dl>
 #
-# _Layout_ supports several events that have no method, but are used
-# by views to communicate information with each other. These events
-# deal with tagging and selection, which is information that is not
-# recorded in the model itself. The event names correspond directly
-# to the methods of the same names in _IncrCanvas_ or _Slate_. The
-# events are:
-# <dl>
-# <dt><b>addtag</b> _tag_ ?_item_ _item_...?
-# <dd>
-# Add the specified _tag_ to each _item_.
-#
-# <dt><b>dtag</b> _tag_ ?_delete_...?
-# <dd>
-# Delete _tag_. If _delete_ is given, delete from matching items,
-# oherwise delete from all items.
-# 
-# <dt><b>selection</b> _mode_ ?_arg_ _arg...?
-# <dd>
-# Manipulate the selection.
-# 
-# </dl>
-#
 class ::tycho::Layout {
     inherit ::tycho::DataModel
     
