@@ -280,7 +280,9 @@ SimHandlerFunction SimControl::setPollAction(SimHandlerFunction f) {
 void SimControl::setPollTimer( int seconds, int micro_seconds ) {
 	// reset the timer - this cancels any current timing in progress
         struct itimerval i;
-	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
+	// hppa.cfront: Can't set tv_sec and tv_usec to 0 on same line.
+	i.it_interval.tv_sec = 0;
+	i.it_interval.tv_usec = 0;
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
 	// Turn off the poll flag until the timer fires
