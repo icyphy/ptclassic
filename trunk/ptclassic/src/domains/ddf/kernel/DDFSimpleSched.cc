@@ -99,8 +99,7 @@ int DDFSimpleSched :: pragmaRegistered(DataFlowStar* st) {
 // Determine in which class the star passed in falls.
 // The possible classes are "not-enabled" (return 0),
 // "enabled, non-deferrable" (return 1),
-// "enabled, deferrable, non-sources" (return 2),
-// "enabled, deferrable sources" (return 3).
+// "enabled, deferrable" (return 2),
 // The return value is also stored in the enabled flag of the star.
 //
 //
@@ -123,32 +122,31 @@ void DDFSimpleSched :: setup () {
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Fire the stars in the sequential list that is passed.
+// Fire the specified star.
 // Return FALSE if an error occurs or a halt is requested.
 // Set the "firedOne" member if any star actually fires.
 //
-int DDFSimpleSched :: fireStarsFrom(SequentialList& list) {
-  while (list.size() > 0) {
-    DataFlowStar *s = (DataFlowStar*)list.getAndRemove();
-    // In order to allow for easier profiling, the star is run through
-    // a local method that is usually in-line.
-    if (!runStar(s)) return FALSE;
-    firedOne = TRUE;
+int DDFSimpleSched :: fireStar(DataFlowStar* s) {
 
-    // Classify the stars that are adjacent this one
-    // (the state of upstream may also change).
-    DFStarPortIter nextPort(*s);
-    DFPortHole *p = 0;
-    while ((p = nextPort++) != 0) {
-      // If the port is not connected, do nothing
-      if (!p->far()) continue;
-      DataFlowStar* far = (DataFlowStar*)p->far()->parent();
-      classify(far);
-    }
+  // In order to allow for easier profiling, the star is run through
+  // a local method that is usually in-line.
+  if (!runStar(s)) return FALSE;
+  firedOne = TRUE;
 
-    // Also, classify myself for the next round.
-    classify(s);
+  // Classify the stars that are adjacent this one
+  // (the state of upstream may also change).
+  DFStarPortIter nextPort(*s);
+  DFPortHole *p = 0;
+  while ((p = nextPort++) != 0) {
+    // If the port is not connected, do nothing
+    if (!p->far()) continue;
+    DataFlowStar* far = (DataFlowStar*)p->far()->parent();
+    classify(far);
   }
+
+  // Also, classify myself for the next round.
+  classify(s);
+
   return TRUE;
 }
 
@@ -157,22 +155,22 @@ int DDFSimpleSched :: fireStarsFrom(SequentialList& list) {
 //
 // One iteration, by default, consists of firing all enabled
 // and non-deferrable actors once. A deferrable actor is one with
-// any output arc that has enough data to satisfy the destination actor.
+// any output arc that has enough data to satisfy the destination actor,
+// where self-loops are ignored.
 //
 // E = enabled actors
 // D = deferrable enabled actors
-// S = source actors
 // F = actors that have fired once already in this one iteration
-//
-// Note that S is a subset of E.
 //
 // One default iteration consists of:
 //      
 //      if (E-D != 0) fire(E-D)
-//      else if (D-S != 0) fire (D-S)
-//      else if (S != 0) fire (S)
+//      else if (D != 0) fire minimax(D)
 //      else deadlocked.
-// 
+//
+// The function "minimax(D)" returns the one actor with the smallest
+// maximum number of tokens on its output paths.
+//
 // This default iteration is defined to fire actors
 // at most once.  A larger notion of an iteration can be specified using
 // the targetPragmas mechanism to identify particular stars that must fire
@@ -212,9 +210,9 @@ int DDFSimpleSched :: run() {
     }
 
     // The following loop might be repeated if any of the stars in
-    // it do not have enough firings to satisfy their pragma.  Each pass through
-    // the loop defines a subiteration.  All passes through the
-    // loop together define one complete iteration.
+    // it do not have enough firings to satisfy their pragma.
+    // Each pass through the loop defines a subiteration.
+    // All passes through the loop together define one complete iteration.
     int doAgain = TRUE;
     while (doAgain) {
     
@@ -223,42 +221,40 @@ int DDFSimpleSched :: run() {
       doAgain = FALSE;
 
       // Scan the list of stars, and depending on the enabled flag,
-      // put the star onto one of the lists of stars that might fire.
+      // put the star onto the list of stars to fire.
+      // For deferrable stars, we identify the one with the smallest
+      // maximum output buffer size.
       enabledNonDef.initialize();
-      enabledDefNonSources.initialize();
-      defSources.initialize();
+      enabledDef = NULL;
       nextStar.reset();
+      int minimaxsize = -1;
       while((c = nextStar++) != 0) {
-	switch(c->flags[enabled]) {
-	case 1:		// enabled and non-deferrable
+	if (c->flags[enabled] == 1) {
+	  // enabled and non-deferrable
 	  enabledNonDef.append(c);
-	  break;
-	case 2:		// enabled, deferrable, non-source
-	  enabledDefNonSources.append(c);
-	  break;
-	case 3:		// enabled, deferrable sources
-	  defSources.append(c);
-	  break;
+	} else if (c->flags[enabled] == 2) {
+	  // enabled, deferrable
+	  if (c->flags[maxout] < minimaxsize || minimaxsize == -1) {
+	    minimaxsize = c->flags[maxout];
+	    enabledDef = c;
+	  }
 	}
       }
 
       // (1) Fire all enabled and non-deferrable actors at most once.
       firedOne = FALSE;
-      if (!fireStarsFrom(enabledNonDef)) return FALSE;
+      while (enabledNonDef.size() > 0) {
+	DataFlowStar *s = (DataFlowStar*)enabledNonDef.getAndRemove();
+	if (!fireStar(s)) return FALSE;
+      }
 
       // (2) If the above yielded no firings at all, then we proceed to the
-      //     step of firing all enabled deferrable actors that are not sources.
-      if (!firedOne) {
-	if (!fireStarsFrom(enabledDefNonSources)) return FALSE;
+      //     step of firing one of the enabled deferrable actors.
+      if (!firedOne && enabledDef) {
+	if (!fireStar(enabledDef)) return FALSE;
       }
 
-      // (3) If the above still yielded no firings, then we now fire
-      //     all deferrable sources.
-      if (!firedOne) {
-	if (!fireStarsFrom(defSources)) return FALSE;
-      }
-	  
-      // (4) If we still have not fired a star, we are deadlocked.
+      // (3) If we still have not fired a star, we are deadlocked.
       if (!firedOne) {
 	if (numFiring < stopTime && !runUntilDeadlock) {
 	  Error :: abortRun("deadlock detected: check for  ",
@@ -303,6 +299,7 @@ int DDFSimpleSched :: run() {
 	}
       }
     }
+    currentTime += schedulePeriod;
   }
   return TRUE;
 }
@@ -322,11 +319,11 @@ int DDFSimpleSched :: isSource(Star& s) {
 ///////////////////////////////////////////////////////////////////////
 // Check the input ports and return the state of the actor.
 // If it is enabled and non-deferrable, return 1.
-// If it is a non-source, enabled and deferrable, return 2.
-// If it is a deferrable source, return 3.
+// If it is enabled and deferrable, return 2.
 // Otherwise, return 0 (it is not enabled).
 // An actor is deferrable if all its output connections already
-// have enough data to enable the downstream actor.
+// have enough data to enable the downstream actor (ignoring
+// self-loops).
 //
 int DDFSimpleSched :: enabledState(DataFlowStar* s) {
 
@@ -342,8 +339,7 @@ int DDFSimpleSched :: enabledState(DataFlowStar* s) {
     // enough data already, enabled and not deferrable.
     if (!isOutputDeferrable(s)) return 1;
 
-    // The actor is enabled and deferrable.  It cannot possibly be
-    // a source, since it has a wait port.
+    // The actor is enabled and deferrable.
     return 2;
   }
 
@@ -354,9 +350,7 @@ int DDFSimpleSched :: enabledState(DataFlowStar* s) {
   // enabled
   if (!isOutputDeferrable(s)) return 1;        // enabled, not deferrable
   // enabled and deferrable
-  if (!isSource(*s)) return 2;                 // enabled, deferrable, non-source
-  // enabled, deferrable source
-  return 3;                                    // enabled, deferrable, source
+  return 2;                                    // enabled, deferrable
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -377,10 +371,16 @@ int DDFSimpleSched :: blockedOnInput(DataFlowStar* s) {
 // Check to see whether any of the outputs has enough data already to
 // satisfy the downstream actor.  If so, return TRUE.
 // If there are no outputs, always return FALSE.
+// As a side effect, this method sets the maxout flag of the
+// star to the amount of data (number of particles) on the largest
+// output buffer.
+// Self loops are ignored.
 //
 int DDFSimpleSched :: isOutputDeferrable(DataFlowStar* s) {
   DFStarPortIter nextPort(*s);
   DFPortHole *p;
+  int maxsize = 0;
+  int deferrable = FALSE;
   while ((p = nextPort++) != 0) {
     if (p->isItInput()) continue;
 
@@ -390,21 +390,27 @@ int DDFSimpleSched :: isOutputDeferrable(DataFlowStar* s) {
     if (!far) continue;
 
     DataFlowStar* ds = (DataFlowStar*) far->parent();
+
+    // If the output is a self-loop, ignore.
+    if (ds == s) continue;
+
     DFPortHole* wp = ds->waitPort();
     if (far == (PortHole*) wp) {
       // The downstream actor is waiting for data on this port.
       // If the number of tokens available is sufficient...
-      if (wp->numTokens() >= ds->waitTokens()) return TRUE;
+      if (wp->numTokens() >= ds->waitTokens()) deferrable = TRUE;
     } else if (wp) {
       // The downstream actor is waiting for data
       // on another port.
-      return TRUE;
+      deferrable = TRUE;
     } else {
       // The downstream actor is waiting for data on this
       // and other ports (probably an SDF actor).
-      if (far->numXfer() <= p->numTokens()) return TRUE;
+      if (far->numXfer() <= p->numTokens()) deferrable = TRUE;
     }
+    if (p->numTokens() > maxsize) maxsize = p->numTokens();
   }
-  return FALSE;
+  s->flags[maxout] = maxsize;
+  return deferrable;
 }
 		
