@@ -77,7 +77,7 @@
 # assume you are using Bash.
 #
 # 1. Set PTARCH
-# 	PTARCH=nt4.mk
+# 	PTARCH=nt4.vc
 #	export PTARCH
 # 2. Set PTOLEMY
 # 	PTOLEMY=/users/ptolemy
@@ -89,7 +89,7 @@
 # 4. Edit the TOOLS32 and TOOLS16 variables to point to the location
 #    of the 32 bit and 16 bit Microsoft Visual C++ tools.
 # 5. Build and install Tcl 8.0 by copying 
-#    $PTOLEMY/src/tcltk/tcl8.0.4/win/makefile.vc to makefile and 
+#    $PTOLEMY/src/tcltk/tcl8.0.5pt/win/makefile.vc to makefile and 
 #    setting the following variables
 #	TOOLS32		= d:\progra~1\micros~2\vc98
 #	TOOLS32_rc	= d:\progra~1\micros~2\common\msdev98
