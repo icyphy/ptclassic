@@ -114,6 +114,14 @@ body ::tycho::EditPtcl::constructor {args} {
     set fillPrefix "#"
 
     #menubar addMenu Special -underline 0
+    # Delete these menus from the parent EditItcl class, they make no sense.
+    menubar delete "Body Template"
+    menubar delete "File Template"
+    menubar delete "Test Template"
+    menubar delete "Generate doc"
+    menubar delete "Generate idoc"
+    menubar delete "Generate class diagram"
+
     menubar add "Retarget" Special -underline 0 \
             -command "::tycho::view Retarget -edit $this -toolbar 1"
 
