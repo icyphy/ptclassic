@@ -43,7 +43,7 @@ defstar
 	desc { execution time }
     }
 
-    setup
+    initCode
     {
 	for(int i = 0; i < include.size(); i++)
 	    addInclude(include[i]);
@@ -56,7 +56,8 @@ defstar
 	addCode(code);
     }
 
-    exectime {
+    exectime
+    {
 	return int(runTime);
     }
 }
