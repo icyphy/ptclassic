@@ -2093,8 +2093,8 @@ StringList ArchTarget :: addSensitivities(VHDLFiring* firing, int level) {
       // which will contain wait statements.  Synopsys complains that
       // it can't synthesize blocks with wait statements if they also
       // have sensitivity lists.
-      StringList ctlName = hashstring(filePrefix);
-      ctlName << "controller";
+      StringList ctlName = "FIREGROUP_";
+      ctlName << "CONTROLLER";
       const char* ctlString = (const char*) ctlName;
       if (!strcmp(firing->name,ctlString)) return all;
       // Another exception for those firings that wish to disable
