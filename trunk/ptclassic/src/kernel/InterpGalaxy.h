@@ -35,6 +35,7 @@ public:
 	SequentialList::size;
 	Geodesic* nodeWithName (const char* name);
 	void initialize();
+	NodeList() {}
 	~NodeList() { initialize();}
 };
 
