@@ -83,18 +83,30 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	const char* arg2 = arg++;
 
 	// ref2 provided for backward compatibility
-	if (matchMacro(func, argList, "ref2", 2)) s = expandRef(arg1, arg2);
-	else if (matchMacro(func, argList, "ref", 2)) s = expandRef(arg1, arg2);
-	else if (matchMacro(func, argList, "ref", 1)) s = expandRef(arg1);
-	else if (matchMacro(func, argList, "val", 1)) s = expandVal(arg1);
-	else if (matchMacro(func, argList, "size", 1)) s = expandSize(arg1);
-	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg1);
-	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg1);
-	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg1);
-	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg1, arg2);
-	else if (matchMacro(func, argList, "interOp", 2)) s = expandInterOp(arg1, arg2);
-	else if (matchMacro(func, argList, "assign", 1)) s = expandAssign(arg1);
-	else if (matchMacro(func, argList, "temp", 2)) s = expandTemp(arg1, arg2);
+	if (matchMacro(func, argList, "ref2", 2))
+	  s = expandRef(arg1, arg2);
+	else if (matchMacro(func, argList, "ref", 2))
+	  s = expandRef(arg1, arg2);
+	else if (matchMacro(func, argList, "ref", 1))
+	  s = expandRef(arg1);
+	else if (matchMacro(func, argList, "val", 1))
+	  s = expandVal(arg1);
+	else if (matchMacro(func, argList, "size", 1))
+	  s = expandSize(arg1);
+	else if (matchMacro(func, argList, "label", 1))
+	  s = codeblockSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "codeblockSymbol", 1))
+	  s = codeblockSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "starSymbol", 1))
+	  s = starSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "sharedSymbol", 2))
+	  s = lookupSharedSymbol(arg1, arg2);
+	else if (matchMacro(func, argList, "interOp", 2))
+	  s = expandInterOp(arg1, arg2);
+	else if (matchMacro(func, argList, "assign", 1))
+	  s = expandAssign(arg1);
+	else if (matchMacro(func, argList, "temp", 2))
+	  s = expandTemp(arg1, arg2);
 	else macroError(func, argList);
 
 	return s;
@@ -111,46 +123,38 @@ StringList VHDLStar :: expandRef(const char* name) {
   
   // Check if it's a State reference.
   if ((state = stateWithName(name)) != 0) {
-    StringList type;
-    StringList initVal;
-
     StringList tempName = targ()->sanitizedFullName(*state);
     ref = sanitize(tempName);
     ref << "_";
     ref << firing;
     
-    type = targ()->stateType(state);
-    initVal = state->initValue();
-
     targ()->registerState(state, firing);
   }
   
   // Check if it's a PortHole reference.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
-    StringList mapping;
-    StringList direction;
-    StringList type;
-
     if (multiPortWithName(portName)) {
-      codeblockError(portName, " is a multiport referenced as a single port");
+      codeblockError(portName,
+		     " is a MultiPortHole referenced as a single PortHole");
       ref.initialize();
       return ref;
     }
     
+    int tokenNum = port->getOffset();
     ref << port->getGeoName();
-    ref << "_";
-    ref << port->getOffset();
+    if (tokenNum >= 0) {
+      ref << "_" << tokenNum;
+    }
+    else { /* (tokenNum < 0) */
+      ref << "_N" << (-tokenNum);
+    }
     
-    mapping = ref;
-    direction = port->direction();
-    type = port->dataType();
-    
-    targ()->registerPortHole(port, port->getOffset());
+    targ()->registerPortHole(port, tokenNum);
   }
 
   // Error:  couldn't find a State or a PortHole with given name.
   else {
-    codeblockError(name, " is not defined as a state or port");
+    codeblockError(name, " is not defined as a State or PortHole");
     ref.initialize();
   }
   
@@ -168,7 +172,8 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 
   ref.initialize();
     
-  // Convert offset State value to  offset (if such a State exists).
+  // Check if offset is a State reference.
+  // Convert offset State value to offset.
   if ((offsetState = stateWithName(offset)) != NULL) {
     // Get State value as a string.
     if (offsetState->isA("IntState")) {
@@ -182,10 +187,11 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
     }
   }
 
+  // Check if it's a State reference.
   // Expand array State reference (since expandRef called with two args).
   if ((state = stateWithName(name)) != NULL) {
-    StringList type;
-    StringList initVal;
+//    StringList type;
+//    StringList initVal;
 
     if (state->isArray()) {
       StringList tempName = targ()->sanitizedFullName(*state);
@@ -215,19 +221,20 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	targ()->registerState(state, firing, offsetInt);
       }
     }
+
+    // Error:  Referencing a non-array state with an index.
     else {
-      codeblockError(name, " is not an array state");
+      codeblockError(name, " is not an array state but is referenced as one");
       ref.initialize();
     }
     return ref;
   }
 
+  // Check if it's a PortHole reference.
   // Expand PortHole reference with offset.
   else if (port = (VHDLPortHole*) genPortWithName(portName)) {
-    StringList mapping;
-    StringList direction;
-    StringList type;
 
+    // Error:  Referencing a MultiPortHole as if it were a single PortHole.
     if (multiPortWithName(portName)) {
       codeblockError(portName, " is a multiport referenced as a single port");
       ref.initialize();
@@ -236,31 +243,44 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
     
     ref << port->getGeoName();
 
-    // Use array notation for large buffers and for embedded buffers
-    // which are referenced through a pointer.
-    if (port->bufSize() > 1) {
-      ref << "_";
-
-      // generate constant for index from state
-      if (offsetState != NULL) {
-	int offsetInt = *(IntState*)offsetState;
-	ref << (port->getOffset() + offsetInt);
-	targ()->registerPortHole(port, offsetInt);
-      }
-
-      // generate constant for index
-      else {
-	// must first convert offset from char* to int
-	int offsetInt = 0;
-	for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
-	  offsetInt = 10*offsetInt + (offset[i]-'0');
-	}
-	ref << (port->getOffset() + offsetInt);
-	targ()->registerPortHole(port, offsetInt);
+//    // Use array notation for large buffers and for embedded buffers
+//    // which are referenced through a pointer.
+//    if (port->bufSize() > 1) {
+// Bag that...do it unconditionally now.  Even if just one token
+// transferred, use name_0 notation.
+    
+    int offsetInt, tokenNum;
+      
+    if (offsetState != NULL) {
+      // Generate constant for index from state.
+      offsetInt = *(IntState*)offsetState;
+    }
+    else {
+      // Generate constant for index from string.
+      // Must first convert offset from char* to int.
+      offsetInt = 0;
+      for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
+	offsetInt = 10*offsetInt + (offset[i]-'0');
       }
     }
+    tokenNum = port->getOffset() - offsetInt;
+    if (tokenNum >= 0) {
+      ref << "_" << tokenNum;
+    }
+    else { /* (tokenNum < 0) */
+      ref << "_N" << (-tokenNum);
+    }
+    targ()->registerPortHole(port, tokenNum);
   }
+  
+//  }
 
+  // Error:  Couldn't find a State or a PortHole with given name.
+  else {
+    codeblockError(name, " is referenced, but not defined as a state or port");
+    ref.initialize();
+  }
+  
   return ref;
 }
 
@@ -385,8 +405,9 @@ void VHDLStar :: initialize() {
 int VHDLStar :: run() {
   int status = 0;
   firing++;
-  status = targ()->runIt(this);
   updateOffsets();
+  status = targ()->runIt(this);
+//  updateOffsets();
   return status;
 }
 
