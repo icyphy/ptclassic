@@ -282,7 +282,7 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 
 # Install itcl
 install_itcl: $(ITCL_DEST_LIB)/libitcl.a
-	(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
 $(ITCL_DEST_LIB)/libitcl.a: \
 		$(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) $(ITCL_DEST) \
