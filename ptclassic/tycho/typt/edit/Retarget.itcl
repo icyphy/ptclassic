@@ -310,7 +310,7 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
 body ::tycho::Retarget::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO typt edit doc usersGuides EditRetargetHelp.html]
+        [file join $TYCHO typt edit doc usersGuides RetargetHelp.html]
 }
 
     ###################################################################
