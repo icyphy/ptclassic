@@ -1,17 +1,10 @@
-#
-# syntax.tcl
-#
-# Functions for defining new "syntax" in tcl. Option reading,
-# new versions of foreach and similar functions, and so on.
-#
-
 ##########################################################################
 #
 # Author:  H. John Reekie
 #
 # Version: $Id$
 #
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -38,70 +31,107 @@
 ##########################################################################
 
 
+#### syntax.tcl
 #
-# FIXME: add correct handling of return in foreach* etc
+# Functions for defining new "syntax" in tcl. Option reading,
+# new versions of foreach and similar functions, and so on.
 #
- 
-## assign {varnames}+ list
+# FIXME: The plethora of option-handling procs needs to be cut down
+# and simplified!
 #
-# Assign elements of a list to multiple variables. If the number
-# of variable names is less then the length of the list, then
-# later elements of the list are just ignored. if the number of
-# variable names is more than the length of the list, then an error
-# will be generated.
-#
-# -- varnames: One or more names of variables.
-# -- list: The list containing values to assign to the variables.
-#
-# FIXME: Use the Tcl7.5 foreach{} to implement.
-#
-proc assign {args} {
-    set values [lindex $args end]            ;# llast
-    foreach var [lreplace $args end end] {   ;# linit
-	upvar $var v
 
-	set v      [lindex   $values 0]      ;# lhead
-	set values [lreplace $values 0 0]    ;# ltail
+
+## apply script arg ?arg?
+#
+# "Apply" a script to some arguments. This is a clumsy imitation
+# of higher-order functions, but is very handy for building
+# callback scripts and the like.
+#
+# The script argument can have one of two formats. If it looks
+# like this:
+#
+#     { .... %0 ..... %1 .... }
+#
+# then each _arg_ is substituted for the corresponding place-holder
+# and the result evaluated IN THE CALLER'S CONTEXT. If it looks
+# like this:
+#
+#     { lambda x y -> ... $x ..... $y .... }
+#
+# then the names between the "lambda" and the "->" are used to
+# substitute argument values into the "body" of the script (after
+# the "->". For example, executing
+#
+#     apply { lambda x y -> expr $x / $y } 6 3
+#
+# will return 2. If there are not enough arguments, then the script
+# will _not_ be evaluated, but will be returned as-is. "Currying!"
+# (This is not the case for the simpler %0-style format -- in that
+# case, the script is evaluated regardless.)
+#
+# NOTE: Nested scripts do not work reliably (because the substitution
+# is simple-minded, and does not understand scope)
+#.
+proc apply {script args} {
+    applylkernel $script $args
+}
+
+
+## applyl script {arg ?arg?}
+#
+# "Apply" a script to a list of arguments. This is the same as
+# apply{}, except that the arguments are in a list -- this is more
+# convenient when working with a list of optional arguments and so on.
+#
+proc applyl {script actuals} {
+    applylkernel $script $actuals
+}
+
+
+## applylkernel script {arg ?arg?}
+#
+# This is the "kernel" for apply and applyl. It's necessary to
+# ensure that the "uplevel" evaluation works correctly.
+#
+proc applylkernel {script actuals} {
+    if { [lindex $script 0] == "lambda" } {
+	# This is the more complicated case. Get the names of the formals.
+	# The split will produce eg {{lambda x y} {} {expr $x + $y}}.
+	set bits [split $script "->"]
+	set formals [lrange [lindex $bits 0] 1 end]
+	set script  [lindex $bits 2]
+
+	# If the script is "fully applied," then substitute all
+	# formals and evaluate it (ignore extra args, if any)
+	if { [llength $actuals] >= [llength $formals] } {
+	    foreach formal $formals actual $actuals {
+		regsub -all \\\$$formal $script $actual script
+	    }
+	    return [uplevel 2 $script]
+	}
+
+	# Otherwise, the number of actuals is less than the number
+	# of formals: substitute as many as there are and return the
+	# a new script with remaining arguments.
+	foreach formal [ltake $formals [llength $actuals]] \
+		actual $actuals {
+	    regsub -all \\\$$formal $script $actual script
+	}
+	return "lambda [ldrop $formals [llength $actuals]] -> $script"
+    } else {
+	# This is the simpler case. Just substitute each argument
+	# for the corresponding %n symbol.
+	foreach actual $actuals n [interval 0 [expr [llength $actuals] - 1]] {
+	    regsub -all %$n $script $actual script
+	}
+
+	# .. and evaluate
+	return [uplevel 2 $script]
     }
 }
 
 
-## behead varname listname
-#
-# Assign the first element of a list to the specified variable,
-# and remove the head from that list. Note that the list is
-# passed by _name_, so that it is destructively altered in place.
-# For example, suppose that fred equal {1 2 3 4}. Then
-#
-#     behead x fred
-#
-# (NB, no $ in front of _fred_) sets _x_ to 1, and _fred_ to {2 3 4}.
-# This is particularly useful for extracting optional arguments, 
-# as in:
-#
-#     if { $args != "" } {
-#         behead thing args
-#     }
-#     if { $args != "" } {
-#         behead thang args
-#     }
-#     process thing thang
-#
-# -- varname: The name of the variable to assign the head of the
-#    list to.
-#
-# -- list: The _name_ of the list to modify.
-#
-proc behead {varname listname} {
-    upvar $varname  v
-    upvar $listname l
-
-    set v [lindex   $l 0]      ;# lhead
-    set l [lreplace $l 0 0]    ;# ltail
-}
-
-#
-# assert
+## assert expr args
 #
 # Print an error if the argument expression fails.
 #
@@ -126,8 +156,63 @@ proc assert {expr args} {
 }
 
 
+## assign {varnames}+ list
 #
-# getopt
+# Assign elements of a list to multiple variables. If the number
+# of variable names is less then the length of the list, then
+# later elements of the list are just ignored. If the number of
+# variable names is more than the length of the list, then the
+# remaining variables are set to null.
+#
+# In really critical situations, you can use the obscure Tcl (7.5)
+# syntax:
+#
+#    foreach {x y z} $list {}
+#
+# instead of:
+#
+#    assign x y z $list
+#
+proc assign {args} {
+    foreach var [lreplace $args end end] val [lindex $args end] {
+	upvar $var v
+	set v $val
+    }
+}
+
+
+
+## behead varname listname
+#
+# Assign the first element of a list to the specified variable,
+# and remove the head from that list. Note that the list is
+# passed by _name_, so that it is destructively altered in place.
+# For example, suppose that fred equal {1 2 3 4}. Then
+#
+#     behead x fred
+#
+# (NB, no $ in front of _fred_) sets _x_ to 1, and _fred_ to {2 3 4}.
+# This is particularly useful for extracting optional arguments, 
+# as in:
+#
+#     if { $args != "" } {
+#         behead thing args
+#     }
+#     if { $args != "" } {
+#         behead thang args
+#     }
+#     process thing thang
+#
+proc behead {varname listname} {
+    upvar $varname  v
+    upvar $listname l
+
+    set v [lindex   $l 0]      ;# lhead
+    set l [lreplace $l 0 0]    ;# ltail
+}
+
+
+## getopt option listname
 #
 # A handy thang for reading option arguments fram an argument
 # list. Sort of like configuration options but more controlled.
@@ -168,58 +253,7 @@ proc getopt {option listname} {
 }
 
 
-proc configopt {option listname} {
-
-    upvar $listname l
-    upvar $option   v
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	uplevel configure -$option [lindex   $l [expr $t+1]]
-	set l [lreplace $l $t [expr $t+1]]
-
-	return 1
-    }
-
-    return 0
-}
-
-
-#
-# readopt
-#
-# Read an option argument, like getopt{}, but instead of setting
-# a variable return the read value of the option.
-#
-# The argument list is modified as for getopt{}.
-#
-# Example:
-#
-#    set thing [readopt fred args]
-#
-# Note that readopt{} does not make getopt{} redundant, since getopt{]
-# does not change the option variable if the option is not present.
-#
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
-#
-proc readopt {option listname} {
-
-    upvar $listname l
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	set v [lindex   $l [expr $t+1]]
-	set l [lreplace $l $t [expr $t+1]]
-
-	return $v
-    }
-    return ""
-}
-
-
-#
-# getoption
+## getoption option listname
 #
 # Like getopt{}, but sets the option variable to all arguments
 # following the option flag up to the next option flag.
@@ -251,38 +285,6 @@ proc getoption {option listname} {
 }
 
 
-#
-# readoption
-#
-# Like readopt{}, but returns all arguments
-# following the option flag up to the next option flag.
-#
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
-#
-proc readoption {option listname} {
-
-    upvar $listname l
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	set ldash [lreplace $l 0 $t]
-	set tdash [lsearch -glob $ldash "-*"]
-
-	if { $tdash == -1 } {
-	    set tdash [llength $ldash]
-	}
-
-	set v [lrange   $ldash 0  [expr $tdash-1]]
-	set l [lreplace $l     $t [expr $t+$tdash]]
-
-	return $v
-    }
-
-    return ""
-}
-
-
 ## getalloptions varname listname
 #
 # Get all options from an argument list into the specified
@@ -293,16 +295,13 @@ proc readoption {option listname} {
 # a uniform way: co-ordinates are the example for which this
 # procedure was originally written.
 #
-# FIXME: This will incorrectly assume that a negative number starts
-# the options list!!!
-#
 proc getalloptions {varname listname} {
 
     upvar $listname l
     upvar $varname  v
 
     set v {}
-    set t [lsearch -glob $l -*]
+    set t [lsearch -glob $l {-[a-z]*}]
     if { $t != -1 } {
 	set v [lrange $l $t end]
 	set l [lrange $l 0 [expr $t-1]]
@@ -314,8 +313,7 @@ proc getalloptions {varname listname} {
 }
 
 
-#
-# getflag
+## getflag option listname
 #
 # Like getopt{}, but set the option variable to 1 if the
 # option flag is there, else 0. Delete the option flag 
@@ -343,53 +341,7 @@ proc getflag {option listname} {
 }
 
 
-#
-# makeflag
-#
-# More-or-less the reverse of getopt: given the name of a boolean value,
-# return a string that is either empty or contains an option. For example,
-#
-#     makeflag fred
-#
-# returns "-fred" if $fred is true in the calling environment, and
-#
-# returns "" if $fred is false in the calling environment.
-#
-proc makeflag {option} {
-    if {[uplevel [list set $option]]} {
-	return "-$option"
-    } else {
-	return ""
-    }
-}
-
-
-
-#
-# makeopt
-#
-# Given the name of a variable, return a string that is either
-# empty or contains an option. For example,
-#
-#     makeopt fred
-#
-# returns "-fred 123" if $fred is equal to 123 in the calling
-# environment, and
-#
-# returns "" if $fred is "" in the calling environment.
-#
-proc makeopt {option} {
-    set value [uplevel [list set $option]]
-    if { $value != "" } {
-	return "-$option $value"
-    } else {
-	return ""
-    }
-}
-
-
-#
-# loop
+## loop n body
 #
 # Loop $n times. Called as "loop n body." The -counter option
 # introduces the name of a variable that ranges from 0 to $n-1.
@@ -412,208 +364,107 @@ proc loop {args} {
 }
 
 
+## makeflag option
 #
-# foreach*
+# More-or-less the reverse of getopt: given the name of a boolean value,
+# return a string that is either empty or contains an option. For example,
 #
-# Multi-argument version of foreach. Stops when any one of the
-# argument lists runs out of elements.
+#     makeflag fred
 #
-# As for loop{},. "body" cannot contain return commands. As
-# for loop{}, this could be fixed later if necessary.
+# returns "-fred" if $fred is true in the calling environment, and
 #
-# Also as for loop{}, the "-counter" option introduces the name
-# of a variable that counts from 0 to n-1, where n is the length
-# of the shortest argument list.
+# returns "" if $fred is false in the calling environment.
 #
-# It works as follows: for each variable name x and corresponding list,
-# it creates a new variable and list v_x and l_x, where v_x is upvar'ed
-# to the caller's variable x. It then builds a script that sets v_x
-# to the head of l_x. Thus, the call
-#
-#     foreach* x {1 2 3} y {4 5 6} {puts "$x $y"}
-#
-# will build the script
-#
-#     set v_x [lindex $l_x $counter]; set v_y [lindex $l_y $counter];
-#
-# In the process, the length of the shortest list is counted. Then
-# the generated script is executed to bind each argument variable
-# in the caller's context to the correct element of the corresponding
-# argument list, and the body executed in the caller's context.
-#
-# This is quite inefficient, of course, although it's not too bad
-# compared with other things you need to do in Tk. For example, I timed
-# the constant overhead (for one input list) at about the same as
-# creating a 50 x 50 rectangle on the Tk canvas.
-#
-# FIXME: The functionalty of foreach*{} will be subsumed by foreach*
-# in Tcl7.5. When that happens, remove this proc!
-#
-proc foreach* {args} {
-    set v [readopt counter args]
-    if {$v != ""} {
-	upvar $v counter
-    }
-
-    set script {}
-    set body  [lindex $args end]
-    set outer [llength [lindex $args 1]]
-    set inner 0
-
-    while { [llength $args] > 1 } {
-	set var [lindex $args 0]         ;# first  element
-	upvar $var v_$var
-	set   l_$var [lindex $args 1]    ;# second element
-	set args [lreplace $args 0 1]    ;# rest of list
-
-	set outer [min2 $outer [llength [set l_$var]]]
-	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
-    }
-    set script [eval concat $script]
-
-    for { set counter 0 } { $counter < $outer } { incr counter } {
-	eval $script
-	uplevel $body
+proc makeflag {option} {
+    if {[uplevel [list set $option]]} {
+	return "-$option"
+    } else {
+	return ""
     }
 }
 
 
-#
-# foreachpair
-#
-# Like foreach{}, but takes _two_ variable names, and assigns them to
-# consecutive elements of the argument list.
-#
-#   foreachpair x y {1 2 3 4} {
-#        puts [expr $x + $y]
-#   }
-#
-# prints:
-#
-#   3
-#   7
-#
-# FIXME: The functionalty of foreachpair{} will be subsumed by foreach*
-# in Tcl7.5. When that happens, remove this proc!
-#
-proc foreachpair {x y l body} {
-    upvar $x fst
-    upvar $y snd
 
-    while { [llength $l] >= 2 } {
-	set fst [lindex $l 0]
-	set snd [lindex $l 1]
-	set l   [lreplace $l 0 1]
-
-	uplevel $body
+## makeopt option
+#
+# Given the name of a variable, return a string that is either
+# empty or contains an option. For example,
+#
+#     makeopt fred
+#
+# returns "-fred 123" if $fred is equal to 123 in the calling
+# environment, and
+#
+# returns "" if $fred is "" in the calling environment.
+#
+proc makeopt {option} {
+    set value [uplevel [list set $option]]
+    if { $value != "" } {
+	return "-$option $value"
+    } else {
+	return ""
     }
 }
 
 
+## readopt option listname
 #
-# apply
+# Read an option argument, like getopt{}, but instead of setting
+# a variable return the read value of the option.
 #
-# Similar to foreach{}, but returns a list containing the
-# result of each application of "body." Body can either be
-# an expression, or a series of statements with the final one
-# an expression. For example:
+# The argument list is modified as for getopt{}.
 #
-#   apply x {1 2 3} {
-#        set q [expr $x * $x]
-#        expr $q * $q  
-#   }
+# Example:
 #
-# In any other language, I'd call this "map."
+#    set thing [readopt fred args]
 #
-# If you want a counter as well, use apply*.
+# Note that readopt{} does not make getopt{} redundant, since getopt{]
+# does not change the option variable if the option is not present.
 #
-# Don't put a return the body---it doesn't do anything
-# sensible. If you want to have the body produce a value
-# conditionally you can do this:
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
 #
-#    apply x {1 2 3} {
-#       if {$x > 2} {expr $x} else {expr $x * $x}
-#    }
-#
-# See also: lmap
-#
-proc apply {v l body} {
+proc readopt {option listname} {
 
-    set result ""
+    upvar $listname l
 
-    upvar $v x
-    foreach x $l {
-	lappend result [uplevel $body]
+    set t [lsearch -exact $l -$option]
+    if { $t != -1 } {
+	set v [lindex   $l [expr $t+1]]
+	set l [lreplace $l $t [expr $t+1]]
+
+	return $v
     }
-
-    return $result
+    return ""
 }
 
 
+## readoption option listname
 #
-# filter
+# Like readopt{}, but returns all arguments
+# following the option flag up to the next option flag.
 #
-# Similar to apply{}, but returns a list containing the elements
-# of the list for which the body evaluates to non-zero.
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
 #
-# See also: lselect, lreject
-#
-proc filter {v l body} {
+proc readoption {option listname} {
 
-    set result ""
+    upvar $listname l
 
-    upvar $v x
-    foreach x $l {
-	if {[uplevel $body]} {
-	    lappend result $x
+    set t [lsearch -exact $l -$option]
+    if { $t != -1 } {
+	set ldash [lreplace $l 0 $t]
+	set tdash [lsearch -glob $ldash "-*"]
+
+	if { $tdash == -1 } {
+	    set tdash [llength $ldash]
 	}
+
+	set v [lrange   $ldash 0  [expr $tdash-1]]
+	set l [lreplace $l     $t [expr $t+$tdash]]
+
+	return $v
     }
 
-    return $result
-}
-
-
-#
-# apply*
-#
-# Like apply{}, but takes multiple variable-arglist pairs,
-# and will also accept the -counter option. It's almost identical
-# to foreach*{} above.
-#
-# For example, to point-wise multiply two lists and pair (in a
-# 2-list) each result with its position in the list, do:
-#
-#    apply* x {1 2 3} y {4 5 6} -counter i {
-#        list $i [expr $x * $y]
-#    }
-#
-proc apply* {args} {
-    set v [readopt counter args]
-    if {$v != ""} {
-	upvar $v counter
-    }
-
-    set script {}
-    set body  [lindex $args end]
-    set outer [llength [lindex $args 1]]
-    set inner 0
-
-    while { [llength $args] > 1 } {
-	set var [lindex $args 0]         ;# first  element
-	upvar $var v_$var
-	set   l_$var [lindex $args 1]    ;# second element
-	set args [lreplace $args 0 1]    ;# rest of list
-
-	set outer [min2 $outer [llength [set l_$var]]]
-	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
-    }
-    set script [eval concat $script]
-
-    set result {}
-    for { set counter 0 } { $counter < $outer } { incr counter } {
-	eval $script
-	lappend result [uplevel $body]
-    }
-
-    return $result
+    return ""
 }
