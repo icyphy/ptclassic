@@ -35,13 +35,14 @@
 # We don't use the toplevel window called ".", so withdraw it.
 wm withdraw .
 
-if ![regexp Iwidgets [package name]] {
-    # Iwidgets is not present, we use the buttonbox from it.
-    # Load in the packages.  For example, on the mac, we need this.
-    package require Itcl
-    package require Itk
-    package require Iwidgets
-}
+# Do we still need this? -cliffc
+#if ![regexp Iwidgets [package name]] {
+#    # Iwidgets is not present, we use the buttonbox from it.
+#    # Load in the packages.  For example, on the mac, we need this.
+#    package require Itcl
+#    package require Itk
+#    package require Iwidgets
+#}
 
 # Check for Itcl2.1 first, since Itcl2.0 does not have [file join . . .]
 if {${itcl::version} < 2.1} {
