@@ -52,6 +52,7 @@ class CGDDFCode {
 public:
 
 	CGDDFCode(MultiTarget* t) : owner(t) {}
+        virtual ~CGDDFCode() {} 
 
 ///////// target dependent section ////////////////
 	// Some preparation steps for code generation

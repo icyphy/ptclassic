@@ -44,6 +44,8 @@ Date: 10/2/92
 
 class BaseCodeStreamList : public NamedList {
 public:
+        virtual ~BaseCodeStreamList() {}
+
 	// adds a new CodeStream called name to the list.  If a CodeStream
 	// called name already exists in the list with a different
 	// CodeStream* return FALSE else return TRUE
