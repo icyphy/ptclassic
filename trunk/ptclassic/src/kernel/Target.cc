@@ -83,7 +83,7 @@ StringList Target::displaySchedule() {
 	if (sched) {
 		return sched->displaySchedule();
 	}
-	return "no scheduler member, so no schedule\n";
+	return "{ { scheduler \"no scheduler member, so no schedule\"} }";
 }
 
 void Target::setGalaxy(Galaxy& g) {

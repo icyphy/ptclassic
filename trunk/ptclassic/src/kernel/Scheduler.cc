@@ -51,7 +51,7 @@ void Scheduler :: setCurrentTime(double val) {
 }
 
 StringList Scheduler :: displaySchedule() {
-	return "displaySchedule not implemented for this scheduler\n";
+  return "{ { scheduler \"Base class Scheduler - No schedule information\"} }";
 }
 
 // Used if not overriden
