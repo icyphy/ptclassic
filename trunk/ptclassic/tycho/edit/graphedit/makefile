@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho visual editors
+# Makefile for tycho.edit.graph package
 #
 # @Author: Christopher Hylands
 #
@@ -40,7 +40,7 @@ VPATH =		$(ROOT)/editors/graphedit
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS =
   
 ITCL_SRCS =  \
 	DFGEdgeController.itcl \
@@ -55,7 +55,9 @@ ITCL_SRCS =  \
 	StarLibrary.itcl \
 	ViewController.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	pkgIndex.tcl \
+	graphedit.tcl
 
 MISC_FILES =		doc test tclIndex icons.tim stars.tim
 
@@ -66,7 +68,7 @@ DIRS =			doc test
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =		Index of classes in tycho/kernel/graphedit
+TYDOC_DESC =		Index of classes in tycho/kernel/graph
 
 all install: $(MISC_SRCS) tclIndex 
 

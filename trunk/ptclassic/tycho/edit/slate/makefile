@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, edit/slate directory.
+# Makefile for Tycho tycho.edit.slate package
 #
 # @Author: Christopher Hylands
 #
