@@ -83,7 +83,7 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		    Error::error(*this, "FilterWidth must be odd.");
 		    return;
 		}
-		halfsize = size/2;
+		halfsize = (size - 1)/2;
 		neighborhoodSize = size * size;
 
 		rankIndex = int(RankOrder);
@@ -115,14 +115,13 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		    // pixel values at p[i][j] where
 		    //   i = -halfsize ... 0 ... halfsize
 		    //   j = -halfsize ... 0 ... halfsize
-		    unsigned char *bufp = buf;
+		    // pijptr points to the current value of p[i][j]
+		    unsigned char *bufptr = buf;
 		    for (int i = -halfsize; i <= halfsize; i++) {
-			// pijptr begins at p[i][-halfsize]
-			// pointer arithmetic: yeah, I feel lucky
 		        unsigned const char *pijptr =
-				p - (i * width - halfsize);
+				p + (i * width - halfsize);
 			for (int j = -halfsize; j <= halfsize; j++) {
-			    *bufp++ = *pijptr++;
+			    *bufptr++ = *pijptr++;
 			}
 		    }
 
@@ -147,9 +146,11 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		}
 
 		// Median filtering -- don't filter boundary pixels for now
+		// Output image has same parameters as input image, but has
+		// uninitialized data (as indicated by TRUE argument below)
+		GrayImage* outImage = new GrayImage(*inImage, TRUE);
 		width = inImage->retWidth();
 		height = inImage->retHeight();
-		GrayImage* outImage = (GrayImage*) inImage->clone(1);
 		unsigned char* outptr = outImage->retData();
 		unsigned const char* inptr = inImage->constData();
 		for (int i = 0; i < height; i++) {
