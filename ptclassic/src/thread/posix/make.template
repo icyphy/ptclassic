@@ -19,7 +19,10 @@ include $(CONFIG)
 LIB= libposixthread.$(LIBSUFFIX)
 
 # Extra directories to include
-INCL= -I$(KERNDIR) -I$(ROOT)/thread/include.$(PTARCH)
+INCL= -I$(KERNDIR)
+ifeq ($(INCLUDE_GTHREADS),yes)
+INCL += -I$(ROOT)/thread/include.$(PTARCH)
+endif
 
 # Library sources.  CC_WITH_H includes all .cc files with a
 # corresponding .h file with the same root.
