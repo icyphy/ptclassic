@@ -58,12 +58,10 @@ public:
 
 	// put a particle into the queue: fails if capacity exceeded
 	int putq(Particle& p) {
-		if (p && !full()) {
-			stk.putTail(p.clone());
-			count++;
-			return TRUE;
-		}
-		else return FALSE;
+		if (full()) return FALSE;
+		stk.putTail(p.clone());
+		count++;
+		return TRUE;
 	}
 	// get a particle from the queue, copy into user-supplied particle
 	// fails if queue empty
