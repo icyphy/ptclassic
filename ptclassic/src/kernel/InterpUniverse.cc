@@ -54,48 +54,52 @@ InterpGalaxy(name,dom), Runnable((Target*)0, dom, this), targName(0)
 { setBlock(name,NULL);}
 
 const char* InterpUniverse :: targetName() const {
-	return targName ? targName : KnownTarget::defaultName(type);
+	return (targName ? targName : KnownTarget::defaultName(type));
 }
 
 int InterpUniverse :: newTarget(const char* newTargName) {
-	if (myTarget()) {
-		LOG_DEL; delete myTarget();
-		setMyTarget(0);
-	}
+	// Delete target and prevent Runnable class from deleting it too
+	delete myTarget();
+	setMyTarget(0);
+
+	// Create new target
 	type = domain();
 	targName = newTargName;
-	setMyTarget(KnownTarget::clone (targetName()));
-	return myTarget() != 0;
+	setMyTarget(KnownTarget::clone(targetName()));
+	return (myTarget() != 0);
 }
 
 Scheduler* InterpUniverse :: scheduler() const {
-	return myTarget()->scheduler();
+	return (myTarget() ? myTarget()->scheduler() : 0);
 }
 
 void InterpUniverse::wrapup() {
-	myTarget()->wrapup();
+	if (myTarget()) myTarget()->wrapup();
 }
 
 InterpUniverse :: ~InterpUniverse() {
-	if (!myTarget()) return;
-	LOG_DEL; delete myTarget();
-	//Is this necessary?
+	// Delete target and prevent Runnable class from deleting it too
+	delete myTarget();
 	setMyTarget(0);
 }
 
 // Modify initTarget to invoke begin methods
 void InterpUniverse :: initTarget() {
-  if (myTarget()->resetRequested()) {
-    reset();
-    Target *newTarget = (Target*) myTarget()->clone();
-    // newTarget->copyStates(*myTarget());
-    LOG_DEL; delete myTarget();
-    setMyTarget(newTarget);
-  }
-  // The following invokes the scheduler
-  Runnable::initTarget();
-  // The following invokes the begin methods of the stars
-  if (!SimControl::haltRequested()) myTarget()->begin();
+	if (! myTarget()) return;
+
+	if (myTarget()->resetRequested()) {
+		reset();
+		Target* newTarget = (Target*) myTarget()->clone();
+		// newTarget->copyStates(*myTarget());
+		delete myTarget();
+		setMyTarget(newTarget);
+	}
+
+	// The following invokes the scheduler
+	Runnable::initTarget();
+
+	// The following invokes the begin methods of the stars
+	if (!SimControl::haltRequested()) myTarget()->begin();
 }
 
 // isa
