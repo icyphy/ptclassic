@@ -114,8 +114,7 @@ void DSKC50Target :: writeCode() {
 	postProcessCmd <<"cut -c 1-79 "
 		 <<filePrefix<<".asm > "
 		 <<filePrefix<<"DSK.asm";
-	systemCall(postProcessCmd,"Post-processing of  asm file failed; 
-			code might still compile");
+	systemCall(postProcessCmd,"Post-processing of  asm file failed;\n code might still compile");
 
   // Compile the code if requested. Note that even if compilation is not
   // wanted the user might want to keep *DSK.asm file to use it later so
