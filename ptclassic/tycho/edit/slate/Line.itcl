@@ -122,7 +122,7 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 	set result "start"
 	set length [expr [llength $coords] / 2 - 1]
 	for {set i 1} {$i < $length} {incr i} {
-	    lappend result "vertex-$n"
+	    lappend result "vertex-$i"
 	}
 	lappend result "end"
 	return $result
