@@ -1,6 +1,6 @@
 # Makefile for Ptolemy C Code Generation uniprocessor targets
 # $Id$
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,24 +28,24 @@
 # Code generation targets
 
 # Root of Ptolemy directory
-ROOT=../../../../..
+ROOT =		../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cgc/targets/uniprocessor
+VPATH = 	$(ROOT)/src/domains/cgc/targets/uniprocessor
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-BDFKERNEL = $(ROOT)/src/domains/bdf/kernel
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
-CGCSTARS = $(ROOT)/src/domains/cgc/stars
-PARDIR = $(ROOT)/src/domains/cg/parScheduler
-CGTARDIR = $(ROOT)/src/domains/cg/targets
-DLDIR = $(ROOT)/src/domains/cg/dlScheduler
-MACRODIR = $(ROOT)/src/domains/cg/macroScheduler
-CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
+SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
+BDFKERNEL = 	$(ROOT)/src/domains/bdf/kernel
+CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+CGCKERNEL = 	$(ROOT)/src/domains/cgc/kernel
+CGCSTARS = 	$(ROOT)/src/domains/cgc/stars
+PARDIR = 	$(ROOT)/src/domains/cg/parScheduler
+CGTARDIR =	$(ROOT)/src/domains/cg/targets
+DLDIR =		$(ROOT)/src/domains/cg/dlScheduler
+MACRODIR =	$(ROOT)/src/domains/cg/macroScheduler
+CGDDFDIR =	$(ROOT)/src/domains/cg/ddfScheduler
 
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
