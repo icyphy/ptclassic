@@ -26,7 +26,6 @@ the xfered list or if it has been changed since the last transfer.
 #include "local.h"
 #include "rpc.h"
 #include "paramStructs.h"
-#include "kernelCalls.h"
 #include "vemInterface.h"
 #include "util.h"
 #include "err.h"

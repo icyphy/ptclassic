@@ -15,7 +15,6 @@ Copyright (c) 1989 The Regents of the University of California.
 #include "rpc.h"
 #include "err.h"
 #include "mkTerm.h"
-#include "kernelCalls.h"
 #include "octIfc.h"
 #include "octMacros.h"
 #include "util.h"
