@@ -35,15 +35,17 @@ This Star uses the GNU library <Normal.h>
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		extern ACG gen;
+		extern ACG* gen;
 	}
 	constructor {
-		random = new Normal(mean,variance,&gen);
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		if(random) delete random;
 	}
 	start {
+		if(random) delete random;
+		random = new Normal(mean,variance,gen);
 		random->mean(double(mean));
 		random->variance(double(variance));
 	}

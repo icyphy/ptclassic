@@ -42,12 +42,17 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 		Random *random;
 	}
 	code {
-		extern ACG gen;
+		extern ACG* gen;
+	}
+	constructor {
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		if(random) delete random;
 	}
 	start {
+		if(random) delete random;
+
 		// decide which distribution.
 		const char* dist = distribution.getInitValue();
 		char  c = dist[0];
@@ -56,13 +61,13 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 
 		switch (c) {
 			case 'u' :
-			case 'U' : random = new Uniform(vOrl, mOru, &gen);
+			case 'U' : random = new Uniform(vOrl, mOru, gen);
 			   	   break;
 			case 'e' :
-			case 'E' : random = new NegativeExpntl(mOru, &gen);
+			case 'E' : random = new NegativeExpntl(mOru, gen);
 			   	   break;
 			case 'n' :
-			case 'N' : random = new Normal(mOru, vOrl, &gen);
+			case 'N' : random = new Normal(mOru, vOrl, gen);
 			   	   break;
 			default :
 			  Error::abortRun(*this, "unknown distribution.");

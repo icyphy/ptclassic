@@ -24,15 +24,17 @@ Probability is equal for each output. The time delay is zero.
 	}
 // declare the extern random-number generator in the .cc file
 	code {
-		extern ACG gen;
+		extern ACG* gen;
 	}
 	constructor {
-		random = new Uniform(0,1,&gen);
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		if(random) delete random;
 	}
 	start {
+		if(random) delete random;
+		random = new Uniform(0,1,gen);
 		random->high(double(output.numberPorts()));
 	}
 
