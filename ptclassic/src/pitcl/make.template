@@ -81,7 +81,11 @@ LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc ptclInit.cc \
 		ptclDescription.cc
 LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
-SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS)
+TCL_SRCS =	gendoc.tcl
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) $(TCL_SRCS)
+
+# 'make realclean' should remove these
+REALCLEAN_STUFF =	ptcl.html
 
 # Header files
 HDRS =		displayFile.h \
@@ -111,7 +115,11 @@ PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o)
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
 
-all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
+all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim pitcl.html
+
+pitcl.html: PITcl.cc gendoc.tcl
+	@echo "Generating html documentation from PITcl.cc"
+	echo "set PTOLEMY $(PTOLEMY); source gendoc.tcl" | $(ISH)
 
 
 # tycommon.mk does not include a rule to build make.template, so 
