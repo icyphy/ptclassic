@@ -519,7 +519,8 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 
 	CGPortHole* inp = 0;
 	CGPortHole* outp = 0;
-	Geodesic* saveInG, *saveOutG;
+	Geodesic* saveInG = 0;
+	Geodesic* saveOutG = 0;
 	if (realPix == 0) {
 		inp = boundaryPort(cbag, 0);
 		if (inp) {
