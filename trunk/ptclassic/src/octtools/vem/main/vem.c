@@ -266,6 +266,8 @@ int	octLogFlag = 1;
 /*
  * No include externs -- can't check arguments either -- most from rpc
  */
+
+extern void		rpcInit();
 extern int vemServer();		/* From rpc */
 extern vemStatus RPCExecApplication();
 extern vemStatus RPCUserFunction();
@@ -309,6 +311,7 @@ int vemSyncEvents();
 
 #define MAX_ARGS	20
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -343,7 +346,7 @@ char *argv[];
     char prog_name[256];
     char *spot, *defver;
 
-    VEM_CKRET(noMain, "Stack corruption");
+    VEM_CKRVAL(noMain, "Stack corruption", 5);
     noMain = 0;
 
     /* Test if OCTTOOLS is set. If it is not, no sense in continuing. */
@@ -375,7 +378,7 @@ char *argv[];
     dmCompatInit(vemHandleEvent);
 
     /* Synchronous */
-    if (tmpDefault = XGetDefault(vemDisp, argv[0], "debug")) {
+    if ( (tmpDefault = XGetDefault(vemDisp, argv[0], "debug")) ) {
 	XSynchronize(vemDisp, atoi(tmpDefault));
     }
 
@@ -388,17 +391,17 @@ char *argv[];
      * defaults for colors and planes.  The solution:  a quick precursor
      * look at Xdefaults:
      */
-    if (tmpDefault = XGetDefault(vemDisp, argv[0], "planes")) {
+    if ( (tmpDefault = XGetDefault(vemDisp, argv[0], "planes")) ) {
 	pln = atoi(tmpDefault);
     } else {
 	pln = 1;
     }
-    if (tmpDefault = XGetDefault(vemDisp, argv[0], "colors")) {
+    if ( (tmpDefault = XGetDefault(vemDisp, argv[0], "colors")) ) {
 	cls = atoi(tmpDefault);
     } else {
 	cls = 25;
     }
-    if (tmpDefault = XGetDefault(vemDisp, argv[0], "logfile")) {
+    if ( (tmpDefault = XGetDefault(vemDisp, argv[0], "logfile")) ) {
 	STRMOVE(log_file_space, util_tilde_expand(tmpDefault));
 	log_file_name = (char *) log_file_space;
     } else {
@@ -409,7 +412,7 @@ char *argv[];
 
     color_flag = atrInit(vemDisp, pln, cls);
     STRMOVE(prog_name, argv[0]);
-    if (spot = strrchr(prog_name, '/')) {
+    if ( (spot = strrchr(prog_name, '/')) ) {
 	spot++;
     } else {
 	spot = prog_name;
@@ -525,7 +528,7 @@ been installed correctly.  Please see your system adminstrator.\n", vemVerString
 #ifdef MF
     m_flush();
 #endif    
-    exit(0);
+    return(0);
 }
 
 
@@ -584,7 +587,7 @@ char **disp_name;		/* Returned display name */
 
     /* Handle remaining arguments as attribute assignments */
     for (i = optind;  i < argc;  i++) {
-	if (p = strchr(argv[i], '=')) {
+	if ( (p = strchr(argv[i], '=')) ) {
 	    char *name, *value;
 
 	    /* Attribute assignment */
@@ -652,7 +655,7 @@ lsList win_list;		/* Window specification triplets */
     char prompt[VEMMAXSTR*4];
 
     ohUnpackDefaults(&fct, "a", ":physical:contents");
-    if (gen = lsStart(win_list)) {
+    if ( (gen = lsStart(win_list)) ) {
 	while (lsNext(gen, (lsGeneric *) &triplet, LS_NH) == LS_OK) {
 	    vemBusy();
 	    ohUnpackFacetName(&fct, triplet->facet_spec);
@@ -810,9 +813,9 @@ XEvent *evt;
 	nbytes = XLookupString(&(evt->xkey), keystr, MAXKEYS,
 			       (KeySym) 0, (XComposeStatus *) 0);
 	for (i = 0;  i < nbytes;  i++) {
-	    if (stopFlag = doKeyInput(evt->xkey.window,
+	    if ( (stopFlag = doKeyInput(evt->xkey.window,
 				      evt->xkey.x, evt->xkey.y,
-				      keystr[i])) {
+				      keystr[i])) ) {
 		break;
 	    }
 	}
@@ -1368,8 +1371,9 @@ XButtonEvent *buttonEvent; 	/* Button event itself     */
 {
     Window root, child;
     wnOpts theOpts;
-    vemOneArg *overArg, *curArg, *lastArg;
-    int curIdx, root_x, root_y;
+    vemOneArg *overArg, *curArg = (vemOneArg *)NULL;
+    vemOneArg *lastArg = (vemOneArg *)NULL;
+    int curIdx = 0, root_x, root_y;
     unsigned int r_mask;
     XEvent localEvent;
     vemPoint startPoint, curPoint, newPoint;
@@ -2680,6 +2684,7 @@ lsList cmdList;		/* Current argument list */
 {
     cur_con.oldList[0] = NULL_CHAR;
     echoUpdate(cmdList);
+    return VEM_OK;
 }
 
 
