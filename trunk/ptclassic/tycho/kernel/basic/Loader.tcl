@@ -75,7 +75,7 @@ body ::tycho::Loader::destructor {} {
     ####                      public methods                       ####
 
 #######################################################################
-#### NameA
+#### loadIfNotPresent
 # Load 'package' if 'command' is not present.
 # If we can't load package, then search first in the Ptolemy tcl tree,
 # Then prompt the user for the file to be loaded.
