@@ -41,7 +41,10 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-SIMPLE_TESTS =
+SIMPLE_TESTS = \
+	Block.itcl \
+	Galaxy.itcl \
+	Universe.itcl
 
 GRAPHICAL_TESTS = \
 	testDomainInfo.itcl \
