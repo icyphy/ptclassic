@@ -5,7 +5,7 @@ defstar {
 Base star for reading and writing audio data.
     }
     version { $Id$ }
-    author { T. M. Parks }
+    author { T. M. Parks and Brian L. Evans }
     copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -35,16 +35,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	standardIO = fileName.null();
     }
 
-    codeblock (declarations) {
+    codeblock(declarations, "const char* datatype, int size") {
 	int $starSymbol(file);
+	@datatype $starSymbol(buf)[@size];
     }
 
-    codeblock (noOpen) {
+    codeblock(noOpen) {
 	/* Use standard input for reading. */
 	$starSymbol(file) = 0;
     }
 
-    codeblock (openFileForReading) {
+    codeblock(openFileForReading) {
 	/* Open file for reading */
 	if (($starSymbol(file) = open("$val(fileName)",O_RDONLY,0666)) == -1)
 	{
@@ -53,7 +54,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     }
 
-    codeblock (openFileForWriting) {
+    codeblock(openFileForWriting) {
 	/* Open file for writing */
 	if (($starSymbol(file) = open("$val(fileName)",O_WRONLY|O_CREAT,0666)) == -1)
 	{
@@ -62,8 +63,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     }
 
-    codeblock (read) {
-	/* Read a block of data from the file */
+    codeblock(read) {
+	/* Read blockSize bytes of data from the file */
 	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(blockSize))
 	{
 	    perror("$val(fileName)");
@@ -71,8 +72,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     }
 
-    codeblock (write) {
-	/* Write data to file. */
+    codeblock(write) {
+	/* Write blockSize bytes to file */
 	if (write($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(
 blockSize))
 	{
@@ -81,16 +82,12 @@ blockSize))
 	}
     }
 
-    codeblock (closeFile) {
+    codeblock(closeFile) {
 	/* Close file */
 	if (close($starSymbol(file)) != 0) {
 	    perror("$val(fileName)");
 	    exit(1);
 	}
-    }
-
-    initCode {
-	addDeclaration(declarations);
     }
 
     wrapup {
