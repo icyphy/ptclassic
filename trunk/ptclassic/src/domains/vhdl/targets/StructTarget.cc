@@ -68,7 +68,6 @@ void StructTarget :: setup() {
     Error::warn("This galaxy is a wormhole!");
   }
   if (galaxy()) setStarIndices(*galaxy()); 
-//  HLLTarget::setup();
   
   VHDLTarget::setup();
 
@@ -174,15 +173,9 @@ void StructTarget :: trailerCode() {
   // Generate entity, architecture for each firing.
   VHDLClusterListIter nextCluster(clusterList);
   VHDLCluster* cl;
-//  int clCount = 0;
   while ((cl = nextCluster++) != 0) {
-//    clCount++;
-//    cout << "Cluster " << clCount <<":  " << cl->name << "\n";
-
     // Begin constructing the cluster's code in myCode.
-
     myCode << "\n\t-- Cluster " << cl->name << "\n";
-//    myCode << " (class " << cl->starClassName << ") \n";
     myCode << "entity " << cl->name << " is\n";
 
     addGenericRefs(cl, level);
@@ -207,19 +200,7 @@ void StructTarget :: trailerCode() {
     myCode << "end process;\n";
     myCode << "end behavior;\n";
     
-/*
-    StringList clLabel = cl->name;
-    clLabel << "_proc";
-    StringList clName = cl->name;
-    */
-    
     registerAndMerge(cl);
-
-/*
-    registerCompDecl(clName, cl->portList, cl->genericList);
-    mergeSignalList(cl->signalList);
-    registerCompMap(clLabel, clName, cl->portMapList, cl->genericMapList);
-    */
   }
   
   // Iterate through the state list and connect registers and
@@ -251,17 +232,9 @@ void StructTarget :: trailerCode() {
 
   // Iterate through the arc list.
   // Track the read/write references made on each arc.
-//  cout << "#############################\n";
   VHDLArcListIter nextArc(arcList);
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
-//    cout << "\n";
-//    cout << "Name:  " << arc->name << "\n";
-//    cout << "    lowWrite:   " << arc->lowWrite << "\n";
-//    cout << "    highWrite:  " << arc->highWrite << "\n";
-//    cout << "    lowRead:    " << arc->lowRead << "\n";
-//    cout << "    highRead:   " << arc->highRead << "\n";
-
     // Determine which signals need to be fed back through registers.
     // All signals which were read, but weren't written, must be latched.
     for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
@@ -283,7 +256,6 @@ void StructTarget :: trailerCode() {
       
       // sourceName is input to register, destName is output of register.
       connectRegister(sourceName, destName, "INTEGER");
-//      cout << "Connecting " << sourceName << " and " << destName << "\n";
 
       // Must also create signals for those lines which are neither read nor
       // written by a $ref() - e.g. if more delays than tokens read.
@@ -408,8 +380,6 @@ void StructTarget :: registerCompMap(StringList name, StringList type,
 // Register the State reference.
 void StructTarget :: registerState(State* state, const char* varName,
 				   int thisFiring/*=-1*/, int pos/*=-1*/) {
-//  StringList temp = sanitizedFullName(*state);
-//  StringList ref = sanitize(temp);
   StringList ref = varName;
   StringList stType = stateType(state);
   StringList root;
@@ -445,8 +415,6 @@ void StructTarget :: registerState(State* state, const char* varName,
   
   // Root is ref, without marking for any particular firing.
   root = ref;
-
-//  ref << "_" << thisFiring;
 
   StringList refIn = sanitize(ref);
   refIn << "_" << thisFiring << "_In";
@@ -501,7 +469,6 @@ void StructTarget :: registerState(State* state, const char* varName,
       // changed it.
       // Also, there should be no output on which to pass on the value,
       // since it isn't changed by this exu.
-//      cout << "State " << ref << " is constant.\n";
       constState = 1;
       listState->constant = 1;
     }
@@ -512,10 +479,6 @@ void StructTarget :: registerState(State* state, const char* varName,
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
       if (constState) {
-	/*
-	firingSignalList.put(root, stType, "", root);
-	firingPortMapList.put(root, root);
-	*/
 	firingSignalList.put(root, stType, "", root);
 	firingPortMapList.put(refIn, root);
       }
@@ -532,10 +495,6 @@ void StructTarget :: registerState(State* state, const char* varName,
       StringList stateSignal = root;
       stateSignal << "_" << listState->lastFiring << "_Out";
       if (constState) {
-	/*
-	firingSignalList.put(root, stType, root, root);
-	firingPortMapList.put(root, root);
-	*/
 	firingSignalList.put(root, stType, root, root);
 	firingPortMapList.put(refIn, root);
       }
@@ -547,11 +506,6 @@ void StructTarget :: registerState(State* state, const char* varName,
     }
 
     if (constState) {
-      /*
-      firingVariableList.put(ref, stType, "");
-      firingPortVarList.put(root, ref);
-      firingPortList.put(root, "IN", stType);
-      */
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(refIn, ref);
       firingPortList.put(refIn, "IN", stType);
@@ -578,7 +532,6 @@ void StructTarget :: connectSource(StringList initVal, StringList initName) {
       StringList label = initName;
       label << "_SOURCE";
       StringList name = "Source";
-//      name << "_" << type;
       name << "_" << "INT";
 
       VHDLGenericMapList* genMapList = new VHDLGenericMapList;
@@ -597,7 +550,6 @@ void StructTarget :: registerSource(StringList /*type*/) {
   setSources();
 
   StringList name = "Source";
-//  name << "_" << type;
   name << "_" << "INT";
 
   VHDLGenericList* genList = new VHDLGenericList;
@@ -605,8 +557,6 @@ void StructTarget :: registerSource(StringList /*type*/) {
   genList->initialize();
   portList->initialize();
   
-//  genList->put("value", type);
-//  portList->put("output", "OUT", type);
   genList->put("value", "INTEGER");
   portList->put("output", "OUT", "INTEGER");
 
@@ -620,7 +570,6 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
       StringList label = outName;
       label << "_MUX";
       StringList name = "Mux";
-//      name << "_" << type;
       name << "_" << "INT";
 
       VHDLGenericMapList* genMapList = new VHDLGenericMapList;
@@ -642,7 +591,6 @@ void StructTarget :: registerMultiplexor(StringList /*type*/) {
   setMultiplexors();
 
   StringList name = "Mux";
-//  name << "_" << type;
   name << "_" << "INT";
 
   VHDLGenericList* genList = new VHDLGenericList;
@@ -650,9 +598,6 @@ void StructTarget :: registerMultiplexor(StringList /*type*/) {
   genList->initialize();
   portList->initialize();
   
-//  portList->put("init_val", "IN", type);
-//  portList->put("input", "IN", type);
-//  portList->put("output", "OUT", type);
   portList->put("init_val", "IN", "INTEGER");
   portList->put("input", "IN", "INTEGER");
   portList->put("output", "OUT", "INTEGER");
@@ -668,7 +613,6 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
       StringList label = outName;
       label << "_REG";
       StringList name = "Reg";
-//      name << "_" << type;
       name << "_" << "INT";
 
       VHDLGenericMapList* genMapList = new VHDLGenericMapList;
@@ -689,7 +633,6 @@ void StructTarget :: registerRegister(StringList /*type*/) {
   setRegisters();
 
   StringList name = "Reg";
-//  name << "_" << type;
   name << "_" << "INT";
 
   VHDLGenericList* genList = new VHDLGenericList;
@@ -697,8 +640,6 @@ void StructTarget :: registerRegister(StringList /*type*/) {
   genList->initialize();
   portList->initialize();
   
-//  portList->put("D", "IN", type);
-//  portList->put("Q", "OUT", type);
   portList->put("D", "IN", "INTEGER");
   portList->put("Q", "OUT", "INTEGER");
   portList->put("C", "IN", "boolean");
@@ -722,15 +663,6 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 // Continue to do normal signal naming and portmapping.
 
   // Create a port and a port mapping for this firing entity.
-/*
-  StringList ref = port->getGeoName();
-  if (tokenNum >= 0) {
-    ref << "_" << tokenNum;
-  }
-  else { // (tokenNum < 0)
-    ref << "_N" << (-tokenNum);
-  }
-  */
   ref << part;
   
   firingPortList.put(ref, port->direction(), port->dataType());
@@ -785,7 +717,6 @@ void StructTarget :: addGenericRefs(VHDLCluster* cl, int level) {
 	    body << ";\n";
 	  }
 	  body << indent(level) << ngen->name << ": " << ngen->type;
-//	  if ((ngen->defaultVal).numPieces() > 0) {
 	  if (strlen(ngen->defaultVal) > 0) {
 	    body << " := " << ngen->defaultVal;
 	  }
@@ -1092,7 +1023,6 @@ void StructTarget :: buildComponentDeclarations(int level) {
 	}
 	component_declarations << indent(level) << ngen->name << ": "
 			       << ngen->type;
-//	if ((ngen->defaultVal).numPieces() > 0) {
 	if (strlen(ngen->defaultVal) > 0) {
 	  component_declarations << " := " << ngen->defaultVal;
 	}
