@@ -19,7 +19,6 @@ description.
 #include "KnownBlock.h"
 #include "Error.h"
 #include <std.h>
-#include "Scheduler.h"
 #include "Domain.h"
 #include "Linker.h"
 
@@ -27,6 +26,7 @@ description.
 
 class KnownListEntry {
 	friend class KnownBlock;
+	friend class KnownBlockIter;
 	Block* b;
 	int onHeap;
 	int dynLinked;
@@ -152,17 +152,6 @@ KnownBlock::clone(const char* type) {
 	return 0;
 }
 
-// Produce a scheduler matching the named domain
-Scheduler*
-KnownBlock::newSched(const char* name) {
-	return &Domain::named(name)->newSched();
-}
-
-Scheduler*
-KnownBlock::newSched() {
-	return &Domain::named(domainNames[currentDomain])->newSched();
-}
-
 // Function to set the domain.
 int
 KnownBlock::setDomain (const char* newDom) {
@@ -223,4 +212,31 @@ KnownBlock::nameList (const char* dom) {
 	if (idx < 0) return "";
 	return nameListForDomain (idx);
 }
+
+// KnownBlockIter methods
+
+void KnownBlockIter::reset() {
+	if (idx >= 0)
+		pos = allBlocks[idx];
+	else
+		pos = 0;
+}
+
+KnownBlockIter::KnownBlockIter (const char* dom) {
+	if (dom)
+		idx = KnownBlock :: domainIndex (dom, 0);
+	else 
+		idx = KnownBlock :: currentDomain;
+	reset();
+}
+
+const Block* KnownBlockIter::next() {
+	if (pos) {
+		const Block* b = pos->b;
+		pos = pos->next;
+		return b;
+	}
+	else return 0;
+}
+
 
