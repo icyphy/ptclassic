@@ -611,18 +611,9 @@ octObject *galFacetPtr;
     char msg[1000], *name;
     boolean xferedBool;
     char *oldDomain, *galDomain, *galTarget, *desc;
+    int known;
 
     name = BaseName(galFacetPtr->contents.facet.cell);
-
-    /* quit if the galaxy is on the outer domain's known list
-     * and it is not modified.  Note that we will compile it
-     * again even if it is unmodified if a different type of
-     * wormhole must be generated.
-     */
-
-    if (KcIsKnown(name) && DupSheetIsDup(&traverse, name)) {
-	return(TRUE);
-    }
 
     oldDomain = curDomainName();
 
@@ -632,27 +623,44 @@ octObject *galFacetPtr;
         return (FALSE);
     }
 
+    /* quit if the galaxy is on the outer domain's known list
+     * and it is not modified.  Note that we will compile it
+     * again even if it is unmodified if a different type of
+     * wormhole must be generated.
+     * It is important that we switch domains before doing this check.
+     */
+
+    known = KcIsKnown(name);
+    if (known && DupSheetIsDup(&traverse, name)) {
+	return(TRUE);
+    }
+
+    /* Call Kernel function to set KnownBlock current domain to the inner
+     * domain
+     */
+    if (! KcSetKBDomain(galDomain)) {
+        PrintErr("Domain error in galaxy or wormhole.");
+        return (FALSE);
+    }
+
     /* get the galaxy target */
     if (!GOCTargetProp(galFacetPtr, &galTarget, "<parent>")) {
         PrintErr(ErrGet());
         return (FALSE);
     }
 
-    /* Call Kernel function to set KnownBlock current domain */
-    if (! KcSetKBDomain(galDomain)) {
-        PrintErr("Domain error in galaxy or wormhole.");
-        return (FALSE);
-    }
-
     ERR_IF2(!ProcessSubGals(galFacetPtr), msg);
     xferedBool = DupSheetIsDup(&xfered, name);
-    if (xferedBool && !IsDirty(galFacetPtr)) {
+    if (known && xferedBool && !IsDirty(galFacetPtr)) {
 	/* galaxy already xfered to kernel and is unchanged */
 	/* restore old domain */
 	KcSetKBDomain(oldDomain);
 	return (TRUE);
     }
-    sprintf(msg, "CompileGal: facet = %s", name);
+    if (strcmp(oldDomain,galDomain) != 0)
+	sprintf(msg, "CompileGal: facet = %s, %s inside %s wormhole",
+		name, galDomain, oldDomain);
+    else sprintf(msg, "CompileGal: facet = %s", name);
     PrintDebug(msg);
     /*
      * So that KcDefgalaxy recognizes wormholes, we have to restore the
