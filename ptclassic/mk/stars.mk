@@ -158,7 +158,7 @@ ifdef CG56
 			$(CG56T)/CG56XCAsynchComm.o \
 			$(CG56T)/CGCXBase.o  
 	endif
-	# Window star in cg56/dsp/stars needs the Cephes Library
+	# Window and RaisedCosine stars in cg56/dsp/stars need Cephes Library
 	CEPHESLIB = 1
 	# CG56 targets need CGCStar
 	CGCLIB = 1
@@ -185,8 +185,8 @@ ifdef C50
 		TARGETS += $(CG56T)/DSKC50Target.o \
 			$(CG56T)/SubC50Target.o
 	endif
-	# Window star in c50/dsp/stars needs the Cephes Library
-	# CEPHESLIB = 1
+	# Window and RaisedCosine star in c50/dsp/stars need Cephes Library
+	CEPHESLIB = 1
 	# C50 targets need CGCStar
 	# CGCLIB = 1
 endif
@@ -410,6 +410,8 @@ ifdef CGC
 	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
 	LIBS += -lcgcstars
 	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX)
+	# Window and RaisedCos stars need the Cephes Library
+	CEPHESLIB = 1
 endif
 
 ifdef CGCLIB
@@ -503,7 +505,7 @@ ifdef SDF
 		STARS += $(LIBDIR)/sdfdspstars.o
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
-		# Cephes library is used by the Window star
+		# Cephes library is used by the Window and RaiseCosine stars
 		CEPHESLIB = 1
 	endif
 	ifdef SDFMATRIX 
