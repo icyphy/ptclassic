@@ -63,56 +63,9 @@ if <CODE>fvwm</CODE> is set so that windows named
 the Tycho console is sticky too.  The <CODE>xprop</CODE> command shows
 that the Tycho console's class is Console
 
-<H3>Tycho0.1 .tycho directory causes problems with Ptolemy0.6 tycho</H3>
-
-In the tycho we ship with Ptolemy 0.6 (tycho version 0.01), we source
-a .tycho file if it is present.  In tycho0.1, we use a .tycho
-directory.  If you run tycho0.01 with a .tycho directory, you get the
-following error:
-
-<PRE>
-cxh@watson 3% setenv PTOLEMY ~ptolemy
-cxh@watson 4% set path = (/users/ptolemy/bin /users/ptolemy/bin.sol2 $path)
-cxh@watson 5% pwd
-/tmp_mnt/mho/ohm1/cxh
-cxh@watson 6% tycho
-error in reading file "/users/cxh/.tycho": Is a directory
-    while executing
-"source $tychostartfile"
-    ("uplevel" body line 1)
-    invoked from within
-"uplevel #0 {source $tychostartfile}"
-    invoked from within
-"if {$tychostartfile != {} && \
-	[file exists $tychostartfile] && \
-	[file readable $tychostartfile]} {
-    uplevel #0 {source $tychostartfile}
-}"
-    (file "/users/ptolemy/tycho/kernel/Tycho.tcl" line 145)
-    invoked from within
-"source /users/ptolemy/tycho/kernel/Tycho.tcl"
-</PRE>
-
-
- <P>The workaround is to move ~/.tycho to another name when using
-Ptolemy0.6.  The problem here is that if you are running Ptolemy0.6,
-and you have a .tycho file, and you try to look inside a star, you
-will get an error message.
-
- <P>The fix would be edit the Ptolemy0.6 $PTOLEMY/tycho/kernel/Tycho.tcl
-file and change:
-
-<PRE>
-set tychostartfile [glob -nocomplain ~/.tycho]
-</PRE>
-
-To:
-<PRE>
-set tychostartfile [glob -nocomplain ~/.tycho/tychorc.tcl]
-</PRE>
-
-
 <HR>
+Up to: <A HREF="introduction.html">Tycho Introduction</A> -
+Previous: <A HREF="releasenotes0.1.html">Release Notes 0.1</A> -
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
