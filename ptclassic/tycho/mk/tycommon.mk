@@ -194,8 +194,14 @@ jclass:	$(JSRCS) $(JCLASS)
 jhtml: doc/codeDoc/tree.html
 doc/codeDoc/tree.html:	$(JSRCS) 
 	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi
-	(cd doc/codeDoc; rm -f images; ln -s ../../$(ROOT)/lib/java/images .)
 	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS)
+	@for x in doc/codeDoc/*.html; do \
+		echo "Fixing paths in $$x"; \
+		sed -e 's|<a href="java|<a href="$(JAVAHTMLDIR)/java|g' \
+		-e 's|<img src="images/|<img src="$(JAVAHTMLDIR)/images/|g' \
+			$$x > $$x.bak; \
+		mv $$x.bak $$x; \
+	done
 
 # Bring up the appletviewer on a test file.
 jtest: $(JTESTHTML) $(JCLASS)
