@@ -276,7 +276,7 @@ void makeScale (win, name, desc, position, callback)
 void displaySliderValue (win, name, value)
     char *win, *name, *value;
 {
-    sprintf(command, ".%s.%s.value configure -text \"%.6s \"",
+    sprintf(command, "%s.%s.value configure -text \"%.6s \"",
 	win, name, value);
     if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
         errorReport("Cannot update slider display");
@@ -306,102 +306,6 @@ verticalScale(fullScale, interp, argc, argv)
     sprintf(interp->result, "%f", *fullScale);
 
     return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- * Create a bar chart in its own window
- *----------------------------------------------------------------------
- *     name: name of the top level window
- *     desc: description to be put in the window
- *     data: an array of data to be plotted
- *     numBars: number of bars in the bar chart
- *     fullScale: pointer to value of the full scale on the bar chart
- *     id: an array to fill with item IDs
- *     geo: geometry of the overall window, in the form =AxB+C+D
- *     width: width of the bar chart itself
- *     height: height of the bar chart itself
- */
-
-void makeBarChart (name, desc, data, numBars, fullScale, id, geo, width, height)
-    char *name, *desc;
-    double *data, *fullScale;
-    int numBars;
-    int *id;
-    char *geo;
-    double width, height;
-{
-    int i;
-    int test;
-
-    /* Register the function to reset fullScale with Tcl */
-    sprintf(command, "%sverticalScale", name);
-    Tcl_CreateCommand (interp, command, verticalScale,
-            (ClientData) fullScale, (void (*)()) NULL);
-
-    /* Make the bar chart */
-    sprintf(command, "makeBarChart %s \"%s\" \"%s\" %d %f %f",
-	name, desc, geo, numBars, width, height);
-    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
-        errorReport("Cannot make bar chart");
-    test = 0;
-    for (i=0;i<numBars;i++) {
-        sprintf(command,
-		".%s.pf.plot create rect %fc %fc %fc %fc -fill firebrick4",
-		name, (i+0.1)*10/numBars, height/2, (i+0.9)*width/numBars,
-		(1-data[i]/(*fullScale))*height/2);
-        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
-            test = 1;
-        else
-            sscanf(interp->result,"%d",&id[i]);
-    }
-    if (test) errorReport("Cannot make bar in bar chart");
-}
-
-/*
- *----------------------------------------------------------------------
- * Set the bars in a bar chart
- *----------------------------------------------------------------------
- *     name: name of the top level window
- *     data: an array of data to be plotted
- *     numBars: number of bars in the bar chart
- *     fullScale: pointer to value of the full scale on the bar chart
- *     id: an array of item IDs filled by makeBarChart
- */
-
-void setBarChart (name, data, numBars, fullScale, id)
-    char *name;
-    double *data;
-    int numBars;
-    double *fullScale;
-    int *id;
-{
-    int i;
-    int test=0;
-    int width, height;
-    int x0, y0, x1, y1;
-    Tk_Window plotwin;
-
-    /* Get the current plot window size */
-    sprintf(command, ".%s.pf.plot", name);
-    plotwin = Tk_NameToWindow(interp,command,w);
-    width = Tk_Width (plotwin);
-    height = Tk_Height (plotwin);
-
-    for (i=0;i<numBars;i++) {
-	x0 = (i+0.1)*width/numBars;
-	y0 = height/2.0;
-	x1 = (i+0.9)*width/numBars;
-	y1 = (1-data[i]/(*fullScale))*height/2;
-        sprintf(command, ".%s.pf.plot coords %d %d %d %d %d",
-		name, id[i], x0, y0, x1, y1);
-        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
-            test = 1;
-    }
-    if (test) {
-	runFlag = 0;
-	errorReport("Cannot update bar chart");
-    }
 }
 
 
