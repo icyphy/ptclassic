@@ -40,7 +40,8 @@ VPATH =		$(ROOT)/tycho/editors/slate
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS = \
+	defs2.tcl
   
 ITCL_SRCS = \
 	$(GRAPHICAL_TESTS) \
