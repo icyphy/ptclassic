@@ -2,7 +2,7 @@ defstar {
 	name { VarDelay }
 	domain { CG56 }
 	desc { A variable delay with linear interpolation. }
-	version { @(#)CG56VarQuasar.pl	1.2 7/14/92 }
+	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
@@ -43,6 +43,8 @@ Delay will vary between 0 and maxDelay as the control varies between -1.0 and 1.
 	        desc { maximum delay }
          }
 	codeblock(block) {
+; initialize varDelay
+; pointer to internal buffer
 	org	$ref(bufStart)
   	dc	$addr(buf)
    	org 	p:
