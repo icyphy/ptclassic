@@ -41,7 +41,9 @@ include $(CONFIG)
 
 EXTRA_SRCS =	\
 	EditForestHelp.html \
-	ProfileTclHelp.html
+	GraphicsHelp.html \
+	ProfileTclHelp.html \
+	index.html
 
 MISC_FILES =
 
