@@ -23,10 +23,12 @@ if [ -r $cmdfile ] ; then
 fi
 libdir=`dirname $0`
 PTOLEMY=${PTOLEMY-`dirname $libdir`}
+HOME=${HOME-.}
 ARCH=${ARCH-`(/bin/arch || /bin/machine) 2> /dev/null`}
 PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$ARCH/pigiRpc}
 COMMAND=${COMMAND-$PIGIRPC}
 DISPLAY=${DISPLAY-'unix:0'}
 TAILARGS=${TAILARGS-''}
-export PTOLEMY ARCH PIGIRPC DISPLAY
+export PTOLEMY HOME ARCH PIGIRPC DISPLAY
+chdir $HOME
 exec $COMMAND $* $TAILARGS
