@@ -120,6 +120,9 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("commInit", &commInit);
 	addStream("compileOptions", &compileOptionsStream);
 	addStream("linkOptions", &linkOptionsStream);	
+	addStream("localLinkOptions", &localLinkOptionsStream);	
+	addStream("remoteLinkOptions", &remoteLinkOptionsStream);	
+	addStream("remoteFiles", &remoteFilesStream);	
 	addStream("mainClose", &mainClose);
 	addStream("mainLoop",&mainLoop);
 
@@ -249,13 +252,6 @@ static char* complexDecl =
 "\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
 "\n typedef struct complex_data { double real; double imag; } complex; \n"
 "#endif\n";
-static char* fixDecl =
-"\n#if !defined(NO_FIX_SUPPORT)"
-"\n/* include definitions for the fix runtime library */"
-"\n#include \"CGCrtlib.h\""
-"\n#endif\n";
-static char* stdlibDecl =					
-"\n#include <stdlib.h>\n";					
 
 static char* setargHead =					
 "void set_arg_val(char *arg[]) {\n"				
@@ -268,7 +264,7 @@ static char* setargHead =
 
 void CGCTarget::trailerCode()
 {
-    include << stdlibDecl << fixDecl << complexDecl;		
+    include << complexDecl;		
 
     if (galaxy() && !SimControl::haltRequested()) {
         declareGalaxy(*galaxy());
@@ -292,7 +288,7 @@ CodeStream CGCTarget::mainLoopBody() {
     defaultStream = &myCode;
     return body;
 }    
-   
+ 
 void CGCTarget::mainLoopCode() {
     defaultStream = &mainLoop;
     // It is possible that the star writer has specified items that go
@@ -346,28 +342,24 @@ void CGCTarget :: frameCode () {
 void CGCTarget :: writeCode()
 {
     writeFile(myCode, ".c", displayFlag);
+    // FIXME: Read the "RemoteFiles" stream to get list of files to transfer
     if (!onHostMachine(targetHost)) {
-	const char* header = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
-	const char* source = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
-	rcpCopyFile(targetHost, destDirectory, header);
-	rcpCopyFile(targetHost, destDirectory, source);
+	const char* header1 = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
+	const char* source1 = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
+	const char* header2 = "$PTOLEMY/src/utils/libptdsp/ptdspMuLaw.h";
+	const char* source2 = "$PTOLEMY/src/utils/libptdsp/ptdspMuLaw.c";
+	rcpCopyFile(targetHost, destDirectory, header1);
+	rcpCopyFile(targetHost, destDirectory, source1);
+	rcpCopyFile(targetHost, destDirectory, header2);
+	rcpCopyFile(targetHost, destDirectory, source2);
     }
 }
 
 int CGCTarget::compileCode()
 {
     // invoke the compiler
-    StringList file, cmd, error, rtlib;
-    if (onHostMachine(targetHost)) {
-	StringList ptolemy = getenv("PTOLEMY");
-	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
-	      << ptolemy << "/lib." << getenv("PTARCH") << " -lCGCrtlib" ;
-	rtlib << " -lptdsp";
-    }
-    else {
-	rtlib << "CGCrtlib.c";
-    }
-    file << filePrefix << ".c " << rtlib;
+    StringList cmd, error, file;
+    file << filePrefix << ".c ";
     cmd << compileLine(file) << " -o " << filePrefix;
     error << "Could not compile " << file;
     return (systemCall(cmd, error, targetHost) == 0);
@@ -375,11 +367,16 @@ int CGCTarget::compileCode()
 
 // return compile command
 StringList CGCTarget :: compileLine(const char* fName) {
-	StringList cmd = (const char*) compileCommand;
-	cmd << " " << (const char*) compileOptions << " "
-	    << compileOptionsStream
-	    << fName << " " << (const char*) linkOptions
-	    << " " << linkOptionsStream;
+	StringList cmd;
+	int onhostflag = onHostMachine(targetHost);
+	cmd << (const char*) compileCommand << " "
+	    << (const char*) compileOptions << " "
+	    << compileOptionsStream << " "
+	    << fName << " ";
+	if (! onhostflag) cmd << remoteLinkOptionsStream << " ";
+	cmd << (const char*) linkOptions << " "
+	    << linkOptionsStream << " ";
+	if (onhostflag) cmd << localLinkOptionsStream << " ";
 	return cmd;
 }
 
