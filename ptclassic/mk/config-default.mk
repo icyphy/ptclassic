@@ -103,25 +103,25 @@ ITCL_VERSION=itcl
 
 
 # Directory containing Tcl include files
-TCL_INCDIR=$(TCL_ROOT)/tcl/include
+TCL_INCDIR=$(TCL_ROOT)/itcl/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl
 
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/tk/include
+TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk #-lXpm
 
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litcl
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 # Uncomment the next line for itcl-2.0b2
-ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
+ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litk
 
 # Location of the itcl_sh binary
 ITCL_SH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/itcl_sh
