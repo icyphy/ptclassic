@@ -1163,7 +1163,7 @@ XColor **value;			/* Returned value  */
 		/* Color display station */
 		if (!XAllocColor(xv_disp(), xv_cmap(), *value)) {
 		    errRaise(def_pkg_name, VEM_RESOURCE,
-			     "Cannot allocate requested pixel for `%s'\n",
+			     "Cannot allocate color for requested pixel for `%s', try exiting color hogs like netscape.\n",
 			     name);
 		}
 	    }
