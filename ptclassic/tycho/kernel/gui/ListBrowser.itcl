@@ -100,7 +100,7 @@ class ::tycho::ListBrowser {
     method clearselection {}
 
     # Complete the partially entered item.
-    method complete {}
+    method complete {{case 0}}
 
     # Goto the specified item in the listbox.
     method goto {item}
@@ -300,21 +300,32 @@ body ::tycho::ListBrowser::clearselection {} {
 # and down arrow keys. If the method is invoked again without an
 # intervening invocation of <code>breakCompleteSequence</code>, then it
 # scrolls through the selected entries as if the down arrow had been
-# pressed.
+# pressed. If the optional argument is given and has a non-zero value,
+# then the match is case sensitive.  Otherwise, it is not case sensitive.
+# Return 0 if no matching entry is found, 1 if one matching
+# entry is found, and 2 if more than one matching entry is found.
 #
-body ::tycho::ListBrowser::complete {} {
+body ::tycho::ListBrowser::complete {{case 0}} {
     if {$uselastpattern} {
 	scroll 1 selection
 	return
     }
-    set pattern [string tolower "[get entry]*"]
+    if !$case {
+        set pattern [string tolower "[get entry]*"]
+    } {
+        set pattern "[get entry]*"
+    }
     set index 0
     set foundone 0
     set firstone -1
     set foundtwo 0
     $itk_component(listbox) selection clear 0 end
     foreach name [$itk_component(listbox) get 0 end] {
-	set nm [string tolower $name]
+        if $case {
+            set nm $name
+        } {
+            set nm [string tolower $name]
+        }
 	if [string match $pattern $nm] {
 	    if $foundone {
 		set foundtwo 1
@@ -328,7 +339,7 @@ body ::tycho::ListBrowser::complete {} {
     if {$foundone == 0} {
 	# No match found.
 	bell
-	return
+	return 0
     }
     if {$foundtwo == 0} {
 	# Found exactly one match.  Replace the entry contents.
@@ -347,6 +358,11 @@ body ::tycho::ListBrowser::complete {} {
 	set scrollposition [expr $firstone-1]
     } {
 	set scrollposition 0
+    }
+    if {$foundtwo == 0} {
+        return 1
+    } {
+        return 2
     }
 }
 
