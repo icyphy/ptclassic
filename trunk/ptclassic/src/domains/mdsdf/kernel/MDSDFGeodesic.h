@@ -36,9 +36,7 @@ public:
         int lastValidCol() { return lastCol; }
 
         // Update the last valid row and column in the Geodesic
-        void setValid(int row, int col) { 
-          lastRow = row + rowDelays;
-          lastCol = col + colDelays; }
+        void setValid(int row, int col);
 
         // Access the location of a single double value stored in the
         // Geodesic's buffer, a quick hack
@@ -72,6 +70,9 @@ public:
 
 	int mNumRows;  // The dimensions of the motherMatrix
 	int mNumCols;
+
+        int originalNumCols; // The number of cols of the motherMatrix if
+	                     // there are no column delays.
 };
 
 #endif
