@@ -57,7 +57,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 void
 Ptdsp_Histogram (const int* matrix, int size, int* hist, int min, int max) {
   /* Initialize the histogram buffer to zero */
-  int i, j;
+  int i;
   int histlen = max - min + 1;
 
   /* Reset the elements of the histogram buffer to zero */
