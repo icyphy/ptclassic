@@ -2,19 +2,19 @@ defstar {
 	name { UpSample }
 	domain { CG56 }
 	desc { 
-Upsample by a factor (default 2), filling with fill (default 0.0).  The
+Upsample by a factor (default 2), filling with "fill" (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
-is to output it first (phase = 0). The maximum phase is "factor" - 1.
+is to output it first (phase of 0). The maximum phase is "factor" - 1.
 	}
 	version { $Id$ }
-	author { Jose Luis Pino Pino, ported from Gabriel }
+	author { Jose Luis Pino, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 control library }
+	location { CG56 main library }
 	input {
 		name {input}
 		type {anytype}
@@ -61,7 +61,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 		addCode (initfill);
-		if (factor > 1) addCode(repeatcode);
+		if (int(factor) > 1) addCode(repeatcode);
 		addCode(fillcode);
 	}
 	codeblock (sendsample) {
@@ -72,6 +72,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode(sendsample);
 	}
 	execTime {
-		return 1;
+		return 2;
 	}
 }
