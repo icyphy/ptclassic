@@ -123,6 +123,7 @@ ITCL_SRCS = \
 	StyleSheet.itcl \
 	Subpanel.itcl \
 	TclShell.itcl \
+	TextModel.itcl \
 	ToolBar.itcl \
 	TopLevel.itcl \
 	TWidget.itcl \
