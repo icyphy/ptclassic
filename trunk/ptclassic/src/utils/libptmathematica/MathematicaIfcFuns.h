@@ -55,7 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <mathlink.h>
+#include "mathlink.h"
 #ifdef __cplusplus
 }
 #endif
