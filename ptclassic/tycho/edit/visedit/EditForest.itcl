@@ -73,6 +73,9 @@ class ::tycho::EditForest {
     # Open a help window.
     method help {}
 
+    # Reload data from the current file.
+    method reload {}
+
     # Find the node in the forest identified by "name".
     # FIXME: Implement this.
     # method seePoint {name}
@@ -105,7 +108,7 @@ configbody ::tycho::EditForest::forest {
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
-    component graphics undoEnable 0
+    component graphics interactiveEnable 0
 
     addMenuSeparator Edit
 
@@ -117,7 +120,7 @@ body ::tycho::EditForest::constructor {args} {
 
     eval itk_initialize $args
 
-    component graphics undoEnable 1
+    component graphics interactiveEnable 1
 }
 
     ###################################################################
@@ -131,7 +134,7 @@ body ::tycho::EditForest::constructor {args} {
 body ::tycho::EditForest::clear {} {
     if [getReadOnly] {bell; return}
     [component graphics forest] clear
-    component graphics updateDisplay
+    ::tycho::Graphics::clear
 }
 
 #######################################################################
@@ -140,6 +143,16 @@ body ::tycho::EditForest::clear {} {
 #
 body ::tycho::EditForest::help {} {
     hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditForestHelp.html" {}
+}
+
+#######################################################################
+#### reload
+# Reload the current file. This is redefined in order to redraw the forest.
+#
+body ::tycho::EditForest::reload {} {
+    component graphics undoBoundary
+    ::tycho::File::reload
+    component graphics redrawForest
 }
 
 #####################################################################
