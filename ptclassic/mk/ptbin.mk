@@ -51,7 +51,7 @@
 # SDFFULL =	1
 
 ifndef VERSION
-	VERSION =	0.7pre.$(BASENAME)
+	VERSION =	0.7.1devel.$(BASENAME)
 endif
 
 ifdef ALLBINARIES
