@@ -57,7 +57,7 @@ public:
 	SDFSchedIter(const SDFSchedule& s) : ListIter(s) {}
 	SDFStar* next() { return (SDFStar*)ListIter::next();}
 	SDFStar* operator++() { return next();}
-	ListIter::reset();
+	ListIter::reset;
 };
 
 class GalStarIter;
