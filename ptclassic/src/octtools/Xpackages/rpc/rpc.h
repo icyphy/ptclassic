@@ -110,7 +110,7 @@ typedef int vemStatus;		/* Status codes          */
 #define MSG_MOREMD	0x04	/* Use more mode             */
 
 extern void vemMessage();  	/* Writes out a message      */
-extern vemStatus vemCommand();	/* perform a vem command     */
+
 
 extern vemStatus bufLock();
 
@@ -266,6 +266,14 @@ struct RPCSpot {
 
 typedef struct RPCSpot RPCSpot;
 
+/* Hack for pigilib/PVem.cc */
+#ifdef __cplusplus
+extern vemStatus vemCommand(char *vemCmd, RPCSpot *spot,
+			     lsList cmdList, long userOptionWord);
+#else /* __cplusplus */
+extern vemStatus vemCommand();	/* perform a vem command     */
+
+#endif /* __cplusplus */
 
 /* RPC Functions */
 
@@ -273,7 +281,14 @@ EXTERN void RPCExit();
 EXTERN void RPCUserIO();
 EXTERN char *RPCXGetDefault();
 EXTERN void RPCExitVem();
+
+/* Hack for pigilib/PVem.cc */
+#ifdef __cplusplus
+extern Window vemOpenWindow(octObject *facet, char *geo);
+#else /* __cplusplus */
 EXTERN Window vemOpenWindow();
+#endif /* __cplusplus*/
+
 EXTERN Window vemOpenRPCWindow();
 EXTERN void vemPrompt();
 EXTERN char *RPCVersionString();
