@@ -82,7 +82,7 @@ class ::tycho::MenuSupport {
     ####                      protected methods                    ####
 
     # Delete submenus within a menu
-    protected method deleteSubMenus {menu}
+    protected method clearMenu {menu}
 
 
     ##########################################################################
@@ -207,13 +207,14 @@ body ::tycho::MenuSupport::addSeparator {inMenu args} {
 body ::tycho::MenuSupport::delete {name} {
     # Check validity
     if { ! [::info exists itemtype($name)] } {
-	error "$name is not a menu or menu entry"
+	return
+	# error "$name is not a menu or menu entry"
     }
 
     # If it's a menu, delete it
     if { [::info exists menupath($name)] } {
 	# Delete nested submenus
-	deleteSubMenus $menupath($name)
+	clearMenu $menupath($name)
 
 	# Delete and forget the menu
 	destroy $menupath($name)
@@ -228,15 +229,29 @@ body ::tycho::MenuSupport::delete {name} {
 
 
 #####################################################################
-#### deleteSubMenus
-# Delete submenus from the given menu.
+#### clearMenu
+# Delete submenus from the given menu and clear all entries.
 #
-body ::tycho::MenuSupport::deleteSubMenus {menu} {
+body ::tycho::MenuSupport::clearMenu {menu} {
     set lastindex [$menu index end]
     set i 0
     while { $i <= $lastindex } {
-	if { [$menu type $i] == "cascade" } {
-	    $this delete [$menu entrycget $i -label]
+	switch [$menu type $i] {
+	    "cascade" {
+puts $i
+	puts \"[$menu entrycget $i -label]\"
+		$this delete [$menu entrycget $i -label]
+	    }
+	    "separator" {
+		;# do nothing
+	    }
+	    default {
+		set name [$menu entrycget $i -label]
+puts $i
+puts \"$name\"
+		unset itemtype($name)
+		unset entrypath($name)
+	    }
 	}
 	incr i
     }
@@ -245,13 +260,14 @@ body ::tycho::MenuSupport::deleteSubMenus {menu} {
 
 #####################################################################
 #### disable
-# Disable a menu or a menu entry. Signal an error if the menu or entry
+# Disable a menu or a menu entry. Do nothing if the menu or entry
 # does not exist.
 #
 body ::tycho::MenuSupport::disable {name} {
     # Check validity
-    if { ! [::info exists entrytype($name)] } {
-	error "$name is not a menu or menu entry"
+    if { ! [::info exists entrypath($name)] } {
+	return
+	# error "$name is not a menu or menu entry"
     }
 
     # Disable the menu entry
@@ -261,13 +277,14 @@ body ::tycho::MenuSupport::disable {name} {
 
 #####################################################################
 #### enable
-# Enable a menu or a menu entry. Signal an error if the menu or entry
+# Enable a menu or a menu entry. Do nothing if the menu or entry
 # does not exist.
 #
 body ::tycho::MenuSupport::enable {name} {
     # Check validity
-    if { ! [::info exists entrytype($name)] } {
-	error "$name is not a menu or menu entry"
+    if { ! [::info exists entrypath($name)] } {
+	return
+	# error "$name is not a menu or menu entry"
     }
 
     # Enable the menu entry
@@ -277,7 +294,8 @@ body ::tycho::MenuSupport::enable {name} {
 
 #####################################################################
 #### entrycget
-# Get a configuration option of a menu entry.
+# Get a configuration option of a menu entry. Flag an error of the entry
+# does not exist.
 #
 body ::tycho::MenuSupport::entrycget {name option} {
     # Check validity
@@ -291,7 +309,8 @@ body ::tycho::MenuSupport::entrycget {name option} {
 
 #####################################################################
 #### entryconfigure
-# Get or configure options of a menu entry.
+# Get or configure options of a menu entry. Flag an error of the entry
+# does not exist.
 #
 body ::tycho::MenuSupport::entryconfigure {name args} {
     # Check validity
@@ -300,7 +319,7 @@ body ::tycho::MenuSupport::entryconfigure {name args} {
     }
     
     # Get or set the option(s)
-    eval $entrypath($name) entryconfigure $name $args
+    eval $entrypath($name) entryconfigure [list $name] $args
 }
 
 #####################################################################
@@ -316,7 +335,8 @@ body ::tycho::MenuSupport::insert {name before args} {
 
     # Check if the new entry already exists
     if { [::info exists entrypath($name)] } {
-	error "Menu entry $name already exists"
+	return
+	# error "Menu entry $name already exists"
     }
 
     # Read the "type" option
@@ -334,7 +354,7 @@ body ::tycho::MenuSupport::insert {name before args} {
 		[join $name ""]] -tearoff 0]
 	set itemtype($name) "cascade"
 
-	eval $entrypath($before) insert $before cascade $args \
+	eval $entrypath($before) insert [list $before] cascade $args \
 		-label [list $name] \
 		-menu $menupath($name)
     } else {
@@ -342,7 +362,8 @@ body ::tycho::MenuSupport::insert {name before args} {
 	set entrypath($name) $entrypath($before)
 	set itemtype($name) $type
 
-	eval $entrypath($before) insert $before $type $args -label [list $name]
+	eval $entrypath($before) insert [list $before] \
+		$type $args -label [list $name]
     }
 }
 
