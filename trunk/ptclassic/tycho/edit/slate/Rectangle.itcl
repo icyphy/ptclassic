@@ -103,6 +103,9 @@ class ::tycho::Rectangle {
     # Test if the first rectangle is inside the second.
     proc inside {x0 y0 x1 y1 a0 b0 a1 b1}
 
+    # Move a rectangle by a given distance
+    proc move {x0 y0 x1 y1 a b}
+
     # Test if two rectangles overlap
     proc overlap {x0 y0 x1 y1 a0 b0 a1 b1}
 
@@ -278,7 +281,8 @@ body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
 # runs, this strategy may no longer be necessary.
 #
 body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
-    ::tycho::getflag ghost args
+    set ghost 0
+    ::tycho::getopt ghost args
 
     # Remember how I am now.
     ::tycho::assign \
@@ -297,7 +301,6 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
     }
     if { [lsearch $args "*e"] >= 0 } {
     	append script {; set scratch($id.e) [expr $scratch($id.e) + $deltaX]}
-	set e [expr $e + $deltaX]
     }
     if { [lsearch $args "n*"] >= 0 } {
     	append script {; set scratch($id.n) [expr $scratch($id.n) + $deltaY]}
@@ -309,10 +312,11 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
 
     # If the -ghost flag is set, draw the ghost box.
     if { $ghost } {
-	set scratch($id.ghost) [eval $canvas create rectangle \
-		$scratch($id.coords) \
-		-outline grey]
-    }
+	$slate ghost $id
+	set scratch($id.ghost) 1
+    } else {
+	set scratch($id.ghost) 0
+    }	
 }
 
 #######################################################################
@@ -331,8 +335,8 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
     eval $scratch($id.script)
 
     # If there's a ghost, reshape it. Otherwise reshape the picture.
-    if { [::info exists scratch($id.ghost)] } {
-	$canvas region $scratch($id.ghost) \
+    if $scratch($id.ghost) {
+	$slate region ghost \
 		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
     } else {
 	$slate region $id  \
@@ -346,16 +350,14 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
 body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the picture to its shape
     # and then delete the ghost.
-    if { [::info exists scratch($id.ghost)] } {
+    if { $scratch($id.ghost) } {
 	# Reshape the picture
-	$slate coords $id [$slate coords $scratch($id.ghost)]
-	$canvas delete $scratch($id.ghost)
-
-	# Clean up
-	unset scratch($id.ghost)
+	eval $slate coords $id [$slate coords ghost]
+	$canvas delete ghost
     }
 
     # General cleaning up
+    unset scratch($id.ghost)
     unset scratch($id.prevX)
     unset scratch($id.prevY)
     unset scratch($id.w)
@@ -414,7 +416,20 @@ body ::tycho::Rectangle::aspect {x0 y0 x1 y1 args} {
 # Test if the first rectangle is inside the second.
 #
 body ::tycho::Rectangle::inside {x0 y0 x1 y1 a0 b0 a1 b1} {
-    return [expr $x0 >= $a0 && $y0 >= $b0 && $x1 <= $a1 && $y1 <= $b1]
+    expr $x0 >= $a0 && $y0 >= $b0 && $x1 <= $a1 && $y1 <= $b1
+}
+
+##########################################################################
+#### move
+#
+# Move a rectangle by the given distance
+#
+body ::tycho::Rectangle::move {x0 y0 x1 y1 a b} {
+    list \
+	    [expr $x0 + $a] \
+	    [expr $y0 + $b] \
+	    [expr $x1 + $a] \
+	    [expr $y1 + $b]
 }
 
 ##########################################################################
@@ -467,12 +482,11 @@ body ::tycho::Rectangle::shrink {x0 y0 x1 y1 hdelta {vdelta {}}} {
     if { $vdelta == "" } {
 	set vdelta $hdelta
     }
-
-    return [list \
+    list \
 	    [expr $x0 + $hdelta] \
 	    [expr $y0 + $vdelta] \
 	    [expr $x1 - $hdelta] \
-	    [expr $y1 - $vdelta] ]
+	    [expr $y1 - $vdelta]
 }
 
 #######################################################################
@@ -487,12 +501,11 @@ body ::tycho::Rectangle::stretch {x0 y0 x1 y1 hdelta {vdelta {}}} {
     if { $vdelta == "" } {
 	set vdelta $hdelta
     }
-
-    return [list \
+    list \
 	    [expr $x0 - $hdelta] \
 	    [expr $y0 - $vdelta] \
 	    [expr $x1 + $hdelta] \
-	    [expr $y1 + $vdelta] ]
+	    [expr $y1 + $vdelta]
 }
 
 ##########################################################################
@@ -502,9 +515,9 @@ body ::tycho::Rectangle::stretch {x0 y0 x1 y1 hdelta {vdelta {}}} {
 # contains both rectangles.
 #
 body ::tycho::Rectangle::union {x0 y0 x1 y1 a0 b0 a1 b1} {
-    return [list \
+    list \
 	    [::tycho::min $x0 $a0] \
 	    [::tycho::min $y0 $b0] \
 	    [::tycho::max $x1 $a1] \
-	    [::tycho::max $y1 $b1]]
+	    [::tycho::max $y1 $b1]
 }
