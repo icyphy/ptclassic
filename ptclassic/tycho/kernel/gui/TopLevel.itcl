@@ -215,12 +215,14 @@ class ::tycho::TopLevel {
 # and the new window is placed in the window order before that one.
 #
 configbody ::tycho::TopLevel::before {
-    set tl [winfo toplevel $itk_option(-before)]
-    if {$tl != {} &&  \
-	    [uplevel #0 info objects $tl] != {} && \
-	    [$tl isa ::tycho::TopLevel]} {
-	$topLevelWindows remove $prefix
-	$topLevelWindows insert $prefix $tl
+    if {$itk_option(-before) != ""} {
+	set tl [winfo toplevel $itk_option(-before)]
+	if {$tl != {} &&  \
+		[uplevel #0 info objects $tl] != {} && \
+		[$tl isa ::tycho::TopLevel]} {
+	    $topLevelWindows remove $prefix
+	    $topLevelWindows insert $prefix $tl
+	}
     }
 }
 
