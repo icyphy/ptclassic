@@ -1,0 +1,137 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Ptolemy NT Bugs</title>
+</head>
+<body bgcolor=#faf0e6>
+<H1>Ptolemy NT Bugs</H1>
+
+<h2>NT Hints</h2>
+
+<menu>
+<li> The NT Resource kit includes a <CODE>shutdown.exe</CODE> binary
+that can be executed from a bash shell.  The following command should reboot:
+<pre>
+shutdown /L /R /Y /C
+</pre>
+</menu>
+
+
+
+<h2><a name="cygwin32hints">Cygwin32 hints</a></h2>
+If you have problems, try searching the Cygwin32 mailing list archives
+via <a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>.
+The FAQ is also useful.
+<h3>Setup</h3>
+<MENU>
+<li> If your tree is located on a Unix file system, use Samba.
+See the <a href="ptntinstall.html">Ptolemy NT Installation page</a>
+for details
+
+<li> If you install the Cygwin X11R6 binaries and Exceed, then
+you can set up NT so that you can telnet in and bring up remote xterms.
+The xterm terminal emulator is better than the vanilla bash terminal, since
+you can have scrollbars and use <CODE>less</CODE> with xterm, but not
+with the vanilla bash emulator.
+	<ol>
+	<li> Turn on the <CODE>telnetd</CODE> daemon by going
+	to <CODE>Control Panels</CODE> -&gt; <CODE>HCL Inetd</CODE>
+	and then selecting <CODE>Telnetd</CODE> and then <CODE>Enable</CODE>
+
+	
+	<li> From the remote machine, telnet in to the NT machine. You
+	will be running a DOS shell.
+	<li> To bring up <CODE>bash</CODE> with the proper environment,
+	run <CODE>C:\Cygnus\b19\cygnus</CODE>
+	
+	<li> To bring up an <CODE>xterm</CODE> from within bash:
+	<pre>
+	DISPLAY=<I>yourremotemachine</I>:0
+	export DISPLAY
+	xterm -sb -e bash &amp;
+	</pre>
+	</ol>
+
+
+<li> The Bash <CODE>type</CODE> command is invaluable in debugging
+path problems.  <CODE>type</CODE> is like the C-Shell <CODE>which</CODE>
+command, it will tell you which script or binary you are actually running.
+
+<li> To use <CODE>gdb</CODE> remotely without the Tcl interface, 
+start it with
+<pre>
+gdb -nw
+</pre>
+
+</MENU>
+
+<h3><a name="Cygwin32 Pathnames">Cygwin32 pathnames</a></h3>
+The way that Cygwin32 handles pathnames can cause a lot of problems.
+<menu>
+<li> The FAQ on the
+<a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>
+has some information about pathnames.
+
+<li> Cygwin32 automatically converts backslashes in Windows
+environment variables to forward slashes.  This causes no end of
+problems with <CODE>/bin/sh</CODE> scripts that are calling
+<CODE>java</CODE>, which expects Windows style backslashed pathnames
+in command line arguments
+
+<li> Cygwin32 has the <CODE>mount</CODE> command, which allows the user
+to mount local and remote file systems in the Cygwin32 file space.
+The downside of this is that applications that do not use the Cygwin32
+api will not be able to see the Cygwin32 mount points.   For example:
+
+<menu>
+<li> <CODE>java</CODE> will not be able to access files
+mounted via the Cygwin32 mount point.
+
+<li> Tycho can have similar problems.  Note that if you install
+Ptolemy under NT, there are now two distinct ways to run Tycho under
+NT:
+	<ol>
+	<li> Using the prebuilt native Windows <CODE>itkwish.exe</CODE>.
+	This binary is available on the
+	<a href="http://www.tcltk.com">Itcl website</a>.
+	This binary uses the native Windows pathnames, so it will
+	not understand Cygwin32 mount points.
+	<li> Using the Cygwin32
+	<CODE>$PTOLEMY/tcltk/itcl.nt4/bin/itkwish2.2.exe</CODE> binary.
+	This binary is built during the Ptolemy Tcl/Tk installation process.
+	This binary understands Cygwin32 mount points.
+	</ol>
+</menu>
+
+<li> When Cygwin32 is converting environment variables to forward
+slashes, it may also attempt to substitute in any mount points it
+knows about.  This can cause problems as well.
+
+
+<li> The location of your root directory can also cause problems with
+<CODE>java</CODE>.  For example, if Cygwin is setup so that
+<CODE>/tmp</CODE> is actually <CODE>d:/tmp</CODE>, then
+<CODE>java</CODE> will probably look in the Windows root, which could
+be <CODE>c:\tmp</CODE>.  Remounting <CODE>d:/</CODE> as <CODE>/</CODE>
+might help here.  The Cygwin FAQ might also have hints.
+
+</menu>
+
+<h2>X11 Hints</h2>
+<menu>
+<li> Under Exceed, the middle mouse button is emulated by holding
+both mouse buttons.  The <CODE>Input</CODE> configuration icon 
+has a check box to turn on the middle mouse button emulation and 
+an entry widget to control how the timing.
+</menu>
+
+ <HR>
+<A HREF="index.html">Up to the Ptolemy under NT page</A> -
+<A HREF="ptnt.html">Back to Ptolemy NT Overview</A> -
+<A HREF="ptntinstall.html">Forward to Ptolemy NT Installation</A>
+<HR>
+Copyright &#169 1997-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>cxh@eecs.berkeley.edu</author>
