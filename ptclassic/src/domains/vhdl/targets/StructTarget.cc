@@ -104,6 +104,11 @@ int StructTarget :: runIt(VHDLStar* s) {
   // Change the default stream back.
   defaultStream = &myCode;
 
+  // Do not create firing data for forks.
+  if (s->isItFork()) {
+    return status;
+  }
+
   // Create a new VHDLFiring to load up.
   VHDLFiring* fi = new VHDLFiring;
 
@@ -150,9 +155,6 @@ int StructTarget :: runIt(VHDLStar* s) {
 
   // Vestigial code - see original for reasoning behind this, then change it.
   if (!status) {
-    return status;
-  }
-  if (s->isItFork()) {
     return status;
   }
   return status;
