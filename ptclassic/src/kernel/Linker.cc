@@ -581,8 +581,9 @@ int Linker::multiLink (int argc, char** argv) {
 	return status;
 }
 
-void Linker::installTable(const char* newTable) {
 #if !defined(USE_DLOPEN) && !defined(USE_SHLLOAD)
+void Linker::installTable(const char* newTable) {
+
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
 		if (!symTableName) symTableName =
@@ -599,8 +600,11 @@ void Linker::installTable(const char* newTable) {
 		char ch;
 		while (in.get(ch)) out.put(ch);
 	}
-#endif // !USE_DLOPEN && !USE_SHLLOAD
 }
+#else
+void Linker::installTable(const char* /*newTable*/) {
+}
+#endif // !USE_DLOPEN && !USE_SHLLOAD
 
 
 // This function scans the symbol table of the code that is to be
@@ -671,7 +675,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	  Error::message(buf);
 	}
 #endif
-	shl_t handle = NULL;
+	shl_t handle = (shl_t)dlhandle;
 	void (*A_ptr)();
 	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr))
 	  Error::abortRun ("shl_findsym failed");
