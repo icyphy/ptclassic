@@ -152,15 +152,15 @@ public:
 			    Real* realPart, Real* imagPart);
 	Matrix* SetVariable(const char* name,
 			    int numrows, int numcols,
-			    const char** realPartStrings,
-			    const char** imagPartStrings);
+			    char** realPartStrings,
+			    char** imagPartStrings);
 	Matrix* GetVariable(char* name,
 			    int* numrows, int* numcols,
 			    Real** realPart, Real** imagPart);
 	Matrix* GetVariable(char* name,
 			    int* numrows, int* numcols,
-			    char** realPartStrings,
-			    char** imagPartStrings);
+			    char*** realPartStrings,
+			    char*** imagPartStrings);
 	void FreeStringArray(char** strarray, int numstrings);
 
 protected:
