@@ -152,6 +152,8 @@ void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 
 int CG56MultiSimTarget::wormLoadCode() {
 
+    if (Scheduler::haltRequested()) return FALSE;
+
     if (compileCode()) runCode();
 
     // done
