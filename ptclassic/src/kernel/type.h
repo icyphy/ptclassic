@@ -15,6 +15,8 @@ $Id$
 #ifndef _type_h
 #define _type_h 1
 
+#include "logNew.h"
+
 // The most general type of pointer, for use in generic types.
 typedef void* Pointer;
 
