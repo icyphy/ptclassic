@@ -72,7 +72,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 	    addGlobal("int $starSymbol(invCount);");
-	    addGlobal("int $starSymbol(ids)[$val(tapSize)];");
+	    addGlobal("int $starSymbol(ids)[1][$val(tapSize)];");
+
+	    // define a pointer to the taps, for compatibility with
+	    // the bar chart routines
+	    addGlobal("double* $starSymbol(taps_ptr);");
+	    addCode("$starSymbol(taps_ptr) = $ref(taps);");
 
 	    // initialize backup values to equal taps initial values.
 	    addGlobal("double $starSymbol(backup)[$val(tapSize)] = { ");
@@ -82,7 +87,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    initvalues << taps[taps.size()-1] << "};";
 	    addGlobal(initvalues);
-
 	    addCode(makeGraph,"tkSetup");
 	    addCode(makeControls,"tkSetup");
 	    addCode(procDefs,"procedure");
@@ -98,27 +102,34 @@ limitation of liability, and disclaimer of warranty provisions.
 		$starSymbol(invCount) = 0;
 		if(ptkSetBarGraph(interp, w,
 			    "$starSymbol(.bar)",
-			    $ref(taps),
+			    &$starSymbol(taps_ptr),
+			    1,
 			    $val(tapSize),
-			    &$ref(fullScale),
+			    $ref(fullScale),
+			    -$ref(fullScale),
 			    $starSymbol(ids)) == 0)
 		    errorReport("Cannot update bar graph.");
 	    }
 	}
 	codeblock (makeGraph) {
+	    Tcl_CreateCommand(interp, "$starSymbol(.bar)rescale",
+			$starSymbol(rescale),
+			(ClientData) 0, (void (*)()) NULL);
 	    if(ptkMakeBarGraph(interp, w,
-			"$starSymbol(.bar)",	/* name of top level window */
+			 "$starSymbol(.bar)",	/* name of top level window */
 			 "$val(identifier)",	/* identifying string */
-			 $ref(taps),		/* data to be plotted */
+			 &$starSymbol(taps_ptr),/* data to be plotted */
+			 1,			/* one trace only */
 			 $val(tapSize),		/* number of data points */
-			 &$ref(fullScale),	/* full scale value */
+			 $ref(fullScale),	/* top of scale */
+			 -$ref(fullScale),	/* bottom of scale */
 			 $starSymbol(ids),	/* array to store item ids */
 			 "$val(geometry)",	/* shape and position, window*/
 			 $val(width),		/* width, in cm */
 			 $val(height)) == 0)
 		errorReport("Cannot create bar chart");
 	    $starSymbol(invCount) = 0;
-	    Tcl_CreateCommand(interp, "$starSymbol(.bar)LMSTkCBredraw",
+	    Tcl_CreateCommand(interp, "$starSymbol(.bar)redraw",
 			$starSymbol(redraw),
 			(ClientData) 0, (void (*)()) NULL);
 	}
@@ -180,11 +191,33 @@ limitation of liability, and disclaimer of warranty provisions.
 	    {
 		if(ptkSetBarGraph(interp, w,
 			    "$starSymbol(.bar)",
-			    $ref(taps),
+			    &$starSymbol(taps_ptr),
+			    1,
 			    $val(tapSize),
-			    &$ref(fullScale),
+			    $ref(fullScale),
+			    -$ref(fullScale),
 			    $starSymbol(ids)) == 0)
 		    errorReport("Cannot redraw bar graph");
+		return TCL_OK;
+	    }
+
+	    static int
+	    $starSymbol(rescale)(dummy, interp, argc, argv)
+		ClientData dummy;		   /* Not used. */
+		Tcl_Interp *interp;		 /* Current interpreter. */
+		int argc;			   /* Number of arguments. */
+		char **argv;			/* Argument strings. */
+	    {
+		float temp;
+		if(sscanf(argv[1], "%4f", &temp) != 1) {
+		    Tcl_AppendResult(interp,
+			"Cannot reset full scale in bar graph",(char*) NULL);
+		    return TCL_ERROR;
+		}
+		$ref(fullScale) = $ref(fullScale) * temp;
+		/* Return new full scale value to tcl */
+		sprintf(interp->result, "%f -%f",
+		    $ref(fullScale), $ref(fullScale));
 		return TCL_OK;
 	    }
 
