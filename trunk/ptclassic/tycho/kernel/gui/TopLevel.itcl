@@ -76,11 +76,9 @@ proc ::tycho::safeUpdate {obj} {
     # NOTE: Formerly used
     #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
     if {[info which -command $obj] == {}} {
-	# FIXME: In the short term, this should bring up an error 
-	# eventually, perhaps we should replace the 'error' with 'puts'
-        error "::tycho::safeUpdate: command aborted: $obj does not exist"
-	#puts "::tycho::safeUpdate: command aborted: $obj does not exist"
-        #::tycho::silentError
+	# If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+        ::tycho::silentError
     }
     return 0
 }
