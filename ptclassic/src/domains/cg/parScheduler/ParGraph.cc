@@ -18,7 +18,6 @@ Date of last revision:
 
 #include "ParGraph.h"
 #include "EGConnect.h"
-#include "UserOutput.h"
 #include "streamCompat.h"
 #include "Error.h"
 

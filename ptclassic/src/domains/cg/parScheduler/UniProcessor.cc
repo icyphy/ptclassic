@@ -62,7 +62,7 @@ StringList UniProcessor :: display(int makespan)
 }
 
 // write Gantt chart.
-int UniProcessor :: writeGantt(UserOutput& o) {
+int UniProcessor :: writeGantt(ostream& o) {
 
 	int total = 0;
 	int start = 0;

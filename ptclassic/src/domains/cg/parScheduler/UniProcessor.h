@@ -16,9 +16,10 @@ Date of last revision:
 
 *****************************************************************/
 
+class ostream;
+
 #include "ParNode.h"
 #include "DataStruct.h"
-#include "UserOutput.h"
 #include "DynamicGalaxy.h"
 #include "BaseMultiTarget.h"
 #include "StringList.h"
@@ -37,6 +38,9 @@ private:
 	ParNode* myNode;
 	NodeSchedule* nextFree;	// free list management.
 public:
+	// reset members
+	void resetMembers() { nextFree = 0; idleFlag = 0; index = -1; }
+
 	// Constructor
 	NodeSchedule() : DoubleLink(0), myNode(0) { resetMembers(); }
 
@@ -44,9 +48,6 @@ public:
 	void setMembers(ParNode* n, int val) {
 		if (n->getType() > 0) idleFlag = TRUE;
 		myNode = n; duration = val; }
-
-	// reset members
-	void resetMembers() { nextFree = 0; idleFlag = 0; index = -1; }
 
 	// get the members
 	int getDuration() { return duration; }
@@ -178,7 +179,7 @@ public:
 	StringList displaySubUniv() { return subGal->printRecursive(); }
 
 	// write Gantt chart
-	int writeGantt(UserOutput&);
+	int writeGantt(ostream&);
 
 	// down-load the code
 	void run();
