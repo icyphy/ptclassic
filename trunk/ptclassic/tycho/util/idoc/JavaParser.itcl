@@ -286,8 +286,9 @@ body ::tycho::JavaDocSys::getClassesInSource {filename} {
 
 #####################################################################
 #### modCheck
-# Checks if the current file is newer than it's associated documentation.
-# And returns 1 if so.
+# Checks if the current file is newer than its associated documentation.
+# And returns 1 if so. Also returns 1 if the generator is newer than the
+# documentation.
 #
 # This requires searching for all classes defined within the file and
 # checking if those class's documents are older. JavaDocSys does not
@@ -299,6 +300,17 @@ body ::tycho::JavaDocSys::getClassesInSource {filename} {
 # appropriate sibling for the file extension.
 #
 body ::tycho::JavaDocSys::modCheck {filename} {
+    global TYCHO
+
+    # Check to see if the generator itself has been changed.
+    set javaGenTime [file mtime [file join $TYCHO lib tydoc JavaDocSys.itcl]]
+    set idocGenTime [file mtime [file join $TYCHO lib tydoc IDocSys.itcl]]
+    if {$javaGenTime > $idocGenTime} {
+        set genTime $javaGenTime
+    } {
+        set genTime $idocGenTime
+    }
+
     set sourceTime [file mtime $filename]
     set extension [file extension $filename]
     
@@ -314,10 +326,17 @@ body ::tycho::JavaDocSys::modCheck {filename} {
         # There is no documentation.
         return 1
     }
-    if {$sourceTime > [file mtime $docFile]} {
+
+    set docTime [file mtime $docFile]
+    if {$sourceTime > $docTime} {
         # The source is newer.
         return 1
     }
+    if {$genTime > $docTime} {
+        # The generator is newer.
+        return 1
+    }
+
     # Not modified
     return 0   
 }
