@@ -269,6 +269,7 @@ void MessageParticle::errorAssign(const char* argType) const {
 	msg += argType;
 	msg += " to a ";
 	msg += type();
+	msg += " Particle.";
 	Error::abortRun(msg);
 }
 
