@@ -48,6 +48,7 @@ variable.  Variables are expanded only at the beginning of the string.
 #include "Error.h"
 #include "Tokenizer.h"
 #include "StringList.h"
+#include "miscFuncs.h"
 #define MAXSTRINGLEN 4096
 
 char* expandPathName(const char* name) {
