@@ -54,7 +54,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libgu.$(LIBSUFFIX)
+CLIB = 		libgu.$(LIBSUFFIX)
 
 EXPHDR =	gu.h
 

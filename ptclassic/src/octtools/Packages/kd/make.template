@@ -54,7 +54,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libkd.$(LIBSUFFIX)
+CLIB = 		libkd.$(LIBSUFFIX)
 
 EXPHDR =	kd.h
 
