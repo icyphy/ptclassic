@@ -358,7 +358,8 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	update
     }
     if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
-	ptkImportantMessage .message {Stopping the run.}
+	# If the universe hasn't stopped already, try again later
+	after 200 ptkRunControlDel $name $window $octHandle $defNumIter
 	return
     }
     unset ptkRunFlag($name)
