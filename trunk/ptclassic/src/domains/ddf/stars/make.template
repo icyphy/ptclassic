@@ -10,14 +10,13 @@
 #
 # This will add the dependencies to the makefile.
 
+ROOT = ../../..
+VPATH = $(ROOT)/src/stars/ddf
 # SRCDIR is the directory containing the Ptolemy kernel source.
-SRCDIR = /usr/tools/ptolemy/src/kernel
-GPPFLAGS = -g -I$(SRCDIR) 
+SRCDIR = $(ROOT)/src/kernel
+GPPFLAGS = -g -I$(SRCDIR)
 GNU = g++
-GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include 
-
-# Where to install
-DESTDIR = /usr/tools/ptolemy/lib/ddf
+GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
 
 .SUFFIXES: .cc
 .cc.o:
@@ -31,8 +30,9 @@ HDRS=DDFSelf.h LastOfN.h Repeater.h Select.h Switch.h DownCounter.h
 
 all:		makefile $(OBJS)
 
-install:	makefile $(OBJS)
-		mv -f $(OBJS) $(DESTDIR)
+# nothing to install -- use it where it lies
+install:	all
+		@echo Installation complete.
 
 sources:	$(SRCS) $(HDRS) make.template
 
@@ -43,8 +43,9 @@ depend:
 
 makefile:	make.template
 		rm -f makefile
-		cp make.template makefile
-		make -f make.template sources depend  # note: use new SRCS list
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		ln -s $(VPATH)/makefile makefile
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
