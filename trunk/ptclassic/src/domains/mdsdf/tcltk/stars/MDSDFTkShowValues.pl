@@ -45,9 +45,11 @@ create problems.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowValues.tcl";
 
-        MDSDFTclScript::setup();
+        MDSDFTclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);
