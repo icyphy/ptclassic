@@ -256,7 +256,8 @@ uplevel #0 {
 	    -type data \
 	    -name tychoPreferences \
 	    -file [file join $tychoprefs _preferences.tcl] \
-	    -build "uplevel #0 source [file join $tychokernel Defaults.tcl]"
+	    -build [list uplevel #0 source [list \
+            [file join $tychokernel Defaults.tcl]]]"
 
     tychoData get preferences
 
