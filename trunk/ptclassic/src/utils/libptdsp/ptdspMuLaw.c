@@ -26,6 +26,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Programmer: J. T. Buck
 Version: $Id$
+
+The 8-bit mu-law format here is 8-bit PCM mu-law encoded audio.
+The 8 bits are: 1 bit for the sign, 3 bits for the exponent,
+and 4 bits for the mantissa.
 */
 
 #include "ptdspMuLaw.h"
@@ -75,4 +79,23 @@ unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
 /* Convert the data to 16 bits and call the 16-bit converter */
 unsigned char Ptdsp_Linear8ToMuLaw8(int sample) {
   return Ptdsp_Linear8ToMuLaw8((sample & 0xFF) << 8);
+}
+
+/* Uncompress 8-bit mu-law data to 16-bit linear data */
+int Ptdsp_MuLaw8ToLinear16(unsigned char ulawbyte) {
+  int exponent, mantissa, sample, sign;
+
+  ulawbyte = ~ulawbyte;
+  sign = ulawbyte & 0x80;
+  exponent = (ulawbyte & 0x70) >> 4;
+  mantissa = (ulawbyte & 0x0F);
+  sample = mantissa << exponent;
+  if (sign) sample = -sample;
+
+  return sample;
+}
+
+/* Uncompress 8-bit mu-law data to 8-bit linear data */
+int Ptdsp_MuLaw8ToLinear8(unsigned char ulawbyte) {
+  return ((Ptdsp_MuLaw8ToLinear16(ulawbyte) >> 8) & 0xFF);
 }
