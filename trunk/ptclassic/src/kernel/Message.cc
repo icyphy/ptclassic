@@ -106,10 +106,9 @@ PacketData* Packet::writableCopy() {
 	if (refCount() > 0) {
 		result = d->clone();
 		*(result->refCount) = 0;
-	} else {
-		result = d;
-		d = &dummyPacket;
 	}
+	else result = d;
+	d = &dummyPacket;
 	return result;
 }
 
