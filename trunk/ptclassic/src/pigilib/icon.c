@@ -356,7 +356,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("make-schem-icon");
@@ -385,8 +385,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject inst = {OCT_UNDEFINED_OBJECT},
-	      facet = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0},
+	      facet = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     static char buf[512];
 
@@ -441,9 +441,9 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject mFacet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT},
-	      facet = {OCT_UNDEFINED_OBJECT};
+    octObject mFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      inst = {OCT_UNDEFINED_OBJECT, 0},
+	      facet = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     char *fullName, codeFile[512], domain[64];
 
@@ -547,8 +547,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject mFacet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT};
+    octObject mFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      inst = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     Window iconWindow; /* the vem window to edit icon in */
     wnOpts options; /* need this to set snap size of iconWindow */

@@ -144,8 +144,8 @@ int usePattern;
 {
     static char *pattern = "00010000 00010000 00010000 11111111 00010000 00010000 00010000 00010000";
 
-    octObject facet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
+	      inst = {OCT_UNDEFINED_OBJECT, 0};
     char word[256];
     vemSelSet ss;
 

@@ -47,7 +47,10 @@ class octObjectClass {
 
 public:
 	// constructor
-        octObjectClass() { facet.type = OCT_UNDEFINED_OBJECT; }
+        octObjectClass() {
+		facet.type = OCT_UNDEFINED_OBJECT;
+		facet.objectId = 0;
+	}
 
 	// destructor
         ~octObjectClass() { FreeOctMembers(&facet); }

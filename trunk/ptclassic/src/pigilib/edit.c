@@ -72,7 +72,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject inst = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     Pointer pointer;
     RPCArg *arg;
@@ -83,7 +83,8 @@ long userOptionWord;
     numObjSelected = 0;
 
     if ((length = lsLength(cmdList)) != 0) {
-        octObject bag = {OCT_UNDEFINED_OBJECT}, inst = {OCT_UNDEFINED_OBJECT};
+        octObject bag = {OCT_UNDEFINED_OBJECT, 0},
+		  inst = {OCT_UNDEFINED_OBJECT, 0};
         octGenerator genInst;
         lsFirstItem(cmdList, &pointer, (lsHandle *) 0);
         arg = (RPCArg *) pointer;
@@ -148,8 +149,8 @@ int* numObjs;
 const char* fname;
 {
 	FILE* fp;
-	octObject facet = {OCT_UNDEFINED_OBJECT};
-        octObject inst = {OCT_UNDEFINED_OBJECT};
+	octObject facet = {OCT_UNDEFINED_OBJECT, 0};
+        octObject inst = {OCT_UNDEFINED_OBJECT, 0};
         octGenerator genInst;
 	int num = 0;
 
@@ -240,7 +241,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     char facetHandle[POCT_FACET_HANDLE_LEN]; 
 
     ViInit("find-name");
@@ -308,8 +309,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
+	      inst = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     char facetHandle[POCT_FACET_HANDLE_LEN],
 	 instanceHandle[POCT_FACET_HANDLE_LEN];
@@ -360,8 +361,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
+	      inst = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     char facetHandle[POCT_FACET_HANDLE_LEN],
 	 instanceHandle[POCT_FACET_HANDLE_LEN];
@@ -488,7 +489,7 @@ lsList cmdList;
 long userOptionWord;
 {
     int i;
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
 
     ViInit("open-palette");
     ErrClear();
@@ -519,8 +520,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT},
-	      obj = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
+	      obj = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
     char facetHandle[POCT_FACET_HANDLE_LEN];
 
@@ -565,7 +566,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-domain");
@@ -616,7 +617,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-target");

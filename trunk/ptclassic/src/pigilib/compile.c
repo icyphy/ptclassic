@@ -110,7 +110,7 @@ boolean
 EssAddObj(obj)
 octObject *obj;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     if (!essExist) {
 	octGetFacet(obj, &facet);
 	essSelSet = vemNewSelSet(facet.objectId, 65535, 0, 0, 2, 3, 1, 1, "0");
@@ -166,14 +166,15 @@ octObject *galFacetPtr;
 
 /* This function will be called recursively if there's hierarchy */
 /* Only free local octObject variable inst in the while loop */
+/* Do not free galFacet */
 static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
 {
     int retval = TRUE;
     octGenerator genInst;
-    octObject inst = {OCT_UNDEFINED_OBJECT},
-	      galFacet = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0},
+	      galFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
@@ -210,7 +211,7 @@ static void
 DetachDelaysFromNets(facetPtr)
 octObject *facetPtr;
 {
-    octObject net = {OCT_UNDEFINED_OBJECT};
+    octObject net = {OCT_UNDEFINED_OBJECT, 0};
     octGenerator netGen;
     octObject prop;		/* most data members are not dynamic */
 
@@ -246,9 +247,9 @@ octObject *facetPtr, *instPtr;
 char *propname;
 {
     int retval = TRUE;
-    octObject path = {OCT_UNDEFINED_OBJECT},
-	      dummy = {OCT_UNDEFINED_OBJECT},
-	      net = {OCT_UNDEFINED_OBJECT};
+    octObject path = {OCT_UNDEFINED_OBJECT, 0},
+	      dummy = {OCT_UNDEFINED_OBJECT, 0},
+	      net = {OCT_UNDEFINED_OBJECT, 0};
     struct octBox box;
     regObjGen rGen;
 
@@ -279,9 +280,7 @@ char *propname;
     }
 
     else {
-	octObject prop;		/* do not deallocate: contains static data */
-	prop.type = OCT_PROP;
-	prop.objectId = 0;				 /* silence Purify */
+	octObject prop = {OCT_PROP, 0}; /* don't deallocate: has static data */
 	prop.contents.prop.name = propname;
 
 	if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
@@ -290,6 +289,7 @@ char *propname;
 		    propname);
 	    ErrAdd(buf);
 	    EssAddObj(&net);
+	    FreeOctMembers(&prop);
 	    retval = FALSE;
 	}
 
@@ -338,7 +338,7 @@ ProcessInsts(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
-    octObject inst = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0};
     ParamListType pList = {0, 0, 0, FALSE};
     char *name, *oldInstName, *akoName, *parentname;
     char instanceHandle[POCT_FACET_HANDLE_LEN];
@@ -433,10 +433,10 @@ IsInputTerm(aTermPtr, result)
 octObject *aTermPtr;
 boolean *result;
 {
-    octObject inst = {OCT_UNDEFINED_OBJECT},
-	      master = {OCT_UNDEFINED_OBJECT},
-	      fTerm  = {OCT_UNDEFINED_OBJECT},
-	      prop  = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0},
+	      master = {OCT_UNDEFINED_OBJECT, 0},
+	      fTerm  = {OCT_UNDEFINED_OBJECT, 0},
+	      prop  = {OCT_UNDEFINED_OBJECT, 0};
     int retval = TRUE;
 
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
@@ -476,7 +476,7 @@ CollectTerms(netPtr, in, inN, out, outN)
 octObject *netPtr, *in, *out;
 int *inN, *outN;
 {
-    octObject term = {OCT_UNDEFINED_OBJECT};
+    octObject term = {OCT_UNDEFINED_OBJECT, 0};
     octGenerator termGen;
     int i;
     int retval = TRUE;
@@ -540,9 +540,9 @@ octObject *inTermPtr, *outTermPtr;
 char *initDelayValues, *width;
 {
     int retval = TRUE;
-    octObject inInst = {OCT_UNDEFINED_OBJECT},
-	      outInst = {OCT_UNDEFINED_OBJECT},
-	      fTerm = {OCT_UNDEFINED_OBJECT};
+    octObject inInst = {OCT_UNDEFINED_OBJECT, 0},
+	      outInst = {OCT_UNDEFINED_OBJECT, 0},
+	      fTerm = {OCT_UNDEFINED_OBJECT, 0};
     boolean inIsGalPort, outIsGalPort;
 
     ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
@@ -612,7 +612,7 @@ JoinToNode(termPtr, nodename)
 octObject *termPtr;
 char *nodename;
 {
-    octObject inst = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0};
 
     ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
@@ -636,7 +636,7 @@ TermIsMulti(termPtr)
 octObject *termPtr;
 {
     int retval = FALSE;
-    octObject inst = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0};
 
     if (GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK) {
 	ErrAdd(octErrorString());
@@ -660,7 +660,7 @@ static boolean
 ConnectPass(facetPtr)
 octObject *facetPtr;
 {
-    octObject net = {OCT_UNDEFINED_OBJECT}, in[TERMS_MAX], out[TERMS_MAX];
+    octObject net = {OCT_UNDEFINED_OBJECT, 0}, in[TERMS_MAX], out[TERMS_MAX];
     octGenerator netGen;
     int inN = 0, outN = 0, totalN, i;
     char delay[BLEN], initDelayValues[BLEN], width[BLEN];
@@ -788,8 +788,8 @@ static boolean
 IsDirty(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl = {OCT_UNDEFINED_OBJECT},
-	      cr = {OCT_UNDEFINED_OBJECT};
+    octObject cl = {OCT_UNDEFINED_OBJECT, 0},
+	      cr = {OCT_UNDEFINED_OBJECT, 0};
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) != OCT_OK) {
 	return (TRUE);
@@ -811,8 +811,8 @@ static boolean
 IsDirtyOrGone(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl = {OCT_UNDEFINED_OBJECT},
-	      cr = {OCT_UNDEFINED_OBJECT};
+    octObject cl = {OCT_UNDEFINED_OBJECT, 0},
+	      cr = {OCT_UNDEFINED_OBJECT, 0};
     char* name;
 
     /* First check to see whether the Ptolemy image exists */
@@ -840,17 +840,15 @@ static boolean
 ClearDirty(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl = {OCT_UNDEFINED_OBJECT};
+    octObject cl = {OCT_CHANGE_LIST, 0};
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) == OCT_OK) {
 	CK_OCT(octDelete(&cl));
     }
-    cl.type = OCT_CHANGE_LIST;
     cl.contents.changeList.objectMask = OCT_ALL_MASK &
 	~OCT_CHANGE_LIST_MASK & ~OCT_CHANGE_RECORD_MASK;
     cl.contents.changeList.functionMask = OCT_ATTACH_CONTENT_MASK |
 	OCT_DETACH_CONTENT_MASK | OCT_MODIFY_MASK | OCT_PUT_POINTS_MASK;
-    cl.objectId = 0;		/* silence Purify */
     CK_OCT(octCreate(facetPtr, &cl));
     octMarkTemporary(&cl);
     return (TRUE);
@@ -864,7 +862,7 @@ CompileGalInst(galInstPtr,parentFacetPtr)
 octObject *galInstPtr, *parentFacetPtr;
 {
     const char* galDomain;
-    octObject galFacet = {OCT_UNDEFINED_OBJECT};
+    octObject galFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     /* get the galaxy domain */
     if (!GOCDomainProp(galInstPtr, &galDomain, curDomainName())) {
@@ -1127,7 +1125,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
 
     ViInit("compile-facet");
     ErrClear();
@@ -1168,12 +1166,13 @@ octObject *facetPtr;
 {
     int retval = TRUE;
     octGenerator genInst;
-    octObject inst = {OCT_UNDEFINED_OBJECT},
-	      univFacet = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT, 0},
+	      univFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	univFacet.type = OCT_UNDEFINED_OBJECT;
+	univFacet.objectId = 0;
 
 	if (!MyOpenMaster(&univFacet, &inst, "contents", "r")) {
 	    PrintErr(octErrorString());
@@ -1192,8 +1191,7 @@ octObject *facetPtr;
 	    PrintDebug(msg);
 	    ptkOctObj2Handle(&univFacet, octHandle);
 	    /* ptkCompileRun is very similar to ptkGo, but assuming controlled
-	       by the run-all-demos panel instead of ordinary run control
-	       panel. */
+	       by run-all-demos panel instead of ordinary run control panel. */
 	    retval = FALSE;
 	    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
 				      " ", octHandle, (char *) NULL));
@@ -1222,7 +1220,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     char* name;
     char octHandle[POCT_FACET_HANDLE_LEN];
 

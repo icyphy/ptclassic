@@ -160,7 +160,7 @@ loop:
 
             /* special case demon functions */
             if (functionNumber == RPC_DEMON_FUNCTION) {
-                octObject changeList = {OCT_UNDEFINED_OBJECT};
+                octObject changeList = {OCT_UNDEFINED_OBJECT, 0};
                 long id;
                 void (*ptr)();                /* was char *ptr */
                 void (*func)();
@@ -193,7 +193,9 @@ fprintf(stderr, "client here: could not find the demon\n");
 /* fprintf(stderr, "client here: sent application complete message\n"); */
             } else if (functionNumber <= size) {
 
-                /* user rpc functions */
+                /* user RPC functions */
+		/* FIXME: Memory Leak: should deallocate argList somewhere */
+		/* See $PTOLEMY/src/octtools/Xpackages/rpc/appVem.c */
                 if (RPCReceiveVemArgs(&spot, &argList, &userOptionWord,
                                       RPCReceiveStream) != RPC_OK) {
                     (void) fprintf(stderr,

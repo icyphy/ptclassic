@@ -123,14 +123,14 @@ Shape boxShape = {
 /* FIXME: packetColor should become messageColor!!! */
 
 static octObject *facetPtr;
-static octObject wiringLayer = {OCT_UNDEFINED_OBJECT};
-static octObject floatColorLayer = {OCT_UNDEFINED_OBJECT},
-		 intColorLayer = {OCT_UNDEFINED_OBJECT},
-		 complexColorLayer = {OCT_UNDEFINED_OBJECT},
-		 anytypeColorLayer = {OCT_UNDEFINED_OBJECT},
-		 packetColorLayer = {OCT_UNDEFINED_OBJECT},
-		 fixColorLayer = {OCT_UNDEFINED_OBJECT},
-		 labelLayer = {OCT_UNDEFINED_OBJECT};
+static octObject wiringLayer = {OCT_UNDEFINED_OBJECT, 0};
+static octObject floatColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 intColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 complexColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 anytypeColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 packetColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 fixColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 labelLayer = {OCT_UNDEFINED_OBJECT, 0};
 
 /* 
  * terminalPath 12/21/91 - by Edward A. Lee
@@ -170,7 +170,7 @@ MkTermLabel(name, input, position, totalNumber)
 	int position;
 	int totalNumber;
 {
-    octObject label = {OCT_UNDEFINED_OBJECT};
+    octObject label = {OCT_UNDEFINED_OBJECT, 0};
     int llx, lly, urx, ury, len;
     
     static struct octBox labelBox;
@@ -294,9 +294,9 @@ MkTerm(name, input, type, multiple, position, totalNumber)
 {
     struct octPoint translation;
     Shape *path;
-    octObject dummy = {OCT_UNDEFINED_OBJECT},
-	      box = {OCT_UNDEFINED_OBJECT},
-	      term = {OCT_UNDEFINED_OBJECT};
+    octObject dummy = {OCT_UNDEFINED_OBJECT, 0},
+	      box = {OCT_UNDEFINED_OBJECT, 0},
+	      term = {OCT_UNDEFINED_OBJECT, 0};
     struct octPoint arrowTranslate;
     octObject *layerPtr;
     boolean thick = FALSE;
