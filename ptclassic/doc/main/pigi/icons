@@ -51,12 +51,13 @@ style.  For example, \fIselect-objects\fP is active in both modes.
 .pp
 A few simple notes will greatly help.
 First note that when the icon window is opened, the snap
-is the same as for schematic icons, normally 25 units.
-This is far too coarse for most editing functions.
-The VEM Options:window-options command allows you to change this.
+is automatically set to 5 units.  This is because the default snap
+for schematic windows, normally 25 units,
+is far too coarse for most editing functions.
 A reasonable compromise is 5 units, unless you are going to
 try to create a very elaborate icon, in which case 1 unit is
-probably what you want.
+probably what you want.  The VEM Options:window-options command
+allows you to change the snap.
 .pp
 Note that when editing an icon, the Vem menu is different than
 when you are editing a schematic.  This is because you are working
@@ -147,7 +148,8 @@ consider the tedium of finding all applications (belonging
 to all users) and reconnecting the block.
 ONLY MOVE TERMINALS ON BRAND NEW ICONS.
 .ip 2)
-You must respect the default snap of 25, and move terminals
+You must respect the default snap of 25 for schematic
+windows, and move terminals
 to a point that falls on a multiple of 25 units.
 Otherwise, connecting to the terminal will be very difficult.
 Normally, when the icon window opens, the grid lines are 10 units
