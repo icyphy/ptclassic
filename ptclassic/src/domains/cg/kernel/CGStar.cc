@@ -324,17 +324,19 @@ StringList CGStar::expandMacro(const char* func, const StringList& argList)
 {
 	StringList s;
 	StringListIter arg(argList);
+	const char* arg1 = arg++;
+	const char* arg2 = arg++;
 
 	// ref2 provided for backward compatibility
-	if (matchMacro(func, argList, "ref2", 2)) s = expandRef(arg++, arg++);
-	else if (matchMacro(func, argList, "ref", 2)) s = expandRef(arg++, arg++);
-	else if (matchMacro(func, argList, "ref", 1)) s = expandRef(arg++);
-	else if (matchMacro(func, argList, "val", 1)) s = expandVal(arg++);
-	else if (matchMacro(func, argList, "size", 1)) s = expandSize(arg++);
-	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg++);
-	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg++);
-	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg++);
-	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg++,arg++);
+	if (matchMacro(func, argList, "ref2", 2)) s = expandRef(arg1, arg2);
+	else if (matchMacro(func, argList, "ref", 2)) s = expandRef(arg1, arg2);
+	else if (matchMacro(func, argList, "ref", 1)) s = expandRef(arg1);
+	else if (matchMacro(func, argList, "val", 1)) s = expandVal(arg1);
+	else if (matchMacro(func, argList, "size", 1)) s = expandSize(arg1);
+	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg1);
+	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg1,arg1);
 	else macroError(func, argList);
 
 	return s;
