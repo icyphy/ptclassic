@@ -334,7 +334,7 @@ body ::tycho::KeyedDigraph::edgeattrs {vertex1 key1 vertex2 key2} {
 body ::tycho::KeyedDigraph::edgecget {vertex1 key1 vertex2 key2 attribute} {
     set name [list $vertex1 $key1 $vertex2 $key2]
     _verify edge {} $name
-    _cget   edge {} $name
+    _itemcget edge {} $name
 }
 
 ########################################################################
@@ -346,7 +346,7 @@ body ::tycho::KeyedDigraph::edgecget {vertex1 key1 vertex2 key2 attribute} {
 body ::tycho::KeyedDigraph::edgeconfigure {vertex1 key1 vertex2 key2 args} {
     set name [list $vertex1 $key1 $vertex2 $key2]
     _verify    edge {} $name
-    _configure edge {} $name
+    _itemconfigure edge {} $name
 }
 
 ########################################################################
@@ -427,7 +427,7 @@ body ::tycho::KeyedDigraph::keyattrs {vertex key} {
 #
 body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
     _verify key $vertex $key
-    _cget   key $vertex $key $attribute
+    _itemcget key $vertex $key $attribute
 }
 
 ########################################################################
@@ -438,7 +438,7 @@ body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
 #
 body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
     _verify    key $vertex $key
-    _configure key $vertex $key $args
+    _itemconfigure key $vertex $key $args
 }
 
 ########################################################################

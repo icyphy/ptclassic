@@ -1224,7 +1224,7 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
     set _vertices($vertex) ""
 
     # Add vertex
-    _addentity vertex {} $vertex {} {} $args
+    _addentity vertex {} $vertex $vertex {} $args
 
     # Return inverse command
     list vertexdelete $vertex
@@ -1249,7 +1249,7 @@ body ::tycho::AbstractGraph::vertexattrs {vertex} {
 #
 body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
     _verify vertex {} $vertex
-    _cget vertex {} $vertex $attribute
+    _itemcget vertex {} $vertex $attribute
 }
 
 ########################################################################
@@ -1261,7 +1261,7 @@ body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
 #
 body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
     _verify vertex {} $vertex
-    _configure vertex {} $vertex $args
+    _itemconfigure vertex {} $vertex $args
 }
 
 ########################################################################
