@@ -119,7 +119,7 @@ extern void mxSetName ARGS((mxArray* pa, const char *s));
 extern void *mxGetData ARGS((const mxArray* pa));
 extern void mxSetData ARGS((mxArray *pa, void *pd));
 extern double *mxGetPr ARGS((const mxArray *pa));
-extern void mxSetPr ARGS((mxArray *pa));
+extern void mxSetPr ARGS((mxArray *pa, double* pr));
 extern void *mxGetImagData ARGS((const mxArray* pa));
 extern void mxSetImagData ARGS((mxArray* pa, void* pi));
 extern double *mxGetPi ARGS((const mxArray* pa));
