@@ -504,7 +504,7 @@ octObject *instPtr;
 ParamListType *pListPtr;
 {
     octObject prop = {OCT_PROP};
-    ParamListType tempList = {0, 0};
+    ParamListType tempList = {0, 0, 0};
 
     ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
 
@@ -555,7 +555,7 @@ octObject *facetPtr;
 ParamListType *pListPtr;
 {
     octObject prop = {OCT_PROP};
-    ParamListType tempList = {0, 0};
+    ParamListType tempList = {0, 0, 0};
 
     ERR_IF1(!KcGetTargetParams(targName, pListPtr));
 

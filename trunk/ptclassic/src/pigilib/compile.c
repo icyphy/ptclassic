@@ -125,7 +125,7 @@ static boolean
 ProcessFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     ParamType *p;
     int i;
 
@@ -143,7 +143,7 @@ ProcessTargetParams(targName, galFacetPtr)
 char* targName;
 octObject *galFacetPtr;
 {
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     if (targName[0] == '<') return TRUE;
     ERR_IF1(!GetTargetParams(targName, galFacetPtr, &pList));
     ERR_IF1(!KcModTargetParams(&pList));
@@ -325,7 +325,7 @@ octObject *facetPtr;
 {
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT};
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     char *name, *oldInstName, *akoName, *parentname;
     char instanceHandle[POCT_FACET_HANDLE_LEN];
     char facetHandle[POCT_FACET_HANDLE_LEN];
