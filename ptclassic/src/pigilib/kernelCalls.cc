@@ -9,13 +9,13 @@ Some code borrowed from Interpreter.cc, see this file for more info.
                        All Rights Reserved.
 */
 
-
-#include "SDFUniverse.h"
+#include "Universe.h"
 #include "InterpGalaxy.h"
 #include "KnownBlock.h"
 #include "Block.h"
 #include "StringList.h"
 #include "State.h"
+#include "miscFuncs.h"
 
 /* boolean data type for pigi */
 typedef int boolean;
@@ -29,18 +29,17 @@ extern "C" void ErrAdd(char*);
 
 // Terminal data structs pigi
 #define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
-struct Term_s {
+struct Term {
     char *name;
     boolean multiple;
 };
-typedef struct Term_s Term;
-struct TermList_s {
+
+struct TermList {
     Term in[TERM_ARR_MAX];
     int in_n;
     Term out[TERM_ARR_MAX];
     int out_n;
 };
-typedef struct TermList_s TermList;
 
 // Parameter structs for pigi
 struct ParamStruct {
@@ -48,20 +47,26 @@ struct ParamStruct {
     char *value;
 };
 typedef struct ParamStruct ParamType;
+
 struct ParamListStruct {
     int length; /* length of array */
     ParamType *array; /* points to first element */
 };
 typedef struct ParamListStruct ParamListType;
 
+// An InterpUniverse is an Universe with an interpreted galaxy
+// in it.  This is accomplished by making it Runnable and an InterpGalaxy.
 
-// An InterpUniverse is an SDFUniverse with an interpreted galaxy in it.
-class InterpUniverse : SDFUniverse {
+class InterpUniverse : public InterpGalaxy, public Runnable {
 public:
-    InterpUniverse (InterpGalaxy *g) {
-	setBlock("Universe", NULL);
-	addBlock(g->setBlock("mainGalaxy", this));
-    }
+        InterpUniverse () : Runnable(KnownBlock::newSched(),
+                                     KnownBlock::domain(),this)
+        { setBlock("mainGalaxy",NULL);}
+        void newSched() {
+                delete scheduler;
+                scheduler = KnownBlock::newSched();
+                type = KnownBlock::domain();
+        }
 };
 
 PlasmaList plasmaList;  // This global is needed for the kernel
@@ -72,35 +77,30 @@ static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 // Delete the universe and make another
 extern "C" void
 KcClearUniverse() {
-    if (universe != NULL && currentGalaxy != NULL) {
-	delete universe;
-	delete currentGalaxy;
-    }
-    currentGalaxy = new InterpGalaxy;
-    universe = new InterpUniverse(currentGalaxy);
+    delete universe;
+    universe = new InterpUniverse;
+    currentGalaxy = universe;
 }
 
 // Create a new instance of star or galaxy
 extern "C" boolean
 KcInstance(char *name, char *ako) {
-    currentGalaxy->addStar(name, ako);
-    return (TRUE);
+    return currentGalaxy->addStar(name, ako);
 }
 
 // connect
 extern "C" boolean
 KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay) {
-    currentGalaxy->connect(inst1, t1, inst2, t2, delay);
-    return (TRUE);
+    return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
-    currentGalaxy->alias(fterm, inst, aterm);
-    return (TRUE);
+    return currentGalaxy->alias(fterm, inst, aterm);
 }
 
+// start a galaxy definition
 extern "C" boolean
 KcDefgalaxy(char *galname) {
     saveGalaxy = currentGalaxy;
@@ -111,7 +111,8 @@ KcDefgalaxy(char *galname) {
 
 extern "C" boolean
 KcEndDefgalaxy() {
-    currentGalaxy->addToKnownList();
+// add to the knownlist for the current domain
+    currentGalaxy->addToKnownList(KnownBlock::domain());
     currentGalaxy = saveGalaxy;
     return (TRUE);
 }
@@ -119,11 +120,11 @@ KcEndDefgalaxy() {
 // Run the universe
 extern "C" boolean
 KcRun(int n) {
-    universe->initialize();
-    for (int i = 0; i < n; i++) {
-	universe->go();
-    }
-    universe->wrapup();
+    if (!universe->initSched())
+	return FALSE;
+    universe->setStopTime(n);
+    universe->run();
+    universe->endSimulation();
     return (TRUE);
 }
 
@@ -140,7 +141,8 @@ KcIsKnown(char *class) {
 Get information about the portholes of a sog.
 Inputs: name = name of sog
 Outputs: terms = list of info about each porthole
-Caveats: This doesn't support multiportholes yet.
+
+Changed to support multiPortHoles, 7/24/90
 */
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
@@ -152,24 +154,24 @@ KcGetTerms(char* name, TermList* terms)
     char *names[TERM_ARR_MAX];
     int isOut[TERM_ARR_MAX];
     int n = block->portNames(names, isOut, TERM_ARR_MAX);
+    int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
     terms->in_n = 0;
     terms->out_n = 0;
-    for (int i=0; i < n; i++) {
+    for (int i=0; i < n + nm; i++) {
 	if (isOut[i]) {
 	    terms->out[terms->out_n].name = names[i];
-	    terms->out[terms->out_n++].multiple = FALSE;
+	    terms->out[terms->out_n++].multiple = (i >= n);
 	} else {
 	    terms->in[terms->in_n].name = names[i];
-	    terms->in[terms->in_n++].multiple = FALSE;
+	    terms->in[terms->in_n++].multiple = (i >= n);
 	}
     }
     return (TRUE);
 }
 
-/* 6/15/90
-Get params of a block.
-First attempt at an implementation, by Joe Buck who doesn't know
-how this is really supposed to work.
+/*
+Get default params of a block.
+
 Inputs:
     name = name of block to get params of
     pListPtr = the address of a ParamList node
@@ -183,17 +185,17 @@ Outputs:
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr)
 {
-    Block *block;
-    if ((block = KnownBlock::find(name)) == 0) {
+    Block *block = KnownBlock::find(name);
+    if (block == 0) {
 	return (FALSE);
     }
     int n = block->numberStates();
     pListPtr->length = n;
+    pListPtr->array = new ParamStruct[n];
     for (int i = 0; i < n; i++) {
 	    State& s = block->nextState();
 	    pListPtr->array[i].name = s.readName();
-	    // we want the initValue; use baseclass method always
-	    pListPtr->array[i].value = s.State::currentValue();
+	    pListPtr->array[i].value = s.getInitValue();
     }
     return (TRUE);
 }
@@ -206,17 +208,12 @@ Outputs: info = points to info string, free string when done
 extern "C" boolean
 KcInfo(char* name, char** info)
 {
-    Block* b = KnownBlock::clone(name);
+    Block* b = KnownBlock::find(name);
     if (!b) {
 	ErrAdd("Unknown block");
 	return (FALSE);
     }
-    b->setBlock(name, NULL);
-    StringList sl = b->printVerbose;  // sl holds string until it can be copied
-    char* s = sl;
-    *info = new char[strlen(s) + 1];
-    strcpy(*info, s);
-    delete b;
+    *info = savestring((char *)b->printVerbose());
     return (TRUE);
 }
 
