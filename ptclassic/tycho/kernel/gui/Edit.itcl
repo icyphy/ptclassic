@@ -525,6 +525,12 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-x><f> \
 	    "%Q queryFillColumn; break"
     
+    # Case control
+    bind $itk_component(text) <Meta-l> "%Q lowerCase; break"
+    bind $itk_component(text) <Escape><l> "%Q lowerCase; break"
+    bind $itk_component(text) <Meta-u> "%Q upperCase; break"
+    bind $itk_component(text) <Escape><u> "%Q upperCase; break"
+
     # Cursor motion keys do not set the modified flag
     # Note that the definitions below have a blank space.
     # This is need to tell Tk that they are real definitions,
@@ -653,10 +659,10 @@ body ::tycho::Edit::constructor {args} {
         $myMenubar addSeparator Format
 
         $myMenubar add "Lower Case" Format -underline 0 \
-                -accelerator "" -command "$this lowerCase"
+                -accelerator "M-l" -command "$this lowerCase"
 
         $myMenubar add "Upper Case" Format -underline 1 \
-                -accelerator "" -command "$this upperCase"
+                -accelerator "M-u" -command "$this upperCase"
     }
 
     insertInDisplay
@@ -1418,7 +1424,7 @@ body ::tycho::Edit::killToEndOfLine {} {
 
 #####################################################################
 #### lowerCase
-# Convert the selection to lower case.
+# Convert the selection or the current word to lower case.
 #
 body ::tycho::Edit::lowerCase {} {
     
@@ -1426,8 +1432,11 @@ body ::tycho::Edit::lowerCase {} {
     
     if {[set sel [getSelection]] != {}} {
 	deleteRange sel.first sel.last
-        insertString insert [string tolower $sel]
+    } {
+        set sel [get "insert wordstart" "insert wordend"]
+        deleteRange "insert wordstart" "insert wordend"
     }
+    insertString insert [string tolower $sel]
 }
 
 #########################################################################
@@ -1869,7 +1878,7 @@ body ::tycho::Edit::unselectRange {start stop} {
 
 #####################################################################
 #### upperCase
-# Convert the selection to upper case.
+# Convert the selection or the current word to upper case.
 #
 body ::tycho::Edit::upperCase {} {
     
@@ -1877,8 +1886,11 @@ body ::tycho::Edit::upperCase {} {
     
     if {[set sel [getSelection]] != {}} {
 	deleteRange sel.first sel.last
-        insertString insert [string toupper $sel]
+    } {
+        set sel [get "insert wordstart" "insert wordend"]
+        deleteRange "insert wordstart" "insert wordend"
     }
+    insertString insert [string toupper $sel]
 }
 
 #####################################################################
