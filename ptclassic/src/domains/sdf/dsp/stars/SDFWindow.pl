@@ -68,7 +68,7 @@ One period of samples are produced on every firing.
     }
     code {
 	extern "C" {
-	    extern int strcasecmp( char*, char*);
+	    extern int strcasecmp(const char*,const char*);
 	}
 #define SDFWinType_Null		(0)
 #define SDFWinType_Rectangle	(1)
@@ -79,7 +79,7 @@ One period of samples are produced on every firing.
 #define SDFWinType_SteepBlackman	(6)
     }
     start {
-	char *wn = name;
+	const char *wn = name;
 
 	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
 	    winType = SDFWinType_Rectangle;
