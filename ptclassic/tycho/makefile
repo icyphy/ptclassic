@@ -1,8 +1,8 @@
 # Makefile for Ptolemy Tycho system, top Tycho directory
 #
-# @(#)makefile	1.2 6/19/95
+# $Id$
 #
-# Copyright (c) 1991-1995 The Regents of the University of California.
+# Copyright (c) 1991-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
