@@ -213,18 +213,23 @@ $(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
 jclass:	$(JSRCS) $(JCLASS) 
 
 # Build the Java documentation.
+javadocs: doc/codeDoc/tree.html
 jhtml: doc/codeDoc/tree.html
 doc/codeDoc/tree.html:	$(JSRCS) 
-	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi
-	rm -f doc/codeDoc/*.html
-	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS)
-	@for x in doc/codeDoc/*.html; do \
+	@if [ "$(JSRCS)" = "" ]; then \
+		echo "No java sources, so we don't run javadoc";\
+	else \
+	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi; \
+	rm -f doc/codeDoc/*.html; \
+	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS); \
+	for x in doc/codeDoc/*.html; do \
 		echo "Fixing paths in $$x"; \
 		sed -e 's|<a href="java|<a href="$(JAVAHTMLDIR)/java|g' \
 		-e 's|<img src="images/|<img src="$(JAVAHTMLDIR)/images/|g' \
 			$$x > $$x.bak; \
 		mv $$x.bak $$x; \
-	done
+	done; \
+	fi
 
 # Bring up the appletviewer on a test file.
 jtest: $(JTESTHTML) $(JCLASS)
