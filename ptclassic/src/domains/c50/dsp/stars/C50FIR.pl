@@ -17,9 +17,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
 	htmldoc {
+<a name="fir"></a>
 The output of the FIR filter is given by:
 <pre>
-        y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] x[N-i] }
+sum from i = 0 to i = (N - 1) of  c[i]&#183x[N-i]
 </pre>
 where N is the order of the filter given by the number of coefficients in
 <i>taps</i>.
