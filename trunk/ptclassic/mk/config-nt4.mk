@@ -55,7 +55,7 @@ RANLIB = touch
 YACC= byacc
 # Use gcc everywhere including in octtools
 CC =		gcc -I$(ROOT)/src/compat/nt
-CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS
+CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS -fpermissive
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
@@ -96,7 +96,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Variables for the linker
 #
 # system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS) -lstdc++ -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm
@@ -120,7 +120,7 @@ BINARY_EXT = .exe
 X11_DIR =	/usr/X11R6.4
 X11_INCSPEC =	-I$(X11_DIR)/include
 X11_LIBDIR =	$(X11_DIR)/lib
-X11EXT_LIBSPEC=	-lXext -lSM -lICE
+X11EXT_LIBSPEC=	-lXpm -lXext -lSM -lICE
 X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
 
 # XMKMF and MKDIRHIER are used when building xv
