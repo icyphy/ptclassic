@@ -62,14 +62,15 @@ $(BINDIR)/pxgraph.x11: FORCE
 	fi;
 
 makefiles:
-sources: makefile 
+sources: makefile $(MISC_FILES)
+	(cd pxgraph; make sources)
 
 clean:
 depend:
 	echo no dependencies to make in this directory
 
 checkjunk:
-	@checkextra -v makefile SCCS
+	@checkextra -v makefile $(MISC_FILES) pxgraph SCCS
 
 sccsinfo:
 	@sccs check || true
