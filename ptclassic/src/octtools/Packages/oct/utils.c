@@ -30,6 +30,31 @@ static char SccsId[]="$Id$";
 #include <varargs.h>  
 #include "uprintf.h"
 
+#include "bag.h"
+#include "box.h"
+#include "change_record.h"
+#include "change_list.h"
+#include "circle.h" 
+#include "default.h"
+#include "edge.h"
+#include "facet.h"
+#include "fsys.h"
+#include "geo.h"
+#include "geo_points.h"
+#include "inst.h"
+#include "label.h"
+#include "layer.h"
+#include "master.h"
+#include "net.h"
+#include "oct_id.h"
+#include "path.h"
+#include "point.h"
+#include "polygon.h"
+#include "prop.h"
+#include "term.h"
+
+#include "oct_utils.h"
+
 int oct_abort_on_error = 0;
 
 #if defined(MCC_DMS)
@@ -115,6 +140,7 @@ octErrorString()
 #define va_dcl		char *fmt;
 #endif
 
+void
 oct_error(va_alist)
 va_dcl
 {
@@ -145,6 +171,7 @@ va_dcl
 #define va_dcl		char *fmt;
 #endif
 
+void
 oct_prepend_error(va_alist)
 va_dcl
 {
@@ -177,6 +204,7 @@ char *string;
     return;
 }
 
+void
 oct_subclass_responsibility()
 {
     errRaise(OCT_PKG_NAME, OCT_ERROR, "subfunction not implemented");
@@ -184,6 +212,7 @@ oct_subclass_responsibility()
 
 struct object_desc oct_object_descs[OCT_MAX_TYPE+1];
 
+void
 oct_init_descs()
 {
     oct_init_default_desc();
