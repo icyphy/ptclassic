@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	1/20/94  major revisions: each Fix now keeps track of errors,
 	         many bugs fixed
 	1/21/94  now twos-complement only
+	6/2/94	 invention of a second precision format "fracbits/length"
 
 This header file declares the class type Fix and its supporting 
 functions. 
@@ -55,6 +56,11 @@ Method 1: a pair of integer arguments, specifying the length in bits
 Method 2: As a string like "3.2", or more generally "m.n", where m is
           intBits and n is the number to the right of the binary point.
 	  Thus length is m+n.
+
+Method 3: A string like "24/32" which means 24 fraction bits from a total
+	  length of 32.  This format is more convenient when using precision
+	  states, because the word length often remains constant while the
+	  number of fraction bits changes with the normalization being used.
 
 Arithmetic is done in such a way that operations like + do not overflow,
 as a rule, unless the result cannot be represented with all FIX_MAX_LENGTH
@@ -75,6 +81,7 @@ access to the flag.
 **************************************************************************/
 
 class ostream;
+class Precision;
 typedef unsigned short uint16;
 typedef unsigned long  uint32;
 typedef unsigned char  uchar;
@@ -111,7 +118,9 @@ public:
     int intb() const { return intBits; }
 
     // bits to left of binary point
-    int precision() const { return length - intBits;}
+    int fracb() const { return length - intBits;}
+    // obsolete
+    int precision() const { return fracb(); }
 
     // return overflow type (one of the codes above)
     int overflow() const { return ovf_type;}
@@ -159,6 +168,7 @@ public:
     // create a Fix with specified precision and zero value.
     Fix(int length, int intbits);
     Fix(const char * precisionString);
+    Fix(const Precision&);
 
     // create a Fix with default precision
     Fix(double value);
@@ -167,6 +177,7 @@ public:
     // We always round to the nearest Fix.
     Fix(int length, int intbits, double value);
     Fix(const char * precisionString, double value);
+    Fix(const Precision&, double value);
 
     // create a Fix, specifying the bits precisely.
     // the first word of bits is the most significant.
