@@ -103,13 +103,13 @@ OBJS =		$(SRCS:.cc=.o)
 # functions for pigiRpc, ptcl and tycho, we need to be sure that
 # libpigi, libptcl and libtycho are all static on the hppa.
 ifdef USE_CORE_STATIC_LIBS
-	LIBNONSHARED =		libtysh.a
-	PT_DEPEND += 	$(LIBDIR)/$(LIBNONSHARED)
-	INSTALL += 	$(LIBDIR)/$(LIBNONSHARED)
+LIBNONSHARED =		libtysh.a
+PT_DEPEND += 	$(LIBDIR)/$(LIBNONSHARED)
+INSTALL += 	$(LIBDIR)/$(LIBNONSHARED)
 else
-	LIB =		libtysh.$(LIBSUFFIX)
-	PT_DEPEND += 	$(LIBDIR)/$(LIB)
-	INSTALL += 	$(LIBDIR)/$(LIB)
+PTLIB =		libtysh.$(LIBSUFFIX)
+PT_DEPEND += 	$(LIBDIR)/$(PTLIB)
+INSTALL += 	$(LIBDIR)/$(PTLIB)
 endif
 
 ifndef BASENAME
