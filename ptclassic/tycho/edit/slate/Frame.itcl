@@ -41,7 +41,7 @@
 # constant when the item is resized. In all other respects, it can be 
 # treated like any other rectangular item.
 #
-# <p><b>Options</b>
+# <p><a name="#Slate Frame class Options"></a><b>Options</b>
 #
 # <dl>
 # <li><dd>
