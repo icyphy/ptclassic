@@ -32,8 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for BDFTarget, the default target to be used in the BDF
  domain.  Very similar to SDFTarget.
 
- If loopScheduler is 1, a clustering scheduler is used (BDFClustSched),
- otherwise a default scheduler, BDFScheduler, is used.
+ BDFTarget uses a clustering scheduler (BDFClustSched).
 
 ***********************************************************************/
 #ifndef _BDFTarget_h
