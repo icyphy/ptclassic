@@ -611,6 +611,9 @@ body ::tycho::File::altFile {} {
     if {$filename != {}} {
 	configure -file $filename
 	windowMenuRemoveAll $prevfile
+        # Reset the insertion cursor to the origin, or else we will
+        # try to preserve the point in the file.
+        $itk_component(text) mark set insert 1.0
         markUnmodified
         reload
     }
