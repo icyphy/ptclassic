@@ -64,7 +64,7 @@ ITCL_LIBSPEC =	$(ITCL_SHARED_LIBSPEC)
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
 # See the ld man page for more information.  These path names must
 # be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/shared
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/:$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/shared
 
 # Shared libraries that libg++.so needs
 SHARED_SYSLIBS =	-lio -lcurses -lrx 
