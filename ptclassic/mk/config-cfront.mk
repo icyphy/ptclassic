@@ -5,11 +5,9 @@
 #		       
 # Programmer:  J. T. Buck
 #
-# This config file suffices to compile Ptolemy, except for some of
-# the Thor stars.  Ptolemy requires more work to function completely
-# under cfront: in particular, the DE domain and cg/gilsScheduler do
-# not function correctly under cfront at present, due either to non-portable
-# constructs or cfront compiler bugs.
+# This config file suffices to compile Ptolemy under cfront version
+# 2.1 on the Sun-4, and should be close to what is needed on other
+# platforms.
 
 # Full path to the ~ptolemy directory (you may need to change this
 # for your installation)
@@ -74,3 +72,11 @@ X11INCL=
 # define the following symbol as "-Ldir" where dir is the directory
 # containing them.  Otherwise leave it blank.
 X11LIBDIR=
+
+# LX11 is normally just -lX11, but some vendors (e.g. DEC) have put
+# this library somewhere else, e.g. -lX11-mit.
+LX11 = -lX11
+
+# LXEXT is normally just -lXext, but some vendors (e.g. DEC) have put
+# this library somewhere else, e.g. -lXext-mit.
+LXEXT = -lXext
