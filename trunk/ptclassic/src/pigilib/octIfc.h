@@ -10,6 +10,8 @@ extern boolean GetFormalParams();
 extern boolean SetSogParams();
 extern boolean GetOrInitSogParams();
 extern void GetOrInitDelayProp();
+extern void GetOrInitBusProp();
+extern void IntizeProp();
 extern boolean IsVemConnector();
 extern boolean IsIoPort();
 extern boolean IsInputPort();
