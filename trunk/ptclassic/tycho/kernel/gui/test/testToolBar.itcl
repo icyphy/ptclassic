@@ -37,87 +37,104 @@ if {[string compare test [info procs test]] == 1} then {
 #set VERBOSE 1
 
 ############################################################################
+#### ToolBar-1.1
 # Test ToolBar
 test ToolBar-1.1 {Test out buttons} {
-   catch {delete object .t}
-   ::tycho::ToolBar .t
-   .t button foo -text Foo -command {set invokeResults "Foo!"}
-   .t button bar -text Bar -command {set invokeResults "Bar!"}
-   .t entry location Location {The location entry contains this text} {puts}
-   pack .t
-   wm deiconify .
+   catch {delete object [$editor displayer]}
+   set editor [::tycho::view Edit -toolbar -1]
+
+   $editor toolbar button foo -text Foo -command {set invokeResults "Foo!"}
+   $editor toolbar button bar -text Bar -command {set invokeResults "Bar!"}
+   $editor toolbar entry location Location \
+	   {The location entry contains this text} {puts}
 
    # Invoke some buttons
-   set retval1 [list [.t invoke foo] [.t invoke bar]]
+   set retval1 [list [$editor toolbar invoke foo] [$editor toolbar invoke bar]]
    update idletasks
 
    # Disable one button
-   .t disable foo
+   $editor toolbar disable foo
    update idletasks
 
-   set retval2 [list [.t invoke foo] [.t invoke bar]]
+   set retval2 [list [$editor toolbar invoke foo] [$editor toolbar invoke bar]]
 
    # Is this a bug?  If a button is disabled, can I still invoke it?
-   .t disable foo
-   .t disable bar
-   .t button bif -text Bif -command {set invokeResults "Bif!"}
+   $editor toolbar disable foo
+   $editor toolbar disable bar
+   $editor toolbar button bif -text Bif -command {set invokeResults "Bif!"}
    update idletasks
 
-   set retval3 [list [.t invoke foo] [.t invoke bar] [.t invoke bif]]
+   set retval3 [list [$editor toolbar invoke foo] \
+	   [$editor toolbar invoke bar] [$editor toolbar invoke bif]]
 
    # Try running entry methods on buttons
-   set retval4 [list [.t clear foo] [.t get bar]]
+   set retval4 [list [$editor toolbar clear foo] [$editor toolbar get bar]]
 
    # Try updating the button with insert, which is an error
-   catch {.t insert foo "This is a foo"} retval5
+   catch {$editor toolbar insert foo "This is a foo"} retval5
 
    # Use the parent buttonconfigure method to change the text
-   .t buttonconfigure foo -text "New foo text"
-   set retval6 [.t buttoncget foo -text]
+   $editor toolbar buttonconfigure foo -text "New foo text"
+
+   set retval6 [$editor toolbar buttoncget foo -text]
+
+   catch {delete object [$editor displayer]}
 
    list $retval1 $retval2 $retval3 $retval4 $retval5 $retval6
 } {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} {can't read "tagsinsert(foo)": no such element in array} {New foo text}}
 
 
+############################################################################
+#### ToolBar-2.1
+#
 test ToolBar-2.1 {Test out entries} {
-   catch {delete object .t}
-   ::tycho::ToolBar .t
-   .t entry location Location {The location entry contains this text} {puts}
-   .t entry location2 Location2 {The other location entry contains this text} \
+   catch {delete object [$editor displayer]}
+   set editor [::tycho::view Edit -toolbar -1]
+   $editor toolbar entry location Location \
+	   {The location entry contains this text} {puts}
+   $editor toolbar entry location2 Location2 \
+	   {The other location entry contains this text} \
            {puts}
-   pack .t
-   wm deiconify .
 
    # Mess with the location entry
-   set retval1 [list [.t get location] [.t get location2]]
-   .t clear location
+   set retval1 [list [$editor toolbar get location] \
+	   [$editor toolbar get location2]]
+   $editor toolbar clear location
    update idletasks
    # Location1 should be empty
-   set retval2 [list [.t get location] [.t get location2]]
-   .t clear 
-   set retval3 [list [.t get location] [.t get location2]]
+   set retval2 [list [$editor toolbar get location] \
+	   [$editor toolbar get location2]]
+   $editor toolbar clear 
+   set retval3 [list [$editor toolbar get location] [$editor toolbar get location2]]
    update idletasks
 
-   .t insert location {New text for the location entry}
-   set retval4 [list [.t get location] [.t get location2]]
+   $editor toolbar insert location {New text for the location entry}
+   set retval4 [list [$editor toolbar get location] \
+	   [$editor toolbar get location2]]
    update idletasks
+   catch {delete object [$editor displayer]}
 
    list $retval1 $retval2 $retval3 $retval4
 } {{{The location entry contains this text} {The other location entry contains this text}} {{} {The other location entry contains this text}} {{} {}} {{New text for the location entry} {}}}
 
+
+############################################################################
+#### ToolBar-2.1
+#
 test ToolBar-3.1 {Test out entryforeground, entrybackground} {
-   catch {delete object .t}
-   ::tycho::ToolBar .t \
+   catch {delete object [$editor displayer]}
+   set editor [::tycho::view Edit -toolbar -1]
+
+   $editor toolbar configure \
 	   -entryforeground red \
 	   -entrybackground blue \
 	   -entryfont fixed
-   .t entry location Location {The location entry contains this text} {puts}
-   pack .t
-   wm deiconify .
-   list [.t cget -entryforeground] \
-           [.t cget -entrybackground] \
-           [.t cget -entryfont]
+   $editor toolbar entry location Location \
+	   {The location entry contains this text} {puts}
+   list [$editor toolbar cget -entryforeground] \
+           [$editor toolbar cget -entrybackground] \
+           [$editor toolbar cget -entryfont]
 } {red blue fixed}
 
 # Delete the last ToolBar
-catch {delete object .t}
+catch {delete object [$editor displayer]}
