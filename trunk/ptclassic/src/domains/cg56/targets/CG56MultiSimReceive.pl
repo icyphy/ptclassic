@@ -1,5 +1,5 @@
 defstar {
-	name { FictionReceive }
+	name { MultiSimReceive }
 	domain { CG56 }
 	desc {
 Receive star for Fiction target
