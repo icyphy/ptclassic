@@ -50,27 +50,47 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 		  "-I$PTOLEMY/tcltk/tk/include -I$PTOLEMY/tcltk/tcl/include "
 		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib "
 		  "-I$PTOLEMY/src/ptklib";
-	char *x11dirstring = getenv("PTX11DIR");
-	if (x11dirstring) {
-	  compOpts << " -I" << x11dirstring << "/include";
-	}
+	// There is no point in including X11 directories here,
+	// since they will be different for each platform.
 	compileOptions.setInitValue(compOpts);
 
+	// Note that as a last resort, a guess at the X11 library is given
 	StringList linkOpts =
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L$PTOLEMY/tcltk/tcl.$ARCH/lib "
 		  "-L$PTOLEMY/lib.$ARCH "
-		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib ";
-	if (x11dirstring) {
-	  linkOpts << " -L" << x11dirstring << "/lib";
-	}
-	linkOpts << " -L/usr/X11/lib";
-	linkOpts << " -ltk -ltcl -lptk -lXpm -lX11 -lm";
+		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
+		  "-L/usr/X11/lib "
+		  "-ltk -ltcl -lptk -lXpm -lX11 -lm";
 	linkOptions.setInitValue(linkOpts);
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
 	addStream("tkSetup", &tkSetup);
+}
+
+// Modify the compile line
+StringList CGCTclTkTarget :: compileLine(const char* fName) {
+  StringList cmd = (const char*) compileCommand;
+
+  // If the appropriate environment variable is defined,
+  // include the location of the X11 directories.
+  char *x11dirstring = getenv("PTX11DIR");
+  if (x11dirstring) {
+    cmd << " -I" << x11dirstring << "/include";
+  }
+  cmd << " " << (const char*) compileOptions << " ";
+
+  cmd << fName << " ";
+
+  // Again, include the X11 directories.
+  // Note that this comes first, so it can only be overridden
+  // with the environment variable.
+  if (x11dirstring) {
+    linkOpts << " -L" << x11dirstring << "/lib ";
+  }
+  cmd << (const char*) linkOptions;
+  return cmd;
 }
 
 void CGCTclTkTarget :: initCodeStrings() {

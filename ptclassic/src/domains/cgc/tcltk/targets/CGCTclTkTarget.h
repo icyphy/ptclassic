@@ -46,6 +46,8 @@ public:
 
 	void beginIteration(int repetitions, int depth);
 
+	/* virtual */ StringList compileLine(const char* fName);
+
 protected:
 
 	// code generation init routine; compute offsets, generate initCode
