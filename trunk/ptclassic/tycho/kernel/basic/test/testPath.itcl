@@ -165,6 +165,8 @@ test Path-4.1 {Test out relativePath} {
 	    [file join a b .. c]] \
 	    [file join a b .. c]]
 
+    # If this test fails, then it is probably because
+    # $TYCHO/editors/visedit/doc/codeDoc/EditForest.html does not exist.
     set r11 [testEq [::tycho::relativePath \
 	    \$TYCHO/typt/editors/doc/codeDoc \
 	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html] \
