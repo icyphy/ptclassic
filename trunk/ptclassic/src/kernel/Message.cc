@@ -43,6 +43,7 @@ StringList PacketData::print() const {
 	StringList out = "<";
 	out += dataType();
 	out += ">: no print method";
+	return out;
 }
 
 int PacketData::errorConvert(const char* arg) const {
@@ -67,6 +68,7 @@ StringList Packet::typeError(const char* expected) const {
 	msg += "', got '";
 	msg += dataType();
 	msg += "'";
+	return msg;
 }
 
 static PacketSample pproto;
@@ -109,7 +111,7 @@ void PacketSample::operator << (const Packet& p) { data = p;}
 // particle copy
 Particle& PacketSample::operator = (const Particle& p) {
 	if (compareType(p))
-		data = ((PacketSample&)p).data;
+		data = ((PacketSample*)&p)->data;
 	return *this;
 }
 
