@@ -81,6 +81,7 @@ void GrayImage::assemble(const BaseImage* bi)
 // Are we set up to merge yet?
 	if (size != fullSize) {
 		unsigned char* tmpPtr = new unsigned char[fullSize];
+		for(int t = 0; t < fullSize; t++) {tmpPtr[t]=(unsigned char) 0;}
 		copy(size, tmpPtr+startPos, grayData);
 		delete grayData;
 		grayData = tmpPtr;
