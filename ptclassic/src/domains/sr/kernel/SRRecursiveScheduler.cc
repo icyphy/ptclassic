@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRRecursiveScheduler.h"
 #include "SRRecursiveSchedule.h"
 #include "SRDependencyGraph.h"
+#include "SRParter.h"
 #include "Set.h"
 #include "StringList.h"
 #include "Error.h"
@@ -48,8 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <limits.h>
 
 extern const char SRdomainName[];
-
-SRPartType SRParter::parter = SRPartOneT;
 
 // Return a printed representation of the schedule
 //
@@ -188,12 +187,14 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   SRRecursiveSchedule schedule( *dgraph );
 
-  int mc = mincost( wholeGraph,
-		    wholeGraph.cardinality() * wholeGraph.cardinality(),
-		    schedule, 0);
+  int mc = mincost( wholeGraph, INT_MAX, schedule, 0);
 
-  cout << "mincost is " << mc << "\n";
-  cout << "best schedule was " << schedule.print() << '\n';
+  if ( mc == INT_MAX ) {
+    cout << "No schedule met the bound\n";
+  } else {
+    cout << "mincost is " << mc << "\n";
+    cout << "best schedule was " << schedule.print() << '\n';
+  }
 
   return 0;
 }
@@ -330,7 +331,7 @@ SRRecursiveScheduler::mincost(
 {
 
   // cout << "mincost called on " << subgraph.print() << " with bound " << max
-  //      << "\n";
+  //     << "\n";
 
   // Decompose the subgraph into strongly-connected components
 
@@ -352,7 +353,7 @@ SRRecursiveScheduler::mincost(
   while( (SCC = (Set *)(next++)) != NULL ) {
     SCCsize[i] = SCC->cardinality();
 
-    // cout << "Size " << SCCsize[i] << "\n";
+    //cout << "Size " << SCCsize[i] << "\n";
 
     remaining += SCCsize[i]*SCCsize[i] - (SCCsize[i] - 1);
     i++;
@@ -364,7 +365,7 @@ SRRecursiveScheduler::mincost(
     remaining = max;	    // Given bound was better -- use it
   }
 
-  // cout << "remaining cost = " << remaining << "\n";
+  // cout << "Initial remaining = " << remaining << "\n";
 
   // Find the minimum cost of each SCC
 
@@ -403,7 +404,7 @@ SRRecursiveScheduler::mincost(
 
       // cout << "The bound on this component is " << bound << "\n";
 
-      SRParter part( *SCC );
+      SRParter part( *SCC, *dgraph );
 
       SRRecursiveSchedule trialSchedule( *dgraph );
 
@@ -466,48 +467,3 @@ SRRecursiveScheduler::mincost(
   return max-remaining;
 
 }
-
-// Construct a new partitioner based on SRPartType and reset it
-SRParter::SRParter( Set & s )
-{
-
-  switch ( parter ) {
-  case SRPartOneT:
-    mypart = new SRPartOne( s );
-  default:
-    mypart = new SRPartOne( s );
-  }
-
-  mypart->init();
-
-}
-
-void SRPartOne::init()
-{
-  vertexIndex = -1;
-}
-
-Set * SRPartOne::next( int b /* Maximum size of the partition */ )
-{
-  if ( b >= 1 ) {
-
-    // Find the next vertex in the set
-
-    while ( vertexIndex < (partSet->size())-1 ) {
-      if ( (*partSet)[++vertexIndex] ) {
-
-	// Return a set containing only that vertex
-
-	Set * s = new Set( partSet->size() );
-	(*s) |= vertexIndex;
-	return s;
-
-      }
-    }
-  }
-
-  return NULL;
-
-}
-
-
