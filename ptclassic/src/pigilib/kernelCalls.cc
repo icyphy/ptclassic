@@ -105,11 +105,12 @@ KcDomainOf(char* name) {
 
 // Delete the universe and make another
 extern "C" void
-KcClearUniverse() {
+KcClearUniverse(const char* name) {
 	delete universe;
-	universe = new InterpUniverse;
+	universe = new InterpUniverse(name);
 	currentGalaxy = universe;
 	LOG << "(reset)\n";
+	LOG << "# Creating universe '" << name << "'\n";
 	logDomain();
 }
 
@@ -484,4 +485,19 @@ Return the name of the nth domain in the list of known domains
 extern "C" char*
 nthDomainName(int n) {
         return (char*) Domain::nthDomainName(n);
+}
+
+// add a node with the given name
+extern "C" int
+KcNode (const char* name) {
+	LOG << "\t(node " << name << ")\n";
+	return currentGalaxy->addNode(name);
+}
+
+// connect a porthole to a node
+extern "C" int
+KcNodeConnect (const char* inst, const char* term, const char* node) {
+ 	LOG << "\t(nodeconnect (" << inst << " \"" << term << "\") " <<
+		node << ")\n";
+	return currentGalaxy->nodeConnect(inst, term, node);
 }
