@@ -655,18 +655,6 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
   localVariableList.put(*newvar);
 }
 
-// Return the assignment operator for States.
-const char* VHDLTarget :: stateAssign() {
-  const char* assign = ":=";
-  return assign;
-}
-
-// Return the assignment operator for PortHoles.
-const char* VHDLTarget :: portAssign() {
-  const char* assign = ":=";
-  return assign;
-}
-
 // Return the VHDL type corresponding to the State type.
 const char* VHDLTarget :: stateType(const State* st) {
   const char* type;
