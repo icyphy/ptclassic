@@ -49,14 +49,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <udpam.h>
 #include <am.h>
 #include <misc.h>  
-#ifdef SOLARIS 
 #include <thread.h>
 #include <sys/filio.h>  
-#include <sys/systeminfo.h>	/* sysinfo() */
-#endif /* SOLARIS */
 
-static
-void BindAndSetSocket(int sd)
+extern void ThreadExitHandler(int sig);   /* SIGTERM signal handler */
+
+/*
+ * static void BindAndSetSocket(int sd)
+ *
+ * DESCRIPTION:  Binds the socket sd to a UDP socket address.  If MYRINET is 
+ * defined, use UDP/IP over Myrinet.  This function also resizes the send
+ * and receive socket buffers and designates sd as non-blocking.
+ */
+static void BindAndSetSocket(int sd)
 {
   int                arg = 1, h_errno;
   int                opt = SB_MAX;  
@@ -67,8 +72,8 @@ void BindAndSetSocket(int sd)
   char               buffer[256];        
   int                bufferlen = 256;
 #ifdef MYRINET
-  char *first_dot, second_half[256];
-  int  second_half_len;
+  char               *first_dot, second_half[256];
+  int                second_half_len;
 #endif /* MYRINET */
   
   /*
@@ -81,17 +86,11 @@ void BindAndSetSocket(int sd)
     perror("malloc error\n");
     exit(-1);
   }
-#ifdef SOLARIS
-  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
-    perror("sysinfo(SI_HOSTNAME,...) error\n");
-    exit(-1);
-  }
-#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
-#endif
+
 /* 
  * If we're using Myrinet, fiddle w/ the hostname so UDPAM chooses the
  * right interface.
@@ -122,10 +121,6 @@ void BindAndSetSocket(int sd)
    * Set socket send and receive buffers to their maximium size and
    * designate socket as non-blocking.
    */
-  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void *)(&opt), opt_len) < 0) {
-    perror("setsockopt error\n");
-    exit(-1);    
-  }
   if (setsockopt(sd, SOL_SOCKET, SO_RCVBUF, (void *)&opt, opt_len) < 0) {
     perror("setsockopt error\n");
     exit(-1);    
@@ -141,6 +136,66 @@ void BindAndSetSocket(int sd)
 }
 
 /*
+ * static int _AM_FreeEndpoint(ea_t ea)
+ *
+ * DESCRIPTION:  Internal version AM_FreeEndpoint used by AM_FreeBundle that 
+ * does not attempt to lock the bundle. 
+ */
+static int _AM_FreeEndpoint(ea_t ea)
+{
+  int            i = 0;
+  struct ep_elem *temp;
+  fd_set         fdset;
+  
+  if (ea == NULL) 
+    return(AM_ERR_BAD_ARG);
+
+  LockEP(ea);
+  FD_CLR(ea->socket, &(ea->bundle->fdset));
+  close(ea->socket);
+  if (ea->socket == ea->bundle->maxfd) {
+    memcpy(&fdset, &(ea->bundle->fdset), sizeof(ea->bundle->fdset));
+    i = ea->bundle->maxfd - 1;
+    while (i > 0) {
+      if (FD_ISSET(i, &fdset)) {
+	ea->bundle->maxfd = i;
+	break;
+      }
+      else
+	i--;
+    }
+  }
+  temp = ea->bundle->head;
+  while (temp != (struct ep_elem *)NULL) {
+    if (temp->endpoint == ea) 
+      break;
+    else 
+      temp = temp->next;
+  }
+  if (ea->bundle->num_eps == 1)                   
+    ea->bundle->head = (struct ep_elem *)NULL;
+  else if (temp->endpoint == ea->bundle->head->endpoint) { 
+    temp->next->prev = (struct ep_elem *)NULL;   
+    ea->bundle->head = temp->next;    
+  }
+  else if (temp->next == (struct ep_elem *)NULL)  
+    temp->prev->next = (struct ep_elem *)NULL;
+  else {                                          
+    temp->prev->next = temp->next;
+    temp->next->prev = temp->prev;
+  }
+  ea->bundle->num_eps--; 
+  free(ea->txpool);
+  free(ea->txfree.pointers);
+  free(ea->txtimeout.unackmessages);
+  free(ea->translation_table);
+  free(ea->handler_table);
+  free(ea);    
+  return(AM_OK);
+}
+
+
+/*
  * Endpoint and Bundle API Functions
  */
 int AM_AllocateBundle(int type, eb_t *endb)
@@ -152,7 +207,6 @@ int AM_AllocateBundle(int type, eb_t *endb)
     perror("calloc error\n");
     exit(-1);
   }
-#ifdef SOLARIS
   if (mutex_init(&(*endb)->lock, USYNC_THREAD, NULL) != 0) {
     perror("mutex_init error\n");
     exit(-1);
@@ -165,7 +219,6 @@ int AM_AllocateBundle(int type, eb_t *endb)
     perror("cond_init error\n");
     exit(-1);
   }
-#endif /* SOLARIS */
   (*endb)->type = type;
   (*endb)->mask = AM_NOEVENTS;
   FD_ZERO(&(*endb)->fdset); 
@@ -179,11 +232,10 @@ int AM_AllocateBundle(int type, eb_t *endb)
     perror("thr_create error\n");
     exit(-1);
   }
-
   return(AM_OK);
 }
 
-int AM_AllocateEndpoint(eb_t bundle, ea_t *endp)
+int AM_AllocateEndpoint(eb_t bundle, ea_t *endp, en_t **name)
 {
   struct ep_elem *new_elem;
   int            i, size = sizeof(struct sockaddr_in);
@@ -211,8 +263,8 @@ int AM_AllocateEndpoint(eb_t bundle, ea_t *endp)
     perror("calloc error\n");
     exit(-1);
   }
-  (*endp)->txfree.head = 0; 
-  (*endp)->txfree.tail = UDPAM_DEFAULT_TXBUFS - 1;
+  (*endp)->txfree.head         = 0; 
+  (*endp)->txfree.tail         = UDPAM_DEFAULT_TXBUFS - 1;
   (*endp)->txfree.num_elements = UDPAM_DEFAULT_TXBUFS;
 
   /* 
@@ -256,16 +308,15 @@ int AM_AllocateEndpoint(eb_t bundle, ea_t *endp)
   }
   for (i = 0; i < AM_MIN_NUMBER_OF_HANDLERS; i++) 
     (*endp)->handler_table[i] = abort;
+
   (*endp)->num_handlers = AM_MIN_NUMBER_OF_HANDLERS;    
-  (*endp)->start_addr = (void *)0;
-  (*endp)->length = 0;
-  (*endp)->tag = AM_NONE;
-#ifdef SOLARIS
+  (*endp)->start_addr   = (void *)0;
+  (*endp)->length       = 0;
+  (*endp)->tag          = AM_NONE;
  if (mutex_init(&((*endp)->lock), USYNC_THREAD, NULL) != 0) {
    perror("mutex_init error\n");
    exit(-1);
  }
-#endif /* SOLARIS */
   if (((*endp)->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket error\n");
     exit(-1);
@@ -277,6 +328,16 @@ int AM_AllocateEndpoint(eb_t bundle, ea_t *endp)
     exit(-1);
   }
 
+  /* 
+   * Allocate space for an endpoint name and set the fields 
+   */
+  if (((*name) = (en_t *)calloc(1, sizeof(en_t))) == NULL) {
+    perror("calloc error\n");
+    exit(-1);
+  }
+  (*name)->port    = (*endp)->sockaddr.sin_port;
+  (*name)->ip_addr = (*endp)->sockaddr.sin_addr.s_addr;
+    
   if ((new_elem = (struct ep_elem *)malloc(sizeof(struct ep_elem))) == NULL) {
     perror("malloc error\n");
     exit(-1);
@@ -320,7 +381,6 @@ int AM_Map(ea_t ea, int index, en_t remote_endpoint, tag_t tag)
     ea->translation_table[index].tag = tag;      
     ea->translation_table[index].inuse = 1;
     ea->translation_table[index].wsize = ea->wsize;
-    /* ea->translation_table[index].wsize = UDPAM_DEFAULT_WSIZE; */
     UnlockEP(ea);
     return(AM_OK);
   }
@@ -351,7 +411,6 @@ int AM_MapAny(ea_t ea, int *index, en_t remote_endpoint, tag_t tag)
     ea->translation_table[i].tag = tag;
     ea->translation_table[i].inuse = 1;
     ea->translation_table[i].wsize = ea->wsize;
-    /* ea->translation_table[i].wsize = UDPAM_DEFAULT_WSIZE; */
     UnlockEP(ea);
     return(AM_OK);
   }
@@ -436,7 +495,7 @@ int AM_FreeBundle(eb_t bundle)
     return(AM_ERR_BAD_ARG);
 
   LockBundle(bundle); 
-  if (thr_kill(bundle->bundle_thread, SIGKILL) != 0) {
+  if (thr_kill(bundle->bundle_thread, SIGTERM) != 0) {
     perror("thr_kill error\n");
     exit(-1);
   }
@@ -455,7 +514,7 @@ int AM_FreeBundle(eb_t bundle)
   if (bundle->num_eps > 0) {
     elem = bundle->head;
     while (elem != (struct ep_elem *)NULL) {
-      if ((error_code = AM_FreeEndpoint(elem->endpoint)) != AM_OK)
+      if ((error_code = _AM_FreeEndpoint(elem->endpoint)) != AM_OK)
 	return(error_code);
       next = elem->next;
       free(elem);
@@ -799,7 +858,9 @@ int AM_SetHandler(ea_t ea, handler_t handler, void (*function)())
   return(AM_OK);
 }
 
-/* abort() == unused entry */
+/*
+ * NOTE: abort() == unused entry 
+ */
 int AM_SetHandlerAny(ea_t ea, handler_t *handler, void (*function)())
 {
   int i = 0;
@@ -934,6 +995,7 @@ int AM_SetEventMask(eb_t eb, int mask)
 
 int AM_Wait(eb_t eb)
 {
+  fd_set temp_fdset;
 
   if (eb == NULL)
     return(AM_ERR_BAD_ARG);
@@ -958,8 +1020,14 @@ int AM_Wait(eb_t eb)
   return(AM_OK);
 }
 
-static
-void BindAndSetKnownSocket(int sd, int port)
+/*
+ * static void BindAndSetSocket(int sd)
+ *
+ * DESCRIPTION:  Binds the socket sd to a UDP socket address.  If MYRINET is 
+ * defined, use UDP/IP over Myrinet.  This function also resizes the send
+ * and receive socket buffers and designates sd as non-blocking.
+ */
+static void BindAndSetKnownSocket(int sd, int port)
 {
   int                arg = 1, h_errno;
   int                opt = SB_MAX;  
@@ -970,8 +1038,8 @@ void BindAndSetKnownSocket(int sd, int port)
   char               buffer[256];        
   int                bufferlen = 256;
 #ifdef MYRINET
-  char *first_dot, second_half[256];
-  int  second_half_len;
+  char               *first_dot, second_half[256];
+  int                second_half_len;
 #endif /* MYRINET */
   
   /*
@@ -979,22 +1047,16 @@ void BindAndSetKnownSocket(int sd, int port)
    * socket to that IP address/UDP port pair.
    */
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);    /* System specified UDP port */
+  addr.sin_port = htons(port);    
   if ((host = (struct hostent *)malloc(sizeof(struct hostent))) == NULL) {
     perror("malloc error\n");
     exit(-1);
   }
-#ifdef SOLARIS
-  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
-    perror("sysinfo(SI_HOSTNAME,...) error\n");
-    exit(-1);
-  }
-#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
-#endif
+
 /* 
  * If we're using Myrinet, fiddle w/ the hostname so UDPAM chooses the
  * right interface.
@@ -1025,10 +1087,6 @@ void BindAndSetKnownSocket(int sd, int port)
    * Set socket send and receive buffers to their maximium size and
    * designate socket as non-blocking.
    */
-  if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void *)(&opt), opt_len) < 0) {
-    perror("setsockopt error\n");
-    exit(-1);    
-  }
   if (setsockopt(sd, SOL_SOCKET, SO_RCVBUF, (void *)&opt, opt_len) < 0) {
     perror("setsockopt error\n");
     exit(-1);    
@@ -1043,7 +1101,7 @@ void BindAndSetKnownSocket(int sd, int port)
   }
 }
 
-int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, int port)
+int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, en_t **name, int port)
 {
   struct ep_elem *new_elem;
   int            i, size = sizeof(struct sockaddr_in);
@@ -1071,8 +1129,8 @@ int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, int port)
     perror("calloc error\n");
     exit(-1);
   }
-  (*endp)->txfree.head = 0; 
-  (*endp)->txfree.tail = UDPAM_DEFAULT_TXBUFS - 1;
+  (*endp)->txfree.head         = 0; 
+  (*endp)->txfree.tail         = UDPAM_DEFAULT_TXBUFS - 1;
   (*endp)->txfree.num_elements = UDPAM_DEFAULT_TXBUFS;
 
   /* 
@@ -1116,16 +1174,15 @@ int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, int port)
   }
   for (i = 0; i < AM_MIN_NUMBER_OF_HANDLERS; i++) 
     (*endp)->handler_table[i] = abort;
+
   (*endp)->num_handlers = AM_MIN_NUMBER_OF_HANDLERS;    
-  (*endp)->start_addr = (void *)0;
-  (*endp)->length = 0;
-  (*endp)->tag = AM_NONE;
-#ifdef SOLARIS
+  (*endp)->start_addr   = (void *)0;
+  (*endp)->length       = 0;
+  (*endp)->tag          = AM_NONE;
  if (mutex_init(&((*endp)->lock), USYNC_THREAD, NULL) != 0) {
    perror("mutex_init error\n");
    exit(-1);
  }
-#endif /* SOLARIS */
   if (((*endp)->socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket error\n");
     exit(-1);
@@ -1137,6 +1194,16 @@ int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, int port)
     exit(-1);
   }
 
+  /* 
+   * Allocate space for an endpoint name and set the fields 
+   */
+  if (((*name) = (en_t *)calloc(1, sizeof(en_t))) == NULL) {
+    perror("calloc error\n");
+    exit(-1);
+  }
+  (*name)->port    = (*endp)->sockaddr.sin_port;
+  (*name)->ip_addr = (*endp)->sockaddr.sin_addr.s_addr;
+    
   if ((new_elem = (struct ep_elem *)malloc(sizeof(struct ep_elem))) == NULL) {
     perror("malloc error\n");
     exit(-1);

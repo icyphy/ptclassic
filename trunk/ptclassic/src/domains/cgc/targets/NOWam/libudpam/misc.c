@@ -48,22 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <udpam.h>
 #include <am.h>
 #include <misc.h>
-
-#ifdef SOLARIS 
 #include <thread.h>
-int gettimeofday(struct timeval *, void *);
-#endif /* SOLARIS */
-
-/* Forward declarations */
-extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
-extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id,
-		       int seq_num, tag_t tag, ea_t dest_ep);
-void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint, 
-		   int reply_endpoint, Token *token, handler_t handler, 
-		   void *source_addr, void *dest_addr, int nbytes, 
-		   int dest_offset, int source_offset,
-		   int arg0, int arg1, int arg2, int arg3, int arg4,
-		   int arg5, int arg6, int arg7, int buf_id, int seq_num);
 
 /*
  * Walk through endpoint's timeout list and resend messages that have 
@@ -82,7 +67,12 @@ void ScanTimeoutList(ea_t ea)
 
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
-  gettimeofday(&curr_time, (void *)NULL);
+#ifdef SOL_2_5
+  gettimeofday(&curr_time);
+#elif SOLARIS
+  gettimeofday(&curr_time, NULL);
+#endif 
+
   while (num_elements-- > 0) {
     if ((curr_time.tv_sec - timeout_elem->timestamp.tv_sec) >
 	(1 << (timeout_elem->num_tries - 1))*QUANTA) {
@@ -542,7 +532,7 @@ int AM_PostSvar(eb_t eb)
       exit(-1);
     }
     DPRINTF(("Posted Semaphore.  Count is now %d\n",
-	     (int)eb->synch_var.count));
+	     eb->synch_var.count));
   }
   return(AM_OK);
 }
@@ -556,7 +546,11 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
   list = &(endpoint->txtimeout);
   timeout_elem->num_tries++;  
   if ((list->num_elements == 1) || (timeout_elem == list->tail)) {
-    gettimeofday(&(timeout_elem->timestamp), (void *)NULL);
+#ifdef SOL2_5
+    gettimeofday(&(timeout_elem->timestamp), NULL);
+#elif SOLARIS
+    gettimeofday(&(timeout_elem->timestamp));
+#endif
     return;
   }
   if (timeout_elem == list->head) {
@@ -567,7 +561,11 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
     timeout_elem->prev->next = timeout_elem->next;
     timeout_elem->next->prev = timeout_elem->prev;
   }
-  gettimeofday(&(timeout_elem->timestamp), (void *)NULL);
+#ifdef SOL2_5
+  gettimeofday(&(timeout_elem->timestamp), NULL);
+#elif SOLARIS
+  gettimeofday(&(timeout_elem->timestamp));
+#endif
   list->tail->next = timeout_elem;
   timeout_elem->prev = list->tail;
   timeout_elem->next = (struct timeout_elem *)NULL;
@@ -625,7 +623,11 @@ void AddTimeout(ea_t endpoint, UDPAM_Buf *buf, int req_buf_id,
   list->unackmessages[i].message = buf;
   list->unackmessages[i].req_buf_id = req_buf_id;    /* BufID of Request */
   list->unackmessages[i].req_seq_num = req_seq_num;  /* SeqNum of Request */
-  gettimeofday(&(list->unackmessages[i].timestamp), (void *)NULL);
+#ifdef SOL2_5
+  gettimeofday(&(list->unackmessages[i].timestamp), NULL);
+#elif SOLARIS
+  gettimeofday(&(list->unackmessages[i].timestamp));
+#endif
   list->unackmessages[i].destination.sin_port = destination->sin_port;
   list->unackmessages[i].destination.sin_addr.s_addr = 
     destination->sin_addr.s_addr;
@@ -725,7 +727,6 @@ void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint,
     memcpy(&(argblock->token), token, sizeof(Token));
   argblock->handler       = handler;
   argblock->source_addr   = source_addr;
-/*  argblock->dest_addr     = dest_addr; */
   argblock->nbytes        = nbytes;
   argblock->dest_offset   = dest_offset;
   argblock->source_offset = source_offset;
@@ -747,7 +748,7 @@ void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint,
  */
 void *TimeoutThread(void *voidbundle)
 {
-  int              num_eps, err = 0, n, flag = 0;
+  int              num_eps, err, n, flag = 0;
   struct ep_elem   *ep_elem_ptr;
   eb_t             bundle;
   fd_set           temp_fdset;
