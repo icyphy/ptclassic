@@ -44,11 +44,13 @@ void SDFStar :: prepareForScheduling() {
 
 // firing SDF star
 void SDFStar :: fire() {
+	BlockPortIter next(*this);
 	for(int i = numberPorts(); i > 0; i--)
-		nextPort().grabData();
+		(next++)->grabData();
 	go();
+	next.reset();
 	for(i = numberPorts(); i > 0; i--)
-		nextPort().sendData();
+		(next++)->sendData();
 }
 
 // The following is defined in SDFDomain.cc -- this forces that module
