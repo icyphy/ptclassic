@@ -250,12 +250,15 @@ body ::tycho::EditProgram::commentSelection {} {
 # hit ok.
 #
 body ::tycho::EditProgram::execProcess {command {waitForOk 1}} {
+    set saveDir [pwd]
+    cd [file dirname $file]
     set w [::tycho::autoName .exec]
     ::tycho::Exec $w -command $command
     $w centerOnScreen
     if {$waitForOk != 1} {
         $w invoke ok 
     }
+    cd $saveDir
 }
 
 #####################################################################
