@@ -51,7 +51,7 @@ int CG56Target :: compileCode() {
 void CG56Target :: headerCode () {
     codeSection();
     MotorolaTarget::headerCode();
-    char* path = expandPathName("$PTOLEMY/lib/cg56");
+    const char* path = expandPathName("$PTOLEMY/lib/cg56");
     myCode << "\tinclude '" << path << "/intequlc.asm'\n\tinclude '"
 	   << path << "/ioequlc.asm'\n";
     delete [] path;
