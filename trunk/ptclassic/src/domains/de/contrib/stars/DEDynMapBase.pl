@@ -430,6 +430,17 @@ changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
                   "Error in computing depth after deletion of a dynamic block");
                     return;
                 }
+
+		// Resort the calendar queue because of
+		// porthole priority changes.
+                if( myMutCQScheduler_p != NULL ) {
+                    myMutCQScheduler_p->resortEvents();
+		} else if( myCQScheduler_p != NULL ) {
+                    myCQScheduler_p->resortEvents();
+		} else if( myDEScheduler_p != NULL ) {
+                    myDEScheduler_p->resortEvents();
+		}
+
             }
             return;
         }  
@@ -614,6 +625,16 @@ changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
                 return;
             }
             
+	    // Resort the calendar queue because of
+	    // porthole priority changes.  
+	    if( myMutCQScheduler_p != NULL ) { 
+		myMutCQScheduler_p->resortEvents();
+	    } else if( myCQScheduler_p != NULL ) {
+                myCQScheduler_p->resortEvents();
+	    } else if( myDEScheduler_p != NULL ) {
+                myDEScheduler_p->resortEvents();
+	    }
+
             // We have to take care of our source stars. A source-star which is
             // derived from DERepeatStar is fired first during DERepeat::begin()
             // We have to call an appropriate method for all source-stars in our
