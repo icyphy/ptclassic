@@ -69,6 +69,10 @@ class tycho::DialogWindow {
     # "questhead".  The default is a null string, which means no bitmap.
     itk_option define -bitmap bitmap Bitmap ""
 
+    #### title option
+    # The title for the window.
+    itk_option define -title title Title "Ptolemy"
+
     #### addButton
     # Add a button to the set of buttons at the bottom.
     method addButton {args} {}
@@ -170,6 +174,8 @@ body tycho::DialogWindow::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    wm title $prefix $itk_option(-title)
 }
 
 #########################################################################
@@ -184,6 +190,13 @@ configbody tycho::DialogWindow::bitmap {
 	}
 	pack $itk_component(bitmap) -side left -before $itk_component(message)
     }
+}
+
+#########################################################################
+#### title configuration
+# 
+configbody tycho::DialogWindow::title {
+    wm title $prefix $itk_option(-title)
 }
 
 #########################################################################
