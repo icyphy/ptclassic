@@ -55,10 +55,18 @@ If the class name is not fully specified, we assume it is defined
 in the global namespace only.
 <p>
 
-The <A NAME="Itcl Editor Method Template">"Method Template" command</A> in
-the "Special" menu places a method template at the current point in the buffer.
-<P>
+The <A NAME="Itcl Editor Body Template">"Body Template" command</A> in
+the "Special" menu places a body template at the current point in the buffer.
+An example body template would be:
+<LISTING>
+#####################################################################
+#### myMethod 
+#
+# body::tycho::ClassName::myMethod {} {
 
+}
+</LISTING>
+<P>
 The <A NAME="Itcl Editor File Template">"File Template" command</A> in
 the "Special" menu copies the file <A
 HREF="../../../../doc/coding/template.itcl"><CODE>$TYCHO/doc/coding/template.itcl</CODE></A>
@@ -67,15 +75,15 @@ name.  For example, if the file is named <CODE>Elvis.itcl</CODE>, then
 the class name <CODE>Elvis</CODE> will be substituted in.
  <P>
 
-The <A NAME="Itcl Editor Generate HTML">"Generate HTML" command</A> in
-the "Special" menu saves the contents of the editor if necessary and
-then runs the <A
+The <A NAME="Itcl Editor Generate doc">"Generate doc" command</A> in
+the "Special" menu asks the user if they would like to save the buffer
+and then runs the <A
 HREF="../../../../lib/tydoc/doc/introduction.html">Tydoc</A> itcl to
 HTML converter on the file and displays the results.  Tydoc produces a
 HTML file at
 <CODE>doc/codeDoc/</CODE><I>clasName</I><CODE>.html</CODE>.  The
 <CODE>index.html</CODE> file in <CODE>doc/codeDoc</CODE> is not
-updated by "Generate HTML", since we are only passing one file to the
+updated by "Generate doc", since we are only passing one file to the
 Tydoc system.  To update <CODE>index.html</CODE>, usually one runs
 <CODE>make itcldocs</CODE>.
 
