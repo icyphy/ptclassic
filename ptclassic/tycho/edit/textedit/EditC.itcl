@@ -201,9 +201,10 @@ body ::tycho::EditC::evaluate {} {
     global env tycho
     saveQuery
 
-    if {$compiler == {} || ![winfo exists $compiler]} {
+    if {$compiler == {}} {
         #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
-        set compiler [::tycho::CompileCTcl [::tycho::autoName .compiler]]
+        # Once we've created compiler, it stays...
+        set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
     }
 
     # Make sure we get .widgetname instead of ::.widgetname
