@@ -37,7 +37,18 @@
 # there may be reason to subclass it to provide access methods 
 # more suitable to particular languages. It is designed to be
 # usable both for documenting classes and for use in 
-# object models. The model has the following attributes:
+# object models. 
+#
+# The _Class_ class provides an interface to HierModel which allows entities
+# of different types to have the same name. HierModel requires that all 
+# entities have unique names regardless of type. The implementation "shines
+# through" in certain error cases and when it requires the type of a parent
+# when accessing a nested entity. FIXME: A happier interface might only require 
+# the parent type when there is a collision, however, Class requires it 
+# whenever a nested entity is accessed. Class only supports one level
+# of nesting.
+#
+# The model has the following attributes:
 # <ul>
 #   <li><b>-name</b>: The class name of the class. (i.e. ::tycho::Class)
 #   <li><b>-language</b>: The language in which the class was written.
@@ -131,12 +142,8 @@
 # <li><b>annotation</b> _name_ _value_: A documentation annotation.
 # Annotations can appear at any level -- by convention, an annotation
 # named "description" is a short description while one named "explanation"
-# is a long description. Both are generally in HTML format.
-# Annotations have the following attributes:
-#   <ul>
-#   <li><b>-format</b>: The formatting of the annotation. This may
-#        include "plain" or "HTML". Default is HTML.
-#   </ul>
+# is a long description. Both are assumed to be in HTML format.
+# Annotations have no attributes.
 #
 # <li><b>parameter</b> _name_: A parameter. At the top level,
 # this is a class parameter, which probably only makes sense if the
@@ -163,7 +170,7 @@
 #     set class [::tycho::Class [::tycho::autoName class]]
 #     $class read string {
 #        modelconfigure -language Itcl -name ::tycho::exampleclass
-#        parent ::tycho::Mommy -sourcefile {$TYCHO/kernel/mommy.itcl}
+#        parent ::tycho::Mommy
 #        annotation description {An example class.}
 #        annotation explanation {This is a <i>silly</i> class.}
 #        variable foo {
@@ -186,7 +193,7 @@
 #
 # Return the explanation of a method:
 # <pre><tcl>
-#     $class get annotation bar.explanation
+#     $class get annotation bar.explanation method
 # </tcl></pre>
 #
 # Return the parameters of a method:
@@ -206,8 +213,8 @@ class ::tycho::Class {
     #################################################################
     ####                     public methods                      ####
 
-    # Add a top-level annotation with attributes to the class
-    method annotation {name string args}
+    # Add an annotation to the class or an entity
+    method annotation {name string {parenttype {}}}
 
     # Add a Constructor with attributes to the class
     method Constructor {name args}
@@ -215,11 +222,23 @@ class ::tycho::Class {
     # Get the Constructor(s) of the class
     method Constructors {}
 
+    # Delete an item
+    method delete {type name}
+
     # Add a Destructor with attributes to the class
     method Destructor {name args}
 
     # Get the Destructor(s) of the class
     method Destructors {}
+
+    # Return the value and args of an item.
+    method get {type name {parenttype{}}}
+
+    # Get an attribute of an item
+    method itemcget {type name option {parenttype{}}}
+
+    # Configure an attribute of an item
+    method itemconfigure {type name option value {parenttype{}}}
 
     # Add a method with attributes to the class
     method method {name args}
@@ -251,6 +270,9 @@ class ::tycho::Class {
     # Evaluate code in this object's context
     protected method evalInSpecificContext {args} {eval $args}
 
+    # Describe an entity.
+    protected method _describeentity {type context name prefix}
+
     # Add a nested annotation with attributes to the class
     protected method _annotation {context name string args}
 
@@ -266,6 +288,12 @@ class ::tycho::Class {
     protected method _variable {context name args} {
     	_nesterror variable $context $name
     }
+    
+    # Return the full name of an entity (to store)
+    protected method fullName {type shortname}
+    
+    # Return the short name of an entity (for user interface)
+    protected method shortName {type fullname}
 }
 
 ########################################################################
@@ -286,8 +314,7 @@ body ::tycho::Class::constructor {args} {
     # Define the "annotation" entity
     defineEntityType annotation \
 	    -valued 1 \
-            -leaf 1 \
-	    -format HTML
+            -leaf 1
 
     # Define the "parent" entity
     defineEntityType parent \
@@ -336,14 +363,22 @@ body ::tycho::Class::constructor {args} {
 # Additional arguments are a flat attribute-value list for the
 # annotation. Flag an error if the annotation already exists. 
 #
-body ::tycho::Class::annotation {name value args} {
+body ::tycho::Class::annotation {name value {parenttype {}}} {
     set splut [split $name $separator]
     set cntxt [lreplace $splut end end]
     set local [lindex $splut end]
 
-    _verifynot annotation $cntxt $local $name
-    _addentity annotation $cntxt $local $name $value $args
-    list delete annotation $name
+    set fullcntxt [fullName $parenttype $cntxt]
+    set fulllocal [fullName annotation $local]
+    if {$cntxt != {}} {
+        set fullname $fullcntxt$separator$fulllocal
+    } {
+        set fullname $fulllocal
+    }
+
+    _verifynot annotation $fullcntxt $fulllocal $fullname
+    _addentity annotation $fullcntxt $fulllocal $fullname $value {}
+    list delete annotation $fullname
 }
 
 ########################################################################
@@ -356,8 +391,10 @@ body ::tycho::Class::annotation {name value args} {
 # constructor.
 #
 body ::tycho::Class::Constructor {name args} {
-    _verifynot Constructor {} $name $name
-    _addentity Constructor {} $name {} {} $args
+    set fullname [fullName Constructor $name]
+
+    _verifynot Constructor {} $fullname $fullname
+    _addentity Constructor {} $fullname {} {} $args
     list delete Constructor $name
 }
 
@@ -367,7 +404,27 @@ body ::tycho::Class::Constructor {name args} {
 # Get the Constructors of the class.
 #
 body ::tycho::Class::Constructors {} {
-    _children Constructor {}
+    set cons {}
+    set con_cons [_children Constructor {}]
+    foreach con $con_cons {
+        lappend cons [shortName Constructor $con]
+    }
+    return $cons
+}
+
+########################################################################
+#### Delete
+#
+# Delete the item of the specified type and name. Certain types in Class
+# have a four character string prepended to them to prevent collisions
+# between types. These are added to the name before being passed to 
+# previous generic delete method.
+#
+body ::tycho::Class::delete {type name} {
+    set fullname [fullName $type $name]
+    set retval [chain $type $fullname]
+    # fix returned value to have name, not fullname
+    lreplace $retval 1 1 $name
 }
 
 ########################################################################
@@ -380,8 +437,10 @@ body ::tycho::Class::Constructors {} {
 # destructor.
 #
 body ::tycho::Class::Destructor {name args} {
-    _verifynot Destructor {} $name $name
-    _addentity Destructor {} $name {} {} $args
+    set fullname [fullName Destructor $name]
+
+    _verifynot Destructor {} $fullname $fullname
+    _addentity Destructor {} $fullname {} {} $args
     list delete Destructor $name
 }
 
@@ -391,7 +450,81 @@ body ::tycho::Class::Destructor {name args} {
 # Get the Destructors of the class.
 #
 body ::tycho::Class::Destructors {} {
-    _children Destructor {}
+    set dess {}
+    set des_dess [_children Destructor {}]
+    foreach des $des_dess {
+        lappend dess [shortName Destructor $des]
+    }
+    return $dess
+}
+
+########################################################################
+#### get
+#
+# Get the value of an item. Flag an error if
+# the item does not exist.
+#
+body ::tycho::Class::get {type name {parenttype {}}} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    set fullcntxt [fullName $parenttype $cntxt]
+    set fulllocal [fullName $type $local]
+    if {$cntxt != {}} {
+        set fullname $fullcntxt$separator$fulllocal
+    } {
+        set fullname $fulllocal
+    }
+    chain $type $fullname
+}
+
+########################################################################
+#### itemcget
+#
+# Get an attribute of an item. The first argument is the
+# entity or link type. Flag an error if the item does
+# not exist.
+#
+body ::tycho::Class::itemcget {type name option {parenttype {}}} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    set fullcntxt [fullName $parenttype $cntxt]
+    set fulllocal [fullName $type $local]
+    if {$local != {}} {
+        set fullname $fullcntxt$separator$fulllocal
+    } {
+        set fullname $fulllocal
+    }
+    chain $type $fullname $option
+}
+
+########################################################################
+#### itemconfigure
+#
+# Configure attributes of an item. The first argument is the
+# entity or link type; only one option value pair is supported
+# Flag an error if the annotation does not exist. Return the inverse command.
+#
+body ::tycho::Class::itemconfigure {type name option value {parenttype {}}} {
+    set splut [split $name $separator]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    set fullcntxt [fullName $parenttype $cntxt]
+    set fulllocal [fullName $type $local]
+    if {$cntxt != {}} {
+        set fullname $fullcntxt$separator$fulllocal
+    } {
+        set fullname $fulllocal
+    }
+
+    set retval [chain $type $fullname $option $value]
+
+    # FIXME: returns default value, not previous (undo) value
+    lreplace $retval 2 2 [shortName $type $fullname] 
 }
 
 ########################################################################
@@ -406,8 +539,11 @@ body ::tycho::Class::method {name args} {
     if { [llength [split $name $separator]] > 1 } {
         error "Method $name is not top-level"
     }
-    _verifynot method {} $name $name
-    _addentity method {} $name {} {} $args
+
+    set fullname [fullName method $name]
+
+    _verifynot method {} $fullname $fullname
+    _addentity method {} $fullname {} {} $args
     list delete method $name
 }
 
@@ -430,7 +566,7 @@ body ::tycho::Class::methods {args} {
 	    }
     	}
     	if { $matching } {
-	    lappend result $method
+	    lappend result [shortName method $method]
     	}
     }
     return $result
@@ -445,9 +581,15 @@ body ::tycho::Class::methods {args} {
 # parameter. Flag an error if the parameter already exists. 
 #
 body ::tycho::Class::parameter {method name args} {
-    _verifynot parameter $method $name $method$separator$name
-    _addentity parameter $method $name $method$separator$name {} $args
-    list delete parameter $method$separator$name
+    set fullmethod [fullName method $method]
+    set fullname [fullName parameter $name]
+
+    _verifynot parameter $fullmethod $fullname $fullmethod$separator$fullname
+    _addentity parameter $fullmethod $fullname \
+            $fullmethod$separator$fullname {} $args
+
+    # no support for the interface other than toplevel
+    list delete parameter $fullmethod$separator$fullname
 }
 
 ########################################################################
@@ -456,7 +598,14 @@ body ::tycho::Class::parameter {method name args} {
 # Get the parameters of a method.
 #
 body ::tycho::Class::parameters {method} {
-    _children parameter $method
+    set fullmethod [fullName method $method]
+
+    set prms {}
+    set prm_prms [_children parameter $fullmethod]
+    foreach prm $prm_prms {
+        lappend prms [shortName parameter $prm]
+    }
+    return $prms
 }
 
 ########################################################################
@@ -467,8 +616,10 @@ body ::tycho::Class::parameters {method} {
 # parent. Flag an error if the parent already exists.
 #
 body ::tycho::Class::parent {name args} {
-    _verifynot parent {} $name $name
-    _addentity parent {} $name {} {} $args
+    set fullname [fullName parent $name]
+
+    _verifynot parent {} $fullname $fullname
+    _addentity parent {} $fullname {} {} $args
     list delete parent $name
 }
 
@@ -478,7 +629,12 @@ body ::tycho::Class::parent {name args} {
 # Get the parents of the class.
 #
 body ::tycho::Class::parents {} {
-    _children parent {}
+    set pnts {}
+    set pnt_pnts [_children parent {}]
+    foreach pnt $pnt_pnts {
+        lappend pnts [shortName parent $pnt]
+    }
+    return $pnts
 }
 
 ########################################################################
@@ -493,8 +649,11 @@ body ::tycho::Class::variable {name args} {
     if { [llength [split $name $separator]] > 1 } {
         error "Variable $name is not top-level"
     }
-    _verifynot variable {} $name $name
-    _addentity variable {} $name {} {} $args
+
+    set fullname [fullName variable $name]
+
+    _verifynot variable {} $fullname $fullname
+    _addentity variable {} $fullname {} {} $args
     list delete variable $name
 }
 
@@ -517,7 +676,7 @@ body ::tycho::Class::variables {args} {
 	    }
     	}
     	if { $matching } {
-	    lappend result $variable
+	    lappend result [shortName variable $variable]
     	}
     }
     return $result
@@ -543,6 +702,93 @@ body ::tycho::Class::_annotation {context name value args} {
 }
 
 ########################################################################
+#### _describeentity
+# Return a string describing the entity of type _type_ called _name_. 
+# The _prefix_ is prepended to each line. Redefined here to support the
+# new naming convention.
+#
+body ::tycho::Class::_describeentity {type context name prefix} {
+    set shortname [shortName $type $name]
+
+    set fullname [@scope ::tycho::Interchange $this \
+            _fullname $type $context $name]
+
+    # Get default options
+    array set dflt $_typeinfo($type,defaults)
+
+    # Figure out what kind of printout to do, according to whether
+    # I have children or not
+    if { $_typeinfo($type,leaf) \
+	    || [array names _info [list * $fullname *]] == "" } {
+        set nestedFormat 0
+    } else {
+        set nestedFormat 1
+    }
+
+    # Start string with type
+    set string $prefix$type
+
+    # Follow with the local name
+    lappend string $shortname
+
+    # If this type has a value, append that
+    if { $_typeinfo($type,valued) } {
+        append string " \\\n$prefix    "
+	lappend string $_value($fullname)
+    }
+    # If I have no children, print my attributes only
+    if { ! $nestedFormat } {
+	foreach {opt val} $_attrs($fullname) {
+	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+                append string " \\\n$prefix    "
+		lappend string $opt $val
+	    }
+	}
+    } else {
+	# If I have children, then print enclosing braces, then
+	# attributes, then entities, then links
+	set childprefix $prefix
+	append childprefix "    "
+	append string " \{\n"
+
+	# Output attributes
+	foreach {opt val} $_attrs($fullname) {
+	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+		append string $childprefix
+		lappend string $opt $val
+		append string "\n"
+	    }
+	}
+	# Output children: entities
+	foreach {_ etype} [array get _typeinfo *,entity] {
+	    set children [_children $etype $fullname]
+	    # Sort if not ordered, to improve readability
+	    if { ! $_typeinfo($etype,ordered) } {
+		set children [lsort $children]
+	    }
+	    foreach child $children {
+		append string [_describeentity $etype \
+                        $fullname $child $childprefix]
+	    }
+	}
+	# Output children: links
+	foreach {_ ltype} [array get _typeinfo *,link] {
+	    set children [_children $ltype $fullname]
+	    # Sort if not ordered, to improve readability
+	    if { ! $_typeinfo($ltype,ordered) } {
+		set children [lsort $children]
+	    }
+	    foreach child $children {
+		append string [_describelink $ltype \
+                        $fullname $child $childprefix]
+	    }
+	}
+	append string "$prefix\}"
+    }
+    return $string\n
+}
+
+########################################################################
 #### _parameter
 #
 # Add a nested parameter.
@@ -554,4 +800,69 @@ body ::tycho::Class::_parameter {context name args} {
     _addentity parameter $context $name $context$separator$name {} $args
 }
 
+########################################################################
+#### fullName
+#
+# Return the full name of an entity, given it's type and name. The full 
+# name has a unique prefix attached to the current name of an entity to
+# avoid collisions between different types of the same name. HierModel
+# does not provide that functionality.
+#
+# Current full name prefixes are:
+# <ul>
+#   <li><b>ann_</b> annotation
+#   <li><b>con_</b> Constructor
+#   <li><b>des_</b> Destructor
+#   <li><b>met_</b> method
+#   <li><b>pnt_</b> parent
+#   <li><b>pra_</b> parameter
+#   <li><b>var_</b> variable
+# </ul>
+#
+body ::tycho::Class::fullName {type shortname} {
+    if {[llength [split $shortname $separator]] > 1} {
+        return $shortname
+    }
+    switch $type {
+        "Constructor" {return con_$shortname}
+        "Destructor" {return des_$shortname}
+        "method" {return met_$shortname}
+        "parent" {return pnt_$shortname}
+        "variable" {return var_$shortname}
+        default {return $shortname}
+    }
+}
 
+########################################################################
+#### shortName
+#
+# Return the short name of an entity, given it's type and full name.
+# The full name has a unique prefix attached to the short name of an entity 
+# to avoid collisions between different types of the same name. HierModel
+# does not provide that functionality.
+#
+# Current full name prefixes are:
+# <ul>
+#   <li><b>ann_</b> annotation
+#   <li><b>con_</b> Constructor
+#   <li><b>des_</b> Destructor
+#   <li><b>met_</b> method
+#   <li><b>pnt_</b> parent
+#   <li><b>pra_</b> parameter
+#   <li><b>var_</b> variable
+# </ul>
+#
+body ::tycho::Class::shortName {type fullname} { 
+    if {[llength [split $fullname $separator]] > 1} {
+        return $fullname
+    }
+    set shortname [string range $fullname 4 end]
+    switch $type {
+        "Constructor" {return $shortname}
+        "Destructor" {return $shortname}
+        "method" {return $shortname}
+        "parent" {return $shortname}
+        "variable" {return $shortname}
+        default {return $fullname}
+    }
+}
