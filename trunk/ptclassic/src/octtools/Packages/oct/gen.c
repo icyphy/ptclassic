@@ -27,7 +27,8 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
-  
+#include "oct_utils.h"  
+
 /*
  * Routines to handle generation of objects attached to other objects.
  * 
@@ -323,13 +324,14 @@ octGenerator *gen;
  * When link current pointed to by generator->next is about to be deleted,
  * contents_fix is used to move generator->next one forward.
  */
-static 
+static int
 contents_fix(generator)
 struct generator *generator;
 {
     if (generator->next != NIL(struct chain)) {
 	generator->next = generator->next->last;
     }
+    return 1;
 }
     
 static octStatus
@@ -393,13 +395,14 @@ octGenerator *gen;
  * When the link current pointed to by generator->next is about to be deleted,
  * containers_fix is used to move generator->next one link forward forward
  */
-static 
+static int
 containers_fix(generator)
 struct generator *generator;
 {
     if (generator->next != NIL(struct chain)) {
 	generator->next = generator->next->next_chain;
     }
+    return 1;
 }
     
 static octStatus
@@ -556,7 +559,8 @@ octGenerator *gen;
 
 /* The code for the backward generator is here */
 
-static backgen(state,obj)
+static octStatus 
+backgen(state,obj)
 struct chain  **state;
 octObject *obj;
 {
@@ -590,7 +594,8 @@ octObject *obj;
 	return OCT_OK;
 }
 
-static backfree(state)
+static octStatus
+backfree(state)
 struct chain *state;
 {
 	return OCT_OK;
@@ -607,7 +612,7 @@ octGenerator *generator;
 	my_chain = ptr->contents;
 	if( my_chain )
 		my_chain = my_chain->next; /* get it to pt to the last guy in the list */
-	octInitUserGen((char*)my_chain, backgen, backfree, generator);
+	return octInitUserGen((char*)my_chain, backgen, backfree, generator);
 }
 
 
