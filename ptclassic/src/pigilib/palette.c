@@ -110,7 +110,7 @@ static struct octPoint defaultCursorPt = {500, -500};
     /* No cursor found, create one... */
     if (octBB(palFacetPtr, &bb) == OCT_OK) {
 	/* It looks like RPC octBB() doesn't give the right BB for some reason,
-	    at least some times (edg 1/5/90)
+	    at least some times (edg 1/5/90)'
 	*/
 	/* Locates cursor at an even (100 octUnits) point below the
 	    lowerLeft corner of current bounding box.
@@ -121,7 +121,8 @@ static struct octPoint defaultCursorPt = {500, -500};
 	cursorPt = defaultCursorPt;
     }
     ERR_IF1(!UGetFullTechDir(&techDir));
-    ERR_IF1(!StrDup(&cell, sprintf(buf, "%s/%s", techDir, "%cCursor")));
+    sprintf(buf, "%s/%s", techDir, "%cCursor");
+    ERR_IF1(!StrDup(&cell, buf));
     CK_OCT(CreateInstance2(palFacetPtr, cursorPtr, "", cell, "schematic",
 	"interface", cursorPt.x, cursorPt.y, OCT_NO_TRANSFORM));
     ERR_IF1(!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width, dx, dy));

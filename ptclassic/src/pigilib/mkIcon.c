@@ -86,7 +86,8 @@ octObject *destPtr, *srcPtr;
 	    } else {
 		char buf[512];
 		PrintDebug("Warning: Path or polygon has no points!");
-		PrintDebug(sprintf(buf, "num = %d", num));
+		sprintf(buf, "num = %d", num);
+		PrintDebug(buf);
 	    }
 */
 	}
@@ -118,8 +119,9 @@ IconType type;
 
     srcFacet.type = OCT_FACET;
     ERR_IF1(!UGetFullTechDir(&techDir));
-    srcFacet.contents.facet.cell =
-	sprintf(buf, "%s/%s", techDir, iconNames[(int) type]);
+
+    sprintf(buf, "%s/%s", techDir, iconNames[(int) type]);
+    srcFacet.contents.facet.cell = buf;
     srcFacet.contents.facet.view = "schematic";
     srcFacet.contents.facet.facet = "interface";
     srcFacet.contents.facet.version = OCT_CURRENT_VERSION;
@@ -277,8 +279,8 @@ octObject *facetPtr, *iconFacetPtr;
     char buf[MSG_BUF_MAX];
     octObject prop;
 
-    PrintDebug(sprintf(buf, "Making palette icon for '%s'",
-	facetPtr->contents.facet.cell));
+    sprintf(buf,"Making palette icon for '%s'", facetPtr->contents.facet.cell);
+    PrintDebug(buf);
     ERR_IF1(!AskAboutIcon(facetPtr->contents.facet.cell));
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, pal));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
@@ -296,8 +298,8 @@ octObject *facetPtr, *iconFacetPtr;
     char buf[MSG_BUF_MAX];
     octObject prop;
 
-    PrintDebug(sprintf(buf, "Making universe icon for '%s'",
-	facetPtr->contents.facet.cell));
+    sprintf(buf,"Making universe icon for '%s'",facetPtr->contents.facet.cell);
+    PrintDebug(buf);
     ERR_IF1(!AskAboutIcon(facetPtr->contents.facet.cell));
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, univ));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
@@ -352,10 +354,10 @@ octObject *iconFacetPtr;
     octObject iconConFacet, prop;
     int maxNumTerms, size;
 
-    ERR_IF2(!KcIsKnown(name),
-	sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
-	name));
-    PrintDebug(sprintf(buf, "Making star icon for '%s'", name));
+    sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)");
+    ERR_IF2(!KcIsKnown(name), buf, name);
+    sprintf(buf, "Making star icon for '%s'", name);
+    PrintDebug(buf);
     ERR_IF1(!ConcatDirName(dir, name, &fileName));
     ERR_IF1(!AskAboutIcon(fileName));
     ERR_IF1(!KcGetTerms(name, &terms));
