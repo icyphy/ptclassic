@@ -88,8 +88,7 @@ static void setenv_init()
 static int envfind( name )
     char* name;
 {
-    char* equals, e;
-    char** ep;
+    char* equals;
     int i = 0;
     int equalP;
 
@@ -128,10 +127,8 @@ util_setenv( name, value )
     char** nep;
     char** newenviron;
     char* newvalue;
-    int equalP;
-    char *equals;
     int namelen, valuelen, envlen;
-    int i;					/* Index of variable to be modified. */
+    int i;			/* Index of variable to be modified. */
 
     setenv_init();
 
