@@ -19,27 +19,16 @@ using polynomial approximation with eight bits of accuracy.
 		type { fix }
 	}
         state {
-                name { d1 }
-                type { fix }
-                default { 0.9981958 }
-                attributes { A_ROM|A_YMEM|A_CONSEC }
+                name { d }
+                type { FIXARRAY }
+                default { "0.9981958 -0.3372223 -0.6626105" }
+                attributes { A_ROM|A_YMEM|A_NONSETTABLE }
         }
-        state {
-                name { d2 }
-                type { fix }
-                default { "-0.3372223" }
-                attributes { A_ROM|A_YMEM|A_CONSEC }
-        }
-        state {
-                name { d3 }
-                type { fix }
-                default { "-0.6626105" }
-                attributes { A_ROM|A_YMEM }
-        }
+
 	codeblock(std) {
         move            m7,r7
         move            $ref(input),a
-        move            #$addr(d1),r1
+        move            #$addr(d),r1
         rep   #23
         norm  r7,a
         move            a,x0
