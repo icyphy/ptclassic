@@ -1,10 +1,9 @@
 defcorona {
     name { Const }
     domain { ACS }
-    version { $Id$ }
     desc { Generate a constant signal with the value given by the "level" parameter (default 0.0).
     }
-    version { @(#)ACSConst.pl	1.1 05/07/98 }
+    version { $Id$ }
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
