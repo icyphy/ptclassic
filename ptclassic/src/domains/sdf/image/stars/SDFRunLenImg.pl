@@ -7,11 +7,12 @@ defstar {
 	location	{ SDF image library }
 	desc {
 Accept a GrayImage and run-length encode it. All values less than
-'thresh' are set to 0, to help improve compression.
+'thresh' from 'meanVal' are set to 'meanVal' to help improve
+compression.
 
-Runlengths are coded with a start symbol of '0' and then a run-length
-between 1 and 255. Runs longer than 255 must be coded in separate
-pieces.
+Runlengths are coded with a start symbol of 'meanVal' and then a
+run-length between 1 and 255. Runs longer than 255 must be coded in
+separate pieces.
 	}
 
 	hinclude { "GrayImage.h", "Error.h" }
@@ -27,6 +28,12 @@ pieces.
 		default { 0 }
 		desc	{ Threshold for run-length coding. }
 	}
+	defstate {
+		name { meanVal }
+		type { int }
+		default { 0 }
+		desc { Center value for thresholding. }
+	}
 
 // CODE.
 	protected { int thresh; }
@@ -38,9 +45,7 @@ pieces.
 		access { protected }
 		arglist { "(unsigned char ch, int in)" }
 		code {
-			static char a;
-			a = char(ch);
-			return (abs(int(a)) > in);
+			return (abs(int(ch) - int(meanVal)) > in);
 		}
 	}
 
@@ -51,7 +56,7 @@ pieces.
 		arglist { "(GrayImage* inImage)" }
 		code {
 // Do the run-length coding.
-			const int size = inImage->retWidth() * inImage->retHeight();
+			const int size = inImage->retFullSize();
 			unsigned char* ptr1 = inImage->retData();
 
 // The biggest blowup we can have is the string "01010101...".
@@ -62,7 +67,7 @@ pieces.
 			int indx1 = 0, indx2 = 0;
 			while (indx1 < size) {
 				while ((indx1 < size) && (gt(ptr1[indx1], thresh))) {
-					ptr2[indx2] = ptr1[indx1]; indx2++; indx1++;
+					ptr2[indx2++] = ptr1[indx1++];
 				}
 				if (indx1 < size) {
 					int thisRun = 1; indx1++;
@@ -70,7 +75,7 @@ pieces.
 							(!gt(ptr1[indx1], thresh))) {
 						indx1++; thisRun++;
 					}
-					ptr2[indx2++] = (unsigned char) 0;
+					ptr2[indx2++] = (unsigned char) int(meanVal);
 					ptr2[indx2++] = (unsigned char) thisRun;
 				}
 			}
@@ -99,8 +104,8 @@ pieces.
 
 // Do processing and send out.
 		doRunLen(inImage);
-		const float comprRatio = inImage->retFullSize() /
-				(inImage->retWidth() * inImage->retHeight());
+		const float comprRatio = float(inImage->retFullSize()) /
+				float(inImage->retWidth() * inImage->retHeight());
 		compression%0 << comprRatio;
 
 		Packet outPkt(*inImage);

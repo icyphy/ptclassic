@@ -22,6 +22,12 @@ Check to make sure we don't write past unallocated memory.
 		name { outData }
 		type { packet }
 	}
+	defstate {
+		name { meanVal }
+		type { int }
+		default { 0 }
+		desc { Center value for thresholding. }
+	}
 
 // Note: we need to check for indx2 < fullFrame in case of lost data.
 // Otherwise we might crash the program when we write past allocated
@@ -43,27 +49,30 @@ Check to make sure we don't write past unallocated memory.
 			int indx1 = 0, indx2 = 0, count;
 			while ((indx1 < size) && (indx2 < fullFrame)) {
 // Do a zero-run.
-				while ((indx1 < size) && (ptr1[indx1] == 0 ) &&
-						(indx2 < fullFrame)) {
+				while ((indx1 < size) && (ptr1[indx1] == int(meanVal))
+						&& (indx2 < fullFrame)) {
 					indx1++; // Skip to run length.
 					for(count = 0; (count < int(ptr1[indx1])) &&
 							(indx2 < fullFrame); count++) {
-						ptr2[indx2++] = (unsigned char) 0;
+						ptr2[indx2++] = (unsigned char) int(meanVal);
 					}
 					indx1++; // Skip past run length.
 				}
 // Handle a non-zero run.
-				while ((indx1 < size) && (ptr1[indx1] != 0) &&
-						(indx2 < fullFrame)) {
+				while ((indx1 < size) && (ptr1[indx1] != int(meanVal))
+						&& (indx2 < fullFrame)) {
 					ptr2[indx2++] = ptr1[indx1++];
 				}
 			}
 
 // Copy the data back.
-			inImage->setSize(indx2);
+			inImage->setSize(fullFrame);
 			ptr1 = inImage->retData();
 			for(indx1 = 0; indx1 < indx2; indx1++) {
 				ptr1[indx1] = ptr2[indx1];
+			}
+			for(; indx1 < fullFrame; indx1++) {
+				ptr1[indx1] = (unsigned char) 0;
 			}
 			LOG_DEL; delete ptr2;
 		} // end { invRunLen }
