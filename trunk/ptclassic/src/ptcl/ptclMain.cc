@@ -21,6 +21,7 @@ static const char file_id[] = "ptclMain.cc";
 #include "Linker.h"
 #include "SimControl.h"
 #include "Error.h"
+#include "StringList.h"
 #include <stdio.h>
 
 extern "C" int isatty(int);
@@ -94,7 +95,9 @@ main (int argc, char** argv) {
 // the following stub is here until we support the Gantt chart
 // under the interpreter.
 
-extern "C" int displayGanttChart(const char*) {
-	Error::error("Gantt chart display not implemented in ptcl");
+extern "C" int displayGanttChart(const char* file) {
+	StringList cmd;
+	cmd << "gantt " << file;
+	system(cmd);
 	return 0;
 }
