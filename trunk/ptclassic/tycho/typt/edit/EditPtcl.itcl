@@ -110,11 +110,9 @@ body ::tycho::EditPtcl::constructor {args} {
     # Set the fill prefix to be the comment character for Tcl.
     set fillPrefix "#"
 
-    menubar addMenu Special -underline 0
+    #menubar addMenu Special -underline 0
     menubar add "Retarget" Special -underline 0 \
-            -command "set w \[::tycho::Retarget .rtrg#auto -edit $this];\
-        \$w centerOnScreen"
-
+            -command "::tycho::view Retarget -edit $this -toolbar 1"
     menubar add "List Stars" Special -underline 0 \
             -command "::tycho::inform \
         \"Stars used: \[$this stars\]\""
@@ -150,7 +148,7 @@ configbody ::tycho::EditPtcl::facet {
     set facet $itk_option(-facet)
     if {$facet != "" } {
 	set facet [::tycho::expandPath $facet]
-	set facetTmpFile ::tycho::tmpFileName [file tail $facet] .pt
+	set facetTmpFile [::tycho::tmpFileName [file tail $facet] .pt]
 
 	# Unix-ism here.  Why anyone would buy (let alone write)
 	# an operating system without an exec is beyond me. :-)
