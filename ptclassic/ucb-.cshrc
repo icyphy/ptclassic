@@ -3,6 +3,8 @@
 
 if (-x /usr/bin/X11) set path = ($path /usr/bin/X11)
 
-# Get Gnu tools for mips from Moby.
-
+# Get software warehouse in the path
 set path = ( $path /usr/sww/bin )
+
+# Modify the printer variable
+setenv PRINTER sp524
