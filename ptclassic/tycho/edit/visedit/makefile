@@ -49,9 +49,12 @@ ITCL_SRCS = \
 	EditForest.itcl \
 	EditForestWidget.itcl \
 	EditSTD.itcl \
+	GanttView.itcl \
+	GanttDF.itcl \
 	Graphics.itcl \
 	GraphicsWidget.itcl \
-	ProfileTcl.itcl
+	ProfileTcl.itcl \
+	SlateView.itcl 
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
