@@ -838,7 +838,77 @@ StringList VHDLTarget :: addSignalDeclarations(VHDLSignalList* signalList,
   return all;
 }
 
-// Add in component mappings here from compMapList.
+// Return component declarations based on compDeclList.
+StringList VHDLTarget :: addComponentDeclarations(VHDLCompDeclList* compDeclList,
+						    int level/*=0*/) {
+  // HashTable to keep track of which components already declared.
+  HashTable myTable;
+  myTable.clear();
+
+  StringList all;
+  VHDLCompDeclListIter nextCompDecl(*compDeclList);
+  VHDLCompDecl* compDecl;
+  while ((compDecl = nextCompDecl++) != 0) {
+    if (!(myTable.hasKey(compDecl->type))) {
+      myTable.insert(compDecl->type, compDecl);
+
+      level++;
+      all << indent(level) << "component " << compDecl->type << "\n";
+
+      // Add in generic refs here from genList.
+      if (compDecl->genList->head()) {
+	level++;
+	all << indent(level) << "generic(\n";
+	VHDLGenericListIter nextGen(*(compDecl->genList));
+	VHDLGeneric* ngen;
+	int genCount = 0;
+	while ((ngen = nextGen++) != 0) {
+	  level++;
+	  if (genCount) {
+	    all << ";\n";
+	  }
+	  all << indent(level) << ngen->name << ": " << ngen->type;
+	  if (ngen->defaultVal.length() > 0) {
+	    all << " := " << ngen->defaultVal;
+	  }
+	  genCount++;
+	  level--;
+	}
+	all << "\n";
+	all << indent(level) << ");\n";
+	level--;
+      }
+    
+      // Add in port refs here from portList.
+      if (compDecl->portList->head()) {
+	level++;
+	all << indent(level) << "port(\n";
+	VHDLPortListIter nextPort(*(compDecl->portList));
+	VHDLPort* nport;
+	int portCount = 0;
+	while ((nport = nextPort++) != 0) {
+	  level++;
+	  if (portCount) {
+	    all << ";\n";
+	  }
+	  all << indent(level) << nport->name << ": " << nport->direction << " "
+	      << nport->type;
+	  portCount++;
+	  level--;
+	}
+	all << "\n";
+	all << indent(level) << ");\n";
+	level--;
+      }
+    
+      all << indent(level) << "end component;\n";
+      level--;
+    }
+  }
+  return all;
+}
+
+// Return component mappings based on compDeclList.
 StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compDeclList,
 					      int level/*=0*/) {
   StringList all;
@@ -852,7 +922,8 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compDeclList,
     if (compDecl->genMapList->head()) {
       level++;
       all << indent(level) << "generic map(\n";
-      VHDLGenericListIter nextGenDecl(*(compDecl->genMapList));
+      //      VHDLGenericListIter nextGenDecl(*(compDecl->genMapList));
+      VHDLGenericListIter nextGenDecl(*(compDecl->genList));
       VHDLGeneric* ngenmap;
       int genCount = 0;
       while ((ngenmap = nextGenDecl++) != 0) {
@@ -873,7 +944,8 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compDeclList,
     if (compDecl->portMapList->head()) {
       level++;
       all << indent(level) << "port map(\n";
-      VHDLPortListIter nextPortDecl(*(compDecl->portMapList));
+      //      VHDLPortListIter nextPortDecl(*(compDecl->portMapList));
+      VHDLPortListIter nextPortDecl(*(compDecl->portList));
       VHDLPort* nportmap;
       int portCount = 0;
       while ((nportmap = nextPortDecl++) != 0) {
