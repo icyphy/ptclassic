@@ -19,8 +19,9 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 # Use gcc everywhere _except_ in octtools
 CC=		gcc
 OPTIMIZER=	-O2
-GPPFLAGS =	-g $(MEMLOG) $(OPTIMIZER)
-CFLAGS =	-g $(OPTIMIZER)
+GPPFLAGS =	-g -Wall -Wcast-qual -Wcast-align $(MEMLOG) $(OPTIMIZER)
+# If you don't use gcc, then these Warning options probably won't work
+CFLAGS =	-g -Wall -Wcast-qual -Wcast-align $(OPTIMIZER)
 
 # Flag that cc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
