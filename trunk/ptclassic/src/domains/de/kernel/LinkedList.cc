@@ -146,7 +146,7 @@ Link * LinkedList :: appendGet(Pointer a)
 }
 
 // return and remove head of list
-Pointer LinkedList :: getAndRemove()
+Pointer LinkedList :: getHeadAndRemove()
 {
 	if (dimen == 0) return 0;
 
