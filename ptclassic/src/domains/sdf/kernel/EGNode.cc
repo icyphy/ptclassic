@@ -22,6 +22,7 @@ $Id$
 ////////////////////
 
 EGNode :: EGNode(SDFStar* s, int n) : pStar(s), invocation(n), next(0) {
+	stickyFlag = 0;
 	if (n == 1) s->setMaster(this);
 }
 

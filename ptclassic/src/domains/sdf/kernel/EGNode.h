@@ -44,16 +44,16 @@ private:
 	// link to the next invocation.
 	EGNode* next;
 
+	// Flag to set if there is dependency between invocations.
+	unsigned stickyFlag : 1;
+
 	// flag for graph-traversal algorithms -- this marks whether or
 	// not this node has been visited
 	unsigned visited : 1;
 
 public:
-
   	// constructor with origin and invocation number arguments
   	EGNode(SDFStar*, int n = 1);
-
-	// destructor
 	virtual ~EGNode();
 
 	// WARNING! does "delete this"!!!! (questionable practice?)
@@ -103,6 +103,10 @@ public:
 
 	// get the visited flag
 	int alreadyVisited() { return visited; }
+
+	// set the sticky-ness: interdependency between invocations.
+	void claimSticky() { stickyFlag = 1; }
+	int sticky() { return stickyFlag; }
 
 	// get the execution time of the invocation
 	int myExecTime() { return myMaster()->myExecTime(); }
