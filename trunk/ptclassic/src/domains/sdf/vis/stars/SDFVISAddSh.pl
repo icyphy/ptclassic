@@ -15,31 +15,31 @@ limitation of liability, and disclaimer of warranty provisions.
 	  corresponding shorts in a 16bit partitioned float.
 	  The result is four signed shorts that is returned as
 	  a single floating point number.  There is no saturation
-	  arithmetic so that overflow results in wraparound.}
-
+	  arithmetic so that overflow results in wraparound.
+	    }
 	input {
-		name { InA }
-		type { float }
-		desc { Input float type }
+	  name { inA }
+	  type { float }
+	  desc { Input float type }
 	}
 	input {
-		name { InB }
-		type { float }
-		desc { Input float type }
+	  name { inB }
+	  type { float }
+	  desc { Input float type }
 	}
 	output {
-		name { Out }
-		type { float }
-		desc { Output float type }
+	  name { out }
+	  type { float }
+	  desc { Output float type }
 	}
         ccinclude {<vis_proto.h>}
 	go {
-
+	  
 	  double sum=0.0;
-
+	  
 	  /*calculate the sum*/
-	  sum = vis_fpadd16(double(InA%0),double(InB%0));
-
-          Out%0 << sum;
+	  sum = vis_fpadd16(double(inA%0),double(inB%0));
+	  
+          out%0 << (double) sum;
       	}
 }

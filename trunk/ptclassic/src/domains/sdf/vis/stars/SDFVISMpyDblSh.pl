@@ -15,42 +15,42 @@ limitation of liability, and disclaimer of warranty provisions.
 	  corresponding shorts in a 16bit partitioned float.
 	  The result is four signed shorts that is returned as
 	  a single floating point number.  Each multiplication
-	  results in a 32 bit result, which is then rounded to 16 bits.}
-
+	  results in a 32 bit result, which is then rounded to 16bits.
+	    }
 	input {
-		name { InA }
-		type { float }
-		desc { Input float type }
+	  name { inA }
+	  type { float }
+	  desc { Input float type }
 	}
 	input {
-		name { InB }
-		type { float }
-		desc { Input float type }
+	  name { inB }
+	  type { float }
+	  desc { Input float type }
 	}
 	output {
-		name { Out }
-		type { float }
-		desc { Output float type }
+	  name { out }
+	  type { float }
+	  desc { Output float type }
 	}
         ccinclude {<vis_proto.h>}
 	go {
-
+	  
 	  double resulthihi, resulthilo, resulthi;
 	  double resultlohi, resultlolo, resultlo;
 	  double result;
 	  float  dataAlo, dataAhi, dataBlo, dataBhi;
 	  float  resultu, resultl;
-
+	  
 	  vis_write_gsr(8);
-
+	  
 	  // setup the data
-	    dataAhi=vis_read_hi(double(InA%0));
-	  dataAlo=vis_read_lo(double(InA%0));
-	  dataBhi=vis_read_hi(double(InB%0));
-	  dataBlo=vis_read_lo(double(InB%0));
+	       dataAhi=vis_read_hi(double(inA%0));
+	  dataAlo=vis_read_lo(double(inA%0));
+	  dataBhi=vis_read_hi(double(inB%0));
+	  dataBlo=vis_read_lo(double(inB%0));
 	  
 	  //calculate the partial products
-	    resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
+	      resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
 	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
 	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
 	  
@@ -62,7 +62,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      resultu = vis_fpackfix(resulthi);
 	  resultl = vis_fpackfix(resultlo);
 	  result = vis_freg_pair(resultu,resultl);
-
-          Out%0 << result;
+	  
+          out%0 << result;
       	}
 }

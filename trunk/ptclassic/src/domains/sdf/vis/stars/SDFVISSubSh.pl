@@ -15,20 +15,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	  corresponding shorts in a 16bit partitioned float.
 	  The result is four signed shorts that is returned as
 	  a single floating point number.  There is no saturation
-	  arithmetic so that overflow results in wraparound. }
+	  arithmetic so that overflow results in wraparound. 
+	    }
 
 	input {
-		name { InA }
+		name { inA }
 		type { float }
 		desc { Input float type }
 	}
 	input {
-		name { InB }
+		name { inB }
 		type { float }
 		desc { Input float type }
 	}
 	output {
-		name { Out }
+		name { out }
 		type { float }
 		desc { Output float type }
 	}
@@ -38,8 +39,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  double diff =0.0;
 	  
 	  /*calculate the difference*/
-	  diff = vis_fpsub16(double(InA%0),double(InB%0));
+	  diff = vis_fpsub16(double(inA%0),double(inB%0));
 
-          Out%0 << diff;
+          out%0 << diff;
       	}
 }
