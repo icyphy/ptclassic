@@ -54,6 +54,7 @@ public:
 	/*virtual*/ int loadCode();
 	/*virtual*/ int runCode();
 	/*virtual*/ void writeCode();
+	/*virtual*/ void frameCode() { MotorolaSimTarget::frameCode(); }
 	Block* makeNew() const;
 	int isA(const char*) const;
 };
