@@ -3,7 +3,7 @@ defstar {
 	name { Progress }
 	domain { DE }
 	desc {
-Periodically print to <stdout> current time of simulation
+Periodically print to &ltstdout&gt current time of simulation
         }
 
 	version {$Id$}
