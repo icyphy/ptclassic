@@ -2,9 +2,9 @@ defstar {
 	name { SmithForm }
 	domain { SDF }
 	desc {
- Decomposes an integer matrix S into a Smith form S = U D V, where
+Decomposes an integer matrix S into a Smith form S = U D V, where
 U, D, and V are integer matrices.
- The Smith form decomposition for integer matrices is analogous to
+The Smith form decomposition for integer matrices is analogous to
 Singular Value Decomposition for floating-point matrices.
 	}
 	version { $Id$ }
@@ -13,41 +13,41 @@ Singular Value Decomposition for floating-point matrices.
         location  { SDF matrix library }
 	explanation {
 .pp
- Smith forms are useful in making non-separable multidimensional 
+Smith forms are useful in making non-separable multidimensional 
 operations that rely on integer matrices separable.
- Examples include multidimensional discrete Fourier transforms 
+Examples include multidimensional discrete Fourier transforms 
 on an arbitrary sampling grid (hexagonal, etc.) [1],
 multidimensional non-separable up/downsampling [2], and 
 multidimensional non-uniform filter bank design [3-4].
 .pp
- This function returns the Smith form of an integer matrix S [5].
- The matrix $S$ is factored into three simpler integer matrices such that
+This function returns the Smith form of an integer matrix S [5].
+The matrix $S$ is factored into three simpler integer matrices such that
 $S = U D V$.
- Here, $D$ is diagonal and
+Here, $D$ is diagonal and
 $U$ and $V$ have determinant of $+1$ or $-1$
 (and are called regular unimodular).
- Therefore, $|det S| = |det D|$.
- Note that $S$ is m x n, so $U$ is m x m, $D$ is m x n, and $V$ is n x n.
- Hence, $U$ and $V$ are always square.
+Therefore, $|det S| = |det D|$.
+Note that $S$ is m x n, so $U$ is m x m, $D$ is m x n, and $V$ is n x n.
+Hence, $U$ and $V$ are always square.
 .pp
- Smith form decompositions are not unique [4].
- However, the Smith normal form imposes a canonical structure on $D$
+Smith form decompositions are not unique [4].
+However, the Smith normal form imposes a canonical structure on $D$
 so that $D$ is unique [5].
- The canonical form of $D$ is that each diagonal element is a factor of
+The canonical form of $D$ is that each diagonal element is a factor of
 the next diagonal element and the greatest common divisor of two adjacent
 diagonal elements is one.
- Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
- Note that this routine \fIwas not\fR coded to return the Smith normal form
+Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
+Note that this routine \fIwas not\fR coded to return the Smith normal form
 (although sometimes this will happen).
- Converting a Smith form to a Smith normal form requires an extra n steps
+Converting a Smith form to a Smith normal form requires an extra n steps
 for an n x n matrix [5].
 .pp
- Because we have chosen to implement the decomposition using
+Because we have chosen to implement the decomposition using
 integers represented by a computer, the intermediate integer
 computations for either large integer matrices or for matrices
 with large integer entries may exceed the precision of integers
 on a given machine.
- As a consequence, we check the decomposition at the end and flag an
+As a consequence, we check the decomposition at the end and flag an
 error if it does not give the original matrix.
 .Ir "Guessoum, A."
 .Ir "Vaidyanathan, P."
