@@ -7,7 +7,7 @@ Successive traces are overlaid on one another.
 	}
 	derivedFrom { Xgraph }
 	version {$Id$}
-	author { J. T. Buck }
+	author { J. T. Buck, N. Becker }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -31,7 +31,9 @@ Multiple traces may be plotted by setting the \fItraceLength\fR
 state to a nonzero value.  In this case, a new plot (starting at
 x value zero) is started every \fItraceLength\fR samples.  The
 first \fIignore\fR samples are not plotted; this is useful for letting
-transients die away.
+transients die away.  The \fIinitCount\fR parameter can be used to
+offset the traces to control their alignment with respect to the
+edge of the plot.
 .Ir "xgraph program"
 .Id "oscilloscope, X window"
 .Id "graph, X window, multi-trace"
@@ -42,6 +44,12 @@ transients die away.
 		default {"0"}
 		desc { Number of samples per trace.  If 0, only one trace. }
 	}
+	defstate {
+		name {initCount}
+		type {int}
+		default {"0"}
+		desc { Offset the traces }
+	}
 	protected {
 		int traceCount;
 		int nTracesSoFar;
@@ -49,8 +57,8 @@ transients die away.
 
 	setup {
 		SDFXgraph::setup();
-		traceCount = 0;
 		nTracesSoFar = 0;
+		traceCount = (int)initCount;
 	}
 
 	go {
