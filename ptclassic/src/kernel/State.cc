@@ -117,22 +117,17 @@ reparse:
 			t.tok = T_ERROR;
 			return t;
 		}
-// hack -- right now we only return a state pointer for Complex
-		if (strcmp(s->type(), "COMPLEX") == 0) {
+		if (strcmp(s->type(), "COMPLEX") == 0 || s->size() != 1) {
 			t.tok = T_ID;
 			t.s = s;
 			return t;
 		}
+// for int, float states we substitute their values here and reparse
 		else if (s->size() == 1) {
 			StringList value = s->currentValue();
 			strncpy (token, value, TOKSIZE-1);
 			goto reparse;
 		}
-		else {
-			parseError ("can't use aggregate states", token);
-			t.tok =  T_ERROR; 
-			return t;
-        	}
 	}
 	else {
 		parseError ("unexpected token", token);
