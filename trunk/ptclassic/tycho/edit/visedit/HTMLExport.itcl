@@ -295,7 +295,7 @@ body ::tycho::HTMLExport::getTitleFromFile {HTMLfile} {
 #
 body ::tycho::HTMLExport::HTMLFileList2PS {filelist} {
     global tcl_platform
-    if { $tcl_platform(platform) != unix } {
+    if { $tcl_platform(platform) != "unix" } {
 	error "Sorry, generating PostScript from HTML currently only works\
 		under Unix, netscape supports -remote only under Unix."
     }
