@@ -354,7 +354,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 
 
 #if defined(LINKING_NOT_SUPPORTED) || defined(SOL2)
-#define STRUCT2_DEFS
+#define STRUCT_DEFS
 #define READHEAD_FAIL 1
 #define READOBJ_FAIL 1
 #define OBJ_SIZE 0
