@@ -32,15 +32,16 @@
 
 DIRS = kernel lib editors doc
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/typt/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
+# Root of Tycho directory
+ROOT =		..
 
+ME = 		editors
+# True source directory
+VPATH =		$(ROOT)/$(ME)
 
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
+include $(CONFIG)
+
+# Include rules for directories that contain only subdirectories.
+include $(ROOT)/mk/tydir.mk
