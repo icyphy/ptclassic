@@ -236,9 +236,11 @@ body ::tycho::Dialog::constructor {args} {
     
     # Create a button box, and pack it with a bit of space
     # around it. Give the buttons some spacing too.
+    # Buttons are given a width of 14, although some subclasses
+    # may need to make this larger.
     itk_component add bbox {
 	::tycho::ButtonBox $itk_component(hull).bbox \
-		-spacingx 6 -spacingy 2
+		-spacingx 6 -spacingy 2 -buttonwidth 14
     } {
 	keep -background -cursor -font -padx -pady
     }
