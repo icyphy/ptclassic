@@ -126,8 +126,8 @@ void TITarget::enableInterrupts() {
 	myCode  << "\tclrc	INTM		;enable interrupts\n";
 }
 
-
-void TITarget::orgDirective(const char* memName, unsigned addr) {
+// FIXME: memName is unused
+void TITarget::orgDirective(const char* /*memName*/, unsigned addr) {
 	myCode << "\t.ds  \t" << int(addr) << "\n";
 	inProgSection = 0;
 }
