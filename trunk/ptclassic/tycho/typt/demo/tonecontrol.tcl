@@ -31,7 +31,10 @@
 #######################################################################
 
 # Turn on debugging
-# controlPanel debug 1
+controlPanel debug 1
+
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/tonecontrol.html}
 
 # Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io

@@ -33,7 +33,10 @@
 # Turn on debugging
 # controlPanel debug 1
 
-# Create the AudioIO control sub-panel and add to the main panel
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/parametric.html}
+
+## Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io
 controlPanel add controlPanel.io -side left
 
