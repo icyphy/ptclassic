@@ -181,11 +181,13 @@ int BDFClusterGal::cluster() {
 	}
 //	if (!urate)
 //		Error::warn("clustering algorithm did not achieve uniform rate");
+#if 0
 	if (change) {
 		if (logstrm)
 			*logstrm << "Looking for parallel loops\n";
 		parallelLoopMergePass();
 	}
+#endif
 	return change;
 }
 
@@ -240,7 +242,7 @@ int BDFClusterGal::mergePass() {
 		// cluster).
 		else if ((c2 = fullSearchMerge()) != 0)
 			nextClust.reset();
-	} while (c2);
+	} while (c2 && !SimControl::haltRequested());
 
 	if (logstrm) {
 		if (changes)
@@ -553,6 +555,9 @@ int BDFClusterGal::loopPass() {
 		int fac;
 		BDFClustPort* cond = c->ifFactor(rel);
 		if (cond) {
+			// add Boolean arc if needed.  cond may be remapped
+			// and rel may be reversed.
+			cond = connectBoolean(c,cond,rel);
 			c->ifIze(cond,rel,logstrm);
 			changes = TRUE;
 		}
@@ -603,33 +608,33 @@ BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 	return cond;
 }
 
+void die(NamedObj& o, const char* m1, const char* m2="", const char* m3="") {
+	cerr << "FATAL: " << o.fullName() << ": " << m1 << m2 << m3 << "\n";
+	exit (1);
+}
+
+// this should move to BDFClustPort but I wanted to use die.
+
+void BDFClustPort::setRelation(BDFRelation r, BDFClustPort* assoc) {
+	if (assoc && parent() != assoc->parent()) {
+		StringList a = assoc->fullName();
+		die(*this, " illegal argument to setRelation: ", a);
+	}
+	BDFPortHole::setRelation(r,assoc);
+}
+
 void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 	if (pCond) {
-		Error::abortRun(*this," already conditional!");
+		die(*this," already conditional!");
 		return;
 	}
 
-// see if this condition is available already in this cluster.
-	BDFClustPortIter nextPort(*this);
-	BDFClustPort *p;
-	BDFRelation r;
-	while ((p = nextPort++) != 0 && (r = sameSignal(cond,p)) == BDF_NONE)
-		;
-	if (!p) {
-		// condition is not available here -- create a new connection
-		if (logstrm)
-			*logstrm << "Creating a boolean arc to pass "
-				 << cond->name() << " to " << name()
-				 << "\n";
-		cond = connectBoolean(cond,rel);
-		r = BDF_SAME;
-	}
-	else if (logstrm)
+	if (logstrm)
 		*logstrm << "Making " << name() << " conditional on "
-			 << p->name() << "\n";
-
+			 << cond->name() << "\n";
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort* p;
 	pCond = cond;
-	if (r == BDF_COMPLEMENT) rel = reverse(rel);
 	pType = (rel == BDF_TRUE ? DO_IFTRUE : DO_IFFALSE);
 	// now adjust conditions on my ports:
 	// unconditionals get a condition
@@ -649,38 +654,13 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 		*logstrm << "After ifIzing: " << *this << "\n";
 }
 
-// return true if any condition associated with the port is satisfied.
-// if "pre" is true, the call is happening before any execution.  We
-// always return true except for DO_IFTRUE and DO_IFFALSE.
-// if "pre" is false, teh call happens after execution and we are being
-// asked if we should keep going, which can be true only for DO_UNTILTRUE
-// or DO_UNTILFALSE.
-
-int BDFCluster::condSatisfied(int pre) {
-	if (pre && pType != DO_IFTRUE && pType != DO_IFFALSE) return TRUE;
-	if (!pre && pType != DO_UNTILTRUE && pType != DO_UNTILFALSE)
-		return FALSE;
-	// get most recent token from geodesic.
-	Geodesic* g = pCond->innermost()->real().geo();
-	Particle* p = g->get();
-	if (!p) {
-		Error::abortRun(*pCond,"Attempt to read from empty geodesic");
-		return FALSE;
-	}
-	int v = int(*p);
-	g->pushBack(p);
-// if this is DO_IFTRUE, return TRUE (execute) if token is true (nonzero).
-// if this is DO_UNTILFALSE, return TRUE (keep going) " "   "     "
-// the reverse happens for DO_IFFALSE or DO_UNTILTRUE.
-	return (pType == DO_IFTRUE || pType == DO_UNTILFALSE) == (v != 0);
-}
-
 // this creates a duplicate of a port.  For bag ports, we recursively
 // go all the way down to the "real thing".
 static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	BDFClustPort* in = cond->inPtr();
 	BDFClustPort* a;
 	BDFCluster* cpar = cond->parentClust();
+	cond->markDuped();
 	if (!in) {
 		LOG_NEW; a = new BDFClustPort(cond->real(),cpar,BCP_DUP);
 		a->setPort(name,cpar,INT);
@@ -688,6 +668,8 @@ static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	else {
 		BDFClustPort* d = createDupPort(in,name);
 		LOG_NEW; a = new BDFClustPort(*d,cpar,BCP_BAG);
+		// a is the external link for d.
+		d->makeExternLink(a);
 	}
 	a->setRelation(BDF_SAME,cond);
 	cpar->addPort(*a);
@@ -711,21 +693,55 @@ static int hasParallel(BDFClustPort* arc,BDFCluster* c) {
 // cluster.  We prefer trying to remap the signal so that it is "parallel"
 // to another input arc.
 
-BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
-					  BDFRelation& rel) {
-	if (!hasParallel(cond,this)) {
+BDFClustPort* BDFClusterGal::connectBoolean(
+	  BDFCluster* c, BDFClustPort* cond, BDFRelation& rel) {
+
+// see if this condition is available already in this cluster.
+	BDFClustPortIter nextPort(*c);
+	BDFClustPort *p;
+	BDFRelation r;
+	while ((p = nextPort++) != 0 && (r = sameSignal(cond,p)) == BDF_NONE)
+		;
+	if (p) {
+		if (r == BDF_COMPLEMENT) rel = reverse(rel);
+		return p;
+	}
+
+	// condition is not available here -- create a new connection
+	if (logstrm)
+		*logstrm << "Creating a boolean arc to pass "
+			 << cond->name() << " to " << c->name()
+			 << "\n";
+// condition is not present.  We must pass it.  If we can pair it with
+// a parallel arc in the same direction this passing is always safe,
+// otherwise we must make sure a delay-free-loop is not introduced.
+	BDFClustPort * acc = hasParallel(cond,c) ? cond : 0;
+	if (!acc) {
 		BDFClustPortRelIter iter(*cond);
 		BDFClustPort* acond;
 		BDFRelation r2;
 		while ((acond = iter.next(r2)) != 0) {
-			if (r2 == BDF_COMPLEMENT)
-				rel = reverse(rel);
-			if (hasParallel(acond,this)) {
-				cond = acond;
+			if (hasParallel(acond,c)) {
+				acc = acond;
 				break;
 			}
 		}
+		if (!acc) {
+			iter.reset();
+			while ((acond = iter.next(r2)) != 0) {
+				stopList.initialize();
+				if (!findPath(c,acond->parentClust(), 1)) {
+					acc = acond;
+					break;
+				}
+			}
+		}
+		if (!acc) {
+			die (*cond, "impossible? can't pass w/o || arc");
+		}
+		if (r2 == BDF_COMPLEMENT) rel = reverse(rel);
 	}
+	cond = acc;
 	// create a new port in the far cluster
 	BDFClustPort *a = createDupPort(cond,pseudoName());
 	// mark it as a control port
@@ -734,9 +750,9 @@ BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
 	// condition and the inner port is cond->innermost(), so
 	// we will not be effected when outer bag ports are zapped.
 	LOG_NEW; BDFClustPort *b =
-		new BDFClustPort(cond->innermost()->real(),this,BCP_DUP_IN);
-	b->setPort(cond->name(),this,INT);
-	addPort(*b);
+		new BDFClustPort(cond->innermost()->real(),c,BCP_DUP_IN);
+	b->setPort(cond->name(),c,INT);
+	c->addPort(*b);
 	b->setRelation(BDF_NONE);
 	b->connect(*a,0);
 	b->initGeo();
@@ -971,8 +987,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 	BDFClustPort* cp;
 	while ((cp = next++) != 0) {
 		BDFClustPort* pFar = cp->far();
-		assert(cp);
-		if (pFar->parent() == this && !leaveSelfLoop(cp,pFar)) {
+		if (pFar && pFar->parent() == this && !leaveSelfLoop(cp,pFar)) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
@@ -1019,10 +1034,11 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 
 	ListIter nextZap(zap);
 	while ((p = (BDFClustPort*)nextZap++) != 0) {
+		BDFClustPort* pFar = p->far();
 		BDFClustPort* near = p->inPtr();
-		BDFClustPort* far = p->far()->inPtr();
+		BDFClustPort* far = pFar->inPtr();
 		int del = p->numTokens();
-		LOG_DEL; delete p->far();
+		LOG_DEL; delete pFar;
 		LOG_DEL; delete p;
 		near->connect(*far, del);
 		near->initGeo();
@@ -1081,9 +1097,11 @@ void BDFClusterBag::adjustAssociations() {
 			}
 			// "upper" should always be non-null now
 			if (!upper) {
-				if (!allowBury)
-					Error::abortRun(*bagp,msg);
 				bagp->setRelation(BDF_NONE);
+				if (!allowBury) {
+					die(*bagp,msg);
+					return;
+				}
 			}
 			else
 				bagp->setRelation(r, upper);
@@ -1215,15 +1233,33 @@ StringList BDFClusterBag::displaySchedule(int depth) {
 	return sch;
 }
 
-// run the cluster, taking into account the loop factor
-void BDFClusterBag::go() {
-	if (!sched || !condSatisfied(TRUE)) return;
-	do {
-		sched->setStopTime(loop()+exCount);
-		sched->run();
-		exCount += loop();
-	} while (!Scheduler::haltRequested() && condSatisfied(FALSE));
-	return;
+// Control for executing all clusters: we must grab any control tokens
+// needed from the level below.
+// At this point, outer run() has done receiveData() to get any input
+// tokens, and of course the inside of the cluster has not yet been
+// run.
+
+// This version copies values for all tokens -- could be improved by
+// only copying needed tokens.
+
+void BDFCluster::go() {
+	// First, cluster might be conditional with a false condition.
+	// Exit immediately if so.
+	if (pType == DO_IFTRUE || pType == DO_IFFALSE) {
+		Particle& boolToken = (*pCond)%0;
+		int v = (int(boolToken) != 0);
+		if (v != (pType == DO_IFTRUE)) return;
+	}
+	// do-while not yet supported: assume standard.
+	runInner();
+}
+
+// run inside of the BDFClusterBag loop() times.
+
+void BDFClusterBag::runInner() {
+	sched->setStopTime(loop()+exCount);
+	sched->run();
+	exCount += loop();
 }
 
 // destroy the bag.
@@ -1501,14 +1537,12 @@ StringList BDFAtomCluster::displaySchedule(int depth) {
 	return sch;
 }
 
-void BDFAtomCluster::go() {
-	if (!condSatisfied(TRUE)) return;
-	do {
-		for (int i = 0; i < loop(); i++) {
-			if (!pStar.run()) return;
-		}
-	} while (condSatisfied(FALSE));
-	return;
+// run inside of the atomCluster loop() times.
+
+void BDFAtomCluster::runInner() {
+	for (int i = 0; i < loop(); i++) {
+		if (!pStar.run()) return;
+	}
 }
 
 int BDFAtomCluster::myExecTime() {
@@ -1632,4 +1666,23 @@ int BDFCluster::dataIndependent() {
 		}
 	}
 	return TRUE;
+}
+
+void gd(Geodesic* g) {
+	if (g) {
+		cerr << "src: " << g->sourcePort()->fullName() << "\n"
+		     << "dst: " << g->destPort()->fullName() << ", "
+		     << g->size() << " tokens\n";
+	}
+	else cerr << "NIL\n";
+}
+
+void cd(BDFCluster* c) {
+	if (c) c->printOn(cerr);
+	else cerr << "NIL\n";
+}
+
+void cpd(BDFClustPort* cp) {
+	if (cp) cerr << *cp;
+	else cerr << "NIL\n";
 }

@@ -92,10 +92,22 @@ public:
 	BDFClustPort* innermost();
 
 	// this overload hides the base version and forces arg to
-	// be a BDFClustPort.
-	void setRelation(BDFRelation r, BDFClustPort* assoc = 0) {
-		BDFPortHole::setRelation(r,assoc);
-	}
+	// be a BDFClustPort.  It also does checking: assoc port must
+	// have same parent as me (unless null).
+	void setRelation(BDFRelation r, BDFClustPort* assoc = 0);
+
+	// data movement routines (for dynamic execution of clusters)
+	void receiveData();
+	void sendData();
+	void initialize();
+
+	// indicate that there is a dup port.  This requires tokens
+	// be recorded for dynamic execution.
+	void markDuped() { dupedFlag = 1;}
+	int duped() const { return dupedFlag;}
+
+	// return last Boolean value
+	int lastBool() const { return lastBoolValue;}
 private:
 	// the real port
 	DFPortHole& pPort;
@@ -113,6 +125,15 @@ private:
 
 	// true if I control some other port
 	unsigned char ctlFlag;
+
+	// value of last boolean
+	unsigned char lastBoolValue;
+
+	// true if I have a corresponding DUP port
+	unsigned char dupedFlag;
+
+	// true if output needs to be moved up
+	unsigned char moveupNeeded;
 };
 
 // determine whether two signals have a fixed relation or not.  It

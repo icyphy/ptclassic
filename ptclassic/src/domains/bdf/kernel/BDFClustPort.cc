@@ -23,11 +23,13 @@ static const char file_id[] = "BDFClustPort.cc";
 #include "Geodesic.h"
 #include <iostream.h>
 
+const int UNKNOWN = 2;		// a value other than TRUE/FALSE.
+
 // constructor for BDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an BDFClusterBag.
 BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 : pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
-  ctlFlag(0)
+  ctlFlag(0), lastBoolValue(2), dupedFlag(0), moveupNeeded(UNKNOWN)
 {
 	const char* name = bp ? port.name() : BDFCluster::mungeName(port);
 	setPort(name,parent,INT);
@@ -48,12 +50,17 @@ BDFClustPort::~BDFClustPort() {
 	if (isBagPort())
 		inPtr()->pOutPtr = 0;
 	if (pOutPtr) {
-		// cerr << fullName() << " has an outPtr!\n";
 		pOutPtr = 0;
 	}
 }
 
 void BDFClustPort::initGeo() { myGeodesic->initialize();}
+
+void BDFClustPort::initialize() {
+	bufferSize = numberTokens;
+	maxBackValue = numberTokens - 1;
+	BDFPortHole::initialize();
+}
 
 // return true if port has same rate as its neighbor.
 int BDFClustPort::sameRate() {
@@ -229,5 +236,85 @@ ostream& operator<<(ostream& o, BDFClustPort& p) {
 	else o << pFar->parent()->name() << "." << pFar->name();
 	if (pFar && p.numTokens() > 0) o << "[" << p.numTokens() << "]";
 	return o;
+}
+
+// copy data between ports.
+static void copy(PortHole* src,PortHole* dst) {
+	int n = src->numXfer();
+	for (int i = n-1; i>=0; i--) {
+		(*dst)%i = (*src)%i;
+	}
+}
+
+// routine to copy data to duplicate ports.  The dup ports form a ring
+// with the real ports and any other real ports that are constrained to
+// be the same.
+static void broadcastDupData(BDFClustPort* src) {
+	for (BDFClustPort* dst = src->assoc();
+	     dst && dst != src;
+	     dst = dst->assoc()
+	    ) {
+		if (dst->isDupPort()) {
+			copy(src,dst);
+		}
+	}
+}
+
+// routines for execution of the ports.
+void BDFClustPort::receiveData() {
+	if (!inFlag) return;	// do nothing for output ports.
+	if (far() == 0) {
+		// we are an external port.  Obtain data by "copying down"
+		// if we are duped or are a control port.
+		if (duped() || isControl()) {
+			copy(pOutPtr,this);
+			// rely on dup ports being processed after real ones.
+			if (duped()) broadcastDupData(this);
+		}
+	}
+	else getParticle();
+}
+
+// see if signal is needed as ctl signal.
+static int seeIfMoveupNeeded(BDFClustPort* me) {
+	while (1) {
+		BDFClustPort* o = me->outPtr();
+		if (!o) break;
+		me = o;
+	}
+	BDFClustPort* mef = me->far();
+	return (mef->duped() || mef->isControl());
+}
+
+void BDFClustPort::sendData() {
+	// for inputs, sendData clears old particles.
+	if (inFlag) {
+		clearParticle();
+		return;
+	}
+	if (moveupNeeded == UNKNOWN)
+		moveupNeeded = seeIfMoveupNeeded(this);
+	// for non-bags, need to get data previously sent by geodesics.
+	if (moveupNeeded && bagPortFlag == BCP_ATOM) {
+		Geodesic* g = real().geo();
+		if (numberTokens == 1) {
+			// convert token to 0 or 1 (booleanize)
+			int tokval = ( int(*(g->tail())) != 0 );
+			(*this)%0 << tokval;
+		}
+		else {
+			cerr << real().fullName()
+			     << ": Cannot moveup > 1 yet\n";
+			exit(1);
+		}
+	}
+	// if I am duped, need to send particles to duplicate outputs.
+	if (duped())
+		broadcastDupData(this);
+	// Note after putParticle, data have been cleared.
+	if (far()) putParticle();
+	else if (moveupNeeded) {
+		copy(this,pOutPtr);
+	}
 }
 

@@ -95,7 +95,7 @@ int BDFStar :: run () {
 
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput() || p->isDynamic()) continue;
-		if (p->numTokens() < p->numXfer())
+		if (p->far() && p->numTokens() < p->numXfer())
 			return handleWait(*p);
 		else p->receiveData();
 	}
@@ -114,7 +114,7 @@ int BDFStar :: run () {
 		// data are moved if control token matches the
 		// assocRelation.
 		if (ctl_is_t == read_on_t) {
-			if (p->numTokens() < p->numXfer())
+			if (p->far() && p->numTokens() < p->numXfer())
 				return handleWait(*p);
 			else p->receiveData();
 		}
