@@ -208,9 +208,10 @@ body ::tycho::CompileJava::classpath {} {
 
     switch $tcl_platform(platform) {
         {unix} { set classpath [join $classPathArg ":"]}
-        {windows} { set classpath [join $classPathArg "\\\\;"]}
-        {macintosh} { error "Internal error: CompileJava::classPath, macintosh \
-                not supported"}
+	# Yes, we need that many slashes.
+        {windows} { set classpath [join $classPathArg "\\\\\\\\\\;"]}
+        {macintosh} { error "Internal error: CompileJava::classPath, \
+		macintosh not supported"}
     }
     return [uplevel #0 subst $classpath]
 }
