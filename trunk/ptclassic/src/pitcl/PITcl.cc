@@ -974,21 +974,30 @@ int PTcl::monitorPtcl(int argc,char **argv) {
 
 // First, define the action function that will be called by the Ptolemy kernel.
 // The string tclAction passed will be executed as a Tcl command.
-void ptkAction(Star* s, const char *tclCommand) {
-    if(tclCommand==NULL || *tclCommand == '\0') {
+void ptkAction(Star* s, const char* tclCommand) {
+    if (tclCommand == NULL || *tclCommand == '\0') {
     	Tcl_Eval(PTcl::activeInterp,
-	  "error {null pre or post action requested}");
+		 "error {null pre or post action requested}");
 	return;
     }
-    StringList temp = s->fullName();
-    Tcl_VarEval(PTcl::activeInterp,tclCommand," \"",
-		(const char*)temp, "\"",
-		(char*)NULL);
+
+    if (s == 0) {
+    	Tcl_Eval(PTcl::activeInterp,
+		 "error {no star passed to pre or post action}");
+	return;
+    }
+
+    InfString temp = s->fullName();
+    Tcl_VarEval(PTcl::activeInterp, tclCommand, " \"",
+		    (char*)temp, "\"", (char*)NULL);
 }
 
 // Destructor cancels an action and frees memory allocated for a TclAction
 TclAction::~TclAction() {
+    // remove action and delete its memory
     SimControl::cancel(action);
+
+    // delete dynamic strings
     delete [] tclCommand;
     delete [] name;
 }
@@ -1026,13 +1035,15 @@ static TclActionList tclActionList;
 //
 int PTcl::registerAction(int argc,char ** argv) {
     if(argc != 3) return usage("registerAction pre|post <command>");
-    int pre;
-    if(strcmp("pre",argv[1]) == 0) pre = 1;
-    else if(strcmp("post",argv[1]) == 0) pre = 0;
+
+    // if "pre" is TRUE, then it is a pre-action
+    int pre = FALSE;
+    if (strcmp("pre",argv[1]) == 0) pre = TRUE;
+    else if (strcmp("post",argv[1]) == 0) pre = FALSE;
     else return usage("registerAction pre|post <command>");
 
-    TclAction *tclAction;
-    LOG_NEW; tclAction = new TclAction;
+    // Define a new Tcl action
+    TclAction* tclAction = new TclAction;
     tclAction->tclCommand = savestring(argv[2]);
     tclAction->action =
 	SimControl::registerAction(ptkAction, pre, tclAction->tclCommand);
@@ -1048,23 +1059,24 @@ int PTcl::registerAction(int argc,char ** argv) {
     // The following guarantees to Tcl that the name will not be deleted
     // at least until the next call to Tcl_Eval.  This is safe because only
     // the cancelAction command below can delete this name.
-    Tcl_SetResult(interp,tclAction->name,TCL_STATIC);
+    // I'm not sure about this. -BLE
+    Tcl_SetResult(interp, tclAction->name, TCL_VOLATILE);
     return TCL_OK;
 }
 
 // Cancel a registered action
 // The single argument is the action_handle returned by registerAction
 //
-int PTcl::cancelAction(int argc,char ** argv) {
-    if(argc != 2) return usage("cancelAction <action_handle>");
-    TclAction *tclAction;
-    if(!(tclAction = tclActionList.objWithName(argv[1]))) {
+int PTcl::cancelAction(int argc, char** argv) {
+    if (argc != 2) return usage("cancelAction <action_handle>");
+    TclAction* tclAction = tclActionList.objWithName(argv[1]);
+    if (tclAction == 0) {
 	Tcl_AppendResult(interp,
 	   "cancelAction: Failed to convert action handle", (char*) NULL);
 	return TCL_ERROR;
     }
     tclActionList.remove(tclAction);
-    LOG_DEL; delete tclAction;
+    delete tclAction;
     return TCL_OK;
 }
 
@@ -1182,13 +1194,12 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	if (monitor && i>2) {
 	  // Call monitorPtcl with the arguments being the
 	  // Ptcl command that we are executing and its arguments
-	  InfString cmd;
-	  cmd = "monitorPtcl ";
+	  InfString cmd = "monitorPtcl ";
 	  for(int j = 0; j < argc; j++) {
 	    cmd += argv[j];
 	    cmd += " ";
 	  }
-	  Tcl_Eval(interp,(char*)cmd);
+	  Tcl_Eval(interp, (char*)cmd);
 	}
 
 	int status = (obj->*(funcTable[i].func))(argc,argv);
