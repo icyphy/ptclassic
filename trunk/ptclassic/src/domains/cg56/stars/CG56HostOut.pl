@@ -1,12 +1,12 @@
 defstar {
 	name { HostOut }
 	domain { CG56 }
-	desc { Data output. }
+	desc { Syncronous Host Output. }
 	version { $Id$ }
 	acknowledge { Gabriel version by Phil Lapsley }
-	author { Chih-Tsung Huang, ported from Gabriel }
+	author { Kennard, Chih-Tsung Huang (ported from Gabriel) }
 	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
+	location { CG56 library }
 	explanation {
 Output data from DSP to host via host port.
 	}
@@ -17,20 +17,20 @@ Output data from DSP to host via host port.
 	state {
 		name { samplesConsumed }
 		type { int }
-		desc { number of samples consumed. }
+		desc { Number of samples consumed. }
 		default { 1 }
 	}
 	state {
 		name { samplesOutput }
 		type { int }
-		desc { number of samples outputed.  }
+		desc { Number of samples transfered to host.  }
 		default { 1 }
 	}
  	state  {
 		name { blockOnHost }
-		type { string }
-		desc {  }
-		default { "yes" }
+		type { int }
+		desc { Boolean: wait until host ready? }
+		default { "YES" }
 	}
  	state  {
 		name { command }
@@ -45,53 +45,54 @@ Output data from DSP to host via host port.
 		const char* p=command;
 		if (p[0] != 0) addRunCmd(command,"\n");
 	}
-	codeblock(yeshostBlock) {
-$label(l)
-	jclr	#m_htde,x:m_hsr,$label(l)
-	jclr	#0,x:m_pbddr,$label(l)
+	codeblock(cbSingleBlocking) {
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
 	movep	$ref(input),x:m_htx
 	}
-	codeblock(elsehostBlock) {
-	jclr	#m_htde,x:m_hsr,$label(l)
-	jclr	#0,x:m_pbddr,$label(l)
+	codeblock(cbSingleNonBlocking) {
+	jclr	#m_htde,x:m_hsr,$label(skip)
+	jclr	#0,x:m_pbddr,$label(slip)
 	movep	$ref(input),x:m_htx
-$label(l)
+$label(skip)
 	}
-	codeblock(nohostBlock) {
-	jclr	#m_htde,x:m_hsr,$label(l3)
-	jclr	#0,x:m_pbddr,$label(l3)
+	codeblock(cbMultiNonBlocking) {
+	jclr	#m_htde,x:m_hsr,$label(skip)
+	jclr	#0,x:m_pbddr,$label(skip)
 	move	#$addr(input),r0
-	do	#$val(samplesOutput),$label(l)
-$label(l2)
-	jclr	#m_htde,x:m_hsr,$label(l2)
-	jclr	#0,x:m_pbddr,$label(l2)
+	.LOOP	#$val(samplesOutput)
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
 	movep	x:(r0)+,x:m_htx
-$label(l)
-$label(l3)
+	.ENDL
+	nop
+$label(skip)
 	}
-	codeblock(done) {
+	codeblock(cbMultiBlocking) {
 	move	#$addr(input),r0
-	do	#$val(samplesOutput),$label(l)
-$label(l2)
-	jclr	#m_htde,x:m_hsr,$label(l2)
-	jclr	#0,x:m_pbddr,$label(l2)
+	.LOOP	#$val(samplesOutput)
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
 	movep	x:(r0)+,x:m_htx
-$label(l1)
-$label(l3)
+	.ENDL
+	nop
 	}
 	go {
-		const char* p=blockOnHost;
-		if (samplesConsumed==1) {
-			if (p[0]=='y' || p[0]=='Y') 
-				gencode(yeshostBlock);
-			else
-				gencode(elsehostBlock);
-		}	
-		else {
-			if (p[0]=='n' || p[0]== 'N')
-				gencode(nohostBlock);
-			else
-				gencode(done);
+		if (int(samplesConsumed)==1) {
+			if ( int(blockOnHost) ) {
+				gencode(cbSingleBlocking);
+			} else {
+				gencode(cbSingleNonBlocking);
+			}
+		} else {
+			if ( int(blockOnHost) ) {
+				gencode(cbMultiBlocking);
+			} else {
+				gencode(cbMultiNonBlocking);
+			}
 		}
 	}
 
