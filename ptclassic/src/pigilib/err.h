@@ -63,6 +63,12 @@ Header for error handing routines.
 	return FALSE; \
     }
 
+#define TCL_CATCH_ERR1_BREAK(tcl_call) \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
+	break; \
+    }
+
 #define TCL_CATCH_ERR2(tcl_call,retVal) \
     if ( (tcl_call) != TCL_OK) { \
 	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
