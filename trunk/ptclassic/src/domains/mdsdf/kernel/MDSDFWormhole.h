@@ -42,21 +42,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class MDSDFWormhole : public Wormhole, public MDSDFStar
 {
 public:
-	// Constructor.
+	// Constructor
 	MDSDFWormhole(Galaxy& g, Target* t=0);
+
 	// Destructor
 	~MDSDFWormhole();
 
 	void setup();
+	void begin() { Wormhole::begin(); }
 	void go();
 	void wrapup();
-	Scheduler* mySched() const { return myTarget()->scheduler();}
+
+	Scheduler* mySched() const { return myTarget()->scheduler(); }
+
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
 	Block* makeNew() const;
 
 	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE;}
+	int isItWormhole() const { return TRUE; }
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
@@ -67,7 +71,7 @@ public:
 	double getStopTime();
 
 	// state initialize
-	void initState() { gal.initState() ;}
+	void initState() { gal.initState(); }
 
 	StringList printVerbose() const;
 	StringList printRecursive() const;
