@@ -50,7 +50,8 @@ fa_point *last, *ptr, *next;
     }
 }
 
-static figure_vertex(last, pnt, next, type)
+static int
+figure_vertex(last, pnt, next, type)
 fa_point *last, *pnt, *next;
 fa_vertex_type *type;
 {
