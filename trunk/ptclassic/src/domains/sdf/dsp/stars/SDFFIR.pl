@@ -5,7 +5,7 @@ defstar {
 A finite impulse response (FIR) filter.  Coefficients are specified by
 the "taps" parameter.  The default coefficients give an 8th-order, linear
 phase lowpass filter. To read coefficients from a file, replace the default
-coefficients with "< fileName", preferably specifying a complete path.
+coefficients with "&lt; fileName", preferably specifying a complete path.
 Rational sampling rate changes, implemented by polyphase multirate filters,
 is also supported.
 	}
@@ -36,7 +36,7 @@ It is best to use tilde's in the filename to reference them to user's
 home directory.  This way, future filesystem reorganizations
 will have minimal effect.
 <p>
-When the <i>decimation\fP (<i>interpolation\fP)
+When the <i>decimation</i> (<i>interpolation</i>)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
@@ -59,7 +59,7 @@ then the filter stopband should begin before f/2.
 If the interpolation ratio is i, then f/2 is a fraction 1/2i
 of the sample rate at which you must design your filter.
 <p>
-The <i>decimationPhase\fP parameter is somewhat subtle.
+The <i>decimationPhase</i> parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
