@@ -269,7 +269,7 @@ int PTcl::delstar(int argc,char** argv) {
 
 // Certain platforms redefine connect with a macro, so we undefine it here.
 // nt4 is one such platform.
-#undefine connect
+#undef connect
 // connect:
 int PTcl::connect(int argc,char** argv) {
 	if (argc != 5 && argc != 6)
