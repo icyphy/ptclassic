@@ -96,9 +96,10 @@ ostream& operator<< (ostream& o, BDFClusterGal& g) {
 BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 : logstrm(log), bagNumber(1), urateFlag(FALSE)
 {
+        int i;
 	int nports = setPortIndices(gal);
 	BDFClustPort** ptable = new BDFClustPort*[nports];
-	for (int i = 0; i < nports; i++)
+	for (i = 0; i < nports; i++)
 		ptable[i] = 0;
 	GalStarIter nextStar(gal);
 	DataFlowStar* s;

@@ -226,6 +226,7 @@ int BDFScheduler::checkStars() {
 }
 
 int BDFScheduler::computeSchedule(Galaxy& galaxy) {
+        int i;
 	GalStarIter nextStar(galaxy);
 	Star* s;
 
@@ -244,7 +245,7 @@ int BDFScheduler::computeSchedule(Galaxy& galaxy) {
 	// check if preamble needed.  Mark which stars write boolean
 	// values that are used -- we cannot fire those stars in the
 	// preamble.
-	for (int i = 0; i < galSize; i++) starInfo[i].writesBoolean = FALSE;
+	for (i = 0; i < galSize; i++) starInfo[i].writesBoolean = FALSE;
 
 	int preambleNeeded = FALSE;
 
