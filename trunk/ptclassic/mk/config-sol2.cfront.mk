@@ -128,7 +128,11 @@ CSYSLIBS =	-lsocket -lnsl -ldl -lm
 #  in libg++, so we don't need to include -lucb.
 # Note that the Solaris ucb library is really broken, so it should be last
 # in the list of libraries, or you may see really serious problems.
-SYSLIBS =	$(CSYSLIBS) -L/usr/ucblib -lucb
+# If we don't have -lc before -lucb, then we get the wrong readdir
+# and pigi fails to start up because of with the error message:
+#  Error: no files matched glob pattern 
+#	"/users/ptdesign/tcltk/itcl/lib/itk/init.*"
+SYSLIBS =	$(CSYSLIBS) -lc -L/usr/ucblib -lucb
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
