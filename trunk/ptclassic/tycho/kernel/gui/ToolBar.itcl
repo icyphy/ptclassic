@@ -42,8 +42,11 @@ class ::tycho::ToolBar {
     ###################################################################
     ####                            options                        ####
 
-    # The command to call when the Close button is pressed
+    # The status bar to use for print help message.
     itk_option define -statusbar statusBar StatusBar {}
+
+    # The font to use for the buttons
+    itk_option define -font font Font [::tycho::font screen]
 
     ###################################################################
     ####                         public methods                    ####
