@@ -170,7 +170,7 @@ proc openAllFiles {args} {
 	if [ file exists [::tycho::expandPath $testfile]] {
 	    set win [::tycho::File::openContext $testfile]
 	    #	wm deiconify $win
-	    puts $win
+	    puts "testDefs.tcl: openAllFiles{}: win = $win"
 	    after [expr {2 * $duration}] removeobj $win 
 	    update
 	}
@@ -188,7 +188,8 @@ proc doneTests {args} {
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    after [expr {2 * $duration}] ::tclexit
+    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 0
+    #after [expr {2 * $duration}] ::tclexit
 }
 
  
