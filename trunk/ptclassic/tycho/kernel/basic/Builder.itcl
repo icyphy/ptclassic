@@ -55,25 +55,28 @@ class ::tycho::Builder {
     ###################################################################
     ####                         public procs                      ####
 
-    # Do what ever is necessary to Build Tycho
+    # Run all the Tycho tests.
+    proc alltests {}
+
+    # Do what ever is necessary to Build Tycho.
     proc build {}
 
-    # Do build in subdirectories
+    # Do build in subdirectories.
     proc buildSubDirectories {}
 
-    # Create the class diagram 
+    # Create the class diagram. 
     proc classDiagram {}
 
-    # Create glimpse files
+    # Create glimpse files.
     proc glimpse {}
 
-    # Create the concept and code Indices
+    # Create the concept and code indices.
     proc indices {}
 
-    # Create itcldocs in the subdirectories
+    # Create itcldocs in the subdirectories.
     proc itcldocs {}
 
-    # Create tclIndex files
+    # Create tclIndex files.
     proc tclIndex {}
 
     ###################################################################
@@ -107,8 +110,21 @@ body ::tycho::Builder::destructor {} {
     ###################################################################
     ####                      public procs                       ####
 
+
 #######################################################################
-#### Builder
+#### alltests
+# Run all the Tycho tests.
+#
+body ::tycho::Builder::alltests {} {
+    global TYCHO
+    set savedir [pwd]
+    cd $TYCHO
+    source [file joint kernel test alltychotests.tcl]
+    cd $savedir
+}
+
+#######################################################################
+#### build
 # Do what ever is necessary to build Tycho
 #
 body ::tycho::Builder::build {} {
