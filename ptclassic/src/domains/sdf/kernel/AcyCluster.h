@@ -56,14 +56,33 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 // AcyLoopScheduler.
 
 class SequentialList;
+/****
+AcyCluster is a class that implements the graph cuttting heuristic required
+by <code>AcyLoopScheduler::RPMC</code>
+<a name="ClassAcyCluster">
 
+@Description Implements the graph cutting heuristic described in Chapter 6 of
+<a href="http://ptolemy.eecs.berkeley.edu/~murthy/book.html">
+<em>"Software Synthesis from Dataflow Graphs",</em></a> by
+<p> 
+Shuvra S. Bhattacharyya, Praveen K. Murthy, and Edward A. Lee,
+Kluwer Academic Publishers, Norwood, MA, 1996.
+</a>
+
+@Author Praveen K. Murthy
+****/
 class AcyCluster: public SynDFCluster {
 public:
-	AcyCluster() {SynDFCluster();}
+	AcyCluster() : SynDFCluster() {};
 
 	/* virtual */ Block* makeNew() const { return new AcyCluster; }
+
+	// The main graph cutting heuristic
 	int legalCutIntoBddSets(int K);
+
+	// Checks answer given by legalCutIntoBddSets
 	int checkLegalCut(int cutValue, int bdd);
+
 protected:
 	void weightArcs();
 	void tagDelayArcs();
@@ -76,6 +95,11 @@ protected:
 
 };
 
+/****
+Iterator class for AcyClusters to avoid using casts everywhere
+
+@Author Praveen K. Murthy
+****/
 class AcyClusterIter : private SynDFClusterIter {
 public:
 	inline AcyClusterIter(Galaxy& g):SynDFClusterIter(g) {};
