@@ -218,6 +218,10 @@ int TclStarIfc::setup (Block* star,
 	Tcl_SetVar2(ptkInterp, (char*)starID, "numOutputs",
 			(char*)buf, TCL_GLOBAL_ONLY);
 
+	buf = star->fullName();
+	Tcl_SetVar2(ptkInterp, (char*)starID, "fullName",
+			(char*)buf, TCL_GLOBAL_ONLY);
+	
 	// Step through all the states
 	State* s;
 	BlockStateIter next(*star);
