@@ -111,6 +111,7 @@ static char* genObjDir (const char* src) {
 		}
 		else *p++ = *src++;
 	}
+	*p = 0;
 	return savestring (buf);
 }
 
@@ -127,8 +128,9 @@ KcLoadInit (const char* argv0) {
 // name = username of the star
 // idomain = domain of the star
 // srcDir = star source directory
-int
-compileAndLink (const char* name, const char* idomain, const char* srcDir) {
+extern "C" int
+KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
+	srcDir = expandPathName (srcDir);
 	char* objDir = genObjDir (srcDir);
 	char plName[512], oName[512], ccName[512], cmd[512];
 // debug statement
@@ -167,7 +169,10 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir) {
 		}
 	}
 // now compile.
-	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
+	srcDir = savestring (srcDir); // yuk: expandPathName has static string
+	int status = compile (name, idomain, srcDir, objDir);
+	delete srcDir;
+	if (!status) return FALSE;
 // finally incremental link.
 	return Linker::linkObj (oName);
 }
@@ -182,7 +187,6 @@ KcLoad (const char* iconName) {
 	char codeName[512], base[128], domain[64], dir[512];
 
 	iconName = expandPathName (iconName);
-
 	if (!IconFileToSourceFile (iconName, codeName, domain))
 		return FALSE;
 	strcpy (dir, codeName);
@@ -203,5 +207,5 @@ KcLoad (const char* iconName) {
 	strcpy (base, b + l);
 	char* p = strrchr (base, '.');
 	if (p) *p = 0;
-	return compileAndLink (base, domain, dir);
+	return KcCompileAndLink (base, domain, dir);
 }
