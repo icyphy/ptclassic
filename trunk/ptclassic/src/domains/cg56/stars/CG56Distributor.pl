@@ -13,11 +13,11 @@ Distributes an input signal among two outputs, alternating samples.
 	}
 	input {
 		name {input}
-		type {FIX}
+		type {anytype}
 	}
 	outmulti {
 		name {output}
-		type {FIX}
+		type {anytype}
 	}
         state {
                 name {blockSize}
@@ -30,14 +30,6 @@ Distributes an input signal among two outputs, alternating samples.
                 type { int }
                 default { 0 }
                 desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-
-        state  {
-                name { runtimeVal }
-                type { int }
-                default { 0 }
-                desc { runtime value }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 
@@ -74,10 +66,9 @@ Distributes an input signal among two outputs, alternating samples.
                         outputNum=i;
                         gencode(loop);
                 }
-                runtimeVal=output.numberPorts();
         }
        exectime {
-                return (2*(int(runtimeVal))+1) ;
+                return (2*(int(output.numberPorts()))+1);
         }
 }
 
