@@ -30,7 +30,8 @@ STARDOCDIR = ../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFBanyanStg.pl \
- SDFController.pl
+ SDFController.pl \
+ SDFToBus.pl 
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc) SDFBanyanGal.cc
