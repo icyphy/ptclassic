@@ -49,9 +49,6 @@ LIB=libsdfdspstars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
-# Supporting C files for stars
-LIBCSRCS= chbevl.c i0.c
-
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFAutocor.pl \
@@ -96,18 +93,18 @@ PL_SRCS= \
  SDFWindow.pl
 
 # The .cc files
-SRCS= $(LIBCSRCS) $(PL_SRCS:.pl=.cc)
+SRCS= $(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(LIBCSRCS:.c=.o) $(PL_SRCS:.pl=.o)
+OBJS= $(PL_SRCS:.pl=.o)
 
 # header files for all stars
-HDRS= cephes.h $(PL_SRCS:.pl=.h)
+HDRS= $(PL_SRCS:.pl=.h)
 
 STAR_MK=sdfdspstars
 DOMAIN=SDF_DSP
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(LIBCSRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		$(SRCS) stars_all
 
