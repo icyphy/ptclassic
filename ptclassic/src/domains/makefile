@@ -59,19 +59,14 @@ subsources:
 	    fi ; \
 	done
 
-starHTML.idx: $(wildcard */doc/stars/starHTML.idx)
-	echo "{Ptolemy Star HTML Index for all domains}" > $@
-	echo "{">> $@
-	@for x in $(DOMAINS); do \
-	    if [ -w $$x ] ; then \
-		echo "{{$$x domain stars} $$x/doc/stars/starHTML.idx {$$x domain stars}}" >> $@; \
-		( cd $$x ; \
-		echo making doc/stars/starHTML.idx in domains/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x doc/stars/starHTML.idx ;\
-		) \
-	    fi ; \
-	done
-	echo "}">> $@
+starHTML.idx: $(addsuffix /starHTML.idx, $(DOMAINS))
+	@echo "Updating $@:"
+	rm -f $@
+	echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
+			$(addsuffix /starHTML.idx, $(DOMAINS)) \
+			" | itclsh
 
 .PHONY:	TAGS
 TAGS:
