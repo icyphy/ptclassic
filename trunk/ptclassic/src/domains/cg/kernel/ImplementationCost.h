@@ -61,7 +61,7 @@ class ImplementationCost {
 		dataMemoryVector[i] = cost;
 	}
 
-	// number of instruction cycles
+	// number of clock cycles
 	inline int time() { return exectime; }
 
 	// number program and data memory locations
