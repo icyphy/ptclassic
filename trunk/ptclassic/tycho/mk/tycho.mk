@@ -60,7 +60,8 @@ JAVADOC = 	$(JAVAHOME)/bin/javadoc
 # Flags to pass to javadoc.
 JDOCFLAGS = 	-author -version # -doctype MIF
 
-
+# Script to run tclBlend
+JTCLSH =	jtclsh
 
 # The destination directory for any libraries created.
 # Usually this is an architecture dependent library.
