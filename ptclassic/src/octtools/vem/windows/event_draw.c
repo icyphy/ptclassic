@@ -1492,13 +1492,13 @@ static void wnBadList(fct)
 octObject *fct;			/* Inconsistent facet */
 /*
  * Sends error messages to the console window and log file
- * if any bad masters where found while redrawing a window.
+ * if any bad masters were found while redrawing a window.
  * Its major side effect:  it clears the table built
  * by wnBadMaster.
  */
 {
     if (bad_masters) {
-	vemMsg(MSG_A, "Bad masters where found in %s:%s:%s:\n",
+	vemMsg(MSG_A, "Bad masters were found in %s:%s:%s:\n",
 	       fct->contents.facet.cell,
 	       fct->contents.facet.view,
 	       fct->contents.facet.facet);
