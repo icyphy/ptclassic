@@ -125,6 +125,12 @@ test Path-3.1 {Test out mkdir and rm} {
     list $shouldExist $shouldNotExist
 } {1 0}
 
+proc testEq { a b } {
+    if { $a == $b } {
+	return 1
+    }
+    return [list $a $b]
+}
 test Path-4.1 {Test out relativePath} {
     global env
     if [info exist env(PTOLEMY)] {
@@ -134,24 +140,39 @@ test Path-4.1 {Test out relativePath} {
 	set TYCHO $env(TYCHO)
     }
 
-    set r1 [::tycho::relativePath [file join / a b c d e] \
-	    [file join / a b c h i]]
-    set r2 [::tycho::relativePath [file join / a b c d e] \
+    set r1 [testEq [::tycho::relativePath [file join / a b c d e] \
+	    [file join / a b c h i]] \
+	    [file join .. .. h i]]
+    set r2 [testEq [::tycho::relativePath [file join / a b c d e] \
+	    [file join .. .. h i]] \
 	    [file join .. .. h i]]
 
     set r3 [::tycho::relativePath . .]
     set r4 [::tycho::relativePath .. ..]
-    set r5 [::tycho::relativePath . [file join .. a]]
+    set r5 [testEq [::tycho::relativePath . [file join .. a]] \
+	    [file join .. a]]
     set r6 [::tycho::relativePath [file join / a b c d e] [file join / a b c d e]]
-    set r7 [::tycho::relativePath [file join / a b ] [file join / a b c d e]]
-    set r8 [::tycho::relativePath  [file join / a b c d e] [file join / a b ]]
-    set r9 [::tycho::relativePath  [file join a b c d e] [file join / a b ]]
-    set r10 [::tycho::relativePath  [file join a b ] [file join a b .. c]]
-    set r11 [::tycho::relativePath  \
-	    /export/watson/watson3/cxh/pt/tycho/typt/editors/doc/codeDoc \
-	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html]
+    set r7 [testEq [::tycho::relativePath [file join / a b ] \
+	    [file join / a b c d e]] \
+	    [file join c d e]]
+    set r8 [testEq [::tycho::relativePath  [file join / a b c d e] \
+	    [file join / a b ]] \
+	    [file join .. .. ..]]
+    set r9 [testEq [::tycho::relativePath  [file join a b c d e] \
+	    [file join / a b ]] \
+	    [file join / a b ]]
+    set r10 [testEq [::tycho::relativePath  [file join a b ] \
+	    [file join a b .. c]] \
+	    [file join a b .. c]]
+
+    set r11 [testEq [::tycho::relativePath \
+	    \$TYCHO/typt/editors/doc/codeDoc \
+	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html] \
+	    [file join .. .. .. .. editors visedit doc codeDoc \
+	    EditForest.html]]
+
     list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10 $r11
-} {../../h/i ../../h/i . .. ../a e c/d/e ../../.. /a/b a/b/../c ../../../../editors/visedit/doc/codeDoc/EditForest.html}
+} {1 1 . .. 1 e 1 1 1 1 1}
 
 test Path-5.1 {Test out pathEnvSearch} {
     set isexecutable [file executable [::tycho::pathEnvSearch itclsh]]
@@ -191,9 +212,10 @@ test Path-6.1 {Test out simplifyPath} {
 	    [list TYCHO]]
 
     # This envvar does not exist
-    set r2 [::tycho::simplifyPath [::tycho::expandPath \
+    set r2 [testEq [::tycho::simplifyPath [::tycho::expandPath \
 	    [file join \$TYCHO doesNotExist]] \
-	    [list NOTAENVVAR]]
+	    [list NOTAENVVAR]] \
+	    [file join [::tycho::expandPath \$TYCHO] doesNotExist]]
     
     set r3 [::tycho::simplifyPath [::tycho::expandPath \
 	    [file join \$TYCHO foo.r3]] \
@@ -205,6 +227,6 @@ test Path-6.1 {Test out simplifyPath} {
 	    [list NOTAENVVAR TYCHO]]
 
     list $r1 $r2 $r3 $r4
-} {{$TYCHO/README.files} /export/watson/watson3/cxh/pt/tycho/doesNotExist {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
+} {{$TYCHO/README.files} 1 {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
 
 doneTests
