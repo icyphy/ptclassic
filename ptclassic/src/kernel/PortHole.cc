@@ -760,7 +760,7 @@ PortHole& MultiPortHole :: newConnection() {
 	}
 
 	// no disconnected ports, make a new one.
-	return real.newPort();
+	return newPort();
 }
 
 // Create a bus connection between two multiportholes.
