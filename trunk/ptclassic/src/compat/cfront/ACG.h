@@ -44,7 +44,18 @@ public:
 	asLong() {return (unsigned long)mrand48();}
 };
 #endif /* !__GNUG__ */
-#else /* hppa */
+#else /* hppa ...*/
+#ifdef PT_USE_SRAND
+extern "C" {
+#include <stdlib.h>
+};
+class ACG {
+public:
+	ACG(unsigned seed = 1) {srand(seed);}
+	unsigned long asLong() {return (unsigned long)rand();}
+};
+
+#else /* PT_USE_RAND */
 extern "C" {
   void srandom(unsigned);
   long random();
@@ -59,5 +70,6 @@ public:
 	}
 
 };
-#endif /* hppa */
+#endif /* PT_USE_RAND */
+#endif /* hppa ....*/
 #endif

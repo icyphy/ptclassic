@@ -45,7 +45,18 @@ public:
 };
 #endif /* __GNUG__ */
 #else /* hppa */
+#ifdef PT_USE_RAND
+//extern "C" int rand();
 
+// returns a random value between 0 and 1.
+
+class Random {
+protected:
+	double unif01() { return double(rand())/2147483648.0;}
+public:
+	virtual double operator()() = 0;
+};
+#else /* PT_USE_RAND */
 extern "C" long random();
 
 // returns a random value between 0 and 1.
@@ -56,6 +67,7 @@ protected:
 public:
 	virtual double operator()() = 0;
 };
+#endif /* PT_USE_RAND */
 #endif /* hppa */
 #endif
 
