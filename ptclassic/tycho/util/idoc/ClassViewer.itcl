@@ -186,7 +186,7 @@ class ::tycho::IDoc {
     private method displayVar {protection}
 
     # Format the explanation of the given item in HTML.
-    private method formatExpl {item}
+    private method formatExpl {item type}
 
     # Calculate a new -relwidth parameter (doesn't reset it)
     private method newRelWidth {pizels}
@@ -519,7 +519,15 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
 # if such a description exists
 #
 body ::tycho::IDoc::bindDesc {item label} {
-    if ![catch {set desc [$myClass get annotation $item.description]}] {
+    # get the type of the label
+    switch [string range $label end end] {
+        "\p" {set type method}
+        "\m" {set type method}
+        "\v" {set type variable}
+        default {set type {}}
+    }
+
+    if ![catch {set desc [$myClass get annotation $item.description $type]}] {
         $myContents bind $label <Enter> \
                 [code "$this putStatus \{$desc\}"]
         $myContents bind $label <KeyRelease-Shift_L> \
@@ -539,9 +547,16 @@ body ::tycho::IDoc::bindDesc {item label} {
 # actual explanation field of the item
 #
 body ::tycho::IDoc::bindExpl {item label} {
- 
+    # get the type of the label
+    switch [string range $label end end] {
+        "\p" {set type method}
+        "\m" {set type method}
+        "\v" {set type variable}
+        default {set type {}}
+    }
+
     # format explanation
-    set expl [formatExpl $item]
+    set expl [formatExpl $item $type]
 
     # bind explanation to button 1 click
     $myContents bind $label <Button-1> \
@@ -749,17 +764,21 @@ body ::tycho::IDoc::displayVar {protection} {
 # bound to a button 1 click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
 #
-body ::tycho::IDoc::formatExpl {item} {
-    if [catch {set expl [$myClass get annotation $item.explanation]}] {
-        set expl [$myClass get annotation $item.description]
+body ::tycho::IDoc::formatExpl {item type} {
+    if [catch {set expl [$myClass get annotation $item.explanation $type]}] {
+        set expl [$myClass get annotation $item.description $type]
     }
+    
     set paramlist {}
-    foreach parameter [$myClass parameters $item] {
-        set default [$myClass itemcget parameter $item.$parameter -default]
-        if {$default == {}} {
-            lappend paramlist $parameter
-        } else {
-            lappend paramlist "$parameter $default"
+    if {$type == "method"} {
+        foreach parameter [$myClass parameters $item] {
+            set default [$myClass itemcget parameter \
+                    $item.$parameter -default $type]
+            if {$default == {}} {
+                lappend paramlist $parameter
+            } else {
+                lappend paramlist "$parameter $default"
+            }
         }
     }
     set html "<b>$item</b> <i>$paramlist</i><p> $expl"
