@@ -102,17 +102,17 @@ non-zero integer (not necessarily 1).
 	// Two-input cases
 
 	codeblock(twoInputAnd) {
-	move	$ref(input#1),x0	; read input i into register x0
-	move	$ref(input#2),x1	; read input i into register x0
+	move	$ref(input#1),x0			; read input#1 into register x0
+	move	$ref(input#2),x1			; read input#2 into register x1
 	mpy	x0,x1,a			; a = x0 * x1
-	asr	a			; a is integer mult, x0 = input
+	asr	a			; a is integer mult
 	}
 
 	// General cases
 
 	codeblock(prepareAndLoop) {
-	move	#<$addr(input#2),r0	; r0 points to the address of input#2
-	move	$ref(input#1),x1	; load input #1 into x1 and wait for r0
+	move	#<$addr(input#2),r0		; r0 points to the address of input#2
+	move	$ref(input#1),x1		; load input #1 into x1 and wait for r0
 	mpy	x:(r0)+,x1,a		; a = x0 * x1, save previous a in x1
 	asr	a			; a is integer mult
 	}
@@ -135,33 +135,30 @@ non-zero integer (not necessarily 1).
 	}
 
 	codeblock(XorAccumulator,"int i") {
-	not	a	a,y0	; save a in y0 and invert a
+	not	a	a,y0		; save a in y0 and invert a
 	tst	b	$ref(input#@i),b	; test input and read next input
-	teq	y0,a		; restore a if input != 0
+	teq	y0,a			; restore a if input != 0
 	}
 
 	codeblock(endXor) {
-	not	a	a,y0	; save a in y0 and invert a
-	tst	b		; test input and read next input
-	teq	y0,a		; restore a if input != 0
+	not	a	a,y0		; save a in y0 and invert a
+	tst	b			; test input and read next input
+	teq	y0,a			; restore a if input != 0
 	}
 
 	// Reusable code blocks
 
 	codeblock(loadAccumulator,"int i") {
-	move	$ref(input#@i),a		; read input i to accumulator a
+	move	$ref(input#@i),a		; read input#@i to accumulator a
 	}
 
 	codeblock(loadx0,"int i") {
-	move	$ref(input#@i),x0		; read input i to accumulator a
+	move	$ref(input#@i),x0		; read input#@i to register x0
 	}
 
-        codeblock(saveStatus) {
-	movec   sr,a    	; save status register (has condition codes)
-	}
-
-	codeblock(invert) {
-	and	x1,a		; returns true if zero (test the Z bit)
+        codeblock(invertAccumulator) {
+	movec   sr,a	#$$04,x1	; save status register (condition codes)
+	and	x1,a			; returns true if zero (test Z bit)
 	}
 
         codeblock(saveResult) {
@@ -219,7 +216,7 @@ non-zero integer (not necessarily 1).
 			break;
 		    case XORID:
 		    case XNORID:
-			header << "negative logic";
+			header << "positive logic";
 			addCode(header);
 			addCode(beginXor);
 			for (i = 2; i < input.numberPorts(); i++ ) {
@@ -230,9 +227,8 @@ non-zero integer (not necessarily 1).
 		}
 
 		// Compute final result, adjusting for positive/negative logic
-		if (test == NANDID || test == NORID || test == XORID ) {
-			addCode(saveStatus);
-			addCode(invert);
+		if (test == NANDID || test == NORID || test == XNORID ) {
+			addCode(invertAccumulator);
 		}
 		addCode(saveResult);
 	}
