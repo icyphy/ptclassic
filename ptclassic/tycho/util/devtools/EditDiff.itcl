@@ -121,7 +121,6 @@ class ::tycho::EditDiff {
         set differenceBlock [lindex $differenceList $differenceListCount]
         regexp {([0-9]+).0 ([0-9]+).0} $differenceBlock match \
                 differenceBegin differenceEnd
-        puts "Current line= $differenceListCount, block=$differenceBlock"
 
         # Highlight from end to beginning to be sure that we always see
         # the beginning of a difference block.
@@ -423,12 +422,7 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     configure -readonly 1
     markUnmodified
 
-    puts "Difference list: $differenceList"
-
     return
-
-    #set data [read $fd]
-    #markModified
 }
 
 #####################################################################
