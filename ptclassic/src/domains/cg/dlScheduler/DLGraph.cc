@@ -23,36 +23,9 @@ Date of last revision:
 EGNode *DLGraph :: newNode(SDFStar* s, int i)
 	{ LOG_NEW; return new DLNode(s,i); }
 
-                        /////////////////////////
-                        ///  initializeGraph  ///
-                        /////////////////////////
-
-// This function sets the following properties of the graph:
-// 1) nodeCount : The number of nodes (star invocations) in the graph
-// 2) runnableNodes : A list of the initially runnable DLNodes
-//
-// and the following property for each node in the graph:
-// StaticLevel : The longest path in execution time from the node
-//		to the end of the graph (over all the endnodes). 
-
-int DLGraph::initializeGraph() {
-
-        EGSourceIter nxtSrc(*this);
-        DLNode *src;
-
-	// Remove the arcs with delay from the ancestors and descendants
-	removeArcsWithDelay();
-
-	// initialize members
-	nodeCount = 0;
-	ExecTotal = 0;
-
-        // Set the levels for each node
-        while ((src = (DLNode*)nxtSrc++) != 0) {
-                if (SetNodeSL(src) < 0) return FALSE;
-        }
-	return TRUE;
-}
+                        ////////////////////
+                        ///  resetGraph  ///
+                        ////////////////////
 
 void DLGraph :: resetGraph() {
 
