@@ -38,14 +38,14 @@ during the simulation.
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 
-    codeblock(report_overflow, "const char* starName") {
+	codeblock(report_overflow, "const char* starName") {
 	if ($ref(ov_cnt)) {
 		double percentage = (100.0*$ref(ov_cnt)) / ($ref(ck_cnt) ? $ref(ck_cnt):1.0);
-		fprintf(stderr, "star @starName: \
-experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n",
+		fprintf(stderr, "star @starName: experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n",
 			$ref(ov_cnt), $ref(ck_cnt), percentage);
 	}
-    }
+	}
+
 	// Invoke these methods before and after generating a code region that
 	// is to be checked for fixed-point overflow conditions.
 	// The generated code depends on the internal fix_overflow variable
@@ -55,7 +55,7 @@ experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n
 		type { void }
 		access { protected }
 		code {
-			if ((int)ReportOverflow) {
+			if (int(ReportOverflow)) {
 				addCode("\tfix_overflow = 0;\n");
 			}
 		}
@@ -65,7 +65,7 @@ experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n
 		type { void }
 		access { protected }
 		code {
-			if ((int)ReportOverflow) {
+			if (int(ReportOverflow)) {
 				addCode("\tif ($ref(ck_cnt)++, fix_overflow)\n");
 				addCode("\t\t$ref(ov_cnt)++;\n");
 			}
@@ -73,11 +73,15 @@ experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n
 	}
 
 	// Currently, the setup routine does nothing, but this might change
-	// in future.  Then stars whose setup routines forget to call
+	// in future.  Then, stars whose setup routines forget to call
 	// CGCFix::setup explicitly are likely to fail.
 
 	setup {
 		// do nothing
+	}
+
+	initCode {
+		addFixedPointSupport();
 	}
 
 	// derived stars should call this method if they defined their own
