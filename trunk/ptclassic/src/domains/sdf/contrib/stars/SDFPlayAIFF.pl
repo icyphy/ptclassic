@@ -375,7 +375,7 @@ SDFPlayAIFF::WriteCommHeader()
    WriteSHORT(16);			// sample size in bits
    unsigned char xsampleRate[10];
    double_to_extended(xsampleRate, sampleRate);
-   output.write((const void *)xsampleRate, 10);
+   output.write((const char *)xsampleRate, 10);
 
    // Now we have to go back and fill in the rest.
    unsigned long filelen = output.tellp();
