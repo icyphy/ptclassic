@@ -248,8 +248,7 @@ int CreateSDFStar::linkFiles () {
 	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
 	    << " -lCGCrtlib " << starLinkOptions << " ";
     if (linkOptionsStream.numPieces()) {
-	const char* expandedLinkOptionsStream =
-	    expandPathName(linkOptionsStream);
+	char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
 	linkCmd << expandedLinkOptionsStream;
 	delete [] expandedLinkOptionsStream;
     }
