@@ -33,6 +33,7 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 
 void AsmTarget :: initStates() {
 	uname = 0;
+	sharedMemory = FALSE;
 	StringList hostPrompt,hostDes,runPrompt,runDes;
 	hostPrompt = "Host for "; hostPrompt += readClassName();
 	hostDes= "Host on which "; hostDes+=readClassName();
@@ -74,7 +75,7 @@ void AsmTarget :: headerCode() {
 int AsmTarget::allocateMemory(Galaxy& g) {
 // clear the memory
 	if (mem == 0) return FALSE;
-	mem->reset();
+	if (!sharedMemory) mem->reset();
 
 	GalStarIter nextStar(g);
 // request memory, using the Target, for all stars in the galaxy.

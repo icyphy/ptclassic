@@ -36,6 +36,11 @@ private:
 protected:
 	ProcMemory* mem;
 
+	// in a multiprocessor target, if the following is TRUE, then
+	// the same memory is used for all child targets.  Note that it
+	// has to be FALSE the first time (for the first processor).
+	int sharedMemory;
+
 	// what it says
 	int allocateMemory(Galaxy&);
 
