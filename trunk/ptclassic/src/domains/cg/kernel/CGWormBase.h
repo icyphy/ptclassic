@@ -64,8 +64,6 @@ public:
 protected:
         // execution time
         int execTime;
-        // myself
-        CGWormBase* selfWorm;
 };
 
 #endif
