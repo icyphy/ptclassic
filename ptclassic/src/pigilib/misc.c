@@ -5,6 +5,7 @@ $Id$
 
 /* Includes */
 #include <stdio.h>
+#include <strings.h>
 #include "local.h"
 #include "rpc.h"
 #include "vemInterface.h"
@@ -17,24 +18,88 @@ $Id$
 
 #define dmWidth 40
 
+
+char* callParseClass();
+
+/* uses the ptman script to print it out the man page for the given
+   star or galaxy */
+ManPage(starName)
+char *starName;
+{
+    char buf[612];
+
+    sprintf(buf, "ptman -x %s &", starName);
+    PrintDebug(buf);
+    if (util_csystem(buf)) {
+        sprintf(buf, "Cannot find man page for Ptolemy code file '%s'", 
+                starName);
+        ErrAdd(buf);
+        return (FALSE);
+    }
+    return (TRUE);
+}
+
+/* print the manual entry of the star the cursor is currently over.
+   written by Alan Kamas.  Based on the "LookInside" code. */
 int 
 Man(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Topic", 1, 40, "man", NULL};
+    octObject mFacet, inst, facet;
+    vemStatus status;
+    char *fullName, codeFile[512], domain[64], *base, *period;
 
-    ViInit("man");
+    ViInit("Man");
     ErrClear();
-    if (dmMultiText("Man", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
+
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
         ViDone();
     }
-    if (FALSE) {
-	ErrAdd("Not yet implemented");
-	PrintErr(ErrGet());
+    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+    if (status == VEM_NOSELECT) {
+        PrintCon("Aborted");
         ViDone();
+    } else if (status != VEM_OK) {
+        PrintErr("Cursor must be over an icon instance");
+        ViDone();
+    } else {
+        if (IsGal(&inst) || IsUniv(&inst) || IsPal(&inst)) {
+            PrintErr("The Man command is currently only supported for Stars.");
+            ViDone();
+        } else {
+            if (IsStar(&inst)) {
+                if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
+                    PrintErr(ErrGet());
+                    ViDone();
+                }
+                octFullName(&mFacet, &fullName);
+
+                /* Figure out source file name */
+                if (!IconFileToSourceFile(fullName, codeFile, domain)) {
+                    PrintErr(ErrGet());
+                    ViDone();
+                }
+		/* Convert source file name to base name for look up */
+                base = BaseName(codeFile); 
+		/* Only want base part, nothing after the period */
+		if ((period = strchr(base, '.')) != NULL) { *period = '\0'; }
+
+		/* now, call ptman with the base star name. */
+                if (!ManPage(base)){
+                    PrintErr(ErrGet());
+                    ViDone();
+		}
+
+            } else {
+                PrintErr("The Man command is currently only supported for Stars.");
+                ViDone();
+            }
+        }
     }
     ViDone();
 }
