@@ -72,13 +72,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 		BarGraph bar;
-		int count,batchCount;
+		int count, batchCount;
 	}
 	setup {
 	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
 	    input.setSDFParams(1,(int)updateSize-1);
+	}
+	begin {
 	    // Need to make non-const copies of "position" and "label"
 	    InfString posCopy((const char*)position);
 	    InfString labCopy((const char*)label);

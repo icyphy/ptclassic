@@ -46,9 +46,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Outputs not supported");
 		return;
 	    }
+	}
+	begin {
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkMeter.tcl";
-	    SDFTclScript::setup();
+	    SDFTclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

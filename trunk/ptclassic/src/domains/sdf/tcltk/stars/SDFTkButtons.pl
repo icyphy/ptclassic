@@ -67,11 +67,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Need as many identifiers as outputs");
 		return;
 	    }
+	}
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkButtons.tcl";
 
-	    SDFTclScript::setup();
+	    SDFTclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

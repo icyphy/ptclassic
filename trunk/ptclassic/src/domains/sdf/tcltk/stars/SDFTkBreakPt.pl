@@ -86,11 +86,13 @@ $ptkControlPanel : The current Run Control window.
 		Error::abortRun(*this, "Outputs not supported");
 		return;
 	    }
+	}
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkBreakPt.tcl";
 
-	    SDFTclScript::setup();
+	    SDFTclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.
