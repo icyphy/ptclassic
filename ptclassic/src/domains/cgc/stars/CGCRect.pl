@@ -7,7 +7,8 @@ and width "width" (default 8).  If "period" is greater than zero,
 then the pulse is repeated with the given period.
 	}
 	version {$Id$}
-	author { J. T. Buck, Kennard White }
+	author { Kennard White }
+	acknowledge { SDF version by J. T. Buck }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
