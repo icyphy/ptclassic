@@ -660,7 +660,7 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 	strncpy (buf, dotname, n);
 	buf[n] = 0;
 	b = blockWithName (buf);
-	if (b->isItAtomic()) return NULL;
+	if (!b || b->isItAtomic()) return NULL;
 	return ((InterpGalaxy&)b->asGalaxy()).blockWithDottedName (p + 1);
 }
 
