@@ -125,14 +125,16 @@ public:
 	void getSimulEvent();
 
 	// create inQue
-	void createQue() { if (!inQue) inQue = new Queue; }
+	void createQue() {
+		if (!inQue) { INC_LOG_NEW; inQue = new Queue; }
+	}
 
 	// clean itself before a new phase of firing.
 	void cleanIt(); 
 
-	// constructor
+	// constructor and destructor
 	InDEPort() : complete(TRUE), triggerList(0), beforeP(0), inQue(0) {}
-	~InDEPort() { if (inQue) delete inQue; }
+	~InDEPort() { INC_LOG_DEL; delete inQue; }
 };
 
 	////////////////////////////////////////////
