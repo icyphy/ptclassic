@@ -45,6 +45,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLArc.h"
 #include "VHDLGeneric.h"
 #include "VHDLPort.h"
+#include "VHDLSignal.h"
+#include "VHDLCompMap.h"
 #include "FloatArrayState.h"
 #include "IntArrayState.h"
 #include "ComplexArrayState.h"
@@ -175,10 +177,16 @@ protected:
         const char* hashOUT;
 
 	// Return a generic clause based on genList.
-	StringList addGenericRefs(VHDLGenericList*, int level=0);
+	StringList addGenericRefs(VHDLGenericList*, int=0);
 
 	// Return a port clause based on portList.
-	StringList addPortRefs(VHDLPortList*, int level=0);
+	StringList addPortRefs(VHDLPortList*, int=0);
+
+	// Return signal declarations based on signalList.
+	StringList addSignalDeclarations(VHDLSignalList*, int=0);
+
+	// Return component mappings based on compMapList.
+	StringList addComponentMappings(VHDLCompMapList*, int=0);
 
 private:
 	VHDLVariableList variableList;

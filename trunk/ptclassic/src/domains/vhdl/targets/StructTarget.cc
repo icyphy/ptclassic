@@ -176,7 +176,7 @@ void StructTarget :: trailerCode() {
     // If its a constant source, need to do things a bit differently:
     // only have a source with a signal, and no mux or reg.
     if (state->constant) {
-      signalList.put(state->name, state->type, "", "");
+      mainSignalList.put(state->name, state->type, "", "");
       connectSource(state->initVal, state->name);
     }
     // If firings change state, need to connect a reg and a mux
@@ -184,11 +184,11 @@ void StructTarget :: trailerCode() {
     if (!(state->constant)) {
       StringList tempName = state->name;
       tempName << "_Temp";
-      signalList.put(tempName, state->type, "", "");
+      mainSignalList.put(tempName, state->type, "", "");
       StringList initName = state->name;
       initName << "_Init";
 
-      signalList.put(initName, state->type, "", "");
+      mainSignalList.put(initName, state->type, "", "");
       //      connectRegister(state->lastRef, tempName, "iter_clock", state->type);
       //      connectMultiplexor(tempName, state->firstRef, initName, state->type);
       connectMultiplexor(state->lastRef, state->firstRef, initName, state->type);
@@ -236,10 +236,10 @@ void StructTarget :: trailerCode() {
 
       // If no system port by the given name, go ahead and make the signal.
       if (sx < arc->lowWrite) {
-	signalList.put(sourceName, "INTEGER", "", "");
+	mainSignalList.put(sourceName, "INTEGER", "", "");
       }
       if (ix < arc->lowWrite) {
-	signalList.put(destName, "INTEGER", "", "");
+	mainSignalList.put(destName, "INTEGER", "", "");
       }
     }
   }
@@ -316,8 +316,8 @@ void StructTarget :: trailerCode() {
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
   buildComponentDeclarations(level);
-  buildSignalDeclarations(level);
-  buildComponentMappings(level);
+  signal_declarations << addSignalDeclarations(&mainSignalList, level);
+  component_mappings << addComponentMappings(&mainCompMapList, level);
   buildArchitectureBodyCloser(level);
   buildConfigurationDeclaration(level);
 }
@@ -437,11 +437,11 @@ void StructTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
   // Scan through the list of signals from the star firing.
   while ((nStarSignal = starSignalNext++) != 0) {
     // Search for a match from the existing list.
-    if (!(signalList.inList(nStarSignal))) {
+    if (!(mainSignalList.inList(nStarSignal))) {
       // Allocate memory for a new VHDLSignal and put it in the list.
       VHDLSignal* newSignal = new VHDLSignal;
       newSignal = nStarSignal->newCopy();
-      signalList.put(*newSignal);
+      mainSignalList.put(*newSignal);
     }
   }
 }
@@ -456,7 +456,7 @@ void StructTarget :: registerCompMap(StringList name, StringList type,
   newCompMap->type = type;
   newCompMap->genMapList = genMapList;
   newCompMap->portMapList = portMapList;
-  compMapList.put(*newCompMap);
+  mainCompMapList.put(*newCompMap);
 }
 
 // Register the State reference.
@@ -1189,75 +1189,6 @@ void StructTarget :: buildComponentDeclarations(int level) {
   }
 }
 
-// Add in signal declarations here from signalList.
-void StructTarget :: buildSignalDeclarations(int level) {
-  VHDLSignalListIter nextSignal(signalList);
-  VHDLSignal* signal;
-  while ((signal = nextSignal++) != 0) {
-    level++;
-    signal_declarations << indent(level) << "signal " << signal->name << ": "
-			<< signal->type << ";\n";
-    level--;
-  }
-}
-
-// Add in component mappings here from compMapList.
-void StructTarget :: buildComponentMappings(int level) {
-  VHDLCompMapListIter nextCompMap(compMapList);
-  VHDLCompMap* compMap;
-  while ((compMap = nextCompMap++) != 0) {
-    level++;
-    component_mappings << indent(level) << compMap->name << ": "
-		       << compMap->type << "\n";
-
-    // Add in generic maps here from genMapList.
-    if (compMap->genMapList->head()) {
-      level++;
-      component_mappings << indent(level) << "generic map(\n";
-      VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
-      VHDLGenericMap* ngenmap;
-      int genCount = 0;
-      while ((ngenmap = nextGenMap++) != 0) {
-	level++;
-	if (genCount) {
-	  component_mappings << ",\n";
-	}
-	component_mappings << indent(level) << ngenmap->name << " => "
-			   << ngenmap->mapping;
-	level--;
-      }
-      component_mappings << "\n";
-      component_mappings << indent(level) << ")\n";
-      level--;
-    }
-
-    // Add in port maps here from portMapList.
-    if (compMap->portMapList->head()) {
-      level++;
-      component_mappings << indent(level) << "port map(\n";
-      VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
-      VHDLPortMap* nportmap;
-      int portCount = 0;
-      while ((nportmap = nextPortMap++) != 0) {
-	level++;
-	if (portCount) {
-	  component_mappings << ",\n";
-	}
-	component_mappings << indent(level) << nportmap->name << " => "
-			   << nportmap->mapping;
-	portCount++;
-	level--;
-      }
-      component_mappings << "\n";
-      component_mappings << indent(level) << ")\n";
-      level--;
-    }
-    
-    component_mappings << indent(level) << ";\n";
-    level--;
-  }
-}
-
 // Generate the architecture_body_closer.
 void StructTarget :: buildArchitectureBodyCloser(int /*level*/) {
   architecture_body_closer << "end structure;\n";
@@ -1472,8 +1403,8 @@ void StructTarget :: initVHDLObjLists() {
   systemPortList.initialize();
   ctlerPortList.initialize();
   compDeclList.initialize();
-  signalList.initialize();
-  compMapList.initialize();
+  mainSignalList.initialize();
+  mainCompMapList.initialize();
   stateList.initialize();
   clusterList.initialize();
 
