@@ -294,8 +294,6 @@ PortHole& WormMultiPort::newPort() {
 
                 from.setEventHorizon(in, worm, numToken);
 		fromPort.setPort(ghostName(toPort), parent(), type);
-                fromPort.inheritTypeFrom(realP);
-		toPort.inheritTypeFrom(fromPort);
 		
                 to.ghostConnect(from);
 
@@ -314,8 +312,6 @@ PortHole& WormMultiPort::newPort() {
 		
                 to.setEventHorizon(out, worm, numToken);
 		toPort.setPort(ghostName(fromPort), parent(), type);
-                toPort.inheritTypeFrom(realP);
-		fromPort.inheritTypeFrom(toPort);
 		
                 to.ghostConnect(from);
 		
