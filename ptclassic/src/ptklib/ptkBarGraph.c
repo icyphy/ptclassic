@@ -30,6 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "tk.h"
+#include <math.h>		/* Pick up isnan() and isinf(). */
 
 /* Number of colors defined in the ptkOptions database */
 #define NUMBER_OF_COLORS 12
