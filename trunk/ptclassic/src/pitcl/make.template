@@ -61,9 +61,10 @@ endif
 endif
 
 # $PTOLEMY/mk/ptbin.mk checks $(PTCL) 
-# If PTCL is set, we don't include Tk.  To use libpitcl instead of libptcl
-# set 'PITCL' see tysh/make.template.
+# If PTCL is set, we don't include Tk.
 PTCL = 1
+# Use libpitcl instead of libptcl
+PITCL = 1
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
