@@ -1,5 +1,5 @@
-#ifndef _MTDFThread_h
-#define _MTDFThread_h
+#ifndef _PNThread_h
+#define _PNThread_h
 
 /* 
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -35,25 +35,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "AweThread.h"
 
-class Star;
+class DataFlowStar;
 class PtCondition;
 
-class MTDFThread : public AweThread
+class PNThread : public AweThread {};
+
+// A Kahn process for dataflow actors.
+class DataFlowProcess : public PNThread
 {
 public:
     // Constructor.
-    MTDFThread(Star& s) : star(s) {}
+    DataFlowProcess(DataFlowStar& s) : star(s) {}
 
 protected:
     /*virtual*/ void run();
-    Star& star;
+    DataFlowStar& star;
 };
 
-class MTDFSourceThread : public MTDFThread
+// A synchronizing Kahn process for datflow actors.
+class SyncDataFlowProcess : public DataFlowProcess
 {
 public:
     // Constructor.
-    MTDFSourceThread(Star& s, PtCondition& c) : MTDFThread(s), start(c) {}
+    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c)
+	: DataFlowProcess(s), start(c) {}
 
 protected:
     /*virtual*/ void run();

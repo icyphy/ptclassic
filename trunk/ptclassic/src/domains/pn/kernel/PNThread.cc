@@ -31,25 +31,35 @@ static const char file_id[] = "$RCSfile$";
 
 #ifdef __GNUG__
 #pragma implementation
-#pragma implementation "MTDFMonitor.h"
-#pragma implementation "MTDFCondition.h"
+#pragma implementation "PNMonitor.h"
+#pragma implementation "PNCondition.h"
 #endif
 
-#include "Star.h"
-#include "MTDFThread.h"
-#include "MTDFMonitor.h"
-#include "MTDFCondition.h"
+#include "DataFlowStar.h"
+#include "DFPortHole.h"
+#include "PNThread.h"
+#include "PNMonitor.h"
+#include "PNCondition.h"
 
-extern const char MTDFdomainName[];
+extern const char PNdomainName[];
 
-void MTDFThread::run()
+void DataFlowProcess::run()
 {
+    // Configure the star for dynamic execution.
+    star.setDynamicExecution(TRUE);
+
     // Fire the Star ad infinitum.
-    while(star.run());
+    do
+    {
+	if (star.waitPort()) star.waitPort()->receiveData();
+    } while(star.run());
 }
 
-void MTDFSourceThread::run()
+void SyncDataFlowProcess::run()
 {
+    // Configure the star for dynamic execution.
+    star.setDynamicExecution(TRUE);
+
     // Fire the star ad infinitum.
     do
     {
@@ -58,5 +68,6 @@ void MTDFSourceThread::run()
 	    CriticalSection region(start.monitor());
 	    start.wait();
 	}
+	if (star.waitPort()) star.waitPort()->receiveData();
     } while (star.run());
 }
