@@ -18,6 +18,8 @@ the input data.
 .pp
 By default, the xgraph program gets the options ``-bar -nl -brw \fIhalfw\fR''
 where \fIhalfw\fR is half the bin width.
+.Ir "xgraph program"
+.Id "histogram, X window"
 	}
 	input {
 		name { input }

@@ -11,6 +11,9 @@ all phase transitions.  It also assumes that the input is in the
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }
+	explanation {
+.Id "phase unwrapping"
+	}
 	input {
 		name {input}
 		type {float}

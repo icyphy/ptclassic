@@ -16,6 +16,8 @@ A null string prevents any such storage.
 The \fIoptions\fR string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
+.Ir "xgraph program"
+.Id "graph"
 	}
 	input {
 		name { input }

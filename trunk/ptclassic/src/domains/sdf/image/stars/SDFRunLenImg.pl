@@ -14,6 +14,12 @@ Runlengths are coded with a start symbol of 'meanVal' and then a
 run-length between 1 and 255. Runs longer than 255 must be coded in
 separate pieces.
 	}
+	explanation {
+.Id "compression, run length"
+.Id "encoding, run length"
+.Id "run length encoding"
+.Id "image, run length encoding"
+	}
 
 	hinclude { "GrayImage.h", "Error.h" }
 
