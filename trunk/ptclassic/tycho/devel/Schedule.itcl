@@ -136,6 +136,7 @@ class ::tycho::Schedule {
     method annotationconfigure {name args}
     method annotationdelete {name}
     method annotationget {name}
+    method annotationin {context name string args}
 
     #### Access methods for dependencies
     method dependency {name string args}
@@ -144,6 +145,7 @@ class ::tycho::Schedule {
     method dependencyconfigure {name args}
     method dependencydelete {name}
     method dependencyget {name}
+    method dependencyin {context name string args}
 
     #### Access methods for resources
     method resource {name args}
@@ -151,6 +153,7 @@ class ::tycho::Schedule {
     method resourcecget {name option}
     method resourceconfigure {name args}
     method resourcedelete {name}
+    method resourcein {context name args}
 
     #### Access methods for tasks
     method task {name args}
@@ -158,6 +161,7 @@ class ::tycho::Schedule {
     method taskcget {name option}
     method taskconfigure {name args}
     method taskdelete {name}
+    method taskin {name args}
 
     # Test if an item exists in the schedule
     method exists {name}
@@ -210,17 +214,9 @@ body ::tycho::Schedule::constructor {args} {
 ########################################################################
 #### Access methods for annotations
 #
-body ::tycho::Schedule::annotationdelete {name} {
-    _verify annotation $name
-    _delete annotation $name
-}
-
 body ::tycho::Schedule::annotation {name value args} {
-    if { [::info exists _type($name)] } {
-	error "Annotation $name already exists in [_dataname]"
-    }
-    eval [list _entity annotation $name $value] $args
-    return [list delete $name]
+    _verifynot annotation name
+    _entity annotation {} $name [concat [list $value] $args]
 }
 
 body ::tycho::Schedule::annotationattrs {name} {
@@ -234,7 +230,12 @@ body ::tycho::Schedule::annotationcget {name option} {
 
 body ::tycho::Schedule::annotationconfigure {name args} {
     _verify annotation $name
-    eval _configure annotation $name $args
+    _configure annotation $name $args
+}
+
+body ::tycho::Schedule::annotationdelete {name} {
+    _verify annotation $name
+    _delete annotation $name
 }
 
 body ::tycho::Schedule::annotationget {name} {
@@ -242,20 +243,17 @@ body ::tycho::Schedule::annotationget {name} {
     _get annotation $name
 }
 
+body ::tycho::Schedule::annotationin {context name value args} {
+    _verifynotin annotation $context name
+    _entity annotation $context $name [concat [list $value] $args]
+}
+
 ########################################################################
 #### Access methods for dependencies
 #
-body ::tycho::Schedule::dependencydelete {name} {
-    _verify dependency $name
-    _delete dependency $name
-}
-
 body ::tycho::Schedule::dependency {name value args} {
-    if { [::info exists _type($name)] } {
-	error "Task $name already exists in [_dataname]"
-    }
-    eval [list _association dependency $name $value] $args
-    return [list delete $name]
+    _verifynot dependency $name
+    _association dependency $name [concat [list $value] $args]
 }
 
 body ::tycho::Schedule::dependencyattrs {name} {
@@ -269,7 +267,12 @@ body ::tycho::Schedule::dependencycget {name option} {
 
 body ::tycho::Schedule::dependencyconfigure {name args} {
     _verify dependency $name
-    eval _configure dependency $name $args
+    _configure dependency $name $args
+}
+
+body ::tycho::Schedule::dependencydelete {name} {
+    _verify dependency $name
+    _delete dependency $name
 }
 
 body ::tycho::Schedule::dependencyget {name} {
@@ -277,20 +280,17 @@ body ::tycho::Schedule::dependencyget {name} {
     _get dependency $name
 }
 
+body ::tycho::Schedule::dependencyin {context name value args} {
+    _verifynotin dependency $context $name
+    _association dependency $context $name [concat [list $value] $args]
+}
+
 ########################################################################
 #### Access methods for resources
 #
-body ::tycho::Schedule::resourcedelete {name} {
-    _verify resource $name
-    _delete resource $name
-}
-
 body ::tycho::Schedule::resource {name args} {
-    if { [::info exists _type($name)] } {
-	error "Resource $name already exists in [_dataname]"
-    }
-    eval [list _entity resource $name] $args
-    return [list delete $name]
+    _verifynot resource $name
+    _entity resource {} $name $args
 }
 
 body ::tycho::Schedule::resourceattrs {name} {
@@ -304,23 +304,25 @@ body ::tycho::Schedule::resourcecget {name option} {
 
 body ::tycho::Schedule::resourceconfigure {name args} {
     _verify resource $name
-    eval _configure resource $name $args
+    _configure resource $name $args
+}
+
+body ::tycho::Schedule::resourcedelete {name} {
+    _verify resource $name
+    _delete resource $name
+}
+
+body ::tycho::Schedule::resourcein {context name args} {
+    _verifynotin resource $context $name
+    _entity resource $context $name $args
 }
 
 ########################################################################
 #### Access methods for tasks
 #
-body ::tycho::Schedule::taskdelete {name} {
-    _verify task $name
-    _delete task $name
-}
-
 body ::tycho::Schedule::task {name args} {
-    if { [::info exists _type($name)] } {
-	error "Task $name already exists in [_dataname]"
-    }
-    eval [list _entity task $name] $args
-    return [list delete $name]
+    _verifynot task $name
+    _entity task {} $name $args
 }
 
 body ::tycho::Schedule::taskattrs {name} {
@@ -334,7 +336,17 @@ body ::tycho::Schedule::taskcget {name option} {
 
 body ::tycho::Schedule::taskconfigure {name args} {
     _verify task $name
-    eval _configure task $name $args
+    _configure task $name $args
+}
+
+body ::tycho::Schedule::taskdelete {name} {
+    _verify task $name
+    _delete task $name
+}
+
+body ::tycho::Schedule::taskin {context name args} {
+    _verifynotin task $context $name
+    _entity task $context $name $args
 }
 
 ########################################################################

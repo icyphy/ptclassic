@@ -94,6 +94,9 @@ class ::tycho::Index {
     # Delete an entry
     method entrydelete {name}
 
+    # Add a nested entry to the array
+    method entryin {context name data args}
+    
     # Test if an entry is present
     method exists {name}
 
@@ -110,7 +113,7 @@ class ::tycho::Index {
     method parent {name}
     
     # Get the root of an entry
-    method root {}
+    method root {name}
     
     # Get the root entries
     method roots {{select all}}
@@ -129,7 +132,7 @@ body ::tycho::Index::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # I have only one entity type
+    # I have only one entity type with a value and no default attributes
     entity entry 1
 }
 
@@ -161,11 +164,8 @@ body ::tycho::Index::children {name {select all}} {
 # of entry options. Return the inverse command.
 #
 body ::tycho::Index::entry {name value args} {
-    if { [::info exists _type($name)] } {
-	error "Entry $name already exists in [_dataname]"
-    }
-    eval [list _entity entry $name $value] $args
-    return [list delete $name]
+    _verifynot entry $name
+    _entity entry {} $name [concat [list $value] $args]
 }
 
 ########################################################################
@@ -175,6 +175,7 @@ body ::tycho::Index::entry {name value args} {
 # option-value list.
 #
 body ::tycho::Index::entryattrs {name} {
+    _verify entry $name
     _attributes entry $name
 }
 
@@ -203,7 +204,7 @@ body ::tycho::Index::entrycget {name option} {
 # 
 body ::tycho::Index::entryconfigure {name args} {
     _verify entry $name
-    eval _configure entry $name $args
+    _configure entry $name $args
 }
 
 ########################################################################
@@ -215,6 +216,18 @@ body ::tycho::Index::entryconfigure {name args} {
 body ::tycho::Index::entrydelete {name} {
     _verify entry $name
     _delete entry $name
+}
+
+########################################################################
+#### entryin
+#
+# Add a new nested entry to the array. Flag an error if the entry
+# already exists. Additional arguments are the initial values
+# of entry options. Return the inverse command.
+#
+body ::tycho::Index::entryin {context name value args} {
+    _verifynotin entry $context $name
+    _entity entry $context $name [concat [list $value] $args]
 }
 
 ########################################################################
