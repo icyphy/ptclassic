@@ -257,11 +257,11 @@ int CGDDFClusterBag :: finalSchedule(int numProcs) {
 		// fill up the processor assignment array for inner
 		// schedule
 		IntArray procMap;
-		int i, sz = inprof->getEffP();
+		int i, j, sz = inprof->getEffP();
 		procMap.create(sz);
 		for (i = 0; i < sz; i++) {
 			int flag = TRUE;
-			for (int j = 0; j < sz; j++)
+			for (j = 0; j < sz; j++)
 				if (inprof->getProcId(j) == i) {
 					flag = FALSE; break;
 				}
