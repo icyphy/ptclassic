@@ -222,12 +222,12 @@ body ::tycho::EditStack::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         $menubar delete  revisioncontrol
         
         $menubar delete undoredo
-        $menubar delete cut
-        $menubar delete paste
-        
-        $menubar delete fillregion
-        $menubar delete rightfillcolumn
-        $menubar delete setfillprefix
+	$menubar delete editsep1
+        $menubar disable cut
+        $menubar disable paste
+
+        # Just delete the whole format menu
+        $menubar delete format
     }
 }
 
