@@ -62,6 +62,7 @@ protected:
 
         CodeStream mainLoopInit;
         CodeStream mainLoopTerm;
+        CodeStream tychoSetup;
         CodeStream tkSetup;
 
         // virtual function to initialize strings
