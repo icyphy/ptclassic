@@ -158,18 +158,17 @@ can be added or reduced-search motion compensation can be performed.
 		}
 	} // end DoOneBlock{}
 
-	inline virtual method { // DON'T use wrap-around, use thresholding.
+// DIVIDE DIFFERENCE BY 2 TO FIT INTO 8 BITS!!
+// ADD 128 SO NEGATIVE NUMBERS DON'T HAVE TO WRAP AROUND!!
+	inline virtual method {
 		name { quant }
 		access { protected }
 		type { "unsigned char" }
 		arglist { "(const int i1, const int i2)"}
 		code {
-			int f = i1 - i2;
-			if (f >= 127) { return ((unsigned char) 255); }
-			if (f <= -128) { return ((unsigned char) 0); }
+			int f = (i1 - i2) / 2;
 			return ((unsigned char) (f + 128));
-		}
-	}
+	}	}
 
 	method {
 		name	{ inputsOk }

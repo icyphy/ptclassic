@@ -136,19 +136,20 @@ write the result to 'output'.
 		}
 	} // end DoLostBlock{}
 
-	// Do thresholding!
+// See SDFMotionCmp::quant()
+// That function divides the true difference by 2 so it will fit into
+// 8 bits.  It also adds 128 so negative numbers don't wrap around.
 	inline virtual method {
 		name { quant }
 		type { "unsigned char" }
 		access { protected }
 		arglist { "(const int i1, const int i2)" }
 		code {
-			int f = i1 + i2 - 128;
+			int f = 2 * (i1 - 128) + i2;
 			if (f < 0) { return ((unsigned char) 0); }
 			else if (f > 254) { return ((unsigned char) 255); }
 			else { return((unsigned char) f); }
-		}
-	}
+	}	}
 
 	method {
 		name { sizesMatch }
