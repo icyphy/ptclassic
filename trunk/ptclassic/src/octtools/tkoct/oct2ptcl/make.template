@@ -26,9 +26,13 @@ MISC_FILES =	Policy README
 
 all:		makefile oct2ptcl
 
-OCT2PTCL_LIBS =        -L../top -ltop $(TCL_LIBSPEC) \
+# Include tk stuff because under sol2.cfront  ../top/libtop has undefined
+# references to it. 
+# Include -lvov because under sol2.cfront, -loh has undefined references
+# to funcs in -lvov.
+OCT2PTCL_LIBS =        -L../top -ltop $(TK_LIBSPEC) $(TCL_LIBSPEC) \
                -L$(OCTLIBDIR) \
-               -loptions -lregion -lkd -lgu -loh  -loct -ltr -lst \
+               -loptions -lregion -lkd -lgu -loh -lvov -loct -ltr -lst \
                -lutility -lerrtrap -luprintf -lport
 
 # top is a package used by OCT2PTCL and oct2ptcl
@@ -54,7 +58,6 @@ $(OUT):	oct2ptcl
 	ln oct2ptcl $(OUT)
 
 install:	makefile $(OUT)
-
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
