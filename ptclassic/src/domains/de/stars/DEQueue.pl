@@ -66,6 +66,10 @@ defstar {
 		desc { "Maximum size of the queue." }
 	}
 
+	start {
+		demand.dataNew = TRUE;
+	}
+
 	go {
 	   // If the data input is new, and the queue is not full, store it
 	   completionTime = arrivalTime;
