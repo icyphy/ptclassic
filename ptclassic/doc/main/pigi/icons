@@ -47,6 +47,13 @@ a layer, place the cursor over an object attached to the desired layer
 before executing a command.  You can open a palette of layers with the
 \fIpalette\fP (``P'') command.
 .pp
+The layer palette  contains several columns of solid and outline colors,
+with the name of the color at the top of the column.  Colors at the top
+of each icon will be layered on top of colors below them in the columns.
+A set of special layers are arranged at the bottom of the palette.
+The layers for icon stems are explained below.  The layers for icon
+bodies define the icon background and optional icon shadow.
+.pp
 A few simple notes will greatly help.
 First note that when the icon window is opened, the snap
 is automatically set to 5 units.  This is because the default snap
