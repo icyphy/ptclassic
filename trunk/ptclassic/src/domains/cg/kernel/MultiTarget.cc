@@ -52,13 +52,6 @@ void BaseMultiTarget :: initState() {
 	if (int(manualAssignment)) oneStarOneProc = TRUE;
 }
 	
-int BaseMultiTarget :: run() {
-	iters = (int)mySched()->getStopTime();
-	mySched()->setStopTime(1);
-	int i = Target::run();
-	return i;
-}
-
 SDFStar* BaseMultiTarget :: createSend(int from, int to, int num) {
 	LOG_NEW; return new SDFStar;
 }
@@ -66,6 +59,8 @@ SDFStar* BaseMultiTarget :: createSend(int from, int to, int num) {
 SDFStar* BaseMultiTarget :: createReceive(int from, int to, int num) {
 	LOG_NEW; return new SDFStar;
 }
+
+void BaseMultiTarget :: pairSendReceive(SDFStar*, SDFStar*) {}
 
 void BaseMultiTarget :: setProfile(Profile*) {}
 
@@ -79,6 +74,8 @@ int BaseMultiTarget :: computeProfile(int pNum, int, IntArray*) {
 void BaseMultiTarget :: insideSchedule() {}
 
 void BaseMultiTarget :: downLoadCode(int, Profile*) {}
+
+void BaseMultiTarget :: addProcessorCode(int, const char* s) { myCode += s; }
 
 void BaseMultiTarget :: saveCommPattern() {}
 void BaseMultiTarget :: restoreCommPattern() {}

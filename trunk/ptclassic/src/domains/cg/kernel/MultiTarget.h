@@ -39,14 +39,13 @@ public:
 	// Resolve the parameter conflicts based on priorities
 	void initState();
 
-	// redefine the run() function
-	int run();
-
 	int getIters() { return iters; }
 
 	// create Send and Receive Star
 	virtual SDFStar* createReceive(int from, int to, int num);
 	virtual SDFStar* createSend(int from, int to, int num);
+	// pair them
+	virtual void pairSendReceive(SDFStar* s, SDFStar* r);
 
 	// set current child.
 	void setCurChild(int i) { curChild = i; }
@@ -99,6 +98,9 @@ public:
         // Download the code for the specified processor.
         // Argument specifies the profile under the current target.
         virtual void downLoadCode(int, Profile*);
+
+	// Add processor code to the multiprocessor target
+	virtual void addProcessorCode(int pid, const char*);
 
 	// return the array of candidate processors.
 	virtual IntArray* candidateProcs(ParProcessors*);
