@@ -1,0 +1,29 @@
+#!/bin/csh -f
+# Version $Id$
+# Author:	T. M. Parks
+# Created:	20 October 1994
+# 
+# Change to the obj.$ARCH directory before invoking make.
+
+# Make sure the $ARCH variable is set.
+if (! $?ARCH) then
+	setenv ARCH `ptarch`
+	echo ARCH=$ARCH
+endif
+
+# Make sure we are not in the wrong obj.$ARCH directory.
+set obj="s:/obj.[^/]*:/obj.${ARCH}:"
+
+# Make sure we are not in the src directory.
+set src="s:/src:/obj.${ARCH}:"
+
+set objdir=`echo $cwd | sed -e $obj:q -e $src:q`
+
+# If we were in the wrong place, then move to the right place.
+if ($cwd != $objdir) then
+	echo cd $objdir
+	cd $objdir
+endif
+
+# Make sure we are in the right place (just in case the cd failed).
+if ($cwd == $objdir) make $*
