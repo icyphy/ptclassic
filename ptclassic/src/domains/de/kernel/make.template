@@ -56,6 +56,9 @@ SRCS = $(HDRS:.h=.cc) DEDomain.cc
 #Library name
 LIB=libde.$(LIBSUFFIX)
 
+# Used to create .dlls under nt4.vc
+DLLDEPS = 	$(KERNEL_DLLDEP)
+
 # Objects:
 OBJS = $(SRCS:.cc=.o)
 
