@@ -200,7 +200,7 @@ long userOptionWord;
         ViDone();
     } else if (status != VEM_OK) {
 	/* cursor not over an instance... */
-	if (IsGalFacet(&facet)) {
+	if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
 	    status2 = EditFormalParams(&facet);
 	} else {
 	    PrintErr("Cursor must be over an instance or a galaxy schematic");
