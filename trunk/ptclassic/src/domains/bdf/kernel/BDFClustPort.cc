@@ -33,8 +33,10 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
 	numberTokens = port.numXfer();
-	// a DUP_IN port is always an input.
-	if (bp == BCP_DUP_IN) {
+	// a DUP_IN port is always an input.  a DUP is always an output.
+	if (bp == BCP_DUP)
+		inFlag = FALSE;
+	else if (bp == BCP_DUP_IN) {
 		inFlag = TRUE;
 		bagPortFlag = BCP_DUP;
 	}
