@@ -48,6 +48,7 @@ EXTRA_SRCS =	\
 	newstars.html \
 	newwork.html \
 	ptrecursion.html \
+	tychotarget.html \
 	typesys.html
 
 
