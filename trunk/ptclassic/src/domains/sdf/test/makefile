@@ -44,7 +44,8 @@ TCL_SRCS = testSDFDefs.tcl
 # Demos that use stars that are not present in pitcl
 SIMPLE_PTCL_TESTS = \
 	testSDFArrayRLS.tcl \
-	testSDFContrib.tcl
+	testSDFContrib.tcl \
+	testSDFTargets.tcl
 
 
 # testSDFStars.tcl should be first, since it instantiates one of every star.
@@ -56,7 +57,6 @@ SIMPLE_TESTS = \
 	testSDFDSP.tcl \
 	testSDFMatrix.tcl \
 	testSDFFourier.tcl
-
 
 GRAPHICAL_TESTS = \
 	dummy
