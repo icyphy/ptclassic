@@ -48,6 +48,7 @@ CCS_WITH_H_FILES=\
  Error.cc \
  FixSample.cc \
  FixState.cc \
+ FixArrayState.cc \
  FloatArrayState.cc \
  FloatState.cc \
  FloatVecData.cc \
@@ -106,7 +107,6 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  CircularBuffer.h \
  ComplexSubset.h \
  ConstIters.h \
- FixArrayState.h \
  Linker.sysdep.h \
  Output.h \
  ParticleQueue.h \
