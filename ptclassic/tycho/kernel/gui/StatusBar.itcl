@@ -130,7 +130,8 @@ class ::tycho::StatusBar {
     private method _drawprogress {progress {color blue}}
 
     # Set the label text
-    private method _label {label}
+    # FIXME: public because Edit uses it...
+    method _label {label}
     
     # Lock the current display mode
     private method _lock {}
@@ -560,8 +561,9 @@ body ::tycho::StatusBar::_openfile {filename caseSens} {
 #######################################################################
 #### entry
 #
-# Create an entry field in the status bar. If the progress bar
-# is currently active, do nothing. The first argument is
+# Create an entry field in the status bar. If there is already
+# an entry field, it is deleted and a new one created.
+# The first argument is
 # a string to display to the left of the entry field; following
 # arguments are an option-value list, and can be any of:
 # <ul>
@@ -588,9 +590,8 @@ body ::tycho::StatusBar::_openfile {filename caseSens} {
 # to control file completion.
 #
 body ::tycho::StatusBar::entry {label args} {
-    if ![_setmode "entry"] {
-	return
-    }
+    _setmode "idle"
+    _setmode "entry"
     
     # Extract args
     array set opts {-command {} -keycommand {} -default {} -tabcommand {}}
@@ -601,6 +602,7 @@ body ::tycho::StatusBar::entry {label args} {
     $itk_component(message) configure -text $label
 
     # Configure the entry widget
+    $itk_component(feedback) delete 0 end
     $itk_component(feedback) insert 0 $opts(-default)
     if { $opts(-command) != "" } {
         bind $itk_component(feedback) <Return> \
