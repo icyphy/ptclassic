@@ -410,6 +410,10 @@ alljtests.tcl: makefile
 	echo "if {![info exists reallyExit]} {set reallyExit 0}" >> $@
 	echo '# Exiting when there are no more windows is wrong' >> $@
 	echo "#::tycho::TopLevel::exitWhenNoMoreWindows 0" >> $@
+	echo '# If there is no update command, define a dummy proc.  Jacl needs this' >> $@
+	echo 'if {[info command update] == ""} then { ' >> $@
+	echo '    proc update {} {}' >> $@
+	echo '}' >> $@
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
