@@ -119,48 +119,41 @@ const State* tempLookup (const char* name, Block* blockIAmIn) {
 }
 
 // This could be moved as a member function of State so that other states
-// can use it.
-const char* parseFileName(State& state, const char* fileName) {
-    char* buf[MAXLEN];
+// can use it.  We allow the filename to be inherited from a state value
+// using the curly braces, e.g. < {FilterTapFile} or < {Directory}/{File}
+StringList parseFileName(State& state, const char* fileName) {
+    StringList emptyString, parsedFileName;
     char tokbuf[MAXSTRINGLEN];
     const char* specialChars = "{}";
     Tokenizer lexer(fileName,specialChars);
     int i = 0;
-    int err=0;
-    while(!lexer.eof() && i < MAXLEN && err == 0) {
+    while(!lexer.eof() && i < MAXLEN) {
 	lexer >> tokbuf;
 	char c = tokbuf[0];
 	if (c != 0 && tokbuf[1]) c = 0;
 	switch (c) {
-	case '{': {
-	    // next token must be a state name.
+	  case '{': {
+	    // next token must be a state name followed by a closed curly brace
 	    lexer >> tokbuf;
-
 	    const State* s = tempLookup(tokbuf,state.parent()->parent());
 	    if (!s) {
-		// state.parseError ("undefined symbol: ",tokbuf);
 		Error::abortRun(state,"undefined symbol: ",tokbuf);
-		err = 1;
-		return NULL;
+		return emptyString;
 	    }
-	    buf[i++] = s->currentValue().newCopy();
+	    parsedFileName << s->currentValue();
 	    lexer >> tokbuf;
 	    if (tokbuf[0] != '}') {
-		// state.parseError ("expected '}'");
-		Error::abortRun(state,"undefined symbol: ",tokbuf);
-		err = 1;
-		return NULL;
+		Error::abortRun(state,"expected closed curly brace: ",tokbuf);
+		return emptyString;
 	    }
 	    break;
-	}
-	default: {
-	    buf[i++] = savestring(tokbuf);
-	}
+	  }
+	  default: {
+	    parsedFileName << tokbuf;
+	  }
 	}
     }
-    StringList parsedFileName;
-    for (int j = 0 ; j < i ; j++) parsedFileName << buf[j];
-    return savestring(parsedFileName);
+    return parsedFileName;
 }
 
 // The state tokenizer: return next token when parsing a state
@@ -179,12 +172,14 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
                 char filename[TOKSIZE];
 // temporarily disable special characters, so '/' (for instance)
 // does not screw us up.
-		const char* tc = lexer.setSpecial ("");
+		const char* tc = lexer.setSpecial("");
                 lexer >> filename;
-		const char* parsedFileName = parseFileName(*this,filename);
-		if (parsedFileName==NULL) return t;
+		StringList parsedFileName = parseFileName(*this,filename);
 // put special characters back.
-		lexer.setSpecial (tc);
+		lexer.setSpecial(tc);
+// check for an error in parsing the file name
+		if (parsedFileName.length() == 0) return t;
+// parse the contents of the file
                 if (!lexer.fromFile(parsedFileName)) {
 			StringList msg;
 			msg << parsedFileName << ": " << why();
@@ -201,7 +196,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
         }
 	
 // handle all special characters
-	if(strchr (",[]+*-/()^", *token)) {
+	if (strchr (",[]+*-/()^", *token)) {
 		t.tok = t.cval = *token;
 		return t;
 	}
