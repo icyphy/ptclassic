@@ -360,10 +360,12 @@ octObject *galFacetPtr, *iconFacetPtr;
     if (ohGetOrCreateLayer(iconFacetPtr, &iconBackgrLayer, "iconBackground")
 	== OCT_OK) {
 	ERR_IF1(!MkBox(&iconBackgrLayer, size));
+/* Not making shadows for galaxies
 	if (ohGetOrCreateLayer(iconFacetPtr, &iconShadowLayer, "iconShadow")
 	    == OCT_OK) {
 	    ERR_IF1(!MkShadow(&iconShadowLayer, size));
 	}
+*/
     }
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
@@ -407,10 +409,12 @@ octObject *iconFacetPtr;
     if (ohGetOrCreateLayer(iconFacetPtr, &iconBackgrLayer, "iconBackground")
 	== OCT_OK) {
 	ERR_IF1(!MkBox(&iconBackgrLayer, size));
+/* Not making shadows for stars
 	if (ohGetOrCreateLayer(iconFacetPtr, &iconShadowLayer, "iconShadow")
 	    == OCT_OK) {
 	    ERR_IF1(!MkShadow(&iconShadowLayer, size));
 	}
+*/
     }
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
