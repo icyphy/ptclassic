@@ -92,6 +92,8 @@ ITCL_MAJOR_VERSION =	itcl2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
 ITCL_VERSION =		itcl2.0
 
+IWIDGETS_VERSION =	iwidgets2.0.0
+
 # Version of tcl and tk shipped with itcl
 ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
 ITCL_TK_MAJOR_VERSION_NUMBER =	4.0
@@ -384,23 +386,25 @@ itcl_shared: $(ITCL_SHARED_OBJ) \
 	@echo "Done making all shared libraries in itcl"
 
 $(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
-	(cd  $(ITCL_SHARED_OBJ)/iwidgets; $(MAKE) all)
+	(cd  $(ITCL_SHARED_OBJ)/$(IWIDGETS_VERSION); $(MAKE) all)
 
 $(ITCL_SHARED_OBJ)/tcl/libtcl.so: 
-	(cd  $(ITCL_SHARED_OBJ)/tcl; $(MAKE) \
+	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
-	(cd  $(ITCL_SHARED_OBJ)/tcl; $(CSHARED_LIBRARY_COMMAND) libtcl.so *.o)
+	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); \
+		 $(CSHARED_LIBRARY_COMMAND) libtcl.so *.o)
 
 $(ITCL_SHARED_OBJ)/tk/libtk.so: 
-	(cd  $(ITCL_SHARED_OBJ)/tk; $(MAKE) \
+	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
-	(cd  $(ITCL_SHARED_OBJ)/tk; $(CSHARED_LIBRARY_COMMAND) libtk.so *.o)
+	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); \
+		$(CSHARED_LIBRARY_COMMAND) libtk.so *.o)
 
 $(ITCL_SHARED_OBJ)/itcl/libitcl.so: 
 	(cd  $(ITCL_SHARED_OBJ)/itcl; $(MAKE) \
