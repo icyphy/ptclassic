@@ -715,10 +715,117 @@ test File-toggleReadOnly-2 {Non-existent file} {
 update
 after 1000
 
+############################################################################
+# openContext{}
+#
+# These tests make sure that openContext is doing some reasonable
+# things. They assume that at least the plain text and Itcl editor
+# modes are installed.
+#
+test File-openContext-1 {Open a plain text file} {
+    _mkfile $foo {Nuts. Just plain nuts.}
+    set w [::tycho::openContext $foo]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::Edit {Nuts. Just plain nuts.}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-2 {Open an Itcl file} {
+    _mkfile $foo.itcl {Salted or plain?}
+    set w [::tycho::openContext $foo.itcl]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::EditItcl {Salted or plain?}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-3 {Open a non-existent plain text file} {
+    catch {file delete $foo}
+    set w [::tycho::openContext $foo]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::Edit {}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-4 {Open a non-existent Itcl file} {
+    catch {file delete $foo.itcl}
+    set w [::tycho::openContext $foo.itcl]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::EditItcl {}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-5 {Open a file and override default mode} {
+    _mkfile $foo {The fine art of roasting}
+    set w [::tycho::openContext $foo "itcl"]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::EditItcl {The fine art of roasting}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+_mkfile $foo {Your hat, Madam.}
+set v [::tycho::openContext $foo]
+# Stupid delay for constructor after weirdness
+update
+after 1000
+test File-openContext-6 {Open an already-open file} {
+    set w [::tycho::openContext $foo]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}] \
+            $w
+} [list ::tycho::Edit {Your hat, Madam.} ::$v]
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-7 {Open a file and override default mode} {
+    _mkfile $foo {The fine art of roasting}
+    set w [::tycho::openContext $foo "itcl"]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::EditItcl {The fine art of roasting}}
+after 1000 [list catch "delete object [$w displayer]"]]
+
+test File-openContext-8 {Try opening a directory} {
+    set w [::tycho::openContext [file join $TYCHO kernel test]]
+    # Stupid delay for constructor after weirdness
+    update
+    after 1000
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::Edit {}}
+after 1000 [list catch "delete object [$w displayer]"]]
 
 ########################################################################
 ## CLEAN UP
 catch {file delete $foo}
+catch {file delete $foo.itcl}
 catch {file delete $bar}
 catch {file delete $autofoo}
 catch {file delete $autononame}
