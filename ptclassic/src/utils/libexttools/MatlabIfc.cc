@@ -330,8 +330,8 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 
 // Highest-level interface to the Matlab process.  We will start
 // Matlab by using (1) userCommand if it is non-null, or (2) a
-// remote shell to the machine given by MATLAB_SERVER_HOSTNAME
-// if the environment variable MATLAB_SERVER_HOSTNAME is set, or
+// remote shell to the machine given by MATLAB_REMOTE_HOST
+// if the environment variable MATLAB_REMOTE_HOST is set, or
 // (3) "matlab".
 int MatlabIfc :: StartMatlab(char* userCommand) {
     int remoteFlag = FALSE;
@@ -345,7 +345,7 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 	command = userCommand;
     }
     else {
-	matlabServer = getenv("MATLAB_SERVER_HOSTNAME");
+	matlabServer = getenv("MATLAB_REMOTE_HOST");
 	// FIXME: This assumes that we are using Unix and X windows
 	if (matlabServer) {
 	    const char* display = getenv("DISPLAY");
