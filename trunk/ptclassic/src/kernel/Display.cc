@@ -72,10 +72,10 @@ const int MAX_NO_GRAPHS = 64;
 #include "Block.h"
 #include "miscFuncs.h"
 #include <math.h>
-#include "streamCompat.h"
 #include "paths.h"
 #include "SimControl.h"
 #include "ieee.h"
+#include <fcntl.h>
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
