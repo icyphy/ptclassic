@@ -27,10 +27,8 @@ $Id$
 #include "ConstIters.h"
 #include "miscFuncs.h"
 #include "Domain.h"
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "miscFuncs.h"
 #include "SimControl.h"
 #include "StringArrayState.h"
 
@@ -110,11 +108,6 @@ void Target::wrapup () {
 	return;
 }
 
-// by default, print to stdout
-void Target::addCode (const char* code) {
-	fputs (code, stdout);
-}
-		
 int Target :: commTime(int,int,int,int) { return 0;}
 
 // by default, pass these on through
@@ -156,9 +149,9 @@ void Target::addChild(Target& newChild) {
 	}
 
 // Create child name.
-	char buf[20];
-	sprintf (buf, "proc%d", nChildren);
-	const char* cname = hashstring(buf);
+	StringList childName = "proc";
+	childName << nChildren;
+	const char* cname = hashstring(childName);
 	newChild.setNameParent(cname,this);
 
 	newChild.link = 0;
@@ -229,9 +222,8 @@ int Target::hasResourcesFor(Star& s,const char* extra) {
 int Target::childHasResources(Star& s,int childNum) {
 	Target* ch = proc(childNum);
 	if (ch == 0) return FALSE;
-	char numbuf[20];
-	sprintf (numbuf, "%d", childNum);
-	return ch->hasResourcesFor(s,numbuf);
+	StringList num(childNum);
+	return ch->hasResourcesFor(s,num);
 }
       
 // set up directory for writing files associated with Target.
