@@ -49,7 +49,7 @@ The inputs and outputs are packets of type GrayImage.
         code {
             if (inval < 0.5) return ((unsigned char) 0);
             else if (inval > 254.5) return ((unsigned char) 255);
-            else return ((unsigned char) inval+0.5);
+            else return ((unsigned char) int(inval+0.5));
         }
     } // end quant()
 

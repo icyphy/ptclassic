@@ -62,9 +62,9 @@ to produce the full filename of the displayed image.
 		TYPE_CHECK(gpkt,"GrayImage");
 		(binput%0).getPacket(bpkt);
 		TYPE_CHECK(bpkt,"GrayImage");
-		GrayImage* tempyD = (GrayImage*) rpkt.myData();
-		GrayImage* tempuD = (GrayImage*) gpkt.myData();
-		GrayImage* tempvD = (GrayImage*) bpkt.myData();
+		const GrayImage* tempyD = (const GrayImage*) rpkt.myData();
+		const GrayImage* tempuD = (const GrayImage*) gpkt.myData();
+		const GrayImage* tempvD = (const GrayImage*) bpkt.myData();
 
 // Set filename and save values.
 		const char* saveMe = saveColor;
@@ -89,9 +89,9 @@ to produce the full filename of the displayed image.
 		int Width  = tempyD->retWidth();
 		int Height = tempyD->retHeight();
 
-		unsigned char* rfp = tempyD->retData();
-		unsigned char* gfp = tempuD->retData();
-		unsigned char* bfp = tempvD->retData();
+		unsigned const char* rfp = tempyD->constData();
+		unsigned const char* gfp = tempuD->constData();
+		unsigned const char* bfp = tempvD->constData();
 
 		unsigned char* rgbfp= new unsigned char[3*Width*Height];
 
@@ -106,7 +106,7 @@ to produce the full filename of the displayed image.
 				rgbfp[temp3+2] = bfp[temp2];
 		}	}
 
-// Write the PGM header and then the data.
+// Write the PPM header and then the data.
 		fprintf (fp, "P6\n %d %d 255\n", Width, Height);
 		fwrite((char*)rgbfp, sizeof(unsigned char), unsigned(3*Width*Height),
 				fp);

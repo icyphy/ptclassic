@@ -49,7 +49,7 @@ difference frames and motion vector frames to the corresponding outputs.
 
 	method {
 		name { getInput }
-		type { "GrayImage*" }
+		type { "const GrayImage*" }
 		access { protected }
 		arglist { "(Packet& inPkt)" }
 		code {
@@ -57,7 +57,7 @@ difference frames and motion vector frames to the corresponding outputs.
 			if (badType(*this,inPkt,"GrayImage")) {
 				return NULL;
 			}
-			return( (GrayImage*) inPkt.myData());
+			return( (const GrayImage*) inPkt.myData());
 		}
 	} // end getInput()
 
@@ -65,7 +65,7 @@ difference frames and motion vector frames to the corresponding outputs.
 		name	{ doFirstImage }
 		access	{ protected }
 		type	{ "void" }
-		arglist	{ "(GrayImage* inp)" }
+		arglist	{ "(const GrayImage* inp)" }
 		code {
 			width  = inp->retWidth();
 			height = inp->retHeight();
@@ -86,8 +86,8 @@ difference frames and motion vector frames to the corresponding outputs.
 		name { doMC }
 		type { void }
 		access { protected }
-		arglist { "(unsigned char* diff, unsigned char* cur,
-				unsigned char* prev, char* horz, char* vert)" }
+		arglist { "(unsigned char* diff, unsigned const char* cur,
+			unsigned const char* prev, char* horz, char* vert)" }
 		code {
 		int i, j, ii, jj, index;
 
@@ -147,7 +147,8 @@ difference frames and motion vector frames to the corresponding outputs.
 		name { setMvDiff }
 		type { "void" }
 		arglist { "(char* horz, char* vert, unsigned char* diff,
-				unsigned char* cur, unsigned char* prev, int ii,
+				unsigned const char* cur,
+				unsigned const char* prev, int ii,
 				int jj)" }
 		access { protected }
 		code {
@@ -195,7 +196,7 @@ difference frames and motion vector frames to the corresponding outputs.
 	go {
 // Read data from input.
 		Packet prevPkt = storPkt; // Holds data from last iteration.
-		GrayImage* inImage = getInput(storPkt); // New data in storPkt.
+		const GrayImage* inImage = getInput(storPkt); // New data in storPkt.
 
 // Initialize if this is the first input image.
 		if (firstTime) {
@@ -212,9 +213,10 @@ difference frames and motion vector frames to the corresponding outputs.
 		MVImage*   mvImage  = new MVImage(*outImage, blocksize);
 
 ////// Do the motion compensation.
-		GrayImage* prevImage = (GrayImage*) prevPkt.myData();
-		doMC(outImage->retData(), inImage->retData(),
-				prevImage->retData(), mvImage->retHorz(),
+		const GrayImage* prevImage =
+			(const GrayImage*) prevPkt.myData();
+		doMC(outImage->retData(), inImage->constData(),
+				prevImage->constData(), mvImage->retHorz(),
 				mvImage->retVert());
 
 // Send the outputs on their way.

@@ -49,7 +49,7 @@ code {
 
 	method {
 		name { getInput }
-		type { "GrayImage*" }
+		type { "const GrayImage*" }
 		access { protected }
 		arglist { "(Packet& inPkt)" }
 		code {
@@ -57,7 +57,7 @@ code {
 			if (badType(*this,inPkt,"GrayImage")) {
 				return NULL;
 			}
-			return( (GrayImage*) inPkt.myData() );
+			return( (const GrayImage*) inPkt.myData() );
 		}
 	} // end getInput()
 
@@ -75,7 +75,7 @@ code {
 		name	{ doFirstImage }
 		access	{ protected }
 		type	{ "void" }
-		arglist	{ "(GrayImage* inImage)" }
+		arglist	{ "(const GrayImage* inImage)" }
 		code {
 			width  = inImage->retWidth();
 			height = inImage->retHeight();
@@ -90,7 +90,7 @@ code {
 	go {
 // Read data from input.
 		Packet pastPkt = storPkt;
-		GrayImage* inImage = getInput(storPkt);
+		const GrayImage* inImage = getInput(storPkt);
 
 // Initialize if this is the first input image.
 		if (firstTime) {
@@ -104,8 +104,9 @@ code {
 // Call clone(int) rather than clone() to avoid copying data.
 		GrayImage* diffImage = (GrayImage*) inImage->clone(1);
 		unsigned char* dif = diffImage->retData();
-		unsigned char* cur = inImage->retData();
-		unsigned char* prv = ((GrayImage*) pastPkt.myData())->retData();
+		unsigned const char* cur = inImage->constData();
+		unsigned const char* prv =
+			((const GrayImage*) pastPkt.myData())->constData();
 
 		for(int travel = 0; travel < width*height; travel++) {
 			dif[travel] = quant(cur[travel] - leak*float(prv[travel]));

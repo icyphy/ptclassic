@@ -99,8 +99,8 @@ for errors in the transmission of the difference frames.
 // Put the difference into the past image (which we won't need after
 // this go{} call), and then send the past image to the output.
 		unsigned char *cur = inImage->retData();
-		unsigned char *prev =
-				((GrayImage*) storPkt.myData())->retData();
+		unsigned const char *prev =
+				((const GrayImage*) storPkt.myData())->constData();
 		for(int travel = 0; travel < width*height; travel++) {
 			cur[travel] = quant(cur[travel] + leak*float(prev[travel]));
 		}
