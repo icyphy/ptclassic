@@ -39,6 +39,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
         defstate {
+          name {scalefactor}
+          type {int}
+          default {"0"}
+          desc { 2^scalefactor is used to scale down the magnitude
+                   of the numerator coefficients between 0 and 1. }
+          attributes{ A_CONSTANT|A_SETTABLE }
+        }
+        defstate {
                 name {taplength}
                 type {int}
                 default {0}
@@ -78,8 +86,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(mainDecl) {
 	  const int $starSymbol(NUMIN) = 1;
 	  const int $starSymbol(NUMPACK) = 4;
-	  const int $starSymbol(UPPERBOUND) = 32767;
-	  const int $starSymbol(LOWERBOUND) = -32768;
 	  double* $starSymbol(accumpair) = (double *)
 	    memalign(sizeof(double),sizeof(double)*$starSymbol(NUMPACK));
 	  float* $starSymbol(result) = (float *)
@@ -93,7 +99,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addDeclaration(mainDecl);
 	}
 	codeblock(localDecl) {
-	  double intmp;
           double *tapptr[4],tapvalue;
           double pairlohi,pairlolo,pairhilo,pairhihi;
           double pairlo,pairhi,pair,packedOut,*packedaccum;
@@ -101,10 +106,11 @@ limitation of liability, and disclaimer of warranty provisions.
           float tappairhi,tappairlo,splithi,splitlo;
           int outerloop,innerloop,numloop,genindex;
 	  int taprowindex, tapcolindex;
-	  short *indexcount;
+	  short *indexcount,scaledown;
 	}
 	codeblock(filter) {
-	  vis_write_gsr(8);	  
+	  vis_write_gsr(($val(scalefactor)+1)<<3);	  
+	  scaledown=(short) 1<<$val(scalefactor);
 	  
 	  /* initialize shifted taparrays to zero*/
 	       indexcount = $starSymbol(shift_taparray);
@@ -120,17 +126,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		 indexcount = $starSymbol(shift_taparray) +
 		   ($val(tappadlength)+1)*(taprowindex);
 		 for(tapcolindex=0;tapcolindex<$val(taplength);tapcolindex++){
-		   /* scale taps, check under/overflow, and cast to short */
-			intmp = $val(scale)*$ref2(taps,tapcolindex);
-		   if (intmp <= (double) $starSymbol(LOWERBOUND)){
-		     *indexcount++ = (short) $starSymbol(LOWERBOUND);
-		   }
-		   else if (intmp >= (double) $starSymbol(UPPERBOUND)){
-		     *indexcount++ = (short) $starSymbol(UPPERBOUND);
-		   }
-		   else{ 
-		     *indexcount++ = (short)(intmp);
-		   }
+		   /* scale and cast taps to short */
+		     *indexcount++ = (short)
+		       $val(scale)/scaledown*$ref2(taps,tapcolindex);
 		 }
 	       }
 
