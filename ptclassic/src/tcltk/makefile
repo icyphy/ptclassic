@@ -249,7 +249,7 @@ config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ) \
 		$(TCL_OBJ)/tclInt.h $(TCL_OBJ)/tcl.h \
 		$(TCL_OBJ)/tclRegexp.h $(TK_OBJ)/tk.h
 	@echo "Configuring itcl"
-	(chdir $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
+	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
 	@echo "Create link for itcl.h installation"
 	-(cd $(ITCL_OBJ)/src; ln -s $(ITCL_SRC)/src/itcl.h itcl.h)
 	-(cd $(ITCL_OBJ)/library; ln -s $(ITCL_SRC)/library/*.tcl .)
