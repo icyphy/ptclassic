@@ -40,16 +40,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class PosixThread : public PtThread
 {
 public:
-    // Constructor for new threads.
-    PosixThread(ThreadScheduler&);
+    // Create a thread.
+    /*virtual*/ void initialize();
 
-    // Destructor.
-    /*virtual*/ ~PosixThread();
+    // Terminate the thread.
+    /*virtual*/ void terminate();
 
 protected:
     static void* runThis(PosixThread*);
-
-    int setPriority(int);
 
     pthread_t thread;
 };
