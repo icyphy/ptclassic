@@ -919,7 +919,9 @@ body ::tycho::Model::redo {{distance 1}} {
 
 	# Execute the command
 	# FIXME: This should do a catch?
-	eval $this $redoCommands($historyMark(current))
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext \
+		eval $redoCommands($historyMark(current))]
 
 	# Publish if publishable
 	if { $publishable($historyMark(current)) } {
@@ -1061,7 +1063,9 @@ body ::tycho::Model::undo {{distance 1}} {
     set count 0
     while { $count < $distance } {
 	# Execute the command
-	eval $this $undoCommands($historyMark(current))
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext \
+		eval $undoCommands($historyMark(current))]
 
 	# Publish if publishable
 	if { $publishable($historyMark(current)) } {
