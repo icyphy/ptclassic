@@ -30,11 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# @(#)testGraph.itcl	1.4  13 Oct 1996
-
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
-    source testDefs.tcl
 } {}
 
 # If necessary load up the definition
