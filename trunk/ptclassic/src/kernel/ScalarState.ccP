@@ -121,7 +121,7 @@ ParseToken State :: eval<T>Factor(Tokenizer& lexer) {
 				return t3;
 			}
 			else if (t3.tok == T_ERROR) return t3;
-			else t1.<C>val = pow(t1.<C>val,t3.<C>val);
+			else t1.<C>val = power(t1.<C>val,t3.<C>val);
 		} else {
 			pushback = t2;
 			return t1;
