@@ -39,6 +39,7 @@ within the scope of 17 U.S.C. A7 105.
 		default { 1 }
 		descriptor { number of tokens produced on each output }
 	}
+	hinclude { <stdio.h> }
 	setup {
 		if ((input.numberPorts() != consume.size()) ||
 		    (output.numberPorts() != produce.size())) {

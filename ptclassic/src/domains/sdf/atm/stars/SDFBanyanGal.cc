@@ -39,6 +39,7 @@ be.
 #endif
 
 #include <math.h>
+#include <stdio.h>              // sprintf()
 #include "VoiceData.h"
 #include "SDFBanyanGal.h"
 #include "GalIter.h"

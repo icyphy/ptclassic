@@ -34,6 +34,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 
+        hinclude {<stdio.h>}
 	ccinclude {"Galaxy.h"}
 	ccinclude {"InterpGalaxy.h"}
 	ccinclude { "SimControl.h" }
