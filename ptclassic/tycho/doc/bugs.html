@@ -36,11 +36,6 @@ and using that.
 
 <h3><a href="../kernel/File.itcl">File</a></h3>
 <ul>
-<li>File names are being added to the list of open files,
-but if the constructor subsequently fails, then Tycho
-becomes incoherent. It looks like the File methods
-used by openContext barf because a widget is in the file
-index but doesn't exist.
 <li>When you open a non-existent HTML file, you probably want
 the HTML editor, not the HTML viewer. But that's what you get.
 </ul>
