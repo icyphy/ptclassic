@@ -125,9 +125,9 @@ int SimGeo::nget(int nPart) {
 // do the preamble as well (if it exists)
 void BDFScheduler :: runOnce () {
 	if (inPreamble) {
-		ListIter next(preamble);
-		Star* s;
-		while ((s = (Star*)next++) != 0) {
+		BlockListIter next(preamble);
+		Block* s;
+		while ((s = next++) != 0) {
 			s->run();
 			if (haltRequested()) return;
 		}
@@ -281,9 +281,9 @@ int BDFScheduler::computeSchedule(Galaxy& galaxy) {
 
 // subtract off executions corresponding to the preamble.
 void BDFScheduler::subtractOffPreamble() {
-	ListIter next(preamble);
+	BlockListIter next(preamble);
 	Block* b;
-	while ((b = (Block*)next++) != 0) {
+	while ((b = next++) != 0) {
 		Star& s = b->asStar();
 		info(s).noTimes -= 1;
 	}
@@ -299,7 +299,7 @@ int BDFScheduler::addIfWeCan (Star& star, int defer) {
 		const BoolTerm& reps = info(star).reps.num();
 		if (inPreamble)
 			// no conditions on preamble execution
-			preamble.put(&star);
+			preamble.put(star);
 		else
 			mySchedule->add(star,reps,info(star).numToksConst,
 					info(star).writesBoolean);
@@ -571,9 +571,9 @@ StringList BDFScheduler :: displaySchedule() {
 	StringList out;
 	if (preamble.size()) {
 		out += "--- preamble ---\n";
-		ListIter next(preamble);
+		BlockListIter next(preamble);
 		Block* b;
-		while ((b = (Block*)next++) != 0) {
+		while ((b = next++) != 0) {
 			out += b->fullName();
 			out += "\n";
 		}

@@ -34,6 +34,15 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 	numberTokens = port.numXfer();
 }
 
+#include <iostream.h>
+
+// destructor
+BDFClustPort::~BDFClustPort() {
+	if (pOutPtr) {
+		cerr << fullName() << " has an outPtr!\n";
+	}
+}
+
 void BDFClustPort::initGeo() { myGeodesic->initialize();}
 
 // return true if port has same rate as its neighbor.
@@ -89,7 +98,6 @@ void BDFClustPortRelIter::reset() {
 }
 
 const int DEBUG_LIMIT = 30;
-#include <stream.h>
 
 BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
 	if (pos == 0) return 0;

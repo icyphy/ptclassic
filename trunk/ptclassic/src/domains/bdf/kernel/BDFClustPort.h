@@ -29,7 +29,7 @@ class BDFCluster;
 class BDFClustPort : public BDFPortHole {
 public:
 	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = 0);
-	~BDFClustPort() {}
+	~BDFClustPort();
 
 	// return what is inside me
 	DFPortHole& real() { return pPort;}
