@@ -46,14 +46,13 @@ ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
 	EditDAG.itcl \
 	EditForest.itcl \
-	EditGraph.itcl \
 	EditPalette.itcl \
 	EditSTD.itcl \
 	Graphics.itcl \
 	HTMLExport.itcl \
 	ProfileTcl.itcl 
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) icons.tim stars.tim
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES =		doc img test tclIndex 
 
