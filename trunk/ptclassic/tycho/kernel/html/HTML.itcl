@@ -1387,7 +1387,9 @@ body ::tycho::HTML::initialize {{menubar {}} \
     configure -readonly 1
 
     # Add myself to the list of open files. 
-    windowMenuAddAll [filename]
+    if {$itk_option(-file) != "NoName"} {
+        windowMenuAddAll [filename]
+    }
 
     # Disable auto-save.
     configure -save 0
