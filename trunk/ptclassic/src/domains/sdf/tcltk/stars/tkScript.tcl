@@ -32,10 +32,9 @@ if {![winfo exists $s] || ![info exists ballId_$starID]} {
     wm iconname $s "Playing Field"
 
     frame $s.f -bd 10
-    canvas $s.f.pad -relief sunken -bg burlywood -height 5c -width 10c
-    scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
-	-sliderforeground bisque1 -fg bisque1 -length 10c \
-        -command setOut_$starID -showvalue 0
+    canvas $s.f.pad -relief sunken -height 5c -width 10c
+    scale $s.f.slider -orient horizontal -from 0 -to 100 \
+	-length 10c -command setOut_$starID -showvalue 0
     button $s.f.ok -text "DISMISS" -command "ptkStop [curuniverse]; destroy $s"
     pack append $s.f $s.f.pad top $s.f.slider {top} $s.f.ok {top fillx}
     pack append $s $s.f top
@@ -48,7 +47,7 @@ if {![winfo exists $s] || ![info exists ballId_$starID]} {
     set y2 [expr 2.5+$ballRadius]
 
     set ballId_$starID [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-        -outline black -fill tan3 ]
+        -outline [ptkColor black] -fill [ptkColor tan3] ]
 
     # Conditionally define procedures, only if they haven't been defined before
     proc setOut_$starID {value} "

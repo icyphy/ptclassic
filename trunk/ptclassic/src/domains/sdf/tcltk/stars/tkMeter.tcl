@@ -29,8 +29,7 @@ if {![winfo exists $s]} {
     }
 
     frame $s.f
-    message $s.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
-	-text [set ${starID}(label)]
+    message $s.msg -width 12c -text [set ${starID}(label)]
     for {set i 0} {$i < [set ${starID}(numInputs)]} {incr i} {
     	ptkMakeMeter $s.f m$i "" [set ${starID}(low)] [set ${starID}(high)]
     }

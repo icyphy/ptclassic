@@ -31,14 +31,13 @@ if {![winfo exists $s]} {
         }
 
         frame $win.f
-        message $win.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
-	    -text $label
+        message $win.msg -width 12c -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
 	global $starID
 	set ${starID}(tkShowValueWaitTrig) 0
         for {set i 0} {$i < $numInputs} {incr i} {
-    	    button $win.f.m$i -relief raised -width 40 -bg AntiqueWhite \
+    	    button $win.f.m$i -relief raised -width 40 \
 		-command "incr ${starID}(tkShowValueWaitTrig)" 
 	    pack append $win.f $win.f.m$i {top frame w pady 4 expand filly}
         }
@@ -67,16 +66,25 @@ if {![winfo exists $s]} {
 
     proc tkShowValueWait {flag starID numInputs win} {
 	if {$flag} {
+	    # Get original background Colors
+	    set origBgList  [$win.f.m0 configure -background]
+            set origBgEnd [expr [llength $origBgList] - 1]
+	    set origBg [lindex $origBgList $origBgEnd]
+	    set origActBgList  [$win.f.m0 configure -activebackground]
+            set origActBgEnd [expr [llength $origActBgList] - 1]
+	    set origActBg [lindex $origActBgList $origActBgEnd] 
+
 	    for {set i 0} {$i < $numInputs} {incr i} {
-	        $win.f.m$i configure -bg {orange1}
-	        $win.f.m$i configure -activebackground {tan3}
+	        $win.f.m$i configure -bg [option get . pressMeBg PressMeBg]
+	        $win.f.m$i configure \
+               -activebackground [option get . pressMeActiveBg PressMeActiveBg]
 	    }
 	    global $starID
 	    set ${starID}(tkShowValueWaitTrig) 0
 	    tkwait variable ${starID}(tkShowValueWaitTrig)
 	    for {set i 0} {$i < $numInputs} {incr i} {
-	        $win.f.m$i configure -bg {AntiqueWhite}
-	        $win.f.m$i configure -activebackground {burlywood}
+	        $win.f.m$i configure -bg $origBg
+	        $win.f.m$i configure -activebackground $origActBg
 	    }
 	}
     }
