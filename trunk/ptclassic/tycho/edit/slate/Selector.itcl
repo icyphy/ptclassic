@@ -55,9 +55,18 @@ class ::tycho::Selector {
     # The drag-select mode: "overlapping" or "enclosed"
     public variable dragmode "overlapping"
 
+    # The color of the drag-select box
+    public variable dragcolor "grey"
+
     # A script executed when an item is deselected. Two arguments are
     # passed: this interactor and the selected picture.
     public variable deselectcommand {}
+
+    # The color of the highlight box
+    public variable highlightcolor "cyan"
+
+    # The width of the highlight box
+    public variable highlightwidth 2
 
     # A script executed when an item is selected. Two arguments are
     # passed: this interactor and the selected picture.
@@ -75,11 +84,14 @@ class ::tycho::Selector {
     # Deselect all tagged items
     method clear {}
 
+    # Return the selected items
+    method contents {}
+
     # Return the highlight of a given item or tag
     method highlight {tag}
 
-    # Return the selected items
-    method selected {}
+    # Test if an item is already selected
+    method selected {id}
 
     # Return a tag that represents the selected items
     method tag {}
@@ -245,7 +257,7 @@ body ::tycho::Selector::click {x y args} {
 	set xCurrent $x
 	set yCurrent $y
     
-	set dragbox [$slate create rect $x $y $x $y -outline grey]
+	set dragbox [$slate create rect $x $y $x $y -outline $dragcolor]
     }
 }
 
@@ -260,6 +272,13 @@ body ::tycho::Selector::clear {} {
 
     # Delete highlight boxes
     $slate delete box.$this
+}
+
+#######################################################################
+#### contents
+#
+body ::tycho::Selector::contents {} {
+    return [$slate find withtag sel.$this]
 }
 
 #######################################################################
@@ -482,6 +501,9 @@ body ::tycho::Selector::release {} {
 # selection. If you don't want to do that, use the highlight{} method
 # to get an item or tag that represents the actual highlight items.
 #
+# Note: Do _not_ call this method if the item is already selected! Use
+# the selected{} method to test if necessary.
+# 
 body ::tycho::Selector::select {id} {
     # Tag the item
     $slate addtag "move.$this" withtag $id
@@ -489,8 +511,8 @@ body ::tycho::Selector::select {id} {
 
     # Draw a box around it.
     eval $canvas create rectangle \
-	    [rectStretch [$slate bbox $id] 1]\
-	    -width 2 -outline blue \
+	    [rectStretch [$slate bbox $id] 2]\
+	    -width 1 -outline $highlightcolor \
 	    -tags [list [list box.$this box.$id move.$this]]
     $slate lower box.$id $id
 
@@ -501,8 +523,8 @@ body ::tycho::Selector::select {id} {
 #######################################################################
 #### selected
 #
-body ::tycho::Selector::selected {} {
-    return [$slate find withtag sel.$this]
+body ::tycho::Selector::selected {id} {
+    return [lmember [$slate gettags $id] sel.$this]
 }
 
 #######################################################################
