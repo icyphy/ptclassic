@@ -58,7 +58,7 @@ PTLIB =		libtop.$(LIBSUFFIX)
 
 all: 		makefile $(PTLIB)
 
-install:	makefile $(PTLIB) $(OUT)
+install:	makefile $(PTLIB)
 
 
 TOPDIR =	$(VPATH)/../top	# top is a package used by tkoct
