@@ -8,8 +8,8 @@ before it is mu-law compressed and written.
 The inputs should be in the range of -32000.0 to 32000.0.
 The file is played at a fixed sampling rate of 8000 samples/second.
 When the wrapup method is called, a file of 8-bit mu-law
-samples is handed to a program named "play" which plays the file.
-The "play" program must be in your path.
+samples is handed to a program named "ptplay" which plays the file.
+The "ptplay" program must be in your path.
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -21,17 +21,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-Generate a file for the SparcStation speaker and play it.  The "play"
+Generate a file for the SparcStation speaker and play it.  The "ptplay"
 program must be on the user's path.
-This star may be used on a different device provided that a "play"
+This star may be used on a different device provided that a "ptplay"
 program is written with the following specifications:
 .lp
-When invoked as "play filename", where filename is a sequence of
+When invoked as "ptplay filename", where filename is a sequence of
 bytes representing mu-law PCM samples, the program should play
 the file at 8000 samples per second.  Perhaps later this rate can
 be a parameter.
 .Ir "Mu law"
-.Ir "play program"
+.Ir "ptplay program"
 .Ir "audio, Sparcstation"
 .Ir "Sparcstation audio"
 	}
@@ -65,7 +65,7 @@ be a parameter.
 	}
 	setup {
 		// check for required program.
-		if (progNotFound("play",
+		if (progNotFound("ptplay",
 			"Sound files cannot be played without it."))
 			return;
 		const char* sf = saveFile;
@@ -137,7 +137,7 @@ be a parameter.
 		StringList cmd;
 
 		if (delFile) cmd += "( ";
-		cmd += "play ";
+		cmd += "ptplay ";
 
 		cmd += fileName;
 		if (delFile) {
