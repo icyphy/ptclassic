@@ -29,7 +29,7 @@ Version identification:
 
 ********************************************************************/
 
-void CGWormhole :: start() {
+void CGWormhole :: setup() {
 
 	// check whether the inner domain is supported. 
 	// If not, currently error.

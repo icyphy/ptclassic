@@ -55,7 +55,7 @@ private:
 	int execTime;
 
 public:
-	void start();
+	void setup();
 		       
 	void go();
 	void wrapup() { target->wrapup(); }

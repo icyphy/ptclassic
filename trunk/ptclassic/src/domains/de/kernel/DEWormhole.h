@@ -31,7 +31,7 @@ class DEWormhole : public Wormhole, public DEStar {
 
 public:
 
-	void start();
+	void setup();
 	void go();
 	void wrapup();
 
