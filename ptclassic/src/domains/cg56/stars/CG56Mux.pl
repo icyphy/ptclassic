@@ -60,6 +60,12 @@ of performing run-time advancement.  This is not currently handled.
 	desc {Number of particles in a block.}
     }
     state {
+	name {useCircular}
+	type {INT}
+	default {1}
+	desc { "Boolean: use circular addressing on inputs." }
+    }
+    state {
 	name {ptrvec}
 	type {INTARRAY}
 	default {""}
@@ -74,7 +80,7 @@ of performing run-time advancement.  This is not currently handled.
 	attributes {A_NONSETTABLE|A_NONCONSTANT}
     }
     state {
-	name {notAllScalorB}
+	name {useModuloB}
 	type {INT}
 	default {0}
 	desc { "True if any input is not scalor." }
@@ -83,6 +89,12 @@ of performing run-time advancement.  This is not currently handled.
     start {
 	output.setSDFParams(int(blockSize),int(blockSize)-1);
 	input.setSDFParams(int(blockSize),int(blockSize)-1);
+	if ( int(useCircular) ) {
+	    input.setAttributes(P_CIRC);
+	} else {
+	    const Attribute P_NONCIRC = { 0, PB_CIRC};	// bogus
+	    input.setAttributes(P_NONCIRC);
+	}
 
 	int np = input.numberPorts();
 	ptrvec.resize(np);
@@ -91,13 +103,14 @@ of performing run-time advancement.  This is not currently handled.
 	char buf[100];
 	int i, np = input.numberPorts();
 
-	notAllScalorB = FALSE;
+	int allScalorB = TRUE;
 	MPHIter portiter(input);
 	for (i=0; i < np; i++) {
 	    AsmPortHole *port = (AsmPortHole*) portiter++;
 	    if ( port->bufSize() != 1 )
-		notAllScalorB = TRUE;
+		allScalorB = FALSE;
 	}
+	useModuloB = int(useCircular) && ! allScalorB;
 
 	addCode("	org	x:$addr(ptrvec)");
 	for (i=0; i < np; i++) {
@@ -126,7 +139,7 @@ of performing run-time advancement.  This is not currently handled.
 	move	$ref(control),n0
 	move	#$addr(output),r3
 	move	x:(r0+n0),r2
-	IF	$val(notAllScalorB)
+	IF	$val(useModuloB)
 	  move	y:(r0+n0),m2	; for scalors m2=0=fft, but doesnt matter
 	ENDIF
 	.LOOP	#$val(blockSize)
@@ -139,7 +152,7 @@ of performing run-time advancement.  This is not currently handled.
     // note that ports are 1-based array, while states are 0-based
     codeblock(cbAdvancePtr) {
 	; advance ptr for input#$val(curinput)
-	IF	$val(notAllScalorB)
+	IF	$val(useModuloB)
 	  move	#$size(input#curinput)-1,m2
 	ENDIF
 	move	x:$addr(ptrvec,curinput)-1,r2
@@ -151,17 +164,19 @@ of performing run-time advancement.  This is not currently handled.
 	if ( int(blockSize) == 1 )	addCode(cbCopyScalor);
 	else				addCode(cbCopyBlock);
 	
-	int np = input.numberPorts();
-	MPHIter portiter(input);
-	for (int i=0; i < np; i++) {
-	    AsmPortHole *port = (AsmPortHole*) portiter++;
-	    if ( port->bufSize() != int(blockSize) ) {
-		// The test above also catchs the bufSize==1 problem
-		curinput = i+1;
-		addCode(cbAdvancePtr);
+	if ( int(useCircular) ) {
+	    int np = input.numberPorts();
+	    MPHIter portiter(input);
+	    for (int i=0; i < np; i++) {
+		AsmPortHole *port = (AsmPortHole*) portiter++;
+		if ( port->bufSize() != int(blockSize) ) {
+		    // The test above also catchs the bufSize==1 problem
+		    curinput = i+1;
+		    addCode(cbAdvancePtr);
+		}
 	    }
 	}
-	if ( int(notAllScalorB) ) {
+	if ( int(useModuloB) ) {
 	    addCode("	move	m7,m2");
 	}
     }
