@@ -74,19 +74,6 @@ protected:
 	// by 'uname'asmSuffix().
 	virtual const char* asmSuffix() const {return ".asm";}
 
-	// 'runCmds' stores commands that are to be executed at run
-	// time.  It's use is strictly defined in the child domain's
-	// target & stars.  'miscCmds' stores misc commands specific
-	// to a child target.  To augment these strings use the
-	// addRunCmd & addMiscCmd methods.
-	// To augment these 
-	StringList runCmds;
-	StringList miscCmds;
-
-	// procedure code independent of the "main" loop code.  Stars
-	// can add to this via addProcCode().  Code in this is added
-	// to myCode in the wrapup() func.
-	StringList procCode;
 
 	// methods for generating code for reading and writing
 	// wormhole ports.  Argument is the "real port" of the interior
@@ -97,16 +84,13 @@ protected:
 	// AsmTargets always support "AnyAsmStar" stars.
 	const char* auxStarClass() const;
 
+	/*virtual*/ void frameCode();
+
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0);
 
 	~AsmTarget();
-
-	// Execute system call on host, with DISPLAY variables
-	// set and inside the destDirectory.  If err is specified,
-	// err is displayed if system call is unsuccessful.
-	virtual int hostSystemCall(const char*,const char* err = NULL);
 
 	Block* makeNew() const = 0;
 
@@ -116,19 +100,16 @@ public:
 	virtual void codeSection() = 0;
 
 	// generate file of stuff named base.suffix.
-	int genFile(StringList& stuff, char* base,const char* suffix=NULL);
+	int genFile(const char* stuff, char* base,const char* suffix=NULL);
 
 	// generate file of stuff named base.suffix and display it.
-	int genDisFile(StringList& stuff,char* base,const char* suffix=NULL);
+	int genDisFile(const char* stuff,char* base,const char* suffix=NULL);
   
 	// Return full file name including path.  
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(const char* base, const char* suffix=NULL);
 
-	// Return file name w/o path.  If the char* returned is not
-	// for immediate use, the calling function must copy the string
-	// into another location.
-	char* fileName(const char* base, const char* suffix=NULL);
+	/*virtual*/ void writeCode();
 
 	// output an "org" directive that switches to the specified
 	// memory and address
@@ -142,7 +123,7 @@ public:
 
 	// output a floating-point value.
 	virtual void writeFloat (double) {};
-
+/*
 	// output a comment.  Default form uses "outputLineOrientedComment"
 	// to make comments beginning with semicolons.
 	void outputComment (const char*);
@@ -151,7 +132,7 @@ public:
 	void outputLineOrientedComment(const char* prefix,
 				       const char* msg,
 				       int lineLen);
-
+*/
 	//Disable interrupts
 	virtual void disableInterrupts();
 
@@ -170,13 +151,6 @@ public:
 	void headerCode();
 
 	void wrapup();
-
-	// commands to augment the runCmds & miscCmds StringLists
-	void  addRunCmd(const char* cmd) { runCmds += cmd;}
-	void addMiscCmd(const char* cmd) {miscCmds += cmd;}
-
-	// Add onto the procedure code
-	void addProcCode(const char* cmd) {procCode += cmd;}
 };
 
 #endif

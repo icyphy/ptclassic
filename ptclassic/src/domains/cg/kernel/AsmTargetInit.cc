@@ -31,19 +31,16 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 	AsmStar &star = (AsmStar&)cgStar;
 	BlockStateIter nextState(star);
 	State* s;
-        StringList comment = "initialization code from star ";
-        comment += star.fullName();
-        comment += " (class ";
-        comment += star.className();
-        comment += ")\n";
-        outputComment(comment);
+        StringList msg = "initialization code from star ";
+	msg << star.fullName() << " (class " << star.className() << ")\n";
+        myCode << comment(msg);
 	while ((s = nextState++) != 0) {
 		if ((s->attributes() & AB_MEMORY) == 0 ||
 		    (s->attributes() & AB_NOINIT) != 0) continue;
 		// too bad -- switching on state types
-		StringList smsg = "initialization for state ";
-		smsg += s->fullName();
-		outputComment (smsg);
+		StringList smsg;
+		smsg << "initialization for state " << s->fullName();
+		myCode << comment(smsg);
 		unsigned addr;
 		ProcMemory *mem = star.lookupEntry(s->name(),addr);
 		orgDirective(mem->name(), addr);

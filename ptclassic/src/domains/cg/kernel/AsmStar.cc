@@ -33,7 +33,7 @@ extern const Attribute A_SYMMETRIC = {AB_SYMMETRIC,0};
 void AsmStar::genInterruptCode(CodeBlock& cb) {
 	AsmTarget* asmTargetPtr = (AsmTarget*)targetPtr;
 	asmTargetPtr->saveProgramCounter();
-	gencode(cb);
+	addCode(cb);
 	asmTargetPtr->restoreProgramCounter();
 	asmTargetPtr->interruptFlag = TRUE;
 }
@@ -225,34 +225,6 @@ void AsmStar::initialize() {
 	CGStar::initialize();
 }
 
-void AsmStar::addRunCmd(const char* cmd,const char* cmd2) {
-	((AsmTarget*)targetPtr)->addRunCmd(cmd);
-	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
-}
-
-void AsmStar::addMiscCmd(const char* cmd,const char* cmd2) {
-	((AsmTarget*)targetPtr)->addMiscCmd(cmd);
-	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
-}
-
-void AsmStar::genRunCmd(CodeBlock& cb) {
-	const char* t = processCode(cb);
-	addRunCmd(t);
-}
-
-void AsmStar::genMiscCmd(CodeBlock& cb) {
-	const char* t = processCode(cb);
-	addMiscCmd(t);
-}
-
-void AsmStar::addProcCode(const char* cmd) {
-	((AsmTarget*)targetPtr)->addProcCode(cmd);
-}
-
-void AsmStar::genProcCode(CodeBlock& cb) {
-	StringList t = processCode(cb);
-	addProcCode((const char*)t);
-}
 
 // run: prefix the code with a comment
 
@@ -262,7 +234,7 @@ int AsmStar::run() {
 	code += " (class ";
 	code += className();
 	code += ")\n";
-	((AsmTarget*)targetPtr)->outputComment(code);
+	outputComment(code);
 	return CGStar::run();
 }
 
