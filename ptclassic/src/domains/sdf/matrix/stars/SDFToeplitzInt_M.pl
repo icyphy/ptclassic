@@ -3,6 +3,12 @@ defstar {
     domain 	{ SDF }
     version	{ $Id$ }
     author	{ Mike J. Chen }
+    copyright {
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location    { SDF matrix library }
     descriptor	{
 Generate an integer data matrix X, with dimensions (numRows,numCols),
