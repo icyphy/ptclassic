@@ -189,7 +189,8 @@ class ::tycho::File {
 
     #### registerEditor
     # Register file extensions and an associated editor class.
-    proc registerEditor {extensions editorClass {description {}}} {}
+    proc registerEditor {extensions editorClass {description {}} \
+	    {baseFilename {}}} {}
 	
     #### windowMenuAddAll
     # Add a file editor object to the window menus of all open File objects.
@@ -245,6 +246,10 @@ class ::tycho::File {
     # This is used to register context-sensitive editors
     # that are indexed by the file extension.
     private common editors
+
+    # This is used to register context-sensitive editors
+    # that are indexed by the base filename.
+    private common editorsBase
 
     # This array stores the names of all currently active objects
     # of type File.  This is used to create crash recovery files.
@@ -829,10 +834,10 @@ body ::tycho::File::openWin {} {
 #####################################################################
 #### openContext
 # If a context-sensitive editor has been registered for the file
-# extension that is given, use it to open the file.  Otherwise, just
-# open a plain text editor.  Return the name of the editor object.
-# If a window already exists editing this file, simply raise it instead.
-# New windows are always opened at the global scope.
+# extension, or base filename that is given, use it to open the file. 
+# Otherwise, just open a plain text editor.  Return the name of the 
+# editor object. If a window already exists editing this file, simply
+# raise it instead. New windows are always opened at the global scope.
 #
 body ::tycho::File::openContext {filename} {
     if {[info exists filesOpen] && \
@@ -843,10 +848,15 @@ body ::tycho::File::openContext {filename} {
 	#check for existing autosave files
 	set filename [checkForAutoSaveFiles $filename]
 	set ext [file extension $filename]
+	set base [file tail $filename]
 	if {[info exists editors] && [info exists editors($ext)]} {
 	    set name [uplevel #0 $editors($ext) [autoName .file] \
 		    -file $filename]
-	} {
+	} elseif {[info exists editorsBase] && [info exists \
+		editorsBase($base)]} {
+	    set name [uplevel #0 $editorsBase($base) [autoName .file] \
+		    -file $filename]
+	} else {
 	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
 	}
 	# FIXME: Should call update here, but this causes a segfault.
@@ -860,20 +870,24 @@ body ::tycho::File::openContext {filename} {
 
 #####################################################################
 #### registerEditor
-# Register a context-sensitive editor by file extension(s). This means
-# means that an open-file command (via the openContext procedure in
-# this class) will recognize the file extension and open the specified
-# editor. The editor is assumed to be a class derived from File, or at
-# least to have a -file option. Note that the leading period is
-# considered part of the extension, as in ".itcl".  If a third
-# argument is given, then the editor will be added to the Window menu
-# of all File objects opened in the future using the value of the
-# third argument as the menu label.  This permits the user to open a
-# new blank editor of the given class.
+# Register a context-sensitive editor by file extension(s), or base 
+# filename. This means means that an open-file command (via the 
+# openContext procedure in this class) will recognize the file 
+# extension, or base filename and open the specified editor. The editor 
+# is assumed to be a class derived from File, or at least to have a 
+# -file option. Note that the leading period is considered part of 
+# the extension, as in ".itcl".  If a third argument is given, then 
+# the editor will be added to the Window menu of all File objects opened 
+# in the future using the value of the third argument as the menu label. 
+# This permits the user to open a new blank editor of the given class.
 #
-body ::tycho::File::registerEditor {extensions editorClass {description {}}} {
+body ::tycho::File::registerEditor {extensions editorClass {description {}} \
+	{baseFilename {}}  } {
     foreach extension $extensions {
 	set editors($extension) $editorClass
+    }
+    foreach basename $baseFilename {
+	set editorsBase($basename) $editorClass
     }
     if {$description != {}} {
 	lappend windowMenuEntries [list $editorClass $description]
