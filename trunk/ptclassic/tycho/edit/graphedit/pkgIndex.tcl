@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded graphedit 1.0 \
+package ifneeded tycho.edit.graphedit 1.0 \
 	[list source [file join $dir graphedit.tcl]]
 
 
