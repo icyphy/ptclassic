@@ -1,4 +1,4 @@
-static const char file_id[] = "AsmConnect.cc";
+static const char file_id[] = "AsmPortHole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -15,7 +15,7 @@ $Id$
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "AsmConnect.h"
+#include "AsmPortHole.h"
 #include "AsmGeodesic.h"
 #include "Error.h"
 #include "miscFuncs.h"
@@ -50,7 +50,7 @@ int AsmPortHole::location() {
 Geodesic* AsmPortHole::allocateGeodesic() {
 	char nm[80];
 	strcpy (nm, "Node_");
-	strcat (nm, readName());
+	strcat (nm, name());
 	LOG_NEW; Geodesic *g = new AsmGeodesic;
 	g->setNameParent(hashstring(nm), parent());
 	return g;

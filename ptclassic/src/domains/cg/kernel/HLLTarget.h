@@ -29,7 +29,7 @@ public:
 	// constructor
 	BaseCTarget(const char* nam, const char* startype, const char* desc);
 	void wrapup ();
-	Block* clone() const = 0;
+	Block* makeNew() const = 0;
 
 	// Routines for writing code: schedulers may call these
 	void beginIteration(int repetitions, int depth);

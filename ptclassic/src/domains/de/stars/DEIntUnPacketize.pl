@@ -17,7 +17,7 @@ data value from the current input packet is output.
 	hinclude { "IntVecData.h" }
 	input {
 		name { data }
-		type { packet }
+		type { message }
 	}
 	input {
 		name { demand }
@@ -29,8 +29,8 @@ data value from the current input packet is output.
 	}
 	protected {
 		int idx;
-		Packet pkt;
-		const IntVecData* currentPacket;
+		Envelope env;
+		const IntVecData* currentMessage;
 		int lastOutput;
 	}
 	constructor {
@@ -39,22 +39,22 @@ data value from the current input packet is output.
 	}
 	start {
 		idx = 0;
-		currentPacket = 0;
+		currentMessage = 0;
 		lastOutput = 0;
 	}
 	go {
 		if (data.dataNew) {
-			// a new packet has arrived
-			data.get().getPacket(pkt);
+			// a new message has arrived
+			data.get().getMessage(env);
 			idx = 0;
-			TYPE_CHECK(pkt,"IntVecData");
-			currentPacket = (const IntVecData*)pkt.myData();
+			TYPE_CHECK(env,"IntVecData");
+			currentMessage = (const IntVecData*)env.myData();
 		}
 		if (demand.dataNew) {
 			// need to write new output
 			demand.dataNew = FALSE;
-			if (currentPacket && idx < currentPacket->length())
-				lastOutput = currentPacket->data[idx++];
+			if (currentMessage && idx < currentMessage->length())
+				lastOutput = currentMessage->data[idx++];
 			output.put(arrivalTime) << lastOutput;	
 		}
 	}

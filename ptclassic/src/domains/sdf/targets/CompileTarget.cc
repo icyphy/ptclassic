@@ -26,11 +26,11 @@ a universe.
 #include <ctype.h>
 #include "pt_fstream.h"
 
-int CompileTarget::setup(Galaxy& g) {
+void CompileTarget::setup() {
 	// This kludge bypasses setup() in CGTarget, which casts
 	// the portholes to CGPortHole.  These casts are no good for
 	// this target, which has SDFPortHole types.
-	return Target::setup(g);
+	Target::setup();
 }
 
 int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
@@ -43,12 +43,12 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
 	// set to equal the name of the galaxy, which is any Unix directory
 	// name.
 	if(!b->isItAtomic())
-		writeGalDef(b->asGalaxy(), sanitize(b->readClassName()));
+		writeGalDef(b->asGalaxy(), sanitize(b->className()));
     }
 
     // prepare the output file for writing
     // Use the original class name, not the sanitized class name
-    StringList galFileName = galaxy.readClassName();
+    StringList galFileName = galaxy.className();
     galFileName += ".h";
     char* codeFileName = writeFileName(galFileName);
     pt_ofstream codeFile(codeFileName);
@@ -65,27 +65,27 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
 }
 
 int CompileTarget::run() {
-    StringList universeClassName = sanitizedName(*gal);
+    StringList universeClassName = sanitizedName(*galaxy());
     universeClassName += "Class";
-    StringList universeName = sanitizedName(*gal);
+    StringList universeName = sanitizedName(*galaxy());
 
     // First generate the files that define the galaxies
-    GalTopBlockIter next(*gal);
+    GalTopBlockIter next(*galaxy());
     Block* b;
     while ((b = next++) != 0) {
 	if(!b->isItAtomic())
-		writeGalDef(b->asGalaxy(), sanitize(b->readClassName()));
+		writeGalDef(b->asGalaxy(), sanitize(b->className()));
     }
 
     // Generate the C++ code file
     StringList myCode = "// C++ code file generated from universe: ";
-    myCode += gal->readFullName();
+    myCode += galaxy()->fullName();
 
     myCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
 
     myCode += "// INCLUDE FILES\n";
     myCode += "#include \"CompiledUniverse.h\"\n";
-    myCode += galDef(gal, universeClassName, 0);
+    myCode += galDef(galaxy(), universeClassName, 0);
 
     myCode += "\n";
     myCode += "// MAIN FUNCTION\n";
@@ -102,7 +102,7 @@ int CompileTarget::run() {
     myCode += "\n";
     myCode += "// set default value for number of iterations\n";
     myCode += "iterations = ";
-    myCode += mySched()->getStopTime();
+    myCode += scheduler()->getStopTime();
     myCode += ";\n";
 
     myCode += universeName;
@@ -116,7 +116,7 @@ int CompileTarget::run() {
     myCode += "// MAIN LOOP\n";
     myCode += "while(iterations-- > 0) {\n";
     addCode(myCode);
-    mySched()->compileRun();
+    scheduler()->compileRun();
     myCode.initialize();
     myCode += "}\n";
 
@@ -170,15 +170,15 @@ void CompileTarget::wrapup() {
     cmd = "cd ";
     cmd += (const char*)destDirectory;
     cmd += "; mv -f code ";
-    cmd += gal->readName();
+    cmd += galaxy()->name();
     cmd += "; cp code.cc ";
-    cmd += gal->readName();
+    cmd += galaxy()->name();
     cmd += ".cc; ";
     cmd += "rm -f code.o; ";
     cmd += "strip ";
-    cmd += gal->readName();
+    cmd += galaxy()->name();
     cmd += "; ";
-    cmd += gal->readName();
+    cmd += galaxy()->name();
     system(cmd);
 }
 
@@ -187,27 +187,28 @@ void CompileTarget::writeFiring(Star& s, int depth) {
 	myCode << indent(depth) << sanitizedFullName(s) << ".fire();\n";
 }
 
-GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
-	GenericPort* g;
-	if(!(g = (GenericPort*) p->getMyMultiPortHole()))
-		g = (GenericPort*) p;
+const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
+	const GenericPort* g = p->getMyMultiPortHole();
+	if (!g) 
+		g = p;
 	return g;
 }
 
 StringList CompileTarget::expandedName(const GenericPort* p) const {
-    StringList out;
-    if(p->isItMulti()) {
-	out = sanitizedName(*p);
-    } else {
-	MultiPortHole* g;
-	if(g = ((PortHole*)p)->getMyMultiPortHole()) {
-		out = g->readName();
-		out += ".newPort()";
+	StringList out;
+	if(p->isItMulti()) {
+		out = sanitizedName(*p);
 	} else {
-		out = p->readName();
+		MultiPortHole* mph =
+			((const PortHole *)p)->getMyMultiPortHole();
+		if (mph) {
+			out = mph->name();
+			out += ".newPort()";
+		} else {
+			out = p->name();
+		}
 	}
-    }
-    return out;
+	return out;
 }
 
 // Define a galaxy
@@ -222,7 +223,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	// classes will have their definitions included more than once.
 	// This is harmless.
 	myCode += "#include \"";
-	myCode += b->readClassName();
+	myCode += b->className();
 	myCode += ".h\"\n";
     }
     // Generate include statements for galaxy states
@@ -230,7 +231,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     State* galState;
     while ((galState = galStateIter++) != 0) {
 	myCode += "#include \"";
-	myCode += galState->readClassName();
+	myCode += galState->className();
 	myCode += ".h\"\n";
     }
 
@@ -245,7 +246,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	// Declare the stars and galaxies used
 	myCode += indent(1);
 	// Have to sanitize below because the class may be an InterpGalaxy
-	myCode += sanitize(b->readClassName());
+	myCode += sanitize(b->className());
 	myCode += " ";
 	myCode += sanitizedName(*b);
 	myCode += ";\n";
@@ -266,7 +267,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	galSetPorts += ".setPort(\"";
 	galSetPorts += sanitizedName(*mph);
 	galSetPorts += "\", this, ";
-	galSetPorts += mph->myType();
+	galSetPorts += mph->type();
 	galSetPorts += ");\n";
 	// generate the alias
 	// We should go down one level of aliasing only
@@ -294,7 +295,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	    galSetPorts += ".setPort(\"";
 	    galSetPorts += sanitizedName(*ph);
 	    galSetPorts += "\", this, ";
-	    galSetPorts += ph->myType();
+	    galSetPorts += ph->type();
 	    galSetPorts += ");\n";
 	    // generate the alias
 	    // We should go down one level of aliasing only
@@ -315,7 +316,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     galStateIter.reset();
     while ((galState = galStateIter++) != 0) {
 	myCode += indent(1);
-	myCode += galState->readClassName();
+	myCode += galState->className();
 	myCode += " ";
 	myCode += sanitizedName(*galState);
 	myCode += ";\n";
@@ -337,9 +338,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	myCode += "addState(";
 	myCode += sanitizedName(*galState);
 	myCode += ".setState(\"";
-	myCode += galState->readName();
+	myCode += galState->name();
 	myCode += "\", this, \"";
-	myCode += galState->getInitValue();
+	myCode += galState->initValue();
 	myCode += "\"));\n";
     }
     next.reset();
@@ -364,10 +365,10 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	    myCode += indent(1);
 	    myCode += sanitizedName(*b);
 	    myCode += ".setState(\"";
-	    myCode += s->readName();
+	    myCode += s->name();
 	    myCode += "\",\"";
 	    // Want to get initial value here -- before processing
-	    myCode += s->getInitValue();
+	    myCode += s->initValue();
 	    myCode += "\");\n";
 	}
     }
@@ -408,7 +409,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 			farPort = ((PortHole&)p->realPort()).far();
 		    }
 		    if (!farPort) {
-			Error::abortRun(b->readFullName(),
+			Error::abortRun(b->fullName(),
 				" Disconnected Universe.");
 			addCode(myCode);
 			return 0;
@@ -420,7 +421,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    myCode += ".";
 		    myCode += expandedName(gp);
 		    myCode += ", ";
-		    myCode += ((PortHole&)p->realPort()).myGeodesic->numInit();
+		    myCode += ((PortHole&)p->realPort()).geo()->numInit();
 		    myCode += ");\n";
 		}
 	    }

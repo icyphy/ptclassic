@@ -1,10 +1,10 @@
-static const char file_id[] = "DDFConnect.cc";
+static const char file_id[] = "DDFPortHole.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "Block.h"
-#include "DDFConnect.h"
+#include "DDFPortHole.h"
 #include "Particle.h"
 #include "Plasma.h"
 #include "CircularBuffer.h"
@@ -28,11 +28,11 @@ void DDFPortHole :: moveData() {}
 
 int InDDFPort :: isItInput () const { return TRUE;}
 
-void InDDFPort :: grabData () { getParticle();}
+void InDDFPort :: receiveData () { getParticle();}
 
 int OutDDFPort :: isItOutput () const { return TRUE;}
 
-void OutDDFPort :: grabData () { clearParticle();}
+void OutDDFPort :: receiveData () { clearParticle();}
 
 void OutDDFPort :: sendData () { putParticle();}
 
@@ -74,7 +74,7 @@ void DDFPortHole :: imageConnect()
 
 	// connect realPort to itself to set farSidePort member.
 	realPort.connect(realPort, 0);
-	imageGeo = realPort.myGeodesic;
+	imageGeo = realPort.geo();
 }
 
 void DDFPortHole :: setDDFParams(unsigned numTokens)

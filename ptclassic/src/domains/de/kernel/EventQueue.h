@@ -42,6 +42,24 @@ public:
 
 class EventQueue : public PriorityQueue
 {
+public:
+	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
+		Event* temp = getEvent(p, ph);
+		leveltup(temp, v, fv);
+	}
+
+	void pushTail(Particle* p, PortHole* ph, double v, double fv) {
+		Event* temp = getEvent(p, ph);
+		levelput(temp, v, fv);
+	}
+	/* virtual */ void putFreeLink(LevelLink* p);
+
+	// put the residual events and particles into the free stores.
+	void initialize();
+
+	EventQueue() : freeEventHead(0) {}
+	~EventQueue();
+private:
 	Event*  freeEventHead;
 	Event*  getEvent(Particle*, PortHole*);
 	void    putEvent(Event* e) {
@@ -50,24 +68,6 @@ class EventQueue : public PriorityQueue
 		}
 	void clearFreeEvents();
 	void clearParticles();
-
-public:
-	void pushHead(Particle* p, PortHole* ph, float v, float fv) {
-		Event* temp = getEvent(p, ph);
-		leveltup(temp, v, fv);
-	}
-
-	void pushTail(Particle* p, PortHole* ph, float v, float fv) {
-		Event* temp = getEvent(p, ph);
-		levelput(temp, v, fv);
-	}
-	void putFreeLink(LevelLink* p);
-
-	// put the residual events and particles into the free stores.
-	void initialize();
-
-	EventQueue() : freeEventHead(0) {}
-	~EventQueue();
 };
 
 #endif

@@ -34,7 +34,7 @@ protected:
 	// Return TRUE and leave the invalid flag clear if and
 	// only if everything went OK.
 	//
-	int computeSchedule(Galaxy& galaxy);
+	int computeSchedule(Galaxy& g);
 
 public:
 	// constructor

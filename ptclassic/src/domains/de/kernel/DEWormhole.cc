@@ -16,8 +16,12 @@ Version identification:
 #endif
 
 #include "DEWormhole.h"
-#include "DEWormConnect.h"
 #include "DEScheduler.h"
+#include "PriorityQueue.h"
+#include "CircularBuffer.h"
+#include "Geodesic.h"
+#include "Plasma.h"
+ 
 
 /*******************************************************************
 
@@ -37,7 +41,12 @@ void DEWormhole :: go()
 	target->setCurrentTime(arrivalTime);
 
 	// run the inner scheduler.
-	run();
+	Wormhole::run();
+}
+
+void DEWormhole :: wrapup()
+{
+	target->wrapup();
 }
 
 // new phase
@@ -62,10 +71,10 @@ LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
-	if (mySched()->stopBeforeDeadlocked) {
-		DEScheduler* sched = (DEScheduler*) parent()->mySched();
+	if (scheduler()->stopBeforeDeadlocked) {
+		DEScheduler* sched = (DEScheduler*) parent()->scheduler();
 		sched->eventQ.levelput(&(this->selfStar), 
-			mySched()->currentTime ,0);
+			scheduler()->currentTime ,0);
 	}
 }
 		
@@ -75,11 +84,132 @@ void DEWormhole :: sumUp() {
 // Otherwise, execute the inner domain until it is deadlocked by returning
 //	the stopTime of the DEScheduler.
 
-float DEWormhole :: getStopTime() {
-	DEScheduler* sched = (DEScheduler*) parent()->mySched();
+double DEWormhole :: getStopTime() {
+	DEScheduler* sched = (DEScheduler*) parent()->scheduler();
 	if (sched->syncMode) {
 		return sched->currentTime;
 	} else {
 		return sched->whenStop();
 	}
 }
+
+/**************************************************************************
+
+	methods for DEtoUniversal
+
+**************************************************************************/
+
+void DEtoUniversal :: receiveData()
+{
+	// 1. get data.
+	getData();
+
+	// 2. time stamp is set from the inside.
+
+	// 3. transfer data
+	transferData();
+}
+
+int DEtoUniversal :: getFromQueue(Particle* p) {
+	if (DEtoUniversal :: isItInput()) {
+		if (moreData) return FALSE;
+
+		// get Particle
+		Particle** myP = myBuffer->next();
+		myPlasma->put(*myP);
+		*myP = p;
+
+		// set the data members
+		moreData++;
+		tokenNew = TRUE;
+		timeMark = ((DEStar*) parent())->arrivalTime;
+	
+		// transfer data
+		transferData();
+	} else {
+		myGeodesic->put(p);
+	}
+	return TRUE;
+}
+
+void DEtoUniversal :: cleanIt() { moreData = 0; }
+
+void DEtoUniversal :: initialize() {
+        InDEPort:: initialize();
+        ToEventHorizon :: initialize();
+}
+
+int DEtoUniversal :: isItInput() const 
+	{ return EventHorizon :: isItInput(); }
+int DEtoUniversal :: isItOutput() const 
+	{ return EventHorizon :: isItOutput(); }
+
+EventHorizon* DEtoUniversal :: asEH() { return this; }
+
+/**************************************************************************
+
+	methods for DEfromUniversal
+
+**************************************************************************/
+
+void DEfromUniversal :: sendData ()
+{
+// It generates an event into the event queue in the DE world.
+
+	// 1. transfer the data from the ghost Port.
+	transferData();
+
+	// check if there is new event arrived.
+   	while (tokenNew) {
+
+		DEScheduler* s;
+	
+		// 2. copy the timeMark from ghostPort if it is an input.
+		if (DEfromUniversal :: isItInput()) {
+			s = (DEScheduler*) parent()->scheduler();
+			timeMark = ghostPort->getTimeMark() * s->relTimeScale;
+		} else {
+			s = (DEScheduler*) parent()->parent()->scheduler();
+			timeMark = s->currentTime;
+		}
+
+		// 3. Find out the fineLevel of the event
+		int level;
+        	// If the port lies on the Wormhole boundary, inform timeMark.
+        	if (farSidePort->isItOutput()) {
+                	EventHorizon* q = farSidePort->asEH();
+                	q->setTimeMark(timeMark / s->relTimeScale);
+                	level = -1;
+        	} else {
+                        level = ((InDEPort*) farSidePort)->depth;
+        	}
+
+		// send the event
+		for (int k = numberTokens; k > 0; k--) {
+			// 3. get the particle
+			Particle** p = myBuffer->here();
+			Particle* pp = myPlasma->get();
+			*pp = **p;
+
+		   	s->eventQ.pushHead(pp, far(), timeMark, level);
+		}
+	
+		// 5. repeat as long as new data exists.
+		tokenNew = FALSE;
+   		transferData();
+   	}
+
+}
+
+void DEfromUniversal :: initialize() {
+	OutDEPort :: initialize();
+	FromEventHorizon :: initialize();
+}
+
+int DEfromUniversal :: isItInput() const 
+	{ return EventHorizon :: isItInput(); }
+int DEfromUniversal :: isItOutput() const 
+	{ return EventHorizon :: isItOutput(); }
+
+EventHorizon* DEfromUniversal :: asEH() { return this; }
+

@@ -1,5 +1,5 @@
-#ifndef _AsmConnect_h
-#define _AsmConnect_h 1
+#ifndef _AsmPortHole_h
+#define _AsmPortHole_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -16,7 +16,7 @@ $Id$
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "CGConnect.h"
+#include "CGPortHole.h"
 
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;

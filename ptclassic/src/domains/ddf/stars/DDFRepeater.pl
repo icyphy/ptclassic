@@ -33,8 +33,8 @@ times to repeat the "input" value on "output".
 	}
 	go {
 		// get Particles from Geodesic
-		control.grabData();
-		input.grabData();
+		control.receiveData();
+		input.receiveData();
 
 		// read control value, and repeat input tokens to output 
 		int num = int (control%0);

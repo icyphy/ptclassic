@@ -27,14 +27,14 @@ $Id$
 
 
 // initialize DDF specific members
-void DDFStar :: prepareForScheduling() {
+void DDFStar :: initialize() {
+	DataFlowStar::initialize();
 	waitPort = NULL;
 	waitNum = 0;
 	// special care for DDFSelf star (recursion)
 	// adjust numberTokens
 	if (isItSelf()) {
-		start();	// define inside Galaxy
-		// If error happens, return
+		// If error happens (from setup call), return
 		if (Scheduler :: haltRequested()) return;
 		BlockPortIter nextp(*this);
 		for (int i = numberPorts(); i > 0; i--) {
@@ -55,7 +55,7 @@ void DDFStar :: waitFor(PortHole& p, int num) {
 	} else {
 		Error::mark(*this);
 		Error::abortRun("waiting port should be input for ", 
-			readFullName());
+			fullName());
 	}
 }
 			

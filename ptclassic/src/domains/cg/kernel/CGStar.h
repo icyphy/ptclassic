@@ -16,7 +16,7 @@ $Id$
 #endif
 
 #include "SDFStar.h"
-#include "CGConnect.h"
+#include "CGPortHole.h"
 #include "Code.h"
 #include "SymbolList.h"
 #include "IntState.h"
@@ -54,7 +54,7 @@ public:
 	virtual void initCode() {}
 
 	// Generate code.  No data is grabbed or put onto geodesics.
-	int fire();
+	int run();
 
 	 // Pointer to target
 	 CGTarget* myTarget() { return (CGTarget*)targetPtr; }
@@ -123,7 +123,7 @@ protected:
 	// Match macro name and argument count.
 	int matchMacro(const char* func, const StringList& argList, const char* name, int argc)
 	{
-	    return (strcasecmp(func, name) == 0) && (argList.size() == argc);
+	    return (strcasecmp(func, name) == 0) && (argList.numPieces() == argc);
 	}
 
 	// Evaluate State used as MultiPortHole index.

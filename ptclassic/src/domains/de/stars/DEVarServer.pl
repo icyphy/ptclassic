@@ -53,7 +53,7 @@ service any events waiting in its queue.
     go
     {
 	if (newServiceTime.dataNew)
-	    serviceTime = float(newServiceTime.get());
+	    serviceTime = newServiceTime.get();
 
 	if (input.dataNew)
 	    DEServer::go();

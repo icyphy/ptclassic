@@ -33,14 +33,10 @@ inline int consistent(bitWord t,const Attribute& a) {
 }
 
 class ProcMemory {
-private:
-	Attribute reqdStateAttributeBits;
-	Attribute reqdPortAttributeBits;
-	const char* name;	// my name
 public:
 	// Return the name of the memory.
 	// This is not a NamedObj because we want readName() to be virtual.
-	virtual const char* readName() { return name; }
+	virtual const char* name() { return myName; }
 
 	const Attribute& reqdStateAttributes() const {
 		return reqdStateAttributeBits;
@@ -54,7 +50,7 @@ public:
 	// required PortHole attributes for any states or ports that
 	// will be assigned this memory.
 	ProcMemory (const char* n, const Attribute& a, const Attribute& p)
-		: name(n), reqdStateAttributeBits(a), reqdPortAttributeBits(p)
+		: myName(n), reqdStateAttributeBits(a), reqdPortAttributeBits(p)
 		{}
 
 	// Destructor.  Dummy here, but declare it virtual.
@@ -94,26 +90,14 @@ public:
 		l += endString;
 		return l;
 	}
+private:
+	Attribute reqdStateAttributeBits;
+	Attribute reqdPortAttributeBits;
+	const char* myName;	// my name
 };
 
 
 class LinProcMemory : public ProcMemory {
-protected:
-	MReqList lin;		// linear allocation requests
-	MReqList circ;		// circular allocation requests
-	IntervalList mem;	// total memory
-	IntervalList memAvail;	// available memory
-	MConsecStateReq *consec;// consecutive-allocation requests
-	MemMap	map;		// map of allocations
-
-	// Assign an address for a request and record it in the map
-	void assign(MReq* request, unsigned addr);
-
-	// allocate using first-fit
-	int firstFitAlloc(unsigned reqSize,unsigned &resultAddr);
-
-	// allocate requiring circular alignment
-	int circBufAlloc(unsigned reqSize,unsigned &resultAddr);
 public:
 	// Constructor with name, required State attributes, required PortHole
 	// attributes, starting address, and length specified.
@@ -151,6 +135,22 @@ public:
 	// The string consists of multiple lines, with each line beginning
 	// with the startString and ending with the endString.
 	virtual StringList printMemMap(const char* startString, const char* endString);
+protected:
+	MReqList lin;		// linear allocation requests
+	MReqList circ;		// circular allocation requests
+	IntervalList mem;	// total memory
+	IntervalList memAvail;	// available memory
+	MConsecStateReq *consec;// consecutive-allocation requests
+	MemMap	map;		// map of allocations
+
+	// Assign an address for a request and record it in the map
+	void assign(MReq* request, unsigned addr);
+
+	// allocate using first-fit
+	int firstFitAlloc(unsigned reqSize,unsigned &resultAddr);
+
+	// allocate requiring circular alignment
+	int circBufAlloc(unsigned reqSize,unsigned &resultAddr);
 };
 
 // this models a two-address-space chip such as the Motorola 56000
@@ -158,9 +158,6 @@ public:
 // in x memory.  States may go into either memory (based on attributes)
 // or go into both memories if they have the AB_SYMMETRIC attribute.
 class DualMemory : public LinProcMemory {
-protected:
-	LinProcMemory x;
-	LinProcMemory y;
 public:
 	// Constructor
 	DualMemory(const char* n_x,	// name of the first memory space
@@ -197,6 +194,9 @@ public:
 	// The string consists of multiple lines, with each line beginning
 	// with the startString and ending with the endString.
 	virtual StringList printMemMap(const char* startString, const char* endString);
+protected:
+	LinProcMemory x;
+	LinProcMemory y;
 };
 	
 #endif

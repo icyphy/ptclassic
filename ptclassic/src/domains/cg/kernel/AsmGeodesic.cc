@@ -42,21 +42,6 @@ ProcMemory* AsmGeodesic::memory() const {
 	return p ? p->geo().memory() : mem;
 }
 
-// local functions
-static int gcd(int a, int b) {
-	// swap to make a > b if needed
-	if (a < b) { int t = a; a = b; b = t;}
-	while (1) {
-		if (b <= 1) return b;
-		int rem = a%b;
-		if (rem == 0) return b;
-		a = b;
-		b = rem;
-	}
-}
-
-inline int lcm(int a, int b) { return a * b / gcd(a,b);}
-
 inline int hasCirc(const PortHole* p) {
 	return (p->attributes() & PB_CIRC) != 0;
 }

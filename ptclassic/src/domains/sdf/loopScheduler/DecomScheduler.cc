@@ -50,7 +50,7 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 	// which is not isolated. Then, attempt merge from that node.
 	// If there is none, we do form a isolated cluster.
 
-	if (!ml.mySize()) {
+	if (!ml.size()) {
 		LSNode* tmp = (LSNode*) p.getNextInvoc();
 		while (tmp && (tmp->connected() == 0))
 			tmp = (LSNode*) tmp->getNextInvoc();
@@ -155,7 +155,7 @@ int DecomScheduler::topLevelSchedule(LSGraph &g)
 		}
 	} while (flag);
 
-	if (g.candidates.mySize() > 0) return FALSE;
+	if (g.candidates.size() > 0) return FALSE;
 	return TRUE;
 }
 

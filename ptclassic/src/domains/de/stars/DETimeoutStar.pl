@@ -55,7 +55,7 @@ defstar
 
     method
     {
-	name { fire }
+	name { run }
 	type { int }
 	access { public }
 	code
@@ -65,7 +65,7 @@ defstar
 		if (!safe && arrivalTime == deadline)
 		    expired = TRUE;
 	    }
-	    return DERepeatStar::fire();
+	    return DERepeatStar::run();
 	}
     }
 }

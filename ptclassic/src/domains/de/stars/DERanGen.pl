@@ -54,10 +54,10 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 		if(random) { LOG_DEL; delete random;}
 
 		// decide which distribution.
-		const char* dist = distribution.getInitValue();
+		const char* dist = distribution;
 		char  c = dist[0];
-		float mOru = double(meanORupper);	// mean or upper
-		float vOrl = double(varianceORlower);	// variance or lower
+		double mOru = double(meanORupper);	// mean or upper
+		double vOrl = double(varianceORlower);	// variance or lower
 
 		switch (c) {
 			case 'u' :
@@ -79,7 +79,7 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 		double p = (*random)();
 		// output
 		completionTime = arrivalTime;
-		output.put(completionTime) << float(p);
+		output.put(completionTime) << p;
 	}
 }
 

@@ -20,8 +20,7 @@ defstar {
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
-	   // (The double cast is because of a gnu compiler bug)
-	   output.put(completionTime) << float(double(magnitude));
+	   output.put(completionTime) << double(magnitude);
 
 	   // and don't schedule any further firings.
 	}

@@ -36,13 +36,13 @@ defstar
 
     virtual method
     {
-	name { fire }
+	name { run }
 	access { public }
 	type { int }
 	code
 	{   // wait until the real time equals arrivalTime
 	    late = !clock.sleepUntil(arrivalTime * (double)timeScale);
-	    return DEStar::fire();
+	    return DEStar::run();
 	}
     }
 }

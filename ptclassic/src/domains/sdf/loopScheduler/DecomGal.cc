@@ -148,7 +148,7 @@ SequentialList* DecomGal :: makeList(SDFCluster* start, SDFCluster* stop) {
 	SDFCluster* path = start;
 	
 	while (path != stop) {
-		newList->tup(path);
+		newList->prepend(path);
 
 		SDFClustPortIter nextP(*path);
 		SDFClustPort* p;
@@ -164,7 +164,7 @@ SequentialList* DecomGal :: makeList(SDFCluster* start, SDFCluster* stop) {
 			}
 		}
 	}
-	newList->tup(stop);
+	newList->prepend(stop);
 	return newList;
 }
 	
@@ -233,7 +233,7 @@ void DecomClusterBag :: setUpGalaxy() {
 		if (!c->asBag()) {
 			gal->removeBlock(*c);
 			nextC.reset();
-			cgal->addBlock(*c, c->readName());
+			cgal->addBlock(*c, c->name());
 		} else {
 			Error :: abortRun("next ClusterBag is prohibited.");
 		}
@@ -249,7 +249,8 @@ void DecomClusterBag :: setUpGalaxy() {
 	}
 	
 	// calculate new repetitions
-	loopSched->setup(*cgal);
+	loopSched->setGalaxy(*cgal);
+	loopSched->setup();
 
 	// update data members of this bag and portholes.
 	nextPort.reset();
@@ -273,7 +274,7 @@ void DecomClusterBag :: setUpGalaxy() {
 // run the cluster, taking into account the loop factor
 void DecomClusterBag::go() {
 	loopSched->setStopTime(loop()+exCount);
-	loopSched->run(*cgal);
+	loopSched->run();
 	exCount += loop();
 }
 

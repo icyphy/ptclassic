@@ -98,10 +98,10 @@ public:
 
 	// The setup function computes an DDF schedule
 	// and initializes all the blocks.
-	int setup(Galaxy& galaxy);
+	void setup();
 
 	// The run function resumes the run where it was left off.
-	int run(Galaxy& galaxy);
+	int run();
 
 	StringList displaySchedule() ;
 
@@ -110,12 +110,12 @@ public:
 	~DDFScheduler ();
 
 	// Timing control funcs
-	void setStopTime (float limit);
-	void resetStopTime (float v);
-	float getStopTime() { return float(stopTime);}
+	void setStopTime (double limit);
+	void resetStopTime (double v);
+	double getStopTime() { return double(stopTime);}
 
 	// scheduler Period : interface with timed domain.
-	float schedulePeriod;
+	double schedulePeriod;
 
 	// check whether the domain is predefined construct or not.
 	int isSDFType()	;

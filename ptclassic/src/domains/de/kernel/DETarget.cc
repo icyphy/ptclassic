@@ -28,19 +28,20 @@ Target("default-DE","DEStar","default DE target")
 	"Enforce that the inner timed domain can not be ahead of me in time"));
 }
 
-void DETarget :: start()
+void DETarget :: setup()
 {
-	if (!mySched()) { LOG_NEW; setSched(new DEScheduler); }
+	if (!scheduler()) { LOG_NEW; setSched(new DEScheduler); }
 
 	// scheduler state set-up
-	DEScheduler* dSched = (DEScheduler*) mySched();
-	dSched->relTimeScale = float(double(timeScale));
-	dSched->syncMode = int(syncMode);
+	DEScheduler* dSched = (DEScheduler*) scheduler();
+	dSched->setGalaxy(*galaxy());
+	dSched->relTimeScale = timeScale;
+	dSched->syncMode = syncMode;
+	Target :: setup();
 }
 
-Block* DETarget :: clone() const  {
-	LOG_NEW; 
-	return &(new DETarget)->copyStates(*this);
+Block* DETarget :: makeNew() const  {
+	LOG_NEW; return new DETarget;
 }
 
 DETarget :: ~DETarget() { delSched();}

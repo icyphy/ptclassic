@@ -30,14 +30,11 @@ INCL = -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
 # Library name
 LIB=libddf.a
 
-# Library sources
-SRCS= \
- DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
- DDFDomain.cc DDFAutoWorm.cc DDFTarget.cc
-
 # Header files
-HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFWormhole.h DDFWormConnect.h \
- DDFTarget.h
+HDRS= DDFPortHole.h DDFScheduler.h DDFStar.h DDFWormhole.h DDFTarget.h
+
+# Library sources
+SRCS= $(HDRS:.h=.cc) DDFDomain.cc DDFAutoWorm.cc
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)

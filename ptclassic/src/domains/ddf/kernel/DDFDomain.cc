@@ -19,8 +19,6 @@ $Id$
 #include "KnownTarget.h"
 #include "DDFScheduler.h"
 #include "DDFWormhole.h"
-#include "DDFConnect.h"
-#include "DDFWormConnect.h"
 #include "AutoForkNode.h"
 
 extern const char DDFdomainName[] = "DDF";
@@ -31,12 +29,6 @@ public:
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new DDFWormhole(innerGal,innerTarget);
 	}
-
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new InDDFPort;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new OutDDFPort;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() { LOG_NEW; return *new DDFfromUniversal;}

@@ -30,7 +30,7 @@ Loop scheduler
 //
 // Main routine for LoopScheduler
 //
-int LoopScheduler::computeSchedule(Galaxy& galaxy)
+int LoopScheduler::computeSchedule(Galaxy& g)
 {
 	LOG_DEL; delete cgal;
 
@@ -43,7 +43,7 @@ int LoopScheduler::computeSchedule(Galaxy& galaxy)
 		else {
 			int fd = creat(expandPathName(file), 0666);
 			if (fd < 0) {
-			    Error::warn(galaxy, "Can't open log file ",file);
+			    Error::warn(g, "Can't open log file ",file);
 			} else {
 				LOG_NEW; logstrm = new ofstream(fd);
 			}
@@ -53,7 +53,7 @@ int LoopScheduler::computeSchedule(Galaxy& galaxy)
 	// Step 1. Shuvra's decomposition idea.
 	//	   After removing the arcs with enough delays.
 
-	LOG_NEW; DecomGal* dGal = new DecomGal(galaxy, logstrm);
+	LOG_NEW; DecomGal* dGal = new DecomGal(g, logstrm);
 	cgal = dGal;
 
 	dGal->simplify();	// remove arcs with enough delays.
@@ -98,10 +98,10 @@ StringList LoopScheduler::displaySchedule() {
 }
 
 void LoopScheduler::compileRun() {
-	Target& target = getTarget();
+	Target& targ = target();
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*) next++) != 0) {
-		c->genCode(target,0);
+		c->genCode(targ,0);
 	}
 }

@@ -31,13 +31,13 @@ protected:
 	OutDEPort feedbackOut;
 
 	// access the feedback arc.
-	void refireAtTime(float when);	// send next event.
+	void refireAtTime(double when);	// send next event.
 	int canGetFired();		// can it be fired?
 
 public:
-	// define the common start function for this class
+	// initialization: generate the first event.
 	// completionTime should be setup beforehand.
-	void start();
+	void initialize();
 
 	// constructor
 	DERepeatStar();

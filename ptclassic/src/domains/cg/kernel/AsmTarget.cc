@@ -37,11 +37,11 @@ const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
 void AsmTarget :: initStates() {
 	uname = 0;
 	StringList hostPrompt,hostDes,runPrompt,runDes;
-	hostPrompt = "Host for "; hostPrompt += readClassName();
-	hostDes= "Host on which "; hostDes+=readClassName();
+	hostPrompt = "Host for "; hostPrompt += className();
+	hostDes= "Host on which "; hostDes+=className();
 	hostDes+=" is installed";
-	runPrompt = "Run "; runPrompt += readClassName(); runPrompt += "?";
-	runDes = "Download and run on "; runDes += readClassName();
+	runPrompt = "Run "; runPrompt += className(); runPrompt += "?";
+	runDes = "Download and run on "; runDes += className();
  	addState(displayFlag.setState("Display code?",this,"YES",
 		"display code if YES."));
 	addState(runFlag.setState(savestring(runPrompt),this,"NO",
@@ -53,34 +53,36 @@ void AsmTarget :: initStates() {
 	destDirectory.setValue("~/DSPcode");
 }
 
-int AsmTarget :: setup(Galaxy& g) {
+void AsmTarget :: setup() {
 	runCmds.initialize();
  	miscCmds.initialize();
 	procCode.initialize();
-	LOG_DEL; delete uname; uname = 0;
-	uname = makeLower(g.readName());
-	return CGTarget::setup(g);
+	if (galaxy()) {
+		LOG_DEL; delete uname;
+		uname = makeLower(galaxy()->name());
+	}
+	CGTarget::setup();
 }
 
 int AsmTarget :: hostSystemCall(const char* cmd, const char* err) {
-	int val = rshSystem(targetHost,cmd,dirFullName);
+	int val = rshSystem(targetHost,cmd,workingDirectory());
 	if (err != NULL && val != 0) Error::abortRun(err);
 	return val;
 }
 
 void AsmTarget :: headerCode() {
 	StringList code = "generated code for target ";
-        code += readFullName();
+        code += fullName();
 	outputComment (code);
 	disableInterrupts();
 }
 
-int AsmTarget::allocateMemory(Galaxy& g) {
+int AsmTarget::allocateMemory() {
 // clear the memory
 	if (mem == 0) return FALSE;
 	mem->reset();
 
-	GalStarIter nextStar(g);
+	GalStarIter nextStar(*galaxy());
 // request memory, using the Target, for all stars in the galaxy.
 // note that allocReq just posts requests; performAllocation processes
 // all the requests.  Note we've already checked that all stars are AsmStar.
@@ -93,9 +95,9 @@ int AsmTarget::allocateMemory(Galaxy& g) {
 	return TRUE;
 }
 
-int AsmTarget :: codeGenInit(Galaxy& g) {
+int AsmTarget :: codeGenInit() {
 	// initialize the porthole offsets, and do all initCode methods.
-	GalStarIter nextStar(g);
+	GalStarIter nextStar(*galaxy());
 	AsmStar* s;
 	while ((s = (AsmStar*)nextStar++) != 0) {
 		BlockPortIter next(*s);
@@ -156,7 +158,8 @@ inline int wormEdge(PortHole& p) {
 extern int warnIfNotConnected (Galaxy&);
 
 // Here's the main guy.
-int AsmTarget::modifyGalaxy(Galaxy& g) {
+int AsmTarget::modifyGalaxy() {
+	Galaxy& g = *galaxy();
 	if (!int(loopScheduler)) return TRUE;
 	// init and call start methods.  We must do this so that
 	// the numberTokens values will be correct.
@@ -246,8 +249,8 @@ PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
 	// initialize the new star.  Name it and add it to the galaxy.
 	// using size of splice list in name forces unique names.
 	StringList newname("splice-");
-	newname << newb->readClassName() << "-" << spliceList.size();
-	gal->addBlock(*newb,hashstring(newname));
+	newname << newb->className() << "-" << spliceList.size();
+	galaxy()->addBlock(*newb,hashstring(newname));
 	newb->initialize();
 
 	// check errors in initialization
@@ -261,7 +264,7 @@ AsmTarget::~AsmTarget() {
 	Block* b;
 	while ((b = (Block*)next++) != 0) {
 		// prevent some galaxy types from deleting b twice.
-		gal->removeBlock(*b);
+		galaxy()->removeBlock(*b);
 		LOG_DEL; delete b;
 	}
 }

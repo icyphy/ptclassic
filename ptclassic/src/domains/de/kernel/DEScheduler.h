@@ -32,7 +32,7 @@ $Id$
 class DEScheduler : public Scheduler {
 
 	// stoping condition of the scheduler
-	float stopTime;
+	double stopTime;
 
 	// detect the delay-free loop
 	int checkLoop(PortHole* p, DEStar* s);
@@ -46,13 +46,13 @@ class DEScheduler : public Scheduler {
 
 	// If output events are generated at the "start" phase,
 	// send them to the global event queue
-	void initialFire(Galaxy&);
+	void initialFire();
 
 	// check deley free loop
-	int checkDelayFreeLoop(Galaxy&);
+	int checkDelayFreeLoop();
 
 	// compute depth of all portholes
-	int computeDepth(Galaxy& g);
+	int computeDepth();
 
 public:
 	// my domain
@@ -63,26 +63,26 @@ public:
 	EventQueue eventQ;
 
 	// Set up the stopping condition.
-	void setStopTime(float limit) {stopTime = limit ;}
+	void setStopTime(double limit) {stopTime = limit ;}
 
 	// redefine the wormhole stopping condition
-	void resetStopTime(float limit) {
+	void resetStopTime(double limit) {
 		setStopTime(limit * relTimeScale) ;
 	}
 
-	float getStopTime() { return stopTime;}
+	double getStopTime() { return stopTime;}
 
 	// Set the current time
-	void setCurrentTime(float val) {
+	void setCurrentTime(double val) {
 		currentTime = val * relTimeScale ;
 	}
 
 	// The setup function initialize the global event queue
 	// and notify the blockes of the queue name.
-	int setup(Galaxy& galaxy);
+	void setup();
 
 	// The run function resumes the run where it was left off.
-	int run(Galaxy&);
+	int run();
 
 	// Display the static schedule for SDF wormholes...
 	StringList displaySchedule(); 
@@ -91,10 +91,10 @@ public:
 	DEScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
-	float whenStop() { return stopTime ;}
+	double whenStop() { return stopTime ;}
 
 	// relative time scale to the outer domain when it is a inner domain.
-	float relTimeScale;
+	double relTimeScale;
 
 	// synchronization mode. It is set by default.
 	// If reset, the execution of the process star can be optimized.
@@ -102,7 +102,7 @@ public:
 	int syncMode;
 
 	// fetch an event on request.
-	int fetchEvent(InDEPort* p, float timeVal);
+	int fetchEvent(InDEPort* p, double timeVal);
 };
 
 #endif

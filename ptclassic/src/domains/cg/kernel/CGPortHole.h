@@ -5,20 +5,20 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee
+ Programmer:  J. Buck, E. A. Lee
 
 This file contains definitions of CG-specific PortHole classes.
 
 ******************************************************************/
-#ifndef _CGConnect_h
-#define _CGConnect_h 1
+#ifndef _CGPortHole_h
+#define _CGPortHole_h 1
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "Connect.h"
-#include "SDFConnect.h"
+#include "PortHole.h"
+#include "SDFPortHole.h"
 
 class CGGeodesic;
 

@@ -52,11 +52,13 @@ void BaseMultiTarget :: initState() {
 	if (int(manualAssignment)) oneStarOneProc = TRUE;
 }
 	
-SDFStar* BaseMultiTarget :: createSend(int from, int to, int num) {
+// args are from, to, and number transferred
+SDFStar* BaseMultiTarget :: createSend(int, int, int) {
 	LOG_NEW; return new SDFStar;
 }
 
-SDFStar* BaseMultiTarget :: createReceive(int from, int to, int num) {
+// args are from, to, and number transferred
+SDFStar* BaseMultiTarget :: createReceive(int, int, int) {
 	LOG_NEW; return new SDFStar;
 }
 
@@ -101,8 +103,8 @@ void BaseMultiTarget :: setTargets(int n) {
 int BaseMultiTarget :: inheritChildTargets(Target* father) {
 
         if (int(nprocs) > father->nProcs()) {
-                Error::abortRun(readName(), " target has more children than \
-its parent target: ", father->readName());
+                Error::abortRun(name(), " target has more children than \
+its parent target: ", father->name());
                 return FALSE;
         }
 

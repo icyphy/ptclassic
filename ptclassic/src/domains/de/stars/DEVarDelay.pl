@@ -47,7 +47,7 @@ and the delay is changed using the "newDelay" input.
     go
     {
 	if (newDelay.dataNew)
-	    delay = float(newDelay.get());
+	    delay = newDelay.get();
 
 	if (input.dataNew)
 	    DEDelay::go();

@@ -29,7 +29,8 @@ DEStar :: DEStar()
 : delayType(FALSE), mode(SIMPLE), arrivalTime(0.0), completionTime(0.0) {}
 
 // initialize DE-specific members.
-void DEStar :: prepareForScheduling() {
+void DEStar :: initialize() {
+	Star::initialize();
 	arrivalTime = 0.0;
 	completionTime = 0.0;
 
@@ -46,8 +47,8 @@ void DEStar :: prepareForScheduling() {
 	}
 }
 
-int DEStar :: fire() {
-	int status = Star::fire();
+int DEStar :: run() {
+	int status = Star::run();
 	sendOutput();
 	return status;
 }

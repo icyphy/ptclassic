@@ -20,7 +20,7 @@ $Id$
 #include "SDFStar.h"
 #include "Particle.h"
 #include "Fraction.h"
-#include "DDFConnect.h"
+#include "DDFPortHole.h"
 
 class DDFWormhole;
 
@@ -38,8 +38,8 @@ public:
 	// constructor
 	DDFStar() { waitNum = 0; waitPort = NULL; }
 
-	// initialize DDF-specific members
-	void prepareForScheduling();
+	// initialize DDF-specific members, plus std initialize
+	void initialize();
 
 	// class identification
 	int isA(const char*) const;
@@ -62,6 +62,8 @@ public:
         virtual DDFWormhole* myWorm();
 
 	virtual const char* readTypeName();
+protected:
+	void initWait() { waitPort = NULL; waitNum = 0;}
 };
 
 #endif

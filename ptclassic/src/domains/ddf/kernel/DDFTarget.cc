@@ -36,13 +36,13 @@ Target("default-DDF","DataFlowStar","default DDF target")
 		"schedulePeriod for interface with a timed domain."));
 }
 
-Block* DDFTarget::clone() const {
-	LOG_NEW; return &(new DDFTarget)->copyStates(*this);
+Block* DDFTarget::makeNew() const {
+	LOG_NEW; return new DDFTarget;
 }
 
 void DDFTarget::start() {
 	// set up the parameters for the DDF scheduler
-	DDFScheduler* s = (DDFScheduler*) mySched();
+	DDFScheduler* s = (DDFScheduler*) scheduler();
 	s->numOverlapped = int(numOverlapped);
 	s->schedulePeriod = float (double(schedulePeriod));
 	s->maxToken = int(maxBufferSize);

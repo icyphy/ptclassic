@@ -61,11 +61,11 @@ int MPortReq::circ() {
 
 StringList MPortReq::print() {
 	StringList out = "port ";
-	out += myport.parent()->readFullName();
+	out += myport.parent()->fullName();
 	out += "(";
-	out += myport.readName();
+	out += myport.name();
 	out += "), type ";
-	out += myport.myType();
+	out += myport.type();
 	return out;
 }
 
@@ -75,9 +75,9 @@ int MStateReq::circ() {
 
 StringList MStateReq::print() {
 	StringList out = "state ";
-	out += mystate.parent()->readFullName();
+	out += mystate.parent()->fullName();
 	out += "(";
-	out += mystate.readName();
+	out += mystate.name();
 	out += "), type ";
 	out += mystate.type();
 	return out;
@@ -104,11 +104,11 @@ StringList MConsecStateReq::print() {
 		const State* s = m->state();
 		if (!s) { out += "???"; return out;}
 		if (first) {
-			out += s->parent()->readFullName();
+			out += s->parent()->fullName();
 			first = 0;
 		}
 		out += sep;
-		out += s->readName();
+		out += s->name();
 		sep = ", ";
 	}
 	out += ")";

@@ -27,28 +27,26 @@ and the universe state values.
 int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 	int i = 1;
 	while (i < argc) {
-	    if(stateWithName(argv[i])) {
-		// argument is recognized as a state name
-		char* value = (++i < argc) ? argv[i] : "";
-		setState(argv[(i++)-1],value);
-	    } else {
-		// assume that the argument is the number of iterations
-		// check to be sure it's the last argument
-		if((i<argc-1) || !sscanf(argv[i], "%d", numIters)) {
-			StateListIter nextState(states);
-			State* s;
-			StringList st = "Usage: ";
-			st += readName();
-			while(s = nextState++) {
-			    st += " [";
-			    st += s->readName();
-			    st += " value]";
-			}
-			st += " [iterations]";
-			Error::abortRun(st);
-			return FALSE;
-		} else { break; }
-	    }
+		if(stateWithName(argv[i])) {
+			// argument is recognized as a state name
+			char* value = (++i < argc) ? argv[i] : "";
+			setState(argv[(i++)-1],value);
+		} else {
+			// assume that the argument is the number of iterations
+			// check to be sure it's the last argument
+			if((i<argc-1) || !sscanf(argv[i], "%d", numIters)) {
+				BlockStateIter nextState(*this);
+				State* s;
+				StringList st;
+				st << "Usage: " << name();
+				while(s = nextState++) {
+					st << " [" << s->name() << " <value>]";
+				}
+				st << " [iterations]";
+				Error::abortRun(st);
+				return FALSE;
+			} else { break; }
+		}
 	}
 	return TRUE;
 }

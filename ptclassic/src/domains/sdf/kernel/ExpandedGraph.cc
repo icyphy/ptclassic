@@ -17,7 +17,7 @@ $Id$
 
 #include "ExpandedGraph.h"
 #include "GalIter.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 #include "Geodesic.h"
 #include "EGConnect.h"
 
@@ -147,7 +147,7 @@ int ExpandedGraph::ExpandArc(SDFStar* src, PortHole* src_port,
 	// set up local variables for connection information.
 	int p = src_port->numberTokens;
 	int q = dest_port->numberTokens;
-	int d = dest_port->myGeodesic->numInit();
+	int d = dest_port->geo()->numInit();
 
 	int src_invocation = 1;
 	int dest_invocation;
@@ -228,9 +228,9 @@ int ExpandedGraph::ExpandArc(SDFStar* src, PortHole* src_port,
 		total_samples -= dummy;
 		if (total_samples < 0) {  
 			StringList msg = "While creating expanded graph, sample rate problem detected between\n";
-			msg += src->readFullName();
+			msg += src->fullName();
 			msg += " and ";
-			msg += dest->readFullName();
+			msg += dest->fullName();
 			Error::abortRun(msg);
 			return FALSE;
 		}

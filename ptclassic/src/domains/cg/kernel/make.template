@@ -31,20 +31,19 @@ LIB=libcg.a
 # .h files with matching cc files
 H_WITH_MATCH= \
 AnyAsmStar.h \
-AsmConnect.h \
+AsmPortHole.h \
 AsmForkNode.h \
 AsmGeodesic.h \
 AsmStar.h \
 AsmTarget.h \
 BaseMultiTarget.h \
 BaseCTarget.h \
-CGConnect.h \
+CGPortHole.h \
 CGDisplay.h \
 CGGeodesic.h \
 CGStar.h \
 CGTarget.h \
 CGUtilities.h \
-CGWormConnect.h \
 CGWormhole.h \
 Code.h \
 IntArray.h \

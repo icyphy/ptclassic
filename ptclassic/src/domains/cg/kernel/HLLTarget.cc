@@ -55,7 +55,7 @@ void BaseCTarget::endIteration(int, int depth) {
 // identifier.  For all names that begin with a numeric character,
 // the character 'x' is prepended.
 StringList BaseCTarget :: sanitizedName (const NamedObj& obj) const {
-        const char *s = obj.readName();
+        const char *s = obj.name();
 	return sanitize(s);
 }
 

@@ -23,17 +23,17 @@ $Id$
 #include "FloatState.h"
 
 class DETarget : public Target {
+public:
+	DETarget();
+	Block* makeNew() const;
+	~DETarget();
 protected:
+	void setup();
 	FloatState timeScale;	// relative time scale for interface with
 				// another timed domain.
 	IntState   syncMode;	// If TRUE, the inner timed domain can not
 				// be ahead of the outer DE domain.
 
-public:
-	DETarget();
-	void start();
-	Block* clone() const;
-	~DETarget();
 };
 
 #endif

@@ -49,7 +49,7 @@ StringList EGNode :: printShort() {
 	StringList out;
 	out += "Star: name = ";
 	if (pStar)
-		out += pStar->readName();
+		out += pStar->name();
 	else
 		out += "noName";
 	out += " (invocation # ";

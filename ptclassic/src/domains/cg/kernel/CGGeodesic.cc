@@ -56,21 +56,6 @@ void CGGeodesic :: incCount(int n) {
 
 ISA_FUNC(CGGeodesic,Geodesic);
 
-// local functions
-static int gcd(int a, int b) {
-	// swap to make a > b if needed
-	if (a < b) { int t = a; a = b; b = t;}
-	while (1) {
-		if (b <= 1) return b;
-		int rem = a%b;
-		if (rem == 0) return b;
-		a = b;
-		b = rem;
-	}
-}
-
-inline int lcm(int a, int b) { return a * b / gcd(a,b);}
-
 int CGGeodesic :: localBufSize() const {
 	if (src() != 0) return 0;
 	else return internalBufSize();
@@ -141,30 +126,27 @@ int CGGeodesic :: internalBufSize() const {
 				if (total % d == 0)
 					rval = total / d;
 			}
-			return rval;
+			bsiz = rval;
 		}
 		// if we fall out of this loop, run-time addressing
 		// will be required, so we might as well use the smaller
 		// size.
 	}
-	else {
-		// no delays: we still prefer to use lcm(nread,nwrite)
-		// (avoiding modulo addressing) unless it is very
-		// wasteful.  Heuristic: OK if <= wasteFactor() times the
-		// sum of nread and nwrite.
-		// example: 5->6 gives 11; 30 > 2*11 so 11 is used.
-		// 2->n, n odd, gives n+2; 2n < 2*(n+2) so 2n is used.
-		// to force use of lcm, make wasteFactor huge; to force
-		// minimum memory, make wasteFactor 1.
+	// we still prefer to use lcm(nread,nwrite)
+	// (avoiding modulo addressing) unless it is very
+	// wasteful.  Heuristic: OK if <= wasteFactor() times the
+	// sum of nread and nwrite.
+	// example: 5->6 gives 11; 30 > 2*11 so 11 is used.
+	// 2->n, n odd, gives n+2; 2n < 2*(n+2) so 2n is used.
+	// to force use of lcm, make wasteFactor huge; to force
+	// minimum memory, make wasteFactor 1.
 
-		int nread = dest->numXfer();
-		int nwrite = originatingPort->numXfer();
-		int lcmValue = lcm(nread,nwrite);
-		if (lcmValue >= bsiz &&
-		    lcmValue <= wasteFactor() * (nread + nwrite))
+	int nread = dest->numXfer();
+	int nwrite = originatingPort->numXfer();
+	int lcmValue = lcm(nread,nwrite);
+	if (lcmValue >= bsiz && lcmValue <= wasteFactor() * (nread+nwrite))
 			return lcmValue;
-	}
-	return bsiz;
+	else return bsiz;
 }
 
 // default waste factor.
