@@ -3,15 +3,13 @@ defstar {
         domain {SDF}
         desc {
 An infinite impulse response (IIR) filter implemented in direct form II,
-using fixed-point arithmetic.
-The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
-where N() and D() are polynomials.
+using fixed-point arithmetic.  The transfer function is of the form
+H(z) = G*N(1/z)/D(1/z), where N() and D() are polynomials.
 The parameter "gain" specifies G, and the floating-point arrays
 "numerator" and "denominator" specify N() and D(), respectively.
 Both arrays start with the constant terms of the polynomial
 and decrease in powers of z (increase in powers of 1/z).
-Note that the constant term of D is not omitted, as is common in
-other programs that assume that it has been normalized to unity.
+The coefficients are rounded to the precision given by "CoefPrecision".
 Before the numerator and denominator coefficients are quantized, they
 are rescaled so that the leading denominator coefficient is unity.
 The gain is multiplied through the numerator coefficients as well.
@@ -36,6 +34,19 @@ The output of the star is the convolution of the input with $h(n)$.
 Note that the numerical finite precision noise increases with the filter order.
 To minimize this distortion, it is often desirable to expand the filter
 into a parallel or cascade form.
+.pp
+Quantization is performed in several places.
+First, the coefficients are quantized (rounded) to the precision
+specified by \fICoefPrecision\fR.
+Each time the star fires, the
+input is optionally quantized (rounded) to precision specified
+by \fIInputPrecision\fR.
+The multiplication of the state by the coefficients preserves
+full precision, but the result is quantized to \fIAccumPrecision\fR
+after being added to other products.
+The state variables are stored with the precision given by \fIStatePrecision\fR.
+The output is quantized (rounded) to \fIOutputPrecision\fR before being
+sent to the output.
 .ID "Schafer, R. W."
 .ID "Oppenheim, A. V."
 .UH REFERENCES
@@ -76,17 +87,37 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
                 default { "2.14" }
                 desc { Precision of the coefficients in bits. }
         }
+	defstate {
+		name { ArrivingPrecision }
+		type {int}
+		default {"YES"}
+		desc {
+Flag indicating whether or not to use the arriving particles as they are:
+YES keeps the same precision, and NO casts them to the precision specified
+by the parameter "InputPrecision".
+		}
+	}
         defstate {
                 name { InputPrecision }
                 type { string }
                 default { "2.14" }
-                desc { Precision of the input in bits.  }
+                desc {
+Precision of the input in bits.
+The input particles are only cast to this precision if the parameter
+"ArrivingPrecision" is set to NO.
+		}
         }
         defstate {
-                name { AccumulationPrecision }
+                name { AccumPrecision }
                 type { string }
                 default { "2.14" }
-                desc { Precision of the accumulation and state in bits. }
+                desc { Precision of the accumulation in bits. }
+        }
+        defstate {
+                name { StatePrecision }
+                type { string }
+                default { "2.14" }
+                desc { Precision of the state in bits. }
         }
         defstate {
                 name { OutputPrecision }
@@ -98,35 +129,14 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		<minmax.h>      // for max()
 	}
         protected {
-                int In_len;
-                int In_intBits;
-                int Coef_len;
-                int Coef_intBits;
-                int Accum_len;
-                int Accum_intBits;
-                int Out_len;
-                int Out_intBits;
 		int numState;
-
 		Fix *fdbckCoefs, *fwdCoefs, *state;
+		Fix fixIn, fdbckAccum, fwdAccum, out;
         }
 	constructor {
 		fdbckCoefs = fwdCoefs = state = NULL;
 	}
         begin {
-	    const char* IP = InputPrecision;
-	    const char* TP = CoefPrecision;
-	    const char* AP = AccumulationPrecision;
-	    const char* OP = OutputPrecision;
-	    In_len = Fix::get_length (IP);
-	    In_intBits = Fix::get_intBits (IP);
-	    Coef_len = Fix::get_length (TP);
-	    Coef_intBits = Fix::get_intBits (TP);
-	    Accum_len = Fix::get_length (AP);
-	    Accum_intBits = Fix::get_intBits (AP);
-	    Out_len = Fix::get_length (OP);
-	    Out_intBits = Fix::get_intBits (OP);
-
 	    int numNumer = numerator.size();
 	    int numDenom = denominator.size();
 	    numState = max(numNumer,numDenom);
@@ -155,30 +165,35 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    LOG_DEL; delete [] state;
 	    LOG_NEW; state = new Fix[numState];
     
-	    Fix coef(Coef_len, Coef_intBits);
-	    Fix st(Accum_len, Accum_intBits);
+	    Fix coef( ((const char *) CoefPrecision));
+	    Fix st( ((const char *) StatePrecision));
 
 	    // Set up the state and coefficient vectors
 	    // The first location in state and fdbckCoefs is wasted.
 	    for ( int i=0; i < numState; i++) {
 		st = 0.0;
 	        state[i] = st;
-	        coef = i<numNumer ? scaleNumer * numerator[i] : 0;
+	        coef = i<numNumer ? scaleNumer * numerator[i] : 0.0;
 	        fwdCoefs[i] = coef;
-	        coef = i<numDenom ? scaleDenom * -denominator[i] : 0;
+	        coef = i<numDenom ? scaleDenom * -denominator[i] : 0.0;
 	        fdbckCoefs[i] = coef;
 	    }
+
+	    // Set the precision of various variables
+	    fixIn = Fix( ((const char *) InputPrecision) );
+	    fdbckAccum = Fix ( ((const char *) AccumPrecision) );
+	    fwdAccum = Fix ( ((const char *) AccumPrecision) );
+	    out = Fix ( ((const char *) OutputPrecision) );
 	}
         go {
-	    Fix fdbckAccum(Accum_len, Accum_intBits),
-	    	fwdAccum(Accum_len, Accum_intBits),
-		fixIn(In_len, In_intBits),
-	    	out(Out_len, Out_intBits);
-
             if ( numState == 1 ) {
                 // actually, this means no state; just feed through
-		fixIn = Fix(signalIn%0);
-		out = fwdCoefs[0] * fixIn;
+		if ( int(ArrivingPrecision) )
+		    out = fwdCoefs[0] * Fix(signalIn%0);
+		else {
+		    fixIn = Fix(signalIn%0);
+		    out = fwdCoefs[0] * fixIn;
+		}
 		signalOut%0 << out;
             } else {
 		fdbckAccum = 0.0;
@@ -187,8 +202,12 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		    fdbckAccum = fdbckAccum + state[i] * fdbckCoefs[i];
 		    fwdAccum = fwdAccum + state[i] * fwdCoefs[i];
 		}
-		fixIn = Fix(signalIn%0);
-		fdbckAccum = fdbckAccum + fixIn;
+		if ( int(ArrivingPrecision) )
+		    fdbckAccum = fdbckAccum + Fix(signalIn%0);
+		else {
+		    fixIn = Fix(signalIn%0);
+		    fdbckAccum = fdbckAccum + fixIn;
+		}
 		for ( i=numState-1; i > 1; i--) {
 		    state[i] = state[i-1];
 		}
