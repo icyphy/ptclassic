@@ -25,6 +25,7 @@ LIB=libsdfstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ SDFAddMvecs.pl \
  SDFAutocor.pl \
  SDFAverage.pl \
  SDFBiQuad.pl \
