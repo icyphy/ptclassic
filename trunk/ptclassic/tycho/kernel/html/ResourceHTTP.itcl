@@ -35,7 +35,7 @@
 #
 #
 class ::tycho::ResourceHTTP {
-    inherit ::tycho::Object
+    inherit ::tycho::Resource
 
     constructor {args} {}
     destructor {}
@@ -95,13 +95,7 @@ class ::tycho::ResourceHTTP {
     method streamable {}
 
     # Return true if a resource is writable
-    method writeable {{path {}}}
-
-    ###################################################################
-    ####                        public procs                       ####
-
-    # Get the status of getting HTTP
-    proc httpStatus {}
+    method writable {{path {}}}
 
     ###################################################################
     ####                      public variables                     ####
@@ -112,8 +106,8 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Opening an HTTP connection. This returns the file name of the HTTP file.
-    method httpget {url}
+    # Opening an HTTP connection and return the tmp HTTP cache file name.
+    method httpget {}
 
     # This is called by file event handler, from httpget.
     method httpread {fd tmpfd}
@@ -127,17 +121,21 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                        protected variables                ####
 
-    # The name of the host name
-    protected variable hostname
-    
     # The full name of the current file (or directory)
     protected variable currentFile
 
+    # The name of the host name
+    protected variable hostname {}
+    
     # The name of the HTTP port. Default is 80
     protected variable port 80
 
     # The index of the get
-    protected variable idx
+    protected variable idx 0
+
+    # FIXME: need to find out where to collect protocols that Tycho
+    # understands:
+    set accept {text/*}
 
     ###################################################################
     ####                         private variables               ####
@@ -187,12 +185,6 @@ body ::tycho::ResourceHTTP::filetype {} {
 }
 
 #####################################################################
-#### flush
-body ::tycho::ResourceHTTP::flush {} {
-    ::tycho::abstractMethod flush
-}
-
-#####################################################################
 #### gets
 body ::tycho::ResourceHTTP::gets {} {
     ::tycho::abstractMethod gets
@@ -224,10 +216,36 @@ body ::tycho::ResourceHTTP::new {{path {}}} {
 
 #####################################################################
 #### open
-body ::tycho::ResourceHTTP::open {path {mode "r"}} {
+# URL should be in the following format: 
+#
+body ::tycho::ResourceHTTP::open {url {mode "r"}} {
     if {$mode!="r"} {
-        return 0
+        return -1
     }
+
+    #puts "Going to get url: $url"
+    # 
+    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
+            host optport port path]} {
+        if {$hostname == {}} {set hostname $host} ;# Supply reasonable default
+        if {$port == {}} {set port 80}            ;# HTTP default service
+        if {$path == {}} {set path /}
+    } else {
+        # Recover from malformed URL
+        if {![string match */* $url]} {
+            # Assume only the hostname:port has been given
+            regexp {([^:]*)(:(.*))?} $url match host optport port
+            if {$host == {}} {set hostname host}
+            if {$port == {}} {set port 80}
+            set path /
+        } else {
+            return -1
+            #error "no hostname given in URL \"$url\""
+        }
+    }
+    set cacheFile [httpget]
+    puts "CACHE: $cacheFile"
 
 }
 
@@ -287,37 +305,16 @@ body ::tycho::ResourceHTTP::writable {{path {}}} {
 
 #########################################################################
 #### httpget
-# Opening an HTTP connection. This returns the file name of the HTTP file.
+# Opening an HTTP connection. This returns the file name of the 
+# temporary HTTP file (later on cache). This method assumes that
+# hostname, port, and path are set.
 #
-body ::tycho::ResourceHTTP::httpget {url} {
-    # FIXME: need to find out where to collect protocols that Tycho
-    # understands:
-    set accept {text/*}
-
-    #puts "Going to get url: $url"
-    # 
-    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-            host optport port path]} {
-        if {$host == {}} {set host $localhost}	;# Supply reasonable default
-        if {$port == {}} {set port 80}		;# HTTP default service
-        if {$path == {}} {set path /}
-    } else {
-        # Recover from malformed URL
-        if {![string match */* $var(path)]} {
-            # Assume only the hostname:port has been given
-            regexp {([^:]*)(:(.*))?} $var(path) all host optport port
-            if {$host == {}} {set host localhost}
-            if {$port == {}} {set port 80}
-            set path /
-        } else {
-            error "no hostname given in URL \"$url\""
-        }
-    }
-    puts "$host:$port, GET $path HTTP/1.0"
-    if {[catch {socket -async $host $port} fd]} {
+body ::tycho::ResourceHTTP::httpget {} {
+    # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[catch {socket -async $hostname $port} fd]} {
         unset $fd
-        error "Can't open $host, $port"
+        return -1
+        #error "Can't open $host, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -340,10 +337,25 @@ body ::tycho::ResourceHTTP::httpget {url} {
     fileevent $fd w {}
     fileevent $fd r "$this httpread $fd $tmpfd"
 
-    # Wait until the entire http file is here!
+    # Wait until the entire http file is here on local drive
     httpwait
 
     return $tmpFile
+}
+
+#########################################################################
+#### httpread
+# This is called by file event handler, from httpget.
+#
+body ::tycho::HTML::httpread {fd tmpfd} {
+    if [eof $fd] {
+	catch {close $fd}
+	catch {close $tmpfd}
+        httpStatus $statusVariableName "done"
+    } else {
+	gets $fd line
+        puts $tmpfd $line
+    }
 }
 
 #########################################################################
