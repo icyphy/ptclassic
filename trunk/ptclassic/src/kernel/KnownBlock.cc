@@ -47,9 +47,12 @@ int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 // Look up the domain index of a block.
 
 int KnownBlock::domainIndex (Block& block) {
-	// handle galaxy case -- domain of first star found
+	// for galaxies, if myDomain isn't set, use domain of
+	// the first sub-block found.
 	if (!block.isItAtomic()) {
 		Galaxy& g = block.asGalaxy();
+		if (g.myDomain)
+			return domainIndex (g.myDomain, TRUE);
 		if (g.numberBlocks() == 0) {
 			// indeterminate domain
 			return -1;
