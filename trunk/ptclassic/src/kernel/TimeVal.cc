@@ -42,6 +42,8 @@ static const char file_id[] = "$RCSfile$";
 
 #ifdef __GNUG__
 typedef void (*SIG_PF)(int);
+#else
+#include <std.h>
 #endif
 
 TimeVal::TimeVal()
