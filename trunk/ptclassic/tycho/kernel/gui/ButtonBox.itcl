@@ -131,6 +131,9 @@ class ::tycho::ButtonBox {
     # Return the location of the given button as row.column
     method location {tag}
 
+    # Reset the location of the next button
+    method reset {{row 0} {column 0}}
+
     ###################################################################
     ####                         protected methods                 ####
 
@@ -163,6 +166,17 @@ class ::tycho::ButtonBox {
 }
 
 #########################################################################
+#### -buttonwidth option configuration
+# Force the buttons to be a given width in characters. If zero, buttons
+# assume their natural size.
+# 
+configbody ::tycho::ButtonBox::buttonwidth {
+    foreach tag [array names _row] {
+	$itk_component(button$tag) configure -width $itk_option(-buttonwidth)
+    }
+}
+
+#########################################################################
 #### -ringwidth option configuration
 # Alter the width of the default ring. This has to change the padding of
 # _all_ buttons.
@@ -172,17 +186,6 @@ configbody ::tycho::ButtonBox::ringwidth {
 	pack $itk_component(button$tag) \
 		-padx $itk_option(-ringwidth) \
 		-pady $itk_option(-ringwidth)
-    }
-}
-
-#########################################################################
-#### -buttonwidth option configuration
-# Force the buttons to be a given width in characters. If zero, buttons
-# assume their natural size.
-# 
-configbody ::tycho::ButtonBox::buttonwidth {
-    foreach tag [array names _row] {
-	$itk_component(button$tag) configure -width $itk_option(-buttonwidth)
     }
 }
 
@@ -539,6 +542,18 @@ body ::tycho::ButtonBox::location {tag} {
 
     set opts [array set [grid info $itk_component(inside)]]
     return [join $opts(-row) $opts(-column) "."]
+}
+
+####################################################################
+#### reset
+# Reset the location at which the next button will be placed.
+# If no arguments are supplied, the position is reset to 
+# zero and zero; if supplied, the position is that row and
+# column.
+#
+body ::tycho::ButtonBox::reset {{row 0} {column 0}} {
+    set currentRow $row
+    set currentColumn $column
 }
 
 #########################################################################
