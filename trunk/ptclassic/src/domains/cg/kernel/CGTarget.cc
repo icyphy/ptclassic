@@ -78,7 +78,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
-	addState(destDirectory.setState("directory", this, "PTOLEMY_SYSTEMS",
+	addState(destDirectory.setState("directory", this, "$HOME/PTOLEMY_SYSTEMS",
 	    "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));

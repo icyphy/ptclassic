@@ -57,9 +57,6 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
 
 void AsmTarget :: initStates() {
-	// change default value of destDirectory
-	destDirectory.setInitValue("~/DSPcode");
-
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
 	displayFlag.setAttributes(A_SETTABLE);
