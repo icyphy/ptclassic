@@ -151,17 +151,19 @@ void ComplexMatrixParticle::operator << (const FloatMatrix&) {
   errorAssign("FloatMatrix"); }
 void ComplexMatrixParticle::operator << (const IntMatrix&) {
   errorAssign("IntMatrix"); }
+void ComplexMatrixParticle::operator << (const Envelope&) {
+  errorAssign("Message"); }
 
 void ComplexMatrixParticle::operator << (int i) { 
-  (ComplexMatrix)*data = Complex(i); }
+  *data = Complex(i); }
 void ComplexMatrixParticle::operator << (double f) { 
-  (ComplexMatrix)*data = Complex(f); }
+  *data = Complex(f); }
 void ComplexMatrixParticle::operator << (const Complex& c) { 
-  (ComplexMatrix)*data = c;}
+  *data = c;}
 void ComplexMatrixParticle::operator << (const Fix& x) { 
-  (ComplexMatrix)*data = Complex(double(x)); }
+  *data = Complex(double(x)); }
 void ComplexMatrixParticle::operator << (const ComplexMatrix& m) { 
-  (ComplexMatrix)*data = m; }
+  *data = m; }
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
@@ -278,19 +280,21 @@ void FixMatrixParticle::operator << (const FloatMatrix&) {
   errorAssign("FloatMatrix"); }
 void FixMatrixParticle::operator << (const IntMatrix&) {
   errorAssign("IntMatrix"); }
+void FixMatrixParticle::operator << (const Envelope&) {
+  errorAssign("Message"); }
 
 //void FixMatrixParticle::operator << (int i) { 
 //  (FixMatrix)*data = Fix(i); }
 void FixMatrixParticle::operator << (int i) { 
-  (FixMatrix)*data = Fix(double(i)); }
+  *data = Fix(double(i)); }
 void FixMatrixParticle::operator << (double f) { 
-  (FixMatrix)*data = Fix(f); }
+  *data = Fix(f); }
 void FixMatrixParticle::operator << (const Complex& c) { 
-  (FixMatrix)*data = Fix(abs(c));}
+  *data = Fix(abs(c));}
 void FixMatrixParticle::operator << (const Fix& x) { 
-  (FixMatrix)*data = x; }
+  *data = x; }
 void FixMatrixParticle::operator << (const FixMatrix& m) { 
-  (FixMatrix)*data = m; }
+  *data = m; }
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
@@ -406,17 +410,19 @@ void FloatMatrixParticle::operator << (const FixMatrix&) {
   errorAssign("FixMatrix"); }
 void FloatMatrixParticle::operator << (const IntMatrix&) {
   errorAssign("IntMatrix"); }
+void FloatMatrixParticle::operator << (const Envelope&) {
+  errorAssign("Message"); }
 
 void FloatMatrixParticle::operator << (int i) { 
-  (FloatMatrix)*data = i; }
+  *data = i; }
 void FloatMatrixParticle::operator << (double f) { 
-  (FloatMatrix)*data = f; }
+  *data = f; }
 void FloatMatrixParticle::operator << (const Complex& c) { 
-  (FloatMatrix)*data = abs(c);}
+  *data = abs(c);}
 void FloatMatrixParticle::operator << (const Fix& x) { 
-  (FloatMatrix)*data = double(x); }
+  *data = double(x); }
 void FloatMatrixParticle::operator << (const FloatMatrix& m) { 
-  (FloatMatrix)*data = m; }
+  *data = m; }
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
@@ -533,17 +539,19 @@ void IntMatrixParticle::operator << (const FixMatrix&) {
   errorAssign("FixMatrix"); }
 void IntMatrixParticle::operator << (const FloatMatrix&) { 
   errorAssign("FloatMatrix"); }
+void IntMatrixParticle::operator << (const Envelope&) {
+  errorAssign("Message"); }
 
 void IntMatrixParticle::operator << (int i) { 
-  (IntMatrix)*data = i; }
+  *data = i; }
 void IntMatrixParticle::operator << (double f) { 
-  (IntMatrix)*data = int(f); }
+  *data = int(f); }
 void IntMatrixParticle::operator << (const Complex& c) { 
-  (IntMatrix)*data = int(abs(c));}
+  *data = int(abs(c));}
 void IntMatrixParticle::operator << (const Fix& x) { 
-  (IntMatrix)*data = int(x); }
+  *data = int(x); }
 void IntMatrixParticle::operator << (const IntMatrix& m) { 
-  (IntMatrix)*data = m; }
+  *data = m; }
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
