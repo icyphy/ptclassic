@@ -93,8 +93,8 @@ Authors:
 .nr SE 0 1 \" Initialize number register for section numbers
 .S 14
 .ne 1.5i
-.uh "\\f\\n(SX\\$1" \\n(S1
-.tm headerU \\n% \\n(S1 \\$1 \"Output for table of contents
+.uh "\\f\\n(SX\\$1"
+.tm headerU \\n% \\$1 \"Output for table of contents
 .S \\n(BX
 ..
 
