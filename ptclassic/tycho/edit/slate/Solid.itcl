@@ -231,7 +231,7 @@ body ::tycho::Solid::constructor {{s {}} {c {}} args} {
     # created with the right color.
     #
     getopt color options
-    set colorObject [Shades::new $color]
+    set colorObject [::tycho::Shades::new $color]
 
     #
     # Override defaults: shape is segmented
