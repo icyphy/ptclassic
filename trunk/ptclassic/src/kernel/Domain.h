@@ -52,7 +52,7 @@ class EventHorizon;
 class Geodesic;
 class Target;
 
-const int NUMDOMAINS = 20;		// maximum # of domains
+const int NUMDOMAINS = 30;		// maximum # of domains
 
 class Domain {
 public:
