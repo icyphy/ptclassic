@@ -1,9 +1,10 @@
-/* edg  5/22/90
+/* 
 Version identification:
 $Id$
 Ptolemy kernel calls.
 Some code borrowed from Interpreter.cc, see this file for more info.
 
+Programmer: E. Goei, J. Buck
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
@@ -80,6 +81,16 @@ inline static Block* findClass (const char* name) {
 	return b->multiPortWithName (mph) ? b : 0;
 }
 
+// This function writes the domain to the log file, if and only if
+// it has changed.
+
+static void logDomain() {
+	static const char* oldDom = "";
+	const char* dom = KnownBlock::domain();
+	if (strcmp(dom, oldDom) == 0) return;
+	LOG << "(domain " << dom << ")\n";
+}
+
 // Return the domain of an object: note, it may not be the current
 // domain (e.g. SDF in DDF)
 extern "C" char *
@@ -89,9 +100,7 @@ KcDomainOf(char* name) {
 		ErrAdd("Unknown block");
 		return NULL;
 	}
-	if (b->isItAtomic())
-		return b->asStar().domain();
-	else return b->asGalaxy().myDomain;
+	return (char *)b->domain();
 }
 
 // Delete the universe and make another
@@ -101,6 +110,7 @@ KcClearUniverse() {
 	universe = new InterpUniverse;
 	currentGalaxy = universe;
 	LOG << "(reset)\n";
+	logDomain();
 }
 
 // Create a new instance of star or galaxy and set params for it
@@ -162,7 +172,6 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 */
 extern "C" boolean
 KcSetKBDomain(char* domain) {
-	LOG << "\t(domain " << domain << ")\n";
 	return KnownBlock::setDomain(domain) ? TRUE : FALSE;
 }
 
@@ -177,6 +186,7 @@ curDomainName() {
 // start a galaxy definition
 extern "C" boolean
 KcDefgalaxy(char *galname, char *domain) {
+	logDomain();
 	LOG << "(defgalaxy " << galname << "\n\t(domain " << domain << ")\n";
 	saveGalaxy = currentGalaxy;
 	currentGalaxy = new InterpGalaxy;
