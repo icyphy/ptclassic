@@ -455,7 +455,7 @@ extern int errno;
 
 /* Use SystemV curses?  See octtools/attache/io.c
  */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTALPHA) || defined(PTFREEBSD)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTALPHA) || defined(PTFREEBSD) ||defined(PTNBSD_386)
 #define USE_SYSV_CURSES
 #endif
 
@@ -466,12 +466,12 @@ extern int errno;
 #endif
 
 /* Do we have termios.h?  See octtools/Xpackages/iv/ivGetLine.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTFREEBSD)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386)
 #define HAS_TERMIOS
 #endif
 
 /* Is sys_siglist[] present?  See octtools/vem/rpc/vemRPC.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTFREEBSD)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386)
 #define NO_SYS_SIGLIST
 #endif 
 
