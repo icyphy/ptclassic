@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Revisions:
 
  Base class for the Ptolemy interface to Matlab.
+ Only once Matlab process is run and is shared by all of Ptolemy.
 
 **************************************************************************/
 
@@ -83,17 +84,7 @@ public:
 	Engine* GetCurrentEngine();
 	int GetMatlabIfcInstanceCount();
 
-	// setup functions
-	void NameMatlabMatrices(char *matNames[],
-				int numMatrices,
-				const char* baseName);
-	const char* BuildMatlabCommand(
-				char* matlabInputNames[], int numInputs,
-				const char* matlabFunction,
-				char* matlabOutputNames[], int numOutputs);
-
-	// manage Matlab process (low-level methods)
-	// derived class must override these methods
+	// low-level interfaces to the Matlab process via the Matlab engine
 	Engine* MatlabEngineOpen(char* unixCommand);
 	int MatlabEngineSend(char* command);
 	int MatlabEngineOutputBuffer(char* buffer, int buferLength);
@@ -114,14 +105,32 @@ public:
 	int CloseMatlabFigures();
 	int KillMatlab();
 
-	// convert Ptolemy particles to Matlab matrices
+	// methods not using data members
+	// 1. generate a list of names for Matlab matrices
+	void NameMatlabMatrices(char *matNames[],
+				int numMatrices,
+				const char* baseName);
+
+	// 2. build up a complete Matlab command
+	const char* BuildMatlabCommand(
+				char* matlabInputNames[], int numInputs,
+				const char* matlabFunction,
+				char* matlabOutputNames[], int numOutputs);
+
+	// 3. convert Ptolemy particles to Matlab matrices
 	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
 				int *errflag);
 
-	// convert Matlab matrices to Ptolemy particles
+	// 4. convert Matlab matrices to Ptolemy particles
 	int MatlabToPtolemy(Particle &particle, DataType portType,
 			    Matrix* matlabMatrix, const char* matrixId,
 			    int *errflag);
+
+	// 5. free an array of Matlab matrices
+	void FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices);
+
+	// 6. name a Matlab matrix in memory
+	void NameMatlabMatrix(Matrix* matrixPtr, const char *name);
 
 private:
 	// indicate whether or not to delete created figures upon destruction
