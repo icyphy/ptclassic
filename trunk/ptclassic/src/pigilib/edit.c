@@ -59,12 +59,11 @@ $Id$
 #define dmWidth 40
 #define dmIncrement 20
 
-/* for DMM and manual partitioning 11/22/95 A. Kalavade */
+/* begin addition for DMM and manual partitioning 11/22/95 A. Kalavade */
 
-/* ### */
-#define LENGTH 100
-char *selectedObjName[LENGTH];
-int numObjSelected = 0;
+#define PIGILIB_OBJNAME_LENGTH 100
+static char *selectedObjName[PIGILIB_OBJNAME_LENGTH];
+static int numObjSelected = 0;
 
 /***** Begin GetStarNames 8/26/93 Asawaree Kalavade *****/
 int
@@ -73,18 +72,18 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-        octObject inst;
-        vemStatus status;
-        Pointer pointer;
-        RPCArg *arg;
-        int length;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
+    vemStatus status;
+    Pointer pointer;
+    RPCArg *arg;
+    int length = 0;
 
-        ViInit("get-object-names");
-        ErrClear();
-        numObjSelected = 0;
+    ViInit("get-object-names");
+    ErrClear();
+    numObjSelected = 0;
 
     if ((length = lsLength(cmdList)) != 0) {
-        octObject bag, inst;
+        octObject bag = {OCT_UNDEFINED_OBJECT}, inst = {OCT_UNDEFINED_OBJECT};
         octGenerator genInst;
         lsFirstItem(cmdList, &pointer, (lsHandle *) 0);
         arg = (RPCArg *) pointer;
@@ -119,8 +118,8 @@ long userOptionWord;
         else
         {
         /*      fprintf(stderr,"name: %s\n",inst.contents.instance.name); */
-                selectedObjName[numObjSelected] = inst.contents.instance.name;
-                numObjSelected++;
+            selectedObjName[numObjSelected] = inst.contents.instance.name;
+            numObjSelected++;
         }
     }
     ViDone();
@@ -128,11 +127,11 @@ long userOptionWord;
 
 void getSelectedObjNames(numObjs,nameList)
 int* numObjs;
-char *nameList[LENGTH];
+char *nameList[PIGILIB_OBJNAME_LENGTH];
 {
         int i;
         *numObjs = numObjSelected;
-        for(i=0; i<numObjSelected; i++)
+        for ( i=0; i<numObjSelected; i++ )
         {
                 nameList[i] = selectedObjName[i];
         }
@@ -149,22 +148,24 @@ int* numObjs;
 char* fname;
 {
 	FILE* fp;
-	octObject facet;
-        octObject inst;
+	octObject facet = {OCT_UNDEFINED_OBJECT};
+        octObject inst = {OCT_UNDEFINED_OBJECT};
         octGenerator genInst;
 	int num = 0;
 
-	fp = fopen(fname,"w");
-	if(fp == NULL)
-	{
-		fprintf(stderr,"Can't open file to write names.\n");
-		return 0;
-	}
-        if(ohOpenFacet(&facet,facetName,"schematic", "contents", "r") <= 0) 
+        if (ohOpenFacet(&facet, facetName, "schematic", "contents", "r") <= 0) 
 	{
                 PrintErr(octErrorString());
-                return 0;
+                return FALSE;
         }
+
+	fp = fopen(fname,"w");
+	if (fp == NULL)
+	{
+		ErrAdd("Can't open file to write names.");
+		return FALSE;
+	}
+
         octInitGenContents(&facet, OCT_INSTANCE_MASK, &genInst);
         while (octGenerate(&genInst, &inst) == OCT_OK) 
 	{
@@ -177,10 +178,10 @@ char* fname;
 	}
         *numObjs = num;
 	fclose(fp);
-	return 1;
+	return TRUE;
 }
 
-/* ### */
+/* end addition for DMM domain */
 
 /* body of parameter-edit code.
 Returns 0 if there is an error.
