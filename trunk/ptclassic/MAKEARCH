@@ -93,15 +93,10 @@ foreach x (libgslider ptplay)
 end
 cd ..
 
-# Make Awesime thread directories (currently specific to sun and mips)
-if ($ARCH =~ sun?* || $ARCH =~ mips) then
-	mkarch thread thread/Awesime
-	pushd thread/Awesime
-	foreach mk (../../../src/thread/Awesime/GNUmakefile*)
-		optlink $mk:h $mk:t
-	end
-	popd
-	mkarch thread/awe
+# Make posix thread and PN directories.
+# Currently specific to SunOS and Solaris.
+if ($ARCH =~ sun?* || $ARCH =~ sol?*) then
+	mkarch thread thread/posix
 	mkarch domains/pn{,/kernel,/stars}
 endif
 
