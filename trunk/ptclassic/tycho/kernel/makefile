@@ -58,27 +58,14 @@ ITCL_SRCS = \
 	DialogWindow.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
-	EditC.itcl \
-	EditCText.itcl \
-	EditCpp.itcl \
-	EditCppText.itcl \
 	EditFSM.itcl \
 	EditHTML.itcl \
 	EditHTMLText.itcl \
-	EditItcl.itcl \
-	EditItclText.itcl \
-	EditMake.itcl \
-	EditMakeText.itcl \
 	EditProgram.itcl \
 	EditProgramText.itcl \
-	EditPtlang.itcl \
-	EditPtlangText.itcl \
 	EditSearch.itcl \
 	EditSpice.itcl \
 	EditSpiceText.itcl \
-	EditTcl.itcl \
-	EditTclText.itcl \
-	EditText.itcl \
 	EditVHDL.itcl \
 	EditVHDLText.itcl \
 	EntryQuery.itcl \
