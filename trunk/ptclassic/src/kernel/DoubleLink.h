@@ -26,11 +26,6 @@ class DoubleLink
 	friend class DoubleLinkList;
 	friend class DoubleLinkIter;
 
-protected:
-	DoubleLink *next;    // next node in the DL list
-	DoubleLink *prev;    // previous node in the list
-	Pointer e;
-
 public:
 	DoubleLink(Pointer a, DoubleLink* n, DoubleLink* p): 
 		e(a), next(n), prev(p) {}
@@ -42,22 +37,16 @@ public:
 	virtual ~DoubleLink();
 
 	void unlinkMe();
-	void removeMe() { unlinkMe(); INC_LOG_DEL; delete this; }
+
+protected:
+	DoubleLink *next;    // next node in the DL list
+	DoubleLink *prev;    // previous node in the list
+	Pointer e;
 };
 
 class DoubleLinkList
 {
         friend class DoubleLinkIter;
-
-        int size;
-
-	// add the first node into the list
-	void firstNode(DoubleLink*);
-
-protected: 
-        DoubleLink *head;
-        DoubleLink *tail;
-       
 public:
 	// virtual destructor
 	virtual ~DoubleLinkList();
@@ -86,9 +75,11 @@ public:
 	void insertBehind(DoubleLink *y, DoubleLink *x);	
 
         // Unlink a link from the list & return ptr to it.
+	// Alert! make sure that x is in the list before call this method!
 	DoubleLink* unlink(DoubleLink *x);	
 
         // Remove a link from the list.
+	// Alert! make sure that x is in the list before call this method!
 	void removeLink(DoubleLink *x) { unlink(x);	
 					 INC_LOG_DEL; delete x; }
 	void remove(Pointer e);
@@ -123,6 +114,16 @@ public:
 		{ if (size==0) return 0;
 		  else return unlink(tail); }
 	Pointer takeFromBack();
+
+protected: 
+        DoubleLink *head;
+        DoubleLink *tail;
+       
+private:
+        int size;
+
+	// add the first node into the list
+	void firstNode(DoubleLink*);
 };
 
 
