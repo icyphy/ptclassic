@@ -6,12 +6,12 @@
 <body bgcolor="#faf0e6">
 <h1><a name="text editors">User's Guide to the Text Edit Windows</a></h1>
 <p>
-The Edit class in Tycho provides an Emacs-like text editor window.
+The Edit class in Tycho provides a text editor window.
 It is derived from the <a href="FileHelp.html">File class</a>, and
 therefore inherits all of its features.
 Several classes derived from Edit provide specialized editors for a variety
-of uses.  All of these share the same Emacs-like
-<a href="../../../doc/bindings.html">key bindings</a> for moving
+of uses.  All of these share the same
+<a href="../../../doc/bindings.html">keyboard shortcuts</a> for moving
 the insertion cursor, modifying text, and paging through a document.
 Equivalent commands are also available in the pull-down menus
 at the top.
@@ -26,8 +26,17 @@ at once.  When a search is launched, all matches are highlighted in the
 text.  You can then step through the matches one by one by repeating the
 search.
 
+<li><code><a name="Incremental search">Incremental search</a></code>
+Incremental search is a quick alternative to Find/Change that uses
+the minibuffer at the bottom of the text editor window and matches
+characters as you type them.  You can search backwards or forwards
+by using different keyboard shortcuts (or menu commands).
+Note that the keyboard shortcuts are documented in the pull-down
+menus.
+
 <li><code><a name="spelling checker">Spelling checker</a></code>.  The
-spelling checker current uses the Unix <CODE>spell</CODE> command and
+spelling checker invokes an external <CODE>spell</CODE> or
+<code>ispell</code> command (which must be installed on your system) and
 highlights all whole words that the spell command identified as being
 misspelled.  In specialized editors derived from this one, a subset of
 the text may be checked for spelling errors.  For example, in a
