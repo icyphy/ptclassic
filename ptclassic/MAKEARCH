@@ -29,49 +29,18 @@ optmkdir lib.$ARCH
 optmkdir obj.$ARCH
 optmkdir octtools
 optmkdir octtools/include
-if ( $ARCH != "sun4.debug" && $ARCH != "cfront" && $ARCH != "hppa.cfront" ) then
-	optmkdir octtools/lib.$ARCH
-	optmkdir octtools/bin.$ARCH
-else
-	# Create links for octtools and tcltk, most users will not have
-	# the other-src file necessary to create special versions of octtools
-	# and tcltk.  Further more, currently octtools can only be compiled
-	# with cc, not with gcc
-	if ( $ARCH == "sun4.debug" ) then
-		cd octtools
-		optdifflink lib.sun4 lib.sun4.debug
-		optdifflink bin.sun4 bin.sun4.debug
-		cd ../tcltk
-		optdifflink tcl.sun4 tcl.sun4.debug
-		optdifflink tk.sun4 tk.sun4.debug
-		cd ..
-	else if ($ARCH == "cfront" ) then
-		cd octtools
-		optdifflink lib.sun4 lib.cfront
-		optdifflink bin.sun4 bin.cfront
-		cd ../tcltk
-		optdifflink tcl.sun4 tcl.cfront
-		optdifflink tk.sun4 tk.cfront
-		cd ..		
-	else if ($ARCH == "hppa.cfront" ) then
-		cd octtools
-		optdifflink lib.hppa lib.hppa.cfront
-		optdifflink bin.hppa bin.hppa.cfront
-		cd ../tcltk
-		optdifflink tcl.hppa tcl.hppa.cfront
-		optdifflink tk.hppa tk.hppa.cfront
-		cd ..		
-	endif
-	cd bin.$ARCH
-	optdifflink ../octtools/bin.$ARCH/attache attache
-	optdifflink ../octtools/bin.$ARCH/installColors installColors
-	optdifflink ../octtools/bin.$ARCH/masters masters
-	optdifflink ../octtools/bin.$ARCH/oct2ps oct2ps
-	optdifflink ../octtools/bin.$ARCH/octfix octfix
-	optdifflink ../octtools/bin.$ARCH/octls octls
-	optdifflink ../octtools/bin.$ARCH/vem vem
-	cd ..
-endif
+optmkdir octtools/lib.$ARCH
+optmkdir octtools/bin.$ARCH
+
+cd bin.$ARCH
+optdifflink ../octtools/bin.$ARCH/attache attache
+optdifflink ../octtools/bin.$ARCH/installColors installColors
+optdifflink ../octtools/bin.$ARCH/masters masters
+optdifflink ../octtools/bin.$ARCH/oct2ps oct2ps
+optdifflink ../octtools/bin.$ARCH/octfix octfix
+optdifflink ../octtools/bin.$ARCH/octls octls
+optdifflink ../octtools/bin.$ARCH/vem vem
+cd ..
 
 # Now, make stuff under obj.$ARCH
 
