@@ -370,6 +370,7 @@ char *argv[];
 					(String) 0, "Vem",
 					(XrmOptionDescRec *) 0,
 					0, &argc, argv));
+    optInit(argv[0], optionList, 0);
     if (vemDisp == NIL(Display)) {
 	(void) fprintf(stderr, "Can't open display.\n");
 	optUsage();
