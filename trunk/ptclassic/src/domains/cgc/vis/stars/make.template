@@ -42,10 +42,11 @@ include $(CONFIG)
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 CGCDIR = $(ROOT)/src/domains/cgc/kernel
+CGCSTAR = $(ROOT)/src/domains/cgc/stars
 
 # VSDKHOME is an environment variable that must
 # be set if you are to use the VIS stars
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) 
+INCL = -I$(CGCSTAR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) 
 
 # Library name
 LIB=libcgcvisstars.$(LIBSUFFIX)
@@ -61,6 +62,9 @@ PL_SRCS= \
  CGCVISMpyDblSh.pl \
  CGCVISMpySh.pl \
  CGCVISPackSh.pl \
+ CGCVISStereoBiquad.pl \
+ CGCVISStereoIn.pl \
+ CGCVISStereoOut.pl \
  CGCVISSubSh.pl \
  CGCVISUnpackSh.pl
 
