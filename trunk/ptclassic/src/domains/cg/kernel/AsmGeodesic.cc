@@ -125,9 +125,14 @@ int AsmGeodesic :: forkDelay() const {
 	return n;
 }
 
-int AsmGeodesic :: bufSize() const {
+int AsmGeodesic :: localBufSize() const {
 	if (src() != 0) return 0;
 	else return internalBufSize();
+}
+
+int AsmGeodesic :: bufSize() const {
+	const AsmPortHole* p = src();
+	return p ? p->geo().bufSize() : internalBufSize();
 }
 
 // Return the address assigned to the geodesic.
