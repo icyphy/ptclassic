@@ -32,7 +32,7 @@ SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexProduct.cc ComplexSum.cc \
 OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexProduct.o ComplexSum.o \
  ComplexPower.o \
  FloatDC.o FloatGain.o FloatProduct.o FloatRamp.o FloatSum.o Fork.o \
- FloatThresh.o IIDUniform.cc IIDGaussian.o IntRamp.o \
+ FloatThresh.o IIDUniform.o IIDGaussian.o IntRamp.o \
  Printer.o Sin.o Xgraph.o Sqrt.o \
  AdaptFilter.o FIR.o IIR.o FloatImpulse.o FloatRect.o BiQuad.o \
  UpSample.o DownSample.o
