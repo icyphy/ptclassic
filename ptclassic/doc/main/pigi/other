@@ -61,6 +61,11 @@ is a parameter defined in the galaxy or universe.
 The basic arithmetic operators are addition (+), subtraction (-),
 multiplication (*), division (/), and exponentiation (^).
 These operators work on integers and floats.
+Currently all intermediate expressions are converted to the type
+of the parameter being computed.  Hence, it is necessary to be very
+careful when, for example, using floating point values to compute
+an integer parameter.  All intermediate expressions will be converted
+to integers.
 .pp
 When defining complex values, the basic syntax is
 .(c
