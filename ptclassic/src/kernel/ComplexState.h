@@ -55,10 +55,7 @@ public:
 	State* clone () const;//  {return new ComplexState;}
 
 private:
-	// Evaluate expression  in string
-	ParseToken evalExpression(Tokenizer& lexer);
-
-	// the real data
+	// the actual data
 	Complex val;
 };
 
