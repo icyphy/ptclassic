@@ -51,6 +51,9 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
+	targetNestedSymbol.setCounter(&symbolCounter);
+	sharedSymbol.setSeparator(separator);
+	sharedSymbol.setCounter(&symbolCounter);
 	addState(destDirectory.setState("destDirectory",this,
 		"PTOLEMY_SYSTEMS","Directory to write to"));
 	addState(loopingLevel.setState("loopingLevel",this,"0",
@@ -96,11 +99,10 @@ void CGTarget::setup() {
 	}
 	if (!galaxy()) return;
 
-	// reset the label counter
-	BaseSymbolList::reset() ;
-
-	// reset nestedSymbols
+	// Reset the symbol lists.
+	symbolCounter = 0;
 	targetNestedSymbol.initialize();
+	sharedSymbol.initialize();
 
 	if (!noSchedule) {
 		if (!modifyGalaxy()) return;
@@ -350,4 +352,9 @@ int CGTarget::systemCall(const char*command,const char*error,const char*host){
           error != NULL)
 		Error::abortRun(error);
 	return i;
+}
+
+const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
+{
+    return sharedSymbol.lookup(scope, name);
 }

@@ -122,6 +122,11 @@ virtual StringList headerComment(const char* begin=NULL,const char* end="",const
     // separator for symbols, <name><separator><unique number>
     char separator;
 
+    // Counter used to make symbols unique.
+    int symbolCounter;
+
+    const char* lookupSharedSymbol(const char* scope, const char* name);
+
 protected:
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -136,6 +141,9 @@ protected:
  /*   virtual int wormCodeGenerate() {generateCode(); return haltRequested; }
    */
     SymbolStack targetNestedSymbol;
+
+    // Symbols which are shared Target-wide.
+    ScopedSymbolList sharedSymbol;
 
     // myCode contains the code generated for the target
     CodeStream myCode;
