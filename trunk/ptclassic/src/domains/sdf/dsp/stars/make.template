@@ -43,6 +43,7 @@ PL_SRCS= \
  SDFFIRFix.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
+ SDFKalman_M.pl \
  SDFLMS.pl \
  SDFLMSCx.pl \
  SDFLMSPlot.pl \
@@ -51,10 +52,12 @@ PL_SRCS= \
  SDFLattice.pl \
  SDFLevDur.pl \
  SDFMuLaw.pl \
+ SDFMUSIC_M.pl \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCosine.pl \
  SDFSinc.pl \
+ SDFSVD_M.pl \
  SDFUnwrap.pl \
  SDFWindow.pl
 
