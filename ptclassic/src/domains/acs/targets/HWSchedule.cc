@@ -1558,7 +1558,12 @@ int Constants::query_bitsize(int index)
     }
   
   // log2(x)=log(x)/log(2)
+
+#ifdef PTHPPA_CFRONT
+  long abs_value=(long) abs((double)value);
+#else
   long abs_value=(long) abs(value);
+#endif
   int bit_count=0;
   if (abs_value==0)
     bit_count=1;
