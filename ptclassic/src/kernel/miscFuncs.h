@@ -40,7 +40,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+
+#if defined(sun) && defined(__svr4__)
+/* Solaris2.3 defines type boolean as an enum.
+ * See also octtools/include/port/port.h
+ */
+#define boolean sun_boolean
+#include <sys/types.h>
+#undef boolean
 #include <std.h>
+#else
+/* std.h eventually includes types.h, which causes problems with SDF
+ * stars under Solaris2.3
+ */
+#include <std.h>
+#endif
+
 #include "logNew.h"
 #include <string.h>
 
