@@ -45,7 +45,8 @@ TCL_SRCS =
 ITCL_SRCS = \
 	$(GRAPHICAL_TESTS) \
 	alltests.itcl \
-	all.itcl
+	all.itcl \
+	defs.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -59,9 +60,13 @@ MISC_FILES = \
 SIMPLE_TESTS = \
 	dummy.tcl
 
+# Test in the order in which they are to be executed
 GRAPHICAL_TESTS = \
 	testIncrCanvas.itcl \
 	testSlate.itcl \
+	testShape.itcl \
+	testRectangle.itcl \
+	testLine.itcl \
 	testTute.itcl
 
 # make checkjunk should not complain about the OLD directory
