@@ -102,6 +102,13 @@ class ::tycho::RevControl {
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {} {return 0}
 
+    # Revision control dependent, returns the user name who checked it out.
+    protected method isCheckedOutBy {} {return {}}
+
+    # Check if the file is writable, used to check whether check-in button
+    # should be enabled.
+    protected method isWritable {} {return [file writable [$object filename]]}
+
     # Access the "revcontrol" preferences
     protected method preference {mode args}
 
@@ -156,7 +163,7 @@ configbody ::tycho::RevControl::object {
     if { [whichRevClass $object] == "" } {
 	initializeRevControl
     }
-    if [isCheckedOut] {
+    if {[isCheckedOut] && [isWritable]} {
 	enableButton checkin
     } {
 	enableButton checkout
