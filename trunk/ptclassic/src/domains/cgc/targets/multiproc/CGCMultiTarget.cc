@@ -79,10 +79,15 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 
 	// make some states invisible
 	childType.setAttributes(A_NONSETTABLE);
+	machineInfo = 0;
+	currentPort = 0;
 }
 
 CGCMultiTarget :: ~CGCMultiTarget() {
-	LOG_DEL; delete [] machineInfo;
+	if (inherited() == 0) {
+		LOG_DEL; delete [] machineInfo;
+		LOG_DEL; delete currentPort;
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -138,8 +143,8 @@ void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 
 	// Set the port_number and machine address.
 	// port_number
-	cs->hostPort.setInitValue(currentPort);
-	cr->hostPort.setInitValue(currentPort++);
+	cs->hostPort.setInitValue(*currentPort);
+	cr->hostPort.setInitValue((*currentPort)++);
 	// machine address
 	int dix = machineId(cr->myTarget());
 	if (dix < 0) {
@@ -163,7 +168,16 @@ int CGCMultiTarget :: machineId(Target* t) {
 			///////////////////
 
 void CGCMultiTarget :: setup() {
-	currentPort = int(portNumber);
+	if (inherited()) {
+		CGCMultiTarget* orgT = (CGCMultiTarget*) child(0)->parent();
+		machineInfo = orgT->getMachineInfo();
+		currentPort = orgT->getPortNumber();
+		CGMultiTarget :: setup();
+		return;
+	}
+
+	LOG_NEW; currentPort = new int;
+	*currentPort = int(portNumber);
 
 	// all runs will append to the same file.
 	// FIXME: should not be done this way.
@@ -244,8 +258,11 @@ void CGCMultiTarget :: wrapup() {
 void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 	StringList code = s;
 	StringList fileName;
-	Target* t = child(i);
-	fileName << t->name() << ".c";
+	if (nChildrenAlloc > 1) {
+		fileName << child(i)->name() << ".c";
+	} else {
+		fileName << galaxy()->name() << ".c";
+	}
 	char* codeFileName = writeFileName((const char*) fileName);
 	display(code,codeFileName);
 }

@@ -79,6 +79,10 @@ public:
 	void addProcessorCode(int, const char* s);
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
+	// get MachineInfo
+	MachineInfo* getMachineInfo() { return machineInfo; }
+	int* getPortNumber() { return currentPort; }
+
 protected:
 	void setup();
 
@@ -109,7 +113,7 @@ private:
 	// Starting port_number. Port_number will be increased by one
 	// for each pair of send/receive stars
 	IntState portNumber;
-	int currentPort;
+	int* currentPort;
 
 	// information on the machines
 	MachineInfo* machineInfo;
