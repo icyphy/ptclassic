@@ -76,18 +76,20 @@ internal state to store the second-to-last valid integer
 		secondToLast = int(initialLastInput);
 	}
 	go {
-		// if the current input is valid, then compare it
-		// with the last and second-to-last valid inputs
-		// and then update the last and second-to-last inputs;
+		// If the current input is valid, then compare it
+		// with the last and second-to-last valid inputs;
 		// otherwise, return FALSE
 		int retval = FALSE;
+		int inputValue = int(initialLastInput);
 		if ( int(valid%0) ) {
-		  int inputValue = int(input%0);
+		  inputValue = int(input%0);
 		  retval = ( inputValue == int(last) &&
 		             int(last) != int(secondToLast) );
-		  secondToLast = int(last);
-		  last = inputValue;
 		}
 		output%0 << retval;
+
+		// Update the last and second-to-last input storage
+		secondToLast = int(last);
+		last = inputValue;
 	}
 }
