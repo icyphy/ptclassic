@@ -55,6 +55,19 @@ proc ::tycho::autoName {stem} {
 }
 
 ########################################################################
+#### evalIfNewer
+# If targetFile does not exist, or if sourceFile has a modification time 
+# later than the file targetFile, then evaluate the rest of the args.
+# This is similar to what the make command does.
+#
+proc ::tycho::evalIfNewer {sourceFile targetFile args} {
+    if {![file exists $targetFile] || \
+	    [file mtime $sourceFile] >= [file mtime $targetFile]} {
+	return [eval $args]
+    }
+}
+
+########################################################################
 #### expandPath
 # Expand a filename, returning an absolute filename with the complete path.
 # The argument might begin with an environment variable, a
