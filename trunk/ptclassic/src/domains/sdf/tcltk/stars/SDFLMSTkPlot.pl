@@ -116,8 +116,15 @@ limitation of liability, and disclaimer of warranty provisions.
 			"Step size is out of range of control");
         	    return;
 	    }
-	    if (setupRun == 0) {
+	    if (setupRun == 0 || !bg.windowExists()) {
 		setupRun = 1;
+
+	        if(bg.setup(this,(char*)identifier,1,taps.size(),
+		    double(fullScale), - double(fullScale), (char*)geometry,
+		    double(width), double(height)) == 0) {
+			Error::abortRun(*this, "Cannot create bar chart");
+			return;
+		}
 
 		// Register the callback functions with Tcl
 		command = sliderName;
@@ -127,13 +134,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		Tcl_CreateCommand(ptkInterp, (char*)command, reset,
 			(ClientData)this, NULL);
 
-		if(bg.setup(this,(char*)identifier,1,taps.size(),
-		    double(fullScale), - double(fullScale), (char*)geometry,
-		    double(width), double(height)) == 0) {
-			Error::abortRun(*this, "Cannot create bar chart");
-			return;
-	        }
-    
 	        // Put controls entries into the window
 	        // First, a button to reset the taps
 	        command = "ptkMakeButton ";
