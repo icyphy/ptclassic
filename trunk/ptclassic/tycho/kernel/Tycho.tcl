@@ -152,19 +152,38 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
     
     if {$tk_version >= 4.1 } {
-	# Really, we should be checking the environment variables here, rather
-	# than just overriding them.
 	if [file isdirectory [file join $PTOLEMY tcltk itcl lib itcl tcl]] {
-	    set env(TCL_LIBRARY) [file join $PTOLEMY tcltk itcl lib itcl tcl]
-	    set env(TK_LIBRARY) [file join $PTOLEMY tcltk itcl lib itcl tk]
+	    # Check the environment variables here, rather
+	    # than just overriding them.
+	    if ![info exists env(TCL_LIBRARY)] {
+		set env(TCL_LIBRARY) [file join $PTOLEMY \
+			tcltk itcl lib itcl tcl]
+	    }
+	    if ![info exists env(TK_LIBRARY)] {
+		set env(TK_LIBRARY) [file join $PTOLEMY \
+			tcltk itcl lib itcl tk]
+	    }
 	    set tk_library $env(TK_LIBRARY)
 	    uplevel #0 {
-		source [file join $PTOLEMY tcltk itcl lib itcl tcl init.tcl]
-		source [file join $PTOLEMY tcltk itcl lib itcl tk tk.tcl]
-		source [file join $PTOLEMY tcltk itcl lib itcl itcl itcl.tcl]
-		source [file join $PTOLEMY tcltk itcl lib itcl itk itk.tcl]
-		source [file join $PTOLEMY tcltk itcl lib itcl \
-			iwidgets iwidgets.tcl]
+		if [catch {
+		    source [file join $PTOLEMY \
+			    tcltk itcl lib itcl tcl init.tcl]
+		    source [file join $PTOLEMY \
+			    tcltk itcl lib itcl tk tk.tcl]
+		    source [file join $PTOLEMY \
+			    tcltk itcl lib itcl itcl itcl.tcl]
+		    source [file join $PTOLEMY \
+			    tcltk itcl lib itcl itk itk.tcl]
+		    source [file join $PTOLEMY \
+			    tcltk itcl lib itcl iwidgets iwidgets.tcl]
+		} errMsg ] {
+		    puts "Error sourcing Ptolemy tcltk files:\n\
+			    $errMsg\nThis sort of thing could happen if\
+			    you are using a itkwish that is a later\n\
+			    release than Ptolemy.\nOr it could mean trouble\
+			    with your Ptolemy tcltk installation.\n\
+			    Continuing. . ."
+		}
 	    }
 	}
     } else {
