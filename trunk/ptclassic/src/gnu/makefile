@@ -80,12 +80,6 @@ REL_GNU_BINDIR=../gnu/$(PTARCH)/bin
 # Location of Ptolemy bin dir.  We make links from here to the GNU stuff
 BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
-# Location of FSF GNU sources, objs
-FSF_SRC=$(PTOLEMY)/src/gnu/old
-FSF_OBJ=$(GNU_OBJ).fsf
-FSF_PREFIX=$(GNU_PREFIX).fsf
-FSF_EXEC_PREFIX=$(GNU_EXEC_PREFIX).fsf
-
 ############################################################
 # Build the GNU tools for non-HP machines
 all: configure bin install
@@ -150,11 +144,29 @@ bin_libg++:
 install: install_make install_egcs install_gcc_links
 
 ####################
-# FSF gcc-2.8.0 - Ptolemy 0.7.1 does not use this
-all_fsf: fsfconfigure bin_fsf install_fsf
+# FSF gcc-2.8.1 - Ptolemy 0.7.1 does not use gcc-2.8.1 because
+# of a bug that fails to compiler kernel/Block.cc under Solaris 2.5.1
+# with -O -fPIC
+
+# To build under FSF gcc-2.8.1, you will need the following directoryies
+# ptolemy/src/gnu/src/make
+#	A link to make-3.76.1
+# ptolemy/src/gnu/old/gcc
+#	A link to gcc-2.8.1
+# ptolemy/src/gnu/old/libg++
+#	A link to libg++-2.8.0
+
+# Location of FSF GNU sources.
+FSF_SRC=$(PTOLEMY)/src/gnu/old
+FSF_OBJ=$(GNU_OBJ).fsf
+FSF_PREFIX=$(GNU_PREFIX).fsf
+FSF_EXEC_PREFIX=$(GNU_EXEC_PREFIX).fsf
+
+# This rule configures, builds and installs make, gcc and libg++
+all_fsf: configure_fsf bin_fsf install_fsf
 
 # gcc-2.x
-fsfconfigure: $(FSF_OBJ) configure_make
+configure_fsf: $(FSF_OBJ) configure_make
 	@echo "Now configure gcc"
 	-mkdir $(FSF_OBJ)/gcc
 	(cd $(FSF_OBJ)/gcc; \
