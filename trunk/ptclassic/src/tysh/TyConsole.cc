@@ -158,7 +158,7 @@ void TyConsole::tyExit(int code) {
   exit(1);
 }
 
-int TyConsole::appInit(Tcl_Interp *ip, Tk_Window win) {
+int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
   if (Tcl_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
   if (Tk_Init(ip) == TCL_ERROR)
