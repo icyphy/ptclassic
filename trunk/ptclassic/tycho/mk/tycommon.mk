@@ -184,6 +184,12 @@ $(LIBDIR)/$(LIB):	$(LIB) $(EXP)
 	rm -f $@
 	ln $(LIB) $(LIBDIR)
 
+# Install debug versions, currently we just do a hard link
+$(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
+	rm -f $@
+	(cd $(LIBDIR); ln $(LIB) $(LIB_DEBUG))
+
+
 # Rule for compiling C++ files
 .cc.o:
 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) $(CCFLAGS) \
@@ -246,10 +252,17 @@ tests:: makefile
 	fi
 
 
-FORCEIT:
-alltests.itcl: FORCEIT
+# alltests.itcl is used to source all the tests
+alltests.itcl: makefile
 	rm -f $@
-	echo "set reallyExit 0" > $@
+	echo '# CAUTION: automatically generated file by a rule in tycommon.mk' > $@
+	echo '# This file will source the .itcl files list in the' >> $@
+	echo '# makefile SIMPLE_TESTS and GRAPHICAL_TESTS variables' >> $@ 
+	echo '# This file is different from all.itcl in that all.itcl' >> $@ 
+	echo '# will source all the .itcl files in the current directory' >> $@
+	echo '#' >> $@
+	echo '# Set the following to avoid endless calls to exit' >> $@
+	echo "set reallyExit 0" >> $@
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
@@ -261,6 +274,23 @@ alltests.itcl: FORCEIT
 	done
 	echo "set reallyExit 1" >> $@
 	echo "doneTests" >> $@
+
+# all.itcl is used to source all the *.itcl files
+all.itcl: makefile
+	rm -f $@
+	echo '# CAUTION: automatically generated file by a rule in tycommon.mk' > $@
+	echo '# This file will source all the .itcl files in the current' >> $@
+	echo '# directory.  This file is different from alltest.itcl' >> $@ 
+	echo '# in that alltest.itcl will source only the itcl files' >> $@
+	echo '# that are listed in the makefile' >> $@
+	echo '#' >> $@
+	echo '# Set the following to avoid endless calls to exit' >> $@
+	echo 'set reallyExit 0' >> $@
+	echo 'foreach file [glob *.itcl] {' >> $@
+	echo '    if {$file != "all.itcl"} {' >> $@
+	echo '         source $file' >> $@
+	echo '    }' >> $@
+	echo '}' >> $@
 
 # Generate html files from itcl files, requires itclsh and tycho
 # We use a GNU make extension here
