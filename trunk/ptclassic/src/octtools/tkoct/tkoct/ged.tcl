@@ -25,8 +25,8 @@ ged_init_env
 #source ./fileselect.tcl
 
 
-source $env(PTOLEMY)/src/ged/tkAux/init.tcl
-source $env(PTOLEMY)/src/ged/ged/fileselect.tcl
+source $env(PTOLEMY)/src/tkvem/tkAux/init.tcl
+source $env(PTOLEMY)/src/tkvem/tkvem/fileselect.tcl
 
 proc ged_bind_class {} {
     option add *XPGedWidget.background grey startupFile
