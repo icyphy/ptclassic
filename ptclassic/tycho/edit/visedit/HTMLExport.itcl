@@ -56,7 +56,7 @@
 #     .h HTML2DAG [file join $TYCHO doc index.html] $dagfile
 #     ::tycho::openContext $dagfile
 #     .h HTML2PS index.html doc.ps
-#     delete .h
+#     delete object .h
 # </pre></tcl>
 #
 class ::tycho::HTMLExport {
@@ -95,7 +95,7 @@ class ::tycho::HTMLExport {
     ####                   private variables                       ####
 
     # An array of files and links, the indice is the file being linked to.
-    protected variable DAGlist {}
+    protected variable DAGlist
 
     # A list of the files that we have seen so far.
     private variable filesSeen {}
@@ -134,8 +134,8 @@ body ::tycho::HTMLExport::HTML2DAG {indexfile DAGfile} {
 
     # Don't cd until after the output file is open
     cd [file dirname $indexfile]
-    # Start at depth 0, generate a DAG
-    puts [HTMLLinks $indexfile 0 $DAGfd]
+    # Generate a DAG, start at depth 0, 
+    puts [HTMLLinks $indexfile 1 0]
 #    puts $DAGfd "\{add \{[::tycho::expandPath $indexfile]\} \
 #	    \{label \{[::tycho::expandPath $indexfile]\}\} \{\}\}"
 
