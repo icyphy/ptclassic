@@ -1,0 +1,70 @@
+# Makefile for Ptolemy CG stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/cg/stars
+# KERNDIR is the directory containing the Ptolemy kernel source.
+KERNDIR = $(ROOT)/src/kernel
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+GPPFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .o .cc .h .pl
+.cc.o:
+	$(GNU) $(GPPFLAGS) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
+
+# Make sure we always run the preprocessor in the source directory
+.pl.cc:
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+
+.pl.h:
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+
+# source files for all stars, using preprocessor
+SRCS= \
+ CGSource.pl \
+ CGThrough.pl \
+ CGSink.pl
+
+# The .cc files
+CCSRCS=$(SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.pl=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.pl=.h)
+
+all:		$(CCSRCS) makefile $(OBJS)
+
+# nothing to install -- use it where it lies
+install:	all
+		@echo Installation complete.
+
+sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template
+
+clean:
+		rm -f *.o core *~ *#
+depend:
+		makedepend -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
+			-I$(GNUINCLUDE) $(CCSRCS)
+
+makefile:	make.template
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
