@@ -46,7 +46,8 @@ SIMPLE_TESTS = \
 	testSDFStars.tcl \
 	testSDFArith.tcl \
 	testSDFConv.tcl \
-	testSDFDSP.tcl
+	testSDFDSP.tcl \
+	testSDFMatrix.tcl
 
 GRAPHICAL_TESTS = \
 	dummy
