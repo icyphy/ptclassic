@@ -136,7 +136,7 @@ all:		makefile stars_all
 install:	stars_install
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 
 # Don't add anything after the next line; makedepend will zap it.
