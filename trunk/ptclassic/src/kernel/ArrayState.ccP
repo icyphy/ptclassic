@@ -60,10 +60,7 @@ const char* <T>ArrayState :: type() const { return "<T>ARRAY";}
 
 StringList <T>ArrayState :: currentValue() const { 
 	StringList s; 
-	s =  "\n";
 	for(int i = 0; i<size(); i++) {
-		s += i;
-		s += " ";
 		s += val[i];
 		s += "\n";
 	} 
