@@ -48,7 +48,7 @@
 
 # Stub files that pull in the stars.
 PTINY_SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfdspstars.o \
-	$(LIBDIR)/sdfmatrixstars.o
+	$(LIBDIR)/sdfmatrixstars.o $(MATLABSTARS_DOT_O)
 SDFSTARS = $(PTINY_SDFSTARS) $(LIBDIR)/sdfimagestars.o
 CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
@@ -76,6 +76,7 @@ PTINY_LIBFILES=\
 $(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
+$(MATLABSTAR_LIBFILE) \
 $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
@@ -88,9 +89,10 @@ $(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) $(LIBDIR)/libImage.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
+$(MATLABSTAR_LIBFILE) \
 $(LIBDIR)/libbdfstars.$(LIBSUFFIX) $(LIBDIR)/libbdf.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
-$(LIBDIR)/libsdf.$(LIBSUFFIX)
+$(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
 STAR_LIBFILES=\
 $(ATM_LIBFILES) \
@@ -114,14 +116,11 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
-$(PN_LIBFILES)
+$(PN_LIBFILES) $(MATLABSTARS_LIBFILE)
 
 ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
-
-# CG-DDF no longer supported
-#$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
 
 # Matlab settings
 # Matlab is installed if the matlabRootDir script returns an non-empty string
@@ -129,20 +128,29 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 #    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #    and set MATLABEXT_LIB to the external library directory
-MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+MATLABDIR := 	$(shell $(ROOT)/bin/matlabRootDir)
 ifeq ($MATLABDIR,)
-MATLABDIR= $(ROOT)/src/compat/matlab
+MATLABDIR= 		$(ROOT)/src/compat/matlab
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlab.$(LIBSUFFIX) 
+MATLABSTAR_LIB=		-lsdfnomatlabstars
+MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
 else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
-MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlab.$(LIBSUFFIX) 
+MATLABSTAR_LIB=		-lsdfmatlabstars
+MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
 endif
+
+# CG-DDF no longer supported
+#$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
 
 # Library switches reqd by stars for a ptiny ptolemy. Note that we don't
 # include the sdf image stars.  Need -lImage for the de ATM stars
 PTINY_STAR_LIBS=\
 -ldestars -lde \
 -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABEXT_LIB)
+$(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 
 PTRIM_STAR_LIBS=\
 -lcgcstars -lcgc -lcgctcltk \
@@ -151,7 +159,7 @@ PTRIM_STAR_LIBS=\
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABEXT_LIB)
+$(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
@@ -166,7 +174,7 @@ $(ATM_LIBS) \
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABEXT_LIB) \
+$(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
