@@ -66,6 +66,8 @@ public:
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget) {
 		return *new CG56Wormhole(innerGal,innerTarget);
 	}
+	// require CG56Target
+	const char* requiredTarget() { return "CG56Target";}
 };
 
 // declare a prototype
