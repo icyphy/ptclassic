@@ -44,7 +44,9 @@ VPATH  = 	$(ROOT)/src
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-DIRS = kernel thread ptlang domains utils ptcl pitcl pigilib ptklib tysh pigiRpc pxgraph filters
+# Note that utils must appear before domains due to the hooks
+# for the Matlab interface that exist in utils/libexttools
+DIRS = kernel thread utils ptlang domains ptcl pitcl pigilib ptklib tysh pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib pxgraph ptcl pitcl ptklib pigiRpc tysh
