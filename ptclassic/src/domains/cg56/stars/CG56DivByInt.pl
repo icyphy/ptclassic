@@ -60,7 +60,7 @@ shift right (asr) because in that case, -1 divided by 2 would still be -1.
 		// Find the absolute value and sign of divisor
 		int thedivisor = int(divisor);
 		int negdivisor = ( thedivisor < 0 );
-		if ( negdivisor ) thedivisor = -divisor;
+		if ( negdivisor ) thedivisor = -thedivisor;
 
 		// Integers are 24 bits (1 sign bit + 23 bits)
 		int largest56int = 16777215;		// 2^24 - 1
