@@ -80,14 +80,16 @@ ackOut.\fP
 	int wait : 1;	// waiting for acknowledge
     }
 
-    constructor {
+    constructor
+    {
+	input.triggers(request);
+	input.before(ackIn);
 	ackIn.triggers(output);
 	ackIn.triggers(ackOut);
 	grant.triggers();
-	input.triggers();
-	grant.before(input);
-	input.before(ackIn);
+	grant.before(ackIn);
     }
+
     start
     {
 	idle = TRUE;
@@ -110,6 +112,17 @@ ackOut.\fP
 	    }
 	}
 
+	if (ackIn.dataNew && wait)	// acknowledge received
+	{
+	    wait = FALSE;
+	    ackOut.put(arrivalTime) = ackIn.get();
+	    if (!input.dataNew)		// generate release
+	    {
+		rel = TRUE;
+		request.put(arrivalTime) << FALSE;
+	    }
+	}
+
 	if (input.dataNew)	// new data available
 	{
 	    if (idle)		// generate request
@@ -123,22 +136,6 @@ ackOut.\fP
 		wait = TRUE;
 		output.put(arrivalTime) = input.get();
 		ackIn.dataNew = FALSE;	// discard any old particle
-	    }
-	}
-
-	if (ackIn.dataNew && wait)	// acknowledge received
-	{
-	    wait = FALSE;
-	    ackOut.put(arrivalTime) = ackIn.get();
-	    if (!input.dataNew)		// generate release
-	    {
-		rel = TRUE;
-		request.put(arrivalTime) << FALSE;
-	    }
-	    else if (open)		// send data
-	    {
-		wait = TRUE;
-		output.put(arrivalTime) = input.get();
 	    }
 	}
     }
