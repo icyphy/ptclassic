@@ -72,6 +72,9 @@ DEEtherSend.pl \
 DEFIFOQueue.pl \
 DEFillNullEvent.pl \
 DEFilter.pl \
+DEFlipFlopD.pl \
+DEFlipFlopJK.pl \
+DEFlipFlopT.pl \
 DEFork.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
