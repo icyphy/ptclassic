@@ -51,6 +51,7 @@ SIMPLE_PTCL_TESTS = \
 SIMPLE_TESTS = \
 	testSDFStars.tcl \
 	testSDFArith.tcl \
+	testSDFControl.tcl \
 	testSDFConv.tcl \
 	testSDFDSP.tcl \
 	testSDFMatrix.tcl \
