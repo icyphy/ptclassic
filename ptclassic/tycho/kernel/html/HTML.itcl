@@ -151,11 +151,6 @@ body ::tycho::HTML::constructor {args} {
 	    -underline 1 \
 	    -command "$this openSource"
 
-    $itk_component(fileMenu) entryconfigure 6 \
-	    -label "Reload" \
-	    -underline 1 \
-	    -command "$this reload"
-
     if {$itk_option(-file) != "NoName"} {
 	# In order to get reasonably interactive response, this is delayed.
 	# Not doing this seems to send the program into an infinite wait.
