@@ -63,7 +63,7 @@ subsources:
 	    fi ; \
 	done
 
-.PHONY:	TAGS
+.PHONY:	TAGS starHTML.idx
 TAGS:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
