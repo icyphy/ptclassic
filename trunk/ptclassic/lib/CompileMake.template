@@ -45,7 +45,7 @@ SRCS=code.cc
 # Rule for compiling with C++ programs
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
 
 all:		makefile code
 
@@ -71,7 +71,7 @@ sources:
 		@echo no sources to be made
 
 depend:	
-		$(DEPEND) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) $(SRCS) | \
+		$(DEPEND) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDFKERSRC) -I$(SDFLOOP) $(SRCS) | \
 		cat make.template - > makefile.n; \
 		mv -f makefile.n makefile
 
