@@ -111,9 +111,11 @@ alltests.itcl: FORCEIT
 	echo "set reallyExit 0" > $@
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
+	echo "set savedir \"[pwd]\"" >> $@
 	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}}" >> $@
 	for x in $(GRAPHICAL_TESTS); do \
 		echo "puts stderr $$x" >> $@; \
+		echo "cd \"\$$savedir\"" >> $@; \
 		echo "source $$x" >> $@; \
 	done
 	echo "set reallyExit 1" >> $@
