@@ -1,0 +1,55 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Troubleshooting Tycho</title>
+</head>
+<body>
+<h1><a name="Troubleshooting Tycho">Troubleshooting Tycho</a></h1>
+<p>
+
+Below is a list of common problems that people have with Tycho.  You
+may also wish to check out <A HREF="bugs0.1.html">Tycho 0.1
+Limitations and Bugs</A> and <A HREF="releasenotes0.1.html">Tycho 0.1
+Release Notes</A>.
+
+<H2><A NAME="Problems Starting Tycho">Problems Starting Tycho</A>
+<H3><A NAME="Error Message about error while autoloading tk_setPalette">
+Error Message about "error while autoloading tk_setPalette"
+</A>
+
+If you see a message like:
+<PRE>
+error while autoloading "tk_setPalette": bad option "join": should be
+atime, dirname, executable, exists, extension, isdirectory,
+isfile, lstat, mtime, owned, readable, readlink, root, size,
+stat, tail, type, or writable
+	
+    invoked from within
+"tk_setPalette activeBackground #e6ceb1 activeForeground black \
+background #ffe4c4 disabledForeground #b0b0b0 foreground black \
+highlightBackground ..."
+</PRE>
+
+the you are probably running itcl2.0, but the <CODE>tclIndex</CODE> 
+files were prepared with itcl2.1.  The workaround is to	regenerate the
+<CODE>tclIndex</CODE> files by doing:
+<PRE>
+cd $TYCHO
+make sources
+</PRE>
+
+
+</H3>
+
+</H2>
+
+<p> 
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>
