@@ -33,7 +33,11 @@
 # 						COPYRIGHTENDKEY
 
 # We don't use the toplevel window called ".", so withdraw it.
-wm withdraw .
+
+if [info exists tk_version] {
+    wm withdraw .
+    tk appname tycho
+}
 
 # Do we still need this? -cliffc
 #if ![regexp Iwidgets [package name]] {
@@ -190,7 +194,7 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 
 if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
     
-    if {$tk_version >= 4.1 } {
+    if { [info exists tk_version] && $tk_version >= 4.1 } {
 	if [file isdirectory [file join $PTOLEMY tcltk itcl lib itcl tcl]] {
 	    # Check the environment variables here, rather
 	    # than just overriding them.
@@ -270,7 +274,6 @@ namespace ::tycho
 # namespace of the class and the global namespace are visible.
 # import add ::tycho
 #
-::tycho::_announce "About to source FontManager.itcl"
 uplevel #0 {
     # Source the preference manager and the default preferences.
     # Might as well source needed files first
@@ -284,16 +287,20 @@ uplevel #0 {
     # More files that we are going to need right away, so there
     # is no point in deferring them to auto-loading.
     source [file join $tychokernel Uninstantiable.itcl]
-    source [file join $tychokernel FontManager.itcl]
-    source [file join $tychokernel ColorManager.itcl]
-    source [file join $tychokernel CircularList.itcl]
-    source [file join $tychokernel TopLevel.itcl]
-    source [file join $tychokernel TWidget.itcl]
-    source [file join $tychokernel View.itcl]
-    source [file join $tychokernel Dialog.itcl]
-    source [file join $tychokernel Message.itcl]
-    source [file join $tychokernel ErrorMessage.itcl]
-    source [file join $tychokernel File.itcl]
+}
+if [info exists tk_version] {
+    uplevel #0 {
+	::tycho::_announce "About to source FontManager.itcl"
+	source [file join $tychokernel FontManager.itcl]
+	source [file join $tychokernel ColorManager.itcl]
+	source [file join $tychokernel CircularList.itcl]
+	source [file join $tychokernel TopLevel.itcl]
+	source [file join $tychokernel TWidget.itcl]
+	source [file join $tychokernel View.itcl]
+	source [file join $tychokernel Dialog.itcl]
+	source [file join $tychokernel Message.itcl]
+	source [file join $tychokernel ErrorMessage.itcl]
+	source [file join $tychokernel File.itcl]
 
 	source [file join $tychokernel Edit.itcl]
 	source [file join $tychokernel HTML.itcl]
@@ -301,11 +308,12 @@ uplevel #0 {
 	source [file join $tychokernel WelcomeMessage.itcl]
 	source [file join $tychokernel MenuSupport.itcl]
 	source [file join $tychokernel PopupMenu.itcl]
-    ::tycho::_announce "Sourced File.itcl"
-
-    # Load the library file
-    source [file join $tychokernel Lib.tcl]
+	::tycho::_announce "Sourced File.itcl"
+	# Load the library file
+	source [file join $tychokernel Lib.tcl]
+    }
 }
+
 
 if {![info exists tychoWelcomeWindow]} {
     # If tychoWelcomeWindow is 0, then no 'Mr. Tycho' window is opened
@@ -364,15 +372,20 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 if {![info exists TychoVersionInfo]} {
-    set TychoVersionInfo "Version 0.2.1devel,\
-	    running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
-	    Tk$tk_version, \$TYCHO = $TYCHO"
+    if [info exists tk_version] {
+	set TychoVersionInfo "Version 0.2.1devel,\
+		running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
+		Tk$tk_version, \$TYCHO = $TYCHO"
+    } else {
+	set TychoVersionInfo "Version 0.2.1devel,\
+		running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
+		\$TYCHO = $TYCHO"
+    }
 }
-# To disable the welcome message, set the global variable
-# tychoWelcomeMessage to zero before sourcing this file.
-# This can be done in your .Tycho/tychorc.tcl file.
+# To disable the welcome message, use the Misc preference
+# under the help button.
 #
-if { $tychoWelcomeWindow \
+if { [info exists tk_version] && $tychoWelcomeWindow \
     && [::tycho::preference get misc welcomeWindow] \
     && ! [::tycho::preference get misc slowNetwork] } {
     ::tycho::_announce "About to create a welcome message"
@@ -384,12 +397,14 @@ if { $tychoWelcomeWindow \
     ::tycho::_announce "Done creating a welcome message"
 
 }
-# Determine whether we exit when there are no more windows.
-::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
+if [info exists tk_version] {
+    # Determine whether we exit when there are no more windows.
+    ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
 
-# We could try sourcing Displayer.itcl here, but 'tycho' and 'tycho foo'
-# behave slightly differently, so it is not worthit.
-::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
+    # We could try sourcing Displayer.itcl here, but 'tycho' and 'tycho foo'
+    # behave slightly differently, so it is not worthit.
+    ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
+}
 
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
 # then we don't adjust the insertOffTime.  A fix might be to have
@@ -408,7 +423,7 @@ if [info exists tyMacBug] {
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
-    if {$tychoConsoleWindow != 0} {
+    if {[info exists tk_version] && $tychoConsoleWindow != 0} {
 	::tycho::_announce "About to create a TclShell"
 	uplevel #0 {
 	    source [file join $tychokernel StatusBar.itcl]
@@ -427,10 +442,19 @@ if {$tychoOpenFiles == 0} {
 if {$tclscripttosource!={} } {
     uplevel #0 {source $tclscripttosource}
 }
+::tycho::_announce "About to unset"
 unset tclscripttosource sawDashE
-
-tk appname tycho
 
 unset tychoWelcomeWindow tychoConsoleWindow \
         tychoOpenFiles tychoExitWhenNoMoreWindows tychoShouldWeDoRegularExit
 
+# tycho -tty uses this to provide a command loop
+if ![info exists tk_version] {
+    while 1 {
+	puts -nonewline "ty% "
+	flush stdout
+	if [catch {puts [eval [gets stdin]]} msg] {
+	    puts stderr $msg
+	}
+    }
+}
