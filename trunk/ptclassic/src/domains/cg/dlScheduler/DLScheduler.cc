@@ -111,7 +111,7 @@ int DLScheduler :: scheduleIt()
   // NO overlapComm, then we do additional list scheduling at the end
   // based on the processor assignment determined by the dynamic level
   // scheduling algorithm.
-  if ((!wormFlag) && noOverlap) {
+  if (!wormFlag) {
 	mtarget->clearCommPattern();
 	myGraph->resetGraph();
 	parSched->initialize(myGraph);
