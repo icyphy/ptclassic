@@ -22,7 +22,7 @@ done with g++ (type "long long"), but it isn't portable.
 	defstate {
 		name { range }
 		type { fix }
-		default { 1.0 }
+		default { ONE }
 		desc { range of random number generator is [-range,+range] }
 	}
 	defstate {
