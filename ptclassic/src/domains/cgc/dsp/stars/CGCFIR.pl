@@ -134,65 +134,38 @@ For more information about polyphase filters, see F. J. Harris,
 	int inPos;
 	double out, tap;
    }
-   codeblock(outForInit) {
+   codeblock(body) {
 	/* phase keeps track of which phase of the filter coefficients is used.
 	   Starting phase depends on the decimationPhase state. */
 	phase = $val(decimation) - $val(decimationPhase) - 1;   
 	
 	/* Iterate once for each input consumed */
-	for (inC = 0; inC < $val(decimation); inC++) 
-   }
-   codeblock(whileInit) {
+	for (inC = $val(decimation); inC > 0; inC--) {
+
 		/* Produce however many outputs are required for each 
 		   input consumed */
-		while (phase < $val(interpolation)) 
-   }
-   codeblock(inForInit) {
+		while (phase < $val(interpolation)) {
 			out = 0.0;
+
 			/* Compute the inner product. */
-			for (i = 0; i < $val(phaseLength); i++) 
-   }
-   codeblock(inForBody) {
+			for (i = 0; i < $val(phaseLength); i++) {
 				tapsIndex = i * $val(interpolation) + phase;
 				if (tapsIndex >= $val(tapSize))
 			    		tap = 0.0;
 				else
 			 		tap = $ref2(taps,tapsIndex);
-				inPos = inC + i;
+				inPos = $val(decimation) - inC - i;
 				out += tap * $ref2(signalIn,inPos);
-   }
-  codeblock(whileBody) {
+			}
 			$ref2(signalOut,outCount) = out;
 			outCount++;;
 			phase += $val(decimation);
-   }
-   codeblock(outForBody) {
+		}
 		phase -= $val(interpolation);
+	}
    }
 	go {
 		gencode(bodyDecl);
-		// hackery since the code block does not allow curse brace.
-		filterBody();
-	}
-
-	method {
-		name { filterBody }
-		access { protected }
-		arglist { "()" }
-		type { void }
-		code {
-			gencode(outForInit);
-			gencode(CodeBlock("\t{\n"));
-			gencode(whileInit);
-			gencode(CodeBlock("\t\t{\n"));
-			gencode(inForInit);
-			gencode(CodeBlock("\t\t\t{\n"));
-			gencode(inForBody);
-			gencode(CodeBlock("\t\t\t}\n"));
-			gencode(whileBody);
-			gencode(CodeBlock("\t\t}\n"));
-			gencode(outForBody);
-			gencode(CodeBlock("\t}\n"));
-		}
+		gencode(body);
 	}
 }

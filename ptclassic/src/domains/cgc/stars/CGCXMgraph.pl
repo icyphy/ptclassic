@@ -105,15 +105,14 @@ for a complete explanation of the options.
 			w += "\",\"w\")))";
 			gencode(CodeBlock((const char*) w));
 			gencode(err);
-			StringList z = "    if(!$starSymbol(fp)[";
-			z += i;
-			z += "]) exit(1);\n";
-			gencode(CodeBlock((const char*)z));
 		}
 	}
 
 codeblock (err) {
+    {
         fprintf(stderr,"ERROR: cannot open output file for Xgraph star.\n");
+	exit(1);
+    }
 }
 		
 	go {

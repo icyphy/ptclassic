@@ -28,10 +28,10 @@ defstar {
 	   gencode(init); 
 	   for (int i = 1; i <= neg.numberPorts(); i++) {
 		index = i;
-		gencode(CodeBlock("\t\t$ref(output) -= $ref(neg#index);\n"));
+		gencode(CodeBlock("\t$ref(output) -= $ref(neg#index);\n"));
 	   }
 	}
 	codeblock (init) {
-		$ref(output) = $ref(pos);
+	$ref(output) = $ref(pos);
 	}
 }

@@ -47,10 +47,10 @@ the same line, separated by tabs.
 	    }
 	}
 codeblock (openfile) {
-    if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) 
+    if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) {
 	fprintf(stderr,"ERROR: cannot open output file for Printer star.\n");
-    /* second if temporarily necessary: can't use brackets */
-    if(!$starSymbol(fp)) exit(1);
+    	exit(1);
+    }
 }
 	go {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
