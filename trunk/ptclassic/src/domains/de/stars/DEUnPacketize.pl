@@ -29,6 +29,7 @@ data value from the current input packet is output.
 	}
 	protected {
 		int idx;
+		Packet pkt;
 		const FloatVecData* currentPacket;
 		float lastOutput;
 	}
@@ -44,7 +45,6 @@ data value from the current input packet is output.
 	go {
 		if (data.dataNew) {
 			// a new packet has arrived
-			Packet pkt;
 			data.get().getPacket(pkt);
 			idx = 0;
 			if (!pkt.typeCheck("FloatVecData")) {
