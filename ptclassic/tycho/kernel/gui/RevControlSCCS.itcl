@@ -36,6 +36,11 @@
 #   It should not be modal.
 
 
+# Default options for the "sccs create" command force there to be ID
+# keywords in the file, and also indicate that %Q% should be replaced with
+# the current year.
+option add *RevControlSCCS.createOptions {-fq19[exec date +%y] -fi} widgetDefault
+
 option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
 option add *RevControlSCCS.commentColor [ptkColor firebrick black] widgetDefault
 
@@ -188,7 +193,8 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 	exec mkdir $revdir
     }
     cdDir $dir
-    catch {exec sccs create $basefile} output
+    set opts [option get $itk_component(hull) createOptions RevControlSCCS]
+    catch {eval exec sccs create $opts $basefile} output
     if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
 	error "Failed to place the file under revision\
 		control: $output."
