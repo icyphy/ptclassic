@@ -170,7 +170,9 @@ char *fname;
     static char result[8][PATHLEN];
     static int count = 0;
     struct passwd *userRecord;
+#ifndef linux
     extern struct passwd *getpwuid(), *getpwnam();
+#endif
     register int i, j;
     char *dir;
 
