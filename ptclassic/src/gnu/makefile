@@ -142,7 +142,7 @@ install: $(BINDIR)
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 		LDFLAGS=-B$(GNU_OBJ)/gcc/ install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
-	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* dec* c++ make.old)
+	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
 
 ############################################################
 # Build the GNU tools for HP machines
