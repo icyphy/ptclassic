@@ -14,115 +14,129 @@
 # be a poor place to do error checking.
 
 # Find out the name that we are being called as
-# Check if $0 is set so we can source this from the csh prompt for testing.
-if [ $# = 0 ]; then
-    progname=`basename $0`
-else
-    progname=ptsetup.sh
-fi
 
-ptarch=`$PTOLEMY/bin/ptarch`
-if [ -z "$PTARCH" ]; then
-    PTARCH=$ptarch
+prg=${prg:-"`basename \"$0\"`"}
+
+# set OCTTOOLS
+OCTTOOLS="${OCTTOOLS:-$PTOLEMY}"
+export OCTTOOLS
+
+# check/guess PTARCH
+ptarch="`$PTOLEMY/bin/ptarch`"
+if [ -z "${PTARCH-}" ]; then
+    PTARCH="$ptarch"
     export PTARCH
 else 
     # check that the basic architecture is set correctly
-    case $PTARCH in
+    case "$PTARCH" in
 	$ptarch*);;
 	*)
-	    echo ${progname}: Warning: \$PTARCH == $PTARCH,
-	    echo "        "but \$PTOLEMY/bin/ptarch returns ${ptarch}.
+	    echo "$prg: Warning: \$PTARCH == '$PTARCH',"
+	    echo "      but \$PTOLEMY/bin/ptarch returns '$ptarch'."
 	    ;;
     esac
     # check that a makefile for this $PTARCH exists
     if [ ! -r "$PTOLEMY/mk/config-$PTARCH.mk" ]; then
-	echo "${progname}: Warning: \$PTARCH == $PTARCH,"
-	echo "        but there is no makefile for this architecture."
+	echo "$prg: Warning: \$PTARCH == '$PTARCH',"
+	echo "      but there is no makefile for this architecture."
     fi
 fi
 unset ptarch
 
-if [ -z "$USER" ]; then
-    USER=$LOGNAME
-    export USER
-fi
+USER="${USER:-${LOGNAME:-ptolemy}}"
+export USER
 
-# We attempt to set the PTOLEMY variable so we can use  
-# it if TYCHO is not set.
-if [ -z "$PTOLEMY" ]; then 
-    if [ "$TYCHO" -a -f "$TYCHO/../bin/ptarch" ]; then
-	PTOLEMY="$TYCHO/.."
-	export PTOLEMY
-    elif [ -d "$PTDEFAULT" ]; then
-	PTOLEMY="$PTDEFAULT"
-	export PTOLEMY
-    fi
-fi
-
-if [ -z "$TYCHO" ]; then
-    if [ "$PTOLEMY" -a -f "$PTOLEMY/tycho/bin/ptarch" ]; then
+# check/guess TYCHO
+if [ -z "${TYCHO-}" ]; then
+    if [ -f "$PTOLEMY/tycho/bin/ptarch" ]; then
 	TYCHO="$PTOLEMY/tycho"
 	export TYCHO
-    elif [ -d "$TYDEFAULT" ]; then
+    elif [ -d "${TYDEFAULT-}" ]; then
 	TYCHO="$TYDEFAULT"
 	export TYCHO
     fi
-    export TYCHO
 fi
 
 # Check for success.
-if [ ! -d "$TYCHO" ]; then
-    echo "\$TYCHO == $TYCHO, which was not found" 
-    echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
-    echo " See tycho/doc/running.html for further information"
+if [ ! -d "${TYCHO-}" ]; then
+    echo "$prg: \$TYCHO == ${TYCHO-}, which was not found" 
+    echo '      You must set $TYCHO or $PTOLEMY for tycho to work'
+    echo "      See tycho/doc/running.html for further information"
 fi
-
 
 # Used by cg56/targets/CGCXBase.pl
-if [ -z "$QCKMON" ]; then
-    case $PTARCH in
-	sol2) QCKMON=qckMon5
-	    export QCKMON;;
-	sun4) QCKMON=qckMon
-	    export QCKMON;;
+case "$PTARCH" in
+    sol2) QCKMON=${QCKMON:-qckMon5}
+	export QCKMON;;
+    sun4) QCKMON=${QCKMON:-qckMon}
+	export QCKMON;;
+esac
+
+S56DSP=${S56DSP:-/users/ptdesign/vendors/s56dsp}
+export S56DSP
+
+# SOME USEFUL FUNCTIONS:
+# Adds to the path variable named by $1 the components $2 if components $2 are
+# not in $1 already. $3 must be "append" or "prepend" to indicate what to do.
+addpath () {
+    eval value=\"\${$1:-}\"
+    oldifs="$IFS"; IFS=":"
+    case "$3" in
+	p*) tmp=""; for i in $2; do tmp="$i${tmp:+:}$tmp"; done;;
+	*)  tmp="$2";;
     esac
-fi
+    for i in $tmp; do
+	case "$value" in
+	    *:$i:*|*:$i|$i:*|$i);;
+	    "") value="$i";;
+	    *)  case "$3" in 
+		    p*)  value="$i:$value";;
+		    *)   value="$value:$i";;
+		esac;;
+	esac
+    done
+    IFS="$oldifs"
+    eval $1=\"$value\"
+    unset value oldifs i tmp
+}
 
-if [ -z "$S56DSP" ]; then
-    S56DSP=/users/ptdesign/vendors/s56dsp
-    export S56DSP
-fi
+# appends to a path variable $1 the components $2 if not in path already.
+append () { addpath "$1" "$2" append; }
 
-TMPLD_LIBRARY_PATH=$PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/${PTARCH}/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+# prepends to a path variable $1 the components $2 if not in path already.
+prepend () { addpath "$1" "$2" prepend; }
+
+
+# set search path for DLLs
+TMPLD_LIB_PATH="$PTOLEMY/lib.$PTARCH:$PTOLEMY/octtools/lib.$PTARCH"
+
+if [ -d "$PTOLEMY/gnu/$PTARCH/lib" ]; then
+    TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$PTOLEMY/gnu/$PTARCH/lib"
+fi 
+
+if [ -d "$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl" ]; then
+    TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl"
+fi 
 
 # Matlab settings
 matlabdir=`$PTOLEMY/bin/matlabRootDir`
 if [ -x "$matlabdir/bin/util/arch.sh" ]; then
-    matlabarch=`echo 'echo $Arch' | cat $matlabdir/bin/util/arch.sh - | /bin/sh`
-    matlablibdir="$matlabdir/extern/lib/$matlabarch"
-    TMPLD_LIBRARY_PATH=${TMPLD_LIBRARY_PATH}:${matlablibdir}
+    matlabarch=`. "$matlabdir/bin/util/arch.sh"; echo "$Arch"`
+    TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$matlabdir/extern/lib/$matlabarch"
+    unset matlabarch
 fi
+unset matlabdir
 
-case $PTARCH in
+case "$PTARCH" in
     hppa*)
-	if [ -z "$SHLIB_PATH" ]; then
-	    SHLIB_PATH=$TMPLD_LIBRARY_PATH
-	    export SHLIB_PATH
-	else
-	    SHLIB_PATH=${TMPLD_LIBRARY_PATH}:${SHLIB_PATH}
-	    export SHLIB_PATH
-	fi;;
+	prepend SHLIB_PATH "$TMPLD_LIB_PATH"
+	export SHLIB_PATH;;
     *)	
-	if [ -z "$LD_LIBRARY_PATH" ]; then
-	    LD_LIBRARY_PATH=$TMPLD_LIBRARY_PATH
-	    export LD_LIBRARY_PATH
-	else
-	    LD_LIBRARY_PATH=${TMPLD_LIBRARY_PATH}:${LD_LIBRARY_PATH}
-	    export LD_LIBRARY_PATH
-	fi;;
+	prepend LD_LIBRARY_PATH "$TMPLD_LIB_PATH"
+	export LD_LIBRARY_PATH;;
 esac
 
-unset TMPLD_LIBRARY_PATH
+unset TMPLD_LIB_PATH
 
 TCL_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/tcl"
 TK_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/tk"
@@ -136,29 +150,7 @@ export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
 PTPWD="`pwd`"
 export PTPWD
 
-# check if binary and script path is in $path
-bp=1
-sp=1
-oldifs="$IFS"; IFS=":"
-for i in $PATH
-do
-    if [ "$PTOLEMY/bin.$PTARCH" = "$i" ]; then
-	bp=1
-    fi 	
-    if [ "$PTOLEMY/bin" = "$i" ]; then
-	sp=1
-    fi	
-done	
-IFS="$oldifs"
+# prepend Ptolemy script path and binary path if not in $PATH
+prepend PATH "$PTOLEMY/bin:$PTOLEMY/bin.$PTARCH"
+export PATH
 
-# prepend Ptolemy binary path if not in $path
-if [ $bp = 0 ]; then
-    PATH=$PTOLEMY/bin.$PTARCH:$PATH
-    export PATH
-fi
-# prepend Ptolemy script path if not in $path
-if [ $sp = 0 ]; then
-    PATH=$PTOLEMY/bin:$PATH
-    export PATH
-fi
-unset sp bp i
