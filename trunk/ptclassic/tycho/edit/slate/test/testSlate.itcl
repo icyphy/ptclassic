@@ -202,7 +202,7 @@ test Slate-moveclick.1 {Move the simple item, no ghosting} {
     .s moveclick $r 100 100; _update
     .s movedrag $r 110 110; _update
     .s movedrag $r 120 120; _update
-    .s moverelease $r 120 120; _update
+    .s moverelease $r; _update
     .s coords $r
 } {60.0 60.0 100.0 100.0}
 
@@ -211,7 +211,7 @@ test Slate-moveclick.2 {Move the simple item, with ghosting} {
     .s movedrag $r 90 90; _update
     .s movedrag $r 80 80; _update
     set result [.s coords ghost]
-    .s moverelease $r 80 80; _update
+    .s moverelease $r; _update
     concat $result [.s coords $r]
 } {40.0 40.0 80.0 80.0 40.0 40.0 80.0 80.0}
 
