@@ -444,7 +444,7 @@ body ::tycho::TopLevel::configure {args} {
  	lappend temp $option
     }
     if { $temp != "" } {
- 	eval ::tycho::preference unsubscribeoptions $this $args
+ 	eval ::tycho::preference unsubscribeoptions $this $temp
     }
     eval ::itk::Archetype::configure $args
 }
