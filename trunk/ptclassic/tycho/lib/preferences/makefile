@@ -45,12 +45,12 @@ ITCL_SRCS =
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex doc test
+MISC_FILES =	
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex
+REALCLEAN_STUFF =
 
-DIRS =		test
+DIRS =		
 
 all install: tclIndex $(MISC_SRCS)
 
