@@ -72,6 +72,8 @@ PL_SRCS = \
  VHDLXMgraph.pl \
  VHDLXYgraph.pl \
  VHDLConstCx.pl \
+ VHDLCxToFloat.pl \
+ VHDLFloatToCx.pl \
 
 # The .cc files
 SRCS =	$(PL_SRCS:.pl=.cc)
