@@ -28,7 +28,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = html
+DIRS = install nt
 
 # Root of Ptolmy directory
 ROOT =		../..
