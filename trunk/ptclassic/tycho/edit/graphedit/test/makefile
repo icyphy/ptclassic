@@ -1,9 +1,9 @@
-# Makefile for Ptolemy Tycho system, editors/graphedit/test directory.
+# Makefile for Ptolemy Tycho system, edit/graphedit/test directory.
 #
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,7 +41,10 @@ include $(CONFIG)
 
 TCL_SRCS = 	
 
-GRAPHICAL_TESTS = 
+GRAPHICAL_TESTS = \
+	testForest.itcl \
+	testGraph.itcl \
+	testDigraph.itcl
 
 ITCL_SRCS = $(GRAPHICAL_TESTS) \
 	alltests.itcl all.itcl
