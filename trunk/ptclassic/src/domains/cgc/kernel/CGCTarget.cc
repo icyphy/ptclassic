@@ -362,6 +362,7 @@ int CGCTarget::compileCode()
 	StringList ptolemy = getenv("PTOLEMY");
 	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
 	      << ptolemy << "/lib." << getenv("PTARCH") << " -lCGCrtlib" ;
+	rtlib << " -lptdsp";
     }
     else {
 	rtlib << "CGCrtlib.c";
