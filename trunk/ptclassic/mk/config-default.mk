@@ -68,8 +68,9 @@ OCTTOOLS = $(ROOT)/octtools
 OCTLIBDIR = $(OCTTOOLS)/lib.$(PTARCH)
 # cc to compile octtools with.
 OCT_CC =	cc
-# octtools/attache uses this
+# octtools/attache uses these two.
 TERMLIB_LIBSPEC = -ltermlib
+CURSES_LIBSPEC = -lcurses
 # hppa.cfront has problems linking vem with -g, so we override this
 OCT_DEBUG_FLAGS = -g
 
