@@ -48,12 +48,8 @@ namespace ::tycho {
 # <p><b>Options</b>:
 # 
 # <ul>
-# <li><b>-anchor</b>. The position on its parent item that the terminal
-# attaches to. If null, the terminal will remain at the location
-# at which its coords make it. If a pair, these two elements are
-# taken to be the relative _x_ and _y_ locations on the parent,
-# where 0 it the top or left and 100 is the bottom or right.
-# If a compass point, than that point on the parent is used.
+# <li><b>-arrowshape</b>. The shape of the arrow, if in one of the
+# arrow styles. Default is *{8 10 3}*.
 # 
 # <li><b>-direction</b>. The direction of the terminal away from its 
 # origin (the point at which it "connects" to something), as a unit 
@@ -66,16 +62,18 @@ namespace ::tycho {
 # 
 # <li><b>-length</b>. The length of the line representing the terminal. 
 # 
-# <li><b>-width</b>. The width of the line. 
+# <li><b>-scaled</b>. If 1 and the item has a parent item, the
+# coordinates are scaled relative to the region occupied by
+# the parent item. (100,100) is full scale. If there is a parent
+# then the coordinates are relative to the parent. If there is no
+# parent the terminal is placed at absolute coordinates. Default is 1.
 # 
-# <li><b>-style</b>.  The "style" of terminal: <i>arrow</i>, 
-# <i>doublearrow</i>, or <i>blob</i>.  If <i>arrow</i>, the terminal is 
-# just a simple arrow; if <i>doublearrow</i>, the arrow has two heads; if 
-# <i>blob</i>, the terminal has a small circle at the wiring end.
+# <li><b>-size</b>. The size of the radius of the circle, in the
+# circle or rectangle styles.
 # 
-# <li><b>-type</b>. The "type" of the terminal: <i>input</i> or 
-# <i>output</i>. This is mainly used to control the appearance of the 
-# terminal.
+# <li><b>-style</b>.  The "style" of terminal: <i>plain</i>,
+# <i>arrowin</i>, <i>arrowout</i>, <i>doublearrowout</i>, 
+# <i>circle</i>, or <i>rectangle</i>. Default is <i>arrowin</i>.
 # 
 # <li><b>-width</b>. The width of the line.
 # 
@@ -84,7 +82,8 @@ namespace ::tycho {
 # <p><b>Components</b>
 #
 # <ul>
-# <li><b>blob</b>: A component item used for terminal ends.
+# <li><b>blob</b>: A component item used for terminal ends. Provided
+# for test suites.
 # </ul>
 #
 # <p><b>Enhancements</b>: The "arrow" style should perhaps put a
@@ -95,9 +94,9 @@ namespace ::tycho {
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   foreach {x y opts} {
 #    	100 50  {}
-#    	100 100 {-type output -fill red}
-#    	100 150 {-style blob  -fill blue}
-#    	100 200 {-direction {1 1} -style doublearrow}
+#    	100 100 {-fill red}
+#    	100 150 {-style circle  -fill blue}
+#    	100 200 {-direction {1 1} -style doublearrowin}
 #   } {
 #    	eval $slate create Terminal $x $y $opts -tags moveable
 #   }
@@ -118,14 +117,8 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-anchor* option
-    proc _anchor {id canvas slate anchor}
-    
     # Update the *-arrowshape* option
     proc _arrowshape {id canvas slate arrowshape}
-    
-    # Update the *-blobsize* option
-    proc _blobsize {id canvas slate blobsize}
     
     # Update the *-direction* option
     proc _direction {id canvas slate direction}
@@ -136,12 +129,15 @@ class ::tycho::Terminal {
     # Update the *-length* option
     proc _length {id canvas slate length}
     
+    # Update the *-scaled* option
+    proc _scaled {id canvas slate size}
+    
+    # Update the *-size* option
+    proc _size {id canvas slate size}
+    
     # Update the *-style* option
     proc _style {id canvas slate length}
     
-    # Update the *-type* option
-    proc _type {id canvas slate type}
-
     # Update the *-width* option
     proc _width {id canvas slate width}
 
@@ -149,7 +145,7 @@ class ::tycho::Terminal {
     proc aspect {id canvas slate args}
 
     # Set or get the Terminal's coordinates
-    proc coords {id canvas slate args}
+    proc coords {id canvas slate {x {}} {y {}}}
     
     ###################################################################
     ####                         private variables                 ####
@@ -166,14 +162,13 @@ class ::tycho::Terminal {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_anchor)     ::tycho::Terminal::_anchor
     set methodtable(_arrowshape) ::tycho::Terminal::_arrowshape
-    set methodtable(_blobsize)   ::tycho::Terminal::_blobsize
+    set methodtable(_scaled)     ::tycho::Terminal::_scaled
+    set methodtable(_size)       ::tycho::Terminal::_size
     set methodtable(_direction)  ::tycho::Terminal::_direction
     set methodtable(_fill)       ::tycho::Terminal::_fill
     set methodtable(_length)     ::tycho::Terminal::_length
     set methodtable(_style)      ::tycho::Terminal::_style
-    set methodtable(_type)       ::tycho::Terminal::_type
     set methodtable(_width)      ::tycho::Terminal::_width
 
     set methodtable(aspect)      ::tycho::Terminal::aspect
@@ -183,36 +178,15 @@ class ::tycho::Terminal {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-anchor)    {}
-    set optiondefault(-arrowshape) {}
-    set optiondefault(-blobsize)  3
+    set optiondefault(-arrowshape) {8 10 3}
+    set optiondefault(-scaled)    1
+    set optiondefault(-size)      3
     set optiondefault(-direction) {1 0}
     set optiondefault(-fill)      black
     set optiondefault(-length)    25
     set optiondefault(-shape)     point
-    set optiondefault(-style)     arrow
-    set optiondefault(-type)      input
+    set optiondefault(-style)     arrowin
     set optiondefault(-width)     1
-}
-
-##########################################################################
-#### -anchor option configuration
-#
-body ::tycho::Terminal::_anchor {id canvas slate anchor} {
-    set option(anchor$id) $anchor
-
-    # Move the item according to the anchor. Do nothing if null.
-    if { [llength $anchor] == 1 } {
-	# Assume a compass point
-	eval coords $id $canvas $slate \
-		[$slate aspect [$slate parent $id] $anchor]
-    } elseif { [llength $anchor] == 2 } {
-	# Assume relative x and y positions
-	::tycho::assign x0 y0 x1 y1 [$slate region [$slate parent $id]]
-	coords $id $canvas $slate \
-		[expr $x0 + [expr ($x1-$x0)/100.0] * [lindex $anchor 0]] \
-		[expr $y0 + [expr ($y1-$y0)/100.0] * [lindex $anchor 1]]
-    }
 }
 
 ##########################################################################
@@ -220,21 +194,7 @@ body ::tycho::Terminal::_anchor {id canvas slate anchor} {
 #
 body ::tycho::Terminal::_arrowshape {id canvas slate arrowshape} {
     set option(arrowshape$id) $arrowshape
-    if { $arrowshape != "" } {
-	$canvas itemconfigure $primary($id) -arrowshape $arrowshape
-    }
-}
-
-##########################################################################
-#### -blobsize option configuration
-#
-body ::tycho::Terminal::_blobsize {id canvas slate blobsize} {
-    set option(blobsize$id) $blobsize
-
-    # Update the style, forcing an update.
-    set style $option(style$id)
-    set option(style$id) {}
-    _style $id $canvas $slate $style
+    $canvas itemconfigure $primary($id) -arrowshape $arrowshape
 }
 
 ##########################################################################
@@ -253,11 +213,8 @@ body ::tycho::Terminal::_direction {id canvas slate direction} {
     # Change the coordinates
     eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
 
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set style $option(style$id)
-    set option(style$id) {}
-    _style $id $canvas $slate $style
+    # Get the right appearance by setting the style option
+    _style $id $canvas $slate $option(style$id)
 }
 
 ##########################################################################
@@ -277,49 +234,68 @@ body ::tycho::Terminal::_fill {id canvas slate fill} {
 #
 body ::tycho::Terminal::_length {id canvas slate length} {
     set option(length$id) $length
-    set coords [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 [$canvas coords $primary($id)]
 
     # Figure the other end.
-    set x1 [expr [lindex $coords 0] \
+    set x1 [expr $x0 \
 	    + [lindex $option(direction$id) 0] * $option(length$id)]
-    set y1 [expr [lindex $coords 1] \
+    set y1 [expr $y0 \
 	    + [lindex $option(direction$id) 1] * $option(length$id)]
 
     # Change the coordinates
-    eval $canvas coords $primary($id) $coords $x1 $y1
+    $canvas coords $primary($id) $x0 $y0 $x1 $y1
 
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set style $option(style$id)
-    set option(style$id) {}
-    _style $id $canvas $slate $style
+    # Get the right appearance by setting the style option
+    _style $id $canvas $slate $option(style$id)
+}
+
+##########################################################################
+#### -scaled option configuration
+#
+body ::tycho::Terminal::_scaled {id canvas slate scaled} {
+    if { $scaled != $option(scaled$id) } {
+        set coords [coords $id $canvas $slate]
+        set option(scaled$id) $scaled
+        eval coords $id $canvas $slate $coords
+    }
+}
+
+##########################################################################
+#### -size option configuration
+#
+body ::tycho::Terminal::_size {id canvas slate size} {
+    set option(size$id) $size
+
+    # Update the style
+    _style $id $canvas $slate $option(style$id)
 }
 
 ##########################################################################
 #### -style option configuration
 #
 body ::tycho::Terminal::_style {id canvas slate style} {
-    # Check direction of arrow
-    if { $style == "arrow" } {
-	if { $option(type$id) == "input" } {
+    set option(style$id) $style
+
+    if { [::info exists component(blob$id)] } {
+	$canvas delete $component(blob$id)
+	unset component(blob$id)
+    }
+    
+    switch -exact $style {
+	"plain" {
+	    $canvas itemconfigure $primary($id) -arrow none
+	}
+	"arrowin" {
 	    $canvas itemconfigure $primary($id) -arrow first
-	} else {
+	}
+	"arrowout" {
 	    $canvas itemconfigure $primary($id) -arrow last
 	}
-	if { [::info exists component(blob$id)] } {
-	    $canvas delete $component(blob$id)
-	    unset component(blob$id)
-	}
-    } elseif { $style == "doublearrow" && $option(style$id) != "doublearrow" } {
-	if { [::info exists component(blob$id)] } {
-	    $canvas delete $component(blob$id)
-	}
+	"doublearrowin" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $option(direction$id) 0]
+	    set ydir [lindex $option(direction$id) 1]
 
-	set coords [$canvas coords $primary($id)]
-	set xdir [lindex $option(direction$id) 0]
-	set ydir [lindex $option(direction$id) 1]
-
-	if { $option(type$id) == "input" } {
 	    $canvas itemconfigure $primary($id) -arrow first
 	    set component(blob$id) [$canvas create line \
 		    [expr [lindex $coords 0] + $xdir * 5] \
@@ -329,46 +305,48 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 		    -fill $option(fill$id) \
 		    -arrow first \
 		    -tags [$canvas gettags $id]]
-	} else {
+	}
+	"doublearrowout" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $option(direction$id) 0]
+	    set ydir [lindex $option(direction$id) 1]
+
 	    $canvas itemconfigure $primary($id) -arrow last
 	    set component(blob$id) [$canvas create line \
-		    [expr [lindex $coords 2] - $xdir * 5] \
-		    [expr [lindex $coords 3] - $ydir * 5] \
 		    [expr [lindex $coords 2] - $xdir * 6] \
 		    [expr [lindex $coords 3] - $ydir * 6] \
+		    [expr [lindex $coords 2] - $xdir * 5] \
+		    [expr [lindex $coords 3] - $ydir * 5] \
 		    -fill $option(fill$id) \
-		    -arrow first \
+		    -arrow last \
 		    -tags [$canvas gettags $id]]
 	}
-    } elseif { $style == "blob" && $option(style$id) != "blob" } {
-	$canvas itemconfigure $primary($id) -arrow none
-	if { [::info exists component(blob$id)] } {
-	    $canvas delete $component(blob$id)
+	"circle" {
+	    set coords [$canvas coords $primary($id)]
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [eval $canvas create oval \
+		    [::tycho::Rectangle::stretch \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    $option(size$id)] \
+		    -fill $option(fill$id) -outline $option(fill$id) \
+		    -tags [list [$canvas gettags $id]]]
 	}
-
-	set coords [$canvas coords $primary($id)]
-	set component(blob$id) [eval $canvas create oval \
-		[::tycho::Rectangle::stretch \
-		[lindex $coords 2] [lindex $coords 3] \
-		[lindex $coords 2] [lindex $coords 3] \
-		$option(blobsize$id)] \
-		-fill $option(fill$id) -outline $option(fill$id) \
-		-tags [list [$canvas gettags $id]]]
+	"rectangle" {
+	    set coords [$canvas coords $primary($id)]
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [eval $canvas create rectangle \
+		    [::tycho::Rectangle::stretch \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    $option(size$id)] \
+		    -fill $option(fill$id) -outline $option(fill$id) \
+		    -tags [list [$canvas gettags $id]]]
+	}
+        default {
+            error "Invalid style \"$style\""
+        }
     }
-    set option(style$id) $style
-}
-
-##########################################################################
-#### -type option configuration
-#
-body ::tycho::Terminal::_type {id canvas slate type} {
-    set option(type$id) $type
-
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set style $option(style$id)
-    set option(style$id) {}
-    _style $id $canvas $slate $style
 }
 
 ##########################################################################
@@ -378,7 +356,6 @@ body ::tycho::Terminal::_width {id canvas slate width} {
     set option(width$id) width
    $canvas itemconfigure $primary($id) -width $width
 }
-
 
 ##########################################################################
 #### aspect
@@ -409,12 +386,30 @@ body ::tycho::Terminal::aspect {id canvas slate args} {
 ##########################################################################
 #### construct
 #
-body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
+body ::tycho::Terminal::construct {id canvas slate tags x y args} {
     # Initialize the options
     foreach {opt val} [concat [array get optiondefault] $args] {
 	set option([string trimleft $opt -]$id) $val
     }
 
+    # Figure out the origin
+    set parent [$slate parent $id]
+    if { $parent != "" } {
+	::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+	if $option(scaled$id) {
+	    set x0 [expr $a0 + ($a1-$a0)/100.0 * $x]
+	    set y0 [expr $b0 + ($b1-$b0)/100.0 * $y]
+	} else {
+	    set x0 [expr $a0 + $x]
+	    set y0 [expr $b0 + $y]
+	}
+        # Remember the set coordinates for coords{}
+        set variable(x$id) $x
+        set variable(y$id) $y
+    } else {
+        set x0 $x
+        set y0 $y
+    }
     # Figure the other end.
     set x1 [expr $x0 + [lindex $option(direction$id) 0] * $option(length$id)]
     set y1 [expr $y0 + [lindex $option(direction$id) 1] * $option(length$id)]
@@ -422,34 +417,51 @@ body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
     # The primary component is also the line.
     set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
 	    -tags $tags -fill $option(fill$id) \
-	    -width $option(width$id)]
-    if { $option(arrowshape$id) != "" } {
-	$canvas itemconfigure $primary($id) \
-		-arrowshape $option(arrowshape$id)
-    }
+	    -width $option(width$id) -arrowshape $option(arrowshape$id)]
 
-    # Update the style, forcing an update.
-    set style $option(style$id)
-    set option(style$id) {}
-    _style $id $canvas $slate $style
-
-    # Move to correct anchor position
-    _anchor $id $canvas $slate $option(anchor$id)
+     # Update the style
+    _style $id $canvas $slate $option(style$id)
 }
 
 ##########################################################################
 #### coords
 #
-body ::tycho::Terminal::coords {id canvas slate args} {
+body ::tycho::Terminal::coords {id canvas slate {x {}} {y {}}} {
+    ::tycho::assign a b [$canvas coords $primary($id)]
+    set parent [$slate parent $id]
+
     # No args: just return coordinates
-    if { $args == "" } {
-	return [lrange [$canvas coords $primary($id)] 0 1]
+    if { $x == "" } {
+        if { $parent != "" } {
+            ::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+            if $option(scaled$id) {
+                set x0 [expr double($a-$a0)/($a1-$a0) * 100]
+                set y0 [expr double($b-$b0)/($b1-$b0) * 100]
+            } else {
+                set x0 [expr $a-$a0]
+                set y0 [expr $b-$b0]
+            }
+        } else {
+            set x0 $a
+            set y0 $b
+        }
+        return [list $x0 $y0]
     }
 
-    # Move the primary
-    set coords [$canvas coords $primary($id)]
-    set moveX [expr [lindex $args 0] - [lindex $coords 0]]
-    set moveY [expr [lindex $args 1] - [lindex $coords 1]] 
-
-    $canvas move $id $moveX $moveY
+    # Figure out the origin
+    if { $parent != "" } {
+	::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+	if $option(scaled$id) {
+	    set x0 [expr $a0 + ($a1-$a0)/100.0 * $x]
+	    set y0 [expr $b0 + ($b1-$b0)/100.0 * $y]
+	} else {
+	    set x0 [expr $a0 + $x]
+	    set y0 [expr $b0 + $y]
+	}
+    } else {
+        set x0 $x
+        set y0 $x
+    }
+    # Move there
+    $canvas move $id [expr $x0-$a] [expr $y0-$b]
 }
