@@ -240,8 +240,8 @@ int FromEventHorizon :: ready() { return TRUE ;}
 
 **************************************************************************/
 
-int WormMultiPort :: isItInput() const { return alias()->isItInput(); }
-int WormMultiPort :: isItOutput() const { return alias()->isItOutput(); }
+int WormMultiPort :: isItInput() const { return myGMPH()->isItInput(); }
+int WormMultiPort :: isItOutput() const { return myGMPH()->isItOutput(); }
 
 extern const char* ghostName(const GenericPort&);
 
@@ -252,7 +252,7 @@ PortHole& WormMultiPort :: newPort() {
 	Domain* outSideDomain = Domain::named(parent()->domain());
 
 	// make real porthole
-	GalMultiPort* galp = (GalMultiPort*) alias();
+	GalMultiPort* galp = myGMPH;
 	PortHole& realP = galp->newConnection();
 
 	// build eventHorizon
