@@ -32,7 +32,24 @@
 #
 include $(ROOT)/mk/config-default.mk
 
+# HPPA CC notes
+# 1) If you purchase just the C++ compiler, you do _not_ get a C
+#    compiler automatically.  You have to purchase the C compiler
+#    separately.  You might be able to compile Ptolemy by using
+#    HP CC and gcc, there are a few lines below that would need to be 
+#    changed, see the comments.
+# 2) To see what version of CC you are running, type 'what /usr/bin/CC'
+# 3) You should probably install the latest and greatest CC and ld
+#    patches off of the hp patch site.  As of 2/96, the site was
+#    http://us-support.external.hp.com/
+#    In a vanilla HPUX-10.20 installation, we installed
+#	PHSS_9855 - s700_800 10.X HP C++ (A.10.24) with a correct eh/lib++.a
+#	PHSS_9400 - s700_800 10.20 ld(1) cumulative patch
+#	PHSS_9927 - s700_800 10.X ANSI C compiler cumulative patch
+#	PHKL_8693 - s700 10.20 sys/time.h fix for select(2)/C++ defects
 #
+
+
 # Programs to use
 #
 RANLIB =	ranlib
@@ -48,7 +65,7 @@ HP_AS =		/usr/ccs/bin/as
 # The following patch was released in early February, 1996:
 # PHSS_6470      s700_800 10.X HP C++ patch version A.10.11
 # If you don't have this patch, you may have problems compililng VHDLObjList.cc
-# You can get the patch from http://us.external.hp.com/
+# See above for patch information
 CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront +a1
 
 # If you turn on debugging (-g) with cfront, expect ptcl and pigiRpc to be
