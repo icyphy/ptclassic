@@ -99,13 +99,13 @@ proc ::tycho::saferUpdate {obj} {
 ##########################################################################
 #### TopLevel
 # This class creates a top-level window with a single frame in it
-# (called <code>$itk_component(childsite)</code>. The class provides methods and
-# options for controlling the position of the window on the screen, its
-# size, and the focus. It also manages a global list of top-level
-# windows for controlling the switching of the focus from one window to
-# the next. It also defines miscellaneous generic procedures and
-# methods. The window is created in the withdrawn state. It is up to
-# the creator of the window to map the window using either "wm
+# (called <code>$itk_component(childsite)</code>. The class provides
+# methods and options for controlling the position of the window on the
+# screen, its size, and the focus. It also manages a global list of
+# top-level windows for controlling the switching of the focus from one
+# window to the next. It also defines miscellaneous generic procedures
+# and methods. The window is created in the withdrawn state. It is up
+# to the creator of the window to map the window using either "wm
 # deiconify" or the method "centerOnScreen". This is normally done
 # right after creating the window. The reason for requiring this
 # explicit mapping is that windows are often constructed piecemeal by
@@ -138,11 +138,17 @@ class ::tycho::TopLevel {
     # Center the window on the screen.
     method centerOnScreen {}
 
+    # In derived classes, return the current point in a form usable by seePoint.
+    method currentPoint {} {return {}}
+
     # Give the window or a subwindow the focus.
     method focusin {}
 
     # Prevent interactive resizing of the window.
     method freezeWindowSize {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {file point}
 
     # Shift the focus to the next window in the topLevelWindows list.
     method nextWindow {{raise 0}}
@@ -152,6 +158,9 @@ class ::tycho::TopLevel {
 
     # Raise the window.
     method raiseWindow {}
+
+    # Find and make visible a point in the display.
+    method seePoint {point}
 
     #################################################################
     ####                   public procedures                     ####
@@ -421,6 +430,34 @@ body ::tycho::TopLevel::freezeWindowSize {} {
 }
 
 #####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is the empty string, just call <code>seePoint</code>,
+# passing it the second argument. Otherwise, the
+# file is opened  with <code>::tycho::File::openContext</code>,
+# which will choose an editor based on the filename extension.
+# Invoke <code>seePoint</code> to view the specified point within the
+# file. The format for the <i>point</i> argument depends on the type of
+# file being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+# 
+body ::tycho::TopLevel::hyperJump {file point} {
+    if {$file != {}} {
+        set obj [uplevel #0 [list ::tycho::File::openContext $file]]
+        if {$point != {}} {
+            # The seePoint call is postponed to give time for the widget
+            # to be created. The catch is in case it is immediately deleted.
+            after 200 [list catch [list $obj seePoint $point]]
+        }
+    } {
+        seePoint $point
+    }
+}
+
+#####################################################################
 #### nextWindow
 # Switch the focus to the next window listed in the array topLevelWindows.
 # If an argument is given, and is non-zero, then raise the window as well.
@@ -448,6 +485,16 @@ body ::tycho::TopLevel::raiseWindow {} {
     wm deiconify $itk_component(hull)
     raise $itk_component(hull)
     focusin
+}
+
+#####################################################################
+#### seePoint
+# In derived classes, this method will go to the point in the display
+# identified by the name argument.  What this means depends on what
+# type of data being displayed.  In this base class, do
+# nothing.
+#
+body ::tycho::TopLevel::seePoint {point} {
 }
 
 #################################################################
