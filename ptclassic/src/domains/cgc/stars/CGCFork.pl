@@ -21,7 +21,7 @@ are laid out; no code is required.
 	ccinclude { "CGCGeodesic.h" }
 	constructor {
 		output.setForkBuf(input);
-		setForkId();
+		isaFork();
 	}
 	exectime {
 		return 0;
