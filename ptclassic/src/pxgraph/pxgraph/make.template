@@ -18,7 +18,7 @@ OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
  st.o params.o
 
 SRCS = $(OBJS:.o=.c)
-HDRS = copyright.h general.h hard_devices.h params.h plotter.h st.h \
+HDRS = copyright.h hard_devices.h params.h plotter.h st.h \
  xgout.h xgraph.h xtb.h
 
 all:	makefile pxgraph
