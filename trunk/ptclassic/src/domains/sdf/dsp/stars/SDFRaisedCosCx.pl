@@ -3,6 +3,7 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIRCx }
 	desc {
+THIS STAR IS OBSOLETE -- Use the RaisedCosineCx galaxy.
 Output a complex raised-cosine Nyquist pulse.
 	}
 	version { $Id$ }
