@@ -1,0 +1,63 @@
+.\" $Id$
+.TI "masters"
+.AU
+David Harrison and Edward A. Lee
+.AE
+.H1 "Introduction"
+.pp
+.IE "moving facets"
+.IE "icon masters"
+.IE "masters"
+.IE "masters"
+Ptolemy universes and galaxies are "oct facets", where oct is
+a design database.  For every icon in these facets, there
+is a master somewhere in the file system.  The master identifies
+the Ptolemy star or galaxy associated with the icon, and also defines
+the appearance of the icon.
+The master is specified using a complete Unix pathname,
+usually relative to an environment variable like "PTOLEMY"
+or a user's home directory, like "~ptolemy".
+.pp
+Whenever stars or galaxies are moved to a different location
+in the file system, any universe or galaxy using their icons
+will be rendered invalid.  This program is used to replace
+such invalid masters with correct masters.  It can also be used
+just to list the masters in a facet, or to replace a valid master
+with a different version, also a valid master.
+.pp
+This program is a version of the octmvlib program
+from the octtools distribution.  It has been made more user-friendly,
+and has been customized for use with Ptolemy.
+.H1 "Invoking masters"
+.pp
+The simplest way to use this program is interactively:
+.(b C
+masters facet(s)
+.)b
+The arguments are the names of the facets that you wish to modify.
+You will be prompted for a pathname to replace. If you enter a
+question mark, the pathnames in the first facet will be listed, with
+invalid pathnames marked.
+The same replacements will be made on the all facets specified on
+the command line.
+If you wish to replace more than one master, just run the program again.
+.pp
+The program may be run non-interactively by specifying the old and
+new pathnames on the command line using the syntax:
+.(b C
+masters -O 'old_path_name' -N 'new_path_name' facet(s)
+.)b
+The single quotes are advisable to avoid expansion of "~user"
+.EQ
+delim ^^
+.EN
+or "$VARIABLE_NAME" entries.
+.EQ
+delim $$
+.EN
+.pp
+Specifying the "-v" option causes the program to give a bit more information
+as it runs, as in
+.(b C
+masters -v facet(s)
+.)b

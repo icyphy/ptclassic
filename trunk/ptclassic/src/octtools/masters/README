@@ -1,0 +1,23 @@
+This program is a version of octmvlib that has been customized for use
+with Ptolemy.  To modify and remake this program, you need to have the
+octtools installed in ~octtools.  This may be fixed sometime in the future
+when we update the makefiles.
+
+To make masters, in a C shell, type "setenv OCTTOOLS ~octtools".
+Then "make".
+
+The program should be used whenever icons used in a particular facet
+have been moved.  For instance, if after developing a useful star,
+the star is installed in a location available to all users.
+The program can also be used whenever a facet has an invalid icon
+(the icon cannot be found).
+
+To run it interactively, simply type:
+
+masters facet(s)
+
+You will be prompted for a pathname to replace. If you enter a
+question mark, the pathnames in the facet will be listed, with
+invalid pathnames highlighted.
+The same replacements will be made on the all facets specified on
+the command line.
