@@ -54,6 +54,8 @@ int Galaxy :: isItAtomic () const { return FALSE;}
 Galaxy& Galaxy :: asGalaxy () { return *this;}
 const Galaxy& Galaxy :: asGalaxy () const { return *this;}
 
+const char* Galaxy :: className() const {return "Galaxy";}
+
 // destructor.  Not really do-nothing because members are deleted
 Galaxy :: ~ Galaxy () {}
 

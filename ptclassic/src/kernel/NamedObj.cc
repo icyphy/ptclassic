@@ -110,3 +110,9 @@ void NamedObjList::deleteAll() {
 	}
 }
 
+// constructor out-of-line to save code (esp. with cfront)
+NamedObjList::NamedObjList() {}
+// ditto for these.
+NamedObjListIter :: NamedObjListIter(NamedObjList& sl) : ListIter (sl) {}
+CNamedObjListIter :: CNamedObjListIter (const NamedObjList& sl)
+: ListIter (sl) {}

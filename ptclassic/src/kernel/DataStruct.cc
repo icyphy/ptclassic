@@ -37,6 +37,14 @@ inline anyway).
 
 #include "DataStruct.h"
 
+// constructor with argument
+	// constructor, with argument
+SequentialList :: SequentialList(Pointer a) : dimen(1)
+{
+	LOG_NEW; lastNode= new SingleLink(a,0);
+	lastNode->next=lastNode;
+}
+
 // add at head of list
 void SequentialList :: prepend(Pointer a)
 {

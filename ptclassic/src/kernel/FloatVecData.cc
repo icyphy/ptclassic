@@ -43,6 +43,17 @@ void FloatVecData::init(int l,const float *srcData) {
 		data[i] = *srcData++;
 }
 
+// constructor: makes an uninitialized array
+FloatVecData::FloatVecData(int l) : len(l) {
+	LOG_NEW; data = new float[l];
+}
+
+// constructor: makes an initialized array from a float array
+FloatVecData::FloatVecData(int l,const float *srcData) { init(l,srcData); }
+
+// copy constructor
+FloatVecData::FloatVecData(const FloatVecData& src) { init(src.len,src.data);}
+
 // constructor: makes an initialized array from a double array
 FloatVecData::FloatVecData(int l,const double *srcData) : len(l) {
 	LOG_NEW; data = new float[l];

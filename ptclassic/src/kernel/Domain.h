@@ -57,11 +57,7 @@ const int NUMDOMAINS = 20;		// maximum # of domains
 
 class Domain {
 public:
-	Domain (const char* domname) {
-		index = numDomains++;
-		allDomains[index] = this;
-		myName = domname;
-	}
+	Domain (const char* domname);
 	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0);
 	virtual EventHorizon& newFrom();
 	virtual EventHorizon& newTo();
