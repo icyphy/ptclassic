@@ -493,9 +493,11 @@ body ::tycho::Displayer::destroyView {view} {
 
     # Destroy the view, its menubar, status bar, and toolbar
     # The view is destroyed first because the destruction might be
-    # cancelled by triggering an error.
+    # cancelled by triggering an error. Note that the destruction
+    # of the view is inside a catch in case this view has somehow
+    # already been deleted.
     set tag $_viewtag($view)
-    delete object [winfo command $view]
+    catch {delete object [winfo command $view]}
     delete object $itk_component(menubar$tag)
     delete object $itk_component(status$tag)
     catch {delete object $itk_component(toolbar$tag)}
