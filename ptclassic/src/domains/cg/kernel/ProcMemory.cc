@@ -27,132 +27,56 @@ $Id$
 #include <builtin.h>
 #include <minmax.h>
 
-MemInterval::~MemInterval() {
-	LOG_DEL; delete link;;
-}
-
-StringList MemoryList::print () {
-	MemInterval* p = l;
-	StringList out = "max=";
-	out += int(max);
-	out += ", min=";
-	out += int(min);
-	while (p) {
-		out += " [";
-		out += int(p->addr);
-		out += ":";
-		out += int(p->addr+p->len-1);
-		out += "]";
-		p = p->link;
-	}
-	return out;
-}
-
-int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
-	MemInterval* p = l;
+int LinProcMemory::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
+	IntervalListIter nextI(memAvail);
+	Interval *p;
 	// skip through the list of blocks until we find one that is
 	// big enough.  Fail if none are big enough.
-	while (p && p->len < reqSize) p = p->link;
+	while ((p = nextI++) != 0 && p->length() < reqSize)
+		;
 	if (p == 0) return FALSE;
-	reqAddr = p->addr;
-	// if block size exceeds requested size, scoop out a chunk of it.
-	if (p->len > reqSize) {
-		p->addr += reqSize;
-		p->len -= reqSize;
-	}
-	// if size matches exactly, remove it from the list (unless it is
-	// the last block)
-	else if (p->link) {
-		// delete this chunk
-		MemInterval* q = p->link;
-		*p = *q;
-		LOG_DEL; delete q;
-	}
-	// if current block is the last block, set its length to zero.p
-	else p->len = 0;
+	reqAddr = p->origin();
+	memAvail.subtract(Interval(reqAddr,reqSize));
 	return TRUE;
 }
 
-int MemoryList::circBufAlloc(unsigned reqSize, unsigned& reqAddr) {
+int LinProcMemory::circBufAlloc(unsigned reqSize, unsigned& reqAddr) {
+	IntervalListIter nextI(memAvail);
 	unsigned mask = 1;
 	while (mask < reqSize) mask <<= 1;
 	mask -= 1;
-	MemInterval* p;
-	for (p = l; p; p = p->link) {
-		if (p->len < reqSize) continue;
+	Interval* p;
+	while ((p = nextI++) != 0) {
+		if (p->length() < reqSize) continue;
 		// get the next higher aligned address
-		reqAddr = (p->addr + mask) & ~mask;
+		reqAddr = (p->origin() + mask) & ~mask;
 		// break if it fits
-		if (p->addr + p->len - reqAddr >= reqSize) break;
+		if (p->origin() + p->length() - reqAddr >= reqSize) break;
 	}
 	if (p == 0) return FALSE;
-	if (reqAddr == p->addr) {
-		p->addr += reqSize;
-		p->len -= reqSize;
-	}
-	else if (reqAddr - p->addr == p->len - reqSize) {
-		p->len -= reqSize;
-	}
-	else {
-	// OK, block has split.  Make new piece for 2nd half
-		int loSize = reqAddr - p->addr;
-		int hiSize = p->len - reqSize - loSize;
-		LOG_NEW; MemInterval* newInt =
-			new MemInterval(reqAddr + reqSize, hiSize, p->link);
-		p->len = loSize;
-		p->link = newInt;
-	}
+	memAvail.subtract(Interval(reqAddr,reqSize));
 	return TRUE;
 }
-
-// copy constructor
-void MemoryList::copy(const MemoryList& src) {
-	min = src.min;
-	max = src.max;
-	MemInterval* q = src.l;
-	LOG_NEW; l = new MemInterval(q->addr,q->len);
-	MemInterval* p = l;
-	while (q->link) {
-		q = q->link;
-		LOG_NEW; p->link = new MemInterval(q->addr,q->len);
-		p = p->link;
-	}
-	p->link = 0;
-}
-
-void MemoryList::zero() {
-	LOG_DEL; delete l; l = 0;
-}
-
-int MemoryList::addChunk(unsigned addr,unsigned len) {
-	if (len == 0) return TRUE;
-	if (addr + len <= min) {
-		min = addr;
-		LOG_NEW; l = new MemInterval(addr, len, l);
-	}
-	else if (addr > max) {
-		max = addr + len - 1;
-		MemInterval* p = l;
-		while (p->link) p = p->link;
-		LOG_NEW; p->link = new MemInterval(addr, len);
-	}
-	else return FALSE;
-	return TRUE;
-}
-
-void MemoryList::reset() {
-	zero();
-	LOG_NEW; l = new MemInterval(min, max-min+1);
-}
-
 
 // stuff for LinProcMemory
 
 LinProcMemory::LinProcMemory(const char* n, const Attribute& a,
-			     const Attribute& p,unsigned addr, unsigned len)
-: ProcMemory(n,a,p), mem(addr,len), consec(0) {}
+			     const Attribute& p,const char* memoryMap)
+: ProcMemory(n,a,p), mem(memoryMap), consec(0) {
+	memAvail = mem;
+}
 
-void LinProcMemory::record(MReq* request, unsigned addr) {
+void LinProcMemory::addMem(const IntervalList& toAdd) {
+	memAvail |= toAdd;
+}
+
+void LinProcMemory::initMem(const IntervalList & memory) {
+	mem = memAvail = memory;
+}
+
+void LinProcMemory::assign(MReq* request, unsigned addr) {
+	// set up the address info for the request.
+	request->assign(*this,addr);
 	// Append the allocation to the memory map
 	map.appendSorted(addr,*request);
 }
@@ -161,8 +85,9 @@ void LinProcMemory::reset() {
 	lin.zero();
 	circ.zero();
 	map.zero();
-	mem.reset();
+	memAvail = mem;
 	LOG_DEL; delete consec;
+	consec = 0;
 }
 
 int LinProcMemory::allocReq(AsmPortHole& p) {
@@ -211,24 +136,22 @@ int LinProcMemory::performAllocation() {
 	MReq* r;
 	while ((r = nextCirc++) != 0) {
 		unsigned addr;
-		if (!mem.circBufAlloc(r->size(),addr)) {
+		if (!circBufAlloc(r->size(),addr)) {
 			StringList m = r->print();
 			Error::abortRun("Memory allocation failure (circ): ", m);
 			return FALSE;
 		}
-		r->assign(*this,addr);
-		record(r,addr);
+		assign(r,addr);
 	}
 	MReqListIter nextLin(lin);
 	while ((r = nextLin++) != 0) {
 		unsigned addr;
-		if (!mem.firstFitAlloc(r->size(),addr)) {
+		if (!firstFitAlloc(r->size(),addr)) {
 			StringList m = r->print();
 			Error::abortRun("Memory allocation failure: ", m);
 			return FALSE;
 		}
-		r->assign(*this,addr);
-		record(r,addr);
+		assign(r,addr);
 	}
 	return TRUE;
 }
@@ -285,30 +208,27 @@ StringList DualMemory::printMemMap(const char* startString, const char* endStrin
 	return l;
 }
 
-DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
+DualMemory:: DualMemory(const char* n_x,       // name of first memory space
 			const Attribute& st_x, // attribute for states
 			const Attribute& p_x,  // attribute for portholes
-			unsigned x_addr,     // start of x memory
-			unsigned x_len,	     // length of x memory
-			const char* n_y,     // name of the second memory space
+			const char* x_map,     // X memory map
+			const char* n_y,       // name of second memory space
 			const Attribute& st_y, // attribute for states
 			const Attribute& p_y,  // attribute for portholes
-			unsigned y_addr,     // start of y memory
-			unsigned y_len	     // length of y memory
+			const char* y_map      // Y memory map
 	) : 
-	sAddr(max(x_addr,y_addr)),
-	sLen(symmetric_len(x_addr,y_addr,x_len,y_len)),
 	// set up the symmetric memory part
 	LinProcMemory("symmetric",
-		      (st_x&st_y)|A_SYMMETRIC,
-		      (p_x&p_y)|A_SYMMETRIC,
-		      max(x_addr,y_addr),
-		      symmetric_len(x_addr,y_addr,x_len,y_len)),
-	x(n_x,st_x,p_x,0,0),
-	y(n_y,st_y,p_y,0,0), 
-	xAddr(x_addr),xLen(x_len),
-	yAddr(y_addr),yLen(y_len)
-{}
+		      (st_x&st_y)|A_SYMMETRIC, (p_x&p_y)|A_SYMMETRIC, "<>"
+		      ),
+		      x(n_x,st_x,p_x,"<>"), y(n_y,st_y,p_y,"<>")
+{
+	IntervalList tmpx(x_map);
+	IntervalList tmpy(y_map);
+	initMem(tmpx&tmpy);
+	x.initMem(tmpx-tmpy);
+	y.initMem(tmpy-tmpx);
+}
 
 DualMemory::~DualMemory() { reset(); }
 
@@ -328,18 +248,13 @@ int DualMemory::allocReq(const State& s) {
 
 int DualMemory::performAllocation() {
 // first do all the symmetric memory.
-
 	if (!LinProcMemory::performAllocation()) return FALSE;
-// now make the remaining-memory-lists for the others.
-	MemoryList newMem = mem;
-	newMem.addChunk(xAddr,sAddr-xAddr);
-	newMem.addChunk(xAddr+xLen,sAddr+sLen-xAddr-xLen);
-	x.copyMem(newMem);
+// now make the remaining-memory-lists for the others, by adding
+// in remaining shared memory.
+	x.addMem(memAvail);
+	y.addMem(memAvail);
+// allocate x and y memory.
 	if (!x.performAllocation()) return FALSE;
-	newMem = mem;
-	newMem.addChunk(yAddr,sAddr-yAddr);
-	newMem.addChunk(yAddr+yLen,sAddr+sLen-yAddr-yLen);
-	y.copyMem(newMem);
 	return y.performAllocation();
 }
 

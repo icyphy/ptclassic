@@ -22,6 +22,7 @@ $Id$
 ******************************************************************/
 #include "MReq.h"
 #include "MemMap.h"
+#include "IntervalList.h"
 
 inline int consistent(bitWord t,const Attribute& a) {
 	return t == a.eval(t);
@@ -91,87 +92,46 @@ public:
 	}
 };
 
-// An interval of memory
-class MemInterval {
-	friend class MemoryList;
-	unsigned addr, len;
-	MemInterval* link;
-	MemInterval(unsigned a, unsigned l, MemInterval* nxt = 0) :
-		addr(a), len(l), link(nxt) {}
-	~MemInterval();
-};
 
-// A collection of intervals of memory
-class MemoryList {
-	MemInterval* l;
-	unsigned min, max;
+class LinProcMemory : public ProcMemory {
+protected:
+	MReqList lin;		// linear allocation requests
+	MReqList circ;		// circular allocation requests
+	IntervalList mem;	// total memory
+	IntervalList memAvail;	// available memory
+	MConsecStateReq *consec;// consecutive-allocation requests
+	MemMap	map;		// map of allocations
 
-	// body of copy constructor
-	void copy(const MemoryList& src);
-
-	// Remove all MemIntervals.
-	void zero();
-
-public:
-	// Constructor with starting address and length of memory.
-	MemoryList(unsigned addr,unsigned len) : min(addr), max(addr+len-1) {
-		INC_LOG_NEW; l = new MemInterval(addr,len);
-	}
+	// Assign an address for a request and record it in the map
+	void assign(MReq* request, unsigned addr);
 
 	// allocate using first-fit
 	int firstFitAlloc(unsigned reqSize,unsigned &resultAddr);
 
 	// allocate requiring circular alignment
 	int circBufAlloc(unsigned reqSize,unsigned &resultAddr);
-
-	// copy constructor
-	MemoryList(const MemoryList& src) { copy(src);}
-
-	// assignment operator
-	MemoryList& operator=(const MemoryList& src) {
-		zero();
-		copy(src);
-		return *this;
-	}
-
-	// destructor
-	~MemoryList() { zero();}
-
-	// Add a new piece to the memory list.  It must not lie in the
-	// range of the existing list.
-	// This is useful when some objects must be allocated in a
-	// restricted range -- first use a MemoryList with a small range,
-	// allocate the objects, then grow the memory, then allocate
-	// more objects.
-	int addChunk(unsigned addr,unsigned len);
-
-	// Reset the memory, clearing all previous allocations.
-	void reset();
-
-	// print (debug)
-	StringList print();
-};
-
-class LinProcMemory : public ProcMemory {
-protected:
-	MReqList lin;
-	MReqList circ;
-	MemoryList mem;
-	MConsecStateReq *consec;
-	MemMap	map;
-	// Record a memory allocation in the memory map.
-	void record(MReq* request, unsigned addr);
-
 public:
 	// Constructor with name, required State attributes, required PortHole
 	// attributes, starting address, and length specified.
 	LinProcMemory(const char* n, const Attribute& a,
-		      const Attribute& p,unsigned addr, unsigned len);
+		      const Attribute& p,const char* memoryMap);
+
+	// Copy constructor: allocation lists are always made empty,
+	// we only copy the total memory list.
+
+	LinProcMemory(const LinProcMemory& arg)
+		: ProcMemory(arg), mem(arg.mem), consec(0) {}
 
 	~LinProcMemory() { reset();}
 
 	// Reset the memory, clearing all previous allocations
 	void reset();
+
+	// Add memory to the available list.
+	void addMem(const IntervalList& toAdd);
+
+	// (re)initialize the mem and memAvail members.
+	void initMem(const IntervalList& memory);
 
 	// Log a request for memory, to be allocated later.
 	// Returns TRUE if the attributes of the state or port match the
@@ -182,8 +142,6 @@ public:
 
 	// Perform all registered allocation requests
 	int performAllocation();
-
-	void copyMem(MemoryList& src) { mem = src;}
 
 	// Return a string describing the memory map.
 	// The string consists of multiple lines, with each line beginning
@@ -199,22 +157,21 @@ class DualMemory : public LinProcMemory {
 protected:
 	LinProcMemory x;
 	LinProcMemory y;
-	unsigned sAddr, sLen;
-	unsigned xAddr, xLen;
-	unsigned yAddr, yLen;
 public:
 	// Constructor
 	DualMemory(const char* n_x,	// name of the first memory space
 		   const Attribute& st_x,	// attribute for states
 		   const Attribute& p_x,	// attribute for portholes
-		   unsigned x_addr,	// start of x memory
-		   unsigned x_len,	// length of x memory
+		   const char* x_map,		// map of x memory
 		   const char* n_y,	// name of the second memory space
 		   const Attribute& st_y,	// attribute for states
 		   const Attribute& p_y,	// attribute for portholes
-		   unsigned y_addr,	// start of y memory
-		   unsigned y_len	// length of y memory
+		   const char* y_map		// map of y memory
 	);
+
+	// Copy constructor
+	DualMemory(const DualMemory& arg) :
+		LinProcMemory(arg), x(arg.x), y(arg.y) {}
 
 	// Reset the memory, clearing all previous allocations
 	void reset();
