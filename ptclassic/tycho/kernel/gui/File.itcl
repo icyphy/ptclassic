@@ -745,9 +745,9 @@ body ::tycho::File::reload {} {
             seePoint $point
             markUnmodified
             if {[file writable $file]} {
-                configure -readonly 0
+		setReadOnly 0
             } else {
-                configure -readonly 1
+		setReadOnly 1
             }
         } {
             error "File $file exists but is not readable"
