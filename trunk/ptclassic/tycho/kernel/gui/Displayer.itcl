@@ -30,11 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME:
-# FEATURES TO BE ADDED:
-# (1) Add the remove menu method so that a menu can be removed
-
-
 #######################################################################
 #### Displayer
 # This class defines a generic view manager that manages a view.  A view
@@ -67,53 +62,71 @@ class ::tycho::Displayer {
     ###################################################################
     ####                            options                        ####
 
+    # Name of the menu bar widget for Displayer
+    itk_option define -menubar menubar Menubar ""
+
     # Name of displayer; appears as title of window
     itk_option define -name name Name ""
 
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a menu to the displayer
-    method addMenu {name leftOrRight args}
+    # Deregister a view
+    method deregisterView {viewLabel}
 
-    # Add a menu item to a menu in the displayer 
-    method addMenuItem {itemName inMenu args}
-    
-    # Add a separator to a menu
-    method addSeparator {inMenu}
+    # Get the displayer menubar
+    method menubar {viewLabel} {return $menubar}
 
-    # Disable an entire menu 
-    method disableMenu {name}
+    # Register the given view with the displayer
+    method registerView {viewName viewLabel} {return $menubar}
 
-    # Disable a menu item in a menu
-    method disableMenuItem {itemName inMenu}
-
-    # Enable an entire menu
-    method enableMenu {name}
-
-    # Enable a menu item in a menu
-    method enableMenuItem {itemName inMenu}
-
-    # Query the state of a menu item in a menu
-    method queryMenuItemState {itemName inMenu} {return $state}
-    
-    # Query the state of an entire menu
-    method queryMenuState {name} {return $state}
-
-    # Remove a menu from the displayer
-    method removeMenu {name}
+    # Remove the given view from the displayer
+    method removeView {viewLabel}
 
     # Display the given view inside the displayer
-    method setView {viewName}
-
+    method setView {viewLabel}
+    
     ###################################################################
-    ####                   private variables                       ####
+    ####                       private variables                   ####
 
-    # need a variable to keep track of number of menus added
-    private variable index 0
+    # keep the previous menubar so that it can be unpacked
+    private variable prevMenubar ""
 
-    # need a variable to keep track of menus
-    private variable validMenus
+    # keep a list of all views currently registered with the display
+    # indexed by their labels
+    private variable viewList 
+
+    # keep a list of inserted views
+    private variable insertedViews {}
+}
+
+#######################################################################
+#### -menubar configuration
+# Name of menubar for displayer  
+# 
+configbody ::tycho::Displayer::menubar {
+
+    # Only pack new menubar if different from previous
+    if {$itk_option(-menubar) != $prevMenubar} {
+
+	# If there is already a menubar then unpack it
+	# Leave deletion to creator of the menubar widget
+	# FIXME: this will not be needed once Tk 4.3 is available
+	if {$prevMenubar != ""} {
+	    pack forget $prevMenubar
+	}
+
+	# Pack the menu bar into the window
+	if {$itk_option(-menubar) != ""} {
+	    pack $itk_option(-menubar) \
+		    -in $itk_component(menuFrame) \
+		    -side left \
+		    -fill x
+	}
+
+	# Remember the menu bar for the next time
+	set prevMenubar $itk_option(-menubar)
+    }
 }
 
 #######################################################################
@@ -131,7 +144,7 @@ configbody ::tycho::Displayer::name {
 #
 body ::tycho::Displayer::constructor {args} {
 
-    # Setup the standard menu bar for a generic view
+    # Setup a frame for the menu bar
     itk_component add menuFrame {
 	frame $itk_component(childsite).menuFrame \
 		-relief raised \
@@ -141,7 +154,7 @@ body ::tycho::Displayer::constructor {args} {
     }
     pack $itk_component(menuFrame) -side top -fill x
 
-    # Setup the childsite for the incorporation of the view
+    # Setup the childsite for the incorporation of views
     itk_component add viewFrame {
 	frame $itk_component(childsite).viewFrame 
     } {
@@ -149,9 +162,25 @@ body ::tycho::Displayer::constructor {args} {
     }
     pack $itk_component(viewFrame) -side top -expand true -fill both
 
-    # Add the File menu which is probably going to be required for
-    # all displays
-    $this addMenu File left -underline 0
+    # Create the default menubar
+    # FIXME: remove once upgraded to Tk 4.3
+    itk_component add menubar {
+	::tycho::Menubar $itk_component(menuFrame).menubar
+    } {
+	keep -background -cursor
+    }
+
+    # Add  a File menu with a quit menu option so that when there are 
+    # no views, the display doesn't look weird with only a single Dismiss
+    # button.
+    $itk_component(menubar) addMenu File left {} -underline 0
+    $itk_component(menubar) addMenuItem Quit File \
+	    -command "$this nextWindow; delete object $this"
+
+    pack $itk_component(menubar) \
+	    -in $itk_component(menuFrame) \
+	    -side left \
+	    -fill x
 
     # reset the text of the dismiss button
     $itk_component(dismiss) configure -text "DISMISS"
@@ -161,6 +190,11 @@ body ::tycho::Displayer::constructor {args} {
     bind $prefix <Return> {}
 
     eval itk_initialize $args
+
+    # For some odd reason, if this is moved to before the itk_initialize, the
+    # standard Display menubar does not appear when the window is
+    # put up on the screen.
+    set prevMenubar $itk_component(menubar)
 }
 
 #######################################################################
@@ -175,336 +209,142 @@ body ::tycho::Displayer::destructor {} {
 
 
 #######################################################################
-#### addMenu
-# Allows a view to add a menu to its displayer.  The arguments to the
-# method are the name of the menu to be added and the specification of
-# extra options for the menu buttom besides the text and menu options.
-# An argument to pack menus on the left or right is also required.
+#### deregisterView
+# De-register a view.  After calling this method, the view and the view's menubar
+# will be no longer exist.  They will have to be constructed again.
 #
-body ::tycho::Displayer::addMenu {name leftOrRight args} {
-    
-    # check if name is already used 
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $name} {
-	    error "Menu $name already exists."
-	}
+body ::tycho::Displayer::deregisterView {viewLabel} {
+
+    # Check if view is registered
+    if [catch {set view $viewList($viewLabel)}] {
+	error "View with label $viewLabel not registered with display"
     }
-	    
-    # if not used, add to list of current menus
-    set validMenus($index) $name
-    incr index
-
-    # create the new menu
-    itk_component add menu_$name {
-	eval menubutton $itk_component(menuFrame).menu_$name \
-		-text "$name" \
-		-menu $itk_component(menuFrame).menu_$name.menu \
-		$args
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-
-    pack $itk_component(menu_$name) -side "$leftOrRight"
-
-    # New menu contents
-    itk_component add menuList_$name {
-	menu $itk_component(menu_$name).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
-
-}
-
-#####################################################################
-#### addMenuItem
-# Add a menu item to the end of a menu.
-# The method takes the name of the menu item, the name of the menu
-# in which the menu item is to be added and other menu item options
-# including the command option.
-#
-body ::tycho::Displayer::addMenuItem {itemName inMenu args} {
-    
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName does not already exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	
-	# create a new menu item 
-	eval $itk_component(menuList_$inMenu) add command \
-		[list -label "$itemName"] \
-		$args
-	
-    } {
-	# if it does then link it to cmd
-	eval $itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		$args
-    }
-}
-
-
-#####################################################################
-#### addSeparator
-# Add a separator to a menu.
-# The method takes the name of the menu as an argument.
-#
-body ::tycho::Displayer::addSeparator {inMenu} {
-
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-
-    $itk_component(menuList_$inMenu) add separator
-}
-
-#######################################################################
-#### disableMenu
-# This method provides a way for the view to disable an entire menu in
-# its displayer.  The name of the menu to be disabled is the only
-# argument.
-#
-body ::tycho::Displayer::disableMenu {name} {
-    
-    set found 0
-
-    # check for valid menu name
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $name} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $name does not exist."
-    }
-    
-    # Get the index of the last entry in the menu
-    set lastEntryIndex [$itk_component(menuList_$name) index last]
    
-    # disable all menu entries
-    set i 0
-    while {$i <= $lastEntryIndex} {
-	$itk_component(menuList_$name) entryconfigure $i -state disabled
-	incr i
-    }
-}
-
-#####################################################################
-#### disableMenuItem
-# Disable the menu item in the specified menu.  The menu item name 
-# and the name of the menu that contains the item are the required
-# arguments.
-#
-body ::tycho::Displayer::disableMenuItem {itemName inMenu} {
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		-state disabled
-    }
-}
-
-#####################################################################
-#### enableMenu
-# Enable an entire menu that has been previously disabled.  The name
-# of the menu of the menu to be enabled is the only argument.
-#
-body ::tycho::Displayer::enableMenu {name} {
-
-    set found 0
-
-    # check for valid menu name
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $name} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $name does not exist."
-    }
-    
-    # Get the index of the last entry in the menu
-    set lastEntryIndex [$itk_component(menuList_$name) index last]
-    
-    # enable all menu entries
-    set i 0
-    while {$i <= $lastEntryIndex} {
-	$itk_component(menuList_$name) entryconfigure $i -state normal
-	incr i
-    }
-}
-
-#####################################################################
-#### enableMenuItem
-# Enable the menu item in the specified menu. Required arguments are
-# the name of the menu item and the name of the menu that contains
-# the item.
-#
-body ::tycho::Displayer::enableMenuItem {itemName inMenu} {
-
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		-state normal
-    }
-}
-
-######################################################################
-#### queryMenuItemState
-# This method allows a view to query the state of a menu item.
-# The required arguments are the name of the menu item and the name
-# of the menu that contains it.  The method returns the state of the
-# menu item: normal, disabled, or active.
-#
-body ::tycho::Displayer::queryMenuItemState {itemName inMenu} {
-
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	set currentState [$itk_component(menuList_$inMenu) \
-		entrycget "$itemName" -state]
+    # If it is inserted in the display then first remove it and
+    # and then de-register it.
+    set index [lsearch -exact $insertedViews $viewLabel]
+    if {$index >= 0} {
+	$this removeView $viewLabel
     }
 
-    return $currentState
-}
+    # Destroy the view and its menubar
+    destroy $itk_component(menubar$viewLabel)
+    destroy $view
 
-#####################################################################
-#### queryMenuState
-# Query the current state of the menu. The only required argument is
-# the name of the menu.  The method returns 0 if all the items in
-# the menu are disabled, 1 if all the entries are enabled, and 
-# 2 otherwise.
-#
-body ::tycho::Displayer::queryMenuState {name} {
-    set found 0
-
-    # check for valid menu name
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $name} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $name does not exist."
-    }
-
-    # Get the index of the last entry in the menu
-    set lastEntryIndex [$itk_component(menuList_$name) index last]
-    
-    # query all entries and count the number of disabled and enabled
-    # entries
-    set i 0
-    set enabledCount 0
-    set disabledCount 0
-    while {$i <= $lastEntryIndex} {
-	set currentState [$itk_component(menuList_$name) entrycget $i -state]
-	if {$currentState == "normal"} {
-	    incr enabledCount
-	}
-	if {$currentState == "disabled"} {
-	    incr disabledCount
-	}
-	incr i
-    }
-
-    # if the total enabled entries equals the total number of entries then
-    # state of the menu is enabled, else if the total number of disabled
-    # entries equals the total number of entries then the state is disabled
-    # else it is neither.
-    if {$enabledCount == [expr $lastEntryIndex + 1]} {
-	return 1
-    } {
-	if {$disabledCount == [expr $lastEntryIndex +1]} {
-	    return 0
-	} {
- 	    return 2
-	}
-    }
+    # De-register the view
+    unset viewList($viewLabel)
 }
 
 #######################################################################
-#### removeMenu
-# Allows a view to remove a menu from its displayer.  It takes the
-# the name of the menu to be removed as an argument.
+#### menubar
+# Get the menubar associated with a specific view
+# If viewName is left empty, then the default menubar is returned.
 #
-body ::tycho::Displayer::removeMenu {name} {
+body ::tycho::Displayer::menubar {viewLabel} {
+
+    if {$viewLabel == ""} {
+	return $itk_component(menubar)
+    }
+
+    # Check to make sure view has been registered.
+    if [catch {set view $viewList($viewLabel)}] {
+	error "View with label $viewLabel not registered with display"
+    }
+
+    return $itk_component(menubar$viewLabel)
 }
 
+#######################################################################
+#### registerView
+# Register view with viewName and viewLabel with the Displayer.  A call to this method
+# is typically made in the constructor of views.  A menubar associated with the view
+# is returned.
+#
+body ::tycho::Displayer::registerView {viewName viewLabel} {
+
+    # Add the view to the list of views
+    set viewList($viewLabel) $viewName
+
+    # Create the menubar for the menu and return the name
+    itk_component add menubar$viewLabel {
+	::tycho::Menubar $itk_component(menuFrame).menubar$viewLabel
+    } {
+	keep -background -cursor
+    }
+    
+    return $itk_component(menubar$viewLabel) 
+}
+
+#######################################################################
+#### removeView
+# Remove view with the viewLabel from the Displayer but do not deregister the view
+# The view and its menubar are not destroyed.  A call to setView with the view's label
+# as the argument will re-insert the view into the Displayer.
+#
+body ::tycho::Displayer::removeView {viewLabel} {
+
+    # Check if viewName is registered
+    if [catch {set view $viewList($viewLabel)}] {
+	error "View $viewLabel not registered with display"
+    }
+   
+    # Check if view is inserted
+    set index [lsearch -exact $insertedViews $viewLabel]
+    if {$index < 0} {
+	error "View $view has not been inserted in Displayer"
+    }
+
+    # Remove menubar associated with view
+    pack forget $itk_component(menubar$viewLabel)
+    
+    # Remove view from display
+    pack forget $view
+    
+    # Remove view from list of inserted views
+    set insertedViews [lreplace $insertedViews $index $index]
+    
+    # Give focus to first view in the list of inserted views; if list is
+    # empty then insert the default menubar
+    if {[llength $insertedViews] <= 0} {
+	configure -menubar $itk_component(menubar)
+    } else {
+	set newViewLabel [lindex $insertedViews 0]
+	$this setView $newViewLabel
+    }
+}
 
 #######################################################################
 #### setView
 # Display the given view inside the displayer.  The required argument
-# is the name of the view widget.
+# is the label associated with the view.  The view must have registered itself with the
+# Displayer before it can be inserted into the Displayer
+# FIXME: might want to add another argument to determine whether view gets packed
+#             vertically or horizontally, ie like the -side option on the packer.
 #
-body ::tycho::Displayer::setView {viewName} {
+body ::tycho::Displayer::setView {viewLabel} {
 
-    # install view menus
-    $viewName addMyMenus
+    # Check if view is registered
+    if [catch {set view $viewList($viewLabel)}] {
+	error "View with label $viewLabel not registered with display"
+    }
+
+    # Check if view is inserted; if yes then just return
+    set index [lsearch -exact $insertedViews $viewLabel]
+    if {$index >= 0} {
+	return
+    }
+
     # pack into the view frame in the window childsite
-    pack $viewName -in $itk_component(viewFrame) -expand true -fill both
+    pack $view -in $itk_component(viewFrame) -expand true -fill both
+
+    # Install the appropriate menubar
+    configure -menubar $itk_component(menubar$viewLabel)
+
+    # Add to list of inserted views
+    lappend insertedViews $viewLabel
+
+    # Give the view the focus
+    $view focusin
 }
 
 
