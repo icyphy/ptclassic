@@ -145,7 +145,8 @@ void Wormhole :: buildEventHorizons () {
 	BlockMPHIter mpi(gal);
 	MultiPortHole* mp;
 	while ((mp = mpi++) != 0) {
-		LOG_NEW; WormMultiPort* wp = new WormMultiPort(this, *mp);
+		GalMultiPort* gp = (GalMultiPort*) mp;
+		LOG_NEW; WormMultiPort* wp = new WormMultiPort(this, *gp);
 		wp->setPort(mp->name(), &selfStar, mp->type());
 		selfStar.addPort(*wp);
 	}
