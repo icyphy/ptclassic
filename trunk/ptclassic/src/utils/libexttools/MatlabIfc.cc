@@ -615,11 +615,11 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
     // Matlab stores values in column-major order like Fortran
     Real* realp = mxGetPr(newMatlabMatrixPtr);
     for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	// index = jrows * numcols + jcol
 	int index = jcol;
 	for ( int jrow = 0; jrow < numrows; jrow++ ) {
-	    // index = jrows * numrows + jcol
 	    realp[index] = atof(*realPartStrings++);
-	    index += numrows;
+	    index += numcols;
 	}
     }
 
@@ -628,11 +628,11 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
     if ( realOrComplex == MXCOMPLEX ) {
 	Real* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	    // index = jrows * numcols + jcol
 	    int index = jcol;
 	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
-		// index = jrows * numrows + jcol
 		imagp[index] = atof(*imagPartStrings++);
-		index += numrows;
+		index += numcols;
 	    }
 	}
     }
@@ -663,6 +663,7 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 	if ( imagp ) *imagPartStrings = new (char*) [numelements];
 	else *imagPartStrings = 0;
 	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
+	    // index = jrows * numcols + jcol
 	    int index = jcol;
 	    for ( int jrow = 0; jrow < *numrows; jrow++ ) {
 		StringList realstring = *realp++;
@@ -671,7 +672,7 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 		    StringList imagstring = *imagp++;
 		    (*imagPartStrings)[index] = savestring(imagstring);
 		}
-		index += *numrows;
+		index += *numcols;
 	    }
 	}
 	mxFreeMatrix(matlabMatrix);
