@@ -42,8 +42,8 @@ cp /Cygnus/B19/H-i386-cygwin32/bin/rm.exe /bin
 by running 
 <pre>
 mkdir /etc
-mkpasswd -d -l -g
-mkgroup -d -l
+mkpasswd -d -l -g > /etc/passwd
+mkgroup -d -l > /etc/group
 </pre>
 For more information, type <CODE>mkpasswd</CODE> and <CODE>mkgroup</CODE>
 without any arguments.  The Cygwin faq also covers these programs.
