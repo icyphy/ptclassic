@@ -63,7 +63,7 @@ This star is based on the MaxMin star in the CG56 domain.
 	}    
 
 	code {
-#define FABS(a)	( (a > 0.0) ? (a) : -(a) )
+#define FABS(a)	( ((a) > 0.0) ? (a) : -(a) )
 	}
 
 	setup {
@@ -87,7 +87,7 @@ This star is based on the MaxMin star in the CG56 domain.
 		while ( i-- ) {
 		    double current = double(input%i);
 		    double currentCmp = cmpMagFlag ? FABS(current) : current;
-		    int minChangeFlag = ( currentCmp > valueCmp );
+		    int minChangeFlag = ( currentCmp < valueCmp );
 		    // Logical exclusive OR between maxflag and minChangeFlag
 		    // but we cannot use the bitwise xor ^
 		    if ( (maxflag && !minChangeFlag) ||
