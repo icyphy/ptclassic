@@ -828,7 +828,8 @@ original cell with the alternate cell using the recover-facet command.\n",
  * The real fix would be to check out serverVem.c and see if this call
  * is really necessary, but that would be non-trivial
  */
-void bufFindBuffer(octId id)
+void bufFindBuffer(id)
+octId id;
 {
   _bufFindBuffer(id);
 }
