@@ -17,6 +17,8 @@ ROOT=../../..
 VPATH = $(ROOT)/src/domains/ddf
 # Kernel directory
 KERNDIR=$(ROOT)/src/kernel
+# SDF support directory
+SDFDIR=$(ROOT)/src/domains/sdf
 # Where to install the libraries
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
@@ -27,7 +29,7 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -c $<
+	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -c $<
 
 # Library name
 LIB=libddf.a
@@ -66,7 +68,7 @@ clean:
 sources:	$(SRCS) $(HDRS) make.template
 
 depend:	
-		makedepend -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
+		makedepend -I$(SDFDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
 
 makefile:	make.template
 		rm -f makefile
