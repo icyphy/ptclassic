@@ -1,8 +1,8 @@
 # Version Identification:
-# $Id$
+# @(#)scratch-srcs.mk	1.31 3/3/95
 # Build GNU binaries and tcl/tk from scratch for Ptolemy
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
