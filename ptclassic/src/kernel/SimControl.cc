@@ -56,17 +56,16 @@ Polling functions added by Alan Kamas, 1/95
 #pragma implementation "SimAction.h"
 #endif
 
-#ifdef hppa
-#ifndef __GNUG__
+#include "compat.h"
+#ifdef PTHPPA_CFRONT
 // cfront on the hp
 typedef void (*SIG_PF)(int);
-#endif /* ! __GNUG__ */
-#endif /* hppa */
+#endif /* PTHPPA_CFRONT */
 
 #ifdef __GNUG__
-#ifndef sgi /* For use with cc -cckr Irix4.0.5H */
+#ifndef PTIRIX5 /* For use with cc -cckr Irix4.0.5H */
 typedef void (*SIG_PF)(int);
-#endif /*sgi*/
+#endif /* PTIRIX5 */
 #else
 #include <std.h>
 #endif
@@ -221,7 +220,7 @@ void SimControl::intCatcher(int) {
 }
 
 /* In gcc2.5.6, signal.h defines SIG_IGN incorrectly. */
-#if defined(ultrix) 
+#if defined(PTMIPS) 
 #ifdef __GNUG__
 #define	SIG_IGN		(void (*)(int))1
 #endif
