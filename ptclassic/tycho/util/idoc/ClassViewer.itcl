@@ -108,8 +108,8 @@ class ::tycho::IDoc {
     # Insert the specified data.
     public method insertData {data}
     
-    # Insert HTML into myHtml widget
-    public method putHtml {data}
+    # Insert HTML into myHtml(Top or Bottom) widget
+    public method putHtml {data {top 1}}
 
     ###################################################################
     ####                      protected variables                  ####
@@ -120,8 +120,11 @@ class ::tycho::IDoc {
     # Internal contents widget
     protected variable myContents
 
-    # Internal HTML widget
-    protected variable myHtml
+    # Internal HTML widget for class-wide documentation
+    protected variable myHtmlTop
+
+    # Internal HTML widget for user-chosen documentation
+    protected variable myHtmlBottom
 
     # Language of current myClass
     protected variable language
@@ -181,20 +184,29 @@ configbody ::tycho::IDoc::bodyfont {
 #
 body ::tycho::IDoc::constructor {args} {
 
-    # Setup a frame for the HTML and contents widgets
-    itk_component add mainFrame {
-        frame $itk_interior.mainFrame
+    # Setup a frame for the HTML widgets
+    itk_component add htmlFrame {
+        frame $itk_interior.htmlFrame
     } 
  
-    itk_component add html {
-        ::tycho::HTML $itk_interior.html
+    itk_component add html1 {
+        ::tycho::HTML $itk_interior.html1
     } {
         rename -textwidth -htmlwidth htmlWidth HtmlWidth
-        rename -textheight -height height Height
+        rename -textheight -topheight topHeight TopHeight
     }
 
-    set myHtml $itk_component(html)
-  
+    set myHtmlTop $itk_component(html1)
+
+    itk_component add html2 {
+        ::tycho::HTML $itk_interior.html2
+    } {
+        rename -textwidth -htmlwidth htmlWidth HtmlWidth
+        rename -textheight -bottomheight bottomHeight BottomHeight
+    }
+
+    set myHtmlBottom $itk_component(html2)
+
     itk_component add contents {
         ::tycho::MultiPanel $itk_interior.contents
     } {
@@ -205,12 +217,15 @@ body ::tycho::IDoc::constructor {args} {
     set myContents $itk_component(contents)
 
     pack $itk_component(contents) -side left -anchor w -fill y \
-            -in $itk_interior.mainFrame
+            -in $itk_interior
 
-    pack $itk_component(html) -side left -expand 1 -fill both \
-            -anchor n -in $itk_interior.mainFrame
+    pack $itk_component(html1) -side top -expand 1 -fill both \
+            -anchor n -in $itk_interior.htmlFrame
+
+    pack $itk_component(html2) -side top -expand 1 -fill both \
+            -anchor n -in $itk_interior.htmlFrame
     
-    pack $itk_component(mainFrame) -side top -expand 1 -fill both
+    pack $itk_component(htmlFrame) -side left -expand 1 -fill both
 
     # Insert items in the menubar, if there is one.
     if {$myMenubar != {}} {
@@ -278,9 +293,18 @@ body ::tycho::IDoc::insertData {data} {
 #### putHtml
 # Load a portion of HTML into the $myHtml widget
 #
-body ::tycho::IDoc::putHtml {data} {
-    $myHtml clear
-    $myHtml insertData $data
+body ::tycho::IDoc::putHtml {data {top 1}} {
+    switch $top {
+        1 {
+            $myHtmlTop clear
+            $myHtmlTop insertData $data
+
+        }
+        0 {
+            $myHtmlBottom clear
+            $myHtmlBottom insertData $data
+        }
+    }
 }
 
     ###################################################################
@@ -321,7 +345,7 @@ body ::tycho::IDoc::bindexpl {item label} {
 
     # bind explanation to double click
     $myContents bind $label <Double-Button-1> \
-            [code "$this putHtml {$expl}"]
+            [code "$this putHtml {$expl} {0}"]
 }
 
 ###########################################################################
