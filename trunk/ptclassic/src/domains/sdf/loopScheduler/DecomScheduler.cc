@@ -74,7 +74,7 @@ void DecomScheduler::buildClusters(LSGraph &g)
 	g.initializeCandidates();
 	while ((p=g.candidateFromFront())!=0) {
 		// when all masters have only one instances, stop clustering.
-		if (p->myMaster()->repetitions == 1) {
+		if (p->myMaster()->repetitions == Fraction(1)) {
 			// push back the current node
 			g.candidatePushBack(p);
 			return;
@@ -157,7 +157,7 @@ int DecomScheduler::topLevelSchedule(LSGraph &g)
 		while ((n = nextNode++ ) != 0) {
 			if (n->fireable()) {
 				n->fireMe();
-				mySchedule.append(n->myMaster());
+				mySchedule.append(*n->myMaster());
 				g.removeCandidate(n);
 				flag = TRUE;
 			}
