@@ -119,27 +119,27 @@ class ::tycho::EditSTD {
 ####  constructor & destructor
 #
 body ::tycho::EditSTD::constructor {args} {
-    component graphics interactiveEnable 0
+    interactiveEnable 0
 
     # Enable items in Edit menu
-    enableMenuItem "Edit Item" Edit
+    menubar enableMenuItem "Edit Item" Edit
 
     # Renew items in Edit menu
-    addMenuItem {Edit Item} Edit -underline 0 \
+    menubar addMenuItem {Edit Item} Edit -underline 0 \
 	    -command "$this editItem selected"
 
     # Add items into Special menu
-    insertMenuItem "I/O Port Names..." "Smooth Toggle" Special -underline 0 \
-            -command "$this ioPortNames"
-    insertMenuItem "Set Initial State" "Smooth Toggle" Special -underline 0 \
-            -command "$this setInitialState selected"
-    insertMenuSeparator "Smooth Toggle" Special
+    menubar insertMenuItem "I/O Port Names..." "Smooth Toggle" Special \
+	    -underline 0 -command "$this ioPortNames"
+    menubar insertMenuItem "Set Initial State" "Smooth Toggle" Special \
+	    -underline 0 -command "$this setInitialState selected"
+    menubar insertMenuSeparator "Smooth Toggle" Special
 
-    insertMenuItem "Make Icon..." "Get Info" Special -underline 0 \
+    menubar insertMenuItem "Make Icon..." "Get Info" Special -underline 0 \
             -command "$this makeIcon"
 
     # Initialize the variables.
-    set canvas [component graphics canvasName]
+    set canvas [canvasName]
 
     # Initialize the io portNames array elements.
     set portNames(in)  ""
@@ -174,7 +174,7 @@ body ::tycho::EditSTD::constructor {args} {
 	tkwait window $w
     }
 
-    component graphics interactiveEnable 1
+    interactiveEnable 1
 }
 
 #######################################################################
@@ -222,11 +222,11 @@ body ::tycho::EditSTD::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-	    disableMenuItem {Edit Item} Edit
-            disableMenuItem {Delete} Edit
+	    menubar disableMenuItem {Edit Item} Edit
+            menubar disableMenuItem {Delete} Edit
 	} {
-	    enableMenuItem {Edit Item} Edit
-            enableMenuItem {Delete} Edit
+	    menubar enableMenuItem {Edit Item} Edit
+            menubar enableMenuItem {Delete} Edit
 	}
     }
 }
