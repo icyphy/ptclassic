@@ -40,12 +40,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FSMStateStar.h"
 #include "FSMPortHole.h"
 
-
 class FSMScheduler : public Scheduler
 {
 public:
     // Constructor.
     FSMScheduler();
+
+    // Destructor
+    ~FSMScheduler();
 
     // Domain identification.
     /*virtual*/ const char* domain() const;
@@ -66,18 +68,18 @@ public:
     /*virtual*/ void resetStopTime(double);
 
     // Type of this machine.       //--|
-    char * machineType;            //  |
+    char* machineType;             //  |
                                    //  |
     // Input/Output name maps.     //  |--These three will be set by Target.
-    char *inputNameMap;            //  |
-    char *outputNameMap;           //--|
+    char* inputNameMap;            //  |
+    char* outputNameMap;           //--|
 
     // Return the input/output multiport of this FSM.
-    MultiPortHole *inPorts() { return myInPorts; }
-    MultiPortHole *outPorts() { return myOutPorts; }
+    MultiPortHole* inPorts() { return myInPorts; }
+    MultiPortHole* outPorts() { return myOutPorts; }
 
     // Return the private Tcl interp.
-    Tcl_Interp *interp() { return myInterp; }
+    Tcl_Interp* interp() { return myInterp; }
 
 protected:
     // Setup InPorts/OutPorts.
@@ -88,16 +90,20 @@ protected:
     int checkStars();
 
 private:
-    // The input/output multiport of this FSM.
-    MultiPortHole *myInPorts;
-    MultiPortHole *myOutPorts;
+    // The input multiport of this FSM.
+    MultiPortHole* myInPorts;
+
+    // The output multiport of this FSM.
+    MultiPortHole* myOutPorts;
 
     // Current state of this FSM.
-    FSMStateStar *curState;
-    // Next transition state.
-    FSMStateStar *nextState;
+    FSMStateStar* curState;
 
-    Tcl_Interp *myInterp;
+    // Next transition state.
+    FSMStateStar* nextState;
+
+    // Private Tcl interpreter
+    Tcl_Interp* myInterp;
 };
 
 #endif
