@@ -45,10 +45,10 @@ void SDFStar :: prepareForScheduling() {
 // firing SDF star
 void SDFStar :: fire() {
 	for(int i = numberPorts(); i > 0; i--)
-		nextPort().beforeGo();
+		nextPort().grabData();
 	go();
 	for(i = numberPorts(); i > 0; i--)
-		nextPort().afterGo();
+		nextPort().sendData();
 }
 
 // The following is defined in SDFDomain.cc -- this forces that module
