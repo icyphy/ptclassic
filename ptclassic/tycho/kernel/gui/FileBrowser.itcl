@@ -103,6 +103,10 @@ proc ::tycho::queryfilename {string {default {}}} {
 # directory will then be the default directory of any newly created
 # file browser.
 #
+# For information about the difference between Unix, Mac and Windows filenames
+# see the tcl filename documentation.  In the Itcl2.2 distribution, this
+# file is at itcl2.2/tcl7.6/doc/filename.n, and is in Unix Man page format.
+#
 class ::tycho::FileBrowser {
     inherit ::tycho::ListBrowser
 
@@ -402,7 +406,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     set dirLength [llength $dirList]
     set fileLength [llength $fileList]
     
-    if {$localCWD != "/"} {
+    if {$localCWD != [::tycho::rootDir $localCWD] } {
 	$itk_component(listbox) insert 0 $updir
     }
     
@@ -413,8 +417,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     } elseif {($dirLength == 0) && ($fileLength == 1)} {
 	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
-	# FIXME: Unixism - What about root on macs and windows?
-	if {$localCWD != "/"} {
+	if {$localCWD != [::tycho::rootDir $localCWD] } {
 	    insert entry "updir"
 	}
     }
