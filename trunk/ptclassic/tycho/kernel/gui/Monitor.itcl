@@ -418,7 +418,10 @@ body ::tycho::Monitor::execProcessInMonitor {} {
         # ASSERT([$this getSatusWait]!="running")       always the case
         if {[$this getStatusWait]=="normal"} {
             # If returned correctly, it's okay to exit this window
-            after 2000 delete object $this
+	    # Wrap this in a catch in case we already destroyed the
+	    # parent window, which will cause this window to be destroyed.
+	    # see tycho/editors/textedit/test/testEditC.itcl
+            after 2000 "catch {delete object $this}"
         } else {
             insertLine "<<NOTE: exit status is [$this getStatusWait],\
                     will not autodestroy.>>"
