@@ -119,7 +119,8 @@ all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim pitcl.html
 
 pitcl.html: PITcl.cc gendoc.tcl
 	@echo "Generating html documentation from PITcl.cc"
-	echo "set PTOLEMY $(PTOLEMY); source gendoc.tcl" | $(ISH)
+	(cd $(VPATH); \
+	  echo "set PTOLEMY $(PTOLEMY); source $(VPATH)/gendoc.tcl" | $(ISH))
 
 
 # tycommon.mk does not include a rule to build make.template, so 
