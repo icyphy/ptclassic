@@ -87,16 +87,11 @@ all: configure bin install
 MACH=`$(GNU_SRC)/gcc/config.guess`
 
 SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
-configure: $(GNU_OBJ)
-	-mkdir $(GNU_OBJ)/make
-	(cd $(GNU_OBJ)/make; \
-	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	@echo "Some non-GNU makes can't deal with VPATH"
-	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
+# gnu make and egcs
+configure: $(GNU_OBJ) configure_make configure_egcs 
+
+# gcc-2.x
+fsfconfigure: $(GNU_OBJ) configure_make
 	@echo "Now configure gcc"
 	-mkdir $(GNU_OBJ)/gcc
 	(cd $(GNU_OBJ)/gcc; \
@@ -111,12 +106,26 @@ configure: $(GNU_OBJ)
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 
+configure_make:
+	-mkdir $(GNU_OBJ)/make
+	(cd $(GNU_OBJ)/make; \
+	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+	@echo "Some non-GNU makes can't deal with VPATH"
+	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
+	@echo "Now configure gcc"
+
 # DEC make can't seem to handle VPATH very well
 #GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 #	 then echo $(GNU_OBJ)/make/make ; \
 #	 else echo make; fi`
 
-bin: bin_make bin_gcc install_gcc bin_libg++
+bin: bin_make bin_egcs
+
+bin_fsf: bin_make bin_gcc install_gcc install_gcc_links bin_libg++
 
 bin_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) )
@@ -128,9 +137,12 @@ bin_make:
 bin_gcc:
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make CC=$(CC) bootstrap)
 
-install_gcc: $(BINDIR)
+install_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
+install_gcc: $(BINDIR) install_make
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+
+install_gcc_links:
 	@echo "Install c++filt, the g++ name demangler"
 	-(cd $(GNU_OBJ)/gcc; cp c++filt $(BINDIR))
 	@echo "Set up some links so we can move the compiler"
@@ -146,7 +158,9 @@ bin_libg++:
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
-install: $(BINDIR) 
+install: install_make install_egcs install_gcc_links
+
+install_fsf: $(BINDIR) 
 	(cd $(GNU_OBJ)/libg++; \
 		PATH=$(GNU_OBJ)/binutils/gas:$(GNU_OBJ)/gcc:$(PATH); \
 		echo $$PATH; \
