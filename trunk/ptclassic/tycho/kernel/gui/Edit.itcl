@@ -58,13 +58,13 @@ class ::tycho::Edit {
     # Call this to give the text subwindow the focus.
     method focusin {}
 
-    #### getModified
-    # Return $modified.
-    method getModified {}
-
     #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
+
+    #### isModified
+    # Return $modified.
+    method isModified {}
 
     #### insertData
     # Insert data.
@@ -73,14 +73,6 @@ class ::tycho::Edit {
     #### insertFile
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
-
-    #### setFont
-    # Query the user for an alternative font.
-    method setFont {}
-
-    #### setInsert
-    # Set the insertion point to the value of position.
-    method setInsert {position}
 
     #### loadFile
     # Directly load the contents of the file.
@@ -97,6 +89,14 @@ class ::tycho::Edit {
     #### seeName
     # Go to the point in the text given by the specified regular expression.
     method seeName {regexpr}
+
+    #### setFont
+    # Query the user for an alternative font.
+    method setFont {}
+
+    #### setInsert
+    # Set the insertion point to the value of position.
+    method setInsert {position}
 
     ###################################################################
     ####                     protected methods                     ####
@@ -266,34 +266,6 @@ body ::tycho::Edit::focusin {} {
 }
 
 ###################################################################
-#### setFont
-# Query the user for an alternative font.
-#
-body ::tycho::Edit::setFont {} {
-    set ifont [cget -textfont]
-    set wname [autoName $itk_component(hull).font]
-    ::tycho::DialogWindow::new FontManager $wname \
-	    -initialfont $ifont \
-	    -okcommand [code \
-	    "$this configure -textfont \[$wname getCurrentFont\]"]
-}
-
-###################################################################
-#### setInsert
-# Set the insert point to the given position.
-#
-body ::tycho::Edit::setInsert {position} {
-    $itk_component(text) setInsert $position
-}
-
-###################################################################
-#### getModified
-#
-body ::tycho::Edit::getModified {} {
-    return $modified
-}
-
-###################################################################
 #### help
 # Open a window with help on the current widget.
 # This should be redefined in derived classes.
@@ -321,6 +293,13 @@ body ::tycho::Edit::insertFile {} {
 	    -text {File to Insert}]
     $itk_component(text) readFile $filename
     markModified
+}
+
+###################################################################
+#### isModified
+#
+body ::tycho::Edit::isModified {} {
+    return $modified
 }
 
 #####################################################################
@@ -415,4 +394,23 @@ body ::tycho::Edit::seeName {regexpr} {
     $itk_component(text) seeName $regexpr
 }
 
+###################################################################
+#### setFont
+# Query the user for an alternative font.
+#
+body ::tycho::Edit::setFont {} {
+    set ifont [cget -textfont]
+    set wname [autoName $itk_component(hull).font]
+    ::tycho::DialogWindow::new FontManager $wname \
+	    -initialfont $ifont \
+	    -okcommand [code \
+	    "$this configure -textfont \[$wname getCurrentFont\]"]
+}
 
+###################################################################
+#### setInsert
+# Set the insert point to the given position.
+#
+body ::tycho::Edit::setInsert {position} {
+    $itk_component(text) setInsert $position
+}
