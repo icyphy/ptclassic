@@ -223,7 +223,11 @@ clean::
 realclean:	clean
 
 
-sources depend sccsinfo clean lint:
+SRCS =		$(OBJECTS:.o=.c) 
+lint: $(SRCS) 
+	lint -u -Iinclude -Ibitmaps -I../include -I$(OCTTOOLS)/include $^ > lint
+
+sources depend sccsinfo clean ::
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
