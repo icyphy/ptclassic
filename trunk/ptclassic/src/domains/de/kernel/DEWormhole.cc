@@ -1,9 +1,9 @@
 static const char file_id[] = "DEWormhole.cc";
 /******************************************************************
 Version identification:
- $Id$
+$Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -92,19 +92,6 @@ void DEWormhole :: go()
 void DEWormhole :: wrapup()
 {
 	myTarget()->wrapup();
-}
-
-// new phase
-void DEWormhole :: startNewPhase() 
-{
-        BlockPortIter next(*this);
-        PortHole* p;
-        while ((p = next++) != 0) {
-                if (p->isItInput()) {
-                        InDEPort* inp = (InDEPort*) p;
-                        inp->cleanIt();
-                }
-        }
 }
 
 // cloner -- clone the inside and make a new wormhole from that.
