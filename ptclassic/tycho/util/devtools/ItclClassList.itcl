@@ -116,7 +116,6 @@ body ::tycho::ItclClassList::constructor {args} {
             -command "$this updateClassDiagram"
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     if {$classDiagramFile == "classDiagram.dag"} {
 	set classDiagramFile [file join [file dirname $file] classDiagram.dag]
