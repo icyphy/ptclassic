@@ -189,7 +189,7 @@ body ::tycho::Frame::_color {id canvas slate color} {
     set colorShadesObject($id) [::tycho::Shades::new $_color($id)]
 
     # FIXME: quick and dirty
-    _relief $id $canvas $_relief($id)
+    _relief $id $canvas $slate $_relief($id)
     $canvas itemconfigure $surface($id) -fill [$colorShadesObject($id) matt]
 }
 
