@@ -46,14 +46,8 @@ class ::tycho::IDocSys {
     ###################################################################
     ####                         public methods                    ####
 
-    # Generate the IDocumentation for a single Itcl file.
-    method generateSingleFileIDoc {filename}
-
-    # Generate an index of the IDocumentation (in HTML)
+    # Generate an index of the IDocumentation (in HTML) FIXME
     method generateIDocIndex { {title {"Index of classes"}}}
-
-    # Check if the given file is newer than its related documentation.
-    method modCheck {filename}
 
     ###################################################################
     ####                      public procs                         ####
@@ -63,6 +57,30 @@ class ::tycho::IDocSys {
 
     # Return a list of all the classes defined in the given source file.
     public proc getClassesInSource {filename}
+
+    # Return the DocSys type that generates IDocs for the given file.
+    public proc generator {filename}
+
+    # Check if the given file is newer than its related documentation.
+    public proc modCheck {filename}
+
+    ###################################################################
+    ####                   protected methods                       ####
+    
+    # Format the class comment, removing tags and things.
+    protected method formatClassComment {comment}
+
+    # Format a description properly
+    protected method formatDesc {comment}
+
+    # Format an explanation properly (in HTML)
+    protected method formatExpl {comment}
+
+    # Uncapitalize and unpluralize a docTag (Authors -> author)
+    protected method formatTag {docTag}
+
+    # Format a description in a short form (when only an explanation is found).
+    protected method shortDesc {comment}
 
     ###################################################################
     ####                   protected procs                         ####
@@ -79,6 +97,9 @@ class ::tycho::IDocSys {
     # The contributor(s) to the current source file
     protected variable contributor ""
 
+    # The package the current source file belongs to
+    protected variable package ""
+    
     # The version of the current source file
     protected variable version ""
 
@@ -96,76 +117,6 @@ class ::tycho::IDocSys {
 
     # The current source file name
     protected variable sourceFile
-
-
-    ###################################################################
-    ####                   private methods                         ####
-
-    # Read the current file, call parseData
-    private method readFile {filename}
-
-    # Parse the data for a single file, creating and modifying classes as needed
-    private method parseData {data}
-
-    # Parse the data within a class definition
-    private method parseClass {class body}
-
-    # Add the class comment by formatting it into HTML.
-    private method addClassComment {class expl}
-
-    # Uncapitalize and unpluralize a docTag (Authors -> author)
-    private method formatTag {docTag}
-
-    # Format and add the arguments in a form the class model understands
-    private method addArgs {class entityName arguments}
-
-    # Add the constructor to the class model
-    private method addConstructor {class arguments desc}
-
-    # Add the destructor to the class model
-    private method addDestructor {class desc}
-
-    # Add an itk_option to the class model
-    private method addItk_Option {class switchName desc {default {}}}
-    
-    # Add a common proc to the class model
-    private method addCommon {class commonName protection desc {default {}}}
-    
-    # Add a variable to the class model
-    private method addVariable {class varName protection desc {default {}}}
-
-    # Add a proc to the class model
-    private method addInsideProc {class procName arguments protection desc}
-    
-    # Add a method to the class model
-    private method addMethod {class methodName protection arguments desc} 
-
-
-    # Attach body information to the appropriate entity in the class model
-    private method addBody {bodyName arguments expl}
-
-    # Attach configbody information to the appropriate entity in the class model
-    private method addConfigBody {configName expl}
-
-    # Add a non-class procedure to the related class model
-    private method addOutsideProc {procName arguments expl}
-
-    
-    # Format a description properly
-    private method formatDesc {comment}
-
-    # Format an explanation properly (in HTML)
-    private method formatExpl {comment}
-
-    # Format a description in a short form (when only an explanation is found).
-    private method shortDesc {comment}
-
-    ###################################################################
-    ####                   private variables                       ####
-
-    # Keywords that can appear in a class definition
-    private common keywords "# variable common itk_option method proc constructor destructor public private protected inherit set array"
-
 }
 
 #######################################################################
@@ -179,44 +130,6 @@ body ::tycho::IDocSys::constructor {args} {
     ####                      public methods                       ####
 
 #####################################################################
-#### generateIDoc
-# Output an IDoc (::tycho::Class) representation of the given Itcl 
-# file (which must have been already read). 
-#
-body ::tycho::IDocSys::generateSingleFileIDoc {filename} {
-    # output class model data
-    foreach class [array names myClass] {
-        # puts $class
-        # puts [$myClass($class) describe
-        if {$class != "related"} {
-            set docFile [info namespace tail $class].idoc
-            ::tycho::rmIfNotWritable $docFile
-            set fd [open $docFile "w"]
-            $myClass($class) write $fd
-            close $fd
-            delete object $myClass($class)
-        } else {
-            if {$relatedModified} {
-                # NOTE: goes by the filename, not the class name, for
-                # related documentation
-                if {[array size myClass] == 1} {
-                    # Not related, ONLY docs
-                    set relFile [file root $filename].idoc
-                } else {
-                    # Related file
-                    set relFile [file root $filename]_rel.idoc
-                }
-                ::tycho::rmIfNotWritable $relFile
-                set fd [open $relFile "w"]
-                $myClass(related) write $fd
-                close $fd
-            }
-            delete object $myClass(related)
-        }
-    }
-}
-
-#####################################################################
 #### generateIDocIndex
 # Fixme!
 #
@@ -224,71 +137,6 @@ body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
 # FIXME: FIXME: FIXME!
 }
 
-#####################################################################
-#### modCheck
-# Checks if the current file is newer than it's associated documentation.
-# And returns 1 if so.
-#
-# This requires searching for all classes defined within the file and
-# checking if those class's documents are older. Takes about 5% of 
-# the time to create the docs.
-#
-# A more ideal system would check which classes need to be redocumented.
-# However, there are few sources with more than one class so this is a
-# decent compromise.
-#
-# For non-itcl/itk/tcl/tk files, it silently returns 1 because it can't tell.
-#
-body ::tycho::IDocSys::modCheck {filename} {
-    set sourceTime [file mtime $filename]
-    set extension [file extension $filename]
-
-    if {$extension == ".tcl" || $extension == ".tk" || $extension == ""} {
-        set docFile [file join doc codeDoc [file root $filename].idoc]
-        if ![file exists $docFile] {
-            # No tcl-only documentation
-            return 1
-        }
-        if {$sourceTime > [file mtime $docFile]} {
-            # The source is newer than the tcl-only docs
-            return 1
-        }
-        # It's okay
-        return 0
-    }
-    
-    if {$extension != ".itcl" && $extension != ".itk"} {
-        # Can't check other types of files
-        return 1
-    }
-
-    set classes [getClassesInSource $filename]
-    foreach class $classes {
-        if {$class == "related"} {
-            set relFile [file join doc codeDoc [file root $filename]_rel.idoc]
-            if ![file exists $relFile] {
-                # No class-related documentation
-                return 1
-            }
-            if {$sourceTime > [file mtime $relFile]} {
-                # The source is newer than the related docs
-                return 1
-            }
-            continue
-        }
-        set docFile [file join doc codeDoc [info namespace tail $class].idoc]
-        if ![file exists $docFile] {
-            # There is no documentation.
-            return 1
-        }
-        if {$sourceTime > [file mtime $docFile]} {
-            # The source is newer.
-            return 1
-        }
-    }
-    # not modified
-    return 0
-}
 
     ###################################################################
     ###################################################################
@@ -304,7 +152,8 @@ body ::tycho::IDocSys::modCheck {filename} {
 # stack.
 #
 body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
-    set IDocSys [::tycho::IDocSys [::tycho::autoName .IDocSys]]
+    set IDocSys ""
+
     set oneFileOnly [expr [llength $filelist] == 1] 
 
     if ![file isdirectory doc/codeDoc] {
@@ -312,9 +161,21 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     }
     set retval ""
     foreach filename $filelist {
-
-        if ![$IDocSys modCheck $filename] {
-            # file does not need to be redocumented if batch and not modified
+        set generator [generator $filename]
+        if {[info command $IDocSys] != {}} {
+            if ![$IDocSys isa $generator] {
+                delete object $IDocSys
+                set IDocSys [$generator [::tycho::autoName IDocSys]]
+            }
+        } {
+            # First file
+            set IDocSys [$generator [::tycho::autoName IDocSys]]
+        }
+puts "g:$generator"
+puts "id:$IDocSys"
+puts "type:[$IDocSys info class]"
+        if ![$generator::modCheck $filename] {
+            # file does not need to be redocumented if not modified
             if $debug {
               #  puts "$filename <not modified>"
             }
@@ -324,6 +185,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         if $debug {
             puts "$filename"
         }
+
         if ![file readable $filename] {
             set retval "$retval\nWarning: generateIDoc: $filename is not readable"
         } else {
@@ -350,6 +212,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     }
     if {$generateIndex == 1} {
         cd doc/codeDoc
+        # Uses the last IDocSys object...not implemented anyway. :)
         if [catch {$IDocSys generateIDocIndex $title} errMsg] {
             set retval "$retval\nWarning: $errMsg"
         }
@@ -360,51 +223,70 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
 }
 
 #####################################################################
+#### generator
+# Return the class name which generates ::tycho::Class models of the
+# given file. Returns {} if none exists.
+#
+# NOTE: This should not be redefined in it's children, rather when 
+# a new child is written, this method should be updated.
+#
+body ::tycho::IDocSys::generator {filename} {
+    set extension [file extension $filename]
+
+    # Note files with no extension are assumed to be Itcl or tcl scripts
+    switch $extension {
+        ".itcl" {return "::tycho::ItclDocSys"}
+        ".itk"  {return "::tycho::ItclDocSys"}
+        ".tcl"  {return "::tycho::ItclDocSys"}
+        ".tk"   {return "::tycho::ItclDocSys"}
+        ".java" {return "::tycho::JavaDocSys"}
+        ""      {return "::tycho::ItclDocSys"}
+    }
+    return {}
+}
+
+#####################################################################
 #### getClassesInSource
 # Quickly scan the source file for the classes which are defined within.
-# Requires around 5% of the time it takes to make the docs. Returns 
-# "related" if there are non-class structures (such as ensembles and 
-# procs) in the file.
 #
-# This is approximate, they must be declared before the first class 
-# in a file or after a body within a file. Which is only decent coding
-# style.
+# Calls the procedure in the appropriate child class for the given file
+# extension.
 #
 body ::tycho::IDocSys::getClassesInSource {filename} {
-    set inClass 0
-    set related 0
-    set retval {}
-    
-    set fd [open $filename]
-    while {![eof $fd]} {
-        gets $fd lineIn
-        if [regexp {^[	 ]*(class)[ 	]+([^ ]+)[ 	]+\{} \
-                $lineIn dummy dummy2 classname] {
-            lappend retval $classname
-            set inClass 1
-        }
-        if {$related} {
-            # don't bother checking
-            continue
-        }
-        # If no related information found yet, keep looking
-        if {$inClass} {
-            # if we see a body, we're out of the class declaration
-            if [regexp {^[	 ]*(body)[ 	]+[^ ]+[ 	]+[^ ]+} \
-                    $lineIn] {
-                set inClass 0
-            }
-        } else {
-            # check for outside procs or ensembles when not in the class
-            if [regexp {^[	 ]*((proc)|(ensemble))[ 	]+[^ ]+[ 	]+[^ ]+} \
-                    $lineIn] {
-                set retval [linsert $retval 0 "related"]
-                set related 1
-            }
-        }
+    set generator [generator $filename]
+
+    if {$generator != {}} {
+        return [$generator::getClassesInSource]
     }
-    close $fd
-    return $retval
+
+    error "Unsupported extension."
+}
+
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so.
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. In Itcl, this takes about 
+# 5 percent of the time to create the docs.
+#
+# A more ideal system would check which classes need to be redocumented.
+# However, there are few sources with more than one class so this is a
+# decent compromise.
+#
+# Works by calling the appropriate subclass proc for the file extension.
+#
+# For unsupported files, it silently returns 1 because it can't tell.
+#
+body ::tycho::IDocSys::modCheck {filename} {
+    set generator [generator $filename]
+
+    if {$generator != {}} {
+        return [$generator::modCheck $filename]
+    }
+
+    return 1
 }
 
     ###################################################################
@@ -422,531 +304,24 @@ body ::tycho::IDocSys::tydocUpdate {obj} {
     # NOTE: Formerly used
     #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
     if {[info which -command $obj] == {}} {
-	# If you are having trouble with safeUpdate, uncomment the line below
+        # If you are having trouble with safeUpdate, uncomment the line below
         # error "::tycho::safeUpdate: command aborted: $obj does not exist"
-
+        
         #::tycho::silentError
-	set savetkerror [info body ::tkerror]
-	proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
-	error silent
-
+        set savetkerror [info body ::tkerror]
+        proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+        error silent   
     }
     return 0
 }
 
     ###################################################################
     ###################################################################
-    ####                      private methods                      ####
+    ####                     protected methods                     ####
 
 #####################################################################
-#### readFile 
-# Read in a file line by line, identify comments, merge multi-line comments
-# into one line, bracket protect the comment contents, and append to a 
-# variable. Then parse that variable to distill class information.
-#
-body ::tycho::IDocSys::readFile {filename} {
-    # Initialize single file data
-    set author ""
-    set contributor ""
-    set version ""
-    set copyright ""
-
-    catch {unset myClass}
-
-    # check extension (only tcl/tk, itk, itcl supported as yet)
-    set ext [file extension $filename]
-    switch $ext {
-        .tk {
-            set language Itcl
-        }
-        .tcl {
-            set language Itcl
-        }
-        .itcl {
-            set language Itcl
-        }
-        .itk {
-            set language Itcl
-        }
-        "" {
-            # Fix for files such as tycho-mac, tydoc, idoc
-            set language Itcl
-        }
-        default {
-            error "::tycho::IDocSys does not support $ext files"
-        }
-    }
-
-    # setup related model for outside class information
-    set myClass(related) [::tycho::Class [::tycho::autoName class]]
-    set relatedModified 0
-
-    set sourceFile $filename
-    set inEscapedComments ""
-    set currentComment {}
-    set currentLongLine {}
-    set fd [open $filename]
-    while {![eof $fd]} {
-        # Keep interface live
-        tydocUpdate $this
-
-        gets $fd lineIn
-     
-        if {[regexp {\\$} $lineIn]} {
-            # Concatenate lines ending with a \.
-        }
-         
-        if [ regexp {^[	 ]*#(.*)$} $lineIn dummy commentText ] {
-            # It's some sort of comment
-            if {[regexp {^# --+[ 	]*$} $lineIn ]} {
-                # Filter out comment lines like the ones in iwidgets:
-                # -----------------------------------
-                continue
-            }
-            if {[regexp {^[	 ]*#[	 ]*#+.*$} $lineIn]} {
-                # Filter out comment lines with multiple #'s
-                continue
-            }
-            # Store adjacent comments
-            append currentComment $commentText "\n"
-        } else {
-            # The text is not a comment line
-            if {$currentComment != {}} {
-                append inEscapedComments "# " [list $currentComment] "\n"
-                set currentComment {}
-            }
-            if {$currentLongLine != {}} {
-                # Currently have a long line
-                if {[regexp {\\$} $lineIn]} {
-                    # Another follows
-                    append currentLongLine " " [string trimleft \
-                            [string trimright $lineIn \\]]
-                } else {
-                    # This is the last
-                    append currentLongLine " " [string trimleft $lineIn]
-                    append inEscapedComments $currentLongLine "\n"
-                    set currentLongLine {}
-                }
-                continue
-            }
-            if {[regexp {\\$} $lineIn]} {
-                # Begin a new long line (ending in "\")
-                append currentLongLine [string trimright $lineIn \\]
-                continue
-            }
-            append inEscapedComments $lineIn "\n"
-        } 
-    }
-    # Make sure all comments are saved
-    if {$currentComment != {}} {
-        append inEscapedComments "# " $currentComment "\n"
-    }
-    close $fd
-
-    parseData $inEscapedComments
-}
-
-#####################################################################
-#### parseData
-# Expects a modified source file, with adjacent comments all on one line,
-# useless comments removed. This data is then gone through as a list,
-# looking for toplevel keywords, such as "class" "proc" "configbody" and 
-# "body". These are parsed according to Itcl's syntax and information
-# of note is added to the class model.
-#
-# Comments are saved until the next keyword and are assumed to belong to
-# that entity. The class comment, then, must be the comment directly
-# preceding the class definition, ignoring initialization code that 
-# IDocSys does not recognize.
-#
-# NOTE: @ tags are only recognized in the class comment, the comment 
-# that appears before the class definition.
-#
-body ::tycho::IDocSys::parseData {data} {
-    set inComment 0
-    set inOutsideProc 0
-    set inBody 0
-    set inConfigBody 0
-    set inEnsemble 0
-    set inClass 0
-    set firstComment {}
-    set lastComment {}
-    foreach construct $data {
-        # Keep interface live.
-        tydocUpdate $this
-
-        if {$inComment} {
-            # This is a comment. Save it.
-            # The first comment in a file contains tags that need to be saved.
-            if {$firstComment == {}} {
-                set firstComment "$construct"
-            } else {
-                set lastComment "$construct"
-            }
-            set inComment 0
-            continue
-        }
-        if {$construct == "\n"} {
-            # Ignore empty lines outside of comments
-            continue
-        }
-        if {$inOutsideProc} {
-            # This is an outside proc. proc name args body
-            if {$inOutsideProc == 1} {
-                set procName $construct
-                set inOutsideProc 2
-            } elseif {$inOutsideProc == 2} {
-                set args $construct
-                set inOutsideProc 3
-            } else {
-                # puts "PROC: $procName ARGS: $args BODY: $construct"
-                addOutsideProc $procName $args $lastComment
-                set inOutsideProc 0
-                set lastComment {}
-                set procName {}
-                set args {}
-            }
-            continue
-        }
-        if {$inBody} {
-            # This is part of a body statement. body class::func arglist body
-            if {$inBody == 1} {
-                set bodyName $construct
-                set inBody 2
-            } elseif {$inBody == 2} {
-                set args $construct
-                set inBody 3
-            } else {
-                # puts "BODY: $bodyName ARGS: $args BODY: $construct"
-                addBody $bodyName $args $lastComment
-                set inBody 0
-                set lastComment {}
-                set bodyName {}
-                set args {}
-            }
-            continue
-        }
-        if {$inConfigBody} {
-            # This is part of a configbody statement. 
-            # configbody class::option body
-            if {$inConfigBody == 1} {
-                set optionName $construct
-                set inConfigBody 2
-            } else {
-                # puts "CONFIG: $optionName BODY: $construct"
-                addConfigBody $optionName $lastComment
-                set inConfigBody 0
-                set lastComment {}
-                set optionName {}
-            }
-            continue
-        }
-        if {$inEnsemble} {
-            # This is part of an ensemble statement. ensemble name { commands }
-            if {$inEnsemble == 1} {
-                set ensembleName $construct
-                set inEnsemble 2
-            } else {
-                #puts "ENS: $ensembleName BODY: $construct"
-                set inEnsemble 0
-                # FIXME: ensembles are unsupported
-                # Keep lastComment: probably relates to Class
-                set ensembleName {}
-            }
-            continue
-        }
-        if {$inClass} {
-            # This is part of a class statement. class name { definition }
-            if {$inClass == 1} {
-                set className $construct
-                set inClass 2
-            } else {
-                # puts "CLASS: $className BODY: $construct"
-                parseClass $className $construct
-                addClassComment $className "$firstComment \n $lastComment"
-                set inClass 0
-                set lastComment {}
-                set className {}
-            }
-            continue
-        }
-        if {[string index $construct 0] == "#"} {
-            # A comment follows.
-            set inComment 1
-            continue
-        }
-        if {$construct == "proc"} {
-            # A proc follows.
-            set inOutsideProc 1
-            continue
-        }
-        if {$construct == "body"} {
-            # A body follows.
-            set inBody 1
-            continue
-        }
-        if {$construct == "configbody"} {
-            # A configbody follows.
-            set inConfigBody 1
-            continue
-        }
-        if {$construct == "ensemble"} {
-            # An ensemble follows.
-            set inEnsemble 1
-            continue
-        }
-        if {$construct == "class"} {
-            # A class follows.
-            set inClass 1
-            continue
-        } 
-        # puts "UNCLASSIFIED: $construct"
-    }
-}
-
-
-#####################################################################
-#### parseClass
-# This method works in much the same way as parseBody. It takes the 
-# contents of the class definition and looks for keywords (see 
-# $keywords). These are then parsed according to Itcl syntax, relevant
-# information added to the class model for this class. 
-#
-# Because there may be multiple classes in one itcl file, each class
-# model is stored in an array which is indexed by the name of the class
-# the class models are created in this procedure while parsing the class
-# definition.
-#
-body ::tycho::IDocSys::parseClass {class body} {
-    set myClass($class) [::tycho::Class [::tycho::autoName class]]
-    $myClass($class) modelconfigure -language $language
-    $myClass($class) modelconfigure -name $class
-    $myClass($class) modelconfigure -source $sourceFile
-
-    set lastComment {}
-    set lastProtection {}
-    set default {}
-    set inComment 0
-    set inVariable 0
-    set inCommon 0
-    set inItk_Option 0
-    set inMethod 0
-    set inProc 0
-    set inConstructor 0
-    set inDestructor 0
-    set inInherit 0
-
-    # To assure every item is seen
-    lappend body # #
-
-    # Parse each item
-    foreach construct $body {
-        # Keep interface live
-        tydocUpdate $this
-
-        # Ignore empty lines (is necessary?)
-        if {$construct == "\n"} {
-            continue
-        }
-
-        # First, check if last word was a keyword
-        if {$inComment} {
-            # This is a comment. Save it.
-            set lastComment "$construct"
-            set inComment 0
-            continue
-        }
-        if {$inVariable} {
-            if {$inVariable == 1} {
-                set name $construct
-                # Default protection is protected
-                if {$lastProtection == {}} {
-                    set lastProtection protected
-                }
-                set inVariable 2
-                continue
-            }
-            # Check for initial value
-            if {[lsearch -exact $keywords $construct] == -1} {
-                # Must be an initial value, save it.
-                # FIXME: can be broken by having an initial value
-                # that is a keyword, as newlines are not considered
-                # NOTE: variables can have an initialization code
-                # field. This is ignored by the parser and is not
-                # specifically checked.
-                addVariable $class $name $lastProtection \
-                        $lastComment $construct
-                set inVariable 0
-                set lastComment {}
-                set lastProtection {}
-                continue 
-            }
-            # No initial value, parse construct.
-            addVariable $class $name $lastProtection $lastComment
-            set inVariable 0
-            set lastComment {}
-            set lastProtection {}
-        }
-        if {$inCommon} {
-            if {$inCommon == 1} {
-                set name $construct
-                # Default protection is protected
-                if {$lastProtection == {}} {
-                    set lastProtection protected
-                }
-                set inCommon 2
-                continue
-            }
-            # Check for initial value
-            if {[lsearch -exact $keywords $construct] == -1} {
-                # Must be an initial value, save it.
-                # FIXME: can be broken by having an intial value
-                # that is a keyword, as newlines are not considered
-                addCommon $class $name $lastProtection \
-                        $lastComment $construct
-                set inCommon 0
-                set lastComment {}
-                set lastProtection {}
-                continue
-            }
-            # Continue parsing this, there is no initial value
-            addCommon $class $name $lastProtection $lastComment
-            set inCommon 0
-            set lastComment {}
-            set lastProtection {}
-        }
-        if {$inItk_Option} {
-            if {$inItk_Option == 1} {
-                if {$construct != "define"} {
-                    # NOTE: must be itk_option define ...
-                    set inItk_Option 0
-                    continue
-                }
-                set inItk_Option 2
-                continue
-            }
-            if {$inItk_Option == 2} {
-                # save switchname
-                set name $construct
-                set inItk_Option 3
-                continue
-            }
-            if {$inItk_Option != 5} {
-                incr inItk_Option
-                continue
-            }
-            # At init value
-            addItk_Option $class $name $lastComment $construct
-            set inItk_Option 0
-            set lastComment {}
-            continue
-        }
-        if {$inMethod} {
-            if {$inMethod == 1} {
-                set name $construct
-                # Default protection is public
-                if {$lastProtection == {}} {
-                    set lastProtection public
-                }
-                set inMethod 2
-                continue
-            }
-            # Getting args
-            addMethod $class $name $lastProtection $construct $lastComment
-            set inMethod 0
-            set lastComment {}
-            set lastProtection {}
-            continue
-        } 
-        if {$inProc} {
-            if {$inProc == 1} {
-                set name $construct
-                # Default protection is public
-                if {$lastProtection == {}} {
-                    set lastProtection public
-                }
-                set inProc 2
-                continue
-            }
-            # Getting args
-            addInsideProc $class $name $lastProtection $construct $lastComment
-            set inProc 0
-            set lastComment {}
-            set lastProtection {}
-            continue
-        } 
-        if {$inConstructor} {
-            # $construct is args, init and body will be ignored by parser
-            addConstructor $class $construct $lastComment
-            set inConstructor 0
-            set lastComment {}
-            continue
-        }
-        if {$inDestructor} {
-            # No args. $construct is destructor body. Ignore.
-            addDestructor $class $lastComment
-            set inDestructor 0
-            set lastComment {}
-            continue
-        }
-        if {$inInherit} {
-            if {[string range $construct 0 1] == "::"} {
-                $myClass($class) parent $construct
-                continue
-            }
-            # No more parents, parse this.
-            set inInherit 0
-        }
-
-        # Below, parse keywords
-        # NOTE: does not support private {method {}{} variable {} ...}
-        switch -- $construct {
-            "#" {
-                set inComment 1
-            }
-            "private" {
-                set lastProtection private
-            }
-            "protected" {
-                set lastProtection protected
-            }
-            "public" {
-                set lastProtection public
-            }
-            "variable" {
-                set inVariable 1
-            }
-            "common" {
-                set inCommon 1
-            }
-            "itk_option" {
-                set inItk_Option 1
-            }
-            "method" {
-                set inMethod 1
-            }
-            "proc" {
-                set inProc 1
-            }
-            "constructor" {
-                set inConstructor 1
-            }
-            "destructor" {
-                set inDestructor 1
-            }
-            "inherit" {
-                set inInherit 1
-            }
-            default {
-                # puts "#UNCLASSIFIED: $construct"
-            }
-        }
-    }
-}
-
-#####################################################################
-#### addClassComment
-# Add a class comment to the class model. This method parses the 
+#### formatClassComment
+# This method parses the 
 # comment preceding the class definition, formatting it into HTML,
 # removing the copyright, and creating the footer with tagged 
 # information, including the first line of the copyright, the author,
@@ -954,10 +329,10 @@ body ::tycho::IDocSys::parseClass {class body} {
 #
 # If more than one class occupies a file, this information is
 # saved. That is, if the tags are not redefined for a new class,
-# the old information is used.
+# some of the old information (author, contributors, copyright, and 
+# version) is used.
 #
-body ::tycho::IDocSys::addClassComment {class expl} {
-    set classModel $myClass($class)
+body ::tycho::IDocSys::formatClassComment {expl} {
     # Parse line by line
     set explList [split $expl "\n"]
     set docTag desc
@@ -1007,7 +382,8 @@ body ::tycho::IDocSys::addClassComment {class expl} {
     if {$copyright != ""} {
         append expl "<br>Copyright: $copyright"
     }
-    $classModel annotation explanation "$expl"
+
+    return $expl
 }
 
 #####################################################################
@@ -1021,200 +397,6 @@ body ::tycho::IDocSys::formatTag {docTag} {
     set docTag [string tolower $docTag]
     set docTag [string trimright $docTag "s"]
     return $docTag
-}
-
-#####################################################################
-#### addArgs
-# Add the arguments to a proc or method to its associated entity in
-# the class model. This involves reformatting from Itcl:
-# <code>add {num1 {num2 0}}</code> to the class model's preferred
-# format: <code>parameter num1; parameter num2 -optional 1 -default 0</code>
-#
-body ::tycho::IDocSys::addArgs {class entityName arguments} {
-    set classModel $myClass($class)
-    foreach arg $arguments {
-        set default [lindex $arg 1]
-        # check the length in case the default is {}
-        if {[llength $arg] == 2} {
-            $classModel parameter $entityName [lindex $arg 0] \
-                    -optional 1 -default $default
-        } else {
-            $classModel parameter $entityName $arg
-        }
-    }
-}
-
-#####################################################################
-#### addConstructor
-# Add the constructor, its arguments, and associated description to
-# the class model for $class.
-#
-body ::tycho::IDocSys::addConstructor {class arguments desc} {
-    set classModel $myClass($class)
-    $classModel Constructor constructor
-    set desc [formatDesc $desc]
-    $classModel annotation constructor.description $desc Constructor
-    addArgs $class constructor $arguments    
-}
-
-#####################################################################
-#### addDestructor
-# Add the destructor, its arguments, and associated description to
-# the class model for $class.
-#
-body ::tycho::IDocSys::addDestructor {class desc} {
-    set classModel $myClass($class)
-    $classModel Destructor destructor
-    set desc [formatDesc $desc]
-    $classModel annotation destructor.description $desc Destructor
-}
-
-#####################################################################
-#### addItk_Option
-# Add the itk_option, its associated description, and its default (if 
-# any) to the class model for $class.
-#
-body ::tycho::IDocSys::addItk_Option {class switchName desc {default {}}} {
-    # Itk_options have the modifier flag set to itk_option in Itcl
-    set classModel $myClass($class)
-    $classModel variable $switchName \
-            -protection public -modifiers itk_option -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $switchName.description $desc variable
-}
-
-#####################################################################
-#### addCommon 
-# Add a common proc at the given protection, its associated description,
-# and its default (if any) to the class model for $class.
-#
-body ::tycho::IDocSys::addCommon {class commonName protection \
-        desc {default {}}} {
-    # Commons are variables of classwide scope in Itcl
-    set classModel $myClass($class)
-    $classModel variable $commonName \
-            -protection $protection -scope class -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $commonName.description $desc variable
-}
-
-#####################################################################
-#### addVariable 
-# Add a variable at the given protection, its associated description,
-# and its default (if any) to the class model for $class.
-body ::tycho::IDocSys::addVariable {class varName protection \
-        desc {default {}}} {
-    # Variables are variables of instance scope in Itcl
-    set classModel $myClass($class)
-    $classModel variable $varName \
-            -protection $protection -scope instance -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $varName.description $desc variable
-}
-
-#####################################################################
-#### addInsideProc
-# Add a proc which is part of a class at the given protection, its
-# associated description, and arguments to the class model for $class.
-#
-body ::tycho::IDocSys::addInsideProc {class procName protection \
-        arguments desc} {
-    # Procs are methods of classwide scope in Itcl
-    set classModel $myClass($class)
-    $classModel method $procName -protection $protection -scope class
-    set desc [formatDesc $desc]
-    $classModel annotation $procName.description $desc method
-    addArgs $class $procName $arguments
-}    
-
-#####################################################################
-#### addMethod 
-# Add a method at the given protection, its arguments, and associated
-# description to the class model for $class.
-#
-body ::tycho::IDocSys::addMethod {class methodName protection arguments desc} {
-    # Methods are methods of instance scope in Itcl
-    set classModel $myClass($class)
-    $classModel method $methodName -protection $protection -scope instance
-    set desc [formatDesc $desc]
-    $classModel annotation $methodName.description $desc method
-    addArgs $class $methodName $arguments
-}
-
-#####################################################################
-#### addBody 
-# Add the information from a body structure to the class model. The body
-# name contains the information necessary to decide which class it 
-# belongs to and which entity its information is applicable to. At 
-# present, it just ignores the $arguments argument because those are
-# added when the entity is first parsed. It adds the explanation to
-# the given entity in the proper class.
-#
-body ::tycho::IDocSys::addBody {bodyName arguments expl} {
-    # assumes the method or proc already exists
-    set class [info namespace qualifiers $bodyName]
-    set bodyName [info namespace tail $bodyName]
-
-    # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists myClass($class)] {
-        set class "::$class"
-    }
-
-    if [info exists myClass($class)] {
-        set classModel $myClass($class)
-        # Insert the explanation
-        set expl [formatExpl "$expl"]
-        if {$expl != {}} {
-            $classModel annotation $bodyName.explanation $expl method
-        }
-    }
-}
-
-#####################################################################
-#### addConfigBody 
-# Add the information from a configbody structure to the class model.
-# the config name contains the information necessary to decide which
-# class it belongs to and which entity its information is applicable
-# to. It adds the explanation to the proper entity in the proper
-# class model.
-#
-body ::tycho::IDocSys::addConfigBody {configName expl} {
-    # assumes the itk_option already exists
-    set class [info namespace qualifiers $configName]
-    set configName [info namespace tail $configName]
- 
-    # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists myClass($class)] {
-        set class "::$class"
-    }
-
-    if [info exists myClass($class)] {
-        set classModel $myClass($class) 
-        set expl [formatExpl "$expl"]
-        if {$expl != {}} {
-            $classModel annotation $configName.explanation $expl variable
-        } 
-    }
-}
-
-#####################################################################
-#### addOutsideProc
-# Add the proc given to the related class model. This model contains
-# all procs which are not defined within a specific class namespace
-# yet are found in the current file.
-#
-body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
-    # add to $myClass(related)
-    set classModel $myClass(related)
-    $classModel method $procName -protection public -scope class
-    set expl [formatExpl "$expl"]
-    if {$expl != {}} {
-        $classModel annotation $procName.explanation $expl method
-    }
-    set desc [shortDesc "$expl"]
-    $classModel annotation $procName.description $desc method
-   
-    set relatedModified 1
 }
 
 #####################################################################
@@ -1288,8 +470,18 @@ body ::tycho::IDocSys::formatExpl {comment} {
 #
 body ::tycho::IDocSys::shortDesc {comment} {
     set comment [formatDesc $comment]
-    if {[string length $comment] > 150} {
-        set comment "[string range $comment 0 150]..."
+
+    # Return the first sentence.
+    set index 0
+    set length [string length $comment]
+    for {} {$index < $length} {incr index} {
+        set letter [string index $comment $index]
+        if {$letter == "." || $letter == "!" || $letter == "?"} {
+            return [string range $comment 0 $index]
+        }
+        if {$letter == "@"} {
+            return [string range $comment 0 [decr index]]
+        }
     }
     return $comment
 }
