@@ -87,3 +87,12 @@ group miscellaneous {
 	-numoutputs 1
     }
 }
+
+group test {
+    -label {Test Icons}
+    item simple {
+        -label {A Simple Icon}
+	-numinputs 0
+	-numoutputs 1
+    }
+}
