@@ -7,6 +7,8 @@ Phased array antenna simulation.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Ie "phased array antenna"
+.Ie "antenna, phased array"
 This demo simulates a plane wave approaching an array of four antennas
 from angles starting from head on and slowly rotating 360 degrees.
 The response of the antenna is plotted as a function of direction
