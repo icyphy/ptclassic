@@ -121,6 +121,7 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "oh.h"
 #include "tap.h"
+#include "errtrap.h"		/* For errRaise() */
 #include "lel.h"
 
 
@@ -201,7 +202,7 @@ unsigned bytes;
     }
     if ((bottom - top + ((top >= bottom) ? RING_SIZE : 0)) < bytes) {
 	/* No space - should create new larger ring */
-	(void) sprintf(error_message,"ring_alloc: no more space - bytes=%d bot=%d top=%d size=%d",
+	(void) sprintf(error_message,"ring_alloc: no more space - bytes=%d bot=%ld top=%ld size=%d",
 		bytes, bottom, top, RING_SIZE);
 	err(error_message);
     }
@@ -381,7 +382,7 @@ stack_item *item;
 	    }
 	} else {
 	    item->string.value = ALLOC(char, MAX_REAL_LENGTH);
-	    (void) sprintf(item->string.value, "%lg", old.real.value);
+	    (void) sprintf(item->string.value, "%g", old.real.value);
 	}
 	break;
     case STR:
@@ -709,7 +710,7 @@ char *fct_spec;
     if (fct->contents.facet.cell) {
 	result.type = STR;
 	strcpy(lib_name,fct->contents.facet.cell);
-	if (cptr=strrchr(lib_name,'/')) {
+	if ( (cptr=strrchr(lib_name,'/')) ) {
 	    *cptr='\0';
 	} else {
 	    lib_name[0]='\0';
@@ -739,7 +740,7 @@ char *fct_spec;
 
     if (fct->contents.facet.cell) {
 	result.type = STR;
-	if (cptr=strrchr(fct->contents.facet.cell,'/')) {
+	if ( (cptr=strrchr(fct->contents.facet.cell,'/')) ) {
 	    ++cptr;
 	    result.string.value = ALLOC(char,strlen(cptr)+1);
 	    strcpy(result.string.value, cptr);
@@ -836,7 +837,7 @@ char *fct_spec;
     }
     format_string = format->string.value;
     strcpy(lib_name,fct->contents.facet.cell);
-    if (cptr=strrchr(lib_name,'/')) {
+    if ( (cptr=strrchr(lib_name,'/')) ) {
 	strcpy(cell_name,++cptr);
 	*--cptr='\0';
     } else {
@@ -1071,7 +1072,7 @@ char *fct_spec;
     } else {
 	char errbuf[1024];
 
-	(void) sprintf(errbuf, "?%d?", one->integer.value);
+	(void) sprintf(errbuf, "?%ld?", one->integer.value);
 	result.string.value = ALLOC(char, strlen(errbuf)+1);
 	(void) strcpy(result.string.value, errbuf);
     }
@@ -1167,7 +1168,7 @@ char *fct_spec;
 	char errbuf[1024];
 
 	result.type = STR;
-	(void) sprintf(errbuf, "?%d?", one->integer.value);
+	(void) sprintf(errbuf, "?%d?", (int)one->integer.value);
 	result.string.value = ALLOC(char, strlen(errbuf)+1);
 	(void) strcpy(result.string.value, errbuf);
     }
@@ -1336,13 +1337,13 @@ char *fct_spec;
 				fw->integer.value+1 : MAX_REAL_LENGTH);
     if (fw->integer.value != 0) {
 	if (pre->integer.value > 0) {
-	    (void) sprintf(format, "%%%d.%de", fw->integer.value,
-			   pre->integer.value);
+	    (void) sprintf(format, "%%%d.%de", (int)fw->integer.value,
+			   (int)pre->integer.value);
 	} else {
-	    (void) sprintf(format, "%%%de", fw->integer.value);
+	    (void) sprintf(format, "%%%de", (int)fw->integer.value);
 	}
     } else if (pre->integer.value > 0) {
-	(void) sprintf(format, "%%.%de", pre->integer.value);
+	(void) sprintf(format, "%%.%de", (int)pre->integer.value);
     } else {
 	(void) strcpy(format, "%e");
     }
@@ -1380,6 +1381,8 @@ static struct engrScale fullScale[] = {
     {	1e-18,	1e-18,	"a"	},
     {	0,	1,	""	},
 };
+#ifdef NEVER
+/* These are apparently unused */
 static struct engrScale capScale[] = {
     {	1e-1,	1,	""	},
     {	1e-8,	1e-6,	"u"	},
@@ -1391,6 +1394,7 @@ static struct engrScale capScale[] = {
 static struct engrScale noScale[] = {
     {	0,	1,	""	},
 };
+#endif
 
 
 
@@ -1434,7 +1438,8 @@ char *fct_spec;
     }
     if (neg_flag) num->real.value = -(num->real.value);
     if (pre->integer.value > 0) {
-	(void) sprintf(format, "%%.%dg%s", pre->integer.value, idx->prefix);
+	(void) sprintf(format, "%%.%dg%s", (int)pre->integer.value,
+		       idx->prefix); 
     } else {
 	(void) sprintf(format, "%%g%s", idx->prefix);
     }
@@ -1442,7 +1447,7 @@ char *fct_spec;
 	char scratch[MAX_REAL_LENGTH];
 
 	(void) sprintf(scratch, format, num->real.value/idx->factor);
-	(void) sprintf(format, "%%%ds", fw->integer.value);
+	(void) sprintf(format, "%%%ds", (int)fw->integer.value);
 	(void) sprintf(result.string.value, format, scratch);
     } else {
 	(void) sprintf(result.string.value, format, num->real.value/idx->factor);
@@ -1506,8 +1511,8 @@ static void init()
 	int_tbl[i] = real_tbl[i] = '\0';
     }
     for (c = '0';  c <= '9';  c++) {
-	int_tbl[c] = c;
-	real_tbl[c] = c;
+	int_tbl[(int)c] = c;
+	real_tbl[(int)c] = c;
     }
     int_tbl['+'] = real_tbl['+'] = '+';
     int_tbl['-'] = real_tbl['-'] = '-';
@@ -1640,7 +1645,7 @@ char *expr;
 
     if (result) FREE(result);
     if (stack_top < 0) init();
-    while (token = get_token(&idx)) {
+    while ( (token = get_token(&idx)) ) {
 	if (token[0] == '"') {
 	    item.type = STR;
 	} else {
@@ -1699,6 +1704,8 @@ char *expr;
 		} else {
 		    item.string.value[last-1] = '\0';
 		}
+		break;
+	      case OP:		/* OP handled above. */
 		break;
 	    }
 	    PUSH(&item);
