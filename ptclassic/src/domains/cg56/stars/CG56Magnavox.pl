@@ -99,7 +99,7 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 		type { int }
   		desc { internal }
 		default { 0 }
- 		attributes {A_NONSETTABLE|A_NONCONSTANT|A_XMEM}
+ 		attributes {A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
 	} 	
         codeblock(pollingInit) {
 ; Polling version

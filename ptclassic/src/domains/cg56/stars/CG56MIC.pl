@@ -45,6 +45,14 @@ DSP56000 - An input star for the Ariel digital microphone
                 default { "yes" }
         }
         state {
+                name { bufLen }
+                type { int }
+                desc { internal }
+                default { 4 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
+        }
+
+        state {
                 name { starInBufptr }
 	        type { fix }
 	        desc { internal }
@@ -63,14 +71,14 @@ DSP56000 - An input star for the Ariel digital microphone
                 type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+                attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC}
         }        
         state {
-                name { intBufferPtr }
+                name { intBufferStart }
                 type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+                attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
         }        
 	    
         codeblock (pollingInit) {
@@ -144,7 +152,90 @@ $label(two)
         movep   x:m_rx,x0
         move    x0,$ref(output2)
         }    
+        codeblock(interruptEquate) {
+; $starSymbol(mic) interrupt circular buffer equates
+$starSymbol(mic)_savereg   equ     $addr(saveReg)
+$starSymbol(mic)_buflen    equ     $val(bufLen)
+$starSymbol(mic)_insptr    equ     $addr(starInBufptr)
+$starSymbol(mic)_iniptr    equ     $addr(intBufferStart)
 
+; Interrupt handler's next-word-to-write pointer
+        org     $ref(intBufferStart)
+        dc      $addr(intBuffer)
+        org     p:
+
+; Empty input buffer by setting bit 0 in each word
+        move    x:$starSymbol(mic)_iniptr,r0
+        move    r0,x:$starSymbol(mic)_insptr
+        move    #$starSymbol(mic)_buflen-1,m0
+        rep     #$val(bufLen)
+        bset    #0,x:(r0)+
+        move    #-1,m0
+        }
+        codeblock(interruptInit) {
+        org     p:i_ssird
+        jsr     $starSymbol(mic)_intr
+        }    
+        codeblock(interruptCont) {
+; Set SSI interrupt to priority 2
+        bset    #12,x:m_ipr
+        bset    #13,x:m_ipr
+; SSI Control Register A
+; 16 bits per word, two words per frame
+        movep   #$$4100,x:m_cra
+; SSI Control Register B
+; Enable receiver and rx interrupts in network mode
+        movep   #$$AA00,x:m_crb
+; Configure PC pins 7, 6, 5 (SRD, SCK, SC2) as SSI pins
+        bset    #7,x:m_pcc
+        bset    #6,x:m_pcc
+        bset    #5,x:m_pcc
+; Configure PC pins 2, 1, and 0 as outputs for sample rate control
+        bset    #2,x:m_pcddr
+        bset    #1,x:m_pcddr
+        bset    #0,x:m_pcddr
+        }
+        codeblock(interruptIn) {
+; Input first sample from interrupt buffer
+        move    x:$starSymbol(mic)_insptr,r0       ; Get pointer to input position
+        move    #$starSymbol(mic)_buflen-1,m0      ; and set modulus
+$label(fillOne)
+        jset    #0,x:(r0),$label(fillOne) ; Wait for position to have data
+        move    x:(r0),y0               ; Get sample from buffer
+        bset    #0,x:(r0)+              ; Mark position as empty
+        move    y0,$ref(output1)
+; Input second sample from interrupt buffer
+$label(fillTwo)
+        jset    #0,x:(r0),$label(fillTwo) ; Wait for position to have data
+        move    x:(r0),y0               ; Get sample from buffer
+        bset    #0,x:(r0)+              ; Mark position as empty
+        move    y0,$ref(output2)
+        move    r0,x:$starSymbol(mic)_insptr       ; Save pointer to next position
+        move    #-1,m0                  ; Restore modulus
+        }    
+        codeblock(interruptTerminate) {
+; Input interrupt handler for 56mic1
+$starSymbol(mic)_intr
+        move    y0,x:$starSymbol(mic)_savereg+0    ; Save y0, r0, m0
+        move    r0,x:$starSymbol(mic)_savereg+1
+        move    m0,x:$starSymbol(mic)_savereg+2
+        move    #$starSymbol(mic)_buflen-1,m0
+; Input sample and update buffers
+        move    x:$starSymbol(mic)_iniptr,r0       ; r0 points to where to save sample
+        nop
+        jset    #0,x:(r0),$label(empty) ; Error if it's already used
+        move    #$$123041,y0
+        jmp     ERROR
+$label(empty)
+        movep   x:m_rx,y0
+        move    y0,x:(r0)
+        bclr    #0,x:(r0)+              ; Mark location as used
+        move    r0,x:$starSymbol(mic)_iniptr       ; Save updated pointer
+        move    x:$starSymbol(mic)_savereg+0,y0    ; Restore y0, r0, m0
+        move    x:$starSymbol(mic)_savereg+1,r0
+        move    x:$starSymbol(mic)_savereg+2,m0
+        rti
+        }    
         start {
         const char* a=forceInterrupts;
 	const char* b=abortOnRealtimeError;
@@ -174,9 +265,16 @@ $label(two)
 		      if (sampleRate==11025) gencode(one);
 		      if (sampleRate==5512)  gencode(five);
              }
-             else  
-                      return;
-                    
+             else {
+                      gencode(interruptEquate);
+                      genInterruptCode(interruptInit);           
+                      gencode(interruptCont);
+                      if (sampleRate==88200) gencode(eight);
+		      if (sampleRate==44100) gencode(four);
+		      if (sampleRate==22050) gencode(two);
+		      if (sampleRate==11025) gencode(one);
+		      if (sampleRate==5512)  gencode(five);
+             }
         }
 
         go { 
@@ -187,7 +285,9 @@ $label(two)
                       gencode(abortyes);
                  gencode(polling);
              }
-
+             else {
+	         gencode(interruptIn);
+             }		 
         }
 	execTime { 
         const char* y = forceInterrupts;
@@ -196,4 +296,11 @@ $label(two)
 	     else
 	           return 61;
         }
+        wrapup {
+        const char* i = forceInterrupts;
+              if (i[0]=='y' || i[0]=='Y') {
+                  gencode(interruptTerminate);
+              }
+        }
+
 }
