@@ -615,6 +615,95 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
+// ptkGetComment <facet-id>
+// returns the Comment for the passed facet or instance.
+//
+// Written by Alan Kamas  1/94
+// 
+int POct::ptkGetComment (int aC,char** aV) {
+    octObject facet;
+    char *comment;
+
+    if (aC != 2) return  
+            usage ("ptkComment <OctObjectHandle>");
+
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (!GetCommentProp(&facet, &comment)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Make sure that the comment is defined.
+    if (comment == NULL) {
+        Tcl_AppendResult(interp, "", (char *) NULL);
+    } else {
+        // return the comment as a list element to preserve whitespace
+        Tcl_AppendElement( interp, comment);
+    }
+
+    return TCL_OK;
+}
+
+// ptkSetComment <facet-id> <commentList> 
+//
+// saves the comment into the passed facet/instance
+// The Comment List is of the form {CommentName CommentValue}
+//   it is the CommentValue that is stored into the facet
+// This procedure was written to work with ptkEditValues
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkSetComment (int aC,char** aV) {
+    octObject facet;
+    char* commentList;
+    char* comment;
+    int commentC;
+    char **commentV;
+
+    if (aC != 3) return 
+        usage ("ptkSetComment <OctObjectHandle> <CommentList>");
+    commentList = aV[2];
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Get the Comment Value out of the Comment List
+    if (Tcl_SplitList( interp, commentList, &commentC, &commentV ) != TCL_OK){
+        Error::error("Cannot parse comment list: ", commentList);
+        return 0;
+    }
+
+    if (commentC != 2) {
+        Tcl_AppendResult(interp, "Comment list does not have 2 elements.", 
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    comment = commentV[1];
+
+    // Set the comment into the passed facet
+    if (!SetCommentProp(&facet, comment)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Free the memory used by commentV as it is no longer needed
+    free((char *) commentV);
+
+    return TCL_OK;
+
+}
+
 // ptkGetDomainNames <facet-id>
 // returns a list of names of domains for the passed facet
 //
@@ -623,11 +712,7 @@ int POct::ptkSetParams (int aC,char** aV) {
 int POct::ptkGetDomainNames (int aC,char** aV) {
     octObject facet;
     char *domain;
-    int nDomains;
-
-    char *defaultTarget, *target ;
-    char *targetNames[MAX_NUM_TARGETS];
-    int nTargets, nChoices, i;
+    int nDomains, i;
 
     if (aC != 2) return  
             usage ("ptkGetDomainNames <OctObjectHandle>");
@@ -1233,6 +1318,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkCompile),
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
+	ENTRY(ptkGetComment),
+	ENTRY(ptkSetComment),
 	ENTRY(ptkGetDomainNames),
 	ENTRY(ptkSetDomain),
 	ENTRY(ptkGetTargetNames),
