@@ -38,6 +38,7 @@ SRCS= \
  SDFBlockFIR.pl \
  SDFBlockAllPole.pl \
  SDFBurg.pl \
+ SDFBusToNum.pl \
  SDFCommutator.pl \
  SDFComplexDC.pl \
  SDFComplexFFT.pl \
@@ -45,6 +46,7 @@ SRCS= \
  SDFComplexProduct.pl \
  SDFComplexReal.pl \
  SDFComplexSum.pl \
+ SDFCompress.pl \
  SDFCos.pl \
  SDFCut.pl \
  SDFCxDiff.pl \
@@ -97,6 +99,8 @@ SRCS= \
  SDFMotionCmp.pl \
  SDFMotionCmpInv.pl \
  SDFMux.pl \
+ SDFNewQuant.pl \
+ SDFNumToBus.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
