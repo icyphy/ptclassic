@@ -57,9 +57,9 @@
 #
 # In another example, we automatically start up the subprocess, and then
 # close the window if the subprocess completed without an error:
-# <tcl><pre>
+# <tcl quiet><pre>
 #   ::tycho::view Monitor -toolbar 1 &#92
-#      -command {ls -al} -autostart 1 -autodestroy 10
+#      -command {ls -al} -autostart 1 -autodestroy 1
 # </pre></tcl>
 # If the make in the above example had returned an error, then the window
 # would not have been destroyed.
