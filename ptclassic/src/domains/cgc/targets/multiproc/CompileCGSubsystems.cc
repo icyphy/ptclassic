@@ -97,7 +97,7 @@ void CompileCGSubsystems::wormPrepare() {
 }
 
 int CompileCGSubsystems::modifyGalaxy() {
-    // Let HOF type stars do there magic
+    // Let HOF type stars do their magic
     if (!CGSharedBus::modifyGalaxy()) return FALSE;
     
     GalStarIter nextStar(*galaxy());
