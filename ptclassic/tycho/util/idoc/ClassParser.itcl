@@ -479,7 +479,9 @@ body ::tycho::IDocSys::shortDesc {comment} {
 
     # Return the first sentence.
     regexp {^([^.!?]*[.!?]+)[ 	]+} $comment dmy comment
-    regexp {^(.*)@} $comment dmy comment
+
+    # Drop everything after an @ is seen.
+    regexp {^([^@]*)@} $comment dmy comment
 
     return $comment
 }
