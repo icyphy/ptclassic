@@ -44,7 +44,7 @@ namespace ::tycho {
 # well with sharp angles (< 25 or so), but with moderate angles
 # they look fine.
 #
-# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #
 class ::tycho::Solid {
     inherit ::tycho::Picture

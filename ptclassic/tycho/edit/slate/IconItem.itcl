@@ -49,7 +49,7 @@ namespace ::tycho {
 # efficient. A more efficient version with hardwired icon and
 # terminal types could be created if this becomes a problem.
 #
-# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #
 # <b>Note</b>: This is an experimental class.
 #
