@@ -936,7 +936,7 @@ proc ed_ConfigCanvas {top facet number} {
   if { $scrollHeight > $maxHeight } {
     if {! $existv} {
       scrollbar $top.f.vscroll -relief sunken -command "$c yview"
-      $c config -yscroll "$top.f.vscroll set"
+      $c config -yscrollcommand "$top.f.vscroll set"
       pack before $c $top.f.vscroll {right filly}
     }
     set canvHeight $maxHeight
