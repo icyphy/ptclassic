@@ -58,9 +58,11 @@ PL_SRCS= \
  SDFLimit.pl \
  SDFLinQuantIdx.pl \
  SDFLog.pl \
+ SDFLogic.pl \
  SDFMpy.pl \
  SDFMpyCx.pl \
  SDFMpyFix.pl \
+ SDFMultiple.pl \
  SDFMux.pl \
  SDFNumToBus.pl \
  SDFPad.pl \
@@ -89,6 +91,7 @@ PL_SRCS= \
  SDFTable.pl \
  SDFTableCx.pl \
  SDFTableInt.pl \
+ SDFTest.pl \
  SDFThresh.pl \
  SDFTrainer.pl \
  SDFUpSample.pl \
