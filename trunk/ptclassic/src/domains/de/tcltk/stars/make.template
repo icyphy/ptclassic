@@ -27,7 +27,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libsdftclstars.a
+LIB=libdetclstars.a
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
@@ -63,7 +63,7 @@ HDRS= $(SRCS:.cc=.h)
 # extra source files: tcl/tk script files
 SCRIPTS= 
 
-STAR_MK=sdftclstars
+STAR_MK=detclstars
 DOMAIN=DE_TCL
 DOMAIN_2=DE
 EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
