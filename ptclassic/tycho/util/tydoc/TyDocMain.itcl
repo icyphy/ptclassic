@@ -1888,13 +1888,13 @@ body ::tycho::HTMLDocSys::putsDefinition {fd xref name arglist} {
 #
 body ::tycho::HTMLDocSys::putsOption {fd xref name arglist} {
     tydocUpdate $this
-    puts $fd " <DT>$xref<CODE>\n$name</CODE></A><CODE>"
+    puts $fd " <DT>$xref<CODE>\n$name</CODE></A>"
     if { [llength $arglist] > 1 } {
-	puts $fd "\{$arglist\}"
+	puts $fd "<CODE>\{$arglist\}</CODE>"
     } elseif { $arglist != "" } {
-	puts $fd "$arglist"
+	puts $fd "<CODE>$arglist</CODE>"
     }
-    puts -nonewline $fd " </CODE> <DD>"
+    puts -nonewline $fd "<DD>"
 }
 
 #######################################################################
