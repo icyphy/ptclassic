@@ -262,13 +262,16 @@ Particle* ComplexParticle :: clone () const {
 void ComplexParticle :: die () { complexPlasma.put(this);}
 
 Particle& ComplexParticle :: operator = (const Particle& p) {
-	data = Complex((const Complex &)p);
+        // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+        Complex t = p;
+        data = t;
+        //data = Complex((const Complex&)p);
         return *this;
 }
 
 int ComplexParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
-	return data == Complex((const Complex &)p);
+	return data == Complex((const Complex&)p);
 }
 
 DataType ComplexParticle :: type() const {return COMPLEX;}
@@ -351,7 +354,10 @@ void FixParticle :: die () { fixPlasma.put(this);}
 Particle* FixParticle :: useNew () const { LOG_NEW; return new FixParticle;}
 
 Particle& FixParticle :: operator = (const Particle& p) {
-	data = Fix((const Fix &)p);
+        // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+        Fix t = p;
+        data = t;
+        //data = Fix((const Fix &)p);
         return *this;
 }
 
