@@ -36,7 +36,7 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
-IntSample :: operator StringList ()
+IntSample :: operator char* ()
 	{ return form("%d",data);}
 
 	////////////////////////////////////////
@@ -56,8 +56,29 @@ Particle& FloatSample :: operator = (const Particle& p)
 	return *this;
 }
 
-FloatSample :: operator StringList ()
-        { return form("%g",data);}
+FloatSample :: operator char* ()
+        { return form("%f",data);}
+
+        ////////////////////////////////////////
+        // class ComplexSample
+        ////////////////////////////////////////
+
+Particle& ComplexSample :: operator = (const Particle& p)
+{
+        if(compareType(p)) {
+                // Types are compatible, so we can copy
+                data = ((ComplexSample&)p).data;
+                }
+        else
+                errorHandler.error(
+                "Particle: attempt to assign incompatible Particle types"
+                        );
+        return *this;
+}
+
+ComplexSample :: operator char* ()
+        { return form("(%f,%f)",data.real(),data.imag());}
+
 
 	////////////////////////////////////////
 	// class Plasma
@@ -77,6 +98,10 @@ Particle* Plasma :: get()
 
 			case FLOAT:
 				p = new FloatSample(0); 
+				break;
+
+			case COMPLEX:
+				p = new ComplexSample(0);
 				break;
 		
 			/**********************************************
