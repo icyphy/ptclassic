@@ -27,6 +27,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "copyright.h"
 #include "utility.h"
+#include "errtrap.h"
 #include "oct.h"
 #include "region.h"
 #include "oh.h"
@@ -37,12 +38,12 @@ static char SccsId[]="$Id$";
 #include "pepint.h"
 
 
+int
 main(argc, argv)
 int argc;
 char **argv;
 {
 
-    char  name[128];
     pepRes *res; 
     int numberOfBranches; 
     octObject facet, net1;
@@ -79,5 +80,6 @@ char **argv;
 	    printf("%s Ohm\n", util_pretty_print(res[i].value));
 	}
     }
+    return 0;
 }
 
