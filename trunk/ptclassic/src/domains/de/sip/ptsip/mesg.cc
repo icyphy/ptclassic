@@ -297,7 +297,7 @@ try_slot:
 	for (m = n->rgt, j = 0; m && j < q->nflds; m = m->rgt, j++)
 	{	if ((verbose&8) && !Rvous && depth >= jumpsteps)
 		{	sr_talk(n, q->contents[i*q->nflds+j],
-			(char *) (full && n->val < 2) ? "Recv " : "[Recv] ",
+			(char *) ((full && n->val < 2) ? "Recv " : "[Recv] "),
                         "<-", j, q);
 		}
 		if (!full)
@@ -318,7 +318,7 @@ try_slot:
 	if ((verbose&8) && !Rvous && depth >= jumpsteps)
 	for (i = j; i < q->nflds; i++)
 	{	sr_talk(n, 0,
-		(char *) (full && n->val < 2) ? "Recv " : "[Recv] ",
+		(char *) ((full && n->val < 2) ? "Recv " : "[Recv] "),
                 "<-", i, q);
 	}
 
