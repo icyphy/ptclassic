@@ -250,8 +250,11 @@ void CGMultiTarget :: prepareChildren() {
 	t->setParent(this);
 	if (cgChild(i)) {
 	    t->stateWithName("file")->setInitValue(childFilePrefix);
+	    const char* expandedPathName =
+		expandPathName(destDirectory.initValue());
 	    t->stateWithName("directory")
-		->setInitValue(expandPathName(destDirectory.initValue()));
+		->setInitValue(hashstring(expandedPathName));
+	    delete [] expandedPathName;
 	    t->stateWithName("display?")
 		->setInitValue(displayFlag.initValue());
 	    t->stateWithName("Looping Level")
