@@ -14,7 +14,11 @@ Xsun3
 Xvax
 #endif
 #ifdef mips
+#ifdef sgi
+Xirix4
+#else
 Xmips
+#endif
 #endif
 #ifdef hppa
 Xhppa
