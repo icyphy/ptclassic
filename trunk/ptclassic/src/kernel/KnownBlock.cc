@@ -87,20 +87,23 @@ const char* KnownBlock::domain()  {
 // we specified no adding.
 
 int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
-
-	for (int i = 0; i < NUMDOMAINS; i++) {
-		if (domainNames[i] == 0) {
-			if (addIfNotFound) {
-				domainNames[i] = myDomain;
-				return i;
-			}
-			else return -1;
-		}
-		else if (strcmp (domainNames[i], myDomain) == 0)
+	for (int i = 0; i < numDomains; i++) {
+		if (strcmp (domainNames[i], myDomain) == 0)
 			return i;
 	}
-	Error::abortRun("Too many distinct domains");
-	return -1;
+	if (addIfNotFound) {
+		if (numDomains == NUMDOMAINS) {
+			Error::abortRun("Too many distinct domains");
+			return -1;		
+		}
+		else {
+			i = numDomains;
+			numDomains++;
+			domainNames[i] = myDomain;
+			return i;
+		}
+	}
+	else return -1;
 }
 
 // Look up the domain index of a block.
