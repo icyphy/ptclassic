@@ -44,12 +44,34 @@ Date of last revision:
 #include "StringList.h"
 #include "streamCompat.h"
 
+
+void ParScheduler::setup() {
+    // compute repetitions, schedule (by calling computeSchedule)
+    SDFScheduler::setup();
+	// targetPtr setup for each processor
+	mapTargets();
+
+	// sub-universe creation.
+	if (!createSubGals(*galaxy())) {
+		invalid = TRUE;
+		return;
+	}
+
+	prepareCodeGen();
+	if (haltRequested()) { invalid = TRUE; return; }
+
+	// make parallel target intervene here to do something necessary
+	// by default, do nothing
+	mtarget->prepareCodeGen();
+	if (haltRequested()) { invalid = TRUE; return; }
+	
+}
+
 /////////////////////////////
 // computeSchedule
 /////////////////////////////
 
 // main body of the parallel schedule
-
 
 ParScheduler :: ParScheduler(MultiTarget* t, const char* logName) {
 	mtarget = t;
@@ -189,6 +211,8 @@ int ParScheduler :: createSubGals(Galaxy& g) {
 	exGraph->restoreHiddenGates();
 	parProcs->createSubGals();
 
+	if (SimControl::haltRequested()) return FALSE;
+
 	// log the created subgals.
 	if (logstrm) {
 		*logstrm << parProcs->displaySubUnivs();
@@ -285,10 +309,12 @@ int ParScheduler :: scheduleManually() {
 
 			// for parallel stars, set up profile of ParNode.
 			Profile* pf = s->getProfile();
-			if (s->isItWormhole()) {
+
+			// We don't support CG wormholes anymore
+			/* if (s->isItWormhole()) {
 				CGWormBase* worm = s->myWormhole();
 				pf = worm->manualSchedule(s->reps());
-			}
+			} */
 			while (n) {
 				n->setProcId(s->getProcId());
 				n->withProfile(pf);
@@ -318,15 +344,23 @@ int ParScheduler :: scheduleIt() { return FALSE; }
 // set up the assignedId field of the wormhole profile.
 // 
 int ParScheduler :: preSchedule() { 
-	// setup profiles of wormholes before main scheduling begins.
-	GalStarIter next(*galaxy());
-	CGStar* s;
-	while ((s = (CGStar*) next++) != 0) {
-		if (s->isItWormhole()) {
-			CGWormBase* worm = s->myWormhole();
-			worm->setupProfile(s->reps());
-		}
-	}
+
+// We may need this code later for clusters, for now, wormholes are
+// not supported anymore
+
+	// // setup profiles of wormholes before main scheduling begins.
+// 	GalStarIter next(*galaxy());
+// 	CGStar* s;
+
+// 	// We don't support wormholes anymore.  We may need this code
+// 	// for clusters.
+// 	while ((s = (CGStar*) next++) != 0) {
+// 		if (s->isItWormhole()) {
+// 			CGWormBase* worm = s->myWormhole();
+// 			worm->setupProfile(s->reps());
+// 		}
+// 	}
+
 	return TRUE; 
 }
 
@@ -340,29 +374,15 @@ void ParScheduler :: compileRun() {
 		SDFScheduler :: compileRun();
 		return;
 	}
-
-	// targetPtr setup for each processor
-	mapTargets();
-
-	// sub-universe creation.
-	if (!createSubGals(*galaxy())) {
-		invalid = TRUE;
-		return;
-	}
-
-	// prepare code generation for each processing element:
-	// galaxy initialize, copy schedule, and simulate the schedule.
-	parProcs->prepareCodeGen();
-	if (haltRequested()) { invalid = TRUE; return; }
-
-	// make parallel target intervene here to do something necessary
-	// by default, do nothing
-	mtarget->prepareCodeGen();
-	if (haltRequested()) { invalid = TRUE; return; }
-	
 	// run sub-universe in each processor to generate the code
 //	parProcs->generateCode();
 	if (haltRequested()) { invalid = TRUE; return; }
+}
+
+void ParScheduler :: prepareCodeGen() {
+    // prepare code generation for each processing element:
+    // galaxy initialize, copy schedule, and simulate the schedule.
+    parProcs->prepareCodeGen();
 }
 
 /////////////////////////////
@@ -416,14 +436,15 @@ void ParScheduler :: setProfile(Profile* profile) {
 int ParScheduler :: finalSchedule() {
 
 	// detect the wormholes, and finalize their schedule.
-	GalStarIter next(*galaxy());
+        // We do not support wormholes anymore
+	/* GalStarIter next(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {
 			CGWormBase* worm = s->myWormhole();
 			if (!worm->insideSchedule()) return FALSE;
 		}
-	}
+	} */
 	return TRUE;
 }
 
