@@ -38,6 +38,7 @@ static char SccsId[]="$Id$";
 #include "commands.h"
 #include "rpcServer.h"
 
+#include "serverUtils.h"
 
 rpcStatus
 RPCTranslateArgsToRPC(inList, outList, facetId, application)
