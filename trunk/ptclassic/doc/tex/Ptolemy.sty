@@ -1,0 +1,45 @@
+% Style option for Ptolemy documentation.
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	23 November 1993
+
+%
+% Use LaTeXinfo as the base style.
+%
+\input{latexinfo.sty}
+
+%
+% Commands for listing authors and contributors of a chapter.
+%
+% Names should be listed one per line, separated by \\.
+%
+\def\Author#1{
+    \noindent
+    \makebox[1.5in][l]{\em Authors:}
+    \parbox[t]{4in}{\em #1} \par
+    \vspace{\baselineskip} }
+\def\Contrib#1{
+    \noindent
+    \makebox[1.5in][l]{\em Other Contributors:}
+    \parbox[t]{4in}{\em #1} \par
+    \vspace{\baselineskip} }
+
+%
+% A list environment for states.
+%
+% The \state command generates a list item.  The first argument is the
+% data type.  The second argument is the name of the state.  The third
+% argument is the default value.
+%
+\newenvironment{statelist}{\begin{description}}{\end{description}}
+\newcommand{\state}[3]{\item[#2](\code{#1}) Default = \samp{#3}\\}
+
+%
+% A list environment for ports.
+%
+% The \port command generates a list item.  The first argument is the
+% data type.  The second argument is the name of the port.
+%
+\newenvironment{portlist}{\begin{description}}{\end{description}}
+\newcommand{\port}[2]{\item[#2](\code{#1})\\}
+
