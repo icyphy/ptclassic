@@ -16,6 +16,7 @@ $Id$
 
 #ifdef __GNUG__
 #pragma implementation
+#pragma implementation "Plasma.h"
 #endif
 
 #include "Particle.h"
