@@ -16,11 +16,20 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean sources depend realclean:
+all install clean sources realclean:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in domains/$(ME)/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/domains/$(ME)/$$x $@ ;\
+		cd .. ; \
+	done
+
+depend:
+	@for x in $(DIRS); do \
+		cd $$x ; \
+		echo making $@ in domains/$(ME)/$$x ; \
+		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../../src/domains/$(ME)/$$x $@ ;\
 		cd .. ; \
 	done
