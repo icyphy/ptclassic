@@ -61,14 +61,17 @@ int euclid(int a, int b) {
 }
 
 MergeLink::MergeLink(LSNode* base, LSNode* relative, int d) : DoubleLink(0) {
-        base_node = base;
-        adjacent_node = relative;
-        parRep = base->myMaster()->repetitions;
-        sonRep = relative->myMaster()->repetitions;
-        gcd = euclid(parRep,sonRep);
-        par_inv = parRep / gcd;
-        adj_ix = relative->invocationNumber();
-        direction = d;
+	base_node = base;
+	adjacent_node = relative;
+	parRep = base->myMaster()->repetitions;
+	sonRep = relative->myMaster()->repetitions;
+	gcd = euclid(parRep,sonRep);
+	par_inv = parRep / gcd;
+	adj_ix = relative->invocationNumber();
+	direction = d;
+
+	par_node = 0;
+	son_node = 0;
 
 	// ClusterNodeLists 
 	preClust = 0;
@@ -76,22 +79,28 @@ MergeLink::MergeLink(LSNode* base, LSNode* relative, int d) : DoubleLink(0) {
 	postClust = 0;
 }
 
+MergeLink::~MergeLink() {
+	delete preClust;
+	delete mainClust;
+	delete postClust;
+}
+
 void MergeList::insertMerge(LSNode *base, LSNode *relative, int d) {
-        MergeListIter nextLink(*this);
-        MergeLink *m;
-        LOG_NEW; MergeLink* newlink = new MergeLink(base, relative, d);
-        int n1 = newlink->par_inv;
-        while ((m = nextLink++)!=0) {
-                int n2 = m->par_inv;
-                if (n1 < n2) {
-                        insertAhead(newlink, m);
-                        return;
-                }
+	MergeListIter nextLink(*this);
+	MergeLink *m;
+	LOG_NEW; MergeLink* newlink = new MergeLink(base, relative, d);
+	int n1 = newlink->par_inv;
+	while ((m = nextLink++)!=0) {
+		int n2 = m->par_inv;
+		if (n1 < n2) {
+			insertAhead(newlink, m);
+			return;
+		}
 		else if ((n1 == n2) && (newlink->adj_ix < m->adj_ix)) {
-                        insertAhead(newlink,m);
-                }
-        }
-        appendLink(newlink);
+			insertAhead(newlink,m);
+		}
+	}
+	appendLink(newlink);
 }
 
 // set up members
@@ -137,8 +146,8 @@ int MergeLink::formRepeatedCluster(LSGraph &g)
 	if (son_node) {
 		if(!postClustering(g)) {
 			LOG_DEL; delete preClust;
-			LOG_DEL; delete mainClust;
 			preClust = 0;
+			LOG_DEL; delete mainClust;
 			mainClust = 0;
 			return FALSE;
 		}
