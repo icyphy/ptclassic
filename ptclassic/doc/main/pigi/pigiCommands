@@ -2,19 +2,36 @@
 .bp
 .UH "Appendix A: Pigi Command Summary"
 .pp
-This appendix contains a list of all the Pigi commands and a brief
+This appendix contains a list of all the \*(PT commands and a brief
 description of what they do.
-.S 10
+The next appendix summaries VEM commands.
+To get the \*(PT menu, hold the shift button, and click the middle
+mouse button.  The menu is sticky, in that it stays around after you
+release the mouse button.  The first menu you see lists only
+command categories.  The submenu is gotten by moving the mouse to
+the arrow.  The submenus have the executable commands.
+To the left of each command in the menu is the single key
+accelerator used for that command.  These accelerators
+are case sensitive.
+.pp
+To execute a command, click any
+button again with the command highlighted.
+To remove the menu without executing the command, click any button
+with the mouse cursor somewhere away from the menu.
+The commands below are grouped according to the submenus in which they appear.
 .lp
+.S 10
 .(b
 .TS
 center, box;
-c s s
+l c c
 l l lw(4i).
-\fBPigi Edit Menu\fP
+\fB\*(PT\fB commands\fR
 .sp 0.5
 Command	Key	Description
 =
+\fBEdit Menu:\fP
+_
 edit-params	e	T{
 To edit the actual parameters of a star, galaxy, or
 delay, place the cursor over the icon of the desired object.  To
@@ -46,19 +63,9 @@ Pigi tries to highlight objects when an error
 occurs during a compile, or when the find-name
 command is invoked.  This clears the highlighting.
 T}
-.TE
-.)b
-.sp
-.lp
-.(b
-.TS
-center, box;
-c s s
-l l lw(4i).
-\fBPigi Window Menu\fP
-.sp 0.5
-Command	Key	Description
 =
+\fBWindow Menu\fP
+_
 open-palette	O	T{
 Open a palette from a list of palettes.
 T}
@@ -87,10 +94,12 @@ T}
 center, box;
 c s s
 l l lw(4i).
-\fBPigi Exec Menu\fP
+\*(PT\fB commands (continued)
 .sp 0.5
 Command	Key	Description
 =
+\fBExec Menu:\fP
+_
 run	R	T{
 Runs a universe.  Cursor must be inside a universe facet.
 T}
@@ -107,19 +116,9 @@ cursor.  The compile is recursive and so if the schematic
 contains sub-galaxies, each sub-galaxy schematic gets compiled also.
 Average users will not need this command.
 T}
-.TE
-.)b
-.sp
-.lp
-.(b
-.TS
-center, box;
-c s s
-l l lw(4i).
-\fBPigi Extend Menu\fP
-.sp 0.5
-Command	Key	Description
 =
+\fBExtend Menu:\fP
+_
 make-schem-icon	@	T{
 Make an icon for the schematic under the cursor.
 T}
@@ -135,18 +134,9 @@ T}
 load	*	T{
 Load a particular star.
 T}
-.TE
-.)b
-.sp
-.(b
-.TS
-center, box;
-c s s
-l l lw(4i).
-\fBPigi Filter Menu\fP
-.sp 0.5
-Command	Key	Description
 =
+\fBFilter Menu:\fP
+_
 equirriple FIR	<	T{
 This is a provisional filter design capability, which simply
 invokes a public domain Fortran program in its own window
@@ -165,19 +155,9 @@ More complete documentation is in the filter section of the Almagest.
 Note that this program starts in your home directory, so filenames
 should be given relative to the home directory.
 T}
-.TE
-.)b
-.sp
-.lp
-.(b
-.TS
-center, box;
-c s s
-l l lw(4i).
-\fBPigi Other Menu\fP
-.sp 0.5
-Command	Key	Description
 =
+\fBOther Menu:\fP
+_
 .sp 0.5
 man		T{
 Display a section of the Almagest.
