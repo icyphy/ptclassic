@@ -29,6 +29,13 @@
 ##########################################################################
 
 
+#
+# Usual options for Slider
+#
+itk::usual Slider {
+    keep -font -background -cursor
+}
+
 #######################################################################
 #### Slider
 #
@@ -84,6 +91,10 @@ class ::tycho::Slider {
 
     # The value when the slider is at the bottom.
     itk_option define -from from From 0
+
+   # The font used for the label
+    itk_option define -font font Font \
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
 
     # The slider's label, which appears underneath it.
     # <i>FIXME</i>: Can't have an empty label
