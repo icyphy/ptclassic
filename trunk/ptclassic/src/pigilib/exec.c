@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1992, 1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -148,7 +148,7 @@ long userOptionWord;
         PrintErr("Failed to set default domain.");
         ViDone();
     }
-    ptkRun(facet,FALSE);
+    ptkRun(&facet,FALSE);
     ViDone();
 }
 
