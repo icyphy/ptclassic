@@ -53,13 +53,16 @@ TITarget :: TITarget (const char* nam, const char* desc,
 	const char* stype): AsmTarget(nam,desc,stype)
 {
 	initStates();
+	loopCounter = 0;
 }
 
 void TITarget :: initStates() {
 	inProgSection = 0;
  	mem = 0;
 	addState(bMemMap.setState("bMemMap",this,"768-1279","B1 memory map"));
-	addState(uMemMap.setState("uMemMap",this,"2432-9999","UD memory map"));
+	// the last 49 word chunk of UD memory is reserved to store
+	// loop counters for nested loops
+	addState(uMemMap.setState("uMemMap",this,"2432-9950","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
 	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
@@ -68,7 +71,7 @@ void TITarget :: initStates() {
 void TITarget :: setup() {
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new TIMemory(bMemMap,uMemMap);
-	AsmTarget::setup();
+
 // complex numbers in the C50 will be allocated 2 consecutive words of
 // memory.
 
@@ -88,6 +91,8 @@ void TITarget :: setup() {
 		
 	}
 
+	AsmTarget::setup();
+
 }
 
 TITarget :: ~TITarget () {
@@ -100,6 +105,7 @@ AsmTarget(src.name(),src.descriptor(),src.starType())
 {
 	initStates();
 	copyStates(src);
+	loopCounter = src.loopCounter;
 }
 
 // makeNew
@@ -109,32 +115,42 @@ Block* TITarget :: makeNew () const {
 
 void TITarget::beginIteration(int repetitions, int) {
     if (repetitions == -1)		// iterate infinitely
-	myCode << targetNestedSymbol.push("LOOP") << "\n";
-    else				// iterate finitely
-	myCode << "\tlacc\t#" << repetitions << "\n"
-	       << targetNestedSymbol.push("LOOP") << "\tsamm	COUNT\n";
+	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
+    else{
+      // iterate finitely
+      int loopAddr = 99951 + loopCounter;
+      loopCounter;
+	*defaultStream << "\tlar\tar0,#" << repetitions << "\n"
+	       << targetNestedSymbol.push("LOOP") << "\tsmmr\tar0,#"
+	       << loopAddr <<"\n";
+    }
 }
 
 void TITarget::endIteration(int repetitions, int) {
 	if (repetitions == -1)		// iterate infinitely
-		myCode << "\tb\t"<< targetNestedSymbol.pop() << "\n";
-	else 				// iterate finitely
-		myCode << "\tnop\n* prevent two endloops in a row\n"
-		       << "\tlamm	COUNT\n"
-		       << "\tsub	#1\n"	
+		*defaultStream << "\tb\t"<< targetNestedSymbol.pop() << "\n";
+	else{
+	  // iterate finitely
+	  int loopAddr = 9951 + loopCounter;
+	  loopCounter ++;
+		*defaultStream << "\tnop\n* prevent two endloops in a row\n"
+		       << "\tlmmr\tar0,#"
+		       << loopAddr
+		       << "\n\tlamm\tar0\n\tsub\t#1\n\tsamm\tar0\n"
 		       << "\tbcnd\t" << targetNestedSymbol.pop() << ",GT\n";
+	}
 }
 
 void TITarget::codeSection() {
 	if (!inProgSection) {
-		myCode << "\t.text \n";
+		*defaultStream << "\t.text \n";
 		inProgSection = 1;
 	}
 }
  
 void TITarget::disableInterrupts() {
 	codeSection();
-	myCode << "\tsetc	INTM		;disable interrupts\n";
+	*defaultStream << "\tsetc	INTM		;disable interrupts\n";
 }
 
 void TITarget::headerCode() {
@@ -143,25 +159,25 @@ void TITarget::headerCode() {
 
 void TITarget::enableInterrupts() {
 	codeSection();
-	myCode  << "\tclrc	INTM		;enable interrupts\n";
+	*defaultStream  << "\tclrc	INTM		;enable interrupts\n";
 }
 
 // FIXME: memName is unused
 void TITarget::orgDirective(const char* /*memName*/, unsigned addr) {
-	myCode << "\t.ds  \t" << int(addr) << "\n";
+	*defaultStream << "\t.ds  \t" << int(addr) << "\n";
 	inProgSection = 0;
 }
 
 void TITarget::writeInt(int val) {
-	myCode << "\t.int\t" << val << "\n";
+	*defaultStream << "\t.int\t" << val << "\n";
 }
 
 void TITarget::writeFix(double val) {
-	myCode << "\t.q15\t" << limitFix(val) << "\n";
+	*defaultStream << "\t.q15\t" << limitFix(val) << "\n";
 }
 
 void TITarget::writeFloat(double val) {
-	myCode << "\t.float\t" << val << "\n";
+	*defaultStream << "\t.float\t" << val << "\n";
 }
 
 void TITarget::trailerCode() {
@@ -171,7 +187,7 @@ void TITarget::trailerCode() {
 void TITarget::frameCode() {
 	AsmTarget::frameCode();
   // Put a STOP instruction at the end of program memory.
-    myCode << "\t.ps 	02b00h\n"
+    *defaultStream << "\t.ps 	02b00h\n"
 	   << "AIC_2ND sach    DXR\n"
 	   << "\tclrc    INTM\n"
 	   << "\tidle\n"
@@ -188,7 +204,7 @@ void TITarget::frameCode() {
 	   << "TINT	RETE\n"
 	   << "RINT	RETE\n"
 	   << "XINT	RETE\n"
-	   << "ENDE	.end\n";	
+	   << "ENDE\n\t.end\n";	
 }
 
 double TITarget::limitFix(double val) { 
