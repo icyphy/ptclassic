@@ -21,11 +21,16 @@ $Id$
 #include "AsmStar.h"
 #include "CG56Connect.h"
 #include "MotorolaAttributes.h"
+#include "FixState.h"
 
 #define CG56CodeBlock CodeBlock
 
+
 class CG56Star : public AsmStar {
+protected:
+	FixState ONE;
 public:
+	CG56Star();
 	// my domain
 	const char* domain() const;
 
