@@ -47,9 +47,6 @@ CGDIR = $(ROOT)/src/domains/cg/kernel
 INCL = -I$(CG56DIR) -I$(CGDIR) -I$(KERNDIR) -I$(CG56SDIR) \
        -I$(ROOT)/src/utils/libptdsp
 
-# Where star doc files go
-STARDOCDIR = ../../doc/stars
-
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
  CG56FIR.pl \
