@@ -81,6 +81,8 @@ void CGPortHole::setForkSource(CGPortHole* p, int cgPortHoleFlag) {
 	// set new forkSrc
 	forkSrc = p;
 	// add me as one of forkSrc's destinations
+	// test the value of forkSrc instead of p to prevent the
+	// compiler optimizer from reordering the two expressions
 	if (forkSrc) forkSrc->putForkDest(this, cgPortHoleFlag);
 }
 
