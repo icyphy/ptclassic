@@ -79,11 +79,10 @@ provisions.
 	addInclude("<fcntl.h>");            // Define O_WRONLY
 	addCode(openFileForWriting);
       }
-      addCode(openCrtlfile);
 
       /* Update parameters */
       StringList updateParameters = "$sharedSymbol(CGCStereoBase,set_parameters)";
-      updateParameters << "($starSymbol(ctlfile), "
+      updateParameters << "($starSymbol(file), "
 		       << "\"" << encodingType << "\", "
 		       << "\"" << outputPort << "\", "
 		       <<  volume << ", " 
@@ -100,7 +99,6 @@ provisions.
     
     wrapup {
       CGCStereoBase::wrapup();
-      addCode(closeCrtlfile);
     }
     
     exectime {
