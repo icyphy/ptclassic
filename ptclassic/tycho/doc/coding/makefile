@@ -44,6 +44,7 @@ EXTRA_SRCS =	fileheader.html \
 		index.html \
 		scope.html \
 		template.html \
+		template.itcl \
 		update.html
 MISC_FILES =
 
