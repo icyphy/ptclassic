@@ -77,8 +77,8 @@ public:
 	virtual int isSDFinContext() const;
 
 	// find source or sink stars quickly
-	int isSource() const { return nInP == numberPorts();}
-	int isSink() const { return nInP == 0;}
+	int isSource() const { return nInP == 0;}
+	int isSink() const { return nInP == numberPorts();}
 	int numInputs() const { return nInP;}
 	int numOutputs() const { return numberPorts()-nInP;}
 
