@@ -68,6 +68,7 @@ public:
 	/*virtual*/ Block* makeNew() const;
 
 	void setup();
+	int run();
 	void headerCode();
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
@@ -120,12 +121,17 @@ private:
 
         // string list to store flags used by targets derived
         // from TITarget
-
         StringList TIFlags;
 	
 	// code stream to store procedures, interrupt routines, coeff. tables
-	
 	CodeStream TISubProcs;
+
+        // flag and functions used to allocate memory for complex
+        // portholes
+        int  cxSetFlag;
+        void setCxPortHoles(void);
+        void resetCxPortHoles(void);
+
 
 };
 
