@@ -1,5 +1,5 @@
 defstar {
-	name { FictionSend }
+	name { MultiSimSend }
 	domain { CG56 }
 	desc {
 Send star for Fiction target
