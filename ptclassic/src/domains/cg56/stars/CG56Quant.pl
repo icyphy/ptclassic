@@ -1,4 +1,3 @@
-
 defstar {
 	name { Quantizer }
 	domain { CG56 }
@@ -46,8 +45,22 @@ an optional offset can be added to shift the output levels up or down.
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	state  {
+		name { X1 }
+		type { FIX }
+		desc { internal }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}    
+	state  {
 		name { Y }
 		type { int }
+		desc { internal }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	state  {
+		name { Y1 }
+		type { FIX }
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
@@ -55,10 +68,13 @@ an optional offset can be added to shift the output levels up or down.
         codeblock(std) {
 	move	$ref(input),x0
 	} 
-        codeblock(cont) {
-	move	-#$val(X),a
+        codeblock(contInt) {
+	move	#-$val(X),a
 	}
-	codeblock(adjust1) {
+        codeblock(contFix) {
+	move	#-$val(X1),a
+        }
+        codeblock(adjust1) {
  	move	#$val(offset),x1
 	}
 	codeblock(cont1) {
@@ -70,13 +86,20 @@ an optional offset can be added to shift the output levels up or down.
 	codeblock(cont2) {
 	move	a1,$ref(output)
 	}
-	codeblock(cont3) {
+	codeblock(cont3Int) {
 	move	#$val(Y),a1
 	move	a1,y0
-	}	
-	codeblock(cont4) {
+	}
+	codeblock(cont3Fix) {
+	move	#$val(Y1),a1
+	move	a1,y0
+	}	    
+	codeblock(cont4Int) {
 	move	#$val(Y),y0
 	}
+	codeblock(cont4Fix) {
+	move	#$val(Y1),y0
+	}    
 	codeblock(cont5) {
 	mpy	x0,y0,a
 	move	a1,$ref(output)
@@ -84,25 +107,24 @@ an optional offset can be added to shift the output levels up or down.
 	codeblock(cont6) {
 	move	x0,$ref(output)
 	}
-	ccinclude { <math.h> }
+	ccinclude {<math.h>}
+
         go { 
 		
-		const int X = 1-int(noBits);
-        	const int Y = int(noBits)-1;
+                double a = pow(2,1-double(noBits));
+        	double b = pow(2,double(noBits)-1);
 		const char *p=intOut;
-		if (X<0)
-	          X=1/pow(2,X);
-		else
-	          X=pow(2,X);
-		if (Y<0)
-	          Y=1/pow(2,Y);
-		else
-	          Y=pow(2,Y);
-
-	
+		X=a;
+		X1=a;
+		Y=b;
+		Y1=b;
 		gencode(std);
 		if (p[0]=='n' || p[0]=='N') {
-                            gencode(cont);
+	                    if(a>1 || a<-1)
+	                    gencode(contInt);
+			    else
+		            gencode(contFix);
+
 			    if (offset !=0) {
                             gencode(adjust1);			     
 			    }
@@ -115,9 +137,15 @@ an optional offset can be added to shift the output levels up or down.
 	        else {
 	        if (noBits !=24) {
 	                    if (noBits<9) 
-				 gencode(cont3);
+			         if (b>1 || b <-1)
+				 gencode(cont3Int);
+				 else
+			         gencode(cont3Fix);
 			    else
-			         gencode(cont4);
+			         if (b>1 || b <-1)
+			         gencode(cont4Int);
+				 else
+			         gencode(cont4Fix);
 			    gencode(cont5);
 		}
 		else
