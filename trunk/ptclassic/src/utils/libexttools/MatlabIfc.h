@@ -173,6 +173,10 @@ protected:
 
 	// Matlab warning string
 	InfString warningString;
+
+	static void MatlabEngineError();
+public:
+#include "MatlabIfc.h.Auto"
 };
 
 #endif
