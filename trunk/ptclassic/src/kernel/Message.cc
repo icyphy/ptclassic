@@ -65,7 +65,7 @@ int PacketData::errorConvert(const char* arg) const {
 
 // clone -- try to catch some errors for folks who don't redefine it.
 PacketData* PacketData::clone() const {
-	PacketData* p = new PacketData(*this);
+	PacketData* p = new PacketData;
 	if (strcmp(dataType(),p->dataType()) != 0)
 		Error::abortRun("PacketData class ",dataType(),
 				"doesn't redefine clone()!");
@@ -169,9 +169,9 @@ Particle& PacketSample::operator = (const Particle& p) {
 // are the same.
 int PacketSample :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
-	Packet p;
-	accessPacket(p);
-	return data.myData() == p.myData();
+	Packet pkt;
+	p.accessPacket(pkt);
+	return data.myData() == pkt.myData();
 }
 
 // clone, useNew, die analogous to other particles.
