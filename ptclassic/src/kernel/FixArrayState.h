@@ -7,6 +7,7 @@
 
 #include "State.h"
 #include "Fix.h"
+#include "PrecisionState.h"
 
 /**************************************************************************
 Version identification:
@@ -51,7 +52,7 @@ class FixArrayState : public State
 {
 public:
 	// Constructor
-	FixArrayState () {nElements = 0; val = 0;}
+	FixArrayState ();
 
 	// alternate constructor: size
 	FixArrayState (int size);
@@ -78,6 +79,20 @@ public:
 	const char* className() const;
 	int isArray() const;
 
+	// Return the precision of the Fix values;
+	// the precision may contain symbolic expressions if it has been set by
+	// the setPrecision() method; otherwise it will only consist of integer
+	// constants.
+	// It is assumed that all array elements have the same precision;
+	// this is usually the case unless the precision of an individual element 
+	// is changed using the return value of the [] operator (not recommended)
+	Precision precision() const;
+
+	// Explicitly set the precision;
+	// if overrideable is FALSE the symbolic expressions can not be redefined
+	// in the future.
+	void setPrecision(const Precision&, int overrideable=TRUE);
+
         // the value as a string
         StringList currentValue() const;
 
@@ -95,6 +110,11 @@ public:
 protected:
 	int	nElements;
 	Fix	*val;
+
+	// symbolic representation of the fix-point precision
+	char *symbolic_length, *symbolic_intBits;
+	// flag that indicates whether the symbolic representation is changeable
+	int overrideablePrecision;
 };
 
 #endif
