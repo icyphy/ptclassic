@@ -274,7 +274,9 @@ body ::tycho::ToolBar::enable {tag} {
 body ::tycho::ToolBar::entry {tag label default command args} {
     # The label.
     itk_component add label_$tag {
-        label $itk_component(entrysite).label_$tag -text "$label"
+        # added eval and \" \"
+        eval label $itk_component(entrysite).label_$tag -text "\"$label\"" \
+                $args
     } {
         keep -background -cursor -font
 	rename -foreground labelcolor labelColor LabelColor
