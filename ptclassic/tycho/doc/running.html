@@ -26,11 +26,27 @@ you are already set up to run Tycho.
 If you do not have Ptolemy installed
 on your system, or are not set up to run Ptolemy,
 then you must have the program <a name=itkwish>"itkwish"</a> in your
-<a name="path envvironment variable">path</a>.
+<a name="path environment variable">path</a>.
 This program is a generic Itcl shell.
 You must be running Itcl version 2.0 or higher.
-<!-- FIXME: Need pointers here to how to get it, and instructions -->
-<!-- on how to check the version. -->
+Tycho0.01 was shipped with Ptolemy0.6, and it will only work with Itcl2.0.
+Tycho0.1 was first shipped in August, 1996, and it will work with Itcl2.0
+or Itcl2.1.
+You can obtain the latest tycho release from 
+<A HREF="http://ptolemy.eecs.berkeley.edu">http://ptolemy.eecs.berkeley.edu</A>
+To check the version number of tycho, look at the startup screen
+that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by 
+selecting the <CODE>Help</CODE> menu in the upper right side and then selecting
+<CODE>About</CODE>.  You can also type
+type
+<tcl><pre>
+puts $TychoVersionInfo
+</pre></tcl>
+into a Tycho console.
+(If you are running tycho, you can just mouse on the tcl command
+above and the version information will be printed in the Console
+window).
+
 You will also need to have the tycho/bin directory in your path.
 In addition, you will need to set an
 <a name="environment variables">environment variable</a>
@@ -55,7 +71,7 @@ version installed on your system.
 To use Tycho standalone (independent of Ptolemy),
 the command-line syntax is:
 <pre>
-    tycho [-nowelcome] [-noconsole] [file...]
+    tycho [-nowelcome] [-noconsole] [-debug] [file...]
 </pre>
 All arguments and options are optional.
 One or more file names may be optionally specified as arguments.
@@ -75,6 +91,9 @@ If you give the -nowelcome option, then you will not get the startup
 This is particularly useful if you are running
 over a slow X connection (like a modem) and do not wish to waste
 the bandwidth.
+The <a name="-debug tycho option">-debug</a> option will bring up itkwish
+inside the Gnu GDB debugger.
+
 <p>
 <h2><a name="Ptolemy with Tycho">Executing Tycho with Ptolemy</a></h2>
 <p>
@@ -91,7 +110,7 @@ All options and arguments are optional.
 The options are interpreted as follows:
 <dl>
 <b><dt>-debug</b><dd>
-Start a version of Ptolemy with debugging symbols, if one is available.
+Start a version of Ptolemy with debugging symbols, if one is available.  
 <b><dt>-ptiny</b><dd>
 Start a minimal version of Ptolemy with only the SDF, DE, and HOF domains.
 <b><dt>-ptrim</b><dd>
