@@ -23,6 +23,7 @@ extern const Attribute A_MEMORY(AB_MEMORY,0);
 extern const Attribute A_CIRC(AB_CIRC,0);
 extern const Attribute A_NOINIT(AB_NOINIT,0);
 extern const Attribute A_REVERSE(AB_REVERSE,0);
+extern const Attribute A_CONSEC(AB_CONSEC,0);
 extern const Attribute A_SHARED(AB_SHARED,0);
 
 // Generate code
