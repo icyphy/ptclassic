@@ -118,7 +118,8 @@ class ::tycho::DocClass {
     public variable set {}
     public variable variable {}
 
-    # We store options and procs that are declared outside of a class here
+    # We store ensembles, options, procs that are declared outside of a class
+    public variable outsideEnsemble {}
     public variable outsideOption {}
     public variable outsideProc {}
 
@@ -886,6 +887,11 @@ body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
 	    switch $construct {
 		option { set construct outsideOption }
 		proc { set construct outsideProc}
+		unknown {
+		    if {$access == "ensemble"} {
+			set construct outsideEnsemble
+		    }
+		}
 	    }
 	    set myClass $topClass
 	    #if {$construct != "class" } {
@@ -893,6 +899,7 @@ body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
 	    #}
 	} 
     }
+    #puts "$currentClass: $construct:\t$access"
     #puts "$currentClass: $construct:\t$access\t$argList\t#$comment"
     $myClass appendConstruct $construct $comment $access $argList
 }
@@ -1057,6 +1064,7 @@ class ::tycho::HTMLDocSys {
     # If verbose is not set, then don't print out any options
     protected method needToOutputOutsideConstructs {class} {
 	return [expr {[$class cget -outsideProc] != "" || \
+		[$class cget -outsideEnsemble] != "" || \
 		[$class cget -outsideOption] != "" && $verbose == 1}]
     }
 
@@ -1217,9 +1225,9 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 	    
 	    # The list of outside constructs we are going to output
 	    if {$verbose} {
-		set allConstructs {outsideOption outsideProc}
+		set allConstructs {outsideOption outsideProc outsideEnsemble}
 	    } else {
-		set allConstructs {outsideProc}
+		set allConstructs {outsideProc outsideEnsemble}
 	    }
 
 	    # Print out the table of contents
@@ -1268,12 +1276,23 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 			puts $fd "<DL>"
 			set printedConstructHeader 1
 		    }
-		    putsDefinition $fd \
+		    # Hack to avoid printing out the entire body of the
+		    # ensemble
+		    if { $construct == "outsideEnsemble" } {
+			putsDefinition $fd \
+			    " <A NAME=\"[info namespace tail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $className class\">" \
+			    [getName $constructList] \
+			    ""
+		    } else {
+			putsDefinition $fd \
 			    " <A NAME=\"[info namespace tail\
 			    [getName $constructList]] $shortConstruct\
 			    associated with $className class\">" \
 			    [getName $constructList] \
 			    "\{[getArgs $constructList]\}"
+		    }
 		    putsClassComment $fd $constructList
 		}
 		if $printedConstructHeader {
