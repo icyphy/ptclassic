@@ -53,7 +53,7 @@ MISC_FILES =	\
 # the makefile that includes this one to use $(EXTRA_SRCS)
 # This rule should be the first rule in this makefile so that 'make'
 # will run 'make sources'.
-sources:: subsources makefile README.files
+sources:: subsources makefile
 
 # We use a subtarget here so that we do make sources in the subdirs
 # before trying to update the indices
