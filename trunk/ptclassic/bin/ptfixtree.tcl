@@ -235,7 +235,7 @@ proc pftSetCellMap { cell newcell } {
 	set celltail [file tail $newcell]
 	regsub "/$celltail$" $newcell "" newcelldir
 	set mapcelldirs($celldir) $newcelldir
-	puts "Adding $celldir -> $newcelldir"
+	puts "Adding $cell -> $newcell"
     }
 }
 
