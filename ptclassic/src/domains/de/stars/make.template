@@ -47,6 +47,7 @@ DEIntPacketize.pl \
 DEIntUnPacketize.pl \
 DELogic.pl \
 DEMeasureDelay.pl \
+DEMeasureInterval.pl \
 DEMerge.pl \
 DENull.pl \
 DEPassGate.pl \
@@ -79,6 +80,7 @@ DETestLevel.pl \
 DETimeout.pl \
 DETimeoutStar.pl \
 DETimer.pl \
+DETimeStamp.pl \
 DEUDCounter.pl \
 DEUnPacketize.pl \
 DEVarDelay.pl \
