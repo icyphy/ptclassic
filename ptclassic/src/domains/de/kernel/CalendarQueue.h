@@ -141,6 +141,7 @@ protected:
 
 	// Store last access to the list for sequential access
 	LevelLink* lastReference;
+	int lastReferenceBucket; // Bucket number where the above element lies
 
 	// To avoid memory (de)allocation overhead at each push/pop, we
 	// store the freeLinks once created.
@@ -163,14 +164,4 @@ private:
 };
 
 
-
-// If it ends up with the last link of the queue, it rounds up the head of
-// the queue.
-inline LevelLink* CalendarQueue :: next()
-{
-	lastReference = lastReference->next;
-	return lastReference;
-}
-		
-	
 #endif

@@ -69,6 +69,26 @@ void CalendarQueue :: putFreeLink(LevelLink* p)
 	numFreeLinks++;
 }
 
+
+
+// If it ends up with the last link of the queue, it rounds up the head of
+// the queue.
+LevelLink* CalendarQueue :: next()
+{
+        LevelLink* temp, nextInSame, firstOfNext;
+        nextInSame = lastReference->next;
+	firstOfNext = cq_bucket[(lastReferenceBucket+1) % FIXMEnum_buckets];
+	// We dont know where the limits of the bucket array are
+	// ask hui to finish for us
+
+
+        return temp;
+}
+
+
+
+
+
 // clear all free Links
 void CalendarQueue :: clearFreeList() 
 {
