@@ -41,22 +41,28 @@ include $(CONFIG)
 
 TCL_SRCS = testSDFDefs.tcl
 
+# Demos that use stars that are not present in pitcl
+SIMPLE_PTCL_TESTS = \
+	testSDFArrayRLS.tcl \
+	testSDFContrib.tcl
+
+
 # testSDFStars.tcl should be first, since it instantiates one of every star.
 SIMPLE_TESTS = \
 	testSDFStars.tcl \
 	testSDFArith.tcl \
-	testSDFContrib.tcl \
 	testSDFConv.tcl \
 	testSDFDSP.tcl \
-	testSDFFourier.tcl \
-	testSDFMatrix.tcl
+	testSDFMatrix.tcl \
+	testSDFFourier.tcl
+
 
 GRAPHICAL_TESTS = \
 	dummy
 
 # Don't include GRAPHICAL_TESTS until we actually have some
 ITCL_SRCS =	\
-	$(SIMPLE_TESTS) \
+	$(SIMPLE_TESTS) $(SIMPLE_PTCL_TESTS) \
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
@@ -72,12 +78,18 @@ OPTIONAL_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-PTCL = $(ROOT)/obj.$(PTARCH)/ptcl/ptcl.ptiny
-tests:: test_simple
+PTCL_PTINY = $(ROOT)/obj.$(PTARCH)/ptcl/ptcl.ptiny
+PTCL = $(ROOT)/obj.$(PTARCH)/ptcl/ptcl
+tests:: test_simple test_ptcl
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 	echo "set TYCHO $(PTOLEMY)/tycho; foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i};     puts \"Total: [expr \$$PASSED + \$$FAILED] (Passed: \$$PASSED Failed: \$$FAILED)\"" | \
+		$(PTCL_PTINY)
+
+# These tests do not require a graphics terminal, but do use ptcl
+test_ptcl: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "set TYCHO $(PTOLEMY)/tycho; foreach i [list $(SIMPLE_PTCL_TESTS)] {puts \$$i; source \$$i};     puts \"Total: [expr \$$PASSED + \$$FAILED] (Passed: \$$PASSED Failed: \$$FAILED)\"" | \
 		$(PTCL)
 
 # These tests require a graphics terminal
