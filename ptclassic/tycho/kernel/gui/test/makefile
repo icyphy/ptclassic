@@ -61,7 +61,11 @@ ITCL_SRCS =	\
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	rcstst sccstst
+MISC_FILES =
+
+# Sources that may or may not be present, but if they are present, we don't
+# want make checkjunk to barf on them.
+OPTIONAL_FILES =	rcstst sccstst
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
