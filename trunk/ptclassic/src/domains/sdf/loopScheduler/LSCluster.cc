@@ -44,11 +44,11 @@ void LSCluster :: determineOrder(LSGraph& g, ClusterNodeList* clist) {
 
 	ClusterNodeListIter firstType(*clist);
 	LSNode* nodePar = firstType++;
-	SDFStar* first = clist->first;
+	DataFlowStar* first = clist->first;
 
 	ClusterNodeListIter secondType(*clist);
 	LSNode* nodeSon = secondType++;
-	SDFStar* second = clist->second;
+	DataFlowStar* second = clist->second;
 	while (nodeSon->myMaster() == first) {
 		nodeSon = secondType++;
 	}
@@ -87,7 +87,7 @@ void LSCluster :: determineOrder(LSGraph& g, ClusterNodeList* clist) {
 	} while (nodeSon);
 }		
 
-void LSCluster :: addFiring(SDFStar* s, int cnt) {
+void LSCluster :: addFiring(DataFlowStar* s, int cnt) {
 
 	LOG_NEW; SDFFiring* newF = new SDFFiring(s, cnt);
 	if (!firing) { 

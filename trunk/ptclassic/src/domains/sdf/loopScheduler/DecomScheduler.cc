@@ -34,7 +34,7 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 {
 	EGGateLinkIter nextGate(p.descendants);
 	EGGate *d;
-	SDFStar *currentmaster = p.myMaster();
+	DataFlowStar *currentmaster = p.myMaster();
 	MergeList ml; 
 	while ((d=nextGate.nextMaster(currentmaster)) != 0) {
 		ml.insertMerge(&p,(LSNode*) d->farEndNode(), 1); 

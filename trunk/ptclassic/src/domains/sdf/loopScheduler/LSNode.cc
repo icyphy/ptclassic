@@ -38,7 +38,7 @@ LSNode* LSNode :: nextConnection(LSNode* model, int flag) {
 	if (!flag) iter.reconnect(ancestors);
 	EGGate* p;
 	EGGate* prev = 0;
-	SDFStar* m = model->myMaster();
+	DataFlowStar* m = model->myMaster();
 
 	while ((p = iter++) != 0) {
 		if (p->farEndMaster() == m) {

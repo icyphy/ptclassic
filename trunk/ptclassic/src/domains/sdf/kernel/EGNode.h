@@ -39,7 +39,7 @@ private:
   	int invocation; 
 
 	// pointer to the original star
-	SDFStar* pStar;
+	DataFlowStar* pStar;
 
 	// link to the next invocation.
 	EGNode* next;
@@ -53,7 +53,7 @@ private:
 
 public:
   	// constructor with origin and invocation number arguments
-  	EGNode(SDFStar*, int n = 1);
+  	EGNode(DataFlowStar*, int n = 1);
 	virtual ~EGNode();
 
 	void	deleteInvocChain();
@@ -81,7 +81,7 @@ public:
 	EGGateList hiddenGates;
 
 	// return a pointer to the corresponding master
-	SDFStar *myMaster() {return pStar;}
+	DataFlowStar *myMaster() {return pStar;}
 
 	// Member function to determine whether or not
 	// this node is a root(source node) in the expanded graph.

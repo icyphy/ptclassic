@@ -21,7 +21,7 @@ $Id$
 // EGNode methods //
 ////////////////////
 
-EGNode :: EGNode(SDFStar* s, int n) : pStar(s), invocation(n), next(0) {
+EGNode :: EGNode(DataFlowStar* s, int n) : pStar(s), invocation(n), next(0) {
 	stickyFlag = 0;
 	if (n == 1) s->setMaster(this);
 }

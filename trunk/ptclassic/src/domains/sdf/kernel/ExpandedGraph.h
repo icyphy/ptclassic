@@ -42,18 +42,18 @@ private:
 	// # samples produced by src, dest star, # sampless 
 	// consumed by dest, number of delays on the arc.
 	// Return value is nonzero iff there were no problems.
-	int ExpandArc(SDFStar* src, PortHole* src_port, SDFStar* dest, 
+	int ExpandArc(DataFlowStar* src, PortHole* src_port, DataFlowStar* dest, 
 		      PortHole* dest_port);
 
 	// Check whether a star depends on previous invocations
 	// of itself, and if so, insert the necessary precedence
 	// links. If enforcedSelfLoop = TRUE, always makes the links.
 	int enforcedSelfLoop;
-	int SelfLoop(SDFStar& s);
+	int SelfLoop(DataFlowStar& s);
 
 	// Set up the invocations which are to form the initial graph.
 	void initialize_invocations();
-	void createInvocations(SDFStar*);
+	void createInvocations(DataFlowStar*);
 
 	// create an arc between two nodes
 	EGGate* makeArc(EGNode *src, EGNode *dest, int samples, int delay)
@@ -63,7 +63,7 @@ private:
 	// invocation "j" of "dest". The arc goes from src to dest, and
 	// carries "n_sam" samples, with "n_d" delay.
 	// return 0 if fails. Return the source_gate.
-	EGGate* connect_invocations(SDFStar* src, int i, SDFStar* dest,
+	EGGate* connect_invocations(DataFlowStar* src, int i, DataFlowStar* dest,
                          int j, int n_sam, int n_d);
 
 	// Identify which port and which sample is assign to each gate.
@@ -89,7 +89,7 @@ protected:
 	EGNodeList sources;
 
 	// Create a new star node with given invocation index
-	virtual EGNode *newNode(SDFStar*, int);
+	virtual EGNode *newNode(DataFlowStar*, int);
 
 public:
 
