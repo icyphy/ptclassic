@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #ifdef __cplusplus
-extern void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
+extern void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin);
 #else
 extern void ptkRegisterCmds();
 #endif /* __cplusplus */
