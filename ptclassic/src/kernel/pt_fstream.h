@@ -43,6 +43,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 //    (and <stdin>, <stdout> ,<stderr>) are recognized.
 //
 // Otherwise they are the same as their baseclasses.
+//
+// Warning: calling close() on a pt_ofstream that writes to <cerr> will
+// close the standard error stream, with probably disasterous results.
+// Calling the destructor, however, will do the right thing.  Overriding
+// close() is not sufficient to solve this because of the design of the
+// fstream and filebuf classes.
 
 #include <fstream.h>
 

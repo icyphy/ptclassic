@@ -71,19 +71,30 @@ static void reportError(const char* op) {
 static int check_special(const char *name, int *pNobufB) {
 	int	fd = -1, bufB = TRUE;
 
-	/*IF*/ if ( strcmp(name,"<cin>")==0 || strcmp(name,"<stdin>")==0 ) {
-	    fd = 0;
-	} else if ( strcmp(name,"<cout>")==0 || strcmp(name,"<stdout>")==0 ) {
-	    fd = 1;
-	    bufB = FALSE;
-	} else if ( strcmp(name,"<cerr>")==0 || strcmp(name,"<stderr>")==0 ) {
-	    fd = 2;
-	    bufB = FALSE;
-	} else if ( strcmp(name,"<clog>")==0 || strcmp(name,"<stdlog>")==0 ) {
-	    fd = 2;
+// see if we begin with "<c" or "<std".  If so, skip prefix, else
+// exit immediately.
+	if (*name != '<') return fd;
+	if (name[1] == 'c') name += 2;
+	else if (strncmp(name+1,"std", 3) == 0) name += 4;
+	else return -1;
+
+// look for remainder of standard names.
+	if (strcmp(name,"in>") == 0)
+		fd = 0;
+	else if (strcmp(name,"out>") == 0)
+	{
+		fd = 1;
+		bufB = FALSE;
 	}
+	else if ( strcmp(name,"err>")==0)
+	{
+		fd = 2;
+		bufB = FALSE;
+	}
+	else if ( strcmp(name,"log>")==0)
+		fd = 2;
 	if ( pNobufB )
-	    *pNobufB = ! bufB;
+		*pNobufB = ! bufB;
 	return fd;
 }
 
@@ -91,13 +102,20 @@ pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
 	open(name,mode,prot);
 }
 
+// open file, treating some names as special.
+
 void pt_ifstream::open(const char* name, int mode, int prot) {
-	int	nobufB;
-	int	fd = check_special(name, &nobufB);
-	if ( fd >= 0 )		rdbuf()->attach(fd);
-	else			ifstream::open(expand(name),mode,prot);
-	if (!*this)	reportError("reading");
-	if (nobufB)	setf(unitbuf);
+	int nobufB;
+	int fd = check_special(name, &nobufB);
+	if (fd == 0) rdbuf()->attach(fd);
+	else if (fd > 0) {
+		Error::abortRun("Can't open ", name,
+				" for reading: write-only file descriptor");
+		return;
+	}
+	else ifstream::open(expand(name),mode,prot);
+	if (!*this) reportError("reading");
+	if (nobufB) setf(unitbuf);
 }
 
 pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
@@ -105,10 +123,15 @@ pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
 }
 
 void pt_ofstream::open(const char* name, int mode, int prot) {
-	int	nobufB;
-	int	fd = check_special(name, &nobufB);
-	if ( fd >= 0 )		rdbuf()->attach(fd);
-	else			ofstream::open(expand(name),mode,prot);
+	int nobufB;
+	int fd = check_special(name, &nobufB);
+	if (fd == 0) {
+		Error::abortRun("Can't open ", name,
+				" for writing: can't write to standard input");
+		return;
+	}
+	else if (fd > 0) rdbuf()->attach(fd);
+	else ofstream::open(expand(name),mode,prot);
 	if (!*this) reportError("writing");
-	if (nobufB)	setf(unitbuf);
+	if (nobufB) setf(unitbuf);
 }
