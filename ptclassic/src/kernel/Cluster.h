@@ -145,7 +145,7 @@ public:
 
 class CClusterIter : private CGalStarIter {
 public:
-    CClusterIter(Cluster& n):CGalStarIter(n.gal) {};
+    CClusterIter(const Cluster& n):CGalStarIter(n.gal) {};
 
     const Cluster* next() {
 	const Star* star = CGalStarIter::next();
