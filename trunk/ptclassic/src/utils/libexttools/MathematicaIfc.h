@@ -37,7 +37,7 @@ Base class for the Ptolemy interface to Mathematica via MathLink.
 
 #include "StringList.h"
 #include "InfString.h"
-#include "mathlink.h"
+#include "MathematicaIfcFuns.h"
 
 #define MATHEMATICA_IFC_DEBUG 0
 
