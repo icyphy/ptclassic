@@ -63,7 +63,8 @@ ITCL_SRCS =	\
 	DirectedAcyclicGraph.itcl \
 	alltests.itcl all.itcl
 
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) chktycho
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
+	chktycho dltest.html
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
