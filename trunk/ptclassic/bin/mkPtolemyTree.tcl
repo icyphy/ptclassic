@@ -26,7 +26,7 @@
 #
 # mkPtolemyTree: A shell script to build custom Ptolemy trees
 #
-# Version: @(#)mkPtolemyTree.tcl	1.26 09/26/96 
+# Version: $Id$
 #
 # Author: Jose Luis Pino
 # Date: 10/20/95
@@ -88,7 +88,11 @@ proc processDirectory {mydir croot root} {
     }
 
     if { "$tarFiles" != "" } {
-	exec sh -c "cd $stddir ; tar cf - $tarFiles | (cd $mydir ; tar xf -)"
+	if [catch { exec sh -c "cd $stddir ; tar cf - $tarFiles | (cd $mydir ; tar xf -)"} errMsg] {
+	    error "processDirectory {$mydir $croot $root}:\
+		    exec failed:\n$errMsg\n\
+		    stddir=$stddir, $tarFiles=$tarFiles, mydir=$mydir"
+	}
     }
 }
 
