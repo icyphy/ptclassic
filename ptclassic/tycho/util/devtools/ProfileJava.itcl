@@ -129,7 +129,7 @@ body ::tycho::ProfileJava::constructor {args} {
 body ::tycho::ProfileJava::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO edit textedit doc \
+	    [file join $TYCHO util devtools doc \
 	    usersGuides ProfileJavaHelp.html] html
 }
 
