@@ -33,26 +33,55 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "tycgc.h"
 
 
+/* Tcl Interpreter for this application. */
+static Tcl_Interp *interpreter;
+
 /*
  * connectControl
  *
  * Connect to a control by name.
 */
 void
-connectControl (char *starname, char *ctrlname, Tcl_CmdProc *callback)
-{	
+connectControl (char *galaxyname, char *starname,
+                char *ctrlname, Tcl_CmdProc *callback)
+{
+  char callbackname[100];
+  char command[200];
+
   /* Register the callback function with Tcl */
-  sprintf(command, "%s.%s.Callback", starname, ctrlname);
-  Tcl_CreateCommand (interp, command, callback,
+  sprintf(callbackname, "::tycho::ptolemy.%s.%s.%s",
+	  galaxyname, starname, ctrlname);
+  Tcl_CreateCommand (interpreter, callbackname, callback,
 		     (ClientData) 0, (void (*)()) NULL);
 
   /* Call Tcl to make the connection */
   sprintf(command,
-	  "::tycho::connectControl %s %s %s.%s.Callback",
-	  starname, ctrlname, starname, ctrlname);
-  if(Tcl_Eval(interp, command) != TCL_OK) {
+	  "::tycho::ControlPanel::starConnect %s %s %s %s",
+	  galaxyname, starname, ctrlname, callbackname);
+  if(Tcl_Eval(interpreter, command) != TCL_OK) {
     printf("Cannot connect control %s.%s\n", starname, ctrlname);
   }
+}
+
+/*
+ * Compatibility function. Can we make this bring up
+ * a proper stack trace?
+ */
+void
+errorReport(char *message)
+{
+   char command[1000];
+   sprintf(command, "error { %s }", message);
+   Tcl_Eval(interpreter, command);
+}
+
+/*
+Bogus compatibility function
+*/
+void
+displaySliderValue (char *win, char *name, char *value)
+{
+    ;
 }
 
 /*
@@ -63,7 +92,7 @@ connectControl (char *starname, char *ctrlname, Tcl_CmdProc *callback)
 int
 Ty_CGC (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   /* Doesn't do anything... */
-  interp-result = "Hey, don't call this!!";
+  interp->result = "Hey, don't call this!!";
   return TCL_ERROR;
 }
 
@@ -74,7 +103,8 @@ Ty_CGC (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
  */
 int
 Tycgc_Init(Tcl_Interp *interp) {
-  
+  interpreter = interp;
+
   Tcl_CreateCommand(interp, "cgc", Ty_CGC,
 		    (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
 

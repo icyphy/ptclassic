@@ -33,6 +33,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "../tytimer/tytimer.h"
 
 void
-connectControl (char *starname, char *ctrlname, Tcl_CmdProc *callback);
+connectControl (char *galaxyname, char *starname, char *ctrlname,
+      Tcl_CmdProc *callback);
 
  
+void
+displaySliderValue (char *win, char *name, char *value);
+
+void
+errorReport(char *message);
+
