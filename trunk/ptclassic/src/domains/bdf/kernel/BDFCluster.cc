@@ -107,6 +107,7 @@ int BDFClusterGal::clusterCore(int& urate) {
 	while ((urate = uniformRate()) == FALSE) {
                 int status = mergePass();
                 status |= loopPass();
+		if (logstrm) logstrm->flush();
                 if (status) change = TRUE;
                 else break;
 	}
@@ -138,8 +139,8 @@ int BDFClusterGal::cluster() {
 	if (!urate && markFeedForwardDelayArcs()) {
 		change |= clusterCore(urate);
 	}
-	if (!urate)
-		Error::warn("clustering algorithm did not achieve uniform rate");
+//	if (!urate)
+//		Error::warn("clustering algorithm did not achieve uniform rate");
 	if (change) {
 		if (logstrm)
 			*logstrm << "Looking for parallel loops\n";
@@ -973,6 +974,15 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	cgal = new BDFClusterGal(gal,logstrm);
 	cgal->cluster();
 
+	if (logstrm) {
+		*logstrm << "Rest not done yet\n";
+		logstrm->flush();
+		LOG_DEL; delete logstrm;
+	}
+	Error::abortRun("Rest of algorithm not yet implemented");
+	invalid = TRUE;
+	return FALSE;
+#if 0
 // generate subschedules
 	if (!cgal->genSubScheds()) {
 		invalid = TRUE; return FALSE;
@@ -987,6 +997,7 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		return TRUE;
 	}
 	else return FALSE;
+#endif
 }
 
 // display the top-level schedule.
