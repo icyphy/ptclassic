@@ -87,7 +87,7 @@ to the table's data.
     }
 
     destructor {
-//      for (int i = 0; i < int(numcpes); i++) {
+ //      for (int i = 0; i < int(numcpes); i++) {
 //	  LOG_DEL; delete [] srttable[i];
 //      }
 //      LOG_DEL; delete [] srttable;
