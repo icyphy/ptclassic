@@ -97,7 +97,7 @@ LIB =		libtycho.$(LIBSUFFIX)
 ifndef BASENAME
 ifndef PIGI
 	ALLBINARIES=1
-	BASENAME=tycho
+	BASENAME=tysh
 endif
 endif
 
