@@ -164,6 +164,7 @@ int ParScheduler :: scheduleManually(Galaxy& g) {
 			// set procId of all invocations of the star
 			ParNode* n = (ParNode*) s->myMaster();
 			while (n) {
+				n->assignProc(s->getProcId());
 				n->setProcId(s->getProcId());
 				n = (ParNode*) n->getNextInvoc();
 			}
