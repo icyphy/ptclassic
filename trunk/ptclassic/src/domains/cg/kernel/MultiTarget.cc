@@ -62,6 +62,9 @@ MultiTarget::MultiTarget(const char* name,const char* starclass,
 	   "If yes, specify processor assignment of stars manually"));
         addState(adjustSchedule.setState("adjustSchedule",this,"NO",
 	   "If yes, overide the previously obtained schedule by manual assignment"));
+	displayFlag.setAttributes(A_SETTABLE);
+	compileFlag.setAttributes(A_SETTABLE);
+	runFlag.setAttributes(A_SETTABLE);
 }
 
 // Based on priorities of the parameters, we may need to adjust the
@@ -72,8 +75,13 @@ void MultiTarget :: initState() {
 	if (int(manualAssignment)) oneStarOneProc = TRUE;
 }
 	
-// associate send and receive stars.  Do nothing by default.
-void MultiTarget :: pairSendReceive(DataFlowStar*, DataFlowStar*) {}
+// associate send and receive stars.  If output of receive star
+// is ANYTYPE, sets the send to be of
+void MultiTarget :: pairSendReceive(DataFlowStar* send, DataFlowStar* receive) {
+	PortHole* input = send->portWithName("input");
+	PortHole* output = receive->portWithName("output");
+	if (output->type() == ANYTYPE) output->inheritTypeFrom(*input);
+}
 
 void MultiTarget :: setProfile(Profile*) {}
 void MultiTarget :: prepareCodeGen() {}
@@ -131,6 +139,13 @@ its parent target: ", father->name());
 		father->setNameParent(saveNm, 0);
 	}
 	return TRUE;
+}
+
+CGTarget* MultiTarget :: cgChild(int n) {
+	Target* childTarget;
+	if (!(childTarget = child(n))) return NULL;
+	if (childTarget->isA("CGTarget")) return (CGTarget*) childTarget;
+	else return NULL;
 }
 
 ISA_FUNC(MultiTarget, CGTarget);
