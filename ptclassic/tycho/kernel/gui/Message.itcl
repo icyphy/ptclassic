@@ -64,9 +64,9 @@ proc ::tycho::post {msg {title ""}} {
 #### postLong
 # Post a long informational message to the user in a window and return.
 # The name of the window is returned.
-# FIXME: The -scrolltext option does not exist.  Anyway, this is not
-# the right solution.  The scrollbar should appear automatically on the
-# message if the message is too long.
+# NOTE: The -scrolltext option does not exist. Anyway, it is not clear
+# this is the right solution. Perhaps the scrollbar should appear
+# automatically on the message if the message is too long.
 #
 # proc ::tycho::postLong {msg {title ""}} {
 #     return [::tycho::DialogWindow::new Message \
