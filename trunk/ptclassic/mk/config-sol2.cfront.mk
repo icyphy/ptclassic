@@ -91,7 +91,7 @@ CDEBUGFLAGS =	-g
 # -DPOSTFIX_OP= is needed for cfront 2.1; it is not needed for 3.0.
 
 # Define PTSOL2_4 if you are on Solaris2_4
-ARCHFLAGS =	-DPTSOL2_4
+#ARCHFLAGS =	-DPTSOL2_4
 
 LOCALCCFLAGS =	$(GPPDEBUGFLAGS) -DSYSV -DSOL2 -D_REENTRANT
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
