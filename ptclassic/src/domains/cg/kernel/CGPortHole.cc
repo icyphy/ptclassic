@@ -3,6 +3,7 @@ static const char file_id[] = "CGConnect.cc";
 #include "CGConnect.h"
 #include "CircularBuffer.h"
 #include "CGGeodesic.h"
+#include "SDFStar.h"
 
 /**************************************************************************
 Version identification:
@@ -53,8 +54,23 @@ void MultiCGPort :: forkProcessing (CGPortHole& p) {
 	}
 }
 
-int CGPortHole :: bufSize() const { return cgGeo().bufSize(); }
-int CGPortHole :: localBufSize() const { return cgGeo().localBufSize(); }
+// ug-lee!!!!
+static int parentReps(const PortHole* p) {
+	SDFStar* s = (SDFStar*)(p->parent());
+	return int(s->repetitions.numerator);
+}
+
+int CGPortHole :: bufSize() const {
+	if (isItInput() == far()->isItInput())
+		return parentReps(this)*numberTokens;
+	else return cgGeo().bufSize();
+}
+
+int CGPortHole :: localBufSize() const {
+	if (isItInput() == far()->isItInput())
+		return parentReps(this)*numberTokens;
+	else return cgGeo().localBufSize();
+}
 
 int InCGPort :: isItInput () const { return TRUE;}
 int OutCGPort :: isItOutput () const { return TRUE;}
