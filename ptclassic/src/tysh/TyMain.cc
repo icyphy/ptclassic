@@ -76,7 +76,7 @@ char *tyFilename = NULL;
 
 /* This defines the default domain for Tycho */
 
-char DEFAULT_DOMAIN[] = "SDF";
+extern char DEFAULT_DOMAIN[];
 
 static void PrintVersion ()
 {

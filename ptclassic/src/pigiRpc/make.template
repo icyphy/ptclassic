@@ -84,8 +84,6 @@ palettes.$(PIGI).c: $(PT_DEPEND)
 	echo "\"$(PALETTES):./user.pal:./init.pal\";}" | \
 		sed -e 's/PTOLEMY/$$PTOLEMY/g' -e 's/ /:/g' \
 		>> palettes.$(PIGI).c
-	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
-		>> palettes.$(PIGI).c
 	$(CC) -c palettes.$(PIGI).c	
 
 
