@@ -69,11 +69,7 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 
 // destructor
 BDFClustPort::~BDFClustPort() {
-	if (isBagPort())
-		inPtr()->pOutPtr = 0;
-	if (pOutPtr) {
-		pOutPtr = 0;
-	}
+	pOutPtr = 0;
 }
 
 void BDFClustPort::initGeo() { myGeodesic->initialize();}
