@@ -48,6 +48,7 @@ TCL_SRCS = \
 	Misc.tcl \
 	Path.tcl \
 	String.tcl \
+	URLPath.tcl \
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
