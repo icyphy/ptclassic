@@ -43,9 +43,15 @@
 # Query the user for a filename and return it.  This procedure brings up
 # a file browser, and returns only when that file browser is dismissed.
 # The first argument is a text string used as a label in the file browser.
-# The optional second argument is an initial filename to display in the
-# entry box.  If it is not specified, then the most recently used file name
-# is displayed instead.
+# The optional second argument is an absolute file path that gives the
+# directory in which the file browser is opened if the
+# fileBrowserUseLastDirectory preference is not set. The optional third
+# argument is the string to insert into the file browser when
+# opened; if it is blank, then the file browser inserts text only
+# if there are zero or one entries in the file list. If it is not
+# blank and the second argument is not null, then the file browser
+# will change to that directory regardless of the setting
+# of the fileBrowserUseLastDirectory preference.
 # <p>
 # This procedure indirectly calls <code>update</code>, a Tk utility
 # that processes pending events, including mouse events. If this
@@ -60,11 +66,17 @@
 # Tcl procedure that is not itself called from within an Itcl object,
 # then there is no cause for worry.
 #
-proc ::tycho::queryfilename {string {default {}}} {
+proc ::tycho::queryfilename {string {directory {}} {filename {}}} {
     set nm [::tycho::autoName .fileBrowser]
-    uplevel #0 [list ::tycho::FileBrowser $nm -text $string]
-    if {$default != {}} {
-        $nm configure -default $default
+    if { $filename == {} } {
+        uplevel #0 [list ::tycho::FileBrowser $nm -text $string \
+                -initial $directory]
+    } else {
+        uplevel #0 [list ::tycho::FileBrowser $nm -text $string]
+        if { $directory != {} } {
+            $nm changeDir $directory
+        }
+        $nm configure -default $filename
     }
     return [::tycho::Dialog::wait $nm]
 }
@@ -114,8 +126,18 @@ class ::tycho::FileBrowser {
     destructor {}
 
     ##################################################################
+    ####                         options                          ####
+
+    # Specify the initial directory to open in.
+    # Must be set in constructor call, otherwise ignored.
+    itk_option define -initial initial Initial ""
+
+    ##################################################################
     ####                     public methods                       ####
    
+    # Change to a new directory
+    method changeDir {directory}
+
     # Complete the partially entered item.
     method complete {}
 
@@ -211,12 +233,14 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Current directory display.
     itk_component add dir {
-	label $itk_component(childsite).dir -text $localCWD -width 35 -anchor e
+	label $itk_component(childsite).dir \
+                -text $localCWD -width 35 -anchor e
     } {
 	keep -background -cursor -foreground
 	rename -font -messagefont messageFont Font
     }
-    pack $itk_component(dir) -side top -fill x -after $itk_component(listscroll)
+    pack $itk_component(dir) -side top -fill x \
+            -after $itk_component(listscroll)
     
     # Create directory button.
     $itk_component(bbox) add mkdir \
@@ -242,19 +266,10 @@ body ::tycho::FileBrowser::constructor {args} {
     # option will be set to the path of the file from which the
     # browser was opened -- if the option is not set, then the
     # most recent directory is used anyway.
-    #
     if { ! [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
-	if {$itk_option(-default) != {} && \
-		[file pathtype $itk_option(-default)] == "absolute" } {
-            set default $itk_option(-default)
-            if ![file isdirectory $default] {
-                set default [file dirname $default]
-            }
-            if [file isdirectory $default] {
-                set CWD $default 
-                set localCWD $CWD
-                $itk_component(dir) config -text $CWD
-            }
+	if {$itk_option(-initial) != {} && \
+		[file pathtype $itk_option(-initial)] == "absolute" } {
+            changeDir $itk_option(-initial)
         }
     }
     # Load the files into the listbox
@@ -265,6 +280,36 @@ body ::tycho::FileBrowser::constructor {args} {
     ##################################################################
     ##################################################################
     ####                     public methods                       ####
+
+######################################################################
+#### changeDir
+# Change to a new directory. The directory name can be relative to
+# the current directory or an absolute path. Any filename
+# component at the end of the directory name is ignored. Return 1 if
+# successful, or 0 if failure.
+#
+body ::tycho::FileBrowser::changeDir {directory} {
+    if { ! [file isdirectory $directory] } {
+        set directory [file dirname $directory]
+    }
+    set directory [::tycho::expandPath $directory]
+
+    if { ! [file exists $directory] } {
+        safeEval ::tycho::warn \
+                "\"[string trimright $directory /]\" does not exist"
+        return 0
+    }
+    if { ! [file readable $directory] || ! [file executable $directory]} {
+        safeEval ::tycho::warn \
+                "Directory \"[string trimright $file /]\" is unreadable"
+        return 0
+    }
+    set CWD $directory
+    set localCWD $CWD
+    $itk_component(dir) config -text $CWD
+    updateListbox
+    return 1
+}
 
 #####################################################################
 #### complete
@@ -480,21 +525,12 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    return 0
 	}
     } 
-    
+
     # If the file does exist, and is a directory
-    if {[file isdir $file] && [::tycho::File::registeredCommands $file] == {}} {
-	if {[file readable $file] && [file executable $file]} {
-	    
-            set CWD [::tycho::expandPath $file]
-            $itk_component(dir) config -text $CWD
-            set localCWD $CWD
-            updateListbox
-            return 0
-	} else {
-	    safeEval ::tycho::warn \
-		    "Directory \"[string trimright $file /]\" is unreadable"
-	    return 0
-	}
+    if {[file isdir $file] \
+            && [::tycho::File::registeredCommands $file] == {}} {
+        changeDir $file
+        return 0
     } else {
 	# It's a plain file or a directory with a registered editor
 	if {[file readable $file]} {
