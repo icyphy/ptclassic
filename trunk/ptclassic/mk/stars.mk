@@ -226,7 +226,7 @@ SDFTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o
 CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
 ifeq ($(USE_SHARED_LIBS),yes) 
-CGCTARGETS =
+CGCTARGETS =	$(CGCTCL)/CGCTclTkTarget.o
 CGCTARGETS_LIBS = 	-lcgctargets
 CGCTARGETS_LIBSFILES = $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
 else
@@ -274,8 +274,13 @@ TARGETS_LIBS = $(CG56TARGETS_LIBS) $(CGCTARGETS_LIBS)
 #
 
 # PN domain.
+ifeq ($(INCLUDE_PN_DOMAIN),yes) 
 PN_LIBS =	-lpnstars -lpn
 PN_LIBFILES =	$(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
+else
+PN_LIBS =
+PN_LIBFILES =
+endif
 
 # CP domain.
 # -laudio is for the Infopad stars in the CP domain
@@ -306,7 +311,7 @@ THREAD_LIBFILES =	$(PTHREAD_LIBFILES)
 endif
 
 # sol2.cfront can't build ipus because of template problems
-ifneq (,$(filter sol2.cfront,$(PTARCH)))
+ifeq ($(INCLUDE_IPUS_DOMAIN),no) 
 IPUSSTARS =
 IPUS_STAR_LIBFILES =
 IPUS_TCLSTARS =
