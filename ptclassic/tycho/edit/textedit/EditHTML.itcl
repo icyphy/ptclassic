@@ -74,6 +74,9 @@ class ::tycho::EditHTML {
     # Execute the HTML and display.
     method evaluate {}
 
+    # Get the blank HTML template for a file and insert it into the window
+    method fileTemplate {}
+
     # Open a help window.
     method help {}
 
@@ -120,7 +123,11 @@ body ::tycho::EditHTML::constructor {args} {
     menubar addSeparator Edit
         
     menubar add "Check Links" Edit -underline 6 \
-	    -command "$this busy checkLinks"
+	    -command "$this busy $this checkLinks"
+
+    menubar addMenu Special -underline 0
+    menubar add "File Template" Special -underline 0 \
+	    -command "$this fileTemplate"
 
 }
 
@@ -206,6 +213,35 @@ body ::tycho::EditHTML::checkLinks {} {
 #
 body ::tycho::EditHTML::evaluate {} {
     $itk_component(text) evaluate
+}
+
+#####################################################################
+#### fileTemplate
+# Insert the blank html template into the file.
+#
+body ::tycho::EditHTML::fileTemplate {} {
+    global TYCHO
+
+    # The location of the template file.  Non-UCB users might want
+    # to edit this file for their own use.
+    set filename $TYCHO/doc/HTMLTemplate.html
+
+    if {$filename != "" && $filename != "NoName"} {
+	if {[file exists $filename]} {
+	    if {[file readable $filename]} {
+		# Read in the template file and stuff it into editor
+		set fd [open $filename r]
+		set data [read $fd]
+		close $fd
+		insertData $data
+                markModified
+	    } {
+		::tycho::warn "File is not readable: $filename"
+	    }
+	} {
+	    ::tycho::warn "File does not exist: $filename"
+	}
+    }
 }
 
 ###################################################################
