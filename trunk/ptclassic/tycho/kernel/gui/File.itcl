@@ -491,24 +491,27 @@ body ::tycho::File::altFile {} {
 # given in the -file option, but with the prefix "#auto#". Then arrange
 # to be called later again, with the time interval given by the option
 # -autosaveinterval.  A value of zero for this option disables auto-saving.
+# An auto-save file is not generated if this file is itself an auto-save
+# file.
 #
 body ::tycho::File::autoSave {} {
     if !$itk_option(-save) {return}
-    if {$modified && $completeFilePath != "" } {
-	# Only save local files
-	if ![::tycho::resource isremote $completeFilePath] {
-	    set filename [::tycho::url tail $completeFilePath]
-	    set filename "#auto#$filename"
-	    set filename [::tycho::url join \
-		    [::tycho::url dirname $completeFilePath] $filename]
-	    if {[catch "saveFile $filename" message] != 0} {
-		putStatus "Auto-save failed: $message"
-		# This is what we used to do:
-		# safeEval ::tycho::warn "Auto-save failed: $message"
-	    }
-	    # Commented out -- why would it be necessary??? -- hjr
-	    # markModified
-	}
+    # Auto-save only if the file is modified, has a file name,
+    # is a local file, and is not itself an auto-save file.
+    if { $modified \
+            && $completeFilePath != "" \
+            && $completeFilePath != "NoName" \
+            && ![::tycho::resource isremote $completeFilePath] \
+            && ![regexp {^#auto#} [::tycho::url tail $completeFilePath]] } {
+        set filename [::tycho::url tail $completeFilePath]
+        set filename "#auto#$filename"
+        set filename [::tycho::url join \
+                [::tycho::url dirname $completeFilePath] $filename]
+        if {[catch "saveFile $filename" message] != 0} {
+            putStatus "Auto-save failed: $message"
+            # This is what we used to do:
+            # safeEval ::tycho::warn "Auto-save failed: $message"
+        }
     }
     set interval [expr int(60000*$itk_option(-autosaveinterval))]
     if {$interval < 0 || $interval > 7200000} {
