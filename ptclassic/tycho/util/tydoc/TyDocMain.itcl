@@ -789,7 +789,7 @@ class ::tycho::ListDocSys {
     # List of DocClass objects that consist of the classes we have seen.
     protected variable classList {}
 
-    # The index of the first class in the list that hasn't been prinrted yet
+    # The index of the first class in the list that hasn't been printed yet
     protected variable currentClassIndex 0
 
     ###################################################################
