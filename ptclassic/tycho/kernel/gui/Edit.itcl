@@ -613,6 +613,11 @@ body ::tycho::Edit::constructor {args} {
          $myMenubar insert "Compile" "Evaluate" -underline 2 \
                  -command "$this execProcess make"
           
+	# This causes us to require that Exec.itcl be read in at startup
+	if ![::tycho::Exec::execWidgetIsSupported] {
+	    $myMenubar disable Compile
+	}
+
 	# Add an Edit menu
         $myMenubar addMenu Edit -before Window -underline 0
         

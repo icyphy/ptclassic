@@ -293,6 +293,11 @@ body ::tycho::HTML::constructor {args} {
 
     menubar add "Appletviewer" Special -underline 0 \
             -command "$this appletViewer"
+    # This causes us to require that Exec.itcl be read in at startup
+    if ![::tycho::Exec::execWidgetIsSupported] {
+	$myMenubar disable Appletviewer
+    }
+
 
     if {$itk_option(-directory) == {}} {
         configure -directory [file dirname $file]
