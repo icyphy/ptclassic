@@ -29,6 +29,8 @@ $Id$
 //Constructor
 CGStar :: CGStar() {
 	starSymbol.initialize();
+        addState(procId.setState("procId", this, "-1",
+                "assigned processor id. If -1, not assigned manually."));
 }
 
 // firing CG star : generate code.
@@ -45,8 +47,11 @@ int CGStar :: fire() {
 void CGStar::advance() {
         BlockPortIter nextPort(*this);
         CGPortHole* p;
-        while ((p = (CGPortHole*) nextPort++) != 0)
-                p->advance();
+        while ((p = (CGPortHole*) nextPort++) != 0) {
+		// temporary do not consider WORMHOLE case.
+		if (p->far()->parent()->isItWormhole() == FALSE)
+                	p->advance();
+	}
 }
 
 const int MAXLINELEN = 256;
