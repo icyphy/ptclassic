@@ -66,6 +66,9 @@ void DDFPortHole :: imageConnect()
 	// get real partner
 	PortHole& realPort = imagePort->newConnection();
 
+	// real port's type should match my own.
+	inheritTypeFrom(realPort);
+
 	// connect realPort to itself to set farSidePort member.
 	realPort.connect(realPort, 0);
 	imageGeo = realPort.geo();
