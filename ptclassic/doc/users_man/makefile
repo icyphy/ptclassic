@@ -44,12 +44,15 @@ update.fmb:
 # Be _sure_ to exclude cgc.doc cp.doc, because these are dummy files
 DOCS=bdf.doc cg.doc cg56.doc cg96.doc ddf.doc de.doc documents.doc domains.doc filter.doc installation.doc mq.doc obtainPtolemy.doc overview.doc pigi.doc ptcl.doc ptglossary.doc references.doc sdf.doc silage.doc sproc.doc thor.doc title.doc troubleshooting.doc users_manIX.doc users_manLOM.doc users_manTOC.doc vem.doc x.doc xgraph.doc
 
-# Update all the cross references and then Create postscript files
+# Script to convert Frame files to Postscript
+FMPRINT2PS =	/usr/cluster/doc/fmprint2ps
 # Script to fix up cg56.ps and cg96.ps postscript and to allow printing
 # on printers w/o the exact size of paper (A4 vs European)
-FIXFRAMEPS=/users/ptdesign/bin/fixframeps
+FIXFRAMEPS =	/users/ptdesign/bin/fixframeps
+
+# Update all the cross references and then Create postscript files
 fm2ps: update_book
-	fmprint2ps $(DOCS)
+	FMPRINT2PS $(DOCS)
 	$(FIXFRAMEPS) *.ps
 	-chmod g+w *.ps
 
