@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: A. Baensch
+ Programmer: A. Baensch, Luis Gutierrez
  Date of creation: 30 June 1995
 
  Target for TI TMS320C5x DSP board.
@@ -87,14 +87,8 @@ void DSKC50Target :: initStates() {
 
 void DSKC50Target :: headerCode () {
 
-
 	// initialize code streams
-
 	shellCmds.initialize();
-
-	// clear flags
-	
-	clearFlags();
 
 	myCode	<< "\t.ds	1271\n"
 		<< "TCR		.word	20h\n"
