@@ -84,9 +84,6 @@ class ::tycho::View {
     # Attach the displayer and the menu/status/tool bars
     method attachDisplayer {displayer menubar statusbar toolbar}
 
-    # In derived classes, return the current point for use by seeFragment.
-    method currentPoint {} {return {}}
-
     # Invoke a command on the Displayer, if it exists.
     method displayer {{method {}} args}
     
