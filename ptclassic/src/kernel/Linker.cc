@@ -44,23 +44,24 @@ pathSearch (const char* name, const char* path) {
 	return 0;
 }
 
-extern Error errorHandler;
-
 void Linker::init (const char* myName) {
 // locate the ptolemy binary that is currently running.
 // main should call this with argv[0] as an argument.
 // We believe argv[0] without checking if it begins with '/'
 	pid = getpid();
 	ptolemyName = pathSearch (myName, getenv("PATH"));
-	if (ptolemyName) return;
-	errorHandler.error ("Cannot locate the running binary!");
-	exit (1);
+	if (!ptolemyName)
+		Error::abortRun ("Cannot locate the running binary!  "
+				 "Incremental linking disabled");
+	return;
 }
 
 typedef void (*PointerToVoidFunction) ();
 const int HEADSIZE = 2 * sizeof (PointerToVoidFunction);
 
 int Linker::linkObj (const char* objName) {
+	if (!ptolemyName)
+		Error::abortRun ("Incremental linking disabled");
 // here, objName is the pathname of the .o file.
 	objName = expandPathName (objName);
 	char tname[20];
@@ -92,6 +93,7 @@ int Linker::linkObj (const char* objName) {
 // round up to be on a page boundary
 	init_fn += pagsiz-1;
 	init_fn &= ~(pagsiz-1);
+	int availSpace = size + pagsiz - (init_fn - (size_t)codeBlock);
 
 // generate the header.  The first word is a pointer to the initialization
 // function, the second to the termination function.
@@ -101,14 +103,15 @@ int Linker::linkObj (const char* objName) {
 // generate the loader command.  The switches mean:
 // -A: incremental loading, using symbols from the ptolemy binary.
 // -T: specify starting address of text segment at init_fn.
-// -N: do not make the text portion read-only.
+// Other switches are in LOADOPTS, from Linker.sysdep.h
 
 	char command[512], *cmd = command;
-	sprintf (cmd, "%s -N -A %s -T %x %s %s -o %s",
-		 LOADER, ptolemyName, init_fn, headerName, objName, tname);
+	sprintf (cmd, "%s %s -A %s -T %x %s %s -o %s",
+		 LOADER, LOADOPTS, ptolemyName, init_fn,
+		 headerName, objName, tname);
 
 	if (system (cmd)) {
-		errorHandler.error("Error in linking file");
+		Error::abortRun("Error in linking file");
 		delete codeBlock;
 		unlink (tname);
 		return FALSE;
@@ -119,13 +122,22 @@ int Linker::linkObj (const char* objName) {
 		delete headerName;
 	}
 	fd = open (tname, 2, 0);
-	if (lseek (fd, sizeof (header), L_SET) < 0) {
-		errorHandler.error("Error in temp file seek");
+//	if (lseek (fd, sizeof (header), L_SET) < 0)
+	if (read (fd, (void*) &header, sizeof(header)) <= 0) {
+		Error::abortRun("Can't read header from incremental link output");
 		delete codeBlock;
 		unlink (tname);
 		return FALSE;
 	}
-	read (fd, (char*) init_fn, size);
+	// we should not need this checking but better safe than sorry
+	int nsize = header.a_text + header.a_data + header.a_bss;
+	if (nsize > size && nsize > availSpace) {
+		// code will not fit
+		Error::abortRun ("Linker: code size unexpectedly large");
+		return FALSE;
+	}
+
+	read (fd, (char*) init_fn, nsize);
 	close (fd);
 	if (makeExecutable(size,pagsiz,init_fn) != 0) {
 		errorHandler.error ("Can't make code executable -- mprotect");
