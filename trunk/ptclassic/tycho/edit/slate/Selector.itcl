@@ -30,12 +30,12 @@
 #######################################################################
 #### Selector
 #
-# An interactor that selects canvas items in the usual fashion: click
-# selects an item and deselelts any other items, shift-click toggles
-# an item, dragging selects items in a region, shift-dragging toggles
-# items in a region.
+# A _Selector_ is an interactor that selects canvas items. It can
+# be configured to select items by clicking, toggle items in and out
+# of the selection set, and, together with another mouse-follower
+# interactor, supports drag-selecting.
 #
-# Currently, selected items are highlights by drawing a rectangle
+# Currently, selected items are highlighted by drawing a rectangle
 # around them -- later this might be made more sophisticated.
 #
 class ::tycho::Selector {
@@ -44,57 +44,108 @@ class ::tycho::Selector {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-	background $background
 
 	eval configure $args
     }
     destructor {}
 
     ###################################################################
+    ####                            options                        ####
+
+    # The drag-select mode: "overlapping" or "enclosed"
+    public variable dragmode "overlapping"
+
+    # A script executed when an item is deselected. Two arguments are
+    # passed: this interactor and the selected picture.
+    public variable deselectcommand {}
+
+    # A script executed when an item is selected. Two arguments are
+    # passed: this interactor and the selected picture.
+    public variable selectcommand {}
+
+    # A script that controls whether interaction events are forwarded
+    # to the slate (or proxy) or not. If this script is null, then
+    # events are forwards; if it is not null, then commands are forwarded
+    # only if it returns true. It has no arguments.
+    public variable movepredicate {}
+
+    ###################################################################
     ####                         public methods                    ####
-
-    # Set the "background" tag or picture
-    method background {b}
-
-    # Bind the interactor to a picture or tag
-    method bind {t args}
 
     # Deselect all tagged items
     method clear {}
 
-    ## Remove the binding of an interactor to a picture or tag
-    method unbind {t}
+    # Return the highlight of a given item or tag
+    method highlight {tag}
+
+    # Return the selected items
+    method selected {}
+
+    # Return a tag that represents the selected items
+    method tag {}
 
 
     ###################################################################
     ####                        protected methods                  ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y}
+    protected method activate {t x y args}
 
-    # Attach the interactor to the current picture
-    protected method altactivate {t x y}
+    # Start the interaction sequence on the target.
+    protected method click {x y args}
+
+    # Remove an item from the set of selected items
+    protected method deselect {id}
+
+    # Continue the interaction sequence: move the mouse.
+    protected method drag {x y}
 
     # Remove the interactor from the current picture
-    protected method deactivate {}
+    protected method deactivate {args}
+
+    # Terminate the interaction sequence.
+    protected method release {}
+
+    # Add an item to the set of selected items
+    protected method select {id}
 
 
     ###################################################################
-    ####                   protected variables                     ####
+    ####                    private variables                      ####
 
-    # The tag or picture to use as the "background"
-    protected variable background "background"
+    # The drag box
+    private variable dragbox ""
+
+    # The pictures currently selected by dragging
+    private variable selected ""
+
+    # The current interaction mode: "move," "drag," or "altdrag"
+    private variable mode drag
+
+    # The flag controlling forwarding of interaction commands
+    protected variable inhibit 0
+
+    # The coordinates of the drag box
+    private variable xOrigin
+    private variable yOrigin
+    private variable xCurrent
+    private variable yCurrent
 }
 
 
 #######################################################################
 #### activate target x y
 #
-# Add a picture object to the selected objects. Motion and release events
-# are bound to the tag "sel" so that the selected objects can be dragged.
+# Add a picture object to the selected objects. Apart from the standard
+# -button and -modifiers options, thie method also responds to the
+# following (meaning that these options can be given when the
+# call to bind{} is made.):
 #
-body ::tycho::Selector::activate {t x y} {
-
+# <ul>
+# <li>*-toggle*: the given options cause items to toggle in and out
+# of the selected set.
+# </ul>
+body ::tycho::Selector::activate {t x y args} {
     # Get the current object
     set current [$slate find withtag current]
 
@@ -103,164 +154,99 @@ body ::tycho::Selector::activate {t x y} {
 	return
     }
 
-    # Select it if it isn't already
-    if { ! [lmember [$slate gettags $current] sel.$this] } {
-	# Deselect all currently selected objects, delete highlights
-	$slate dtag   sel.$this
-	$slate dtag   move.$this
-	$slate delete box.$this
+    # Set the target to the "move" tags for selected objects
+    $this target move.$this
 
-	# Tag it for moving
-	$slate addtag "move.$this" withtag $current
+    # Process depending on whether this is toggle mode or not
+    getflag toggle args
+    if { ! $toggle } {
+	# Deselect all other items and select this one. If it's already
+	# selected, do nothing
 
-	# Draw a box around it
-	set box [eval $canvas create rectangle \
-		[rectStretch [$slate bbox $current] 1]\
-		-width 3 -outline blue \
-		-tags [list [concat \
-	            box.$this \
-		    box.$current \
-		    [ldelete [$slate gettags $current] current]]]]
-	$slate lower $box $current
+	# Select it if it isn't already
+	if { ! [lmember [$slate gettags $current] sel.$this] } {
+	    # Deselect all currently selected objects
+	    $this clear
 
-	# Tag the current object again
-	$slate addtag "sel.$this" withtag $current
+	    # Select and highlight the current object
+	    $this select $current
+	}
+    } else {
+	# Toggle mode: toggle the state of the clicked-on item
 
-	# Set the target
-	set target "move.$this"
+	if { [lmember [$slate gettags $current] "sel.$this"] } {
+	    # The item is selected, so deselect it
+	    $this deselect $current
+	} else {
+	    # The item is not selected. Select and highlight it
+	    $this select $current
+	}
     }
 
-    # Set up the movement bindings
-    foreach b $button {
-	$slate bind $target \
-		[::tycho::Interactor::event Motion -button $b] \
-		[list @scope [info class] "$this drag %x %y; update idletasks"]
-	$slate bind $target \
-		[::tycho::Interactor::event Release -button $b] \
-		[list @scope [info class] "$this release; $this deactivate"]
-    }
+    # Set the mode
+    set mode "move"
+
+    # Set up the bindings to perform the moving and deactivation.
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion $args] \
+	    [list @scope [info class] "$this drag %x %y; update idletasks"]
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release $args] \
+	    [list @scope [info class] "$this release; $this deactivate $args"]
 
     # Execute the user-specified activation command
-    execute $activatecommand $x $y
+    execute $activatecommand $x $y $args
 
     # Start the interaction sequence
-    eval click $x $y $options
+    eval click $x $y $args
 }
 
 
 #######################################################################
-#### altactivate target x y
+#### click
 #
-# Toggle a picture object's selection state, without affecting other
-# selected pictures.
+# Start an interaction sequence. The behaviour depends on the
+# current "mode" of the selector: in move mode, the default
+# behaviour is used (which usually moves the selected objects);
+# in drag or altdrag modes, this method creates a drag outline.
 #
-body ::tycho::Selector::altactivate {t x y} {
-    
-    # Get the current picture
-    set current [$slate find withtag current]
-
-    # If it's a highlight box, just ignore
-    if { [lmember [$slate gettags $current] "box.$this"] } {
-	return
-    }
-
-    if { [lmember [$slate gettags $current] "sel.$this"] } {
-	# The item is already selected. Delete its highlight
-	# and deselect it
-	$slate delete box.$current
-	$slate dtag   $current sel.$this
-	$slate dtag   $current move.$this
-
-	# Make sure mouse is updated
-	update idletask
-    } else {
-	# The item is not selected. Select and highlight it
-
-	# Tag it for moving
-	$slate addtag "move.$this" withtag $current
-
-	# Draw a box around it
-	set box [eval $canvas create rectangle \
-		[rectStretch [$slate bbox $current] 1]\
-		-width 3 -outline blue \
-		-tags [list [concat \
-	            box.$this \
-		    box.$current \
-		    [ldelete [$slate gettags $current] current]]]]
-	$slate lower $box $current
-
-	# Tag the current object again
-	$slate addtag "sel.$this" withtag $current
-
-	# Set the target
-	set target "move.$this"
-
-	# Set up the movement bindings
-	foreach b $button {
-	    $slate bind $target \
-		    [::tycho::Interactor::event Motion -button $b] \
-		    [list @scope [info class] \
-		        "$this drag %x %y; update idletasks"]
-	    $slate bind $target \
-		    [::tycho::Interactor::event Release -button $b] \
-		    [list @scope [info class] \
-		        "$this release; $this deactivate"]
+# Note that the drag and altdrag modes are used only if this
+# selector is a proxy of another mouse follower of some kind.
+# (Sorry if this is obscure, I'll try to explain it better
+# later.)
+#
+body ::tycho::Selector::click {x y args} {
+    if { $mode == "move" } {
+	# Figure it if we're inhibited
+	if { $movepredicate != "" } {
+	    set inhibit [expr { ! [uplevel #0 $movepredicate] } ]
 	}
 
-	# Execute the user-specified activation command
-	execute $activatecommand $x $y
+	# If not, forward the move
+	if { ! $inhibit } {
+	    eval ::tycho::Interactor::click $x $y $args
+	}
+    } else {
+	# Figure out if this is the toggling mode
+	getflag toggle args
+	if { $toggle } {
+	    set mode "altdrag"
+	} else  {
+	    set mode "drag"
+	    $this clear
+	}
 
-	# Start the interaction sequence
-	eval click $x $y $options
-    }
-}
-
-
-#######################################################################
-#### bind target
-#
-# Bind button-press events to the specified object or tag, so that
-# clicking on one of those pictures calls activate{}. The configuration
-# options *-button* and *-modifiers* determine the actual events.
-#
-body ::tycho::Selector::bind {t args} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b ] \
-		[list @scope [info class] "$this activate $t %x %y"]
-	$slate bind $t \
-		[::tycho::Interactor::event Press \
-		-button $b -modifiers Shift] \
-		[list @scope [info class] "$this altactivate $t %x %y"]
-    }
-}
-
-
-#######################################################################
-#### background
-#
-# Set the background tag or picture of this selector. The background
-# is the picture against which clicking to clear a selection and
-# drag-selecting are performed.
-#
-# Although having a background picture seems complicated at first
-# compared to binding to the canvas) it is necessary to make dragging
-# and selecting on hierarchical pictures work.
-#
-body ::tycho::Selector::background {b} {
+	# Start with no objects selected in the drag region
+	set selected {}
+	
+	# Create the drag box
+	set xOrigin $x
+	set yOrigin $y
+	set xCurrent $x
+	set yCurrent $y
     
-    # Remove bindings from the old background
-
-    #
-    $slate dtag   sel.$this
-    $slate dtag   move.$this
-
-    # Delete highlight boxes
-    $slate delete box.$this
-
-    # Set the bindings
-    $slate bind $background <Button-1> "$this clear"
-    $slate bind $background <Shift-Button-1> ""
+	set dragbox [$slate create rect $x $y $x $y -outline grey]
+    }
 }
 
 
@@ -268,10 +254,9 @@ body ::tycho::Selector::background {b} {
 #### clear
 #
 body ::tycho::Selector::clear {} {
-    
     # Remove selection tags
-    $slate dtag   sel.$this
-    $slate dtag   move.$this
+    $slate dtag sel.$this
+    $slate dtag move.$this
 
     # Delete highlight boxes
     $slate delete box.$this
@@ -283,34 +268,246 @@ body ::tycho::Selector::clear {} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 #
-body ::tycho::Selector::deactivate {} {
+body ::tycho::Selector::deactivate {args} {
     # Remove bindings
-    foreach b $button {
-	$slate bind $target \
-		[::tycho::Interactor::event Motion -button $b] {}
-	$slate bind $target \
-		[::tycho::Interactor::event Release -button $b] {}
-    }
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion $args] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release $args] {}
+
+    # Reset the mode
+    set mode "drag"
 
     # Execute the user-specified de-activation command
     execute $deactivatecommand
     
     # Update the screen. This appears to be necessary to ensure that
-    # the current tag is updated correctly before processing another
+    # the "current" tag is updated correctly before processing another
     # event.
     update idletasks
 }
 
 
 #######################################################################
-#### unbind target
+#### deselect
 #
-# Remove the bindings to the specified object or tag. The specified 
-# pictures will no longer respond to the mouse.
+body ::tycho::Selector::deselect {id} {
+    # Delete the item's highlight
+    $slate delete box.$id
+
+    # Remove its selection tags
+    $slate dtag $id sel.$this
+    $slate dtag $id move.$this
+
+    # Execute the deselection command
+    execute $deselectcommand
+
+    # Make sure mouse is updated
+    update idletasks
+}
+
+#######################################################################
+#### drag
 #
-body ::tycho::Selector::unbind {t} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b] {}
+# Continue an interaction sequence with a mouse move. The behaviour
+# depends on the
+# current "mode" of the selector: in move mode, the default
+# behaviour is used (which usually moves the selected objects);
+# in drag or altdrag modes, this method moves the drag outline and
+# selects and deselects objects within the region.
+#
+body ::tycho::Selector::drag {x y} {
+    switch -exact $mode {
+	"move" {
+	    # Forward drag events only if not inhibited.
+	    if { ! $inhibit } {
+		eval ::tycho::Interactor::drag $x $y
+	    }
+	}
+	"drag" {
+	    # Move the drag box
+	    set xCurrent $x
+	    set yCurrent $y
+	    $slate coords $dragbox $xOrigin $yOrigin $x $y
+
+	    # Get the box again in "correct" coordinates
+	    set coords [$slate coords $dragbox]
+
+	    # Find objects now overlapping or enclosed by the drag box
+	    set candidates [eval $slate find $dragmode $coords]
+
+	    # Find already selected objects
+	    set selected [$slate find withtag sel.$this]
+
+	    # Add newly covered selectable objects. An object
+	    # is selectable if its name is in the binding set, or if
+	    # it has a tag that is in the binding set
+	    foreach o [lsubtract $candidates $selected] {
+		if { [lmember [array names bindings] $o] \
+			|| ! [ldisjoint [array names bindings] \
+			                [$slate gettags $o]] } {
+		    # Select it
+		    $this select $o
+		}
+	    }
+
+	    # Deselect selectable objects that are no longer covered
+	    foreach o [lsubtract $selected $candidates] {
+		if { [lmember [array names bindings] $o] \
+			|| ! [ldisjoint [array names bindings] \
+                                        [$slate gettags $o]] } {
+		    # Deselect it
+		    $this deselect $o
+		}
+	    }
+
+	    # Update the selected pictures for next time
+	    set selected $candidates
+	    
+	    # Execute the drag command
+	    execute $dragcommand $x $y
+	}
+	"altdrag" {
+	    # Move the drag box
+	    set xCurrent $x
+	    set yCurrent $y
+	    $slate coords $dragbox $xOrigin $yOrigin $x $y
+
+	    # Get the box again in "correct" coordinates
+	    set coords [$slate coords $dragbox]
+
+	    # Find objects overlapping or enclosed by the drag box
+	    set candidates [eval $slate find $dragmode $coords]
+
+	    # Toggle any selectable objects that have changed state
+	    foreach o [concat \
+		    [lsubtract $candidates $selected] \
+		    [lsubtract $selected $candidates]] {
+		# An object is selectable if its name is in the binding
+		# set or if it has a tag in the binding set.
+		set otags [$slate gettags $o]
+		if { [lmember [array names bindings] $o] \
+			|| ! [ldisjoint [array names bindings] $otags] } {
+		    # Test if already selected or not, and act accordingly
+		    if { [lmember [$slate gettags $o] "sel.$this"] } {
+			# Deselect it
+			$this deselect $o
+		    } else {
+			# Select it
+			$this select $o
+		    }
+		}
+	    }
+	    
+	    # Update the covered pictures for next time
+	    set selected $candidates
+	    
+	    execute $dragcommand $x $y
+	}
     }
+}
+
+#######################################################################
+#### highlight
+#
+# Return a tag that represents highlight items of the
+# given id or tag. Note: just because this method returns something
+# does not mean that a highlight actually exists.
+# Use "all" to get a tag for all selected items.
+#
+body ::tycho::Selector::highlight {tag} {
+    # If passed an id, return the highlight tag
+    if { [string match {[0-9]*} $tag] || [string match {_*} $tag] } {
+	return box.$tag
+    } elseif { $tag == "current" } {
+	set id [$slate find withtag current]
+	if { $id != "" } {
+	    return box.$id
+	} else {
+	    return {}
+	}
+    } elseif { $tag == "all" } {
+	# All selected items is easy
+	return box.$this
+    } else {
+	# A tag indicating some selected items. The only
+	# way to do it is to get the items and process them individually
+	# to add a tag to their highlights
+	set items [$slate find withtag $tag]
+	foreach i $items {
+	    $slate addtag box.$tag withtag box.$i
+	}
+	return box.$tag
+    }
+}
+
+#######################################################################
+#### release
+#
+# Terminate an interaction sequence. The behaviour
+# depends on the current "mode" of the selector: in move mode, the default
+# behaviour is used; in drag or altdrag modes, this method deletes
+# the selection drag box.
+#
+body ::tycho::Selector::release {} {
+    switch -exact $mode {
+	"move" {
+	    # Forward a release event only if not inhibited.
+	    if { ! $inhibit } {
+		eval ::tycho::Interactor::release
+	    }
+	    set inhibit 0
+	}
+	"drag" {
+	    $slate delete $dragbox
+	}
+	"altdrag" {
+	    $slate delete $dragbox
+	}
+    }
+}
+
+#######################################################################
+#### select
+#
+# When a picture is selected, it is tagged with "sel.$this" to indicate
+# that it is selected, and "move.$this" so that it can be moved.
+# The highlight box (or whatever) is tagged with "box.$this" so it can
+# be accessed later, "move.$this" so it is moved together with the
+# other selected items, and "box.$this.$id" also so it can be access later.
+# <i>Do not assume use these tags directly, as they may change.</i>
+#
+# If directly doing things with objects, you have to take care that
+# highlights are operated on too. The safest approach is to clear the
+# selection. If you don't want to do that, use the highlight{} method
+# to get an item or tag that represents the actual highlight items.
+#
+body ::tycho::Selector::select {id} {
+    # Tag the item
+    $slate addtag "move.$this" withtag $id
+    $slate addtag "sel.$this" withtag $id
+
+    # Draw a box around it.
+    eval $canvas create rectangle \
+	    [rectStretch [$slate bbox $id] 1]\
+	    -width 2 -outline blue \
+	    -tags [list [list box.$this box.$id move.$this]]
+    $slate lower box.$id $id
+
+    # Execute the deselection command
+    execute $selectcommand
+}
+
+#######################################################################
+#### selected
+#
+body ::tycho::Selector::selected {} {
+    return [$slate find withtag sel.$this]
+}
+
+#######################################################################
+#### tag
+#
+body ::tycho::Selector::tag {} {
+    return sel.$this
 }
