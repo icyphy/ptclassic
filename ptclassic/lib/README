@@ -29,8 +29,8 @@ pigiDebugRpc
 pigiXRes*
 	Various X resource files for pigi
 
-tech*
-	Various "technogies" for pigi (which determine how Oct facets
+colors
+	Default "technology" for pigi (which determine how Oct facets
 	are displayed by Vem).
 
 vem.bindings.*
