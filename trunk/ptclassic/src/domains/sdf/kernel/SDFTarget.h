@@ -25,11 +25,16 @@ $Id$
 #include "Target.h"
 #include "StringState.h"
 #include "IntState.h"
+#include "FloatState.h"
 
 class SDFTarget : public Target {
 protected:
 	StringState logFile;
 	IntState loopScheduler;
+
+	// schedulePeriod for interface with a timed domain.
+	FloatState schedulePeriod;
+
 public:
 	SDFTarget();
 	void start();
