@@ -11,7 +11,9 @@ converted to 'min' (default -100).
 	location { SDF main library }
 	explanation {
 For inputs that are greater than zero, the output either
-$20 log sub 10 (input)$ or \fImin\fR, whichever is larger.
+$N log sub 10 (input)$ or \fImin\fR, whichever is larger, where
+$N ~=~ 10$ if \fIinputIsPower\fR is TRUE, and $N ~=~ 20$ otherwise.
+The default is $N ~=~ 20$.
 For inputs that are zero or negative, the output is \fImin\fR.
 	}
 	input {
@@ -28,12 +30,27 @@ For inputs that are zero or negative, the output is \fImin\fR.
 		default{"-100"}
 		desc{Minimum output value.}
 	}
+	defstate {
+		name{inputIsPower}
+		type{int}
+		default{"FALSE"}
+		desc{
+TRUE if input is a power measurment, FALSE if it's an amplitude measurement.
+		}
+	}
+	private {
+		float gain;
+	}
+	start {
+		if (int(inputIsPower)) gain=10.0;
+		else gain = 20.0;
+	}
 	go {
 		float f = input%0;
 		if (f <= 0.0)
 			output%0 << double(min);
 		else {
-			f = 20.0 * log10 (f);
+			f = gain * log10 (f);
 			if (f < double(min)) f = double(min);
 			output%0 << f;
 		}
