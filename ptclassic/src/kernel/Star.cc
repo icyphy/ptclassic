@@ -1,3 +1,14 @@
+/******************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 12/15/89
+
+*******************************************************************/
 #include "Star.h"
 #include "StringList.h"
 
@@ -31,4 +42,23 @@ Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
 	noTimes = 0;
 
 	return *this;
+}
+
+// Methods to consume and produce particles, invoked by the scheduler
+void SDFStar :: produceParticles() {
+	SDFPortHole* port;
+	for(int i = numberPorts(); i>0; i--) {
+		port = &(SDFPortHole&)nextPort();
+		if (port->isItOutput())
+			port->increment(port->numberTokens);
+	}
+}
+
+void SDFStar :: consumeParticles() {
+	SDFPortHole* port;
+	for(int i = numberPorts(); i>0; i--) {
+		port = &(SDFPortHole&)nextPort();
+		if (port->isItInput())
+			port->increment(port->numberTokens);
+	}
 }

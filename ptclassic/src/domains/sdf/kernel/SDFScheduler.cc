@@ -3,7 +3,7 @@
 // Jan. 5, 1990
 
 // SCCS version identification
-// $Id$
+// @(#)Scheduler.cc	1.8	1/15/90
 
 
 #include "type.h"
@@ -46,6 +46,7 @@ SDFSchedule :: operator char* () {
 int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
 
    int i,j;
+   SDFStar* currentStar;
 
    // Run the initialize routines of all the atomic stars.
    for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
@@ -55,8 +56,20 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
    mySchedule.reset();
 
    for (j = numIterations; j>0; j--)
-	for (i = mySchedule.size(); i>0; i--)
-	    ((SDFStar&)mySchedule.nextBlock()).go();
+	for (i = mySchedule.size(); i>0; i--) {
+
+	    // next star in the list
+	    currentStar = &(SDFStar&)mySchedule.nextBlock();
+
+	    // First ensure output particles are created
+	    currentStar->produceParticles();
+
+	    // Then run the star
+	    currentStar->go();
+
+	    // Now discard the consumed samples
+	    currentStar->consumeParticles();
+	}
 
    // Run the termination routines of all the atomic stars.
    for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)

@@ -1,3 +1,17 @@
+/******************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 12/15/89
+
+ This header includes everything needed by a class implementing
+ the Star function
+
+*******************************************************************/
 #ifndef _Star_h
 #define _Star_h 1
 
@@ -6,14 +20,6 @@
 #include "Block.h"
 #include "Output.h"
 
-
-// SCCS version identification
-// @(#)Star.h	1.5	1/14/90
-
-/*
-This header includes everything needed by a class implementing
-the Star function
-*/
 
 	////////////////////////////////////
 	// class Star
@@ -74,6 +80,16 @@ public:
 	// so that various SDF-specific initilizations can be performed.
 	// If the parent pointer is not provied, it defaults to NULL
 	Block& setBlock(char* starName, Block* parent = NULL);
+
+	// The following method produces Particles on the geodesics
+	// connected to output ports for the star to write its data.
+	// This method is invoked automatically by the scheduler.
+	void produceParticles();
+
+	// The following method discards Particles that have been
+	// consumed by the star.  It is automatically invoked
+	// by the scheduler also.
+	void consumeParticles();
 };
 
 #endif
