@@ -18,14 +18,14 @@ $Id$
 #endif
 
 #include "BaseCTarget.h"
+#include "StringState.h"
 
 class CGCPortHole;
+class EventHorizon;
 
 class CGCTarget : public BaseCTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
-	// copy constructor
-	CGCTarget(const CGCTarget&);
 	Block* clone() const;
 	void headerCode();
 	int setup(Galaxy&);
@@ -53,6 +53,10 @@ public:
 	// make public this method
 	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
 
+	// provide the methods to be used at the wormhole interface
+	virtual void getDataToSend(EventHorizon*);
+	virtual void getDataToReceive(EventHorizon*);
+
 protected:
 	char *schedFileName;
 	StringList staticDeclarations;
@@ -66,6 +70,11 @@ protected:
 
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit(Galaxy&);
+
+	// states
+	StringState funcName;
+	StringState compileCommand;
+	StringState compileOption;
 
 private:
 	StringList includeFiles;
