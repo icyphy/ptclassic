@@ -117,6 +117,10 @@ LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR)
 
+# Default is to build non-shared (or static) libraries
+C_SHAREDFLAGS =
+CC_SHAREDFLAGS =
+
 # Libraries are of the form libfoo.$(LIBSUFFIX) 
 LIBSUFFIX = 	a
 
