@@ -107,10 +107,6 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
     
     # If statement is used to prevent crashing
     if [info exists $statusVariableName] {
-        #uplevel #0 [tkwait variable $statusVariableName]
-        # Get the return value and unset the variable that contained it
-        #set retval [uplevel #0 "set $statusVariableName"]
-        #return [list $retval $execWidget]
         return [list [$execWidget getStatusWait] $execWidget]
     } else {
         error "ERROR IN execModal: $statusVariableName doesn't exist!"
@@ -184,29 +180,25 @@ class ::tycho::Exec {
     # The name of the global variable that will contain the exit status.
     public variable statusVariableName {}
 
-    # Exec a process, if there is any output, save it to history.
-    # The arguments are: command line, directory name, and maximum lines
-    # of output allowed.
-    method execProcess {command dir maxline}
-
-    # Stop a process now.
-    method killProcess {parent}
-
-    # Get the contents of the history window, if any.
-    method getHistory {} {}
-    method clearHistory {} {set history {}; set maxLineAllow 0}
+    # Add a line entry to history log
     method addHistory {line} {}
 
-    # Read from the file descriptor, and close if we are at eof.
-    method readOrClose {fd}
+    # clear history log to {}
+    method clearHistory {} {set history {}; set maxLineAllow 0}
 
-    # Set the action for each output from the execution
-    # This is handy if each line output from the process must be
-    # parsed immediately, in line by line basis.
+    # Set the action for each output from the execution. Used for line by line
+    # parsing, etc.
     method doEachLine {action} {set doEachLine $action}
+
     # This is similar to doEachLine, except the action here
     # is processed as soon as the process has exited.
     method doWhenDone {action} {set doWhenDone $action}
+
+    # Exec a process, if there is any output, save it to history.
+    method execProcess {command dir maxline}
+
+    # Get the contents of the history window, if any.
+    method getHistory {} {}
 
     # Get the name of the global variable that will contain the return status.
     # NOTE: Global variable is used, because tkwait can only wait for
@@ -214,15 +206,16 @@ class ::tycho::Exec {
     method getStatusVariableName {} {return $statusVariableName}
 
     # Wait patiently until the forked process ends and returns status
-    # Default wait time is forever!
     method getStatusWait {{timeToWait {}} } {}
 
-    # Get the immediate status, whether the function is still "running",
-    # "created", etc...
-    method getStatusNow {} {
-        global $statusVariableName
-        return [uplevel #0 "set $statusVariableName"]
-    }
+    # Get the immediate status, "created", "running", etc...
+    method getStatusNow {} 
+
+    # Stop a process now.
+    method killProcess {parent}
+
+    # Read from the file descriptor, and close if we are at eof.
+    method readOrClose {fd}
 
     # Open a help window.
     method help {}
@@ -236,29 +229,40 @@ class ::tycho::Exec {
     # History is the buffer (used to be just history in Tk canvas)
     # Otheres used to be embedded in Tk, now they're simply variables
     private variable history {}
+
+    # Command to execute for this object
     private variable commandToExec {}
+
+    # Directory to execute from
     private variable dirToExecFrom {}
+
+    # Maximum number of lines allowed to output, used for long parsing.
     private variable maxLineAllow {}
+
+    # Number of lines output by the process, used by maxLineAllow
     private variable linecount 0
+
     # Commands to execute from 3rd party methods. Potentially this 
     # could be used for line by line parsing (line-parse-on-demand as
     # opposed to waiting until process ends, then parse).
     # This is currently not used.
     private variable doWhenDone {}
-    private variable doEachLine {}
 
+    # Similar to doWhenDone
+    private variable doEachLine {}
 }
 
+#######################################################################
 # This is used within the constructor to set the global
 # variable name. This is used so that tkwait can wait for
 # the global variable to change from "running" to either
 # "normal" or "abnormal"
+#
 proc setGlobal {name value} {
     global $name
     set $name $value
 }
 
-#######################################################################
 #### constructor
 #
 body ::tycho::Exec::constructor { {cmd make} {dir {}} {maxline {}} } {
@@ -300,6 +304,8 @@ body ::tycho::Exec::destructor {} {
 #######################################################################
 #### execProcess
 # Execute a process.  If there is any output, append to history
+# The arguments are: command line, directory name, and maximum lines
+# of output allowed.
 #
 body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     clearHistory
@@ -492,6 +498,7 @@ body ::tycho::Exec::readOrClose {fd} {
 #### getStatusWait
 # Wait patiently until the forked process ends and returns status
 # Default wait time is forever!
+#
 body ::tycho::Exec::getStatusWait {{timeToWait {}} } {
     global $statusVariableName
 
@@ -511,4 +518,12 @@ body ::tycho::Exec::getStatusWait {{timeToWait {}} } {
     return [getStatusNow]
 }
 
-
+#####################################################################
+#### getStatusWait
+# Immediately get the status of a process now, whether it is
+# running or not. This could return "stopped", "running", etc etc...
+#
+body ::tycho::Exec::getStatusNow {} {
+    global $statusVariableName
+    return [uplevel #0 "set $statusVariableName"]
+}
