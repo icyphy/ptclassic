@@ -27,6 +27,7 @@ PL_SRCS= \
  SDFAdd.pl \
  SDFAddCx.pl \
  SDFAddFix.pl \
+ SDFAddInt.pl \
  SDFAverage.pl \
  SDFAverageCx.pl \
  SDFBitsToInt.pl \
@@ -36,7 +37,7 @@ PL_SRCS= \
  SDFConst.pl \
  SDFConstCx.pl \
  SDFCos.pl \
- SDFCut.pl \
+ SDFCutAndPaste.pl \
  SDFCutVarOffset.pl \
  SDFCxToRect.pl \
  SDFDB.pl \
@@ -50,6 +51,7 @@ PL_SRCS= \
  SDFGain.pl \
  SDFGainCx.pl \
  SDFGainFix.pl \
+ SDFGainInt.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
  SDFImpulse.pl \
@@ -62,10 +64,10 @@ PL_SRCS= \
  SDFMpy.pl \
  SDFMpyCx.pl \
  SDFMpyFix.pl \
+ SDFMpyInt.pl \
  SDFMultiple.pl \
  SDFMux.pl \
  SDFNumToBus.pl \
- SDFPad.pl \
  SDFPlay.pl \
  SDFPolarToRect.pl \
  SDFPrinter.pl \
