@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Swallows an input sample
 	}
-        version {$Id$
+        version {$Id$}
         author { Ken Smith, Eric K. Pauer }
         copyright {
 Copyright (c) 1998-%Q% The Regents of the University of California

@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-        version {$Id$
+        version {$Id$}
         author { Ken Smith }
         copyright {
 Copyright (c) 1998-%Q% The Regents of the University of California

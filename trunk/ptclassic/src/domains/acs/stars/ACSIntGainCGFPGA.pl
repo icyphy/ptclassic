@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces constant coefficient multiply
 	}
-	version {$Id$
+	version {$Id$}
 	author { P. Fiore }
 	copyright {
 Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company

@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-	version {$Id$
+	version {$Id$}
 	author { Eric K. Pauer }
 	copyright {
 Copyright (c) 1998-%Q% The Regents of the University of California

@@ -6,7 +6,7 @@ defcore {
     desc { Generate a ramp signal, starting at "value" (default 0) and
 incrementing by step size "step" (default 1) on each firing.
     }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998-%Q% The Regents of the University of California.
