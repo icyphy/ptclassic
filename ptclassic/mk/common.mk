@@ -2,7 +2,7 @@
 # built from a make.template file.
 # Version identification:
 # $Id$
-# Copyright (c) 1992 The Regents of the University of California.
+# Copyright (c) 1992-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 # Date of creation: 6/15/92.
 # Written by: J. Buck
@@ -33,16 +33,44 @@ whatToBuild:	all
 .c.o:
 	$(CC) $(CFLAGS) $(C_INCL) -c $<
 
+# Note that forcing the installation of ptlang might not be the best
+# thing to do, it would be best if 'make sources' did not touch the
+# bin.$(ARCH) directory, so we check to see if there is a ptlang in the
+# obj.$(ARCH)/ptlang directory and use it.  This is awkward, but the
+# GNU tools do something similar
+
+# ptlang binary in the obj directory
+PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
+
+# Use either the ptlang binary in the obj directory or just use ptlang
+PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
+	then echo $(PTLANG_IN_OBJ) ; \
+	else echo ptlang; fi`
+
+# Build the ptlang binary if necessary
+$(PTLANG_IN_OBJ):
+	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) )
+
+# Can't use mkdir -p here, it might not exist everywhere
+$(STARDOCDIR):
+	@if [ ! -d `dirname $(STARDOCDIR)` ]; then \
+		echo "Making directory `dirname $(STARDOCDIR)`"; \
+		mkdir `dirname $(STARDOCDIR)`; \
+	fi
+	@if [ ! -d $(STARDOCDIR) ]; then \
+		echo "Making directory $(STARDOCDIR)"; \
+		mkdir $(STARDOCDIR); \
+	fi
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
 # the "mv" part moves the documentation to the doc dir.
 # note if there is no doc dir, the command continues despite the error.
 .pl.cc:
-	cd $(VPATH); ptlang $< 
+	cd $(VPATH); $(PTLANG) $< 
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 .pl.h:
-	cd $(VPATH); ptlang $< 
+	cd $(VPATH); $(PTLANG) $< 
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 # Rule for the thor preprocessor
@@ -87,7 +115,7 @@ $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
 		ln $(STAR_MK).o $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) make.template
+sources:	$(PTLANG_IN_OBJ) $(STARDOCDIR) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
 
 CRUD=*.o core *~ *.bak ,* LOG*
 clean:
