@@ -13,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.
 	}
-	location { CG56 main library }
+	location { CG56 dsp library }
 	explanation { 
 This star computes the sinc of the input, which must be in the range
 [-1.0, 1.0).  The output equals
