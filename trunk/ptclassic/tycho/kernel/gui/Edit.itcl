@@ -440,6 +440,7 @@ body ::tycho::Edit::constructor {args} {
     itk_component add text {
         # Put at the global scope to avoid invoking "unknown".
         uplevel #0 text $itk_interior.text \
+		-highlightthickness 1 \
 		-setgrid true
     } {
 	keep -background -highlightbackground \
