@@ -112,7 +112,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    cmd << ");";
 	    addCode(cmd);
 	  }
-	  addCode(updateDisplay(input.numberPorts()));
+	  // Conditional code generation: If updateSize differs from the
+	  // default, assume the user knows best and update the whole display.
+	  if (int(updateSize) > 1)
+	    addCode(updateDisplay(input.numberPorts()));
+	  else
+	    addCode(updateFamily(input.numberPorts()));
 	}
 	codeblock (updateDisplay,"int numIn") {
 	  if (++$starSymbol(count) == $val(number_of_bars)) {
@@ -129,6 +134,21 @@ limitation of liability, and disclaimer of warranty provisions.
 			      $ref(bottom),
 			      $starSymbol(ids_ptr)) == 0)
 	      errorReport("Cannot update bar graph.");
+	  }
+	}
+	codeblock (updateFamily,"int numIn") {
+	  if(ptkSetOneFamily(interp, &w,
+			     "$starSymbol(.bar)",
+			     $starSymbol(buffer_ptr),
+			     @numIn,
+			     $val(number_of_bars),
+			     $ref(top),
+			     $ref(bottom),
+			     $starSymbol(ids_ptr),
+			     $starSymbol(count)) == 0)
+	    errorReport("Cannot update bar graph.");
+	  if (++$starSymbol(count) == $val(number_of_bars)) {
+	    $starSymbol(count) = 0;
 	  }
 	}
 	codeblock (makeGraph,"int numIn") {
