@@ -28,13 +28,13 @@ defstar {
 	}
 	outmulti {
 		name{output}
-		type{ANYTYPE}
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		type{= input}
 	}
 	go {
-                for(int i=output.numberPorts(); i>0; i--)
-			(output())%0 = input%0;
+		MPHIter nextp(output);
+		PortHole* p;
+		while ((p = nextp++) != 0)
+			(*p)%0 = input%0;
 	}
 }
+

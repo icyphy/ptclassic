@@ -27,10 +27,7 @@ defstar {
 	}
 	outmulti {
 		name { output }
-		type { ANYTYPE }
-	}
-	constructor {
-		output.inheritTypeFrom(input);
+		type { =input }
 	}
 	start {
 		int n = output.numberPorts();
@@ -38,8 +35,9 @@ defstar {
 	}
 // note: delay 0 is the newest sample, so we must read backwards
 	go {
+		MPHIter nexto(output);
 		for (int i = output.numberPorts() - 1; i >= 0; i--)
-			output()%0 = input%i;
+			(*nexto++)%0 = input%i;
 	}
 }
 
