@@ -6,31 +6,182 @@
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 
-source query.itk
-
-
 catch {delete class iwidgets::Query}
 source query.itk
 
-catch {delete object .q}
-iwidgets::query .q -columnspan 6 -childspan 3
+catch {delete class iwidgets::Widgettree}
+source ../Widgettree/widgettree.itk
 
-.q add entry foo -label "An entry" -initial "Some text!"
-.q add entry oof -label "Another entry" -initial "Some more text!"
 
-.q add hline bar -label !!!
-.q vskip
+catch {delete object .f}
+iwidgets::scrolledframe .f \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 400 -width 500
 
-.q add checkbutton baz -label "A checkbutton" \
-        -onvalue On -offvalue Off \
-        -initial On -text "Check me!"
-.q add radiobutton maz -label "A radiobutton" \
-        -initial Foo -value yes -text "Radio me?"
+set w [.f childsite].w
+iwidgets::widgettree $w -createcommand "createQuery $w" \
+        -openedbitmap @../Widgettree/arrowopen.xbm \
+        -closedbitmap @../Widgettree/arrowclose.xbm \
+	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
+$w options query {
+	rename -labelfont -font font Font
+}
 
-.q add group gee -label "Groupies" -initial foo
-.q add radiobutton gee.a -text Foo -value foo
-.q add radiobutton gee.b -text Bar -value bar
-.q add radiobutton gee.c -text Baz -value baz
+foreach tag {simple double mixed boxed separated} label {
+    "A query with a single column of widgets"
+    "A query with two labeled columns of widgets"
+    "A query with mixed-span widgets"
+    "A query with boxed groups"
+    "A query with separated groups"
+} {
+    $w add node $tag -text $label
+}
+grid $w -sticky nw
 
-pack .q -fill both -expand on
+pack .f -fill both -expand on
+wm deiconify .
 raise .
+
+# This is the proc that create the queries when panels are opened.
+
+proc createQuery {win tag} {
+    switch -exact $tag {
+        "simple" {
+            $win add query simple.q -columnspan 4 -childspan 3 -labelcolor blue
+            set q [$win component simple.q]
+
+            $q add entry foo -label "An entry" -initial "Some text"
+            $q add entry oof -label "Another entry" -initial "Some more text"
+
+            $q add checkbutton baz -label "A checkbutton" \
+                    -onvalue On -offvalue Off \
+                    -initial On -text "Check me!"
+
+            $q group gee -label "Groupies" -rowspan 4 -initial foo \
+                    -rowspan 2
+            $q add radiobutton gee.a -text Foo -value foo
+            $q add radiobutton gee.b -text Bar -value bar
+            $q add radiobutton gee.c -text Baz -value baz
+            $q add radiobutton gee.d -text Goo -value goo
+            $q add radiobutton gee.e -text Boo -value boo
+            $q add radiobutton gee.f -text "A longer name" -value loo
+        }
+        "double" {
+            $win add query double.q -columnspan 8 -childspan 3 -labelcolor blue
+            set q [$win component double.q]
+
+            $q add entry foo -label "An entry" -initial "Some text"
+            $q add entry oof -label "Another entry" -initial "Some more text"
+            $q add entry bar -label "And so on..."
+            $q add entry rab -label "And so on"
+
+  	    $q group gee -label "Groupies" -rowspan 2 -initial foo 
+            $q add radiobutton gee.a -text Foo -value foo
+            $q add radiobutton gee.b -text Bar -value bar
+            $q add radiobutton gee.c -text Baz -value baz
+            $q add radiobutton gee.d -text Goo -value goo
+            $q add radiobutton gee.e -text Boo -value boo
+            $q add radiobutton gee.f -text "A longer name" -value loo
+
+            $q group checkies -label Checkies -rowspan 2 -columnspan 1
+            $q add checkbutton checkies.a -label "A checkbutton" \
+                    -initial 1 -text "Check me!"
+            $q add checkbutton checkies.b -label "Another" \
+                    -text "Me too!"
+        }
+        "mixed" {
+            # Layout from page 164 of Mullet and Sano
+            $win add query mixed.q -columnspan 4 -childspan 1 -labelcolor blue
+	    set q [$win component mixed.q]
+
+            $q add entry name -label "Name:" -columnspan 3
+            $q add entry street -label "Street:" -columnspan 3
+            $q add entry city -label "City/Street:" -columnspan 2
+            $q add entry state -style plain
+            $q add entry zip -label "ZIP:"
+            $q vskip
+            $q add entry phone -label "Phone/FAX:"
+            $q add entry fax -style plain
+            $q vskip
+            $q add entry email -label "E-mail:" -columnspan 2
+            $q vskip
+            $q vskip  ;# FIXME: need to be able to insert space
+
+            $q group interests -label "Interests:" -columnspan 3
+            $q add checkbutton interests.compilers -text "Compilers"
+            $q add checkbutton interests.databases -text "Databases" \
+                    -initial 1
+            $q add checkbutton interests.productivity -text "Productivity"
+            $q add checkbutton interests.prototyping -text "Prototyping"
+            $q add checkbutton interests.teamware -text "Teamware" \
+                    -initial 1
+            $q add checkbutton interests.networking -text "Networking"
+        }
+        "boxed" {
+            $win add query boxed.q -columnspan 8 -childspan 3 \
+                    -childstyle boxed -labelcolor blue
+            set q [$win component boxed.q]
+
+            $q group entries -label "Enter here" -rowspan 2 -colspan 2 \
+                    -childspan 2 -childstyle simple
+
+            $q add entry entries.foo -label "An entry" \
+                    -initial "Some text"
+            $q add entry entries.oof -label "Another entry" \
+                    -initial "Some more text"
+
+            $q group checks -label "Check here" -rowspan 2 -columnspan 1
+            $q add checkbutton checks.a -label "A checkbutton" \
+                    -onvalue On -offvalue Off \
+                    -initial On -text "Check me!"
+            $q add checkbutton checks.b -label "Another" \
+                    -onvalue On -offvalue Off \
+                    -initial On -text "Check me too!"
+
+ 	    $q group gee -label "Group here" -rowspan 4 \
+                    -rowspan 2 -childspan 3 -childstyle simple
+
+            $q group gee.a -label "Choose one" -initial foo
+            $q add radiobutton gee.a.a -text Foo -value foo
+            $q add radiobutton gee.a.b -text Bar -value bar
+
+            $q group gee.b -label "Choose another" -initial goo
+            $q add radiobutton gee.b.a -text Goo -value goo
+            $q add radiobutton gee.b.b -text Boo -value boo
+
+
+            $q group radio -label "Radio here" -rowspan 2 -columnspan 1 \
+                    -initial A
+            $q add radiobutton radio.a -value M -text "Mars calling"
+            $q add radiobutton radio.b -value E -text "Earth calling"
+        }
+       "separated" {
+            $win add query separated.q  -columnspan 3 \
+                    -childstyle separated -childspan 3 -labelcolor blue
+            set q [$win component separated.q]
+
+            $q group entries -label "Enter here" -rowspan 2 \
+                    -childspan 3 -childstyle simple
+
+            $q add entry entries.foo -label "An entry" \
+                    -initial "Some text"
+            $q add entry entries.oof -label "Another entry" \
+                    -initial "Some more text"
+
+            $q group checks -label "Check here" -rowspan 2
+            $q add checkbutton checks.a -text "Check me!"
+            $q vskip
+            $q add checkbutton checks.b -text "Me too!"
+            
+            $q vskip
+ 	    $q group gee -label "Group here" -rowspan 4 -initial foo \
+                    -rowspan 2
+            $q add radiobutton gee.a -text Foo -value foo
+            $q add radiobutton gee.b -text Bar -value bar
+            $q add radiobutton gee.c -text Baz -value baz
+            $q add radiobutton gee.d -text Goo -value goo
+            $q add radiobutton gee.e -text Boo -value boo
+            $q add radiobutton gee.f -text "A longer name" -value loo
+        }
+    }
+}
