@@ -81,10 +81,16 @@ int AsmGeodesic :: internalBufSize() const {
 	    !hasCirc(dest) && !hasCirc(src)) {
 		int total = src->parentReps() * src->numXfer();
 		if (total < size) {
-			Error::abortRun (*destinationPort,
-		 "maximum buffer size exceeds number of particles produced\n",
-			 "in one schedule iteration (not yet supported)");
-			return 0;
+			StringList msg = "the maximum buffer size exceeds ";
+			msg << "the number of particles produced "
+			    << "in one schedule iteration ("
+			    << size
+			    << " > "
+			    << total
+			    << "), which is not supported in code generation.";
+			msg << " One possible workaround is to add type "
+			    << "conversion or gain blocks on the connection.";
+			Error::abortRun(*destinationPort, msg);
 		}
 	}
 	return size;
