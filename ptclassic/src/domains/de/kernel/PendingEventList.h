@@ -45,8 +45,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "type.h"
 #include "LinkedList.h"
 
+class MutableCQEventQueue;
 class CqLevelLink;
-// class DEStar;
+class DEStar;
 
 
 class PendingEventList : public LinkedList {
@@ -55,7 +56,7 @@ class PendingEventList : public LinkedList {
 
 public:
 	// Constructor 
-	PendingEventList(); 
+	PendingEventList(MutableCQEventQueue *eventQueue); 
 
 	// Destructor
 	~PendingEventList();
@@ -64,13 +65,7 @@ public:
 	Link * appendGet( CqLevelLink * obj ); 
 
 	// return and remove head of list
-	Pointer getHeadAndRemove() {
-	    // myStar->target()->sched();
-	    return LinkedList::getHeadAndRemove();
-	}
-
-	// return and remove tail of list
-	LinkedList::getTailAndRemove;
+	Pointer getHeadAndRemove(); 
 
 	// Clear list
 	LinkedList::initialize;
@@ -80,14 +75,10 @@ public:
 
 private:
 	// Remove an element from the list
-	// Note that this method can lead 
-	// to memory leaks.
 	void remove( Link * obj ); 
 
-	// The DEStar which owns this PendingEventList
-	// DEStar *myStar;
-
-	// MutableCalendarQueue *queue;
+	// The Event Queue owned by this PendingEventList
+	MutableCQEventQueue *myQueue;
 
 };
 
@@ -117,6 +108,7 @@ public:
         // the most common cases, with rarer cases taking decreasing
         // priority in the if-structure.
 	inline CqLevelLink* next() { 
+	    // FIXME: myQueue->decrementEventCount();
 	    return (CqLevelLink*)LinkedListIter::next();
 	}
         inline CqLevelLink* operator++ (POSTFIX_OP) { return next();}

@@ -42,11 +42,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "PendingEventList.h"
 #include <assert.h>
+#include "Error.h"
+#include "PendingEventList.h"
+#include "MutableCQEventQueue.h"
 
 
-PendingEventList::PendingEventList() {
+PendingEventList::PendingEventList(MutableCQEventQueue *eventQueue) {
+	if( eventQueue == 0 ) {
+	    Error::abortRun("Null MutableEventQueue pass to PendingEventList.");
+	    return;
+	}
+	myQueue = eventQueue;
 	LinkedList::LinkedList();
 }
 
@@ -59,12 +66,14 @@ Link * PendingEventList::appendGet( CqLevelLink * obj )
 	return (Link *)LinkedList::appendGet( obj );
 }
 
+Pointer PendingEventList::getHeadAndRemove() {
+        myQueue->decrementEventCount(); 
+	return LinkedList::getHeadAndRemove();
+}
+
 void PendingEventList::remove( Link * obj )
 {
-	// Both of these are equivalent. We use the latter.
-	// LinkedList::directRemove( obj );
 	LinkedList::removeLink( *obj );
-
 	return;
 }
 
