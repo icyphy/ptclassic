@@ -28,13 +28,6 @@ The data values are simply copied at runtime.
 	  name{outputB}
 	  type{= input}
 	}
-	state {
-	  name {ix}
-	  type { int }
-	  default { 1 }
-	  desc { index for multiple input trace }
-	  attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
 	// The following test is done in the begin method rather than
 	// setup so that inputs or outputs can have Nop stars connected.
 	begin {
@@ -54,12 +47,12 @@ The data values are simply copied at runtime.
 	go {
 	  MPHIter nextin(input), nextoutA(outputA), nextoutB(outputB);
 	  PortHole *in, *outA, *outB;
-	  ix = 0;
+	  int port = 0;
 	  while (((in = nextin++) != 0) &&
 		 ((outA = nextoutA++) != 0) &&
 		 ((outB = nextoutB++) != 0)) {
-	    ix = ix+1;
-	    addCode("\t$ref(outputA#ix) = $ref(outputB#ix) = $ref(input#ix);");
+	    port++;
+	    @	$ref(outputA#@port) = $ref(outputB#@port) = $ref(input#@port);
 	  }
 	}
 }

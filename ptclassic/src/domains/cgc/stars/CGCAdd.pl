@@ -19,29 +19,19 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {float}
 	}
-	state {
-		name {ix}
-		type { int }
-		default { 1 }
-		desc { index for multiple input trace }
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
 	constructor {
 		noInternalState();
 	}
 	go {
 		StringList out = "\t$ref(output) = ";
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			// This code relies on side effects, i.e.,
-			// the current value of the state ix
-			ix = i;
-			out << "$ref(input#ix)";
-			if (i < input.numberPorts()) out << " + ";
-			else out << ";\n";
-			addCode(out);
-			// Reinitialize out (indent the code)
-			out = "\t\t";
+			out << "$ref(input#" << i << ")";
+			if (i < input.numberPorts())
+			  out << " + ";
+			else
+			  out << ";\n";
 		}
+		addCode(out);
 	}
 	exectime {
 		return input.numberPorts();

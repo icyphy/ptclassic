@@ -19,13 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {float}
 	}
-	state {
-		name {ix}
-		type { int }
-		default { 1 }
-		desc { index for multiple input trace }
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
 	constructor {
 		noInternalState();
 	}
@@ -33,13 +26,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		StringList out;
 		out << "\t$ref(output) = ";
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			ix = i;
-			out << "$ref(input#ix)";
+			out << "$ref(input#" << i << ")";
 			if (i < input.numberPorts()) out << " * ";
 			else out << ";\n";
-			addCode((const char*)out);
-			out.initialize();
 		}
+		addCode((const char*)out);
 	}
 	exectime {
 		return input.numberPorts();

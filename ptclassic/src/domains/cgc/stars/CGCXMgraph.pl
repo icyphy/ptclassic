@@ -75,18 +75,6 @@ for a complete explanation of the options.
 		attributes {A_NONCONSTANT|A_NONSETTABLE}
 	}
 	defstate {
-		name {ix}
-		type {int}
-		default { 0 }
-		attributes {A_NONCONSTANT|A_NONSETTABLE}
-	}
-	defstate {
-		name {iy}
-		type {int}
-		default { 0 }
-		attributes {A_NONCONSTANT|A_NONSETTABLE}
-	}
-	defstate {
 		name {resources}
 		type {stringarray}
 		default { "STDIO" }
@@ -183,15 +171,13 @@ codeblock (err) {
 	}
 
 	go {
-
-@	if (++$ref(count) >= $val(ignore)) {
-		for (int i = 1; i <= int(numIn); i++) {
-			ix = i;
-			iy = i - 1;
-@		fprintf($starSymbol(fp)[$val(iy)],"%g %g\n",$ref(index),$ref(input#ix));
-		}
-@	}
-@	$ref(index) += $val(xUnits);
+	  @    if (++$ref(count) >= $val(ignore)) {
+	  for (int i = 1; i <= int(numIn); i++) {
+	    @        fprintf($starSymbol(fp)[@(i-1)],"%g %g\n",
+	    @		 $ref(index),$ref(input#@i));
+	  }
+	  @    }
+	  @    $ref(index) += $val(xUnits);
 	}
 
 codeblock(closeFile) {
