@@ -65,6 +65,7 @@ ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(PTARCH)/lib -litcl
 INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
 		-I$(ITCL_INCDIR)
+C_INCL =	-I$(TCL_INCDIR)
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
