@@ -20,8 +20,11 @@ CFLAGS=-DUSG -g
 
 # The following is temporary until the problem with LINK_LIBGCC_SPECIAL
 # is cleared up -- must pass dir with libg++.a to linker
-GNULIBDIR=/home/gnu/lib
-LINKFLAGS=-L$(LIBDIR) -L$(GNULIBDIR)
+# Note that the location of the gnu library is set to the software
+# warehouse installation at Berkeley.  If your location is different
+# (it probably is), modify the following line.
+GNULIBDIR=/usr/sww/lib
+LINKFLAGS=-L$(LIBDIR) -L$(GNULIBDIR) -Xlinker -x -static
 
 # If the X11 include directories are in /usr/include/X11, leave
 # the following symbol blank.  Otherwise define it as "-Idir" where
