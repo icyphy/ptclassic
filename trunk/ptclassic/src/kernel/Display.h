@@ -17,8 +17,11 @@ used for X window displays, such as classes that invoke xgraph.
 
 #include "type.h"
 #include "miscFuncs.h"
+#include <stdio.h>
 
 #define MAX_NO_GRAPHS 64
+
+class Block;
 
 	//////////////////////////////////////
 	// class XGraph
@@ -32,7 +35,8 @@ public:
 	// constructor
 	XGraph();
 
-	void initialize(int noGraphs,
+	void initialize(Block* parent,
+			int noGraphs,
 			const char* options,
 			const char* title,
 			const char* saveFile);
@@ -58,6 +62,8 @@ public:
         void terminate();
 
 private:
+	void fcheck(float);
+	Block* blockIamIn;
 	const char* opt;
 	const char* sf;
 	const char* ttl;
