@@ -120,6 +120,7 @@ SRCS= \
  SDFTrainer.pl \
  SDFUnwrap.pl \
  SDFUpSample.pl \
+ SDFWaterfall.pl \
  SDFWaveForm.pl \
  SDFXMgraph.pl \
  SDFXYgraph.pl \
