@@ -45,7 +45,7 @@ ITCL_SRCS =	EditForest.itcl createForest.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	EsTest.fsm sample.fst sample.gfk
+MISC_FILES =	sample.fst sample.gfk
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
