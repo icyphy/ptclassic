@@ -132,7 +132,7 @@ DECLARE(xtb_to_del, void, (Window win));
 
 DECLARE(xtb_ti_new, void, (Window win, char *text, int maxchar,
 			   xtb_hret (*func)(Window win, int ch,
-					    char *textcopy, xtb_data *val),
+					    char *textcopy, xtb_data val),
 			   xtb_data val, xtb_frame *frame));
    /* Creates a new text input frame */		   
 
