@@ -18,6 +18,7 @@ special routines to generate the sub universes.
 #endif
 
 #include "UniProcessor.h"
+#include "ParProcessors.h"
 #include "CGCollect.h"
 #include "CGSpread.h"
 #include "KnownBlock.h"
@@ -546,25 +547,12 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 	PortHole* sP = newR->portWithName("output");
 	sP->connect(*rP, delay);
 
+	// set the cloned star pointer of the receive nodes
 	int comp = myId() - pindex;
-	if (g == 0) {
-		matchReceiveNode(newR, rP, n, comp);
-		return;
-	}
-
-	// set the cloned star pointer of the Receive node
-	ParAncestorIter iter(n);
-	ParNode* pn;
-	while ((pn = iter++) != 0) {
-		if (pn->getOrigin() == g) {
-			pn->setCopyStar(newR,0);
-			newR->setMaster(pn);
-			// pair Send and Receive star
-			if (comp > 0) mtarget->pairSendReceive(
-				pn->getPartner()->getCopyStar(), newR);
-			break;
-		}
-	}
+	ParNode* pn = parent->matchCommNodes(newR, g, rP);
+	// pair Send and Receive star
+	if ((comp > 0) && (pn != 0)) 
+	    mtarget->pairSendReceive(pn->getPartner()->getCopyStar(), newR);
 }
 
 // Note that the delay is attached in the receiver part if any.
@@ -580,25 +568,12 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 	PortHole* rP = newS->portWithName("input");
 	sP->connect(*rP, 0);
 
-	int comp = myId() - pindex;
-	if (g == 0) {
-		matchSendNode(newS, sP, n, comp);
-		return;
-	}
-
 	// set the cloned star pointer of the Send node
-	ParDescendantIter iter(n);
-	ParNode* pn;
-	while ((pn = iter++) != 0) {
-		if (pn->getOrigin() == g) {
-			pn->setCopyStar(newS,0);
-			newS->setMaster(pn);
-			// pair Send and Receive star
-			if (comp > 0) mtarget->pairSendReceive(newS, 
-					pn->getPartner()->getCopyStar());
-			break;
-		}
-	}
+	int comp = myId() - pindex;
+	ParNode* pn = parent->matchCommNodes(newS, g, sP);
+	// pair Send and Receive star
+	if ((comp > 0)  && (pn != 0))
+	    mtarget->pairSendReceive(newS,pn->getPartner()->getCopyStar());
 }
 	
 ///////////////////////////////
@@ -608,7 +583,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 // create a Spread star and connect it to the source porthole.
 
 SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
-	LOG_NEW; SDFStar* newSpread =  new CGSpread;
+	SDFStar* newSpread =  mtarget->createSpread();
 	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
@@ -624,7 +599,7 @@ SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 // create a Collect star and connect it to the destination porthole.
 
 SDFStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
-	LOG_NEW; SDFStar* newCollect = new CGCollect;
+	SDFStar* newCollect = mtarget->createCollect();
 	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
@@ -695,55 +670,6 @@ M:
 		}
 		n = n->getNextNode();
 	} while(n);
-}
-
-///////////////////////////////////////
-// matchReceiveNode and matchSendNode
-///////////////////////////////////////
-
-// set the cloned star pointer of the Receive node
-void UniProcessor :: matchReceiveNode(SDFStar* s, PortHole* p, 
-				      ParNode* n, int update) {
-	// Note that n is the first invocation.
-	while (n) {
-		ParAncestorIter iter(n);
-		ParNode* pn;
-		while ((pn = iter++) != 0) {
-			EGGate* orgG = pn->getOrigin();
-			if (orgG)
-			  if(!strcmp(orgG->readName(), p->readName())) {
-				pn->setCopyStar(s,0);
-				// pair Send and Receive star
-				if (update > 0) {
-					mtarget->pairSendReceive(pn->
-					    getPartner()->getCopyStar(),s);
-				}
-			  }
-		}
-		n = (ParNode*) n->getNextInvoc();
-	}
-}
-
-void UniProcessor :: matchSendNode(SDFStar* s, PortHole* p, 
-				   ParNode* n, int update) {
-	// Note that n is the first invocation.
-	while (n) {
-		ParDescendantIter iter(n);
-		ParNode* pn;
-		while ((pn = iter++) != 0) {
-			EGGate* orgG = pn->getOrigin();
-			if (orgG)
-			  if(!strcmp(orgG->readName(), p->readName())) {
-				pn->setCopyStar(s,0);
-				// pair Send and Receive star
-				if (update > 0) {
-					mtarget->pairSendReceive(s,
-					    pn->getPartner()->getCopyStar());
-				}
-			  }
-		}
-		n = (ParNode*) n->getNextInvoc();
-	}
 }
 
 			//////////////////////
