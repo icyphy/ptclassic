@@ -29,7 +29,6 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h> }
 
-//////// OUTPUTS AND STATES.
 	output { name { output } type { message } }
 
 	defstate {
@@ -108,7 +107,8 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		}
 		sscanf(word, "%d", &maxval);
 		if (maxval > 255) {
-			Error::abortRun(*this, fullName,": not in 8-bit format.");
+			Error::abortRun(*this, fullName,
+					": not in 8-bit format.");
 			return;
 		}
 		fscanf(fp, "%*c");		// skip one whitespace char.
@@ -116,8 +116,10 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		// Create image object and fill it with data.
 		LOG_NEW;
 		GrayImage* imgData = new GrayImage(width, height, int(frameId));
-		fread( (char*)imgData->retData(), sizeof(unsigned char),
-		       unsigned(width*height), fp );
+		fread( (char*)imgData->retData(),
+		       width * sizeof(unsigned char),
+		       height,
+		       fp );
 		fclose(fp);
 		frameId = int(frameId) + 1;		// increment frame id
 
