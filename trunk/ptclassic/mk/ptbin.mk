@@ -218,8 +218,8 @@ $(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 
 $(BINDIR)/$(PIGI): $(PIGI)
 		@echo Installing $<
-		rm -f $(BINDIR)/$(PIGI)
-		ln $< $(BINDIR)/$(PIGI)
+		rm -f $(BINDIR)/$(PIGI)$(BINARY_EXT)
+		ln $<$(BINARY_EXT) $(BINDIR)/$(PIGI)$(BINARY_EXT)
 
 else
 
