@@ -16,7 +16,10 @@ $Id$
  the buffers of a fork star to be allocated as only a single buffer.
 
 *******************************************************************/
-
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 
 #include "Geodesic.h"
 
