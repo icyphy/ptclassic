@@ -45,6 +45,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class InvokeInterp {
 public:
+	// constructor
+	InvokeInterp();
+
+	// destructor
+	~InvokeInterp();
+
 	// send a string to an external interpreter for evaluation
 	const char* interpreter(const char* expression);
 };
