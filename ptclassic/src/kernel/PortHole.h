@@ -100,10 +100,14 @@ public:
 	virtual PortHole& newConnection();
 
 	// Translate aliases, if any.
-	GenericPort& realPort() {
+	GenericPort& translateAliases() {
 		GenericPort* p = this;
 		while (p->aliasedTo) p = p->aliasedTo;
 		return *p;
+	}
+
+	GenericPort& realPort() {
+		return translateAliases();
 	}
 
 	// this one permits use in const expressions
@@ -334,10 +338,10 @@ public:
         // class PortListIter
         //////////////////////////////////////////
 
-// An iterator for PortLists
+// An iterator for PortLists, non-const version
 class PortListIter : private ListIter {
 public:
-	PortListIter(const PortList& plist) : ListIter (plist) {}
+	PortListIter(PortList& plist) : ListIter (plist) {}
 	PortHole* next() { return (PortHole*)ListIter::next();}
 	PortHole* operator++() { return next();}
 	ListIter::reset;
@@ -354,6 +358,7 @@ public:
 class MultiPortHole: public GenericPort
 {
 	friend class MPHIter;
+	friend class CMPHIter;
 public:
 	void initialize();
 
@@ -378,7 +383,7 @@ public:
 	MultiPortHole& realPort() {
 	// my apologies for this horrible cast.  It is safe because
 	// alias for a MultiPortHole is always a MultiPortHole.
-		return *(MultiPortHole *)&GenericPort::realPort();
+		return *(MultiPortHole *)&translateAliases();
 	}
 
 	// set alias for MultiPortHole
@@ -449,7 +454,7 @@ public:
 // Iterator for MultiPortHoles
 class MPHIter : public PortListIter {
 public:
-	MPHIter(const MultiPortHole& mph) : PortListIter (mph.ports) {}
+	MPHIter(MultiPortHole& mph) : PortListIter (mph.ports) {}
 };
 
 #endif
