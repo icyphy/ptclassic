@@ -62,13 +62,14 @@ MATHLINK2LIBNAME = ML
 # matlabRootDir traverses the user's path, so we only run it when
 # we really need it.
 !ifdef  NEED_MATHEMATICADIR
-!message "$(MATHEMATICADIR)"
+!message "mk/mathematica.mk.vc: MATHEMATICADIR = $(MATHEMATICADIR)"
 #	MATHEMATICADIR := $(shell $(ROOT)\bin\mathRootDir)
 #MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)\Source\Includes
 !if "$(MATHEMATICADIR)" == "" #ifeq
 
 MATHEMATICADIR = 	$(ROOT)\src\compat\mathematica
 MATHEMATICAEXT_LIB = 	-lptmathematica
+MATHEMATICA_INCSPEC=    -I$(MATHEMATICADIR)\Source\Includes
 !else
 !if "$(wildcard $(MATHEMATICADIR)\Bin\MathLink)" == "" #ifeq
 		# Mathematica3.x
@@ -87,5 +88,5 @@ MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)\Bin\MathLink \
 # Ptolemy interface directories
 EXTTOOLSLIB = $(ROOT)\src\utils\libexttools
 PTMATHEMATICALIB = $(ROOT)\src\utils\libptmathematica
-MATHEMATICAIFC_INCSPEC = -I$(EXTTOOLSLIB) -I$(PTMATHEMATICALIB)
 
+MATHEMATICAIFC_INCSPEC = -I$(EXTTOOLSLIB) -I$(PTMATHEMATICALIB) -I$(MATHEMATICADIR)\Source\Includes
