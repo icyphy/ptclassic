@@ -1,7 +1,20 @@
 defstar {
 	name { LMSOscDet }
 	domain { C50 }
- 	derivedFrom { FIR }
+
+// 	derivedFrom { FIR }
+// this star is derived from FIR in the cg56 domain but in the 50
+// domain the coefficients for FIR are stored in program memory.
+// the dsk assembler does not accept an statement like
+// lmmr bmar,#<label pointing to 1st tap> so the only other way 
+// to modify the second tap is to do
+// rptb <label pointing to 1st tap> which loads the address of
+// first tap into paer reg. and then do lmmr bmar,#paer to 
+// get bmar to point to second tap.  One could then use bldp/blpd
+// instructions to modify the second tap.  Because of all these
+// instructions are expensive it's not convenient to derive this
+// star from FIR.
+
 	desc {
 This filter tries to lock onto the strongest sinusoidal component in
 the input signal, and outputs the current estimate of the cosine
@@ -50,6 +63,17 @@ of the LMS star upon which this star derived.
 	}
 	seealso {FIR, LMS}
 
+	input {
+		name { signalIn }
+		type { fix }
+	}
+
+	output {
+		name { signalOut }
+		type { fix }
+	}
+
+
 	// Since we're not derived from C50LMS, declare an error port
         input {
 		name { error }
@@ -90,6 +114,27 @@ The initial guess at the angle being estimated in radians.
 		     }
 	}
 
+	defstate { 
+		name { lmsOldSamples }
+		type { fixarray }
+		default { "0.0 0.0 0.0 " }
+		desc {
+Buffer to hold old samples, since the star is not derived
+from FIR.
+		}
+		attributes { A_NONSETTABLE| A_NONCONSTANT | A_UMEM }
+	}
+	
+	defstate {
+		name { tap }
+		type { fix }
+		default { 0.707106781 }
+		desc {
+Tap that's being adapted.
+		}
+		attributes { A_NONSETTABLE| A_NONCONSTANT | A_UMEM }
+	}
+
 	defstate {
 		name { delayBuf }
 		type { fixarray }
@@ -110,20 +155,8 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 
-	constructor {
-		// taps state: not constant, length three, and not settable
-		taps.clearAttributes(A_CONSTANT);
-		taps.clearAttributes(A_SETTABLE);
-
-		// decimation is not supported
-		decimation.clearAttributes(A_SETTABLE);
-		decimationPhase.clearAttributes(A_SETTABLE);
-
-	}
-
 	initCode {
 		if (int(errorDelay) > 1)   addCode(initDelayPtr);
-		C50FIR::initCode(); // call initCode method of FIR filter
 	}
 
         method {
@@ -138,7 +171,7 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		}
 		if ( (int(errorDelay) < 1) || (int(errorDelay) > 255) ) {
 		    Error::abortRun(*this,
-				    "The error delay must be in the range [1,255]");
+			"The error delay must be in the range [1,255]");
 		    return;
 		}
 	    }
@@ -149,18 +182,23 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		int intMu;
 		// delayMask is used to implement modulo addressing
 		int delayMask;
+		// parameter to keep track of exec time
+		int time;
 	}
 
 	setup {
 		// if delay requested is larger than 1 allocate 
 		// memory for delayBuf and delayPtr
+		
+		time = 23;
 
 		if (int(errorDelay) > 1) {
+			time += 12;
 			delayBuf.setAttributes(A_UMEM|A_CIRC);
 			delayPtr.setAttributes(A_UMEM);
 			int buffSize = 1;
 			int delaySize = errorDelay - 1;
-		//to support modulo addressing delayBuf must be
+		//to support modulo 2 addressing delayBuf must be
 		// 2^k words long.
 			for ( int i = 0; i < 8; i++){
 				if ( buffSize >= delaySize) break;
@@ -175,24 +213,16 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		// in go method.
 		// CheckParameterValues();
 	
-		// we don't support decimation: make sure that it's 1
-		decimation = 1;
-
-		// initialize the taps of the three-tap LMS FIR filter
-		taps.resize(3);
-		taps[0] =  0.5;
-		taps[1] = -cos(double(initialOmega));
-		taps[2] =  0.5;
+		tap = -cos(double(initialOmega));
+		
+		lmsOldSamples.resize(2);
 	
 		double temp = stepSize.asDouble();
 		if (temp >= 0) {
 			intMu = int(32768*temp + 0.5);
 		} else {
-			intMu = int(32768*(1-temp) + 0.5);
+			intMu = int(32768*(2+temp) + 0.5);
 		}
-
-		// call the LMS FIR filter setup method
-		C50FIR::setup();
 
 	}
 
@@ -203,54 +233,60 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 	}
 
 	codeblock(initialCode) {
-	ldp	#00h			; data page pointer = 0
-	setc	ovm			; set overflow mode
-	lar	ar1,#$addr(oldSamples,1) ; ar1-> x[n-1]
+	lar	ar4,#$addr(signalOut)
+	lar	ar3,#$addr(tap)
+	lar	ar1,#$addr(lmsOldSamples,1) ; ar1-> x[n-2]
 	lar	ar2,#$addr(cosOmega)	; ar2->cosOmega
-	lacl	#$starSymbol(cfs)	; acc -> taps[1]
-	add	#1			; acc++
-	samm	bmar			; BMAR -> taps[1]
-* taps for FIR are stored in program memory(at label $starSymbol(cfs))!!
-	blpd	bmar,ar3		; ar3 = taps[1]
-	mar	*,ar1			; arp = 1
+	mar	*,ar1
 	}
 
 // this star is generally used with the diamond shaped delay symbol
 //attached to the feedback path leading to the error input. Only 
 //delays of 1 are currently supported with this symbol so a value
 //of 1 for the delay means do nothing as far as this star is
-//concerned.  For larger values of delays additional code is requird
+//concerned.  For larger values of delays additional code is requird.
+//Also note that the adaptation has the term e[n]*x[n-1] but due to
+//the fact that the signal out is simply connected to the output this
+//represents an inherent delay of 1 so one has to use e[n-1]*x[n-2]
 
 	codeblock(delayOne){
 	lmmr	treg0,#$addr(error)	; treg0 = error
 	}
 
 	codeblock(delayStd,""){
-	mar	*,ar4
-	lacl	#@delayMask
+	ldp	#00h
+	mar	*,ar5
+	lacc	#@delayMask
 	samm	dbmr
-	lmmr	ar4,#$addr(delayPtr)
+	lmmr	ar5,#$addr(delayPtr)
 	bldd	#$addr(error),*+
-	apl	ar4			; the apl/opl thing is there because
+	apl	ar5			; the apl/opl thing is there because
 	opl	#$addr(delayBuf),ar4	; the C50 doesn't support modulo
-	smmr	ar4,#$addr(delayPtr)	; addressing directly.
+	smmr	ar5,#$addr(delayPtr)	; addressing directly.
 	sbrk	#$val(errorDelay)	; 0< erroDelay < 256 !!
-	apl	ar4
-	opl	#$addr(delayBuf),ar4
+	apl	ar5
+	opl	#$addr(delayBuf),ar5
 	lt	*,ar1
 	}
 	
 	codeblock(finalCode,""){
-	mpy	#@intMu			; p = 0.5*error*Mu
-	ltp	*,ar2			; acc = 0.5*error*Mu, treg0 = x[n-1]
-	sach	*,3			; cosOmega = 4*error*Mu
-	mpy	*			; p = 2*error*Mu*x[n-1]
-	lacc	ar3,15			; acc = 0.5*taps[1](old)
-	spac				; acc = 0.5(taps[1](old)-4*error*Mu*x[n-1])
-	sach	ar3,1			; ar3 = 2*acc
-	neg				; acc = -acc
-	sach	*,1			; cosOmega = -2(acc)
-	bldp	ar3			; taps[1] = newtap
+	mpy	#@intMu		; p = 0.5*error*Mu
+	ltp	*,ar2		; acc = 0.5*error*Mu, treg0 = x[n-2]
+	sach	*,3		; cosOmega = 4*error*Mu
+	mpy	*,ar3		; p = 2*error*Mu*x[n-1]
+	lacc	*,15		; acc = 0.5*tap
+	spac			; acc = 0.5(tap-4*error*Mu*x[n-1])
+	sach	*,1,ar2		; tap = tap -4*error*Mu*x[n-1]
+	neg			; acc = -acc
+	sach	*,1,ar1		; cosOmega = -(tap)
+	lacc	*-,14		; acc = x[n-2]/4, ar1->x[n-1]
+	lt	*		; treg0 = x[n-1]
+	dmov	*,ar3		; x[n-2] = x[n-1] <delay>
+	mpy	*,ar1		; p = 0.5*tap*x[n-1]
+	bldd	#$addr(signalIn),*	; x[n-1] = x[n] <delay>
+	apac			; acc = 0.5(x[n-2]/2 + tap*x[n-1])
+	add	*,14,ar4	; acc = 0.5(0.5*x[n] +tap*x[n-1] + 0.5*x[n-2])
+	sach	*,1
 	}
 
 
@@ -263,15 +299,10 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		if (int(errorDelay) > 1) addCode(delayStd());
 		else addCode(delayOne);
 		addCode(finalCode());
-
-
-		// Run the FIR filter
-		C50FIR :: go();
 	}
-	// Inherit the wrapup method
 
 	exectime {
-		return 20 + C50FIR::myExecTime();
+		return time;
 	}
 
 }
