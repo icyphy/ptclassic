@@ -115,7 +115,7 @@ cd $PTOLEMY/obj.$PTARCH
 # EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
 # Experimental domains not included: capsim cgdsp3
 
-set EXPDOMAINS=(c50 cg56 cgc fsm rtg vhdlb vhdl mdsdf hof sr)
+set EXPDOMAINS=(c50 cg56 cgc fsm acs vhdlb vhdl mdsdf hof sr)
 set EXPEXTRAS=(c50/targets cg56/targets)
 
 set ALLDOMAINS=(sdf ddf de bdf cg $EXPDOMAINS)
