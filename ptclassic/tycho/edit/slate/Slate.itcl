@@ -487,9 +487,9 @@ body ::tycho::Slate::delete {args} {
 	if { $p == "all" } {
 	    set picts [$this find all]
 	    break
-	} elseif { [string match {[0-9]*} $pict] } {
+	} elseif { [string match {[0-9]*} $p] } {
 	    # Canvas item: just delete now
-	    $itk_component(canvas) delete $pict
+	    $itk_component(canvas) delete $p
 	} elseif { ! [isObject $p] } {
 	    set picts [concat $picts \
 		    [$this roots [$this find withtag $p]]]
