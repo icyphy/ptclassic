@@ -169,14 +169,14 @@ _vem:
 	done
 
 
-linkvem.debug:
+linkvem.debug: $(OBJECTS)
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem:
+linkvem: $(OBJECTS)
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
 
-linkvem.debug.gcc:
+linkvem.debug.gcc: $(OBJECTS)
 	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem.gcc:
+linkvem.gcc: $(OBJECTS)
 	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
