@@ -41,6 +41,16 @@ if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
 endif
 
+# If the user has set PIGIRPC, check to see if it exists
+# We don't try and do anything smart if the user has set $PIGIRPC
+# and it does not exist.
+if ( $?PIGIRPC ) then
+	if ( ! -x $PIGIRPC) then
+		echo \$PIGIRPC = $PIGIRPC, which does not exist, exiting.
+		exit 3
+	endif
+endif
+
 set cell = init.pal
 set resfile = pigiXRes9
 
@@ -80,15 +90,9 @@ while ($#argv)
 			breaksw
 		case -ptiny:
 			setenv PIGIBASE ptinyRpc
-			if ( ! $?PIGIRPC ) then
-				setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
-			endif
 			breaksw
 		case -ptrim:
 			setenv PIGIBASE ptrimRpc
-			if ( ! $?PIGIRPC ) then
-				setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptrimRpc
-			endif
 			breaksw
 		case -*:
 			echo Bad option: $argv[1]
@@ -131,11 +135,12 @@ if ( ! $?PIGIBASE ) then
      endsw
 endif
 
-if ( ! $?PIGIRPC ) then
-     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
-endif
-
-if ($?pigidebug && ! -x $PIGIRPC ) then
+# If the user has set $PIGIRPC and is calling -debug, don't try and be 
+# smart here
+if ($?pigidebug && ! $?PIGIRPC ) then
+	if ( ! $?PIGIRPC ) then
+	     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
+	endif
 	if ($?pigidebug && ! -x $PIGIRPC.debug ) then
 		echo "$PIGIRPC.debug does not exist or is not executable"	
 		if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
@@ -153,6 +158,10 @@ if ($?pigidebug && ! -x $PIGIRPC ) then
 	endif
 endif
 
+if ( ! $?PIGIRPC ) then
+     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
+endif
+
 if ( ! -x $PIGIRPC ) then
 	echo "$PIGIRPC does not exist or is not executable."
 	if ( $?pigidebug && -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
@@ -168,7 +177,6 @@ if ( ! -x $PIGIRPC ) then
 		endif
 	endif
 endif
-
 
 if ( "$1" =~ "-*" ) then
     echo "${0}: Bad option: $1"
