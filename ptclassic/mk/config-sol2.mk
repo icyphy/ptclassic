@@ -97,7 +97,7 @@ XV_CC =		gcc -traditional -I/usr/openwin/include -L/usr/openwin/lib \
 XV_RAND = 	-DNO_RANDOM
 
 # Under sol2, xmkmf is not compatible with gcc, so we don't use it
-XMKMF =		/usr/openwin/bin/xmkmf
+XMKMF =		rm -f Makefile; cp Makefile.std Makefile
 
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
