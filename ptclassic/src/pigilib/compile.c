@@ -72,7 +72,7 @@ CompileFacet is called.  xfered never gets re-initialized.
 #include "handle.h"
 
 /* for DMM support: A. Kalavade 8/3/94 and 11/22/95 */
-int dmmRecompileFlag;
+int dmmRecompileFlag = TRUE;
 
 /* maximum number of actual terms allowed on a net */
 #define TERMS_MAX 50
@@ -1025,9 +1025,9 @@ octObject *galFacetPtr;
 		"DupSheetAdd2 failure! Out of memory?");
     }
     /* for DMM support */
-    dmmRecompileFlag = 1;
+    dmmRecompileFlag = TRUE;
 
-    recompileFlag = 1;
+    recompileFlag = TRUE;
     KcFlushLog();
     return (TRUE);
 }
