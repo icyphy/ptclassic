@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: J. Buck and J. Pino
+ Programmer: J. Buck, J. Pino, and T. M. Parks
 
  Base target for Motorola DSP assembly code generation.
 
@@ -40,7 +40,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "AsmTarget.h"
 #include "ProcMemory.h"
 #include "StringState.h"
-#include "MotorolaAttributes.h"
 
 class MotorolaMemory : public DualMemory {
 public:
@@ -59,10 +58,14 @@ public:
 	void endIteration(int repetitions, int depth);
 	virtual double limitFix(double val);
 	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
+	/*virtual*/ void writeFiring(Star&,int);
 	~MotorolaTarget();
 protected:
 	StringState xMemMap;
 	StringState yMemMap;
+
+	// Write star firings as subroutine calls.
+	IntState subFire;
 
 	/*virtual*/ void tailerCode();
 	void codeSection();
