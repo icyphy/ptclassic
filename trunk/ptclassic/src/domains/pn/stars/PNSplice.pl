@@ -39,8 +39,7 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	type { "DataFlowStar*" }
 	name { splice }
-	arglist { "(const char* starClass, const char* aliasPort,
-                    const char* connectPort, PortHole* port)" } 
+	arglist { "(const char* starClass, const char* aliasPort, const char* connectPort, PortHole* port)" } 
 	code
 	{
 	    StringList starName;
