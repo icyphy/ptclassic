@@ -1,12 +1,13 @@
 How to make your own personal pigiRpc
 $Id$
+Written by: Joseph T. Buck
 
-pigi's ability to dynamically link in stars has limitations; you can't
-link in new libraries or have one dynamically linked star be derived
-from another dynamically linked star.  Also, you cannot dynamically link
-in a new domain.  To get around those limitations, you can build your
-own pigiRpc executable.  To use the executable, set the environment
-variable PIGIRPC to the full path of your personal pigiRpc executable.
+pigi's ability to dynamically link in stars has limitations; while it
+is now possible to dynamically link in large amounts of your own code,
+it is slow and needs to happen every time.  For this reason, it sometimes
+pays to build your own pigiRpc executable.  To use the executable, set the
+environment variable PIGIRPC to the full path of your personal pigiRpc
+executable, and then the pigi command will use your personal copy.
 
 To build your own pigiRpc, you should create a working directory, and
 copy the makefile, pigiMain.cc, and defpalettes.c from this directory
@@ -20,7 +21,7 @@ Specifically, the variable ROOT should point to the ptolemy home directory,
 and the variable OBJDIR to the root of the ptolemy object tree for the
 current architecture.  For example:
 
-ROOT          = /usr/users/ptolemy
+ROOT          = /whereever/ptolemy/is/installed
 OBJDIR        = $(ROOT)/obj.$(ARCH)
 VPATH         = .
 
@@ -28,7 +29,8 @@ The latter value assumes you will run make in the source directory
 and want the object files stored in the same directory.
 
 To make a version of pigi that has debugging enabled, do "make pigiRpc.debug"
-and start things up with "pigiDebug" instead of pigi.  Warning: if you
+and start things up with "pigi -debug" instead of pigi.  (You must have
+gdb, the Gnu debugger, installed for this to work).  Warning: if you
 don't have a lot of memory on your workstation, this will be extremely
 slow.
 
@@ -45,4 +47,4 @@ install: makefile pigiRpc
 
 This will leave the pigiRpc in whatever directory you make it.
 
-Joe Buck
+
