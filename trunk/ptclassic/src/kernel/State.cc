@@ -54,6 +54,12 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
                 return t;
         }
 
+	if(*token  == ',') {
+		t.tok = "SEPARATOR";
+		t.cval = (char)*token;
+		return t;
+	}
+
         if (*token == '+' || *token == '-' || *token == '*' ||  *token == '/'
 	|| *token == '(' || *token == ')') {
                 t.tok = "OP";
@@ -64,12 +70,12 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
         if (isdigit(*token) || *token == '.' )  {
                 if (index (token, '.')) {
                         t.tok = "FLOAT";
-                        t.dval = atof(token);
+                        t.doubleval = atof(token);
 			return t;
                 }
                 else {
                         t.tok = "INT";
-                        t.ival = atoi(token);
+                        t.intval = atoi(token);
 			return t;
                 }
         }
