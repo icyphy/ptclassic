@@ -14,12 +14,11 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 PARKERNEL = $(ROOT)/src/domains/cg/parScheduler
 DLKERNEL = $(ROOT)/src/domains/cg/dlScheduler
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR)
 
 SRCS =	HuNode.cc HuGraph.cc HuScheduler.cc HuParProcs.cc
 

@@ -14,10 +14,9 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR)
 
 SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
 		UniProcessor.cc CodeGen.cc ParProcessors.cc CGWormStar.cc
