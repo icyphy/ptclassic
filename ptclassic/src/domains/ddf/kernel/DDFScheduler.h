@@ -70,6 +70,9 @@ public:
 	void setStopTime (float limit) { stopTime = int(limit) ;}
 	void resetStopTime () { stopTime = 1; numFiring = 0; }
 
+	// declare "untimed"
+	int amITimed();
+
 	// scheduler Period : interface with timed domain.
 	float schedulePeriod;
 };
