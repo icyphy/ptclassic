@@ -30,6 +30,12 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+#### FIXME:  Known bugs
+# - When checking in a file, the window in which the user enters comments
+#   is modal.  This makes it awkward to look around to construct the comments.
+#   It should not be modal.
+
+
 option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
 option add *RevControlSCCS.commentColor [ptkColor firebrick black] widgetDefault
 
@@ -122,10 +128,14 @@ body ::tycho::RevControlSCCS::checkIn {} {
     if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	error "The file \"$basefile\" is not checked out."
     }
+    if {![file writable [format "%s/SCCS" $dir]]} {
+	error "SCCS file is not writable"
+    }
     cdDir $dir
-    set comment [$this getComments]
+    set comment [getComments]
     if {$comment == ""} {
 	# cancelled
+	::tycho::inform "Checkin cancelled"
 	return
     }
     catch {exec echo $comment | sccs delget $basefile} output
@@ -151,6 +161,9 @@ body ::tycho::RevControlSCCS::checkOut {} {
 
     if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	error "The file \"$basefile\" is already checked out."
+    }
+    if {![file writable [format "%s/SCCS" $dir]]} {
+	error "SCCS file is not writable"
     }
     cdDir $dir
     catch {exec sccs edit $basefile} output
@@ -276,7 +289,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 	parseHistory $history [$itk_component(history) textWinName]
 
 	# Delay or the focus command is ignored.  Tk bug?
-	after 500 "focus [$itk_component(history) textWinName]"
+	after 500 [code "focus [$itk_component(history) textWinName]"]
 
 	cd $olddir
     }
@@ -308,7 +321,8 @@ body ::tycho::RevControlSCCS::isUnderRevControl {file} {
 # Open a dialog box to query the user for comments.
 # 
 body ::tycho::RevControlSCCS::getComments {} {
-    set list [DialogWindow::newModal EntryQuery [autoName .getcomment] \
+    set list [::tycho::DialogWindow::newModal EntryQuery \
+	    [::tycho::autoName .getcomment] \
 	    -queries {{body {Comment:} {} 5}}  \
 	    -entrywidth 60]
     set comments [lindex [lindex $list 0] 1]
