@@ -141,10 +141,6 @@ proc listEq {list1 list2} {
 
 proc ed_UpdateParam {facet number name args} {
    global paramArray
-#puts "facet: $facet"
-#puts "number: $number"
-#puts "name: $name"
-#puts "args: $args"
    if {[llength $args] == 2} {
 	set value [lindex $args 1]
 	set type [list [lindex $args 0]]
@@ -447,13 +443,11 @@ proc ptkEditParams {facet number} {
     global paramArray paramBAKArray
     set top .o$num
 
-#    set paramArray(addBorder) 0
-
     set ed_GetResult [ptkGetParams $facet $number]
 
 #    regsub -all {(\})(\{)} $ed_GetResult {\1 \2} ed_GetResult
     if {$ed_GetResult == ""} {
-	ptkImportantMessage .error "ed_GetParams returns {}"
+#	ptkImportantMessage .error "ed_GetParams returns {}"
 	return
     }
     if {$ed_GetResult == "NIL"} {
@@ -477,7 +471,8 @@ proc ptkEditParams {facet number} {
     }
 
     toplevel $top
-    wm title $top "Edit Params: $number"
+#    wm title $top "Edit Params: $number"
+    wm title $top "Edit Params"
     wm iconname $top "Edit Params"
     wm minsize $top 0 0
 
@@ -507,7 +502,8 @@ proc ptkEditParams {facet number} {
 		paramArrayBAK($facet,$number\"; destroy $top"] \
 		{left expand fillx}
 
-    if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
+#    {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])}
+    if {$number == "NIL"} {
 	pack append $u \
 	   [button $u.add -text "Add parameter <M-a>" -command \
 		"ed_AddParamDialog $facet $number"] {left expand fillx} \
@@ -543,7 +539,7 @@ proc ptkEditParams {facet number} {
 			return
 		} else { 
 			set paramArray($facet,$number) {}
-			wm title $top "Edit Params: $facet"
+#			wm title $top "Edit Params: $facet"
 			break
 		}
 	}
@@ -759,3 +755,4 @@ proc ed_ConfigCanvas {top facet number} {
     $c configure -width $canvWidth -height $canvHeight
 
 }
+
