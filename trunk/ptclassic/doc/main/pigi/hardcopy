@@ -128,7 +128,7 @@ to include this postcript in a TeX document, include the command
 .)c
 in the TeX file and use the commands
 .(c
-begin{figure}
+\\\\begin{figure}
   \\\\centerline{
   \\\\psfig{figure=mySchematic.ps,width=4in,height=2in}}
   \\\\caption{Ptolemy Schematic}
