@@ -30,11 +30,13 @@
 # Set up the "function table." Explicitly load the superclass
 # to avoid a bizarre problem with variable scoping.
 #
-uplevel #0 {
-    if { [::info classes ::tycho::Picture] == "" } {
-	source $tychoslate/kernel/Picture.itcl
+namespace ::tycho {
+    if { [::info classes Picture] == "" } {
+	uplevel #0 {source $tychoslate/kernel/Picture.itcl}
     }
+}
 
+uplevel #0 {
     array set Frame [array get Picture]
 
     set Frame(borderwidth) ::tycho::Frame::borderwidth
