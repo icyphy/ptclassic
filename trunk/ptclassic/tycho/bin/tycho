@@ -142,6 +142,11 @@ while ($#argv)
 	shift
 end
 
+if ( $?selectTty && $?filename ) then
+	echo "Usage: $0 : -tty and filename are not compatible."
+	exit 2	
+endif
+
 if ( ! $?TYCHO ) then
 	if ( $?PTOLEMY ) then
 		setenv TYCHO "$PTOLEMY/tycho"
