@@ -125,7 +125,7 @@ StringList&
 StringList :: operator += (double f)
 {
 	char buf[SMALL_STRING];
-        sprintf(buf,"%g",f);
+        sprintf(buf,"%.15g",f);
 	if (strchr(buf,'e') == NULL && strchr(buf,'.') == NULL)
 		strcat(buf,".0");
 	return *this += buf;
