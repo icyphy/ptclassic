@@ -33,7 +33,6 @@
 # 						COPYRIGHTENDKEY
 
 # We don't use the toplevel window called ".", so withdraw it.
-
 if [info exists tk_version] {
     wm withdraw .
     tk appname tycho
@@ -125,7 +124,6 @@ if {![info exists ptolemy]} {
     set ptolemy [file join $tycho ..]
     set PTOLEMY $ptolemy
 }
-
 ::tycho::_announce "TYCHO=$TYCHO"
 
 global ::ptolemyfeature
@@ -266,26 +264,6 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 	}
     }
 }
-uplevel #0 {
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
-
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib iwidgets generic ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychopt controls ] ]
-}
-::tycho::_announce "Set auto_path"
-
-# auto-loading
-# Set up the directories to be searched in order of priority.
-#
-global ::tychokernel
-set ::auto_path [linsert $auto_path 0 $tychokernel ]
 
 # Create the tycho namespace
 namespace ::tycho
@@ -298,53 +276,57 @@ namespace ::tycho
 # namespace of the class and the global namespace are visible.
 # import add ::tycho
 #
-uplevel #0 {
-    # Source the preference manager and the default preferences.
-    # Might as well source needed files first
-    source [file join $tychokernel Path.tcl]
 
-    source [file join $tychokernel Uninstantiable.itcl]
-    source [file join $tychokernel Registry.itcl]
-
-    source [file join $tychokernel Object.itcl]
-    source [file join $tychokernel Model.itcl]
-    source [file join $tychokernel DataModel.itcl]
-    source [file join $tychokernel StyleSheet.itcl]
-    source [file join $tychokernel UserProfile.itcl]
-
-    ::tycho::_announce "Handled preferences"
-}
-if [info exists tk_version] {
+set OBSOLETE {
+    # auto-loading
+    # Set up the directories to be searched in order of priority.
+    #
+    global ::tychokernel
+    set ::auto_path [linsert $auto_path 0 $tychokernel ]
+    
     uplevel #0 {
-	::tycho::_announce "About to source FontManager.itcl"
-	source [file join $tychokernel FontManager.itcl]
-	# source [file join $tychokernel CacheManager.itcl]
-	source [file join $tychokernel ColorManager.itcl]
-	source [file join $tychokernel CircularList.itcl]
-	source [file join $tychokernel TopLevel.itcl]
-	source [file join $tychokernel TWidget.itcl]
-	source [file join $tychokernel View.itcl]
-	# source [file join $tychokernel Dialog.itcl]
-	# source [file join $tychokernel Message.itcl]
-	# Note: ErrorMessage MUST be sourced at startup in
-	# order to override the default error-handling procs
-	source [file join $tychokernel ErrorMessage.itcl]
-	source [file join $tychokernel File.itcl]
-
-	source [file join $tychokernel Edit.itcl]
-	# source [file join $tychokernel HTML.itcl]
-	# source [file join $tychokernel HTMLMessage.itcl]
-	# source [file join $tychokernel WelcomeMessage.itcl]
-	source [file join $tychokernel MenuSupport.itcl]
-	# This has already been sourced -- why???
-	# source [file join $tychokernel MenuBar.itcl]
-	source [file join $tychokernel PopupMenu.itcl]
-	::tycho::_announce "Sourced File.itcl"
-	# Load the library file
-	source [file join $tychokernel Lib.tcl]
+	set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
+	
+	set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tycholib iwidgets generic ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
+	set ::auto_path [linsert $auto_path 0 [file join $tychopt controls ] ]
     }
+    ::tycho::_announce "Set auto_path"
 }
 
+# Require packages. For now, require all of them
+lappend auto_path $TYCHO
+
+package require tycho.kernel.basic
+package require tycho.kernel.gui
+package require tycho.kernel.html
+
+package require tycho.edit.textedit
+package require tycho.edit.visedit
+package require tycho.edit.graphedit
+
+package require tycho.util.devtools
+package require tycho.util.tydoc
+
+::tycho::_announce "Loaded packages"
+
+# The following are for backwards-compatibility only
+# and will disappear when all packages are completed
+uplevel #0 {
+    set ::auto_path [linsert $auto_path 0 [file join $tycholib iwidgets generic ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt controls ] ]
+}
+
+####
 
 if {![info exists tychoWelcomeWindow]} {
     # If tychoWelcomeWindow is 0, then no 'Mr. Tycho' window is opened
@@ -356,17 +338,18 @@ if {![info exists tychoConsoleWindow]} {
 }
 set tychoOpenFiles 0
 
-
-# Source ~/.Tycho/tychorc.tcl if it exists.
-set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
-if {$tychostartfile != {} && \
-	[file exists $tychostartfile] && \
-	[file readable $tychostartfile]} {
-    if [catch {uplevel #0 {source $tychostartfile}} msg] {
-        ::tycho::warn "Failure sourcing $tychostartfile.\n$msg"
+set OBSOLETE {
+    # Source ~/.Tycho/tychorc.tcl if it exists.
+    set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
+    if {$tychostartfile != {} && \
+	    [file exists $tychostartfile] && \
+	    [file readable $tychostartfile]} {
+	if [catch {uplevel #0 {source $tychostartfile}} msg] {
+	    ::tycho::warn "Failure sourcing $tychostartfile.\n$msg"
+	}
     }
+    unset tychostartfile
 }
-unset tychostartfile
 
 # If tycho was started with -e tclscript, then we open up all the files
 # and then source tclscript
@@ -463,9 +446,6 @@ if {$tychoOpenFiles == 0} {
     if {[info exists tk_version] && $tychoConsoleWindow != 0} {
 	::tycho::_announce "About to create a TclShell"
 	uplevel #0 {
-	    source [file join $tychokernel StatusBar.itcl]
-	    source [file join $tychokernel MenuBar.itcl]
-	    source [file join $tychokernel TclShell.itcl]
 	    ::tycho::view TclShell \
 		    -geometry +0+0 \
 		    -master 1 \
