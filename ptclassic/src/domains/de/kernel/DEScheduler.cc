@@ -3,6 +3,7 @@
 #include "Output.h"
 #include "StringList.h"
 #include "FloatState.h"
+#include "GalIter.h"
 
 /**************************************************************************
 Version identification:
@@ -50,9 +51,7 @@ int DEScheduler :: setup (Block& b) {
 	currentTime = 0;
 
 	Galaxy& galaxy = b.asGalaxy();
-	
-	// initialize the SpaceWalk member
-	alanShepard.setupSpaceWalk(galaxy);
+	GalStarIter next(galaxy);
 
 	// initialize the global event queue and process queue.
 	eventQ.initialize();
@@ -62,14 +61,14 @@ int DEScheduler :: setup (Block& b) {
 
 	// Notify each star of the global event queue, and fire source
 	// stars to initialize the global event queue.
-	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
-		Star& s = alanShepard.nextStar();
-		if (strcmp (s.domain(), DEdomainName) != 0) {
-			Error::abortRun (s, " is not a DE star");
+	Star* s;
+	while ((s = next++) != 0) {
+		if (strcmp (s->domain(), DEdomainName) != 0) {
+			Error::abortRun (*s, " is not a DE star");
 			return FALSE;
 		}
-		// set up the block's event queue.
-		DEStar* p = (DEStar*) &s;
+		// set up the block event queue.
+		DEStar* p = (DEStar*) s;
 		p->eventQ = &eventQ;
 
 		// reset data members
@@ -77,11 +76,9 @@ int DEScheduler :: setup (Block& b) {
 	}
 
 	// set the depth of the stars...
-	alanShepard.setupSpaceWalk(galaxy);
-	for (i = alanShepard.totalSize(galaxy); i>0; i--) {
-		Star& s = alanShepard.nextStar();
-		DEStar* ds = (DEStar*) &s;
-		setDepth(ds);
+	next.reset();
+	while ((s = next++) != 0) {
+		setDepth((DEStar*) s);
 	}
 
 	galaxy.initialize();
@@ -97,7 +94,8 @@ int DEScheduler :: setup (Block& b) {
 	else		syncMode = TRUE;
 	
 	if (!relTimeScale) {
-		errorHandler.error("zero timeScale is not allowed in DE.");
+		Error::abortRun(galaxy,
+				": zero timeScale is not allowed in DE.");
 		return FALSE;
 	}
 
@@ -114,7 +112,7 @@ int DEScheduler :: setup (Block& b) {
 int
 DEScheduler :: run (Block& galaxy) {
 	if (haltRequestFlag) {
-		errorHandler.error ("Can't continue after run-time error");
+		Error::abortRun(galaxy,": Can't continue after run-time error");
 		return FALSE;
 	}
 	while (eventQ.length() > 0 && !haltRequestFlag) {
@@ -133,7 +131,7 @@ DEScheduler :: run (Block& galaxy) {
 		// If the event time is less than the global clock,
 		// it is an error...
 		} else if (level < currentTime - 0.1) {
-			errorHandler.error("global clock is screwed up in DE");
+			Error::abortRun(galaxy, ": global clock is screwed up in DE");
 			return FALSE;
 		}
 
@@ -215,7 +213,7 @@ DEScheduler :: run (Block& galaxy) {
 
 // calculate the depth of a DEStar.
 int DEScheduler :: setDepth(DEStar* s) {
-	
+
 	// 1. Check if the depth is already set, then return immediately.
 	if (s->depth < 0) return s->depth;
 
@@ -231,8 +229,9 @@ int DEScheduler :: setDepth(DEStar* s) {
 		// 4. scan through all output connections. Get the minimum
 		//    depth to set its depth.
 		int min = 0;
+		BlockPortIter nextp(*s);
 		for (int i = s->numberPorts(); i > 0; i--) {
-			PortHole& port = s->nextPort();
+			PortHole& port = *nextp++;
 
 			// 5. check whether it is on the wormhole boundary.
 			//    and check it is on the feedback arc.
