@@ -30,6 +30,19 @@
 # 						COPYRIGHTENDKEY
 
 
+# Source the users ~/.ptkrc file if it is present
+# Interesting variables to set:
+# If gSlowX11Link is set, do not show the mr ptolemy bitmap
+# ptkVerboseErrors controls whether we get a stack trace
+#
+if {[file exists [glob ~/.ptkrc ]]} {
+    global gSlowX11Link
+    source ~/.ptkrc
+    if {! [info exists gSlowX11Link] } {
+	set gSlowX11Link 0
+    }
+}
+
 proc pigilib_init_env {} {
     global env tcl_prompt1 tcl_prompt2 tk_library tk_version
     global ptolemy PTOLEMY
