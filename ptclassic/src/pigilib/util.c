@@ -31,7 +31,7 @@ Utility functions.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <pwd.h>
 #include <search.h>
 #include "err.h"

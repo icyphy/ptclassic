@@ -36,7 +36,7 @@ Version identification:
 /* Includes */
 #include "local.h"
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include "rpc.h"
 #include "vemInterface.h"
 #include "util.h"

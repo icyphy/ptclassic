@@ -31,7 +31,7 @@ Useful higher level OCT interface functions.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <ctype.h>
 #include "rpc.h"
 #include "paramStructs.h"
