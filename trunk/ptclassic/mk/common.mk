@@ -204,3 +204,17 @@ checkjunk:
 # "check" does not print anything if nothing is being edited.
 sccsinfo:
 	@sccs check || true
+
+# Matlab settings
+# Matlab is installed if the matlabRootDir script returns an non-empty string
+# -- If Matlab is not installed, then set MATLABDIR to
+#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
+# -- If Matlab is installed, then set MATLABDIR accordingly
+#    and set MATLABEXT_LIB to the external library directory
+MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+ifeq ($MATLABDIR,)
+MATLABDIR= $(ROOT)/src/compat/matlab
+else
+MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+endif
