@@ -398,15 +398,22 @@ int CGCTarget::modifyGalaxy()
 		    if (port->type() == port->resolvedType()) continue;
 		}
 
+		Star* s = 0;
+
 		if (port->type() == COMPLEX)
 		{
-		    if (!spliceStar(input, "CxToFloat", TRUE, domain))
+		    if (!(s = (Star*)spliceStar(input, "CxToFloat", TRUE, domain)))
 			return FALSE;
 		}
 		else if (port->resolvedType() == COMPLEX)
 		{
-		    if (!spliceStar(input, "FloatToCx", TRUE, domain))
+		    if (!(s = (Star*)spliceStar(input, "FloatToCx", TRUE, domain)))
 			return FALSE;
+		}
+
+		if (s)
+		{
+		    s->setTarget(this);
 		}
 	    }
 	}
