@@ -526,7 +526,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 
     # If the file does exist, and is a directory
     if {[::tycho::resource isdirectory $file] \
-            && [::tycho::File::registeredCommands $file] == {}} {
+            && [::tycho::registry filemode $file] == {}} {
         set fileLastOpened ""
         changeDir $file
         return 0
