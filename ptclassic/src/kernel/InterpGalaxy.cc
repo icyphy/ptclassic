@@ -7,6 +7,9 @@ $Id$
 
  Programmer:  J. T. Buck
  Date of creation: 3/18/90
+ Revisions:
+	5/26/90 - I. Kuroda
+		add InterpGalaxy::addState and InterpGalaxy::setState
 
  InterpGalaxy is a galaxy that may dynamically be added to, as well
  as cloned.
@@ -116,6 +119,51 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	actionList += portname;
 }
 
+InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
+        statename = savestring (statename);
+        stateclass = savestring (stateclass);
+        statevalue = savestring (statevalue);
+        State *src = KnownState::clone(stateclass);
+        if (src == 0) return;
+        addState(src->setState(statename,this,statevalue));
+        initState();
+//add action to list
+        actionList += "T";
+        actionList += statename;
+        actionList += stateclass;
+        actionList += statevalue;
+        return;
+}
+
+
+InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
+        blockname = savestring (blockname);
+        statename = savestring (statename);
+        statevalue = savestring (statevalue);
+	if(!strcmp(blockname, "this"))
+	{
+        State *src = stateWithName(statename);
+        if (src == 0) return;
+        setState(statename,statevalue);
+	initState();
+	}
+	else
+	{
+	Block* blk = blockWithName(blockname);
+	if (blk ==  0) return;	
+	State *src = blk->stateWithName(statename);
+	if(src == 0) return;
+	blk->setState(statename,statevalue);
+        initState();
+	};
+//add action to list
+        actionList += "R";
+	actionList += blockname;
+        actionList += statename;
+        actionList += statevalue;
+        return;
+}
+
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
 // the action strings to be combined into one string.  This will break
 // clone()!!!  Do not do it!  If you must, since StringList's copy
@@ -164,6 +212,22 @@ InterpGalaxy::clone() {
 			gal->alias (a, b, c);
 			nacts -= 4;
 			break;
+               case 'T':       // add a state
+                        a = actionList.next();
+                        b = actionList.next();
+                        c = actionList.next();
+                        gal->addState (a, b, c);
+                        nacts -= 4;
+                        break;
+               case 'R':       // set a state
+                        a = actionList.next();
+                        b = actionList.next();
+                        c = actionList.next();
+                        gal->setState (a, b, c);
+                        gal->setState (a, b, c);
+                        nacts -= 4;
+                        break;
+
 		default:
 			errorHandler.error ("Internal error in InterpGalaxy");
 		}

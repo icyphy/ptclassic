@@ -14,6 +14,9 @@ $Id$
 	to know at compile time whether an argument is a PortHole or
 	MultiPortHole.
 
+	5/26/90 - I. Kuroda 
+	Add method Galaxy::initState
+
 Methods for class Galaxy
 ***************************************************************************/
 #include "Star.h"
@@ -80,11 +83,28 @@ Galaxy :: operator StringList () {
 	out += numberBlocks();
 	out += "\n";
 	out += printPorts("Galaxy");
+	out += printStates("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
 	for(int i = numberBlocks(); i>0; i--)
 		out += StringList(nextBlock());
 	return out;
 }
+
+
+        ////////////////////////////////////
+        // initState()
+        ////////////////////////////////////
+
+void Galaxy :: initState() {
+        Block::initState();
+        for(int i=blocks.size(); i>0; i--) {
+                Block& b = blocks++;
+                b.initState();}
+}
+
+        ////////////////////////////////////
+        // Block* blockWithName()
+        ////////////////////////////////////
 
 Block *
 BlockList::blockWithName (const char* ident) {
