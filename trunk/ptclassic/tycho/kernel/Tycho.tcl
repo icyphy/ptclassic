@@ -298,6 +298,7 @@ if [info exists tk_version] {
     uplevel #0 {
 	::tycho::_announce "About to source FontManager.itcl"
 	source [file join $tychokernel FontManager.itcl]
+	source [file join $tychokernel CacheManager.itcl]
 	source [file join $tychokernel ColorManager.itcl]
 	source [file join $tychokernel CircularList.itcl]
 	source [file join $tychokernel TopLevel.itcl]
