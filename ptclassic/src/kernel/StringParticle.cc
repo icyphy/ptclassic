@@ -38,8 +38,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 #include "StringParticle.h"
-#include "StringArrayState.h"
-#include "StringMessage.h"
+// #include "StringArrayState.h"
+// #include "StringMessage.h"
 #include "Plasma.h"
 #include "Error.h"
 
@@ -56,86 +56,34 @@ extern const DataType STRING = "STRING";
 static Envelope dummy;
 
 
-StringParticle::StringParticle(const Envelope& p) : data(p) {}
-
-StringParticle::StringParticle() {}
-
 DataType StringParticle::type() const { return STRING;}
-
-StringParticle::operator int () const {
-	return data.asInt();
-}
-
-StringParticle::operator double () const {
-	return data.asFloat();
-}
-
-StringParticle::operator float () const {
-	return float(data.asFloat());
-}
-
-StringParticle::operator Complex () const {
-	return data.asComplex();
-}
-
-StringParticle::operator Fix () const {
-	return data.asFix();
-}
-
-
-StringList StringParticle::print() const {
-	return data.print();
-}
-
-// get the Message from the StringParticle.
-void StringParticle::accessMessage (Envelope& p) const {
-	p = data;
-}
-
-// get the Message and remove the reference (by setting data to dummy)
-void StringParticle::getMessage (Envelope& p) {
-	p = data;
-	data = dummy;
-}
-
-Particle& StringParticle::initialize() { data = dummy; return *this;}
 
 // Initialize a given ParticleStack with the values in the delay
 // string, obtaining other Particles from the given Plasma.  
 // Returns the number of total Particles initialized, including
-// this one.  This should be redefined by the specific message class.
-// 3/2/94 added
-int StringParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
-				   Plasma* myPlasma, const char* delay) {
-  StringArrayState initDelays;
-  initDelays.setState("initDelays",parent,delay);
-  initDelays.initialize();
-  int numInitialParticles = initDelays.size();
-  if(numInitialParticles > 0) {
-      StringMessage *str = new StringMessage(initDelays[0]);
-      Envelope p(*str);
-      data = p;
-      for(int i = 1; i < numInitialParticles; i++) {
-	  str = new StringMessage(initDelays[i]);
-	  Particle* p = myPlasma->get();
-	  *p << *str;
-	  pstack.putTail(p);
-      }
-  }
-  return numInitialParticles;
-}
-
-// load with data -- function errorAssign prints an
-// error and calls Error::abortRun().
-// FIXME: These should be defined.  No reason not to.
-
-void StringParticle::operator << (int) { errorAssign("int");}
-void StringParticle::operator << (double) { errorAssign("double");}
-void StringParticle::operator << (const Complex&) { errorAssign("complex");}
-void StringParticle::operator << (const Fix&) { errorAssign("fix");}
-
-// only loader that works.
-void StringParticle::operator << (const Envelope& p) { data = p;}
+// this one.
+//
+// FIXME: Code added but not tested.
+//
+// int StringParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
+// 				   Plasma* myPlasma, const char* delay) {
+//   StringArrayState initDelays;
+//   initDelays.setState("initDelays",parent,delay);
+//   initDelays.initialize();
+//   int numInitialParticles = initDelays.size();
+//   if(numInitialParticles > 0) {
+//       StringMessage *str = new StringMessage(initDelays[0]);
+//       Envelope p(*str);
+//       data = p;
+//       for(int i = 1; i < numInitialParticles; i++) {
+// 	  str = new StringMessage(initDelays[i]);
+// 	  Particle* p = myPlasma->get();
+// 	  *p << *str;
+// 	  pstack.putTail(p);
+//       }
+//   }
+//   return numInitialParticles;
+// }
 
 // particle copy
 Particle& StringParticle::operator = (const Particle& p) {
@@ -144,16 +92,6 @@ Particle& StringParticle::operator = (const Particle& p) {
 		data = ps.data;
 	}
 	return *this;
-}
-
-// particle compare: considered equal if Message addresses
-// are the same.
-// FIXME: This should compare string values.
-int StringParticle :: operator == (const Particle& p) {
-	if (!typesEqual(p)) return 0;
-	Envelope pkt;
-	p.accessMessage(pkt);
-	return data.myData() == pkt.myData();
 }
 
 // clone, useNew, die analogous to other particles.
@@ -175,12 +113,3 @@ void StringParticle::die() {
 	data = dummy;
 	stringMessagePlasma.put(this);
 }
-
-// FIXME: Remove this when the assignements above are defined.
-void StringParticle::errorAssign(const char* argType) const {
-	StringList msg = "Attempt to assign type ";
-	msg += argType;
-	msg += " to a StringParticle";
-	Error::abortRun(msg);
-}
-
