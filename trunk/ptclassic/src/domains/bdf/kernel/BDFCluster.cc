@@ -152,13 +152,6 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 	delete [] ptable;
 }
 
-// Delete the list of clusters dynamically allocated
-// The clusters may be of derived classes, but the virtual
-// destructor of the BDFCluster class will do the right thing
-BDFClusterGal::~BDFClusterGal() {
-	deleteAllBlocks();
-}
-
 // remove blocks from this galaxy without deallocating the blocks.
 // It does deallocate the sequential list holding the block pointers. -BLE
 void BDFClusterGal::orphanBlocks() {
@@ -1825,7 +1818,7 @@ BDFAtomCluster::BDFAtomCluster(DataFlowStar& star,Galaxy* parent) : pStar(star)
 	while ((p = nextPort++) != 0) {
 		// do not make a port in the cluster if it is a "loopback" port
 		if (p->far()->parent() == &star) continue;
-		BDFClustPort* cp = new BDFClustPort(*p,this);
+		BDFClustPort* cp = new BDFClustPort(*p, this, BCP_ATOM);
 		addPort(*cp);
 		cp->numIO();	// test
 	}
