@@ -204,8 +204,14 @@ class ::tycho::Graphics {
     # Print the contents of the canvas, using conversion to postscript.
     method print {}
 
-    # FIXME: comment needed here.
-    method printOut {win}
+    # Generate a GIF file with the contents of the canvas.
+    method printGif {filename}
+
+    # Generate a postscript file with the contents of the canvas.
+    method printPs {win}
+
+    # Generate an X window dump file with the contents of the canvas.
+    method printXwd {filename}
 
     # Redo using the current redo buffer.
     method redo {}
@@ -930,7 +936,7 @@ body ::tycho::Graphics::edit {{ids {}}} {
 body ::tycho::Graphics::focusin {} {
     # FIXME: The following does not work.  Slate gets the focus, but
     # not the canvas.
-    focus $canvas
+    focus [$canvas component canvas]
     displayer setCurrentView $viewName
 }
 
@@ -1055,16 +1061,44 @@ body ::tycho::Graphics::print {} {
 	$w.tofile.entry insert 0 "[file rootname $file].ps"
 
 	button $w.buttons.print -text "Print"\
-		-command "$this printOut $w" -relief groove -bd 8
+		-command "$this printPs $w" -relief groove -bd 8
 	button $w.buttons.cancel -text "Cancel" -command "destroy $w" -bd 5
 	pack $w.buttons.print $w.buttons.cancel -fill both -expand 1\
 		-side left -padx 2 -pady 2
     }
 }
 
-# FIXME: Comment needed here.
+#######################################################################
+#### printGif
+# Generate a GIF file with the contents of the canvas.
+# NOTE: Unix-only implementation.  Also, depends on the programs
+# xwdtopnm, ppmtogif, and xwd, which must be in your path.
 #
-body ::tycho::Graphics::printOut {win} {
+body ::tycho::Graphics::printGif {filename} {
+    set fn1 [::tycho::tmpFileName]
+    set fn2 [::tycho::tmpFileName]
+    printXwd $fn1
+    if [catch {exec xwdtopnm $fn1 > $fn2 2> /dev/null} msg] {
+        error "The following command failed:\n \
+                xwdtopnm $fn1 > $fn2 2> /dev/null\n \
+                Is the program xwdtopnm in your path?\n$msg"
+    }
+    # NOTE: -transparent color option should be added for the background.
+    if [catch {exec ppmtogif -interlace $fn2 > $filename 2> /dev/null} msg] {
+        error "The following command failed:\n \
+                ppmtogif -interlace $fn2 > $filename 2> /dev/null\n \
+                Is the program ppmtogif in your path?\n$msg"
+    }
+    ::tycho::rm $fn1
+    ::tycho::rm $fn2
+    # FIXME: Should display the gif!
+}
+
+#######################################################################
+# Generate a postscript file and print it.
+# FIXME: This method needs major rework.
+#
+body ::tycho::Graphics::printPs {win} {
     set height [winfo height [canvasName]]
     if {$height == 1} {
         # Canvas has not been mapped yet
@@ -1120,6 +1154,24 @@ body ::tycho::Graphics::printOut {win} {
     }
 
     destroy $win
+}
+
+#######################################################################
+#### printXwd
+# Generate an X window dump with the contents of the canvas.
+# NOTE: Unix-only implementation.
+#
+body ::tycho::Graphics::printXwd {filename} {
+    set id [winfo id $itk_component(canvas)]
+    raiseWindow
+    ::tycho::safeUpdate $this
+    # NOTE: xwd always returns an error status.
+    catch {exec xwd -id $id > $filename 2> /dev/null} msg
+    if ![file exists $filename] {
+        error "The following command failed:\n \
+                xwd -id $id > $filename 2> /dev/null\n \
+                Is the xwd program in your path?\n$msg"
+    }
 }
 
 #######################################################################
