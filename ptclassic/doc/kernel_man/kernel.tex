@@ -10,8 +10,8 @@
 @finalout
 @titlepage
 @title The Ptolemy Kernel
-@subtitle a programmer's companion for Ptolemy 0.4
-@subtitle November 1992
+@subtitle A programmer's companion for Ptolemy 0.4
+@subtitle December 7, 1992
 @author by Joseph T. Buck
 @end iftex
 
@@ -721,11 +721,11 @@ which makes a more exact duplicate (with the same values for states,
 for example).
 
 @menu
-* Block constructors and destructors::  
-* Block public "information" members::  
-* other Block public members::  
-* Block protected members::     
-* Block iterator classes::      
+* Block constructors and destructors::
+* Block public "information" members::
+* other Block public members::
+* Block protected members::
+* Block iterator classes::
 @end menu
 
 @node Block constructors and destructors, Block public "information" members, class Block, class Block
@@ -4366,6 +4366,164 @@ Creates an identical copy with @code{new}.
 The incremental linker permits user written code to be added to the
 system at runtime.  Two different mechanisms are provided, called
 a temporary link and a permanent link.
+
+In either case, code is linked using the incremental linking facilities
+of the Unix linker, the new code is read into the Ptolemy executable,
+and symbols corresponding to C++ global constructors are located and called.
+This means that such code is expected to register objects on Ptolemy's
+known lists (e.g. KnownBlock, KnownState, or KnownTarget) so that new
+classes become usable.
+
+@emph{Warning:} if the executable containing the Linker class is
+stripped, the incremental linker will not work!
+
+@menu
+* types of links::              Temporary vs. Permanent Incremental Linking
+* Linker public members::       Linker public members
+* Linker implementation::       Linker implementation
+@end menu
+
+@node types of links, Linker public members, The incremental linker, The incremental linker
+@subsection Temporary vs. Permanent Incremental Linking
+
+Code that is linked in by the ``temporary link'' technique does not
+alter the symbol table in use.  For that reason, subsequent incremental
+links, whether temporary or permanent, cannot ``see'' any code that
+was linked in by previous temporary links.  The advantage is that the
+same symbols (for example, a Ptolemy star definition) may be redefined,
+which is useful in code development, as buggy star definitions can be
+replaced by valid ones without exiting Ptolemy.
+
+Code that is linked in by the ``permanent link'' method has the same
+status as code that was linked into the original executable.  A
+permanent link creates or replaces the @file{.pt_symtable} file in
+the directory in which Ptolemy was started.  This file contains the
+current symbol table for use by subsequent links, temporary or
+permanent.  This file is deleted when the Ptolemy process exits
+normally.  It is left around when the process crashes, as it is useful
+for debugging (as it contains symbols for object files that were
+incrementally linked using the permanent method as well as those in
+the original executable).
+
+@node Linker public members, Linker implementation, types of links, The incremental linker
+@subsection Linker public members
+
+
+@example
+static void init(const char* @var{execName});
+@end example
+
+This function initializes the linker module by telling it where the
+executable for this program is.  For most purposes, passing it the
+value of @code{argv[0]} passed to the @code{main} function will
+suffice.
+
+@example
+static int linkObj(const char* @var{objName});
+@end example
+
+Link in a single object module using the temporary link mechanism
+(this entry point is provided for backward compatibility).
+
+@example
+static int multiLink(const char* @var{args}, int @var{permanent});
+static int multiLink(int @var{argc}, char** @var{argv});
+@end example
+
+Both of these functions give access to the main function for doing
+an incremental link.  They permit either a temporary or a permanent
+link of multiple files; flags to the Unix linker such as @code{-l}
+to specify a library or @code{-L} to specify a search directory for
+libraries are permitted.  For the first form, @var{args} are passed
+as part of a linker command that is expanded by the Unix shell.  A
+permanent link is performed if @var{permanent} is true (nonzero);
+otherwise a temporary link is performed.
+
+The second form is provided for ease of interfacing to the Tcl
+interpreter, which likes to pass arguments to commands in this
+style.  In this case, @code{@var{argv}[0]} indicates the type of
+link: if it begins with the character @code{p}, a permanent link
+is performed; otherwise a temporary link is performed.  The remaining
+arguments are concatentated (separated by spaces) and appear in the
+argument to the Unix linker.
+
+@example
+static int isActive();
+@end example
+
+
+This function returns TRUE if the linker is currently active (so objects
+can be marked as dynamically linked by the known list classes).
+Actually the flag it returns is set while constructors or other
+functions that have just been linked are being run.
+
+@example
+static int enabled();
+@end example
+
+Returns true if the linker is enabled (it is enabled by calling
+@code{Linker::init} if that function returns successfully.
+
+@example
+static const char* imageFileName();
+@end example
+
+Return the fully-expanded name of the executable image file (set by
+@code{Linker::init}.
+
+@example
+static void setDefaultOpts(const char* @var{newValue});
+static const char* defaultOpts();
+@end example
+
+These functions set or return the linker's default options, a set of
+flags appended to the end of the command line by all links.
+
+@node Linker implementation,  , Linker public members, The incremental linker
+@subsection Linker implementation
+
+This section is intended to assist those that attempt to port the
+Linker module to other platforms.
+
+The Linker class is implemented in three files: @file{Linker.h},
+specifying the class interface, @file{Linker.cc}, specifying the
+implementation, and @file{Linker.sysdep.h}, specifying all the machine
+dependent parts of the implementation.
+
+The Linker class currently works on the Sun-3 or Sun-4 running
+@code{g++}, the Sun-4 running Sun's @code{cfront} port, and
+Vaxes and DecStations running Ultrix.  Some work has been done to
+port it to the HP-PA architecture; this is not yet complete.
+
+The intent is to structure the code in such a way that no @code{#ifdef}s
+appear in @file{Linker.cc}; they should all be in @file{Linker.sysdep.h}.
+
+The linker reads all new code into a pre-existing large array, rather
+than creating blocks of the right size with @code{new}, because the
+right size is not known in advance but a starting location must, as a
+rule, be passed to the loader in advance.  This means that there is a
+wired-in limit to how much code can be linked in.  The symbol
+@code{LINK_MEMORY}, which is set to one megabyte by default, is easily
+changed if required.
+
+Here are the steps taken by the linker to do its work:
+
+Align the memory as required.
+
+Form the command line and execute the Unix linker.  Only certain flags
+in the command line will be system-dependent.
+
+Read in the object file.  This is heavily system-dependent.
+
+Make the read-in text executable.  On most systems this is a do-nothing
+step.
+
+Invoke constructors in the newly read in code.  Constructors are found
+by use of the @file{nm} program; the output is parsed to search for
+constructor symbols, whose form depends on the compiler used.
+
+If this is a permanent link, copy the linker output to file
+@file{.pt_symtable}; otherwise delete it.
 
 @node Parameters and States, known lists, The incremental linker, Top
 @chapter Parameters and States
