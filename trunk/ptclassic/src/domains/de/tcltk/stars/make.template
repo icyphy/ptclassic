@@ -65,13 +65,13 @@ PL_SRCS= \
  DETkXYPlot.pl \
  DETkBarGraph.pl \
  DETkButtons.pl \
+ DETkLogicAnalyzer.pl \
  DETkMeter.pl \
  DETkPlot.pl \
  DETkShowEvents.pl \
  DETkSlider.pl \
  DETkStripChart.pl \
- DETkText.pl \
- DETkLogicAnalyzer.pl
+ DETkText.pl
 
 # DELMSTkPlot.pl \
 # DELMSCxTkPlot.pl \
