@@ -26,4 +26,8 @@ $Id$
 */
 
 /* Register various Tcl functions used by pigi */
+#if defined(__cplusplus)
+void registerTclFns(Tcl_Interp *interp);
+#else
 void registerTclFns();
+#endif
