@@ -1,6 +1,6 @@
 # Ptolemy Tycho class that exec's a process and displays the output
 #
-# @Author: Christopher Hylands
+# @Author: Christopher Hylands and Kevin Chang
 #
 # @Version: $Id$
 #
@@ -82,13 +82,9 @@ proc ::tycho::tyexec { args } {
 proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
     if {$execWidget == {}} {
         set win [::tycho::autoName .makeExec]
-        set execWidget [::tycho::Exec $win]
+        #set execWidget [::tycho::Exec $win]
+        set execWidget [::tycho::Monitor $win]
     }
-
-
-    # Get the name of the variable that will contain the status of 
-    # exec after the exec is deleted
-    set statusVariableName ::tycho::Exec::[$execWidget getStatusVariableName]
 
     if {$command != {} } {
 	$execWidget configure -command $command
@@ -97,13 +93,26 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 	$execWidget configure -dir $dir
     }
     $execWidget raiseWindow
-    $execWidget execProcess
-    #::tycho::Dialog::wait $win
-    uplevel #0 [tkwait variable $statusVariableName]
+    $execWidget execProcessInMonitor
 
-    # Get the return value and unset the variable that contained it
-    set retval [uplevel #0 "set $statusVariableName"]
-    return [list $retval $execWidget]
+    #This is the modal mode, which we don't use anymore
+    #::tycho::Dialog::wait $win
+
+    # Get the name of the variable that will contain the status of 
+    # exec after the exec is deleted
+    set statusVariableName [$execWidget getStatusVariableName]
+    global $statusVariableName
+    
+    # If statement is used to prevent crashing
+    if [info exists $statusVariableName] {
+        #uplevel #0 [tkwait variable $statusVariableName]
+        # Get the return value and unset the variable that contained it
+        #set retval [uplevel #0 "set $statusVariableName"]
+        #return [list $retval $execWidget]
+        return [list [$execWidget getStatusWait] $execWidget]
+    } else {
+        error "ERROR IN execModal: $statusVariableName doesn't exist!"
+    }
 }
 
 #######################################################################
@@ -113,185 +122,110 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 # <a href="../internals/exec.html">$TYCHO/kernel/doc/internals/exec.html</a>
 # for further documentation.
 #
-# <p>
-# Here is an example of how to use the Exec:
-# <tcl><pre>
-#     set win [::tycho::autoName .execExample]
-#     ::tycho::Exec $win -command {make all}
-#     $win centerOnScreen
-#     ::tycho::Dialog::wait $win
-#     ::tycho::inform "We waited until the Exec window was closed"
-# </pre></tcl>
-# In the above example, we bring up the Exec window and then wait  
-# until the user closes it.
-#
-# In this example, we automatically start up the subprocess, and then
-# close the window if the subprocess completed without an error
-# <tcl><pre>
-#     set win [::tycho::autoName .execExample]
-#     ::tycho::Exec $win &#92
-#        -command {make all} &#92
-#        -autostart 1 &#92
-#        -autodestroy 1
-#     $win centerOnScreen
-# </pre></tcl>
-# If the make in the above example had returned an error, then the window
-# would not have been destroyed.
-#
+# This is the basic non-graphical based Exec.
+
 class ::tycho::Exec {
-    inherit ::tycho::Query
-    constructor {args} {}
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The name of the global variable that will contain the exit status.
+    # This line here is a hack, does it still have functionality???
+    public variable statusVariableName {}
+
+    # File descriptor of the process. Process id is simply pid = [pid $fd]
+    private variable fd {}
+
+    # History is the buffer (used to be just history in Tk canvas)
+    # Otheres used to be embedded in Tk, now they're simply variables
+    private variable history {}
+    private variable commandToExec {}
+    private variable dirToExecFrom {}
+    private variable maxLineAllow {}
+    private variable linecount 0
+    # Commands to execute from 3rd party methods
+    private variable doWhenDone {}
+    private variable doEachLine {}
+
+    #inherit ::tycho::Query
+    constructor {command dir maxline} {}
     destructor {}
     
     ###################################################################
-    ####                            options                        ####
-
-    # If non-zero, close widget if the subprocess exits with an ok status.
-    itk_option define -autodestroy autodestroy Autodestroy 0
-
-    # If non-zero, start the subprocess automatically
-    itk_option define -autostart autostart Autostart 0
-
-    # Command to be executed.
-    itk_option define -command command Command "make"
-
-    # Directory to execute the command in.
-    itk_option define -dir dir Dir {}
-
-    ###################################################################
     ####                         public methods                    ####
 
-    # Exec a process, if there is any output, bring up a window and display it.
-    method execProcess {}
+    # Exec a process, if there is any output, save it to history.
+    # The arguments are: command line, directory name, and maximum lines
+    # of output allowed.
+    method execProcess {command dir maxline}
+    # Stop a process now.
+    method killProcess {parent}
+
+    # Get the contents of the history window, if any.
+    method getHistory {{start 0.0} {end end}} {}
+    method clearHistory {} {set history {}; set maxLineAllow 0}
+    method addHistory {line} {}
+
+    # Read from the file descriptor, and close if we are at eof.
+    method readOrClose {fd}
+
+    # Set the action for each output from the execution
+    method doEachLine {action} {set doEachLine $action}
+    method doWhenDone {action} {set doWhenDone $action}
 
     # Get the name of the global variable that will contain the return status.
     method getStatusVariableName {} {return $statusVariableName}
 
-    # Get the contents of the history window, if any.
-    method getHistory {start {end end}} {}
+    # Get the immediate status
+    method getStatusNow {} {
+        global $statusVariableName
+        return [uplevel #0 "set $statusVariableName"]
+    }
+    # Wait patiently until the forked process ends and returns status
+    # Default wait time is 30 seconds
+    method getStatusWait {{timeToWait 30000} } {
+        global $statusVariableName
+        after $timeToWait set $statusVariableName "timeout"
+        tkwait variable $statusVariableName
+        if {[uplevel #0 "set $statusVariableName"]=="timeout"} {
+            addHistory "Timeout after $timeToWait\n"
+            killProcess "$this and ::getStatusWait"
+        }
+        return [getStatusNow]
+    }
 
     # Open a help window.
     method help {}
-
-    # Read from the file descriptor, and close if we are at eof.
-    method readOrClose {fd}
 
     ###################################################################
     ####                         public procs                       ####
 
     # Return 1 if the Exec widget will work on the current platform
     proc execWidgetIsSupported {} 
-
-    ###################################################################
-    ####                         private variables                 ####
-
-    # The value of the cursor before we set it to the busy cursor.
-    private variable oldCursor
-
-    # The name of the global variable that will contain the exit status.
-    private variable statusVariableName {}
-
-    # File descriptor of the process.
-    private variable fd {}
 }
 
-#######################################################################
-#### -autodestroy configuration
-# If non-zero, destroy the widget if the process exits with an 'ok'
-# status
-configbody ::tycho::Exec::autodestroy {
-    if {$itk_option(-autodestroy) == 0} {
-        insert autoDestroy No
-    } else {
-        insert autoDestroy Yes
-    }
-}
-
-#######################################################################
-#### -command configuration
-# Command to be executed.
-#
-configbody ::tycho::Exec::command {
-    clear commandToExec
-    insert commandToExec $itk_option(-command)
-}
-
-#######################################################################
-#### -dir configuration
-# The directory that we should exec from.  If the value of this option
-# is {}, then we don't change the current directory.  Otherwise,
-# we cd to the value of this option.
-#
-configbody ::tycho::Exec::dir {
-    clear dirToExecFrom
-    insert dirToExecFrom $itk_option(-dir)
+# For some reason this is needed within the constructor, or else
+# it doesn't work.
+proc setGlobal {name value} {
+    global $name
+    set $name $value
 }
 
 #######################################################################
 #### constructor
 #
-body ::tycho::Exec::constructor {args} {
-    configure -queries [list \
-            {line commandToExec {Command to Exec:} make } \
-            {line dirToExecFrom {Directory to Exec from:} {}} \
-            {radio autoDestroy {Close window automatically:} {Yes No} No}]
+body ::tycho::Exec::constructor { {cmd make} {dir {}} {maxline {}} } {
+    set history {}
 
-    eval itk_initialize $args
-
-    # If the command option has not been set, set the default now.
-    # This has to be done in the constructor rather than in the class
-    # definition (as a default) because "$this" is known here.
-    if {$itk_option(-command) == {}} {
-	configure -command {make}
-    }
-
-    $itk_component(bbox) buttonconfigure ok \
-	    -text {Exec <Ret>} \
-	    -command "$this execProcess"
-
-    $itk_component(bbox) buttonconfigure cancel \
-	    -text {Close <Esc>}
-
-    $itk_component(bbox) add help \
-	    -text "Help" \
-	    -command "$this help"
-    if {![info exists itk_component(history)] || \
-            ![winfo exists $itk_component(history)]} {
-        # We have not yet created the history window, so do so now.
-        itk_component add history {
-            ::tycho::Edit $itk_component(hull).history -textheight 15
-        } {
-            keep -readonly -textwidth -background \
-                    -highlightbackground -highlightcolor -selectforeground \
-                    -cursor -insertbackground -textforeground -textfont \
-                    -textbackground
-        }
-        pack $itk_component(history) -expand yes -fill both \
-                -after $itk_component(querysite)
-        $itk_component(history) configure -readonly 1 -save 0
-    }
+    set commandToExec $cmd
+    set dirToExecFrom $dir
+    set maxLineAllow $maxline
 
     set statusVariableName [::tycho::autoName gExecStatus]
-    global $statusVariableName
-    set $statusVariableName "constructed"
 
-    # Make the entry boxes wide so we can see the entire command
-    configure -entrywidth 80
-
-    wm resizable $prefix 1 1
-    # NOTE: There seems to be no way to find out the actual window size at this
-    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
-    # a "tkwait visibility" and an "update".  So we just set some reasonable
-    # minimum size.
-    wm minsize $prefix 10 10
-
-
-    # If autostart is not equal to zero, then start the subprocess
-    # This should be at the end of the constructor
-    if {$itk_option(-autostart) != 0} {
-        $this execProcess
-    }
-
+    #the following lines do not work for some reason!
+    #global $statusVariableName
+    #set $statusVariableName "constructed"
+    setGlobal $statusVariableName "constructed"
 }
 
 #######################################################################
@@ -305,14 +239,10 @@ body ::tycho::Exec::destructor {} {
 
     # Mark the editor as unmodified so that we are not prompted as
     # to whether we want to save it.
-    if {[info exists itk_component(history)] && \
-            [winfo exists $itk_component(history)]} {
-        #$itk_component(history) configure -readonly 0
-        #$itk_component(history) clear
-        $itk_component(history) markUnmodified
-    }
     catch {unset ::tycho::Exec::$statusVariableName}
 }
+
+
 
     ###################################################################
     ###################################################################
@@ -320,24 +250,33 @@ body ::tycho::Exec::destructor {} {
 
 #######################################################################
 #### execProcess
-# Execute a process.  If there is any output, display it.
+# Execute a process.  If there is any output, append to history
 #
-body ::tycho::Exec::execProcess {} {
+body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
+    clearHistory
+    global $statusVariableName
+    if {[uplevel #0 "set $statusVariableName"] == "running"} {
+        error "Sorry, process is already running"
+    }
+
+    # Manually set the command, or use the previous value
+    if {$cmd != {}} {set commandToExec $cmd}
+    if {$dir != {}} {set dirToExecFrom $dir}
+    if {$maxline != {}} {set maxLineAllow $maxline}
+
     # If necessary, cd to the proper directory.
-    set dirToExecFrom [get dirToExecFrom]
     if { $dirToExecFrom != {} } {
         set saveDir [pwd]
         cd "$dirToExecFrom"
     }
 
-    # Set the busy cursor
-    set oldCursor [lindex [config -cursor] end]
-    config -cursor {watch}
-    $itk_component(history) configure -readonly 0
-    $itk_component(history) insertData "<<Running: [get commandToExec]>>\n"
-    $itk_component(history) center
-    $itk_component(history) configure -readonly 1
+    # Add command to history log...
+    #$itk_component(history) insertData "<<Running: [get commandToExec]>>\n"
+    addHistory "<<Running: $commandToExec in $dirToExecFrom>>\n"
 
+    #set continue 0
+    #after 1000 set continue 1
+    #tkwait variable continue
     ::tycho::safeUpdate $this
 
     # Open a non-blocking pipe from the command
@@ -345,32 +284,63 @@ body ::tycho::Exec::execProcess {} {
     # error.  However, this presupposes that 'cat' is a command, which might
     # not be true under Windows or Macintosh.
     if [catch {set fd [open \
-	    [concat "|[get commandToExec] |& cat"] {RDONLY NONBLOCK}]} errMsg] {
-        config -cursor $oldCursor
-	error "$errMsg"
+	    [concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} errMsg] {
+        addHistory "$errMsg\n"
+	error "$errMsg"   ;#This exits this procedure
     }
 
     # Register our file event handler
     fileevent $fd readable "$this readOrClose $fd"
 
+    # Go back to our original directory before the execution
     if { $dirToExecFrom != {} } {
         cd "$saveDir"
     }
+
     global $statusVariableName
     set $statusVariableName "running"
     return $statusVariableName
 }
 
+
+#####################################################################
+#### stopExec
+# Manually force stop the process
+#
+body ::tycho::Exec::killProcess {{parent {}}} {
+    global $statusVariableName
+    if {[uplevel #0 "set $statusVariableName"]=="killed"} {
+        error "Process already killed."
+    }
+    catch {close $fd}
+    if {$parent=={}} {
+        addHistory "<<Process killed>>\n"
+    } else {
+        addHistory "<<Process killed by $parent>>\n"
+    }
+
+    set $statusVariableName "killed"
+    if {$doWhenDone!={}} {eval $doWhenDone}
+}
+
+
 #####################################################################
 #### getHistory
 # Return the contents of the history buffer, if any.
 # 
-body ::tycho::Exec::getHistory {start {end end}} {
-    if {![info exists itk_component(history)] || \
-            ![winfo exists $itk_component(history)]} {
-	return {}
-    }
-    return [$itk_component(history) get $start $end]
+body ::tycho::Exec::getHistory {{start 0.0} {end end}} {
+    #return [$itk_component(history) get $start $end]
+    #FIXME: return according to start and end
+    return $history
+}
+#####################################################################
+#### getHistory
+# Return the contents of the history buffer, if any.
+# 
+body ::tycho::Exec::addHistory {line} {
+    append history "$line" ;# Note: carriage return must be explicitly used!!!
+    # This is for outer interface (ie. scribbling notes, etc)
+    if {$doEachLine!={}} {eval $doEachLine}
 }
 
 ######################################################################
@@ -383,6 +353,7 @@ body ::tycho::Exec::help {} {
 	    [file join $TYCHO kernel doc usersGuides ExecHelp.html]
 }
 
+
 #####################################################################
 #### readOrClose
 # Read from the file descriptor.  If we are at the end of file, then
@@ -392,35 +363,41 @@ body ::tycho::Exec::help {} {
 # things in the global scope.
 #
 body ::tycho::Exec::readOrClose {fd} {
-    $itk_component(history) configure -readonly 0
-    $itk_component(history) insertData "[gets $fd]\n"
-    $itk_component(history) center
-    $itk_component(history) configure -readonly 1
+    global $statusVariableName
+
+    incr linecount            ;# Do not exceed maxLineAllow
+    # Check if the command outputs more lines than we want.
+    if {$maxLineAllow != {}} {
+        if {$linecount > $maxLineAllow} {
+            killProcess $this
+            set msg "Command '$commandToExec'\
+                    exceeded maximum lines ($maxLineAllow) allowed."
+            addHistory $msg
+            error $msg
+        }
+    }
+
+    # We append history here.
+    set line [gets $fd]
+    addHistory "$line\n"
 
     # If we are at the end of the file, close the descriptor.
     # See the man page for the fileevent tcl command.
     if [eof $fd] {
-        global $statusVariableName
-        config -cursor $oldCursor
+        #config -cursor $oldCursor
         if ![catch {close $fd} errMsg] {
             set $statusVariableName "normal"
-            $itk_component(history) configure -readonly 0
-            $itk_component(history) insertData "<<Process exited Normally>>\n"
-            $itk_component(history) configure -readonly 1
-            if {[get autoDestroy] == "Yes" } {
-                after 5000 delete object $this
-            }
+	    addHistory "<<Process exited Normally>>\n"
+            #if {[get autoDestroy] == "Yes" } {
+            #    after 5000 delete object $this
+            #}
         } else {
             set $statusVariableName "abnormal"
-            $itk_component(history) configure -readonly 0
-            $itk_component(history) insertData "<<Process exited Abnormally>>\n"
-            $itk_component(history) configure -readonly 1
+	    addHistory "<<Process exited Abnormally>>\n"
         }
+        # Action to perform when done (ie. parse the entire output, etc...)
+        if {$doWhenDone!={}} {eval $doWhenDone}
     }
-    # Mark this unmodified when we are done so that if we destroy a
-    # parent object, we can just destroy this without being asked if we
-    # want to save.
-    $itk_component(history) markUnmodified
 }
 
     ###################################################################
