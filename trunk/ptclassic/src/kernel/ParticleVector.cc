@@ -52,7 +52,7 @@ void ParticleVector::init(int l, Particle **srcData, const char** fields) {
 // constructor: makes an uninitialized array
 ParticleVector::ParticleVector(int l) : len(l) {
         data = new ParticlePointer[l];
-	fieldName = new (const char *)[l];
+	fieldName = new const char *[l];
 }
 
 // constructor: makes an initialized array from a ParticleVector array
