@@ -41,7 +41,8 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS		= cp.h \
-		cp_internal.h
+		cp_internal.h \
+		cp_procs.c
 
 LIBCSRCS	= cp.c \
 		cp_procs.c \
