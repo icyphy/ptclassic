@@ -37,11 +37,11 @@
 # Using this class, remote attributes are abstracted away
 # from functionalities that Resource has.
 # 
-# <i>NOTE: Currently, FTP will assume anonymous account, and will only
+# <i>NOTE</i>: Currently, FTP will assume anonymous account, and will only
 # receive files. But in the future, it will be relatively easy to implement
 # features that will allow users to input user name and password, and
 # have full FTP features. Using those features, it will be easy to implement
-# ange-ftp.</i>
+# ange-ftp.
 #
 # Here is a tutorial to download a file through FTP:
 # <ul>
@@ -71,6 +71,7 @@
 #   }
 #   ::tycho::inform $line
 # </pre></tcl>
+# </ul>
 #
 class ::tycho::ResourceFTP {
     inherit ::tycho::ResourceRemote
