@@ -40,9 +40,12 @@ when displaying single frames from a moving sequence.
 
 	code {
 	// Function to sort unsigned char's.
+	// These types and casts are required to satisfy cfront's
+	// ridiculously strict rules.
 	extern "C" {
-	static int sortUC(unsigned char* a, unsigned char*b)
-	{
+	static int sortUC(const void* aV,const void* bV) {
+		unsigned char* a = (unsigned char*)aV;
+		unsigned char* b = (unsigned char*)bV;
 		if (*a < *b) return -1;
 		else if (*a == *b) return 0;
 		else return 1;
