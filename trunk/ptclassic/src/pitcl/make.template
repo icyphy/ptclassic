@@ -67,7 +67,7 @@ NON_LIB_SRCS =	ptclAppInit.cc
 SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
 
 # Header files
-HDRS =		PTcl.h ganttChart.h
+HDRS =		MatlabTcl.h PTcl.h ganttChart.h
 
 # Objects that make up the library
 OBJS =		$(LIB_SRCS:.cc=.o)
