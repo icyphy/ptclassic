@@ -51,20 +51,16 @@ CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
-	if (forkSrc) {
-		forkSrc->forkDests.remove(this);
-	}
-
 	ListIter next(forkDests);
 	OutCGPort* p;
 	while ((p = (OutCGPort*)next++) != 0) p->setForkSource(0);
 
+	if (forkSrc) forkSrc->forkDests.remove(this);
+
 	// If myGeodesic is switched, the pointer is set to zero to prevent
 	// deleting the same geodesic multiple times.  Make sure that
 	// original geodesic is destroyed when switching geodesics.
-	if (switched()) {
-		myGeodesic = 0;
-	}
+	if (switched()) myGeodesic = 0;
 }
 
 // Advance the offset by the number of tokens produced or
@@ -83,34 +79,27 @@ void CGPortHole::setForkSource(CGPortHole* p) {
 	if (forkSrc) forkSrc->forkDests.put(this);
 }
 
-
 // processing for each port added to a fork buffer
 // call this from OutXXX
 void MultiCGPort :: forkProcessing (CGPortHole& p) {
-	if (forkSrc) {
-		p.setForkSource(forkSrc);
-	}
+	if (forkSrc) p.setForkSource(forkSrc);
 }
 
 // this avoids having cfront generate many copies of the destructor
 MultiCGPort :: ~MultiCGPort() {}
 
 int CGPortHole :: bufSize() const {
-	if (atBoundary())
-		return parentReps()*numberTokens;
-	else return cgGeo().bufSize();
+	return atBoundary() ? (parentReps()*numberTokens) : cgGeo().bufSize();
 }
 
 int CGPortHole :: localBufSize() const {
-	if (atBoundary())
-		return parentReps()*numberTokens;
-	else return cgGeo().localBufSize();
+	return atBoundary() ? (parentReps()*numberTokens) : cgGeo().localBufSize();
 }
 
-int InCGPort :: isItInput () const { return TRUE;}
-int OutCGPort :: isItOutput () const { return TRUE;}
-int MultiInCGPort :: isItInput () const { return TRUE;}
-int MultiOutCGPort :: isItOutput () const { return TRUE;}
+int InCGPort :: isItInput () const { return TRUE; }
+int OutCGPort :: isItOutput () const { return TRUE; }
+int MultiInCGPort :: isItInput () const { return TRUE; }
+int MultiOutCGPort :: isItOutput () const { return TRUE; }
 
 PortHole& MultiInCGPort :: newPort () {
 	LOG_NEW; CGPortHole& p = *new InCGPort;
