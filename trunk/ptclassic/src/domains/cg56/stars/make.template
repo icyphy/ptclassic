@@ -36,8 +36,7 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH)
 SRCS= \
  CG56Abs.pl \
  CG56BlackHole.pl \
- CG56DC.pl \
- CG56FIR.pl
+ CG56DC.pl
 
 # The .cc files
 CCSRCS=$(SRCS:.pl=.cc)
