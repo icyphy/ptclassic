@@ -104,7 +104,7 @@ configbody ::tycho::EditPtcl::facet {
 ###################################################################
 #
 body ::tycho::EditPtcl::constructor {args} {
-    
+    global PTOLEMY    
     eval itk_initialize $args
     
     addMenu Special left Window -underline 0
@@ -116,15 +116,26 @@ body ::tycho::EditPtcl::constructor {args} {
             -command "::tycho::inform \
         \"Stars used: \[\[$this component text\] stars\]\""
 
-    addMenuItem "Ptolemy Universes" Special -underline 0 \
-            -command "::tycho::File::openContext \[file join \$env(PTOLEMY) tycho typt lib PtolemyFacets.fst\]"
-
     addMenuItem "Universe Name" Special -underline 0 \
             -command "::tycho::inform \
             \" Universe: \[\[$this component text\] universeName\]\""
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
+
+    # Stuff for the help menu
+    addMenuItem "Ptolemy Universes" Help -underline 0 \
+            -command "::tycho::File::openContext \
+	    \[file join \$env(PTOLEMY) tycho typt lib PtolemyFacets.fst\]"
+
+    addMenuItem "Star/Demo Xref" Help -underline 11 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY doc star-demo-index index.html]"
+
+    addMenuItem "Ptolemy stars" Help -underline 0 \
+            -command "::tycho::File::openContext \
+	    \[file join \$env(PTOLEMY) src domains starHTML.idx.fst\]"
+
 }
 
 ###################################################################
