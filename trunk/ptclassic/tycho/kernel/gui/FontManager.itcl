@@ -115,6 +115,10 @@ class ::tycho::FontManager {
     # or the largest value in the sizes list.
     method getValidSize {proposed}
 
+    #### help
+    # Open a help window.
+    method help {}
+
     #### setCurrentFont
     # Attempt to set the font specified by the menu radio buttons.
     method setCurrentFont {}
@@ -355,7 +359,7 @@ body ::tycho::FontManager::constructor {args} {
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
 	    -underline 0 \
-	    -command [code help]
+	    -command "$this help"
 
     set sample "
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -500,6 +504,15 @@ body ::tycho::FontManager::getValidSize {proposed} {
 	if {$proposed <= $size} {return $size}
     }
     return $size
+}
+
+#########################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::FontManager::help {} {
+    global TYCHO
+    ::tycho::File::openContext $TYCHO/kernel/doc/FontManager.html
 }
 
 #########################################################################
