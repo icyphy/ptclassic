@@ -239,6 +239,18 @@ int CompileCGSubsystems::runCode() {
 }
 
 ISA_FUNC(CompileCGSubsystems,CGSharedBus);
- 
+
+const char* CompileCGSubsystems::className() const {
+    return "CompileCGSubsystems";
+}
+
+int CompileCGSubsystems::childIsA(const char* type) const {
+    return TRUE;
+    // FIXME - this doesn't work - the name given by type is not
+    // always the name the target is registered under
+    // const Target* targetType = KnownTarget::find(type);
+    // return targetType? targetType->isA("CGTarget"):FALSE;
+}
+
 static CompileCGSubsystems cgCompileCGSubsystems("CompileCGSubsystems","CGStar","A CG wormhole target");
 static KnownTarget entry(cgCompileCGSubsystems,"CompileCGSubsystems");

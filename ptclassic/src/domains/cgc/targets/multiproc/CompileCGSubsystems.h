@@ -49,6 +49,8 @@ public:
     // wormholes.
     /*virtual*/ int modifyGalaxy();
     /*virtual*/ int isA(const char*) const;
+    /*virtual*/ const char* className() const;
+    /*virtual*/ int childIsA(const char*) const;
     /*virtual*/ Block* makeNew() const {
 	 return new CompileCGSubsystems(name(),starType(),descriptor());
      }
