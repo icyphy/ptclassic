@@ -72,7 +72,6 @@ char *inst_fct;			/* Instance facet            */
 {
     vemOneArg *pntArg, *txtArg;
     octObject newInst, foundObj, fct, spot_fct;
-    struct octBox bb;
     int len, do_spot, i, errs, con_flag;
     STR remain;
     char masterName[VEMMAXSTR*2], viewName[VEMMAXSTR], fctName[VEMMAXSTR];
@@ -167,11 +166,11 @@ octObject *inst;		/* Newly created instance */
  * that should be deleted to `dead'.
  */
 {
-    int expert = vemExpert( 0 );
     octObject dest_obj;
     regObjGen gen;
     struct octBox bb;
     char warning[1024];
+    (void) vemExpert( 0 );
 
     /* Check for things under instance */
     if ((octBB(inst, &bb) == OCT_OK) &&
