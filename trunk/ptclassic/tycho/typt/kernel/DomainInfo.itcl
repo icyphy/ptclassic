@@ -99,7 +99,7 @@ class ::tycho::DomainInfo {
     public proc knownBlocks {domain}
 
     # Return the 'print' output for starName in domain.
-    method print {starName domain}
+    public proc print {starName domain}
 
     # Bring up ListBox with all the domains, return the user's choice.
     public proc queryDomain { {msg "Choose a Domain:"} {default {}} } {}
@@ -397,7 +397,10 @@ body ::tycho::DomainInfo::starInfo {starName} {
     # have these.
     if {![regexp {^Star: (.*)
 Descriptor:(.*)} $printResults dummy star rest]} {
-        error "Error while parsing Descriptor: $printResults"
+        if {![regexp {^GALAXY: (.*)
+Descriptor:(.*)} $printResults dummy star rest]} {
+             error "Error while parsing Descriptor: $printResults"
+        }
     }
     
     set status [regexp {(.*)
@@ -456,7 +459,7 @@ States:(.*)
     if {!$status} {
         set descriptor $rest
         # The object did not have a multiport, it could be a base?
-        puts "No multiport: $star, $rest"
+        puts "DomainInfo::starInfo{}: No multiport: $star, $rest"
     }
 
 
