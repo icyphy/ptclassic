@@ -45,6 +45,7 @@ Name of the window function to generate:
 Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 		}
 	}
+
 	state {
 		name { length }
 		type { int }
@@ -84,7 +85,7 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	setup {
 	const char *wn = name;
 
-	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
+	if ( strcasecmp( wn, "Rectangle")==0 ) {
 	    winType = SDFWinType_Rectangle;
 	} else if ( strcasecmp( wn, "Bartlett")==0 ) {
 	    winType = SDFWinType_Bartlett;
@@ -104,7 +105,8 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	// Don't want to risk divide by zero
 	realLen = int(length);
 	if ( realLen < 4 ) {
-	    Error::abortRun(*this, ": Window length too small");
+	    Error::abortRun(*this, ": Window length too small",
+			    " (should be greater than 3)");
 	    return;
 	}
 
@@ -112,7 +114,7 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	double sin_base_w = sin(base_w);
 	double sin_2base_w = sin(2*base_w);
 	double d = - (sin_base_w/sin_2base_w) * (sin_base_w/sin_2base_w);
-	scale0 = 0; scale1 = 0; freq1 = 0; scale2 = 0; freq2 = 0;
+	scale0 = scale1 = freq1 = scale2 = freq2 = 0.0;
 
 	// Window defs taken from Jackson, Digital Filters and Signal
 	//  Processing, Second Ed, chap 7.
@@ -121,13 +123,17 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	    scale0 = 1;
 	    break;
 	  case SDFWinType_Bartlett:
-	    scale0 = 0;		scale1 = 2.0/realLen;
+	    scale1 = 2.0/(realLen - 1);
 	    break;
 	  case SDFWinType_Hanning:
-	    scale0 = .5;	scale1 = -.5;	freq1 = 2*base_w;
+	    scale0 = .5;
+	    scale1 = -.5;
+	    freq1 = 2*base_w;
 	    break;
 	  case SDFWinType_Hamming:
-	    scale0 = .54;	scale1 = -.46;	freq1 = 2*base_w;
+	    scale0 = .54;
+	    scale1 = -.46;
+	    freq1 = 2*base_w;
 	    break;
 	  case SDFWinType_Blackman:
 	    // This is a special case of SteepBlackman
@@ -153,8 +159,8 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 
 	switch ( winType ) {
 	  case SDFWinType_Bartlett:
-	    for ( i=0; i < realLen/2; i++) {
-		val = scale1 * (i+1);
+	    for ( i=0; i < (realLen - 1)/2; i++) {
+		val = scale1 * i;
 		window << val << " ";
 	    }
 	    for ( ; i < realLen; i++) {
