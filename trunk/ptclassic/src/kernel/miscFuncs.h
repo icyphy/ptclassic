@@ -63,6 +63,6 @@ inline unsigned max(unsigned a, unsigned b) {return (a > b ? a : b);}
 // because other func is extern "C".
 
 int power(int base,int exp);
-double power(double base,double exp) { return pow(base,exp);}
+inline double power(double base,double exp) { return pow(base,exp);}
 
 #endif
