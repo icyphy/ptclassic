@@ -1,5 +1,3 @@
-static const char file_id[] = "$RCSfile$";
-
 /*  Version $Id$
 
     Copyright 1992 The Regents of the University of California.
@@ -11,32 +9,34 @@ static const char file_id[] = "$RCSfile$";
     Code for domain-specific PortHole classes.
 */
 
+static const char file_id[] = "$RCSfile$";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "MTDFConnect.h"
+#include "MTDFPortHole.h"
 #include "MTDFGeodesic.h"
 #include "CircularBuffer.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <strstream.h>
 
 // Class identification.
 ISA_FUNC(MTDFPortHole,PortHole);
 
-// Constructor.
-MTDFPortHole::MTDFPortHole() : myGeodesic(PortHole::myGeodesic)
-{
-}
-
 // Allocate and return a MTDFGeodesic.
 Geodesic* MTDFPortHole::allocateGeodesic()
 {
+    // Construct name for new Geodesic.
+    ostrstream string;
+    string << "Node_" << name();
+    char* nm = string.str();
+
     LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
-    char name[80];
-    strcpy(name, "Node_");
-    strcat(name, readName());
-    g->setNameParent(hashstring(name),parent());
+    g->setNameParent(hashstring(nm), parent());
+
+    LOG_DEL; delete nm;
     return g;
 }
 
@@ -106,7 +106,7 @@ int InMTDFPort::isItInput() const
 }
 
 // Get data from the Geodesic.
-void InMTDFPort::grabData()
+void InMTDFPort::receiveData()
 {
     getParticle();
 }
@@ -118,7 +118,7 @@ int OutMTDFPort::isItOutput() const
 }
 
 // Update buffer pointer (for % operator) and clear old Particles.
-void OutMTDFPort::grabData()
+void OutMTDFPort::receiveData()
 {
     clearParticle();
 }
@@ -128,7 +128,6 @@ void OutMTDFPort::sendData()
 {
     putParticle();
 }
-
 
 // Input/output identification.
 int MultiInMTDFPort::isItInput() const
