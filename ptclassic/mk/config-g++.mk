@@ -33,10 +33,7 @@
 
 #
 # Programs to use
-# If you are using FSF gcc, then comment out the CPLUSPLUS_COMPAT
-# line.  If you are using egcs, then leave it uncommented.
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
-CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT)
+CPLUSPLUS = g++
 
 # If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
 # based probably don't have gcc.
