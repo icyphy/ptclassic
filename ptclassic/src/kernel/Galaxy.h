@@ -47,7 +47,10 @@ class BlockList : SequentialList
 	void put(Block* b) {SequentialList::put(b);}
 
 	// Return size of list
-	int size() {return SequentialList::size();}
+	int size() const {return SequentialList::size();}
+
+	// Return first Block on list (a const method)
+	Block& head () const {return *(Block*) SequentialList::head();}
 
 	// Return next Block on list
 	Block& operator ++ () {return *(Block*) next();}
@@ -71,9 +74,6 @@ protected:
 
 	// Add blocks to the list
 	void addBlock(Block& b) {blocks.put(&b);}
-
-	// Add block and call setBlock for it
-	void addBlock(Block& b,const char* bname) {addBlock(b.setBlock(bname,this));}
 
 	// Connect sub-blocks with a delay (default to zero delay)
 	void connect(GenericPort& source, GenericPort& destination,
@@ -117,11 +117,16 @@ public:
                 b.stateWithName(stateName)->setValue(expression);
         }
 
+	// Add block and call setBlock for it
+	void addBlock(Block& b,const char* bname) {
+		addBlock(b.setBlock(bname,this));
+	}
+
         // States initialize
         void initState();
 
 	// Return the number of blocks in the galaxy.
-	int numberBlocks() {return blocks.size();}
+	int numberBlocks() const {return blocks.size();}
 
 	// Return the next block in the list
 	Block& nextBlock() {return blocks++;}
@@ -138,6 +143,9 @@ public:
 
 	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
 	Galaxy& asGalaxy() const; // { return *this;}
+
+	// return my domain
+	const char* domain () const;
 
 	// my domain
 	const char* myDomain;
