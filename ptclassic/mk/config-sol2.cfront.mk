@@ -119,7 +119,13 @@ LINKER =	CC
 # startup module
 CRT0 =
 # system libraries (libraries from the environment)
-SYSLIBS =	-lsocket -lnsl -ldl -lm
+# Note that -lucb lib is needed to get bcopy and bzero for libMLelf.a
+#  The current release of Mathematica uses these obsolete functions
+#  instead of memcopy and memset.  Under g++, bcopy and bzero are defined
+#  in libg++, so we don't need to include -lucb.
+# Note that the Solaris ucb library is really broken, so it should be last
+# in the list of libraries, or you may see really serious problems.
+SYSLIBS =	-lsocket -lnsl -ldl -lm -L/usr/ucblib -lucb
 # system libraries for linking .o files from C files only
 CSYSLIBS =	$(SYSLIBS)
 
@@ -131,9 +137,9 @@ CSYSLIBS =	$(SYSLIBS)
 
 # Can't use -Bstatic here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR)
+LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):/usr/ucblib
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR)	
+LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):/usr/ucblib	
 
 #
 # Directories to use
