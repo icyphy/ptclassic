@@ -37,10 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLTarget.h"
-#include "VHDLStar.h"
-#include "FloatArrayState.h"
-#include "IntArrayState.h"
-#include "ComplexArrayState.h"
+#include <ostream.h>
 
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
@@ -77,6 +74,11 @@ void VHDLTarget :: addCodeStreams() {
   addStream("architecture_body_opener", &architecture_body_opener);
   addStream("variable_declarations", &variable_declarations);
   addStream("architecture_body_closer", &architecture_body_closer);
+  addStream("mainDecls", &mainDecls);
+  addStream("loopOpener", &loopOpener);
+  addStream("loopCloser", &loopCloser);
+  addStream("useLibs", &useLibs);
+  addStream("sysWrapup", &sysWrapup);
 }
 
 // Initialize codeStreams.
@@ -85,12 +87,72 @@ void VHDLTarget :: initCodeStreams() {
   architecture_body_opener.initialize();
   variable_declarations.initialize();
   architecture_body_closer.initialize();
+  mainDecls.initialize();
+  loopOpener.initialize();
+  loopCloser.initialize();
+  useLibs.initialize();
+  sysWrapup.initialize();
+}
+
+// Register a read or write to an arc and the offset.
+void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
+  StringList direction = port->direction();
+  StringList name = port->getGeoName();
+  int noSuchArc = 1;
+  
+  // Search through the arc list for an arc with the given name.
+  // If one is found, update it's low/high write/read markers.
+  VHDLArcListIter nextArc(arcList);
+  VHDLArc* arc;
+  while ((arc = nextArc++) != 0) {
+    if (!strcmp(arc->name, name)) {
+      noSuchArc = 0;
+      if (!strcmp(port->direction(),"OUT")) {
+	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
+	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
+      }
+      else if (!strcmp(port->direction(),"IN")) {
+	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
+	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
+      }
+      else {
+	Error::error(*port, " is neither IN nor OUT");
+      }
+    }
+  } 
+
+  // If no arc with the given name is in the list, then create one.
+  if (noSuchArc) {
+    VHDLArc* newArc = new VHDLArc;
+    newArc->name = name;
+    if (!strcmp(port->direction(),"OUT")) {
+      newArc->type = port->dataType();
+      newArc->lowWrite = tokenNum;
+      newArc->highWrite = tokenNum;
+      newArc->lowRead = -(port->geo().numInit());
+      newArc->highRead = -(port->geo().numInit());
+    }
+    else if (!strcmp(port->direction(),"IN")) {
+      newArc->type = port->dataType();
+      newArc->lowWrite = 0;
+      newArc->highWrite = 0;
+      newArc->lowRead = tokenNum;
+      newArc->highRead = tokenNum;
+    }
+    else {
+      Error::error(*port, " is neither IN nor OUT");
+    }
+    arcList.put(*newArc);
+  }
 }
 
 // Setup the target.
 void VHDLTarget :: setup() {
-	if (galaxy()) setStarIndices(*galaxy()); 
-	HLLTarget::setup();
+  if (galaxy()) setStarIndices(*galaxy()); 
+  HLLTarget::setup();
+
+  // Initialize codeStreams.
+  initCodeStreams();
 }
 
 // Main routine.
@@ -157,6 +219,70 @@ void VHDLTarget :: headerCode() {
 
 // Trailer code.
 void VHDLTarget :: trailerCode() {
+  // Iterate through the arc list.  Track read/write refs made on each arc.
+  // Determine which variables need to be "wrap-around" assigned.
+  VHDLArcListIter nextArc(arcList);
+  VHDLArc* arc;
+  while ((arc = nextArc++) != 0) {
+    for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
+      StringList sourceName = arc->name;
+      StringList destName = arc->name;
+      int sx = (ix + (arc->highWrite - arc->lowWrite) + 1);
+      if (sx >= 0) {
+	sourceName << "_" << sx;
+      }
+      else { /* (sx < 0) */
+	sourceName << "_N" << (-sx);
+      }
+      if (ix >= 0) {
+	destName << "_" << ix;
+      }
+      else { /* (ix < 0) */
+	destName << "_N" << (-ix);
+      }
+      
+      // sourceName is input to register, destName is output of register.
+//      connectRegister(sourceName, destName, "INTEGER");
+      myCode << destName << " := " << sourceName << ";\n";
+      cout << "Connecting " << sourceName << " and " << destName << "\n";
+      
+      // Must also create variables for those lines which are neither read nor
+      // written by a $ref() - e.g. if more delays than tokens read.
+      // However, do not create a variable if it's a wormhole input.
+      // Will have created a system port input instead.
+
+      // If no system port by the given name, go ahead and make the variable.
+//      if (sx < arc->lowWrite) {
+      if (!(variableList.inList(sourceName))) {
+	// Allocate memory for a new VHDLVariable and put it in the list.
+	VHDLVariable* newvar = new VHDLVariable;
+	newvar->name = sourceName;
+	newvar->type = arc->type;
+	if (!strcmp(arc->type,"INTEGER")) {
+	  newvar->initVal = "0";
+	}
+	else {
+	  newvar->initVal = "0.0";
+	}
+	variableList.put(*newvar);
+      }
+//      if (ix < arc->lowWrite) {
+      if (!(variableList.inList(destName))) {
+	// Allocate memory for a new VHDLVariable and put it in the list.
+	VHDLVariable* newvar = new VHDLVariable;
+	newvar->name = destName;
+	newvar->type = arc->type;
+	if (!strcmp(arc->type,"INTEGER")) {
+	  newvar->initVal = "0";
+	}
+	else {
+	  newvar->initVal = "0.0";
+	}
+	variableList.put(*newvar);
+      }
+    }
+  }
+  
   // Go through registered variables and give them
   // declarations with initialization.
   VHDLVariableListIter nextVariable(variableList);
@@ -184,21 +310,27 @@ void VHDLTarget :: trailerCode() {
 
 // Combine all sections of code.
 void VHDLTarget :: frameCode() {
-  StringList code = headerComment();
+  CodeStream code;
+  code << headerComment();
+  code << "\n" << useLibs;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
   code << "\n" << "process";
+  // Special inserted line for initCode methods to use
+  code << "\n" << mainDecls;
   code << "\n" << variable_declarations;
   code << "\n" << "begin";
+  code << "\n" << loopOpener;
   
   // Prepend the header, declarations, and initialization.
-  prepend(code, myCode);
+//  prepend(code, myCode);
+  code << myCode;
+  
+  code << "\n" << loopCloser;
+  code << "\n" << architecture_body_closer;
 
-  myCode << "\n" << architecture_body_closer;
-
-  // after generating code, initialize codeStreams again.
-  initCodeStreams();
-
+  myCode = code;
+  
   // Initialize lists.
   firingVariableList.initialize();
   variableList.initialize();
@@ -250,26 +382,26 @@ StringList VHDLTarget :: comment(const char* text, const char* b,
 
 // Generate code to begin an iterative procedure
 void VHDLTarget :: beginIteration(int repetitions, int depth) {
-  myCode << "\n";
-  myCode << indent(depth);
+  loopOpener << "\n";
+  loopOpener << indent(depth);
   // Check for infinite iteration.
   if (repetitions == -1)
-    myCode += "while TRUE loop\n";
+    loopOpener += "while TRUE loop\n";
   else {
-    variable_declarations << indent(depth)
-	   << "variable " << targetNestedSymbol.push("i") << ": INTEGER;\n";
-    myCode << indent(depth)
-	   << "for " << targetNestedSymbol.pop() << " in 1 to "
-	   << repetitions << " loop\n";
+    variable_declarations << indent(depth) << "variable "
+			  << targetNestedSymbol.push("i") << ": INTEGER;\n";
+    loopOpener << indent(depth)
+	       << "for " << targetNestedSymbol.pop() << " in 1 to "
+	       << repetitions << " loop\n";
   }
   return;
 }
 
 // Generate code to end an iterative procedure
 void VHDLTarget :: endIteration(int /*reps*/, int depth) {
-  myCode << indent(depth) << "wait for 1 ns;" << "\n";
-  myCode << indent(depth)
-	 << "end loop;     -- end repeat, depth " << depth << "\n";
+  loopCloser << indent(depth) << "wait for 1 ns;" << "\n";
+  loopCloser << indent(depth)
+	     << "end loop;     -- end repeat, depth " << depth << "\n";
 }
 
 // code generation init routine; compute offsets, generate initCode
@@ -460,6 +592,16 @@ void VHDLTarget :: registerState(State* state, int thisFiring/*=-1*/,
 
 // Register PortHole reference.
 void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
+  // The registry keeps track of all refed arcs, and their min/max R/W offsets.
+  registerArcRef(port, tokenNum);
+
+// I want to pass along the offset info as well as whether it's
+// a read or a write so I can keep tabs on the production window and
+// the read window, and then do nice things at the end based on that.
+// Also, must do special things if it's a wormhole input.
+
+// Continue to do normal signal naming and portmapping.
+
   StringList ref = port->getGeoName();
   if (tokenNum >= 0) {
     ref << "_" << tokenNum;
@@ -468,13 +610,16 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
     ref << "_N" << (-tokenNum);
   }
 
+  //FIXME: May want to do something different if it's a wormhole port.
+  //Such as, what was done in StructTarget: make extra port to VHDL module.
+
   if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = port->dataType();
-  newvar->initVal.initialize();
+  newvar->initVal = "0.0";
   firingVariableList.put(*newvar);
 }
 
@@ -488,7 +633,7 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = sanitizeType(type);
-  newvar->initVal.initialize();
+  newvar->initVal = "0.0";
   firingVariableList.put(*newvar);
 }
 

@@ -40,6 +40,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "HLLTarget.h"
 #include "VHDLStar.h"
 #include "VHDLVariable.h"
+#include "VHDLArc.h"
+#include "FloatArrayState.h"
+#include "IntArrayState.h"
+#include "ComplexArrayState.h"
 
 class VHDLTarget : public HLLTarget {
 public:
@@ -105,6 +109,11 @@ protected:
 	CodeStream architecture_body_opener;
 	CodeStream variable_declarations;
 	CodeStream architecture_body_closer;
+	CodeStream mainDecls;
+	CodeStream loopOpener;
+	CodeStream loopCloser;
+	CodeStream useLibs;
+	CodeStream sysWrapup;
 
 	// Keep this at the top of this file to please the compiler.
 	// Add code to the beginning of a CodeStream instead of the end.
@@ -124,6 +133,11 @@ protected:
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
+
+	// Register a read or write to an arc and the offset.
+	void registerArcRef(VHDLPortHole*, int);
+
+	VHDLArcList arcList;
 
 private:
 	// The following is for keeping track of variables.
