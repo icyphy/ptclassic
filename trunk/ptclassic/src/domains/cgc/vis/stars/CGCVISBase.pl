@@ -10,12 +10,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
-	// Pull in prototype for getenv
-	ccinclude { <stdlib.h> }
 	initCode{
-	  StringList visIncludeSpec;
-	  char* vsdkpath = getenv("VSDKHOME");
-	  visIncludeSpec << "-I" << vsdkpath;
-	  addCompileOption(visIncludeSpec);
+	// environment variables are automatically expanded
+	  addCompileOption("-I$VSDKHOME/include"); 
 	}
 }
