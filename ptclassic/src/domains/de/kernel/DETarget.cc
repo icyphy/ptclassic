@@ -43,47 +43,49 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CQScheduler.h"
 #include "GalIter.h"
 
+// Defined in DEDomain.cc
+extern const char DEdomainName[];
+
 DETarget :: DETarget() : 
-Target("default-DE","DEStar","default DE target") 
-{
+Target("default-DE","DEStar","default DE target") {
 	addState(timeScale.setState("timeScale",this,"1.0",
 	    "Relative time scale for interface with another timed domain"));
 	addState(syncMode.setState("syncMode",this,"YES",
-	"Enforce that the inner timed domain can not be ahead of me in time"));
+	"Enforce that the inner timed domain cannot be ahead of me in time"));
 	addState(calQ.setState("calendar queue scheduler?", this, "YES",
 	    "Use the CalendarQueue scheduler."));
 }
 
-void DETarget :: setup()
-{
+void DETarget :: setup() {
 	DEBaseSched* dSched;
-	if (calQ) {
+	if (int(calQ)) {
 		LOG_NEW; dSched = new CQScheduler;
-	} else {
+	} 
+	else {
 		LOG_NEW; dSched = new DEScheduler;
 	}
+
 	// setSched deletes the old scheduler.
 	setSched(dSched);
 	if (galaxy()) dSched->setGalaxy(*galaxy());
 	dSched->relTimeScale = timeScale;
-	dSched->syncMode = syncMode;
+	dSched->syncMode = int(syncMode);
 	Target :: setup();
 }
 
-// invoke begin methods
+// Invoke begin methods.  Some DE stars, such those derived from
+// DERepeatStar, generate output events in their begin methods.
+// Make sure these events get into the event queue.
 void DETarget::begin() {
-  Galaxy *gal = galaxy();
-  if (!gal) return;
-  GalStarIter nextStar(*gal);
-  Star *s;
-  while ((s = nextStar++) != 0) {
-    s->begin();
-
-    // Some DE stars, such those derived from DERepeatStar, generate
-    // output events in their begin methods.  So we need to call
-    // sendOutput here to get these events into the event queue.
-    ((DEStar*)s)->sendOutput();
-  }
+	Galaxy *gal = galaxy();
+	if (!gal) return;
+	GalStarIter nextStar(*gal);
+	Star *s;
+	while ((s = nextStar++) != 0) {
+		s->begin();
+		// call sendOutput here to get events into the event queue
+		((DEStar*)s)->sendOutput();
+	}
 }
 
 Block* DETarget :: makeNew() const  {
@@ -93,5 +95,5 @@ Block* DETarget :: makeNew() const  {
 DETarget :: ~DETarget() { delSched();}
 
 const char* DETarget :: domain() {
-	return galaxy() ? galaxy()->domain() : "DE";
+	return galaxy() ? galaxy()->domain() : DEdomainName;
 }
