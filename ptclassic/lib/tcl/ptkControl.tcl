@@ -51,7 +51,7 @@ set ptkRunFlag(main) IDLE
 # GO button.
 #
 proc ptkClearRunFlag { name octHandle } {
-    global ptkRunFlag
+    global ptkRunFlag ptkStepAction
     set  cntrWindow .run_$octHandle
     catch {$cntrWindow.panel.gofr.go configure -relief raised}
     catch {$cntrWindow.panel.pause configure -relief raised}
@@ -285,19 +285,18 @@ proc ptkSetRunInteractivity { name octHandle } {
 # Procedure to toggle between scripted runs and non-scripted runs
 #
 proc ptkToggleScript { name octHandle } {
-    global ptkControlPanel ptkScriptOn
-    set ptkControlPanel .run_$octHandle
+    global ptkScriptOn
+    set ctrlPanel .run_$octHandle
     if {$ptkScriptOn($name)} {
 	# Switching to scripted runs
-	pack forget $ptkControlPanel.iter
-	pack $ptkControlPanel.tclScript -expand 1 -fill both \
-	    -after $ptkControlPanel.options
+	pack forget $ctrlPanel.iter
+	pack $ctrlPanel.tclScript -expand 1 -fill both \
+	    -after $ctrlPanel.options
     } {
 	# Reverting to non-scripted run
-	pack forget $ptkControlPanel.tclScript
-	pack $ptkControlPanel.iter -anchor w -fill x \
-	    -after $ptkControlPanel.options
-	wm geometry $ptkControlPanel ""
+	pack forget $ctrlPanel.tclScript
+	pack $ctrlPanel.iter -anchor w -fill x \
+	    -after $ctrlPanel.options
     }
 }
 
@@ -358,7 +357,7 @@ proc ptkSetOrClearDebug { name octHandle } {
 	ptkGrAnimation 0
 	ptkTxAnimation 0
 	# Close control panel.
-	catch {pack unpack $w.debug}
+	catch {pack forget $w.debug}
 	# Disable verbose Tcl errors
 	set ptkVerboseErrors 0
     }
