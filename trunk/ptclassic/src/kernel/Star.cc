@@ -59,7 +59,7 @@ Star& Star :: asStar () { return *this;}
 const Star& Star :: asStar () const { return *this;}
 
 // set the target for the star.
-virtual void Star :: setTarget(Target* t) { 
+void Star :: setTarget(Target* t) { 
 	targetPtr = t;
 }
 
