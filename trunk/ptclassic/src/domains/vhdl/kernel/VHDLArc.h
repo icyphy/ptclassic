@@ -68,6 +68,9 @@ class VHDLArc : public VHDLObj
   // Return a pointer to a new copy of the VHDLArc.
   VHDLArc* newCopy();
 
+  void setType(const char* newType) { type = newType; }
+  StringList getType() { return type; }
+
  protected:
  private:
 };
