@@ -34,7 +34,7 @@ VPATH = $(ROOT)/src/compat/X11R4
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS = 	X.h Xlib.h Xos.h Xutil.h curosrfont.h
+HDRS = 	X.h Xlib.h Xos.h Xutil.h cursorfont.h
 
 MISC_FILES = README
 
