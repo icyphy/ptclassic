@@ -34,11 +34,13 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars dsp targets tcltk rtlib
+SUBDOMAINDIRS = dsp tcltk
+DIRS = kernel stars targets rtlib $(SUBDOMAINDIRS)
 
 # Only build the CGC UltraSparc VIS subdomain on Solaris machines
 ifneq ("$(filter sol% ,$(PTARCH))","")
 	DIRS += vis
+	SUBDOMAINDIRS += vis
 endif
 
 ME = cgc

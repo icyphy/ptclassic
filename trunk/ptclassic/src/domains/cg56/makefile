@@ -33,7 +33,8 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars dsp targets
+SUBDOMAINDIRS = dsp
+DIRS = kernel stars $(SUBDOMAINDIRS) targets 
 
 ME = cg56
 
