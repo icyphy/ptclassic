@@ -56,6 +56,7 @@ TCLTK_DEST=	$(PTOLEMY)/tcltk
 XV_DEST= 	$(PTOLEMY)
 OBJARCH=	$(PTOLEMY)/obj.$(ARCH)
 ROOT=		.
+XV_CC=		cc
 
 include $(ROOT)/mk/config-$(ARCH).mk
 
@@ -141,6 +142,7 @@ $(OBJARCH)/xv/tiff/Makefile:
 xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
+		CC=$(XV_CC) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		AR=ar\
 		RANLIB=ranlib \
@@ -150,6 +152,7 @@ xv_bin: $(OBJARCH)/xv
 xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
+		CC=$(XV_CC) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		AR=ar\
 		RANLIB=ranlib \
