@@ -48,13 +48,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 			     const char* desc) :
 VHDLTarget(name,starclass,desc) {
-  addState(synopsys.setState("$SYNOPSYS",this,"/usr/tools/synopsys",
+  addState(synopsys.setState("$SYNOPSYS",this,"",
 			    "value for SYNOPSYS environment variable."));
   // Needed by the "gvan" vhdl code analyzer.
-  addState(arch.setState("$ARCH",this,"sparcOS5",
+  addState(arch.setState("$ARCH",this,"",
 			    "value for ARCH environment variable."));
   // Needed by the "(pt)vhdlsim" vhdl simulator.
-  addState(simarch.setState("$SIM_ARCH",this,"sparcOS5",
+  addState(simarch.setState("$SIM_ARCH",this,"",
 			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code."));
