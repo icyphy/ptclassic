@@ -21,10 +21,10 @@ $Id$
 #include "DLScheduler.h"
 #include "QuasiScheduler.h"
 #include "DeclustScheduler.h"
-#include "UserOutput.h"
 #include "KnownTarget.h"
 #include "CGSend.h"
 #include "CGReceive.h"
+#include "pt_fstream.h"
 
 CGFullConnect::CGFullConnect(const char* name,const char* sClass,
 			     const char* desc) :
@@ -140,12 +140,14 @@ extern "C" int displayGanttChart(const char*);
 // Display Gantt chart if requested.
 void CGFullConnect::displaySchedule(ParScheduler* s) {
         if (int(ganttChart)) {
-            UserOutput o;
-            const char* gname = tempFileName();
-            o.fileName(gname);
-            s->writeGantt(o);
-            displayGanttChart(gname);
-            unlink(gname);
+		char* gname = tempFileName();
+		pt_ofstream o(gname);
+		if (o) {
+			s->writeGantt(o);
+			displayGanttChart(gname);
+			unlink(gname);
+		}
+		LOG_DEL; delete gname;
         }
 }
 
@@ -155,13 +157,10 @@ void CGFullConnect::wrapup() {
 	StringList logMsg;
 	for (int i = 0; i < nProcs(); i++) {
 		// write out generated code.
-		UserOutput out;
 		StringList name = (const char*)filePrefix;
 		name += i;
-		if (!out.fileName(name)) {
-			Error::abortRun(*this, "Cannot open file ",name);
-			return;
-		}
+		pt_ofstream out(name);
+		if (!out) return;
 		CGTarget* nextChild = (CGTarget*)child(i);
 		nextChild->writeCode(out);
 		logMsg += "code for ";
