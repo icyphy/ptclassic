@@ -302,7 +302,11 @@ AbsPath(path, abs_path)
 	char		oldpath[MAXPATHLEN];
 	struct stat	s;
 
+#ifndef SYSV
 	if (getwd(oldpath) == NULL) {
+#else
+	if (getcwd(oldpath, MAXPATHLEN) == NULL) {
+#endif
 		return (-1);
 	}
 
@@ -318,7 +322,11 @@ AbsPath(path, abs_path)
 		return (-4);
 	}
 
+#ifndef SYSV
 	if (getwd(abs_path) == NULL) {
+#else
+	if (getcwd(abs_path, MAXPATHLEN) == NULL) {
+#endif
 		return (-5);
 	}
 
