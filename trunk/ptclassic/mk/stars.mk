@@ -468,9 +468,12 @@ ifdef SDF
 		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
 		LIBS += -lsdfcontrib -lsdfcontribstars
 	endif
-	CUSTOM_DIRS += $(SDFDIR)/stars $(SDFDIR)/targets 
+	CUSTOM_DIRS += $(SDFDIR)/stars
 	STARS += $(LIBDIR)/sdfstars.o 
 	ifdef CG
+		# The only thing in sdf/targets also depends on 
+		# cg... should this be in the cg directory
+		CUSTOM_DIRS += $(SDFDIR)/targets 
 		TARGETS += $(SDFT)/CompileTarget.o
 	endif
 	LIBS += -lsdfstars
