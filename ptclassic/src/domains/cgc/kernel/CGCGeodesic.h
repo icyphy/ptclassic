@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee
+ Programmer: S. Ha and E. A. Lee
 
  Geodesic for C code generation.
  In addition to fork management provide by CG Geodesics,

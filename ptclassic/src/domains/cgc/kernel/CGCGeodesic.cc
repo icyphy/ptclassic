@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee
+ Programmer: S. Ha and E. A. Lee
 
  geodesics for CGCCode stars.  In addition to the functions of CG
  geodesics, they manage memory allocation for buffers.
