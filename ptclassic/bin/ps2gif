@@ -28,7 +28,7 @@ if (! $?DISPLAY) then
 	echo "          Font quality may be compromized."
 	set options = "-dNODISPLAY $options"
 endif
-gs $options -g1x1 pstoppm.ps << END-GS >& /dev/null
+gs $options pstoppm.ps << END-GS >& /dev/null
 (${temp:r}) ppm24run
 END-GS
 
