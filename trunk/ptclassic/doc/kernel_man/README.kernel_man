@@ -13,4 +13,5 @@ system.
 ptk.ps.Z is a compressed PostScript version of the document.  The
 document is 122 pages long.
 
+The file title_small.ps is the same as title.ps, but without the cover art
 
