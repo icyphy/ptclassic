@@ -314,7 +314,7 @@ body ::tycho::TopLevel::constructor {args} {
     bind $prefix <Control-x><k> \
             "$this nextWindow; delete object $this; break"
     bind $prefix <Control-x><Control-f> \
-            {::tycho::File::openWin %Q; break}
+            {::tycho::File::openWin %W; break}
     bind $prefix <Control-x><o> \
             "$this nextWindow 1; break"
     
