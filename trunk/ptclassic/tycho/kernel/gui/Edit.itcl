@@ -54,16 +54,6 @@
 # classes, for parsing text in order to color it, control the font,
 # etc.
 # <p>
-# This widget is designed to be placed within a Displayer window,
-# although it can also be used on its own.
-# To use within a Displayer, the following commands will work:
-# <tcl><pre>
-# catch {destroy .d}
-# ::tycho::Displayer .d
-# ::tycho::Edit .d.e
-# .d centerOnScreen
-# </pre></tcl>
-# <p>
 # Note that sometime in the future, many of the public methods in this
 # class may become private or protected.  Currently they are public
 # to permit access from key bindings (shortcuts).  The "code" directive in Itcl
