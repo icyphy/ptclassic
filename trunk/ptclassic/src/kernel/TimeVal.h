@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* Version $Id$
+/* $Id$
    Copyright 1991 The Regents of the University of California.
    All Rights Reserved.
 
@@ -46,6 +46,7 @@ class TimeVal : public timeval
 public:
     TimeVal();
     TimeVal(double);
+    TimeVal(timeval);
     operator double() const;
 
     TimeVal operator +(const TimeVal&) const;

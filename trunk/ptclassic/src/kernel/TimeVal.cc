@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
    Created:	8 Nov 91
 */
 
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "TimeVal.cc";
 
 #ifdef __GNUG__
 #pragma implementation
@@ -58,6 +58,12 @@ TimeVal::TimeVal(double seconds)
     tv_sec = (TV_SEC_TYPE)seconds;
     tv_usec = (TV_USEC_TYPE)(1.0e6 * (seconds - (double)tv_sec));
     normalize();
+}
+
+TimeVal::TimeVal(timeval value)
+{
+    tv_sec = value.tv_sec;
+    tv_usec = value.tv_usec;
 }
 
 void TimeVal::normalize()
