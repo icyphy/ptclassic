@@ -20,6 +20,10 @@ $Id$
 #include "Output.h"
 #include "Star.h"
 
+// The following is defined in DEScheduler.cc -- this forces that module
+// to be included if any DE stars are linked in.
+extern const char DEdomainName[];
+
 class PriorityQueue;
 
 	////////////////////////////////////
@@ -30,7 +34,7 @@ class DEStar : public Star {
 
 public:
 	// my domain
-	const char* domain() { return "DE";}
+	const char* domain() { return DEdomainName;}
 
 	// Redefine method setting internal data in the Block
 	// so that various DE-specific initilizations can be performed.
