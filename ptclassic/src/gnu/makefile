@@ -151,7 +151,7 @@ install: install_make install_egcs install_gcc_links
 
 ####################
 # FSF gcc-2.8.0 - Ptolemy 0.7.1 does not use this
-allfsf: fsfconfigure bin_fsf install_fsf
+all_fsf: fsfconfigure bin_fsf install_fsf
 
 # gcc-2.x
 fsfconfigure: $(FSF_OBJ) configure_make
@@ -220,7 +220,8 @@ install_fsf: $(BINDIR)
 # GNU assembler so the the -g flag will work.
 # Also, we need to install gcc before trying to build libg++
 
-hp_all: hp_configure hp_pregcc_install hp_bin hp_postgcc_install install hp_post_install
+hp_all: hp_configure hp_pregcc_install hp_bin install \
+		hp_bin_flex hp_postgcc_install hp_post_install
 
 hp_configure: $(GNU_OBJ)
 	@echo "Configure binutils, as we need gas for debugging"
@@ -257,7 +258,7 @@ hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
-hp_bin: bin_make hp_bin_binutils hp_install_gas bin_egcs hp_bin_flex
+hp_bin: bin_make hp_bin_binutils hp_install_gas bin_egcs
 
 hp_bin_bison:
 	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make)
@@ -272,8 +273,8 @@ hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
 	-mkdir $(GNU_OBJ)/flex
 	(cd $(GNU_OBJ)/flex; \
-	CC=$(BINDIR)/gcc; \
-	$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
+		CC=$(BINDIR)/gcc; \
+		$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
