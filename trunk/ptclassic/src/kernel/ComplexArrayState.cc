@@ -4,10 +4,9 @@ static const char file_id[] = "ComplexArrayState.cc";
 #endif
 
 #include <std.h>
-#include "ComplexState.h"
 #include "ComplexArrayState.h"
-#include "FloatState.h"
 #include "Tokenizer.h"
+#include "KnownState.h"
 
 const int MAXLEN = 2000;
 

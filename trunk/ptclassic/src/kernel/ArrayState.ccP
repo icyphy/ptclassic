@@ -5,9 +5,9 @@ static const char file_id[] = "<T>ArrayState.cc";
 #endif
 
 #include <std.h>
-#include "<T>State.h"
 #include "<T>ArrayState.h"
 #include "Tokenizer.h"
+#include "KnownState.h"
 
 #define MAXLEN 20000
 

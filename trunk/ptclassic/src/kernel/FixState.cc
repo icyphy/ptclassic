@@ -20,6 +20,7 @@ $Id$
 #endif
 
 #include "FixState.h"
+#include "KnownState.h"
 
 void FixState :: initialize() {
 	FloatState :: initialize();

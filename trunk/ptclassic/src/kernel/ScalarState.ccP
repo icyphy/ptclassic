@@ -8,6 +8,7 @@ static const char file_id[] = "<T>State.cc";
 #include "<T>State.h"
 #include "Tokenizer.h"
 #include "miscFuncs.h"
+#include "KnownState.h"
 
 /**************************************************************************
 Version identification:
