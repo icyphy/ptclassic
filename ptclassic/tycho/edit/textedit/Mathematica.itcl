@@ -1,10 +1,10 @@
 # Definition of a Mathematica window that executes Mathematica commands.
 #
-# Authors: Joel R. King, Edward A. Lee
+# @Authors: Joel R. King and Edward A. Lee
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
