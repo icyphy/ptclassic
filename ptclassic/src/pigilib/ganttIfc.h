@@ -30,6 +30,7 @@ $Id$
 */
 
 #ifdef __cplusplus
+#include "rpc.h"
 extern int CreateFrames();
 extern int Frame(char *stars[]);
 extern int ClearFrames();
