@@ -33,13 +33,32 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel thread ptlang islang domains utils ptcl pigilib libgantt ptklib tycho pigiRpc pxgraph filters
+# root of source tree
+ROOT =		..
+# Path (absolute or relative) to the object directory root
+OBJDIR =	..
+# VPATH points to the "real" source directory
+VPATH  = 	$(ROOT)/src
+
+# Get configuration info
+# Need $(INCLUDE_IPUS_DOMAIN) below
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# Don't include IPUS if your are running a non GNU c++
+ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
+ISLANG =	islang
+else
+ISLANG =
+endif
+
+DIRS = kernel thread ptlang $(ISLANG) domains utils ptcl pigilib libgantt ptklib tycho pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib
 
 # "leaf" directories with no make.template
-LDIRS = ptlang islang pigiRpc filters utils
+LDIRS = ptlang $(ISLANG) pigiRpc filters utils
 
 # directories with subtrees
 SDIRS = thread domains
