@@ -466,6 +466,8 @@ _xpAxisConfigGeom( Tcl_Interp *ip, XPAxisWdg *pAxis) {
     return TCL_OK;
 }
 
+static Tk_GeomMgr _xpAxisScrollbarGM;
+
 /**
     This is the geometry manager callback for the scollbar window.
 **/
@@ -788,7 +790,11 @@ _xpAxisConfig( Tcl_Interp *ip, XPAxisWdg *pAxis) {
     }
     if ( pAxis->scrollWdg ) {
 	if ( pAxis->scrollB ) {
-	    Tk_ManageGeometry(pAxis->scrollWdg, _xpAxisScrollbarGeomCB, 
+	    /* For tk4.0.  Will this work? */
+	    _xpAxisScrollbarGM.requestProc = _xpAxisScrollbarGeomCB;
+	    _xpAxisScrollbarGM.lostSlaveProc = NULL;
+
+	    Tk_ManageGeometry(pAxis->scrollWdg, &_xpAxisScrollbarGM, 
 	      (ClientData) pAxis);
 	    /* map occurs in ConfigGeom() above */
 	} else {
