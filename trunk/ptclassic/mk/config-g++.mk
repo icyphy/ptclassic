@@ -60,8 +60,14 @@ GNULIB=$(PTOLEMY)/gnu/$(PTARCH)/lib
 LINKER=g++
 # startup module
 CRT0=
+
+# system libraries for linking .o files from C files only
+CSYSLIBS=-lm 
+
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lm
+SYSLIBS=-lg++ $(CSYSLIBS)
+
+
 # link flags (tell linker to strip out debug symbols)
 # -static prevents use of shared libraries when building ptolemy
 # shared libraries interfere with incremental linking of stars.

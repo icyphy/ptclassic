@@ -65,8 +65,11 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 #
 # Variables for the linker
 #
-# system libraries (libraries from the environment)
+# system libraries (libraries from the environment) for c++ files
 SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lg++ $(SHARED_SYSLIBS) -lm
+
+# system libraries for linking .o files from C files only
+CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lm
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
 # -s conflicts with purelink, so if you are using purelink comment this out.

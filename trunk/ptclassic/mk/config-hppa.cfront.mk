@@ -81,6 +81,9 @@ CRT0 =
 # /usr/lib/end.o is necessary for debugging with xdb
 SYSLIBS =	-lm /usr/lib/end.o
 
+# system libraries for linking .o files from C files only
+CSYSLIBS = $(SYSLIBS)
+
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
 #      +A   Cause the linker ld(1) to use only archive libraries for all

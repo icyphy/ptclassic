@@ -65,7 +65,12 @@ CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #
 # Variables for the linker
 #
-SYSLIBS =	-lg++ -lm -lmld
+
+
+# system libraries for linking .o files from C files only
+CSYSLIBS = 	-lm -lmld
+# system libraries (libraries from the environment) for c++ files
+SYSLIBS =	-lg++ $(CSYSLIBS)
 
 # -s strips out debugging information, otherwise we get a 30Mb pigiRpc
 # -x is also useful, it removed local symbols, see the ld man page

@@ -139,6 +139,8 @@ SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 else
 SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 endif
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lsocket -lnsl -ldl -lm
 
 PTLANGLIB= -L/tools/gccs/lib -liberty
 

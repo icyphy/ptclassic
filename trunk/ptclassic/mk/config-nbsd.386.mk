@@ -76,7 +76,11 @@ GNULIB =	/usr/lib
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
-SYSLIBS=-lg++ -lm
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lm
+
+# system libraries (libraries from the environment)
+SYSLIBS=	-lg++ $(CSYSLIBS)
 
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static

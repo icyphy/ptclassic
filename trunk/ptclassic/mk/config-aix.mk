@@ -102,6 +102,9 @@ MATLABEXT_LIB = -Xlinker \
 # fix sent by Alexander Kurpiers (a.kurpiers@uet.th-darmstadt.de)
 SYSLIBS= -lm -lbsd
 
+# system libraries for linking .o files from C files only
+CSYSLIBS = $(SYSLIBS)
+
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -lbsd
 
