@@ -132,7 +132,9 @@ $(VEMOBJECTS):
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
 	)
 
-VEMLIBS = rpc/librpcserver.$(LIBSUFFIX) dialogs/libdialogs.$(LIBSUFFIX) \
+#rpc/librpcserver.$(LIBSUFFIX) dialogs/libdialogs.$(LIBSUFFIX) \
+
+VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
