@@ -30,15 +30,41 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 		default {0}
 		desc { Where to put the input in the output block. }
 	}
+	state {
+		name {fill}
+		type {float}
+		default {0.0}
+		desc { Value to fill the output block. }
+	}
+	state {
+		name {ix}
+		type {int}
+		default {0}
+		attributes { A_NONSETTABLE }
+	}
 	start {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
-	codeblock (sendsample) {
-	$ref2(output,phase) = $ref(input);
+	constructor {
+		noInternalState();
+	}
+	codeblock (sendOne) {
+	$ref2(output,ix) = $ref(input);
+	}
+	codeblock (sendAll) {
+	int i;
+	for (int i = 0; i < $val(factor); i++) {
+		$ref2(output,i) = $val(fill);
+	}
+	$ref2(output,ix) = $ref(input);
 	}
 	go {
-		gencode(sendsample);
+		ix = int(factor) - int(phase) - 1;
+		if (output.staticBuf() && output.linearBuf())
+			gencode(sendOne);
+		else
+			gencode(sendAll);
 	}
 }

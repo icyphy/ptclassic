@@ -18,6 +18,9 @@ are laid out; no code is required.
 		name {output}
 		type {=input}
 	}
+	constructor {
+		noInternalState();
+	}
 	start {
 		forkInit(input,output);
 	}
