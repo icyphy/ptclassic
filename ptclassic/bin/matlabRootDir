@@ -1,0 +1,102 @@
+#!/bin/csh
+#
+# Script to find the root (installation) Matlab directory.  Used by
+# makefiles to determine the location of the external interface library.
+# It returns either the path name of the root Matlab directory or an
+# empty string.
+#
+# Author:  Brian L. Evans
+# Version: $Id$
+#
+# Copyright (c) 1990-1994 The Regents of the University of California.
+# All rights reserved.
+# See the file $PTOLEMY/copyright for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+#
+# This script takes no arguments.  It first searches for the script
+# "matlab" on the path and if it is not found there, it searches on
+# an alternative path of bin sub-directories in /usr.  If it finds
+# the matlab script, then it follows symbolic links to the actual
+# location of matlab script in the Matlab installation.  From that
+# path name, the script at the sub-directories of the directories
+# along the path name that contains the sub-directories extern/lib
+# and extern/include.
+#
+#
+#  Look for the matlab startup script
+#
+set searchfile = "matlab"
+#
+#  Search the path
+#
+foreach i ( $path )
+  if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
+    set matpath = $i/$searchfile
+    break
+  endif
+end
+#
+#  Search an alternate path:  all bin sub-directories of /usr
+#
+if ( ! $?matpath ) then
+  if ( -x /usr/bin && -r /usr/bin && -d /usr/bin ) then
+    set altpath = /usr/{bin,*/bin}
+    foreach i ( $altpath )
+      if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
+        set matpath = $i/$searchfile
+        break
+      endif
+    end
+  endif
+endif
+#
+#  If the Matlab script is found, then
+#  1. the first while statement will determine the full path name of the
+#     matlab script by following a finite number of symbolic links.
+#  2. the second while statement will back up one directory at a time
+#     along the full matlab script path name to find the Matlab root
+#     directory which contains the external interface sub-directories
+#     extern/include and extern/lib
+#
+if ( ! $?matpath ) then
+  echo ""
+else
+  set numlinks = 1
+  set maxsymlinks = 8
+  set oldpath = ""
+  set newpath = $matpath
+  while ( $oldpath != $newpath && $numlinks < $maxsymlinks )
+    set lsinfo = `ls -l $newpath`
+    if ( "$lsinfo[1]" != "lrwxrwxrwx" ) then
+      break
+    endif
+    set oldpath = $newpath
+    set newpath = ""
+    foreach lsword ( $lsinfo )
+      if ( $?getlsrest ) then
+        set newpath = "$newpath $lsword"
+      endif
+      if ( "$lsword" == "->" ) then
+        set getlsrest = ""
+      endif
+    end
+    @ numlinks ++
+  end
+  set oldpath = $newpath
+  set newpath = $oldpath:h
+  while ( $oldpath != $newpath )
+    set matextern = $newpath/extern
+    if ( -x $matextern && -r $matextern && -d $matextern ) then
+      set matexterninc = $matextern/include
+      if ( -x $matexterninc && -r $matexterninc && -d $matexterninc ) then
+        set matexternlib = $matextern/lib
+        if ( -x $matexternlib && -r $matexternlib && -d $matexternlib ) then
+          break
+        endif
+      endif
+    endif
+    set oldpath = $newpath
+    set newpath = $oldpath:h
+  end
+  echo $newpath
+endif
