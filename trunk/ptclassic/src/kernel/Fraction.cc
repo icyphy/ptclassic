@@ -59,7 +59,7 @@ int operator == (const Fraction& i, const Fraction& j)
     return ((i.numerator == j.numerator) && (i.denominator == j.denominator));
 }
 
-Fraction :: operator char* () const
+Fraction :: operator StringList () const
 {
 	StringList out;
 	out = numerator;
