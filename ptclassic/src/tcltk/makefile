@@ -314,6 +314,36 @@ $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 ######################################################
+# Jacl
+
+JACL_MAJOR_VERSION = 1.0
+JACL_MINOR_VERSION = a1up1
+JACL_VERSION = $(JACL_MAJOR_VERSION)$(JACL_MINOR_VERSION)
+
+JACL_SRC =	$(TCLTK_SRC)/jacl$(JACL_VERSION)/unix
+JACL_OBJ =	$(TCLTK_OBJ)/jacl$(JACL_VERSION)
+JACL_DEST =	$(TCL8_DEST)
+JACL_INDEPENDENT_DEST =	$(TCL8_INDEPENDENT_DEST)
+
+all_jacl: config_jacl jacl install_jacl
+config_jacl: $(JACL_OBJ)
+	@echo "Configuring jacl"
+	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; \
+	$(JACL_SRC)/configure \
+		--srcdir=$(JACL_SRC) \
+		--prefix=$(JACL_INDEPENDENT_DEST))
+
+
+jacl:
+	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE))
+
+install_jacl:
+	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE) install)
+
+$(JACL_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+######################################################
 # TclX rules
 # we use TclX for the profile command
 all_tclx: all config_tclx tclx
