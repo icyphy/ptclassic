@@ -145,6 +145,7 @@ proc test {test_name test_description contents_of_test passing_results} {
         puts "---- $test_name FAILED" 
 	incr FAILED
     }
+    update
 
     # Now we're done, reset the variable
     # We place a catch around this in case we have recursive tests
