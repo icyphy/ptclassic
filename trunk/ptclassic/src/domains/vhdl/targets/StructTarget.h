@@ -96,11 +96,13 @@ public:
 	/*virtual*/ const char* stateAssign();
 	/*virtual*/ const char* portAssign();
 
-  	// The only reason for redefining this from HLLTarget
- 	// is to change the separator from "." to "_".
- 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+//  	// The only reason for redefining this from HLLTarget
+// 	// is to change the separator from "." to "_".
+// 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
 
 protected:
+	/*virtual*/ void begin();
+
 	/*virtual*/ void setup();
 
 	// code generation init routine; compute offsets, generate initCode
@@ -137,7 +139,9 @@ private:
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
 	CodeStream configuration_declaration;
+	CodeStream preSynch;
 	CodeStream firingAction;
+	CodeStream postSynch;
 	CodeStream ctlerAction;
 
 	// General VHDLObjLists.
@@ -170,8 +174,14 @@ private:
 	VHDLPortVarList ctlerPortVarList;
 	VHDLPortVarList ctlerVarPortList;
 
-	// Assign names for each geodesic according to port connections.
-	void setGeoNames(Galaxy&);
+	// Method called by C2V star to place important code into structure.
+        /*virtual*/ void registerC2V(int pairid, int numxfer, const char* dtype);
+
+	// Method called by V2C star to place important code into structure.
+	/*virtual*/ void registerV2C(int pairid, int numxfer, const char* dtype);
+
+//	// Assign names for each geodesic according to port connections.
+//	void setGeoNames(Galaxy&);
 
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
