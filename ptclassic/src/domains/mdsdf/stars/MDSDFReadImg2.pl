@@ -93,22 +93,22 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     } // end genFileName()
   }
 
-////// Read data into an GrayImage object...
   go {
-// Open file containing the image.
+    // Open file containing the image.
     char fullName[512];
     genFileName(fullName, fileName, int(frameId));
     FILE* fp = fopen(fullName, "r");
-    if (fp == (FILE*) NULL) {
-      Error::abortRun(*this, "File not opened: ", fullName);
+    if (fp == 0) {
+      Error::abortRun(*this, "cannot open '", fullName, "' for reading.");
       return;
     }
 
-// Read header, skipping 1 whitespace character at end.
+    // Read header, skipping 1 whitespace character at end.
     char word[80];
     int fileImageWidth, fileImageHeight, maxval;
     fscanf(fp, "%s", word);
     if (strcmp(word, "P5")) { // "P5" is PGM magic number.
+      fclose(fp);
       Error::abortRun(*this, fullName, ": not in PGM format");
       return;
     }
@@ -128,32 +128,42 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     }
     sscanf(word, "%d", &maxval);
     if (maxval > 255) {
-      Error::abortRun(*this, fullName,": not in 8-bit format.");
+      fclose(fp);
+      Error::abortRun(*this, fullName, ": not in 8-bit format.");
       return;
     }
     fscanf(fp, "%*c"); // skip one whitespace char.
 
-// Create a FloatMatrix object and fill it with data.
-// We use a hack for faster file reading: create a buffer to read in
-// the data as unsigned char's and then convert that in memory.
-    if(fileImageWidth != int(width) ||
-       fileImageHeight != int(height)) {
-      Error::abortRun("the width and height states of the star do not match those of the file image");
+    // Create a FloatMatrix object and fill it with data.
+    // We use a hack for faster file reading: create a buffer to read in
+    // the data as unsigned char's and then convert that in memory.
+    if (fileImageWidth != int(width) ||
+        fileImageHeight != int(height)) {
+      fclose(fp);
+      Error::abortRun(*this,
+		      "the width and height states of the star do ",
+		      "not match those of the image file ",
+		      fullName);
       return;
     }
     unsigned int size = fileImageWidth * fileImageHeight;
     unsigned char *buffer = new unsigned char[size];
     unsigned char *p = buffer;
-    fread((char*)buffer, sizeof(unsigned char), size, fp);
+    fread( (char*)buffer,
+    	   fileImageWidth * sizeof(unsigned char),
+	   fileImageHeight,
+	   fp );
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
-    for(unsigned int i = 0; i < size; i++)
+    for (unsigned int i = 0; i < size; i++) {
       imgData->entry(i) = double(*p++);
+    }
     delete[] buffer;
     delete imgData;
     fclose(fp);
+
     IntSubMatrix* floatIdOut = (IntSubMatrix*)frameIdOutput.getOutput();
     floatIdOut->entry(0) = frameId;
-    frameId = int(frameId) + 1; // increment frame id
+    frameId = int(frameId) + 1;			// increment frame id
     delete floatIdOut;
   } // end go{}
 } // end defstar{ ReadImg2 }

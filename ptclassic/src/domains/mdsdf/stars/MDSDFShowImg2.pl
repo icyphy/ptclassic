@@ -94,28 +94,28 @@ complete filename of the displayed image.
     const char* saveMe = saveImage;
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-    StringList fileName;
     const char* iname = imageName;
-    if (iname && iname[0]) {
-      fileName = iname;
+    const char* nm = 0;
+    if (iname && *iname) {
+      nm = expandPathName(iname);
     }
     else {
-      char* nm = tempFileName();
-      fileName = nm;
-      delete [] nm;
+      nm = tempFileName();
     }
+    StringList fileName = nm;
     fileName << "." << frame;
+    delete [] nm;
 
-    FILE* fptr = fopen(fileName, "w");
-    if (fptr == (FILE*) NULL) {
-      Error::abortRun(*this, "can not create: ", fileName);
+    FILE* fp = fopen(fileName, "w");
+    if (fp == 0) {
+      Error::abortRun(*this, "cannot open '", fileName, "' for writing.");
       delete image;
       delete frameId;
       return;
     }
 
     // Write the PGM header and the data, and then run.
-    fprintf (fptr, "P5\n %d %d 255\n", int(width), int(height));
+    fprintf(fp, "P5\n %d %d 255\n", int(width), int(height));
 
     // Reverse of the hack used in ReadImage, first copy the data to
     // a buffer of the unsigned char's, then do a block fwrite
@@ -132,9 +132,11 @@ complete filename of the displayed image.
       else
         *p++ = (unsigned char)tmp;
     }
-
-    fwrite((const char*)buffer, sizeof(unsigned char), size, fptr);
-    fclose(fptr);
+    fwrite( (const char*) buffer,
+    	    sizeof(unsigned char) * int(width),
+	    int(height),
+	    fp );
+    fclose(fp);
     delete [] buffer;
 
     StringList cmdbuf = "(";
