@@ -183,7 +183,7 @@ void CreateSDFStar::frameCode() {
 	 << "}\n" << globalDecls << procedures << "\t}\nprivate{\n"
 	 << mainDecls << "\t}\n\tbegin{\n" << commInit << mainInit 
 	 << "\t}\n\tsetup{\n" << starSetup
-	 << "\t}\n\tgo{\n" << myCode
+	 << "\t}\n\tgo{\n" << mainLoop
 	 << "\t}\n\twrapup{\n" << mainClose << "\t}\n}";
     myCode.initialize();
     myCode << code;
