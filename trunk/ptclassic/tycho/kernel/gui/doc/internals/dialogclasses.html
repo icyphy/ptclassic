@@ -103,19 +103,50 @@ By default, the cancel button returns -1.
 <h2>EntryQuery Class</h2>
 </a>
 <p>
-The EntryQuery class opens a dialog box with one or more text entry widgets.
+The EntryQuery class opens a dialog box with one or more
+<a name="text entry">text entry widgets widgets</a>
+and/or <a name="radio button widgets">radio button widgets.</a>
 It is used by the "<a href="dialogs.html#queryinfo procedure">queryinfo</a>"
-procedure described above.
+procedure,
+which provides a simplified procedural interface.
 You can also create instances of it directly.
-It creates a dialog box with one or more entry widgets, an OK button,
-and a Cancel button.  The actions taken in response to these buttons
+It creates a dialog box that includes OK
+and Cancel buttons.  The actions taken in response to these buttons
 are given by the <a name="okcommand option">-okcommand</a> and
 <a name="cancelcommand option">-cancelcommand</a> options.
-By default, the -okcommand just returns the value entered by the user.
+By default, the -okcommand just returns the value(s) entered by the user
+or selected in the radio buttons (you will only see this returned
+value if you create a modal version of the dialog, using newModal,
+for example, as explained below).
 The -cancelcommand does nothing.  After either command is executed,
-the widget is destroyed.  The
-<a name="queries option">-queries option</a> specifies the initial
-list of entry boxes that will appear in the window.
+the widget is destroyed.
+<p>
+Entry boxes can be created using the
+<a name="addQuery method">addQuery method</a>, as shown here:
+<tcl><pre>
+::tycho::EntryQuery .bb -okcommand {inform [.bb get]}
+.bb addQuery month {Enter Month} Jan
+.bb addQuery day {Enter Day} Mon
+.bb centerOnScreen
+</tcl></pre>
+This method takes three arguments,
+a tag, a label, and a default string.
+The get method, invoked on clicking the OK button, returns
+an indexed list of entries.
+<p>
+The <a name="addRadioQuery method">addRadioQuery method</a>
+puts radio buttons into the dialog.  For example, assuming you
+have not dismissed the EntryQuery that you created above,
+<tcl><pre>
+.bb addRadioQuery selmonth {Select Month} {Jan Feb March} Jan
+.bb addRadioQuery selday {Select Day} {Mon Tue Wed Thu Fri} Mon
+</tcl></pre>
+The arguments are a name for the bank of buttons, a label,
+the list of possible values, and the default selection.
+<p>
+The <a name="queries option">-queries option</a> specifies the initial
+list of entry boxes that will appear in the window (there is not currently
+a comparable option for radio buttons).
 The value of this option should be a list of three or four-element lists.
 The first element of each list is an arbitrary tag used to identify
 the entry box.  The second element is the label to put next to the
@@ -142,10 +173,8 @@ are returned is arbitrary.
 <p>
 Alternatively, entry boxes can be added after the EntryQuery object
 is created using the
-<a name="addQuery method">addQuery method</a>.
-This method takes three arguments,
-a tag, a label, and a default string.  These serve the same function
-as the elements passed in a -queries option.  The removeQuery method
+<a name="addQuery method">addQuery method</a>, as detailed above.
+The removeQuery method
 takes a tag as an argument and simply removes the corresponding query.
 Click again on the above example to create the EntryQuery, if you dismissed
 it.  Then try this example:
@@ -202,10 +231,9 @@ option is important.  In most circumstances, you will want them first.
 You also have access to the "new" and "newModal" methods of the base class.
 For example,
 <tcl><pre>
-::tycho::inform [::tycho::DialogWindow::newModal EntryQuery .z &#92
-    -queries {{onlytag {Enter a value} {default value}}}]
+::tycho::inform [::tycho::DialogWindow::newModal &#92
+    EntryQuery .z -queries {{n {Enter value} {default}}}]
 </pre></tcl>
-
 <p>
 <a name="FileBrowser class">
 <h2>FileBrowser Class</h2>
