@@ -501,18 +501,46 @@ The JavaScope database must be flushed by hand at the end of a run, or the
 code coverage data of the run will not be dumped out to disk.
  <P>There are two ways to do this.
 <OL>
-<LI> Use the <CODE>-IFLUSHCLASS=true</CODE> option with
-<CODE>jsintr</CODE>.
 
-<LI> Create a dummy Java method that flushes the database, and call
-that method before exiting. 
+<LI> The <CODE>IFLUSHCLASS</CODE> option will flush out the coverage
+information for the current class at the end of each method.
+
+<LI> The <CODE>IFLUSH</CODE> option will flush out all the coverage
+information at the end of each method.
+
 </OL>
-The former method has a high performance hit, the latter method is faster
-faster.  However, with <CODE>TclBlend</CODE>, we were only able to
-use the <CODE>-IFLUSHCLASS=true</CODE> option.  
+Obviously, using <CODE>IFLUSH</CODE> will take more time than using 
+<CODE>IFLUSHCLASS</CODE>.
 
- <P>Here's how we attempted to flush the database using a dummy Java method.
- <P>We created <CODE>JavaScopeFlush</CODE> class:
+ <P>The <CODE>jsintr</CODE> options are set by consulting the following
+resources in order.
+<OL>
+<LI> system properties - environment variables 
+
+<LI> $(HOME)/<CODE>javascope.properties</CODE>
+
+<LI> ./<CODE>javascope.properties</CODE> in the current directory.
+
+<LI> Options can be embedded in files as comments:
+<PRE>
+/*jsoptions: ...*/
+</PRE>
+Embedded comment options can be set more than once in a file.  Embedded
+comment options are in effect until is the option is changed by another
+Embedded comment option.
+
+<LI>  Command line arguments to <CODE>jsinstr</CODE>.
+
+</OL>
+
+See the <A HREF="http://www.suntest.com/JavaScope/jsinstr.html"><CODE>jsinstr</CODE></A> documentation for details.
+
+I tried to use TclBlend to call a dummy Java method that flushes the
+database using an embedded comment, and then call that method before
+exiting.
+
+ <P>Here's how I attempted to flush the database using a dummy Java method.
+ <P>I created the <CODE>JavaScopeFlush</CODE> class:
 <PRE>
 public class JavaScopeFlush {
     /*jsoptions:IFLUSH=true*/
@@ -523,11 +551,11 @@ public class JavaScopeFlush {
 </PRE>
  <P>Ran <CODE>jsinstr</CODE> on <CODE>JavaScopeFlush.java</CODE>
 
- <P>We then tried to call this method with:
+ <P>I then tried to call this method with:
 <PRE>
 java::call JavaScopeFlush flush
 </PRE>
-
+Unfortunately, it looks like embedded comments are broken.
  <P>For more information, see the 
 <A HREF="http://www.suntest.com/NewJavaScope/faq.html#Q5">JavaScope FAQ</A>.
 
