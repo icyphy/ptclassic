@@ -38,12 +38,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Allocate an empty set of the given size with given initial value
 //
 // @Description If this is a Set(i), then the indices of its contents
-// are 0,1,...,i-1.
+// are 0,1,...,i-1.  The size must be equal to or greater than one.
 
 Set::Set(int s /* number of elements in the set */,
 	 int f = 0 /* zero = empty set, non-zero = full set */ )
 {
   mysize = s;
+
   words = new int[numwords()];
   for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] = f ? ~0 : 0;
@@ -59,7 +60,7 @@ void Set::setequal(Set & s) {
   words = new int[numwords()];
   for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] = s.words[i];
-  }  
+  }
 }
 
 // Destroy the set
