@@ -18,7 +18,13 @@ This two-pole, two-zero IIR filter has a transfer function of
 {n sub 0 ~+~ n sub 1 z sup -1 ~+~ n sub 2 z sup -2} over
 {1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2} ~.
 .EN
+.Id "filter, biquad"
+.Id "biquad filter"
+.Id "filter, IIR"
+.Id "IIR filter"
 The default is a Butterworth filter with a cutoff 0.1 times sample freq.
+.Ir "filter, Butterworth"
+.Ir "Butterworth filter"
 .lp
 \fBThis star will eventually be replaced by a general IIR star.\fR
 	}
