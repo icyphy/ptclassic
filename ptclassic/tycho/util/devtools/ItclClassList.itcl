@@ -263,9 +263,6 @@ body ::tycho::ItclClassList::initialize \
                 -description {Generate a class diagram from the files \
                 listed in the current file.}
     }
-
-    # Add myself to the list of open files. 
-    windowMenuAddAll [filename]
 }
     ###################################################################
     ###################################################################
