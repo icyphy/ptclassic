@@ -6,6 +6,7 @@
 #include "Output.h"
 #include "type.h"
 #include "NamedObj.h"
+#include "ComplexSubset.h"
 
 /**************************************************************************
 Version identification:
@@ -34,8 +35,9 @@ public:
 	union {
 		char cval;
 		const char *sval;
-		int ival;
-		double  dval;
+		int intval;
+		double  doubleval;
+		Complex* Complexval;
 		State*  s;
 	}; 
 };
