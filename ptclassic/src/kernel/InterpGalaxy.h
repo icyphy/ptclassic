@@ -42,7 +42,7 @@ public:
 
 class NodeListIter : private ListIter {
 public:
-	NodeListIter(const NodeList& n) : ListIter(n) {}
+	NodeListIter(NodeList& n) : ListIter(n) {}
 	Geodesic* next() { return (Geodesic*) ListIter::next();}
 	Geodesic* operator++() { return next();}
 	ListIter::reset;
