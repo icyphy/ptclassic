@@ -43,7 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 #include "Error.h"
 
-#define SMALL_STRING 32
+// Must be greater than the maximum number of characters in the %22.15g format
+#define SMALL_STRING_SIZE 32
 
 /**************************************************************************
  Global operators, not members of the various Matrix classes.
@@ -581,7 +582,7 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
 
 // Prints matrices in standard row column form.
 StringList ComplexMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "ComplexMatrix: (";
   strm << nRows;
@@ -1052,7 +1053,7 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matrices in standard row column form.
 StringList FixMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "FixMatrix: (";
   strm << nRows;
@@ -1408,7 +1409,7 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
 
 // Prints matrices in standard row column form.
 StringList FloatMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "FloatMatrix: (";
   strm << nRows;
@@ -1765,7 +1766,7 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matrices in standard row column form.
 StringList IntMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "IntMatrix: (";
   strm << nRows;
