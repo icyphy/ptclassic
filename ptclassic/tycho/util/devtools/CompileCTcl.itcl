@@ -1,0 +1,212 @@
+# Compile a C file and load it into Tcl
+#
+# @Author: Christopher Hylands
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### CompileCTcl
+# Description of class.
+#
+# <p>
+# Here is an example of how to use the Compile:
+# <tcl><pre>
+#     ::tycho::CompileCTcl .x ...
+# </pre></tcl>
+#
+class ::tycho::CompileCTcl {
+    inherit ::tycho::Compile
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Check the source files for necessary features.
+    protected method checkSourceFiles {}
+
+    # Create a makefile.   Usually subclasses modify this method.
+    protected method createMakefile {}
+
+    # Run make and then load the result back into Tycho.
+    protected method loadFiles {}
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::CompileCTcl::constructor {args} {
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::CompileCTcl::destructor {} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### checkSourceFiles
+# Check the source files for necessary features. 
+# When a C file is loaded into Tcl, an initialization procedure with
+# a specific name is called.  See the Tcl load command for naming details.
+# 
+# We search the first filename in the list for an apropriately named
+# initialization function.  This might be a mistake, the fix would
+# be to make this code package aware so that it could use the package
+# name.
+#
+body ::tycho::CompileCTcl::checkSourceFiles {} {
+    set initProcName "[string toupper\
+            [string range $basename 0 0]][string tolower\
+            [string range $basename 1 end]]_Init"
+
+    # Search for tcl.h and initProcName
+    set sawInclude 0
+    set sawInitProcName 0
+    # catch all of this incase the file does not yet exist
+    if ![catch {set fd [open $firstFile r]}] {
+        while {[gets $fd linein] >= 0} {
+            if [regexp {#include [<"](tcl|tk|itcl).h[">]} $linein] {
+                set sawInclude 1 
+            }
+            if [regexp $initProcName $linein] {
+                set sawInitProcName 1
+                break
+            } 
+        }
+        close $fd
+    }
+
+    if {$sawInitProcName == 0} {
+	# The initialization procedure was not found.
+	# Ask the user if they want to append one, if they do, append it
+	# and don't load, so the user can stick in the body and re-evaluate.
+	set nm [::tycho::autoName .editCYNC]
+	::tycho::YesNoCancel $nm \
+		-text "The file $firstFile does not have a Tcl initialization \
+		procedure named \"$initProcName\".\nIf you choose to add\
+		the initialization procedure, then be sure to reedit\
+		the file and insert calls to register your commands and\
+		reevaluate the file.\nAdd\
+		the initialization procedure now?"
+	
+	set response [::tycho::Dialog::wait $nm]
+    	switch $response {
+	    -1 {return}
+	    0 {}
+	    1 {
+		# Add a initialization procedure to the end of the file
+		set fd [open $firstFile a]
+                # Check to see if we need to add #include <tcl.h>
+                if {$sawInclude == 0 } { 
+                    puts $fd "#ifndef _TCL\n#include <tcl.h>"
+                    puts $fd "#endif"
+                }
+
+		puts $fd "/* Tcl initialization procedure added for\
+			the Tcl load command\n */"
+		puts $fd "int ${initProcName}\(Tcl_Interp *interp)\n\{"
+		puts $fd "    /* A sample Tcl command registration. */"
+		puts $fd "    /* Tcl_CreateCommand(interp, \"$basename\",\
+			Tcl_${basename}Cmd,"
+		puts $fd "                         (ClientData) NULL,\
+			(Tcl_CmdDeleteProc*) NULL);"
+                puts $fd "     */"
+                puts $fd "    return TCL_OK;\n\}"
+		close $fd
+                if {$view != {} } {
+                    $view reload
+                }
+                putStatus "Successfully added initialization procedure"
+		return
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### createMakefile
+# Create a makefile.   Usually subclasses modify this method.
+# The makefile that is created is named by the *makefile* protected variable.
+#
+body ::tycho::CompileCTcl::createMakefile {} {
+    global tycho env
+    if ![file exists [file join $dirname $makefile]] {
+	# Create a makefile by reading in from the template and 
+	# substituting %basename% for the value of $basename
+	# FIXME: templateMakefile should probably be a preference.
+	set templateMakefile \
+		[file join $tycho editors textedit templates Cmakefile.mk]
+	set fdin [open $templateMakefile r]
+	set fdout [open [file join $dirname $makefile] w]
+	while {[gets $fdin linein] >= 0} {
+	    regsub -all {%basename%} $linein $basename lineout
+	    puts $fdout $lineout
+	}
+	close $fdout
+	close $fdin
+    }
+    if [info exists env(PTARCH)] {
+	set PTARCH $env(PTARCH)
+    } else {
+	error "Sorry, the PTARCH environment variable is not set.\nIn csh,\
+		you can exit Tycho, and run\nsetenv PTARCH `$TYCHO/bin/ptarch`"
+    }
+    if {![file exists [file join $tycho obj.$PTARCH tcl.mk]] || \
+	    ![file exists [file join $tycho obj.$PTARCH java.mk]]} {
+	putStatus "About to make tcl.mk and java.mk, when complete, be\
+		sure to close the Exec window to continue."
+	::tycho::execModal "make config_tclexts" $tycho
+	putStatus ""
+    }
+}
+
+#######################################################################
+#### loadFiles
+# Run load the shared objects back into Tycho.
+#
+body ::tycho::CompileCTcl::loadFiles {} {
+    foreach file $filenameList {
+	set filebase [file rootname [file tail $firstFile]]
+	if [catch {uplevel #0 \
+		load [file join $dirname $filebase[info sharedlibextension]]} \
+		errMsg] {
+	    error "Failed to load\
+		    [file join $dirname $filebase[info sharedlibextension]]:\n\
+		    $errMsg"
+	}
+    }
+}
