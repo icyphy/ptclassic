@@ -40,7 +40,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/ddf/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # SDF support directory

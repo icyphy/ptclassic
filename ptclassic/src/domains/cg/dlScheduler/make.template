@@ -32,7 +32,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cg/dlScheduler
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel

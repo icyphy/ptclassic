@@ -49,7 +49,7 @@ DEPEND= $(CPLUSPLUS) -MM
 SHARED_LIBRARY_COMMAND =	g++ -shared -o
 
 # where the Gnu library is
-GNULIB=$(PTOLEMY)/gnu/$(ARCH)/lib
+GNULIB=$(PTOLEMY)/gnu/$(PTARCH)/lib
 
 # linker to use for pigi and interpreter.
 LINKER=g++

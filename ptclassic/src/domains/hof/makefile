@@ -28,7 +28,7 @@
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/hof.
-# Instead run in from ~ptolemy/obj.$ARCH/domains/hof (through the symbolic
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/hof (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 

@@ -29,24 +29,24 @@
 #	Programmers: Dan Ellis (MIT Media Lab), Christopher Hylands
 #
 # NOTES on installing Ptolemy 0.5.2 beta under SGI IRIX 5.3 using the 
-# vendor's compilers ($ARCH=irix5.cfront)
+# vendor's compilers ($PTARCH=irix5.cfront)
 # 
 # I believe this is working well.  To install, you need only grab the
 # archives pt-0.5.2beta.src.tar.gz and pt-0.5.2beta.other.src.tar.gz .
 # Then proceed as ususal
 # 
-# (a) You have to make sure that the default $ARCH is irix5.cfront 
+# (a) You have to make sure that the default $PTARCH is irix5.cfront 
 #     rather than the plain irix5.  I did this by putting a patch 
-#     into ~/.cshrc, which is where ARCH is set from ~ptolemy/bin/ptarch. 
+#     into ~/.cshrc, which is where PTARCH is set from ~ptolemy/bin/ptarch. 
 #     Thus, lines 12-16 .cshrc become:
 #
 #	# The arch script figures out what type of machine we are on.
-#	if (! $?ARCH) setenv ARCH ` $PTOLEMY/bin/ptarch`
+#	if (! $?PTARCH) setenv PTARCH ` $PTOLEMY/bin/ptarch`
 #	
 #	# We want to use cfront - append .cfront suffix if not already there
-#	setenv ARCH `echo $ARCH | sed -e "s/\..*//"`.cfront
+#	setenv PTARCH `echo $PTARCH | sed -e "s/\..*//"`.cfront
 #
-#     You have to have the test because .cshrc is run many times with ARCH 
+#     You have to have the test because .cshrc is run many times with PTARCH 
 #     already set, and you end up with ~/bin.irix5.cfront.cfront.cfront ...
 #
 # (b) Gnu make - must be the first `make' in $path.  I tried putting an 

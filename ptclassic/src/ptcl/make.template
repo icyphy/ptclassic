@@ -42,7 +42,7 @@ OBJDIR =	..
 VPATH =		$(ROOT)/src/ptcl
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 INCL = 		-I$(KERNDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)

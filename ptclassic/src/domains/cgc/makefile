@@ -28,7 +28,7 @@
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cgc.
-# Instead run in from ~ptolemy/obj.$ARCH/domains/cgc (through the symbolic
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/cgc (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 

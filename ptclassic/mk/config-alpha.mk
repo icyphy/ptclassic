@@ -106,7 +106,7 @@ MATARCH = alpha
 # Debugging Hacks:  These really should not be necessary!
 
 # We're not getting tk/tcl from the Ptolemy tree, it's already installed.
-TK_LIBSPEC =	-L$(TCL_ROOT)/tk.$(ARCH)/lib -ltk
+TK_LIBSPEC =	-L$(TCL_ROOT)/tk.$(PTARCH)/lib -ltk
 
 # For some silly reason, the X11 library has a function linked in
 # which wants to see DECnet.  Fortunately, science has a cure.

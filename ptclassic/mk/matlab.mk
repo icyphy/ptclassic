@@ -49,7 +49,7 @@
 # (b) libmat.a is linked if Matlab is installed.
 #
 # If Matlab is installed, the old way to determine the Matlab architecture is
-# MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+# MATARCH := $(shell $(ROOT)/bin/matlabArch $(PTARCH))
 # Now, MATARCH is set by the config makefiles.
 #
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)

@@ -107,9 +107,9 @@ SYSLIBS =	-lsocket -lnsl -ldl -lm
 
 # Can't use -Bstatic here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
+LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)	
+LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)	
 
 #
 # Directories to use

@@ -43,15 +43,15 @@ OBJDIR =	../..
 VPATH =		$(ROOT)/src/tycho/kernel
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # To use Tcl 7.4 and tk4.0, set the following
 # FIXME: The version should not be hardwired in this way.
 TCL_INCDIR=$(TCL_ROOT)/tcl7.4/include
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4.$(ARCH)/lib -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4.$(PTARCH)/lib -ltcl
 TK_INCDIR=$(TCL_ROOT)/tk4.0/include
-TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0.$(ARCH)/lib -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0.$(PTARCH)/lib -ltk #-lXpm
 
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
@@ -59,7 +59,7 @@ PTKDIR = $(ROOT)/src/ptklib
 # Directory containing the [incr Tcl] extensions to Tcl
 # FIXME: This should be in the Ptolemy tree
 ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
-ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(ARCH)/lib -litcl
+ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(PTARCH)/lib -litcl
 
 INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
