@@ -25,22 +25,21 @@ as the package searcher can find them.
 
 <p>In the standard installation, packages are not installed in the
 top-level directory, but underneath sub-directories called
-<b>kernel/</b>, <b>editors/</b>, <b>utils/</b>. This provides for
+<b>kernel/</b>, <b>editors/</b>, <b>util/</b>. This provides for
 manageable growth in the number of packages.  The structure of each
 package is given in <a href="structure.html">Package structure</a>.
 
-<p>By convention, each package that is a proper part of Tycho
-has the name <b>tycho.<i>pkg</i></b>, where <b><i>pkg</i></b>
-is the name of the directory in which it lives. For example,
-the GUI kernel package is named <b>tycho.gui</b>. Packages
-that are not part of Tycho proper, such as some of those in
-the <b>utils</b> directory, have simple names, such as
-<b>obstcl</b>.
+<p>By convention, each package that is a proper part of Tycho has a
+name such as <B>tycho.kernel.gui</B>, to mimic the Java convention of
+placing packages by directory. The Tcl package system, of course, does
+not understand this convention, so in a non-standard installation you
+can place the packages anywhere you please. Some packages in the
+<B>util</B> directory are completelt stand-alone, and so have simple
+names such as <B>obstcl</B>.
 
- <P>Note that you do <B>not</B> need to install the Tycho
-framework to use Tycho packages. As long as you have all the
-packages you require, you can install them in your own
-directories in any way you choose.
+<P>Note that you do not need to install the Tycho framework to use
+Tycho packages. As long as you have all the packages you require, you
+can install them in your own directories in any way you choose.
 
  <P>
 <table valign=top cellpadding=4>
@@ -127,7 +126,7 @@ textual and graphical editors and viewers.
 <td>
 <td>
 <td><P class="file">
-idoc/
+tydoc/
 <br>
 textedit/
 <br>
@@ -138,12 +137,12 @@ graphedit/
 ...
 
 <td>
-<b>idoc/</b> is a documentation generator and viewer for [incr Tcl]
+
+<b>tydoc/</b> is a documentation generator and viewer for [incr Tcl]
 and Java. It can generate plain HTML as well as its own
-format. <b>textedit/</b> is a collection of syntax-sensitive
-text editors. <b>visedit/</b> is a collection of graphical
-editors. <b>graphedit/</b> contains editors for directed
-graphs.
+format. <b>textedit/</b> is a collection of syntax-sensitive text
+editors. <b>visedit/</b> is a collection of graphical
+editors. <b>graphedit/</b> contains editors for directed graphs.
 
 <tr valign=top>
 <td>
@@ -192,22 +191,20 @@ gui/
 <br>
 html/
 <br>
-lib/
-<br>
 model/
 
 <td>
 
-<b>basic/</b> is the minimal set of
-classes that is used by any non-graphical Tycho program. Its
-<b>bin/</b> directory contains scripts that know how to start Tycho up
-in various graphical and non-graphical configurations.  <b>gui/</b> is
-the Tycho graphical kernel, which is used by all graphical
-applications. <b>html/</b> contains the HTML viewer and support
-classes such as HTTP access and network support. <b>lib/</b> is a
-library of Tcl procedures that could be used anywhere, such as list
-and string manipulation. <b>model/</b> is a package that forms the
-model part of the model-view architecture used in parts of Tycho.
+<b>basic/</b> is the minimal set of classes that is used by any
+non-graphical Tycho program, and includes . Its <b>bin/</b> directory
+contains scripts that know how to start Tycho up in various graphical
+and non-graphical configurations. <b>gui/</b> is the Tycho graphical
+kernel, which is used by all graphical applications. <b>html/</b>
+contains the HTML viewer and support classes such as HTTP access and
+network support. <b>lib/</b> is a library of Tcl procedures that could
+be used anywhere, such as list and string manipulation. <b>model/</b>
+is a package that forms the model part of the model-view architecture
+used in parts of Tycho.
 
 <tr valign=top>
 <td>
@@ -227,7 +224,7 @@ tycho.mk
 <tr valign=top>
 <td>
 <td><P class="file">
-utils/
+util/
 
 <td><P class="file">
 makefile
