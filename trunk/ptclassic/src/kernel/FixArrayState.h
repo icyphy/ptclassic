@@ -36,7 +36,7 @@ $Id$
 // fixed point number).
 
 class FixArrayState : public FloatArrayState {
-
+public:
 	void initialize();
 
 	const char* type() const; // return "FIXARRAY"
