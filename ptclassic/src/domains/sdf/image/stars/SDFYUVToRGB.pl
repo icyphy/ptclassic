@@ -16,7 +16,7 @@ output three float matrices that describe an image in RGB format.
 	}
 	explanation {
 The YUV format, which is an affine mapping (linear mapping plus offset)
-of the RGB format, is used in broadcast television to maintain compability
+of the RGB format, is used in broadcast television to maintain compatibility
 between color and black-and-white televisions [1].
 Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).

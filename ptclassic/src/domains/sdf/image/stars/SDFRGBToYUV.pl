@@ -18,7 +18,7 @@ No downsampling is performed on the U and V signals.
 	}
 	explanation {
 The YUV format, which is a linear mapping of the RGB format, is used
-in broadcast television to maintain compability between color and
+in broadcast television to maintain compatibility between color and
 black-and-white televisions [1].
 Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).
