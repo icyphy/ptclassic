@@ -94,8 +94,7 @@ public:
 class InDEPort : public DEPortHole
 {
 protected:
-friend class DEScheduler;
-friend class CQScheduler;
+friend class DEBaseSched;
 friend class MultiInDEPort;
 	// It is said "complete" if this input affects all outputs
 	// immediately. Valid definition for functional stars.
