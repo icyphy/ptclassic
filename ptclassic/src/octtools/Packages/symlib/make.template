@@ -71,6 +71,8 @@ KRUFT =		$(DRIVER)
 
 DRVRDIR =	bob
 
+DRVROBJ =	test.o
+
 DRVRLIBS =	-lregion -loh -ltap -lgu -loptions -loct -ltr -lkd -lutility -lport -lerrtrap -luprintf -lst -lm
 
 # common makefile file for vem libraries
