@@ -75,9 +75,8 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		name { doInvDCT }
 		type { void }
 		access { protected }
-		arglist {
-			"(unsigned char* outdata, float* indata, int outw,
-				int outh, int inw, int inh)"
+		arglist {	// can't break string across lines in cfront
+"(unsigned char* outdata, float* indata, int outw, int outh, int inw, int inh)"
 		}
 		code {
 	register int ndx, ndx2, cntr;
