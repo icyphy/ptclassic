@@ -60,6 +60,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptkRegisterCmds.h"		/* define ptkRegisterCmds */
 #include "ptkNet.h"			/* define ptkRPCFileHandler */
 #include "err.h"			/* define ErrAdd */
+#include "ptkImage.h"			/* define the new ptimage types */
 
 
 /* Used to pass the funcArray through Tk */
@@ -168,6 +169,11 @@ ptkTkSetup(funcArray, size)
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
     			 ptkRPCFileProc, (ClientData) &RPCdata);
 #endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */
+
+    /* Add tkPtimageImageType and ptimage formats for  *
+     * robust image rendering in Tk, written by X. Mei */
+    Tk_CreateImageType(&tkPtimageImageType);
+    Tk_CreatePtimageImageFormat(&tkPtImgFmtPPM);
 
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
