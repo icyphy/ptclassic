@@ -269,7 +269,7 @@ non-zero integer (not necessarily 1).
 				addCode(doXor(i));
 			if (test == XORID) addCode(endXor);
 			else addCode(endXnor);
-			return;
+			break;
 		}
 
 		// Compute final result, adjusting for positive/negative logic
