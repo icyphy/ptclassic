@@ -2,11 +2,31 @@
 Version identification:
 $Id$
 
- Copyright (c) 1992 The Regents of the University of California.
+ Copyright (c) 1992, 1993 The Regents of the University of California.
                        All Rights Reserved.
 
  Programmer:  J. Buck
  Date of creation: 7/6/92
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
 
 This file defines all the classes for a clustering BDF scheduler.
 This one is a modified copy of SDFCluster.cc, later we will merge
@@ -44,6 +64,7 @@ static const char file_id[] = "BDFCluster.cc";
 
 #include "BDFCluster.h"
 #include "BDFClustPort.h"
+#include "BDFRelIter.h"
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "Target.h"
@@ -351,6 +372,47 @@ static int onlyNeighbor(BDFCluster* me,BDFCluster* only) {
 	return TRUE;
 }
 
+// This function returns true if the argument, a control signal, has an
+// initial Boolean delay anywhere back to its "source" (the first point
+// in the generation of the signal that can't be traced via SAME or
+// COMPLEMENT arcs to an "earlier" version.  If there is no delay, it
+// returns BDF_NONE.  If the first token will be TRUE, it will return
+// BDF_TRUE, FALSE => BDF_FALSE.
+
+static BDFRelation hasBoolDelay(BDFClustPort* p) {
+	int reversed = 0;
+	if (p->selfLoop()) return BDF_FALSE;
+	while (1) {
+		if (p->isItInput()) {
+			// input: see if delay is on arc.  Otherwise
+			// trace back to source by checking far pointer.
+			if (p->numTokens() > 0)
+				return reversed ? BDF_TRUE : BDF_FALSE;
+			else if (p->far()) p = p->far();
+			else if (p->outPtr()) p = p->outPtr();
+			else return BDF_NONE;
+		}
+		else {
+			// output: if no SAME or COMPLEMENT arcs, this
+			// is the source, return BDF_NONE.  Otherwise traverse
+			// back to a corresponding input arc (to handle
+			// Fork, Not actors).  If no input found, this
+			// is again the source, so return BDF_NONE.
+			if (!SorC(p->relType())) return BDF_NONE;
+			BDFClustPort* a = p;
+			do {
+				if (a->relType() == BDF_COMPLEMENT)
+					reversed = 1 - reversed;
+				a = a->assoc();
+				if (a == p) return BDF_NONE;
+			} while (a->isItOutput());
+			// a is now an input corresponding to p.
+			p = a;
+			// go around the loop again with new value
+		}
+	}
+}
+
 BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	// assumption: a and b meet every condition for merging
 	// except for buried control arcs.
@@ -410,11 +472,16 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 			if (condSrc->isItInput()) condSrc = condSrc->far();
 			desrel = p->relType();
 		}
-		// see if we can turn off "ifInstead"
-		if (ifInstead &&
-		    (p->numIO() != pFar->numIO() ||
-		     !onlyNeighbor(pFar->parentClust(),p->parentClust())))
+		// see if we can turn off "ifInstead".  We do not make
+		// an if if the conditional has a delay token, or the
+		// pointed-to clusters aren't leaves.
+		if (ifInstead) {
+			if (p->numIO() != pFar->numIO() ||
+			    hasBoolDelay(condSrc) != BDF_NONE ||
+			    !onlyNeighbor(pFar->parentClust(),p->parentClust()))
 			ifInstead = FALSE;
+		}
+
 	}
 	if (!condSrc) return 0;
 	if (logstrm)
@@ -669,6 +736,8 @@ int BDFClusterGal::loopPass() {
 // on any arcs -- we are looking for an arc where my end is unconditional
 // and the far end is conditional.  We will never do if-ing if the reverse
 // is true, which means the other end should be surrounded by an if.
+// Also, we avoid creating a conditional on a Boolean signal that has a
+// delay in its path; while loops will be constructed for such cases.
 
 BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 	BDFClustPortIter nextPort(*this);
@@ -693,12 +762,13 @@ BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 			return 0;
 		}
 	}
-	// if the conditional is on a self-loop, we may want to avoid
+	// if the conditional's control signal is a delayed version of
+	// some other signal, we may want to avoid
 	// creating an if construct and create a "while" instead.
-	// we will avoid the if if the if-condition matches the state
-	// of the initial token on the feedback arc.
-	// FIXME: for now we assume initial tokens are always FALSE.
-	if (cond->selfLoop() && rel == BDF_FALSE) {
+	// We do so if the initial token value matches the conditional
+	// direction.
+	BDFRelation initToken = hasBoolDelay(cond);
+	if (initToken == rel) {
 //		cerr << "Avoiding making 'if' out of " << name() << "\n";
 		return 0;
 	}
@@ -1199,6 +1269,8 @@ void BDFClusterBag::adjustAssociations() {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* bagp;
 	while ((bagp = nextPort++) != 0) {
+		BDFRelation r_remap;
+
 		// control bits are turned back on in a subsequent pass
 		bagp->setControl(FALSE);
 		BDFRelation r = bagp->inPtr()->relType();
@@ -1207,7 +1279,7 @@ void BDFClusterBag::adjustAssociations() {
 		BDFClustPort* upper = lower->outPtr();
 		if (TorF(r)) {
 			if (upper == 0) {
-				BDFRelation r_remap = BDF_NONE;
+				r_remap = BDF_NONE;
 				BDFClustPortRelIter iter(*lower);
 				while (!upper && (lower = iter.next(r_remap)) != 0) {
 					upper = lower->outPtr();
@@ -1326,25 +1398,31 @@ static const char* tab(int depth) {
 
 static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
 
-// return the bag's schedule.
+// return the bag's schedule.  Note we may have both a condition and
+// a count, for two levels of nesting.
+
 StringList BDFClusterBag::displaySchedule(int depth) {
 	int close = 0;
 	if (sched == 0) genSched();
 	StringList sch;
-	if (loop() > 1) {
-		sch << tab(depth) << loop() << "*{\n";
-		close = 1;
-	}
-	else if (pType != DO_ITER) {
+	if (pType != DO_ITER) {
+		// add a nesting with the condition
 		sch << tab(depth) << do_conds[pType]
 		    << pCond->name() << ") {\n";
-		close = 1;
+		close++;
+		depth++;
 	}
-	depth += close;
+	if (loop() > 1) {
+		// add a nesting for the loop
+		sch << tab(depth) << loop() << "*{\n";
+		close++;
+		depth++;
+	}
 	sch << sched->displaySchedule(depth);
-	if (close) {
+	while (close > 0) {
 		depth--;
 		sch << tab(depth) << "}\n";
+		close--;
 	}
 	return sch;
 }
@@ -1426,6 +1504,12 @@ static BDFClustPort *remapAfterMerge(BDFClustPort* ctlP, BDFRelation& rel,
 		if (needInput && a->isItOutput()) continue;
 		BDFClustPort* afar = a->far();
 		if (afar == 0) continue;
+		BDFCluster *ap = a->parentClust();
+		if (ap != me && ap != you) {
+//			cerr << "skipping " << a->fullName()
+//			     << ": wrong parent\n";
+			continue;
+		}
 		BDFCluster *cl = afar->parentClust();
 		if (cl != me && cl != you) return a;
 	}
@@ -1460,7 +1544,8 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 		// If p is an input, remapped port must also be input,
 		// hence isItInput is used to get the argument.
 		BDFRelation r;
-		if (!remapAfterMerge(ctl,r,p->isItInput())) {
+		BDFClustPort* remap = remapAfterMerge(ctl,r,p->isItInput());
+		if (!remap) {
 			if (logstrm) {
 				*logstrm << "Can't merge " << src->name()
 					<< " and " << dest->name() <<
@@ -1469,6 +1554,11 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 					<< "Arc controlled: " << *p << "\n";
 			}
 			return TRUE;
+		}
+		else if (logstrm) {
+			*logstrm << "buriedCtlArcs: will remap "
+				 << ctl->fullName() << " to "
+				 << remap->fullName() << "\n";
 		}
 	}
 	return FALSE;
@@ -1500,6 +1590,16 @@ BDFCluster* BDFCluster::mergeCandidate() {
 
 		int ok = (!p->fbDelay() && myIO==peerIO && condMatch(p,pFar));
 
+		if (p->isItInput()) {
+			if (src == 0) src = peer;
+			if (src != peer) multiSrc++;
+			if (ok) srcOK = peer;
+		}
+		else {
+			if (dst == 0) dst = peer;
+			if (dst != peer) multiDst++;
+			if (ok) dstOK = peer;
+		}
 		// we cannot merge a control arc unless it can be "remapped"
 		// or nothing it controls is external or it has a delay.
 		// Since this is the fast merge pass, we do not try to 
@@ -1514,18 +1614,8 @@ BDFCluster* BDFCluster::mergeCandidate() {
 			// clusters -- if ANY disappearing control port
 			// is a problem we must veto the merge.
 
-			if (peer == srcOK) srcOK = 0;
-			if (peer == dstOK) dstOK = 0;
-		}
-		if (p->isItInput()) {
-			if (src == 0) src = peer;
-			if (src != peer) multiSrc++;
-			if (ok) srcOK = peer;
-		}
-		else {
-			if (dst == 0) dst = peer;
-			if (dst != peer) multiDst++;
-			if (ok) dstOK = peer;
+			if (peer == srcOK) multiSrc++;
+			if (peer == dstOK) multiDst++;
 		}
 	}
 	// we can use srcOK if it is the only source.
@@ -1645,11 +1735,11 @@ ostream& BDFAtomCluster::printOn(ostream& o) {
 
 StringList BDFAtomCluster::displaySchedule(int depth) {
 	StringList sch = tab(depth);
+	if (pType != DO_ITER) {
+		sch << do_conds[pType] << pCond->name() << ") ";
+	}
 	if (loop() > 1) {
 		sch << loop() << "*";
-	}
-	else if (pType != DO_ITER) {
-		sch << do_conds[pType] << pCond->name() << ") ";
 	}
 	sch << real().fullName() << "\n";
 	return sch;
