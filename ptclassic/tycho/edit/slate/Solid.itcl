@@ -85,13 +85,18 @@ class ::tycho::Solid {
     ###################################################################
     ####                         protected variables               ####
 
+    # Components of the picture
     common lit
     common notlit
     common shaded
     common notshaded
     common surface
 
-    common colorObject
+    # The object used to get shades of color
+    common colorShadesObject
+
+    # The "shape" of pictures of this class
+    common shape "polygon"
 
     #### Set option defaults
     set optiondefault(-color)       background
@@ -164,11 +169,11 @@ body ::tycho::Solid::borderwidth {id canvas bw} {
 #
 body ::tycho::Solid::color {id canvas co} {
     set color($id) $co
-    set colorObject($id) [::tycho::Shades::new $color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
 
     # FIXME: quick and dirty
     relief $id $canvas $relief($id)
-    $canvas itemconfigure $surface($id) -fill [$colorObject($id) matt]
+    $canvas itemconfigure $surface($id) -fill [$colorShadesObject($id) matt]
 }
 
 
@@ -184,7 +189,7 @@ body ::tycho::Solid::construct {id tags canvas args} {
     }
 
     # This object is used to get the shades of color
-    set colorObject($id) [::tycho::Shades::new $color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
  
     # Create the primary component for the outline coordinates
     set primary($id) [eval $canvas create polygon $args \
@@ -192,7 +197,7 @@ body ::tycho::Solid::construct {id tags canvas args} {
 
     # Create the surface component with null size
     set surface($id) [$canvas create polygon 0 0 0 0 0 0 \
-	    -fill [$colorObject($id) matt] -tags $tags]
+	    -fill [$colorShadesObject($id) matt] -tags $tags]
 
     # Create the borders using the coords{} method. Set the list and
     # shaded components to null to save work in coords{}.
@@ -234,8 +239,8 @@ body ::tycho::Solid::coords {id canvas args} {
 
     # Adjust the positions of the border polygons, creating and
     # deleting them as necessary.
-    adjust $id $canvas "lit"    [$colorObject($id) light] $litC
-    adjust $id $canvas "shaded" [$colorObject($id) dark]  $shadedC
+    adjust $id $canvas "lit"    [$colorShadesObject($id) light] $litC
+    adjust $id $canvas "shaded" [$colorShadesObject($id) dark]  $shadedC
 
     # If the relief is "groove" or "ridge," adjust the inner borders
     # as well. Note that _inside_ is over-written with new values.
@@ -243,8 +248,8 @@ body ::tycho::Solid::coords {id canvas args} {
 	assign inside notlitC notshadedC \
 		[polyBorders 45 -135 $inside $borderwidth($id)]
 
-	adjust $id $canvas "notshaded" [$colorObject($id) light] $notshadedC
-	adjust $id $canvas "notlit"    [$colorObject($id) dark]  $notlitC
+	adjust $id $canvas "notshaded" [$colorShadesObject($id) light] $notshadedC
+	adjust $id $canvas "notlit"    [$colorShadesObject($id) dark]  $notlitC
     }
 
     # Change the co-ordinates of the surface component, if it exists.
@@ -288,12 +293,12 @@ body ::tycho::Solid::relief {id canvas re} {
 
     if { $relief($id) == "ridge" || $relief($id) == "groove" } {
 
-	set light [$colorObject($id) light]
-	set dark  [$colorObject($id) dark]
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
 
 	if { $relief($id) == "groove" } {
 	    set light $dark
-	    set dark [$colorObject($id) light]
+	    set dark [$colorShadesObject($id) light]
 	}
 
 	# Change the color of the lit and shaded components
@@ -334,14 +339,14 @@ body ::tycho::Solid::relief {id canvas re} {
 	    }
 	}
     } else {
-	set light [$colorObject($id) light]
-	set dark  [$colorObject($id) dark]
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
 
 	if { $relief($id) == "sunken" } {
 	    set light $dark
-	    set dark [$colorObject($id) light]
+	    set dark [$colorShadesObject($id) light]
 	} elseif { $relief($id) == "flat" } {
-	    set light [$colorObject($id) matt]
+	    set light [$colorShadesObject($id) matt]
 	    set dark $light
 	}
 

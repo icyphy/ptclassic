@@ -66,7 +66,11 @@ class ::tycho::Picture {
 
     # All options have a default value
     common optiondefault
+
+    # The "shape" of pictures of this class -- rectangle by default
+    common shape "rectangle"
 }
+
 
 ##########################################################################
 #### construct
