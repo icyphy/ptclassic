@@ -90,7 +90,6 @@ proc ptkImportantMessage {w text} {
     tkwait visibility $w
     bind $w <Key> "ptkSafeDestroy $w"
     bind $w <ButtonPress> "ptkSafeDestroy $w"
-    bind $w.msg <Button> "ptkSafeDestroy $w"
     set prevFocus [focus]
     focus $w
     grab $w
@@ -128,7 +127,6 @@ proc ptkInform {w text} {
     tkwait visibility $w
     bind $w <Key> "ptkSafeDestroy $w"
     bind $w <ButtonPress> "ptkSafeDestroy $w"
-    bind $w.msg <Button> "ptkSafeDestroy $w"
 }
 
 
@@ -159,7 +157,7 @@ proc ptkStartupMessage {pigiVersion pigiFilename} {
     wm title . "Ptolemy Welcome Window"
     wm iconname . "Ptolemy Welcome Window"
 
-    pack [button .mainok -text "DISMISS" -command "wm iconify ."] \
+    pack [button .mainok -text "OK <Return>" -command "wm iconify ."] \
 	-side bottom -fill x -expand 1
     pack [frame .version -relief raised -bd 5] \
 	-side top -fill both -expand 1
@@ -214,13 +212,9 @@ and disclaimer of warranty provisions, push the button below. "
 
     wm geometry . +200+300
     tkwait visibility .
-    bind . <ButtonRelease> "wm iconify ."
-    bind .version.msg <Button> "wm iconify ."
-    bind .version.msg.msg1 <Button> "wm iconify ."
-    bind .version.msg.msg2 <Button> "wm iconify ."
-    bind .version.bm <Button> "wm iconify ."
+    bind . <ButtonRelease> \
+	    {if {"%W" != ".version.msg.at.copyright"} {wm iconify .}}
     bind . <Key> "wm iconify ."
-    bind .version <Key> "wm iconify ."
 }
 
 ###################################################################
@@ -255,8 +249,6 @@ proc ptkDisplayProfile {} {
 
     wm geometry $w +200+200
     tkwait visibility $w
-    focus $w
     bind $w <Return> "ptkSafeDestroy $w"
     bind $w <Button> "ptkSafeDestroy $w"
-    bind $w.msg <Button> "ptkSafeDestroy $w"
 }
