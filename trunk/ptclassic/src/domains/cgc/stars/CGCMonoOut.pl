@@ -27,6 +27,7 @@ provisions.
   input {
     name { input }
     type { float }
+    desc { Input ranges from -1.0 to 1.0 }
   }
 
   defstate {
