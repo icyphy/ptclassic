@@ -54,7 +54,7 @@ here for convenience.
 		XHistogram his;
 	}
 	hinclude { "Histogram.h" }
-	start {
+	setup {
 		his.initialize(this,binWidth,options,title,saveFile);
 	}
 	go {

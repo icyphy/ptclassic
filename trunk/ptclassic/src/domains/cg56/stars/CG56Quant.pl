@@ -85,7 +85,7 @@ $label(term)
 $label(term)
         move    b,$ref(output)
         }
-        start {
+        setup {
              if(levels.size() != thresholds.size()+1)
                  Error::abortRun (*this,
 		 ": Must have 1 more level than threshold to quantize.");

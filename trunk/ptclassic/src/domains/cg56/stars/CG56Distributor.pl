@@ -39,7 +39,7 @@ Distributes an input signal among two outputs, alternating samples.
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 
-	start {
+	setup {
                 int n = output.numberPorts();
                 input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
                 MPHIter nexto(output);

@@ -38,7 +38,7 @@ which is then set to zero.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
- 	start {
+ 	setup {
 	           pulse=impulseSize;
 	      }
 

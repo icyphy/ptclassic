@@ -34,7 +34,7 @@ of the particle is used to generate the output.
 	protected {
 		pt_ofstream output;
 	}
-	start {
+	setup {
 		// abortRun is called on open failure
 		output.open(fileName);
 	}

@@ -48,7 +48,7 @@ with step size "step" (default 0.001).
         move    a1,$ref(sum)
 	}
 	
-	start {
+	setup {
 		sum=value;
 	}
 	go {

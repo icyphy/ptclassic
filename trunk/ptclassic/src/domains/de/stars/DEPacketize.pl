@@ -44,7 +44,7 @@ signal arrives and there is no data.
 		data.triggers();
 		data.before(demand);
 	}
-	start {
+	setup {
 		LOG_DEL; delete saveData;
 		LOG_NEW; saveData = new float[int(maxLength)];
 		idx = 0;

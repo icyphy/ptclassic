@@ -51,7 +51,7 @@ will be delayed by more than the nominal service time.
 	constructor {
 		delayType = TRUE;
 	}
-	start {
+	setup {
 		numberInService = 0;
 		tokensInService.initialize();
 	}

@@ -42,7 +42,7 @@ is on your path, or this will not work!!!
 	protected {
 		XGraph graph;
 	}
-	start {
+	setup {
 		graph.initialize(this, 1, (const char*) options,
 				    (const char*) title,
 				    (const char*) saveFile);

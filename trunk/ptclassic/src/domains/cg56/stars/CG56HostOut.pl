@@ -57,7 +57,7 @@ flow control.
 		desc {  }
 		default { "" }
 	}
-	start {
+	setup {
 	input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
 	}
 	initCode {

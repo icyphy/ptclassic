@@ -95,7 +95,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	grant.before(ackIn);
     }
 
-    start
+	setup
     {
 	idle = TRUE;
 	req = rel = open = wait = FALSE;

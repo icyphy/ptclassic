@@ -47,7 +47,7 @@ done with g++ (type "long long"), but it isn't portable.
 	initCode {
 		addCode(initSeed);
 	}
-	start {
+	setup {
 		scaledRange = int(double(range) * 8388608);
 	}
 	go {

@@ -51,7 +51,7 @@ same packet is routed through a delay-free path and also a path with delay.
 	constructor {
 		input.triggers(output);
 	}
-	start {
+	setup {
 		firstArrivalQ.initialize();
 	}
 

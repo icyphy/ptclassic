@@ -24,7 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	exectime {
 		return 0;
 	}
-	start {
+	setup {
 		forkInit(input,output);
 	}
 }

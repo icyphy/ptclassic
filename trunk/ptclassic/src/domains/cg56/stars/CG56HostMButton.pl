@@ -33,7 +33,7 @@ is not checked at compile time: it is literally passed to qdm.
     codeblock(cbMultiButtonAio) {
 aio_multibutton $ref(value) $fullname() {$val(label)} {$val(pairs)}
     }
-    start {
+    setup {
 	// For now, we dont do anycheck of the pairs
     }
     initCode {

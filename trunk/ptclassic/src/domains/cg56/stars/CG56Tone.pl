@@ -55,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE}
 	}
-	start {
+	setup {
 		// maximum fixed point value
 		double twoPiF = 2.0 * M_PI * double(frequency);
 		X = cos(twoPiF);

@@ -25,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    pt_ofstream output;
 	}
 
-	start
+	setup
 	{
 	    // abortRun is called on open failure
 	    output.open("<cerr>");

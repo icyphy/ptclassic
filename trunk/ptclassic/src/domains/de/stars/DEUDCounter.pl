@@ -76,7 +76,7 @@ a Null star to the unneeded inputs.
 		countDown.before(demand);
 		reset.before(demand);
 	}
-	start {
+	setup {
 		content = int(resetValue);
 	}
 	go {

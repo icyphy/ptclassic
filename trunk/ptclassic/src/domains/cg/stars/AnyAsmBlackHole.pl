@@ -17,7 +17,7 @@ Black hole star for assembly-code domains.  No code is generated at runtime.
 		type {anytype}
 		attributes {P_CIRC}
 	}
-	start {
+	setup {
 		int n = input.far()->numXfer();
 		input.setSDFParams(n,n-1);
 	}

@@ -59,7 +59,7 @@ At compile time, this star appears to just be an atomic star.
 	constructor {
 		gal = 0;
 	}	
-	start {
+	setup {
 		if (gal) return;
 
 		StringList msg = "DDFSelf Star \"";

@@ -76,7 +76,7 @@ Output data from DSP to host via host port asynchronously.
     protected {
 	int	doCopyB;
     }
-    start {
+    setup {
         input.setSDFParams(int(blockSize),int(blockSize)-1);
 	doCopyB = FALSE;
 	const char *m = mode;

@@ -149,7 +149,7 @@ Maximum total number of particles. If <0, capacity is infinite.
 		// events should be made available.
 		inData.before(demand);
 	}
-	start {
+	setup {
 		emptyQueue();
 		infinite = (int(capacity) < 0);
 	}

@@ -22,7 +22,7 @@ in that case.
 	protected {
 		short identity;
 	}
-	start {
+	setup {
 		identity = (double(gain) >= CG56_ONE);
 		if (identity) forkInit(input,output);
 	}

@@ -42,7 +42,7 @@ data value from the current input packet is output.
 		data.triggers();
 		data.before(demand);
 	}
-	start {
+	setup {
 		idx = 0;
 		currentMessage = 0;
 		lastOutput = 0;

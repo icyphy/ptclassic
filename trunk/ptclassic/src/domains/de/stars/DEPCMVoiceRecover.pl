@@ -128,7 +128,7 @@ Missing Speech Segments in Packet Voice Communications,"
 				*created;
 	}
 
-	start {
+	setup {
 		if ( numInfoBits > 384 )
 			Error::abortRun( *this, "illegal SeqATMCell size" );
 		if ( searchWindowSize > 4*int(numInfoBits)/8 ||

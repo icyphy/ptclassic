@@ -46,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	Clock clock;
     }
 
-    start
+	setup
     {
 	clock.reset();
     }

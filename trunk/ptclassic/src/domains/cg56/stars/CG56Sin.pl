@@ -75,7 +75,7 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
         move    y:(r1),b	; read the table
         move    b1,$ref(output)
 	}
-	start {
+	setup {
 		double ph = double(phase);
 		if ( ph < 0 ) {
 			int n = (int) floor(-ph / 360.0);

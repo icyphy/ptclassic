@@ -38,7 +38,7 @@ It outputs lines of comments, instead of code.
 		name {output}
 		type {FLOAT}
 	}
-	start {
+	setup {
 		input.setSDFParams(int(consume),int(consume)-1);
 		output.setSDFParams(int(produce),int(produce)-1);
 	}

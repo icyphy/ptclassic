@@ -74,7 +74,7 @@ Delay will vary between 0 and maxDelay as the control varies between -1.0 and 1.
         move    a,$ref(output)
         movec   m1,m0           ; restore m0
         }
-        start {
+        setup {
                 buf.resize(maxDelay+1);
         }		
         initCode {

@@ -47,7 +47,7 @@ Arithmetic shifts are used.
     protected {
 	int doSat;
     }
-    start {
+    setup {
 	int scnt = int(leftShifts);
 	absShifts = scnt >= 0 ? scnt : - scnt;
 	const char *str = saturation;
