@@ -54,8 +54,8 @@ class MacroNode : public DLNode {
 
 public: 
         // Constructor declaration
-        MacroNode(DataFlowStar* Mas, int invoc_no): descWork(-1),
-		 DLNode(Mas, invoc_no) {}
+        MacroNode(DataFlowStar* Mas, int invoc_no):
+		 DLNode(Mas, invoc_no), descWork(-1) {}
  
         // Constructor used for idle nodes or communication nodes
         MacroNode(int type): DLNode(type) {}
