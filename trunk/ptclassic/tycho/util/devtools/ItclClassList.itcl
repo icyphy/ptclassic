@@ -1,4 +1,4 @@
-# Graphical front end used to generate a class diagram
+# Edit a list of Itcl Files that can be used to generate a class diagram
 #
 # @Author: Christopher Hylands
 #
@@ -115,14 +115,16 @@ body ::tycho::ItclClassList::constructor {args} {
     toolbar button updateClassDiagram \
             {Generate a class diagram from the files listed in the \
             current file} \
-            -text Update \
+            -text {Update Class Diagram}\
             -command "$this updateClassDiagram"
-    toolbar button help {Display the Itcl Class Diagram Generator Help} \
-            -text Help \
-            -command "$this help"
 
     eval itk_initialize $args
     eval preference exclude $this $args
+
+    focusin
+
+    # Add myself to the list of open files. 
+    windowMenuAddAll $file
 }
 
 
@@ -130,10 +132,6 @@ body ::tycho::ItclClassList::constructor {args} {
 #### destructor
 #
 body ::tycho::ItclClassList::destructor {} {
-    catch {unset sizeName($this)}
-    if {[info exists stack] && [info objects $stack] != {}} {
-	delete object $stack
-    }
 }
 
 
@@ -170,9 +168,17 @@ body ::tycho::ItclClassList::help {} {
 # Add all the itcl files in a directory that the user chooses
 # 
 body ::tycho::ItclClassList::includeDirectoryClasses {} {
+    set itclFileList [glob -nocomplain *.itcl]
+    if { [llength $itclFileList] > 0 } {
+	set firstItclFile [lindex $itclFileList 0]
+    } else {
+	set firstItclFile {}
+    }
+
     set includeDirectory [::tycho::queryfilename \
             "Choose a File from the directory you want\n\
-            to include all *.itcl files from"]
+            to include all *.itcl files from" \
+	    $firstItclFile]
     if {$includeDirectory != {} } {
         if ![file isdirectory $includeDirectory] {
             set includeDirectory [file dirname $includeDirectory]
@@ -231,8 +237,8 @@ body ::tycho::ItclClassList::updateClassDiagram {} {
 #### updateClassListFile
 # Insert files into the classListFile.
 #
-body ::tycho::ItclClassList::updateClassListFile {files} {
-    foreach file $files {
-        insertData "[::tycho::simplifyPath $file TYCHO]\n"
+body ::tycho::ItclClassList::updateClassListFile {myfiles} {
+    foreach myfile $myfiles {
+        insertData "[::tycho::simplifyPath $myfile TYCHO]\n"
     }
 }
