@@ -369,28 +369,35 @@ body ::tycho::HTML::constructor {args} {
     # Add buttons to the toolbar, if it exists.
     # FIXME: should the user be allowed to change the home window?
     
-    toolbar button back {Go back to the previously-viewed page} \
+    toolbar button back \
+	    -description {Go back to the previously-viewed page} \
             -text Back -command "$this back" -state disabled
     
-    toolbar button forward {Go forward to the next previously-viewed page} \
+    toolbar button forward \
+	    -description {Go forward to the next previously-viewed page} \
             -text Forward -command "$this forward" -state disabled
     
     global ::TYCHO
     
-    toolbar button home {Go to the Tycho home page} \
+    toolbar button home \
+	    -description {Go to the Tycho home page} \
             -text Home -command "$this hyperJump \
 	    [file join \$TYCHO doc index.html]"
     
-    toolbar button reload {Reload and reparse from the file} \
+    toolbar button reload \
+	    -description {Reload and reparse from the file} \
             -text Reload -command "$this reload"
     
-    toolbar button open {Open a new file} \
+    toolbar button open \
+	    -description {Open a new file} \
             -text Open -command "$this altFile"
     
-    toolbar button find {Find text or a pattern on this page} \
+    toolbar button find \
+	    -description {Find text or a pattern on this page} \
             -text Find -command "$this search"
     
-    toolbar button stop {Abort rendering} \
+    toolbar button stop \
+	    -description {Abort rendering} \
             -text Stop -command "$this stopRendering"
 
     set text $itk_component(text)
@@ -524,6 +531,7 @@ body ::tycho::HTML::constructor {args} {
     $text configure -insertofftime 0
     $text configure -insertbackground [$text cget -background]
 
+    # Add the entry widget displaying the current page
     toolbar entry location Location $file "$this hyperJump"
 
     # Put some space around the text
