@@ -75,19 +75,26 @@ int UniProcessor :: writeGantt(UserOutput& o) {
 	SequentialList revList;
 	while ((obj = iter++) != 0) {
 		ParNode* node = (ParNode*) obj->getNode();
-		if (!node->getType()) { // Not a comm star
+		int nType = node->getType();
+		if (nType <= 0) { // Not an idle star
 			total += obj->getDuration();
 			fin = start + obj->getDuration();
 
 			char tmpbuf[160];
-			const char* starName = node->myStar()->readName();
+			const char* starName;
+			if (!nType) 
+				starName = node->myStar()->readName();
+			else if (nType == -1)
+				starName = "snd";
+			else
+				starName = "rcv";
 			sprintf (tmpbuf, "\t%s {%d} (%d %d)\n",
                                          starName,
                                          node->invocationNumber(),
                                          start, fin);
 			revList.tup(savestring(tmpbuf));
 			start = fin;
-		} else { // A Communication node or idle node
+		} else { // Idle node
 			start += obj->getDuration();
 		}
 	}
@@ -127,29 +134,33 @@ int UniProcessor :: schedAtEnd(ParNode* pd, int when, int leng) {
 }
 	
 // Check whether we can schedule a node in an idle slot if any.
-int UniProcessor :: filledInIdleSlot(ParNode* node, int start) {
+int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 
 	int load = node->getExTime();
 	int curTime = getAvailTime();
 	NodeSchedule* obj = (NodeSchedule*) myTail();
 	ParNode* temp;
+	int prevTime = -1;
+	if (limit >= curTime) prevTime = curTime;
 
 	while (obj) {
 		curTime -= obj->getDuration();
 		temp = obj->getNode();
 		if (obj->isIdleTime() == 0) { // regular or visible comm node
 			if (curTime < start + load) {
-				return -1;
+				return prevTime;
 			} 
 		} else { // idle node or comm node which is hidden.
-			if (obj->getDuration() > load) {
-				if (curTime < start) curTime = start;
-				return curTime;
+			if (obj->getDuration() >= load) {
+				if (curTime < start) 
+					return start;
+				else if ((limit == 0) || (curTime <= limit))
+					prevTime = curTime;
 			} 
 		}
 		obj = (NodeSchedule*) obj->previousLink();
 	}
-	return -1;
+	return prevTime;
 }
 
 // schedule in the middle (during an idle slot)
@@ -168,8 +179,7 @@ int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 			if (curTime < when + leng) {
 				return FALSE;
 			}
-		} else if (obj->getDuration() >= leng) {
-			if (curTime > when) when = curTime;
+		} else if ((curTime <= when) && (obj->getDuration() >= leng)) {
 			int endSlot = curTime + obj->getDuration();	
 
 			// schedule the node.
@@ -216,6 +226,46 @@ void UniProcessor :: appendNode(ParNode* n, int val) {
 	ns->setMembers(n, val);
 	appendLink(ns);
 	curSchedule = ns;
+}
+
+			//////////////////////
+			///  scheduleComm  ///
+			//////////////////////
+
+// schedule a communication node
+void UniProcessor :: scheduleCommNode(ParNode* n, int start) {
+	// We check when this node can be scheduled in this
+	// Processor and in the Communication link simultaneously.
+	// To do that, we detect the time slots in this processor to
+	// schedule the node first, and check whether these time slots
+	// are available in the communication link. 
+	if (start < availTime) {
+		int load = n->getExTime();
+		int curTime = 0;
+		ProcessorIter iter(*this);
+		NodeSchedule* obj;
+
+		while ((obj = iter++) != 0) {
+			if (obj->isIdleTime() == FALSE) {
+				curTime += obj->getDuration();
+				continue;
+			}
+			int from = (curTime < start)? start: curTime;
+			curTime += obj->getDuration();
+			if (curTime - from >= load) {
+				int limit = curTime - load;
+				int t = mtarget->scheduleComm(n,from,limit);
+				if (t > 0) {
+					addNode(n,from);
+					return;
+				}
+			}
+		}
+		start = availTime;
+	}	
+	int t = mtarget->scheduleComm(n, start);
+	if (t > start) start = t;
+	addNode(n, start);
 }
 
 			/////////////////
@@ -290,6 +340,7 @@ void UniProcessor :: run() {
 
 // destructor
 UniProcessor :: ~UniProcessor() {
+	LOG_DEL; delete subGal;
 	initialize();
 	clearFree();
 }
@@ -370,3 +421,4 @@ NodeSchedule* UniProcessor :: getNodeSchedule(ParNode* n) {
 		if (ns->getNode() == n) return ns;
 	return 0;
 }
+
