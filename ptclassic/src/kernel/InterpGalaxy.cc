@@ -64,6 +64,7 @@ InterpGalaxy::InterpGalaxy(const char* c, const char* dom) {
 	setDescriptor("An interpreted galaxy");
 	if (c) 	myClassName = c;
 	setDomain(dom);
+	defSource = NULL;
 }
 
 // Report an error: no such star or porthole
@@ -548,6 +549,12 @@ InterpGalaxy::setDomain (const char* name) {
 	return TRUE;
 }
 
+// set the definition source
+void
+InterpGalaxy::setDefinitionSource(const char* source) {
+	defSource = source ? hashstring(source) : ((const char *) NULL);
+}
+
 // clone function: uses copy constructor.
 Block*
 InterpGalaxy::clone() const { LOG_NEW; return new InterpGalaxy(*this);}
@@ -570,6 +577,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 	setDescriptor(g.descriptor());
 	setDomain(g.domain());
 	myClassName = g.myClassName;
+	defSource = g.defSource;
 	setNameParent(g.name(), NULL);
 
 // process the action list
@@ -720,6 +728,8 @@ InterpGalaxy::addToKnownList(const char* definitionSource,
 	setNameParent(myName, parent());
 // use my name as the "class name" for all objects that are cloned from me.
 	myClassName = myName;
+// save away the definition source info
+	setDefinitionSource(definitionSource);
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
