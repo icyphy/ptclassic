@@ -398,7 +398,7 @@ $(TYDIST_EX): $(ROOT)/mk/tycommon.mk
 	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
 		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a tar exclude file"; \
 	else \
-		/bin/echo "adm\nSCCS\nmakefile\n$(TYDIST).tar.gz\n$(TYDIST).zip\n$(JARFILE)" > $@ ; \
+		/bin/echo "adm\nSCCS\n$(TYDIST).tar.gz\n$(TYDIST).zip\n$(JARFILE)" > $@ ; \
 	fi
 
 # Tar file distribution
@@ -418,7 +418,7 @@ $(TYDIST).zip:
 		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a zip file"; \
 	else \
 		echo "Building $@"; \
-		(cd $(TYPACKAGE_ROOTDIR); zip -r $(TYPACKAGE_DIR)/$@ $(TYPACKAGE_DIR) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(TYDIST).tar.gz -x \*/$(TYDIST).zip); \
+		(cd $(TYPACKAGE_ROOTDIR); zip -r $(TYPACKAGE_DIR)/$@ $(TYPACKAGE_DIR) -x \*/adm/\* -x \*/SCCS/\* -x \*/$(TYDIST).tar.gz -x \*/$(TYDIST).zip); \
 	fi
 
 # Build sources in a form suitable for releasing
