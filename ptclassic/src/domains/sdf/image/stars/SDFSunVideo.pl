@@ -86,12 +86,15 @@ Y,U and V components.
 	    }
 	    port_str = (const char*) port;
 	    if (grabber->command("port",(void*)port_str) < 0){
-	      Error::abortRun(*this,"set port command failed\n");
+	      Error::abortRun(*this,"set port command failed,\n"
+		 "Perhaps you don't have a Sun Camera on your machine?\n");
+	      return;
 	    }
 	    u_int dec;
 	    dec = (int)decimate;
 	    if (grabber->command("decimate",(void*)&dec) < 0){
 	      Error::abortRun(*this,"set decimation command failed\n");
+	      return;
 	    }
 	    grabber->returnGeometry(width,height);
 	    width = width/dec;
