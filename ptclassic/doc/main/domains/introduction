@@ -91,4 +91,5 @@ A
 may contain other
 .c Wormhole s.
 This document illustrates the detailed mechanism of the domain interface.
+.IE "domain interface"
 In the last section, we will discuss how to create a new domain in \*(PT.

@@ -1,6 +1,8 @@
 .\" $Id$
 .H1 "EventHorizons
 .pp
+.IE "EventHorizon"
+.IE "EventHorizon, design"
 Like a 
 .c Star, a
 .c Wormhole
@@ -62,6 +64,7 @@ of the
 .c EventHorizon s.
 .pp
 It is worth pointing out that data-format conversion is not a task
+.IE "data-format conversion"
 of 
 .c EventHorizon s
 , opposed to what seems to be.
