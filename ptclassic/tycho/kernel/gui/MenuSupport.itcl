@@ -201,9 +201,12 @@ body ::tycho::MenuSupport::add {name inMenu args} {
     # Create a sub-menu
     if { $type == "cascade" } {
 	set entrypath($name) $menupath($inMenu)
-	set menupath($name) [menu $menupath($inMenu).[string tolower \
-		[join $name ""]] \
-		-tearoff 0]
+	set menupath($name) $menupath($inMenu).[string tolower [join $name ""]]
+	itk_component add $menupath($name) {
+	    menu $menupath($name) -tearoff 0
+	} {
+	    keep -background -cursor -font
+	}
 	set itemtype($name) "cascade"
 
 	eval $menupath($inMenu) add cascade $args \
