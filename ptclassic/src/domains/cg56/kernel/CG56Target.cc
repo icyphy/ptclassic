@@ -38,9 +38,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "StringList.h"
+#include "FixState.h"
+
 #include "CG56Target.h"
 #include "CG56Star.h"
-#include "FixState.h"
 
 static TypeConversionTable cg56CnvTable[6] = {
   {  FIX,	COMPLEX,	"FixToCx"	},
@@ -53,23 +55,31 @@ static TypeConversionTable cg56CnvTable[6] = {
 
 CG56Target::CG56Target (const char* nam, const char* desc) :
 MotorolaTarget(nam,desc,"CG56Star") {
-    // Initialize type conversion table
-    typeConversionTable = cg56CnvTable;
-    typeConversionTableRows = 6;
+    initDataMembers();
 }
 
 // copy constructor
 CG56Target::CG56Target(const CG56Target& src) : 
 MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {
+    initDataMembers();
+}
+
+void CG56Target::initDataMembers() {
     // Initialize type conversion table
     typeConversionTable = cg56CnvTable;
     typeConversionTableRows = 6;
+    assemblerOptions = "-A -B -L -Oso";
 }
 
 int CG56Target :: compileCode() {
-    StringList assembleCmds;
-    assembleCmds << "asm56000 -b -l -A -oso " << filePrefix;
-    return !systemCall(assembleCmds,"Errors in assembly",targetHost);
+    StringList assembleCmds = "asm56000 ";
+    assembleCmds << assemblerOptions << " " << filePrefix;
+    resetMemoryUsage();
+    int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
+    if (valid && computeMemoryUsage()) {
+	if (int(reportMemoryUsage)) Error::message(memoryUsageString());
+    }
+    return valid;
 }
 
 void CG56Target :: headerCode () {
@@ -83,13 +93,13 @@ void CG56Target :: headerCode () {
 
 void CG56Target :: setup() {
     Galaxy* g = galaxy();
-    addCG56One(this,g);
+    addCG56One(this, g);
     MotorolaTarget :: setup();
 }
 
 void addCG56One(Target* target,Galaxy* g) {
     if (g && (g->stateWithName("ONE") == 0)) {
-	LOG_NEW; FixState& ONE = *new FixState;
+	FixState& ONE = *new FixState;
 	g->addState(ONE.setState("ONE",target,"",
 				 "Max Fix point value",
 				 A_NONSETTABLE|A_CONSTANT));
@@ -99,7 +109,7 @@ void addCG56One(Target* target,Galaxy* g) {
 
 // makeNew
 Block* CG56Target :: makeNew () const {
-    LOG_NEW; return new CG56Target(*this);
+    return new CG56Target(*this);
 }
 
 void CG56Target::writeFloat(double val) {
@@ -108,9 +118,6 @@ void CG56Target::writeFloat(double val) {
     MotorolaTarget::writeFloat(val);
 }
 
-const char* CG56Target::className() const { return "CG56Target";}
+const char* CG56Target::className() const { return "CG56Target"; }
 
 ISA_FUNC(CG56Target,MotorolaTarget);
-
-
-

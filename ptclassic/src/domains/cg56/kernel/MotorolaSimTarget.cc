@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "MotorolaSimTarget.h"
 
-void MotorolaSimTarget :: initStates(const char* dsp,const char* start, 
+void MotorolaSimTarget :: initStates(const char* dsp, const char* start, 
 	const char* end) {
 	dspType = dsp;
 	startAddress = start;
@@ -50,12 +50,18 @@ void MotorolaSimTarget :: initStates(const char* dsp,const char* start,
 			"Interactive Simulation",this,"YES",""));
 	addStream("simulatorCmds", &simulatorCmds);
 	addStream("shellCmds", &shellCmds);
+	assemblerOptions = "-A -B -L";
 }
 
 int MotorolaSimTarget::compileCode() {
-	StringList assembleCmds;
-	assembleCmds << "asm" << dspType << " -A -b -l " << filePrefix << ".asm";
-	return !systemCall(assembleCmds, "Errors in assembly");
+	StringList assembleCmds = "asm";
+	assembleCmds << dspType << " " << assemblerOptions << " " << filePrefix;
+	resetMemoryUsage();
+	int valid = !systemCall(assembleCmds, "Errors in assembly");
+	if (valid && computeMemoryUsage()) {
+	    if (int(reportMemoryUsage)) Error::message(memoryUsageString());
+	}
+	return valid;
 }
 
 int MotorolaSimTarget::loadCode() {
@@ -63,7 +69,7 @@ int MotorolaSimTarget::loadCode() {
 	cmdFile << "load " << filePrefix << ".lod\n" << simulatorCmds
 		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
 		<< "\n";
-	if (!interactiveFlag) cmdFile << "quit\n";
+	if (! int(interactiveFlag)) cmdFile << "quit\n";
 	return writeFile(cmdFile, ".cmd");
 }
 
@@ -75,15 +81,15 @@ void MotorolaSimTarget::writeCode() {
 	realcmds << "# Remove all of the CG56WriteFile outputs\n";
 	realcmds << "/bin/rm -f /tmp/cgwritefile*\n";
 	realcmds << "# Run the simulator\n";
-	if (interactiveFlag) 
+	if (int(interactiveFlag))
 		realcmds << "(xterm -e sim";
 	else 
 		realcmds << "(sim";
 	realcmds << dspType << " " << filePrefix << ".cmd" << ">/dev/null)\n";
 	realcmds << "\n# Display the results\n";
 	realcmds << shellCmds;
-	if (!writeFile(realcmds,"",FALSE,0755)) {
-	    Error::abortRun(*this,"Shell command file write failed");
+	if (!writeFile(realcmds, "", FALSE, 0755)) {
+	    Error::abortRun(*this, "Failed to write the shell command file");
 	    return;
 	}
     }
@@ -105,7 +111,7 @@ void MotorolaSimTarget :: headerCode () {
 };
 
 void MotorolaSimTarget :: trailerCode () {
-	trailer << "ERROR	jmp	$" << endAddress << "\n";
+	trailer << "ERROR\tjmp\t$" << endAddress << "\n";
 	inProgSection = TRUE;
 }
 

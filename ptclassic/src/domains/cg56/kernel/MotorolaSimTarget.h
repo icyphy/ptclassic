@@ -40,14 +40,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "MotorolaTarget.h"
+#include "StringList.h"
 #include "StringState.h"
 #include "IntState.h"
+#include "MotorolaTarget.h"
 
 class MotorolaSimTarget : public virtual MotorolaTarget {
 protected:
 	IntState interactiveFlag;
-	StringList dspType;	//either 56000 or 96000
+	StringList dspType;		// either 56000 or 96000
 	StringList startAddress;
 	StringList endAddress;
 	/*virtual*/ void headerCode();
