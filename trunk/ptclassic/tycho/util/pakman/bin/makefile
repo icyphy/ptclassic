@@ -61,7 +61,7 @@ TYDOC_DESC =
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS) tclIndex
 
-sources::
+sources:: pakman
 	chmod a+x pakman
 
 # We don't include common.mk since we don't use the compiler here
