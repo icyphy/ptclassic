@@ -9,8 +9,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
+#include <X11/Xresource.h>	/* Pick up XrmUniqueQuark() for sol2 */
 
-#define VERSION_STRING	"11.3.2 December 1989"
+#include "compat.h"		/* Pick up common decls (sprintf() etc) */
+
+#define VERSION_STRING	"11.3.3 November 1994"
 
 #define MAXKEYS		50
 #define MAXATTR 	8
@@ -19,6 +22,13 @@
 #define MAXLS		50
 
 #define STRDUP(xx)	(strcpy(malloc((unsigned) (strlen(xx)+1)), (xx)))
+
+#if defined(__STDC__) || defined(__cplusplus)
+#define ARGS(args)	args
+#else
+#define ARGS(args)	()
+#endif
+
 
 typedef unsigned long Pixel;
 
