@@ -221,8 +221,11 @@ void CGTarget::setup() {
 
 	// be sure that this routine does not initialize the galaxy if it
 	// is a child target. It is already initialized, and done more!
-	if (!parent())
+	if (!parent()) {
+	    if (!galaxy() || haltRequested()) return;
+	    galaxy()->initialize();
 	    if (!modifyGalaxy()) return;
+	}
 
 	if (inWormHole()) wormPrepare();
 
@@ -647,6 +650,7 @@ const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
 }
 
 int CGTarget :: modifyGalaxy() {
+    if(haltRequested()) return FALSE;
     if(!typeConversionTable) return TRUE;
 
     extern int warnIfNotConnected (Galaxy&);
@@ -667,18 +671,6 @@ int CGTarget :: modifyGalaxy() {
 	while ((port = portIter++) != NULL) {
 	    // Splice in type conversion stars.
 	    if (needsTypeConversionStar(*port)) {
-		// Avoid re-initializing the Galaxy, which will break
-		// things if this is a child in a MultiTarget. (Why? See
-		// comments for CGTarget::setup() method.)  Initialize it
-		// only if there is no resolved type.
-		if (port->resolvedType() == NULL) {
-		    gal.initialize();
-		    if (SimControl::haltRequested()) return FALSE;
-		    // We must now re-run modifyGalaxy, blocks & ports may
-		    // have been added or deleted in the initialize method.
-		    return modifyGalaxy();
-		}
-
 		PortHole* input = port->far();	// destination input PortHole
 
 		int i;
