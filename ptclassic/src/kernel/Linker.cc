@@ -351,6 +351,16 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
     return (char *) NULL;
   }
 
+#ifdef READONLY_SHAREDLIBS
+  // HPPA really, really wants shared library permissions to be 555.
+  if (chmod(objName, 0555) < 0) {
+    Error::abortRun("Failed to make shared lib write-protected: ",
+ 		    objName);
+    return (char *) NULL;
+  }
+#endif // READONLY_SHAREDLIBS
+
+
   return objName;
 }
 
