@@ -18,8 +18,10 @@ include $(ROOT)/mk/config-g++.mk
 #
 # IRIX5.x does not have a ranlib
 RANLIB = 	true
-# For the time being, use cc 
-CC =		cc
+CC =		gcc
+# OCT_CC is used in src/octtools/vem-{lib,bin}.mk
+OCT_CC =	gcc -fwritable-strings
+
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
 
@@ -33,8 +35,8 @@ GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
 #     -cckr   The traditional K&R/Version7 C with SGI extensions
 # Note that -cckr will not work with gcc
-CFLAGS =	-G 0 -cckr $(OPTIMIZER)
-
+#CFLAGS =	-G 0 -cckr $(OPTIMIZER)
+CFLAGS =	-G 0 $(WARNINGS) $(OPTIMIZER)
 #
 # Variables for the linker
 #
@@ -54,6 +56,10 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 
 # S56 directory is only used on sun4.
 S56DIR =
+
+# Variables for local Matlab installation
+MATLABDIR =	$(PTOLEMY)/vendors/matlab
+MATLABLIBDIR =
 
 #
 # Variables for miscellaneous programs
