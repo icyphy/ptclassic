@@ -47,8 +47,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "InfString.h"
 #include "miscFuncs.h"
 
+// Must be large enough to hold %d and %u formats (20 digits on 64-bit arch)
+#define SMALL_STRING_SIZE 32
 
-#define SMALL_STRING 32
+// Must be large enough to hold the %.15g format (30 digits on 64-bit arch)
+// sign + digit + . + 30 digits + E + sign + 3 digits
+#define DOUBLE_STRING_SIZE 48
 
     
 StringList&
@@ -74,7 +78,8 @@ StringList :: operator = (const char* s) {
 StringList&
 StringList :: operator = (char c) {
 	char buf[2];
-	buf[0] = c; buf[1] = 0;
+	buf[0] = c;
+	buf[1] = 0;
 	return *this = buf;
 }
 
@@ -142,7 +147,7 @@ StringList :: operator << (char c)
 {
         char buf[2];
         buf[0] = c;
-        buf[1] = '\0';
+        buf[1] = 0;
         return *this << buf;
 }
 
@@ -150,8 +155,8 @@ StringList :: operator << (char c)
 StringList&  
 StringList :: operator << (int i)
 {
-	char buf[SMALL_STRING];
-        sprintf(buf,"%d",i); 
+	char buf[SMALL_STRING_SIZE];
+        sprintf(buf, "%d", i); 
 	return *this << buf;
 }
 
@@ -159,8 +164,8 @@ StringList :: operator << (int i)
 StringList&
 StringList :: operator << (unsigned int i)
 {
-	char buf[SMALL_STRING];
-        sprintf(buf,"%u",i); 
+	char buf[SMALL_STRING_SIZE];
+        sprintf(buf, "%u", i); 
 	return *this << buf;
 }
 
@@ -176,22 +181,23 @@ StringList :: operator << (unsigned int i)
 StringList&
 StringList :: operator << (double f)
 {
-	char buf[SMALL_STRING];
+	char buf[DOUBLE_STRING_SIZE];
         sprintf(buf,"%.15g",f);
 
 	// If the ASCII result looks like an integer, add ".0" so that it
 	// doesn't look like an integer anymore.
-
 	int looksLikeInt = 1;
-	for (register char *p = buf; *p != 0; p++) {
+	char *p = buf;
+	while (*p) {
 		// If there is a decimal point, or an alphabetic
 		// character such as the 'e' in scientific notations
 		// or the special values "NaN", "Infinity", etc., then
 		// it doesn't looks like an integer.
-		if ((*p == '.') || (isalpha((unsigned char) *p))) {
+		if ((*p == '.') || isalpha(*p)) {
 			looksLikeInt = 0;
 			break;
 		}
+		p++;
 	}
 	if (looksLikeInt) {
 		p[0] = '.';
