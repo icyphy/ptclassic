@@ -41,6 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <std.h>
 
+class StringList;
+
 class Linker {
 	friend class Linker_Cleanup;
 public:
@@ -64,7 +66,7 @@ public:
 // check whether linker is active (so objects can be marked as dynamically
 // linked).  Actually it's set while constructors or other functions that
 // have just been linked are being run.
-	static int isActive() { return activeFlag;}
+	static int isActive();
 
 // see whether the linker is enabled.
 	static int enabled() { return ptolemyName != 0;}
@@ -108,5 +110,17 @@ private:
 
 	// default options to be added to links
 	static const char* myDefaultOpts;
+
+	// Below here, these slots are only used for dlopen() style linking
+
+	// Generate a .so file from one or more .o or .so files
+	static char *generateSharedObject( int argc, char **argv,
+ 					   char* objName, int maxsize); 
+
+	// Link Sequence number.  Incremented with each link.
+	static int linkSeqNum;
+
+	// Names of all the files that have been permlinked
+	static StringList permlinkFiles;
 };
 #endif
