@@ -4,7 +4,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1995  The Regents of the University of California.
+Copyright (c) 1994-%Q%  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -108,6 +108,9 @@ public:
     /*virtual*/ void wormPrepare();
     /*virtual*/ void allWormInputCode();
     /*virtual*/ void allWormOutputCode();
+
+    // This method should not be necessary, see CGCTargetWH.cc for details
+    /*virtual*/ int modifyGalaxy();
 
     int linkFiles();
     
