@@ -103,9 +103,10 @@ void NamedObjList::initElements() {
 
 void NamedObjList::deleteAll() {
 	NamedObj *p;
-	NamedObjListIter next(*this);
-	while ((p = next++) != 0) {
+	// get and remove list nodes, while any remain.
+	// delete the pointed-to objects.
+	while ((p = (NamedObj*)getAndRemove()) != 0) {
 		LOG_DEL; delete p;
 	}
-	initialize();
 }
+
