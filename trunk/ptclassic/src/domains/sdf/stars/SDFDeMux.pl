@@ -9,7 +9,7 @@ point 0.0.  Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
 outside this range, all outputs get 0.0.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
