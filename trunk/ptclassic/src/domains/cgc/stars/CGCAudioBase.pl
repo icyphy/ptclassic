@@ -174,8 +174,14 @@ limitation of liability, and disclaimer of warranty provisions.
     }	
 
     codeblock(read) {
-      /* Read blockSize bytes of data from the file */
-      read($starSymbol(file), $starSymbol(bufferptr), $val(blockSize));
+      /* Read blockSize bytes of data from the file. If it returns
+	 zero, assume end of file and break - this will break out
+ 	 of the execution loop in with the TclTkTarget and the TychoTarget
+	*/
+      if ( read($starSymbol(file), $starSymbol(bufferptr),
+		$val(blockSize)) <= 0 ) {
+	    break;
+	}
     }
 
     codeblock(write) {
