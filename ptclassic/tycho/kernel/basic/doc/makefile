@@ -51,7 +51,7 @@ ITCL_SRCS =
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	index.html
 
-MISC_FILES = 
+MISC_FILES = codeDoc img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
