@@ -46,6 +46,7 @@ static const char file_id[] = "SDFCluster.cc";
 #include "Plasma.h"
 #include "Target.h"
 #include "streamCompat.h"
+#include "Error.h"
 
 // A SDFClusterGal is a Galaxy, built from another galaxy.
 
@@ -89,12 +90,10 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 	LOG_DEL; delete ptable;
 }
 
-// Main clustering routine.  Alternate merge passes and loop passes
+// Core clustering routine.  Alternate merge passes and loop passes
 // until no more can be done.
-int SDFClusterGal::cluster() {
-	if (numberClusts() <= 1) return TRUE;
-
-	int urate, change = FALSE;
+int SDFClusterGal::clusterCore(int& urate) {
+	int change = FALSE;
 	while ((urate = uniformRate()) == FALSE) {
                 int status = mergePass();
                 status |= loopPass();
@@ -104,16 +103,42 @@ int SDFClusterGal::cluster() {
 	if (numberClusts() == 1) {
 		if (logstrm)
 			*logstrm << "Reduced to one cluster\n";
-		return TRUE;
 	}
-	if (urate) {
+	else if (urate) {
 		if (logstrm)
 			*logstrm << "Uniform rate achieved: one extra merge pass now\n";
-		mergePass();
+		if (mergePass()) change = TRUE;
 	}
 	return change;
 }
 
+// Top level of clustering algorithm.  Here's the outline.
+// 1. Do a clusterCore pass.
+// 2. If not reduced to uniform rate, mark feedforward delays as ignorable
+//    and do another clusterCore pass.
+// 3. Do a pass that merges parallel loops with the same rate.
+
+int SDFClusterGal::cluster() {
+	int urate;
+	int change = clusterCore(urate);
+
+	// if we did not get to uniform rate, try marking feedforward
+	// delay arcs as ignorable and clustering some more.
+
+	if (!urate && markFeedForwardDelayArcs()) {
+		change |= clusterCore(urate);
+	}
+	if (!urate)
+		Error::warn("clustering algorithm did not achieve uniform rate");
+	if (change) {
+		if (logstrm)
+			*logstrm << "Looking for parallel loops\n";
+		parallelLoopMergePass();
+	}
+	return change;
+}
+
+// Generate schedules in all the lower-level clusters.
 int SDFClusterGal::genSubScheds() {
 	SDFClusterGalIter nextClust(*this);
 	SDFCluster* c;
@@ -122,6 +147,7 @@ int SDFClusterGal::genSubScheds() {
 	return TRUE;
 }
 
+// Test to see if we have uniform rate.
 int SDFClusterGal::uniformRate() {
 	if (numberClusts() <= 1) return TRUE;
 	SDFClusterGalIter nextClust(*this);
@@ -132,6 +158,7 @@ int SDFClusterGal::uniformRate() {
 	return TRUE;
 }
 
+// Merge adjacent actors that can be treated as a single cluster.
 int SDFClusterGal::mergePass() {
 	if (numberClusts() <= 1) return FALSE;
 	int changes = 0;
@@ -151,9 +178,10 @@ int SDFClusterGal::mergePass() {
 			changes = TRUE;
 			nextClust.reset();
 		}
-		// if no more merge candidates, try the slow merge
+		// if no more merge candidates, try the slow merge.
 		// note we must always reset the iterator after a
-		// merge since it might be invalid.
+		// merge since it might be invalid (point to a deleted
+		// cluster).
 		else if ((c2 = fullSearchMerge()) != 0)
 			nextClust.reset();
 	} while (c2);
@@ -179,7 +207,7 @@ SDFCluster* SDFClusterGal::fullSearchMerge() {
 		SDFClustPort *p;
 		while ((p = nextPort++) != 0) {
 			// check requirement 1: same rate and no delay
-			if (p->numTokens() == 0 &&
+			if (!p->fbDelay() &&
 			    p->numIO() == p->far()->numIO()) {
 				SDFCluster *peer = p->far()->parentClust();
 				SDFCluster *src, *dest;
@@ -203,6 +231,63 @@ SDFCluster* SDFClusterGal::fullSearchMerge() {
 	return 0;
 }
 
+int SDFClusterGal::parallelLoopMergePass() {
+	// See if we can do a merge of two disconnected
+	// clusters that have the same loop factor.
+	SDFClusterGalIter nextClust(*this);
+	int changes = FALSE;
+	SDFCluster *c;
+// step 1: apply recursively to each cluster
+	while ((c = nextClust++) != 0)
+		changes |= c->internalClustering();
+	nextClust.reset();
+// step 2: apply at top level.
+
+	// falseHitList is a list of clusters not to try again.
+	SequentialList falseHitList;
+
+	while ((c = nextClust++) != 0) {
+		if (c->loop() <= 1) continue;
+		if (falseHitList.member(c)) continue;
+		// copy the iterator using the copy constructor.
+		SDFClusterGalIter i2(nextClust);
+		SDFCluster* c2;
+		int falseMatch = FALSE;
+		while ((c2 = i2++) != 0) {
+			if (c2->loop() != c->loop()) continue;
+			if (logstrm)
+				*logstrm <<
+				 "Trying parallel loop merge of " <<
+				 c->readName() << " and " << c2->readName();
+			// merge if no indirect paths in either direction.
+			if (indirectPath(c,c2) || indirectPath(c2,c)) {
+				if (logstrm) *logstrm <<
+					"... Can't merge, indirect paths\n";
+				falseMatch = TRUE;
+			}
+			else {
+				if (logstrm) *logstrm << "... looks good!\n";
+				// Do the merge!
+				merge(c,c2);
+				changes = TRUE;
+				// reset iterator so we will rescan
+				// from the beginning.
+				nextClust.reset();
+				falseMatch = FALSE;
+				break;
+				// break out of inner while, continue
+				// to do the outer while from the beginning.
+			}
+		}
+		// if we get here and falseMatch is true, then c cannot
+		// merge with anything even though its rate matches another
+		// loop.  We add it to a stop list so we don't keep trying
+		// to merge it each time through.
+		if (falseMatch) falseHitList.put(c);
+	}
+	return changes;
+}
+
 // this function returns true if there exists an indirect path from the
 // src cluster to the dst cluster (one that passes through another
 // cluster), treating the ports as directed paths.
@@ -210,34 +295,12 @@ SDFCluster* SDFClusterGal::fullSearchMerge() {
 int SDFClusterGal::indirectPath(SDFCluster* src, SDFCluster* dst) {
 	stopList.initialize();
 	stopList.put(src);
-	if (logstrm)
-		*logstrm << "indirectPath(" << src->readName()
-			<< "," << dst->readName() << ")\n";
 	SDFClustPortIter nextP(*src);
 	SDFClustPort* p;
 	while ((p = nextP++) != 0) {
 		SDFCluster* peer = p->far()->parentClust();
-		if (p->isItOutput() && peer != dst && findPath(peer,dst)) {
-			if (logstrm)
-				*logstrm << "indirectPath(" << src->readName()
-					<< "," << dst->readName()
-						<< ") = TRUE\n";
+		if (p->isItOutput() && peer != dst && findPath(peer,dst))
 			return TRUE;
-		}
-	}
-	if (logstrm)
-		*logstrm << "indirectPath(" << src->readName()
-			<< "," << dst->readName() << ") = FALSE\n";
-	return FALSE;
-}
-
-// this should be a part of the SequentialList class.
-// it returns true if the pointer argument is a member of the list.
-static int member(Pointer p,SequentialList& l) {
-	ListIter next(l);
-	Pointer q;
-	while ((q = next++) != 0) {
-		if (q == p) return TRUE;
 	}
 	return FALSE;
 }
@@ -249,9 +312,6 @@ static int member(Pointer p,SequentialList& l) {
 // src on the stop list to initialize it.
 
 int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
-	if (logstrm)
-		*logstrm << "findPath(" << start->readName()
-			<< "," << dst->readName() << ")\n";
 	stopList.put(start);
 	SDFClustPortIter nextP(*start);
 	SDFClustPort* p;
@@ -259,20 +319,22 @@ int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
 		if (p->isItInput()) continue;
 		SDFCluster* peer = p->far()->parentClust();
 		if (peer == dst) return TRUE;
-		if (member(peer,stopList)) continue;
+		if (stopList.member(peer)) continue;
 		if (findPath(peer,dst)) return TRUE;
 	}
 	return FALSE;
 }
 
-// This routine removes all feed-forward delays on a clusterGal to
-// enhance the looping capability without hazard of dead-lock condition.
-// We suggest that this method is called after the initial clustering is 
-// completed for efficiency.
+static ostream& operator<<(ostream& o, SDFClustPort& p);
 
-int SDFClusterGal :: removeDelay() {
+// This routine marks all feed-forward delays on a clusterGal to
+// enhance the looping capability without hazard of dead-lock condition.
+// We suggest that this method be called after the initial clustering is 
+// completed for efficiency (since searching for indirect paths is expensive)
+
+int SDFClusterGal :: markFeedForwardDelayArcs() {
 	if (logstrm)
-		*logstrm << "starting removeDelay()\n";
+		*logstrm << "starting markFeedForwardDelayArcs()\n";
 	if (numberClusts() <= 1) return FALSE;
 	int changes = FALSE;
 	SDFClusterGalIter nextClust(*this);
@@ -288,15 +350,17 @@ int SDFClusterGal :: removeDelay() {
 			SDFCluster* peer = p->far()->parentClust();
 			stopList.initialize();
 			if (!findPath(peer,c))  {
-				// if no feedback path, remove delay
-				p->setDelay(0);
-				p->initGeo();
+				p->markFeedForward();
+				if (logstrm) {
+					*logstrm << "Marking " << *p;
+					*logstrm << "as a feedforward arc\n";
+				}
 				changes = TRUE;
 			}
 		}
 	}
 	return changes;
-}			
+}
 	
 // This is the loop pass.  It loops any cluster for which loopFactor
 // returns a value greater than 1.
@@ -314,6 +378,7 @@ int SDFClusterGal::loopPass() {
 	// special handling for two clusters: do arbitrary rate
 	// changes if no delays between the clusters and rate
 	// mismatch exists.
+	// We can ignore feedforward delays.
 	if (numberClusts() == 2) {
 		SDFCluster* c1 = nextClust++;
 		SDFCluster* c2 = nextClust++;
@@ -322,7 +387,7 @@ int SDFClusterGal::loopPass() {
 		SDFClustPortIter nextPort(*c1);
 		SDFClustPort* p;
 		while ((p = nextPort++) != 0) {
-			if (p->numTokens() > 0 ||
+			if (p->fbDelay() ||
 			    p->numIO() == p->far()->numIO()) return FALSE;
 		}
 		// ok, loop both clusters so that their
@@ -367,10 +432,10 @@ int SDFCluster::loopFactor() {
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
 		// can't loop if connected to a different rate star by a delay
-		if (p->numTokens() && myIO != peerIO) return 0;
-		// don't loop if I already match a peer's rate or if peer
-		// should loop first.
-		if (myIO >= peerIO) return 0;
+		// (unless it is a feedforward).
+		if (p->fbDelay() && myIO != peerIO) return 0;
+		// don't loop if peer should loop first
+		if (myIO > peerIO) return 0;
 		// try looping if things go evenly.
 		if (peerIO % myIO == 0) {
 			int possFactor = peerIO / myIO;
@@ -383,27 +448,33 @@ int SDFCluster::loopFactor() {
 	return retval;
 }
 
+// fn to print a single port of a cluster
+static ostream& operator<<(ostream& o, SDFClustPort& p) {
+	o << p.parent()->readName() << "." << p.readName();
+	SDFClustPort* pFar = p.far();
+	if (p.isItOutput())
+		o << "=>";
+	else
+		o << "<=";
+	if (!pFar) o << "0";
+	else o << pFar->parent()->readName() << "." << pFar->readName();
+	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
+	return o;
+}
+
 // fn to print ports of a cluster.
 ostream& SDFCluster::printPorts(ostream& o) {
 	const char* prefix = "( ";
 	SDFClustPortIter next(*this);
 	SDFClustPort* p;
 	while ((p = next++) != 0) {
-		o << prefix << p->parent()->readName() << "." << p->readName();
-		SDFClustPort* pFar = p->far();
-		if (p->isItOutput())
-			o << "=>";
-		else
-			o << "<=";
-		if (!pFar) o << "0";
-		else o << pFar->parent()->readName() << "." << pFar->readName();
-		if (p->numTokens() > 0) o << "[" << p->numTokens() << "]";
+		o << prefix << *p;
 		prefix = "\n\t  ";
 	}
 	return o << " )";
 }
 
-// loop a cluster.
+// loop a cluster.  Adjust repetitions and token counts.
 void SDFCluster::loopBy(int fac) {
 	pLoop *= fac;
 	repetitions.numerator /= fac;
@@ -413,6 +484,19 @@ void SDFCluster::loopBy(int fac) {
 		p->numberTokens *= fac;
 }
 
+// unloop a cluster.  Return old loop factor.  This undoes the effect
+// of previous loopBy calls.
+int SDFCluster::unloop() {
+	int fac = pLoop;
+	pLoop = 1;
+	repetitions.numerator *= fac;
+	SDFClustPortIter nextPort(*this);
+	SDFClustPort* p;
+	while ((p = nextPort++) != 0)
+		p->numberTokens /= fac;
+	return fac;
+}
+
 // generate a name for a new bag
 const char* SDFClusterGal::genBagName() {
 	char buf[20];
@@ -420,16 +504,27 @@ const char* SDFClusterGal::genBagName() {
 	return hashstring(buf);
 }
 
-// This method combines two clusters into one.  There are four cases:
+// This function combines two clusters into one.  There are four cases:
 // basically the distinction between atomic and non-atomic clusters.
 
 SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
-	if (logstrm)
-		*logstrm << "merging " << *c1 << "\nand " << *c2 << "\n";
+	int fac = 1;
 
 // if a bag has a loop factor we treat it as an atom for merging
 // purposes (put it inside another bag instead of combining bags).
 // That's why we test for the loop count.
+// Exception: if both loop factors are the same, we "unloop" and
+// "reloop".
+
+	// unloop check
+	if (c1->loop() == c2->loop() && c1->loop() > 1) {
+		fac = c1->unloop();
+		c2->unloop();
+	}
+
+	if (logstrm)
+		*logstrm << "merging " << c1->readName() << " and " <<
+			c2->readName() << "\n";
 
 	SDFClusterBag* c1Bag = (c1->loop() == 1) ? c1->asBag() : 0;
 	SDFClusterBag* c2Bag = (c2->loop() == 1) ? c2->asBag() : 0;
@@ -444,29 +539,49 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	else {
 		// make a new bag and put both atoms into it.
 		LOG_NEW; SDFClusterBag* bag = new SDFClusterBag;
+		addBlock(bag->setBlock(genBagName(),this));
 		bag->absorb(c1,this);
 		bag->absorb(c2,this);
-		addBlock(bag->setBlock(genBagName(),this));
 		c1Bag = bag;
 	}
 	if (logstrm)
 		*logstrm << "result is " << *c1Bag << "\n\n";
+
+	if (fac > 1) {
+		// reloop after merge
+		c1Bag->loopBy(fac);
+	}
 	return c1Bag;
 }
+
+// constructor: make empty bag.
+SDFClusterBag :: SDFClusterBag()
+: owner(TRUE), exCount(0), sched(0), gal(0)
+{}
+
 
 void SDFClusterBag :: createScheduler() {
 	LOG_DEL; delete sched;
 	LOG_NEW; sched = new SDFBagScheduler;
 }
 
+void SDFClusterBag :: createInnerGal() {
+	LOG_DEL; delete gal;
+	LOG_NEW; gal = new SDFClusterGal;
+	if (parent())
+		gal->dupStream((SDFClusterGal*)parent());
+}
+
 // This function absorbs an atomic cluster into a bag.
 
-void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
-	if (gal.numberBlocks() == 0)
+void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
+	if (size() == 0) {
+		createInnerGal();
 		repetitions = c->repetitions;
+	}
 // move c from its current galaxy to my galaxy.
 	par->removeBlock(*c);
-	gal.addBlock(*c,c->readName());
+	gal->addBlock(*c,c->readName());
 // adjust the bag porthole list.  Some of c's ports will now become
 // external ports of the cluster, while some external ports of the
 // cluster that connnect to c will disappear.
@@ -495,7 +610,9 @@ void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 
 // this function merges two bags.
 void
-SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
+SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
+	if (b->size() == 0) return;
+	if (!gal) createInnerGal();
 	// get a list of all "bagports" that connect the two clusters.
 	// we accumulate them on one pass and delete on the next to avoid
 	// problems with iterators.
@@ -520,8 +637,8 @@ SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	// now we simply combine the remaining bagports and clusters into this.
 	SDFClusterBagIter nextC(*b);
 	SDFCluster* c;
-	while ((c = (SDFCluster*)nextC++) != 0) {
-		gal.addBlock(*c,c->readName());
+	while ((c = nextC++) != 0) {
+		gal->addBlock(*c,c->readName());
 	}
 	SDFClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
@@ -532,6 +649,11 @@ SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	par->removeBlock(*b); // remove from parent galaxy
 	b->owner = FALSE;     // prevent from zapping contents, I took them
 	LOG_DEL; delete b;    // zap the shell
+}
+
+// internal clustering for a bag
+int SDFClusterBag::internalClustering() {
+	return size() >= 2 ? gal->parallelLoopMergePass() : FALSE;
 }
 
 // print a bag on a stream.
@@ -550,7 +672,10 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 }
 
 // generate the bag's schedule.  Also make schedules for "the bags within".
+// Does nothing for an empty bag.
 int SDFClusterBag::genSched() {
+	if (size() == 0) return TRUE;
+
 	// create scheduler
 	createScheduler();
 
@@ -558,7 +683,7 @@ int SDFClusterBag::genSched() {
 	SDFCluster* c;
 	while ((c = nextClust++) != 0)
 		if (!c->genSched()) return FALSE;
-	return (sched->setup(gal));
+	return (sched->setup(*gal));
 }
 
 // indent by depth tabs.
@@ -571,6 +696,9 @@ static const char* tab(int depth) {
 
 // return the bag's schedule.
 StringList SDFClusterBag::displaySchedule(int depth) {
+	if (sched == 0) {
+		return "schedule has not been computed";
+	}
 	StringList sch;
 	if (loop() > 1) {
 		sch += tab(depth);
@@ -588,29 +716,19 @@ StringList SDFClusterBag::displaySchedule(int depth) {
 }
 
 // run the cluster, taking into account the loop factor
-void SDFClusterBag::go() {
+int SDFClusterBag::fire() {
+	if (!sched) return FALSE;
 	sched->setStopTime(loop()+exCount);
-	sched->run(gal);
+	sched->run(*gal);
 	exCount += loop();
+	return !Scheduler::haltRequested();
 }
 
 // destroy the bag.
 SDFClusterBag::~SDFClusterBag() {
 	if (!owner) return;
-	// delete my ports
-	BlockPortIter nextP(*this);
-	PortHole* p;
-	while ((p = nextP++) != 0) {
-		p->setNameParent("",0); // avoid p removing itself from list
-		LOG_DEL; delete p;
-	}
-	// delete my blocks
-	GalTopBlockIter nextB(gal);
-	Block* b;
-	while ((b = nextB++) != 0) {
-		LOG_DEL; delete b;
-	}
-	delete sched;
+	LOG_DEL; delete gal;
+	LOG_DEL; delete sched;
 }
 
 // find an attractive and compatible neighbor.
@@ -631,7 +749,7 @@ SDFCluster* SDFCluster::mergeCandidate() {
 		// a connection is ok to use for merging if there are
 		// no delays and no sample rate changes.
 
-		int ok = (p->numTokens() == 0 && myIO == peerIO);
+		int ok = (!p->fbDelay() && myIO == peerIO);
 		if (p->isItInput()) {
 			if (src == 0) src = peer;
 			if (src != peer) multiSrc++;
@@ -661,7 +779,8 @@ static const char* mungeName(NamedObj& o) {
 	char* p = buf;
 	int i = 0;
 	while (i < 79 && *cname) {
-		*p++ = (*cname == '.') ? '_' : *cname;
+		if (*cname == '.') *p++ = '_';
+		else *p++ = *cname;
 		cname++;
 	}
 	*p = 0;
@@ -720,9 +839,11 @@ StringList SDFAtomCluster::displaySchedule(int depth) {
 	return sch;
 }
 
-void SDFAtomCluster::go() {
-	for (int i = 0; i < loop(); i++)
-		pStar.fire();
+int SDFAtomCluster::fire() {
+	for (int i = 0; i < loop(); i++) {
+		if (!pStar.fire()) return FALSE;
+	}
+	return TRUE;
 }
 
 int SDFAtomCluster::myExecTime() {
@@ -732,7 +853,7 @@ int SDFAtomCluster::myExecTime() {
 // constructor for SDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an SDFClusterBag.
 SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp), pOutPtr(0)
+: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0)
 {
 	const char* name = bp ? port.readName() : mungeName(port);
 	setPort(name,parent,INT);
@@ -876,5 +997,3 @@ StringList SDFBagScheduler::genCode(Target& t, int depth) {
 	}
 	return out;
 }
-
-
