@@ -200,8 +200,70 @@ static void andNotGeoList
 	ARGS((harList *geoListPtr, harList *cutGeoListPtr));
 
 
-static void message
-	ARGS((va_alist));
+/*
+ *	This stuff is basically a small subset of the nonexistent
+ *  ``snprintf'' function with a facet-printing primitive.
+ */
+#define ERR_BUF_SIZE	1000
+static char errorBuffer[ERR_BUF_SIZE + 20];	/* enough extra for any %d */
+static char *errBufPtr = errorBuffer;
+
+
+/*VARARGS*/
+static void message(va_alist)
+va_dcl
+{
+    vulcanMessageType type;
+    char *format;
+    va_list ap;
+
+    va_start(ap);
+    type = va_arg(ap, vulcanMessageType);
+    if ((int) type > (int) worstMessage) worstMessage = type;
+    format = va_arg(ap, char *);
+
+    while (*format != '\0') {
+	spillExcessError();
+
+	if (*format != '%') {
+	    *errBufPtr++ = *format++;
+	} else {
+	    format++;
+	    switch (*format++) {
+		case 's':		/* string argument */
+		    errAddString(va_arg(ap, char *));
+		    break;
+		case 'd':		/* decimal number argument */
+		    errAddNumber(va_arg(ap, int));
+		    break;
+		case 'f':		/* facet pointer */
+		    {
+			octObject *facetPtr = va_arg(ap, octObject *);
+
+			*errBufPtr++ = '`';
+			errAddString(facetPtr->contents.facet.cell);
+			*errBufPtr++ = ':';
+			errAddString(facetPtr->contents.facet.view);
+			*errBufPtr++ = ':';
+			errAddString(facetPtr->contents.facet.facet);
+			*errBufPtr++ = ':';
+			errAddString(facetPtr->contents.facet.version);
+			*errBufPtr++ = '\'';
+		    }
+		    break;
+		default:		/* shouldn't happen */
+		    ASSERT(0, "***bad format directive in message"); /* SUPPRESS 275 */
+	    }
+	}
+    }
+    *errBufPtr = '\0';
+    va_end(ap);
+
+    if (type != VULCAN_PARTIAL) {
+	(*messageHandler)(type, errorBuffer);
+	errBufPtr = errorBuffer;
+    }
+}
 
 /*
  *	vulcanParameterized -- full form of interface generator
@@ -1321,70 +1383,7 @@ static int masterHash(val, mod)
     return(st_strhash(instPtr->contents.instance.master, mod));
 }
 
-/*
- *	This stuff is basically a small subset of the nonexistent
- *  ``snprintf'' function with a facet-printing primitive.
- */
-#define ERR_BUF_SIZE	1000
-static char errorBuffer[ERR_BUF_SIZE + 20];	/* enough extra for any %d */
-static char *errBufPtr = errorBuffer;
 
-/*VARARGS*/
-static void message(va_alist)
-va_dcl
-{
-    vulcanMessageType type;
-    char *format;
-    va_list ap;
-
-    va_start(ap);
-    type = va_arg(ap, vulcanMessageType);
-    if ((int) type > (int) worstMessage) worstMessage = type;
-    format = va_arg(ap, char *);
-
-    while (*format != '\0') {
-	spillExcessError();
-
-	if (*format != '%') {
-	    *errBufPtr++ = *format++;
-	} else {
-	    format++;
-	    switch (*format++) {
-		case 's':		/* string argument */
-		    errAddString(va_arg(ap, char *));
-		    break;
-		case 'd':		/* decimal number argument */
-		    errAddNumber(va_arg(ap, int));
-		    break;
-		case 'f':		/* facet pointer */
-		    {
-			octObject *facetPtr = va_arg(ap, octObject *);
-
-			*errBufPtr++ = '`';
-			errAddString(facetPtr->contents.facet.cell);
-			*errBufPtr++ = ':';
-			errAddString(facetPtr->contents.facet.view);
-			*errBufPtr++ = ':';
-			errAddString(facetPtr->contents.facet.facet);
-			*errBufPtr++ = ':';
-			errAddString(facetPtr->contents.facet.version);
-			*errBufPtr++ = '\'';
-		    }
-		    break;
-		default:		/* shouldn't happen */
-		    ASSERT(0, "***bad format directive in message"); /* SUPPRESS 275 */
-	    }
-	}
-    }
-    *errBufPtr = '\0';
-    va_end(ap);
-
-    if (type != VULCAN_PARTIAL) {
-	(*messageHandler)(type, errorBuffer);
-	errBufPtr = errorBuffer;
-    }
-}
-
 static void spillExcessError()
 {
     if (errBufPtr >= &errorBuffer[ERR_BUF_SIZE]) {
