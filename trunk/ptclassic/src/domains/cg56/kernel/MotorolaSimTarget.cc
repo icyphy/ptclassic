@@ -102,10 +102,7 @@ void MotorolaSimTarget::writeCode() {
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
 	realcmds << "\n# Run the simulator\n";
-	if (int(interactiveFlag))
-		realcmds << "xterm -e sim";
-	else 
-		realcmds << "sim";
+        realcmds << "xterm -e sim";
 	realcmds << dspType << " " << filePrefix << ".cmd"
     		 << " >/dev/null 2>&1\n";
 	if (int(reportExecutionTime)) {
