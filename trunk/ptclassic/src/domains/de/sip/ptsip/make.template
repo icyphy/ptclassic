@@ -85,7 +85,8 @@ HDRS = \
 	pangen5.h \
 	spin.h \
 	tl.h \
-	version.h
+	version.h \
+	y.tab.h
 
 # object files for all stars
 OBJS= y.tab.o $(SRCS:.cc=.o)
@@ -98,9 +99,11 @@ install:        makefile $(LIBDIR)/$(LIB)
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
+y.tab.h: spin.y
+	cd $(VPATH); $(YACC) -d $^
+
 # yacc it!
-y.tab.o: spin.y
-	cd $(VPATH); $(YACC) $^
+y.tab.o: y.tab.h
 	rm -f $@
 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) \
 		-I$(VPATH) $(INCL) -c $(VPATH)/y.tab.c -o y.tab.o
