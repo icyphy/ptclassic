@@ -71,7 +71,6 @@ include $(ROOT)/mk/matlab.mk
 include $(ROOT)/mk/mathematica.mk
 
 CG56T = $(OBJDIR)/domains/cg56/targets
-CG96T = $(OBJDIR)/domains/cg96/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
 CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
 CGT = $(OBJDIR)/domains/cg/targets
@@ -82,20 +81,14 @@ BDFDIR = $(CROOT)/src/domains/bdf
 CGDDFDIR = $(CROOT)/src/domains/cg
 CGDIR = $(CROOT)/src/domains/cg
 CGCDIR = $(CROOT)/src/domains/cgc
-CG96DIR = $(CROOT)/src/domains/cg96
 CG56DIR = $(CROOT)/src/domains/cg56
-CPDIR = $(CROOT)/src/domains/cp
 DDFDIR = $(CROOT)/src/domains/ddf
 DEDIR = $(CROOT)/src/domains/de
 HOFDIR = $(CROOT)/src/domains/hof
 IPUSDIR = $(CROOT)/src/domains/ipus
 MDSDFDIR = $(CROOT)/src/domains/mdsdf
-MQDIR = $(CROOT)/src/domains/mq
 PNDIR = $(CROOT)/src/domains/pn
 SDFDIR = $(CROOT)/src/domains/sdf
-SILAGEDIR = $(CROOT)/src/domains/silage
-THORDIR = $(CROOT)/src/domains/thor
-VHDLFDIR = $(CROOT)/src/domains/vhdlf
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
 VHDLDIR = $(CROOT)/src/domains/vhdl
 
@@ -114,20 +107,7 @@ ifndef TK
 	SDFDFM=
 endif 
 
-# Motorola DSP assembly code generation domains
-
-ifdef CG96
-	CUSTOM_DIRS += $(CG96DIR)/kernel $(CG96DIR)/stars \
-		$(CG96DIR)/targets $(CG96DIR)/dsp/stars
-	CG = 1
-	PALETTES += PTOLEMY/src/domains/cg96/icons/cg96.pal
-	STARS += $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
-	LIBS += -lcg96targets -lcg96dspstars -lcg96stars -lcg96
-	LIBFILES += $(LIBDIR)/libcg96targets.$(LIBSUFFIX) \
-		$(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcg96stars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcg96.$(LIBSUFFIX)
-endif
+# Motorola DSP assembly code generation domain
 
 ifdef CG56
 	CUSTOM_DIRS += $(CG56DIR)/kernel $(CG56DIR)/stars \
@@ -163,28 +143,6 @@ ifdef CG56
 	CEPHESLIB = 1
 	# CG56 targets need CGCStar
 	CGCLIB = 1
-endif
-
-ifdef SILAGE
-	CUSTOM_DIRS += $(SILAGEDIR)/kernel $(SILAGEDIR)/stars \
-		$(SILAGEDIR)/targets
-	CG = 1
-	SDFLIB = 1
-	PALETTES += PTOLEMY/src/domains/silage/icons/silage.pal
-	STARS += $(LIBDIR)/silagestars.o
-	LIBS += -lsilagestars -lsilage
-	LIBFILES += $(LIBDIR)/libsilagestars.$(LIBSUFFIX) \
-		$(LIBDIR)/libsilage.$(LIBSUFFIX)
-endif
-
-ifdef THOR
-	CUSTOM_DIRS += $(THORDIR)/kernel $(THORDIR)/stars \
-		$(THORDIR)/pepp $(THORDIR)/analyzerX11
-	PALETTES += PTOLEMY/src/domains/thor/icons/thor.pal
-	STARS += $(LIBDIR)/thorstars.o
-	LIBS += -lthorstars -lthor
-	LIBFILES += $(LIBDIR)/libthorstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libthor.$(LIBSUFFIX)
 endif
 
 ifdef CGDDF
@@ -240,17 +198,6 @@ ifdef VHDL
 		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
 endif
 
-ifdef VHDLF
-	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars
-	CG = 1
-	SDFLIB = 1
-	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
-	STARS += $(LIBDIR)/vhdlfstars.o
-	LIBS += -lvhdlfstars -lvhdlf
-	LIBFILES += $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlf.$(LIBSUFFIX)
-endif
-
 ifdef VHDLB
 	CUSTOM_DIRS += $(VHDLBDIR)/kernel $(VHDLBDIR)/stars
 	CG = 1
@@ -276,30 +223,6 @@ ifdef MDSDF
 		LIBFILES += $(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX)
 		LIBS += -lmdsdftclstars
 	endif
-endif
-
-ifdef CP
-	# The CP domain is only supported under the Sun Operating System,
-	# matched by the sun% pattern
-	ifneq ("$(filter sun%, $(PTARCH))","")
-		CUSTOM_DIRS += $(CPDIR)/kernel $(CPDIR)/stars \
-			$(CPDIR)/infopad/kernel $(CPDIR)/infopad/stars
-		PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
-		LWP = 1
-		STARS += $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
-		LIBS += -lcpstars -lcpipstars -lcp -laudio
-		LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libcp.$(LIBSUFFIX)
-	else
-		# This line will not echo, but it will produce an error
-		echo "The CP domain is only supported under sun4"
-	endif
-endif
-
-ifdef LWP
-	LIBS += -llwpthread -llwp
-	LIBFILES += $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
 endif
 
 ifdef PN
@@ -342,15 +265,6 @@ ifdef IPUS
 				$(LIBDIR)/libipus.$(LIBSUFFIX) \
 				$(LIBDIR)/libicp.$(LIBSUFFIX)
 	endif
-endif
-
-ifdef MQ
-	ATM = 1
-	CUSTOM_DIRS += $(MQDIR)/kernel $(MQDIR)/stars
-	ATMSTARS = $(LIBDIR)/mqstars.o
-	LIBS += -lmqstars -lmq 
-	LIBFILES += $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libmq.$(LIBSUFFIX)
 endif
 
 ifdef DE
