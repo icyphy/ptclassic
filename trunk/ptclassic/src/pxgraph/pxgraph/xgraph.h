@@ -44,10 +44,6 @@ extern void do_hardcopy();	/* Carries out hardcopy    */
 extern void ho_dialog();	/* Hardcopy dialog         */
 extern void set_X();		/* Initializes X device    */
 
-#if defined(__sparc) && defined(__svr4__)
-#define SOL2
-#endif
-
 extern char *strcpy();
 extern char *strcat();
 extern char *strrchr();
