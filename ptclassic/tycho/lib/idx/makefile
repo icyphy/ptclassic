@@ -49,7 +49,9 @@ INDICES = \
 	tycho.idx \
 	codeDoc.idx
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) $(INDICES)
+# Don't add $(INDICES) here, or running 'make sources' from the 
+# top tycho directory will result in generating these files twice
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
 # make clean will remove the indices.
 KRUFT =		$(INDICES)
@@ -65,6 +67,7 @@ FORCE:
 # We could use the GNU make $(wildcard) extension here, but that would
 # force users to have GNU make.
 tycho.idx: FORCE
+	@echo "About to create Tycho concept index"
 	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
@@ -79,6 +82,7 @@ tycho.idx: FORCE
 
 # Create a tycho code index file
 codeDoc.idx: FORCE
+	@echo "About to create Tycho code index"
 	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
