@@ -1,4 +1,4 @@
-# Makefile for compiling the sample cgc package
+# Makefile for compiling Tycho's CGC support package
 #
 # @Author: Christopher Hylands
 #
@@ -54,19 +54,19 @@ OTHERCFLAGS =
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libcgctest$(TCL_SHLIB_SUFFIX)
+LIB =		libtycgc(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
 	-I$(srcdir) \
 	$(TCL_INCLUDES)
 
-SRCS = 		cgctest.c
-HDRS =		
+SRCS = 		tycgc.c
+HDRS =		tycgc.h
 
-EXTRA_SRCS =	makefile.in test.tcl
+EXTRA_SRCS =	makefile.in tclif.c test.tcl
 
-OBJS =		cgctest.o
+OBJS =		tycgc.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
