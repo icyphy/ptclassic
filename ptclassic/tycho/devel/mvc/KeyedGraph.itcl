@@ -170,6 +170,7 @@ body ::tycho::AbstractGraph::keys {vertex} {
 # Attach welds to a vertex. The arguments are a list of keys.
 #
 # FIXME: Return the inverse command.
+# FIXME: _vertices is not accessible in this class!
 #
 body ::tycho::AbstractGraph::weld {vertex args} {
 	#
