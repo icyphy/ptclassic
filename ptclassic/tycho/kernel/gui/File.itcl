@@ -508,6 +508,11 @@ body ::tycho::File::constructor {args} {
         $myMenubar add "About Tycho" Help -underline 0 -command \
                 {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
         
+	global ::TYCHO
+        $myMenubar add "Tycho Home Page" Help -underline 0 -command \
+                {::tycho::File::openContext \
+		[file join $TYCHO doc index.html]}
+
         $myMenubar add "Guide to $myclass widget" Help -underline 0 \
                 -command "$this help"
         
