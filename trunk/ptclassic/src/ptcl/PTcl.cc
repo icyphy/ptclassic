@@ -378,6 +378,10 @@ int PTcl::computeSchedule() {
 	   		(char*) NULL);
 		return FALSE;
 	}
+	if (SimControl::flagValues() & SimControl::halt) {
+		Tcl_AppendResult(interp, "Halt was requested when setting up the schedule", (char*) NULL);
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -386,10 +390,24 @@ int PTcl::schedule(int argc,char **) {
 		return usage("schedule");
 	// should arrange so that previously computed schedule can
 	// be returned
-	if (computeSchedule()) {
+	SimControl::clearHalt();
+	// Here we call Runnable::initTarget rather than Universe::initTarget,
+	// because Universe::initTarget invokes the begin methods of the 
+	// stars.  We just want to generate the schedule.
+	universe->Runnable::initTarget();
+	if (SimControl::flagValues() & SimControl::error) {
+		Tcl_AppendResult(interp, "Error in setting up the schedule",
+			(char*) NULL);
+		return TCL_ERROR;
+	} else
 		return result(universe->displaySchedule());
-	}
-	else return TCL_ERROR;
+}
+
+// return the stop time of the current run
+int PTcl::stoptime(int argc, char **argv) {
+	if (argc > 1) return usage("stoptime");
+	sprintf(interp->result, "%g", stopTime);
+	return TCL_OK;
 }
 
 // return the current time from the top-level scheduler of the current
@@ -424,11 +442,28 @@ int PTcl::schedtime(int argc,char **argv) {
 int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
 		return usage("run ?<stoptime>?");
+
+	// We need to set stopTime first, so that the
+	// "stoptime" command can work in the setup,
+	// begin, and go methods of the stars.
+	stopTime = 1.0;  // default value of the stop time
+	lastTime = 1.0;
+	if (argc == 2) {
+		double d;
+		if (Tcl_GetDouble(interp, argv[1], &d) != TCL_OK)
+			return TCL_ERROR;
+		stopTime = d;
+		lastTime = d;
+	}
+
 	if (!computeSchedule())
 		return TCL_ERROR;
-	stopTime = 0.0;
-	lastTime = 1.0;
-	return cont(argc,argv);
+	// universe->setStopTime has to be called after computeSchedule
+	// because computeSchedule resets the stop time.
+	universe->setStopTime(stopTime);
+	universe->run();
+	return (SimControl::flagValues() & SimControl::error) ?
+		TCL_ERROR : TCL_OK;
 }
 
 int PTcl::cont(int argc,char ** argv) {
@@ -981,6 +1016,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(registerAction),
 	ENTRY(reset),
 	ENTRY(run),
+	ENTRY(stoptime),
 	ENTRY(schedtime),
 	ENTRY(schedule),
 	ENTRY(seed),
