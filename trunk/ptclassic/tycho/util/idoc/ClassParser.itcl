@@ -171,9 +171,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
             # First file
             set IDocSys [$generator [::tycho::autoName IDocSys]]
         }
-puts "g:$generator"
-puts "id:$IDocSys"
-puts "type:[$IDocSys info class]"
+
         if ![$generator::modCheck $filename] {
             # file does not need to be redocumented if not modified
             if $debug {
@@ -467,6 +465,8 @@ body ::tycho::IDocSys::formatExpl {comment} {
 #### shortDesc
 # Format a description into a short form. Used when only an explanation
 # is provided (like in outside/related procs).
+#
+# Only one of formatDesc and shortDesc need be called (short calls format)
 #
 body ::tycho::IDocSys::shortDesc {comment} {
     set comment [formatDesc $comment]
