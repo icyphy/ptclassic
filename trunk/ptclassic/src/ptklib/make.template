@@ -22,7 +22,7 @@ VPATH         = $(ROOT)/src/ptklib
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS	      = ptkBarGraph.h ptkPlot.h
+HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h
 
 LIBCSRCS      = ptkBarGraph.c ptkPlot.c
 
@@ -33,6 +33,11 @@ SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
 LIB=libptk.$(LIBSUFFIX)
+
+# extra source files: tcl/tk script files
+SCRIPTS = ptkPlot.tcl
+
+EXTRA_SRCS = $(SCRIPTS) README
 
 all:	makefile $(LIB)
 
