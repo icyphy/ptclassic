@@ -44,14 +44,14 @@ int DFNebula::run() {
 // Constructors
 DFNebula::DFNebula() : DataFlowStar(), Nebula(*(DataFlowStar*)this) {};
 
-DFNebulaPort::DFNebulaPort(const PortHole* master, Nebula* parentN)
-: DFPortHole(), NebulaPort(*this,*master,parentN) {
+DFNebulaPort::DFNebulaPort(const PortHole* master, Star* parent)
+: DFPortHole(), NebulaPort(*this,*master,parent) {
     const DFPortHole& dfmaster = *(const DFPortHole*)master;
     DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
-PortHole* DFNebula::clonePort(const PortHole* master) {
-    return new DFNebulaPort(master,this);
+PortHole* DFNebula::clonePort(const PortHole* master, Star* parent) {
+    return new DFNebulaPort(master,parent);
 }
 
 Nebula* DFNebula::newNebula(Block* master) const {
@@ -61,8 +61,9 @@ Nebula* DFNebula::newNebula(Block* master) const {
 }
 
 int DFNebula::isSDFinContext() const {
-    if (Nebula::master->isItAtomic())
-	return ((DataFlowStar*)Nebula::master)->isSDFinContext();
+    
+    if (isNebulaAtomic())
+	return Nebula::master?((DataFlowStar*)Nebula::master)->isSDFinContext():TRUE;
     GalStarIter nextStar(gal);
     DataFlowStar* s;
     while ((s = (DataFlowStar*) nextStar++) != 0)
