@@ -3,7 +3,6 @@
 .SD
 Stabilization of IIR filters using the cepstrum
 .DE
-.IE
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
 .LO "~ptolemy/src/domains/sdf/demo"

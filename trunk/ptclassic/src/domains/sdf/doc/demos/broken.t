@@ -11,3 +11,4 @@ of sample rate inconsistencies.  The FloatSum star requires a single
 input on both input arcs, but because of the UpSample star, its
 input arcs have different sample rates.  Because of this, generating
 an SDF schedule is impossible.
+.ES
