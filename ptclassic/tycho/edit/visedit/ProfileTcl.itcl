@@ -307,7 +307,6 @@ body ::tycho::ProfileTcl::updateTimes {} {
 # the attachDisplayer{} method.
 #
 body ::tycho::ProfileTcl::_initializeBars {menubar statusbar toolbar} {
-        {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$toolbar != {}} {
