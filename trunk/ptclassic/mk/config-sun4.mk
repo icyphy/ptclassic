@@ -100,13 +100,13 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-#COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
-COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld-2.6.3
+COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2.2/ld
 
-PURELINK =	purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	purelink $(COLLECTOR) purify -best-effort
-QUANTIFY =	purelink $(COLLECTOR) quantify
-PURECOV = 	purecov $(COLLECTOR)
+#PURELINK =	purelink $(COLLECTOR) -hardlink=yes
+#PURIFY =	purelink $(COLLECTOR) purify -best-effort
+PURIFY =	purify -best-effort
+#QUANTIFY =	purelink $(COLLECTOR) quantify
+#PURECOV = 	purecov $(COLLECTOR)
 
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional -DXLIB_ILLEGAL_ACCESS
