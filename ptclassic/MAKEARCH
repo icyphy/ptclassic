@@ -52,7 +52,7 @@ cd obj.$ARCH
 optlink ../src makefile
 
 # interp used to be in the line below, as of 0.5.1, it is no longer.
-foreach x (domains ptcl kernel tycho pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
+foreach x (domains ptcl kernel tycho pigiRpc pigilib libgantt ptlang islang pxgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -122,12 +122,16 @@ cd pxgraph
 optlink ../../src/pxgraph bitmaps
 cd ..
 
-# EXPDOMAINS = experimental domains
-# EXPDOMAINS = capsim bdf
+# EXPDOMAINS: experimental domains
+# EXPEXTRAS: non-standard sub-directories of experimental domains
+# EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
+# Experimental domains not included: capsim cgdsp3
 
 # cg-ddf should be removed from any released versions of this file.
-set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof)
-set EXPEXTRAS=(cg56/targets cg96/targets silage/targets)
+set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof ipus)
+set EXPEXTRAS=(cg56/targets cg96/targets silage/targets \
+		ipus/cat ipus/cat2 ipus/targets ipus/tcltk)
+set EXPSUBEXTRAS=(ipus/tcltk/stars)
 set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
 
 # If the tst directory is present, then populate it
@@ -197,7 +201,8 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
+	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets \
+	$EXPSUBEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
