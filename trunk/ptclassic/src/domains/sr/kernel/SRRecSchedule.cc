@@ -1,4 +1,4 @@
-static const char file_id[] = "SRRecursiveScheduler.cc";
+static const char file_id[] = "SRRecScheduler.cc";
 
 /* Version $Id$
 
@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "SRRecursiveSchedule.h"
+#include "SRRecSchedule.h"
 #include "SRDependencyGraph.h"
 #include "StringList.h"
 #include "Set.h"

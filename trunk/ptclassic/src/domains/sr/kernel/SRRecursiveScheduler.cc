@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SRStar.h"
 #include "SRRecursiveScheduler.h"
-#include "SRRecursiveSchedule.h"
+#include "SRRecSchedule.h"
 #include "SRDependencyGraph.h"
 #include "SRParter.h"
 #include "Set.h"
