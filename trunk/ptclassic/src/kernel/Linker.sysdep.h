@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define SUN4
 #endif
 
-#if defined(__alpha) || defined(linux)
+#if defined(__alpha)
 #define LINKING_NOT_SUPPORTED
 #endif
 
@@ -102,7 +102,7 @@ const int linkingNotSupported =
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
-#if defined(__sgi) || defined (sgi)
+#if defined(__sgi) || defined (sgi) || defined (__linux)
 // For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
@@ -116,7 +116,7 @@ const int linkingNotSupported =
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
 
-#if defined(__sgi) || defined (sgi)
+#if defined(__sgi) || defined (sgi) || defined (__linux)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
 #if defined(SOL2)
@@ -129,6 +129,8 @@ const int linkingNotSupported =
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
 // running executable.
+// linux note: this should be OK for binutils-1.9, but new versions will
+// use different flags :( neal@ctd.comsat.com ):
 #ifdef hpux
 #define LOADOPTS "-N -x -a archive"
 #define LOC_OPT "-R"
@@ -165,6 +167,9 @@ const int linkingNotSupported =
 #ifdef hpux
 inline size_t getpagesize() { return 4096;}
 #else
+#ifdef __linux
+#include <unistd.h>
+#else /* __linux */
 #ifdef __GNUG__
 #if defined(__sgi) || defined(sgi)
 #if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
@@ -173,6 +178,7 @@ extern "C" int getpagesize(void);
 #endif /* SVR4 */
 #else
 extern "C" size_t getpagesize(void);
+#endif
 #endif
 #endif
 #endif
@@ -246,7 +252,11 @@ extern "C" size_t getpagesize(void);
 // -x print in hex rather than decimal
 #define NM_OPTIONS "-phx"
 #else
+#ifdef __linux
+#define NM_OPTIONS "-g --no-cplus"
+#else
 #define NM_OPTIONS "-g"
+#endif
 #endif
 
 #if defined(hpux)
@@ -384,6 +394,16 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #define READOBJ_FAIL (read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
 #endif
+#endif
+
+#ifdef __linux
+#define STRUCT_DEFS exec header
+#define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
+#define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
+#define READOBJ_FAIL \
+ (lseek(fd, N_TXTOFF(header), 0) < 0 \
+   || read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
+#define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
 #endif
 
 
