@@ -38,7 +38,7 @@
 #
 # Limitations:
 #  - Modal dialogs are not tested so that the test can proceed automatically.
-#  - This is assumed to be run in $PTOLEMY/tycho/kernel_itk.
+#  - This is assumed to be run in $TYCHO/kernel
 #  - The tests are by no means complete.
 #
 # The modal dialogs are adequately tested by the demo script.
@@ -164,8 +164,8 @@ test HTML-1.1 {Test HTML} {
 # Test IndexBrowser
 test IndexBrowser-1.1 {Test IndexBrowser} {
     global tycho
-    set win [::tycho::view IndexBrowser \
-	    [list -file $tycho/lib/idx/tycho.idx ] ]
+    set win [::tycho::IndexBrowser [::tycho::autoName .ib] \
+	    -file [file join $tycho lib idx tycho.idx]]
     wm deiconify $win
 #    after $duration ::tycho::safeUpdate $win
     after $longDuration removeobj $win
@@ -198,13 +198,12 @@ test TopLevel-1.1 {Test TopLevel} {
 ############################################################################
 # Test WelcomeMessage
 test WelcomeMessage-1.1 {Test WelcomeMessage} {
-#    set win [::tycho::view WelcomeMessage { \
-#	    -version "A test version" \
-#	    -executable "A test executable" } ]
-#    wm deiconify $win
+    set win [::tycho::welcomeMessage \
+            "A test version" \
+	    "A test executable" ]
 ##    after $duration ::tycho::safeUpdate $win
-#    after $longDuration removeobj $win
-#    list {Done}
+    after $longDuration removeobj $win
+    list {Done}
 } {Done}
 
 
@@ -212,7 +211,7 @@ test WelcomeMessage-1.1 {Test WelcomeMessage} {
 # Test YesNoCancel
 test YesNoCancel-1.1 {Test YesNoCancel} {
     global globalReturn
-    after $duration .yesnocancel invoke cancel
+    after $longDuration .yesnocancel invoke cancel
     ::tycho::YesNoCancel .yesnocancel \
 	    -text "Yes, No, or Cancel" \
 	    -yescommand "set globalReturn yes" \
