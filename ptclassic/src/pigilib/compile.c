@@ -449,7 +449,7 @@ octObject *facetPtr;
 {
     octObject net, in[TERMS_MAX], out[TERMS_MAX];
     octGenerator netGen;
-    int inN, outN, totalN, i;
+    int inN = 0, outN = 0, totalN, i;
     char delay[BLEN], width[BLEN];
     char *errMsg = 0;
 
