@@ -79,7 +79,7 @@ body ::tycho::PNSimulation::startServer {} {
 
     # Create the universe
     _send {
-	set univ [java::new pt.domains.pn.kernel.PNUniverse]
+	set univ [java::new pt.domains.pn.kernel.PNCompositeActor]
 	$univ setName Universe
         #set exec [$univ getExecutor]
     }
@@ -109,21 +109,22 @@ body ::tycho::PNSimulation::_construct {} {
             set result [_send "set $v \[java::new $type \$univ $v\]"]
             debug " -> $result"
 
-	    # Set its parameters.
-	    # FIXME: Currently, we look at the case of the parameter
-	    # to tell whether it is a parameter that is understood
-	    # by the star. This is sooooo fragile...
-	    foreach {attr val} [$_graph attrset $v] {
-		if [string match {-[A-Z]*} $attr] {
-		    debug "\$[set v] set[string trim $attr -] $val"
-		    set result [_send \
-			    "\$[set v] set[string trim $attr -] $val"]
-		    debug " -> $result"
-		}
-	    }
-            # Initialize the star
-            debug "\$[set v] initialize"
-            set result [_send "\$[set v] initialize"]
+
+	    # Set its parameters. Get the star master.
+            set m [split [$_graph attrget $v -master] #]
+            set libname [lindex $m 0]
+            set starname [split [lindex $m 1] "."]
+            set library [::tycho::model dereference \
+                    [::tycho::model locate $libname]]
+            
+            # Get the attributes of the star and set them
+            foreach attr [$library match attribute $starname] {
+                set val [$_graph attrget $v -$attr]
+                debug "\$[set v] setParam [string trim $attr -] $val"
+                set result [_send \
+                        "\$[set v] setParam [string trim $attr -] $val"]
+                debug " -> $result"
+            }
         }
     }
 
