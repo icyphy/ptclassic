@@ -46,7 +46,14 @@ INCL = -I$(KERNDIR)
 LIB=libacs.$(LIBSUFFIX)
 
 # Header files
-HDRS= ACSPortHole.h ACSScheduler.h ACSStar.h ACSWormhole.h # ACSGeodesic.h
+HDRS= \
+	ACSCore.h \
+	ACSCorona.h \
+	ACSPortHole.h \
+	ACSScheduler.h \
+	ACSStar.h \
+	ACSWormhole.h \
+	# ACSGeodesic.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) ACSDomain.cc
