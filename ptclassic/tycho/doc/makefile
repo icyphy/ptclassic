@@ -111,7 +111,6 @@ HTMLDIRS= $(TYCHO)/doc \
 	$(TYCHO)/editors/slate/doc/usersGuides \
 	$(TYCHO)/kernel/doc/internals \
 	$(TYCHO)/editors/slate/doc/internals \
-	$(TYCHO)/editors/slate/doc/tutorial \
 	$(TYCHO)/src/tytest \
 	$(TYCHO)/src/tytimer \
 	$(TYCHO)/java/doc \
