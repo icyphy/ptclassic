@@ -130,19 +130,9 @@ ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
 ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
 
 # For shared libraries, if we use them
-TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib/shared -ltcl
-TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib/shared -ltk
-ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -litcl
-
-# Uncomment these to override the above for itcl-2.0
-#TCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-#TCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -ltcl
-#TK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-#TK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -ltk
-#TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -ltcl
-#TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -ltk
-#ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -litcl
-
+TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -ltcl
+TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -ltk
+ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litcl
 
 #-----------------------------------------------------------------------
 # 		Global options to use
