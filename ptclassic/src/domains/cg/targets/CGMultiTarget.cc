@@ -65,7 +65,7 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 				   "ignore communication cost?"));
 	addState(overlapComm.setState("overlapComm",this,"NO",
 				   "processor can overlap communication?"));
-	addState(useCluster.setState("useCluster",this,"YES",
+	addState(useCluster.setState("useCluster",this,"NO",
 				   "Use Gil's declustering algorithm?"));
 	oldChildType[0] = 0;
 }
@@ -446,30 +446,46 @@ void CGMultiTarget :: setProfile(Profile* p) {
 	((ParScheduler*) scheduler())->setProfile(p);
 }
 
-int CGMultiTarget :: computeProfile(int nP, int flag, IntArray*) {
-	resetResources();
+// flag = -2 when manual scheduling option is taken (final stage).
+// flag = -1 indicate the final scheduling from the automatic scheduling
+// flag = 1 is the setup stage scheduling in the automatic scheduling.
+
+int CGMultiTarget :: computeProfile(int nP, int flag, IntArray* procMap) {
 	ParScheduler* qs = (ParScheduler*) scheduler();
-	qs->setUpProcs(nP);
-	int temp = qs->mainSchedule();
-	if (flag < 0) qs->finalSchedule();
-	return temp;
+	if (flag >= -1) {
+		resetResources();
+		qs->setUpProcs(nP);
+		if (!qs->mainSchedule()) return FALSE;
+	}
+	if ((flag == -1) || ((flag == -2) && (nP > 1))) {
+		qs->mapTargets(procMap);
+		if (!qs->createSubGals(*galaxy())) return FALSE;
+		return qs->finalSchedule();
+	} 
+	return TRUE;
 }
 
 int CGMultiTarget :: totalWorkLoad() {
         return ((ParScheduler*) scheduler())->getTotalWork();
 }
 
-void CGMultiTarget :: insideSchedule() {
-	if (nChildrenAlloc > 1)
- 		((ParScheduler*) scheduler())->sortProcessors();
+int CGMultiTarget::downLoadCode(int index, int pId, Profile*) {
+	if (nChildrenAlloc == 1) {
+		ParScheduler* s = (ParScheduler*) scheduler();
+
+		// set the numProcs of ParScheduler to be zero to call the
+		// SDFScheduler :: compileRun() method. Refer to the
+		// ParScheduler :: compileRun() method when numProcs = 0.
+
+		s->setUpProcs(0);
+		return ((CGTarget*) child(pId))->insertGalaxyCode(galaxy(), s);
+	} else {
+		return ((ParScheduler*)scheduler())->
+			getProc(index)->genCodeTo(child(pId));
+	}
 }
 
-void CGMultiTarget::downLoadCode(int pId, Profile*) {
-	if (nChildrenAlloc == 1) 
-		((ParScheduler*)scheduler())->compileRun();
-	else
-		((ParScheduler*)scheduler())->getProc(pId)->run();
-}
+ISA_FUNC(CGMultiTarget, MultiTarget);
 
 static CGMultiTarget targ("FullyConnected","CGStar",
 "Fully-connected targets for parallel scheduling");
