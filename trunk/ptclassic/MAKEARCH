@@ -48,7 +48,7 @@ cd obj.$ARCH
 optlink ../src makefile
 
 # interp used to be in the line below, as of 0.5.1, it is no longer.
-foreach x (domains ptcl kernel pigiRpc pigiRpc.cp pigilib libgantt ptlang pxgraph ptklib octtools)
+foreach x (domains ptcl kernel pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -102,6 +102,10 @@ endif
 
 # Make thread and CP directories (currently specific to sun)
 if ($ARCH =~ sun?*) then
+	mkarch pigiRpc.cp
+	cd pigiRpc.cp
+	oplink ../../src/pigiRpc/makefile
+	cd ..
 	mkarch thread/lwp
 	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
 endif
