@@ -44,8 +44,11 @@ VPATH  = 	$(ROOT)/src
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# Note that utils must appear before domains due to the hooks
-# for the Matlab interface that exist in utils/libexttools
+# Note that utils must appear before domains to generate the
+# *Auto* files that must be created before the Matlab stars
+# and the ptcl interface to Matlab can be compiled.  The
+# utils/libexttools directory provides the interface to the
+# rest of Ptolemy.
 DIRS = kernel thread utils ptlang domains ptcl pitcl pigilib ptklib tysh pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
