@@ -59,6 +59,9 @@ private:
 	// target for the current galaxy
 	Target* currentTarget;
 
+	// the current domain
+	const char* curDomain;
+
 	// the Tcl interpreter
 	Tcl_Interp* interp;
 
