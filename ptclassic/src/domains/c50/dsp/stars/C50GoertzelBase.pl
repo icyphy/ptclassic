@@ -131,9 +131,11 @@ which is a function of k and N
 	lacc	#@iter,0
 	samm	brcr			; load block repeat counter with iter
 	lar	ar0,#$addr(input) 	; ar0 -> input
-	lar	ar1,#$addr(delays,1)	; ar1 -> old samples[1]	
+	lar	ar1,#$addr(delays)	; ar1 -> old samples[1]	
 	lar	ar2,#$addr(wnReal)	; ar2 -> twiddle factors(real,imag)
 	mar	*,ar1			; make arp -> ar1
+	sach	*+			; reset IIR states
+	sach	*			
 	rptb	$starSymbol(gl)		; block repeat inst.
 	zap				; zero prod reg & acc
 	rpt	#1			; repeat twice
