@@ -52,7 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/unistd.h>
 extern void *sbrk(int);
 #else
-#if defined(PTFREEBSD)
+#if defined(PTFREEBSD) || defined(PTNBSD_386)
 /* sbrk is not POSIX, but it is in unistd.h as long as _POSIX_SOURCE
  * isn't defined.
  */
