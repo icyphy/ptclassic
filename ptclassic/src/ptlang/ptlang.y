@@ -77,9 +77,10 @@ char* progName = "ptlang";	/* program name */
 int nerrs = 0;			/* # syntax errors detected */
 
 char* blockID;			/* identifier for code blocks */
-char* blockNames[NUMCODEBLOCKS];
-char* codeBlocks[NUMCODEBLOCKS];
 char* blockArg;
+char* codeBlocks[NUMCODEBLOCKS];
+char* codeBlockNames[NUMCODEBLOCKS];
+char* codeBlockLines[NUMCODEBLOCKS];
 char* codeBlockArgs[NUMCODEBLOCKS];
 int numBlocks = 0;
 
@@ -129,7 +130,7 @@ int stateMarks[NSTATECLASSES];
 
 /* external functions */
 char* save();			/* duplicate a string */
-char* save_optblk();			/* duplicate a string */
+char* savelineref();
 char* malloc();
 char* ctime();
 time_t time();
@@ -437,9 +438,10 @@ staritem:
 					{ char* b = malloc(SMALLBUFSIZE);
 					  blockID = $3;
 					  strcpy(b,blockID);
-					  blockNames[numBlocks]=b;
-					  codeBlockArgs[numBlocks]=
-					    save_optblk($4);
+					  codeBlockNames[numBlocks]=b;
+					  codeBlockArgs[numBlocks]=save($4);
+					  codeBlockLines[numBlocks]=
+					    savelineref();
 					  codeMode = 1;
 					  codeModeBraceCount = 1;
 					}
@@ -457,7 +459,7 @@ lines:	/* nothing */
 				}
 ;
 
-cbargs: /*nothing*/		{ $$ = ""; }
+cbargs: /*nothing*/		{ $$ = (char*)0; }
 |	',' STRING		{ $$ = stripQuotes($2); }
 ;
 
@@ -642,11 +644,26 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |EXPLANATION|START
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE|STATIC
 ;
+
 %%
+
+/*****************************************************************************
+ *
+ *			C functions
+ *
+ * These are 3 classes of functions in this section:
+ * 
+ * 1. Utility functions called by the grammar (above) to store away
+ *    pieces of data.
+ * 2. "Generation" functions that write out all the data we've collected
+ *    to produce the .h, .cc, and doc files.
+ * 3. The yacc driver and lexer.
+ *
+ *****************************************************************************/
+
 /* Reset for a new star or galaxy class definition.  If arg is TRUE
    we are defining a galaxy.
  */
-
 clearDefs (g)
 int g;
 {
@@ -698,6 +715,36 @@ char* name;
 	}
 	*p = 0;
 	return buf;
+}
+
+
+char* whichMembers (type)
+char* type;
+{
+/* type must be "protected", "public", or "private" */
+	switch (type[2]) {
+	case 'o':
+		return protectedMembers;
+	case 'b':
+		return publicMembers;
+	case 'i':
+		return privateMembers;
+	default:
+		fprintf (stderr, "Internal error in whichMembers\n");
+		exit (1);
+		/* NOTREACHED */
+	}
+}
+
+/* add declarations of extra members to the class definition */
+addMembers (type, defs)
+char* type;
+char* defs;
+{
+	char * p = whichMembers (type);
+	strcat (p, defs);
+	strcat (p, "\n");
+	return;
 }
 
 /* get "real" state class name from an argument */
@@ -929,39 +976,30 @@ genConnect () {
 	/* FILL IN */
 }
 
-char* whichMembers (type)
-char* type;
+
+
+/* fn to write out standard methods in the header */
+genStdProto(fp,i)
+FILE* fp;
+int i;
 {
-/* type must be "protected", "public", or "private" */
-	switch (type[2]) {
-	case 'o':
-		return protectedMembers;
-	case 'b':
-		return publicMembers;
-	case 'i':
-		return privateMembers;
-	default:
-		fprintf (stderr, "Internal error in whichMembers\n");
-		exit (1);
-		/* NOTREACHED */
-	}
+	if (codeBody[i])
+		fprintf (fp, "\t/* virtual */ %s%s()%s\n", codeType[i],
+			 codeFuncName[i], inlineFlag[i] ? " {" : ";");
+	if (inlineFlag[i])
+		fprintf (fp, "%s\n\t}\n", codeBody[i]);
 }
 
-/* add declarations of extra members to the class definition */
-addMembers (type, defs)
-char* type;
-char* defs;
-{
-	char * p = whichMembers (type);
-	strcat (p, defs);
-	strcat (p, "\n");
-	return;
-}
-
-/*
+/**
     Generate a code block's function internals.  Basically just
-    parsing the string {str} and looking for @ substitutions.
-*/
+    parsing the string {str} and looking for ``@'' substitutions,
+    writing the result to {fp}.  Syntax rules:
+	@@	==> @			(double ``@'' goes to single)
+	@LBRACE ==> {			(LBRACE is literal string)
+	@RBRACE ==> }			(LBRACE is literal string)
+	@id	==> C++ token {id}	(id is one or more alphanumerics)
+	@(expr) ==> C++ expr {expr}	(expr is arbitrary with balanced parens)
+**/
 genCodeBlockFunc( fp, str)
 FILE *fp;
 char *str;
@@ -970,40 +1008,49 @@ char *str;
     int		c;
 
     for ( s=str, c = *s++; c != '\0'; c = *s++) {
-top:;
 	if ( c != '@' ) {
 	    putc( c, fp);
-	} else {
-	    c = *s++;
-	    /*IF*/ if ( c == '@' ) {
-		putc( c, fp);
-	    } else if ( c == '(' ) {
-		fputs( "\" << ", fp);
-		for ( c = *s++; c != ')'; c = *s++) {
-		    if ( c == '(' ) {
-			do {
-		    	    putc( c, fp);
-			    c = *s++;
-			} while ( c != ')' && c != '\0');
-		    }
-		    if ( c == '\0' ) {
-			fprintf(stderr,"Unbalanced parans in codeblock\n");
-			exit(1);
-		    }
-		    putc( c, fp);
+	    continue;
+	}
+	c = *s++;
+	/*IF*/ if ( c == '@' ) {
+	    /* this is same as default case below, but be explicit */
+	    putc( c, fp);
+	} else if ( c == '(' ) {
+	    fputs( "\" << (", fp);
+	    for ( c = *s++; c != ')'; c = *s++) {
+		if ( c == '(' ) {
+		    do {
+			putc( c, fp);
+			c = *s++;
+		    } while ( c != ')' && c != '\0');
 		}
-		fputs( " << \"", fp);
-	    } else if ( isalnum(c) ) {
+		if ( c == '\0' ) {
+		    fprintf(stderr,"Unbalanced parans in @() codeblock\n");
+		    exit(1);
+		}
+		putc( c, fp);
+	    }
+	    fputs( ") << \"", fp);
+	} else if ( isalnum(c) ) {
+	    /*IF*/ if ( strncmp(s-1,"LBRACE",6)==0 ) {
+		putc( '{', fp);		/* } (to balance 'vi') */
+		s += 5;
+	    } else if ( strncmp(s-1,"RBRACE",6)==0 ) {
+		/* { (to balance 'vi') */
+		putc( '}', fp);	
+		s += 5;
+	    } else {
 		fputs( "\" << ", fp);
 		do { 
 		    putc( c, fp);
 		    c = *s++;
 		} while ( isalnum(c) );
 		fputs( " << \"", fp);
-		goto top;
-	    } else {
-		putc( c, fp);
+		--s;	/* for() loop will advance */
 	    }
+	} else {
+	    putc( c, fp);
 	}
     }
 }
@@ -1100,12 +1147,13 @@ genDef ()
 	if (!pureFlag)
 		fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
         fprintf (fp, "\t/* virtual*/ const char* className() const;\n");
+/* The code blocks */
 	for (i=0; i<numBlocks; i++) {
 		if ( codeBlockArgs[i] == NULL ) {
-		    fprintf (fp, "\tstatic CodeBlock %s;\n",blockNames[i]);
+		    fprintf (fp, "\tstatic CodeBlock %s;\n",codeBlockNames[i]);
 		} else {
-		    fprintf (fp, "\tstatic const char* %s(%s);\n",
-		      blockNames[i], codeBlockArgs[i]);
+		    fprintf (fp, "\tconst char* %s(%s);\n",
+		      codeBlockNames[i], codeBlockArgs[i]);
 		}
 	}
 	for (i = C_EXECTIME; i <= C_DEST; i++)
@@ -1166,11 +1214,13 @@ genDef ()
 /* generate the CodeBlock constructor calls */
 	for (i=0; i<numBlocks; i++) {
 	    if ( codeBlockArgs[i] == NULL ) {
-		fprintf (fp, "\nCodeBlock %s :: %s (\n%s);\n",
-			fullClass,blockNames[i],codeBlocks[i]);
+		fprintf (fp, "\nCodeBlock %s :: %s (\n%s\n%s);\n",
+			fullClass,codeBlockNames[i],codeBlockLines[i],
+			codeBlocks[i]);
 	    } else {
-		fprintf (fp, "\nconst char* %s :: %s(%s) {\n",
-			fullClass,blockNames[i],codeBlockArgs[i]);
+		fprintf (fp, "\nconst char* %s :: %s(%s) {\n%s\n",
+			fullClass,codeBlockNames[i],codeBlockArgs[i],
+			codeBlockLines[i]);
 		fprintf (fp, "\tstatic StringList _str_; _str_.initialize(); _str_ << \n");
 		genCodeBlockFunc( fp, codeBlocks[i]);
 		fprintf (fp, ";\n\treturn (const char*)_str_;\n}\n");
@@ -1469,8 +1519,8 @@ yylex () {
 		int startQLine = yyline;
 /* if !docMode, put a "#line" directive in the token */
 		if (!docMode) {
-		   sprintf (yytext, "# line %d \"%s\"\n", yyline, inputFile);
-		   p = yytext + strlen (yytext);
+		   sprintf(p, "# line %d \"%s\"\n", yyline, inputFile);
+		   p += strlen(p);
 		}
 
 		while (brace > 0) {
@@ -1676,32 +1726,45 @@ char* text;
 	return p->code;
 }
 
-/* save token in dynamic memory */
+/*
+ * save token in dynamic memory
+ * For the processing of codeblocks, its important that NULLs stay
+ * NULL and that the empty string should remain an entry string.
+ */
 char* save(in)
 char* in;
 {
-	char* out = malloc((unsigned)strlen(in)+1);
-	return strcpy(out,in);
-}
-
-/* save token in dynamic memory, optional block (handle NULLs) */
-char* save_optblk(in)
-char* in;
-{
 	char* out;
-	if ( in == NULL || in[0] == '\0' )
-	    return NULL;
+	if ( in == NULL )	return NULL;
 	out = malloc((unsigned)strlen(in)+1);
-	return strcpy(out,in);
+	strcpy(out,in);
+	return out;
 }
 
-/* strip quotes, save token in dynamic memory */
+char* savelineref()
+{
+    char buf[SMALLBUFSIZE];
+    sprintf(buf, "# line %d \"%s\"", yyline, inputFile);
+    return save(buf);
+}
+
+/**
+    strip quotes, save token in dynamic memory
+    A previous version of this used to special case the situation where
+    the string was only two characters (presumbly just ``""'') and would
+    return exactly that.  This breaks things, so now an empty string
+    (instead of ``""'') is returned -- kennard
+**/
 char* stripQuotes(in)
 char* in;
 {
 	char* out;
 	int l = strlen (in);
-	if (l <= 2 || *in != QUOTE) return in;
+	if ( l<2 || in[0]!=QUOTE || in[l-1]!=QUOTE ) {
+		yyerror("String without quotes in stripQuotes().");
+		return save(in);
+	}
+	if ( l == 2 ) { return save(""); }
 	out = malloc((unsigned)l-1);
 	strncpy(out,in+1,l-2);
 	/* strncpy does not necessarily null-terminate the string */
@@ -1806,14 +1869,3 @@ char *s;
 	exit (1);
 }
 
-/* fn to write out standard methods in the header */
-genStdProto(fp,i)
-FILE* fp;
-int i;
-{
-	if (codeBody[i])
-		fprintf (fp, "\t/* virtual */ %s%s()%s\n", codeType[i],
-			 codeFuncName[i], inlineFlag[i] ? " {" : ";");
-	if (inlineFlag[i])
-		fprintf (fp, "%s\n\t}\n", codeBody[i]);
-}
