@@ -59,21 +59,13 @@
 # <pre><tcl quiet>
 #     catch {delete object $graph}
 #     set graph [::tycho::Digraph [::tycho::autoName graph]]
-#     $graph configureEntityType vertex -label ""
-#     $graph configureLinkType edge -weight 0
+#     $graph attrconfigure vertex label
+#     $graph attrconfigure edge weight -default 0
 # </tcl></pre>
 #
-# (Note that, by default, vertices and edges can only be given the attributes
-# declared when the entity or link is defined with defineEntityType{}
-# or defineLinkType{}, or added later with configureEntityType{}
-# or configureLinkType{}. If, however, the *-strictoptions*
-# option is set to 0 the vertices and edges will accept
-# any attributes.) Now load the graph with some data. In
-# this example, give it a string
-# in TIM format -- usually, you would set the *-datafile* option and
-# call load{} (see <a href="Model.html">Model</a>):
+# Now load the graph with some data:
 # <pre><tcl>
-#     $graph read string {
+#     $graph parse {
 #         vertex b -label "Second vertex"
 #         vertex a -label "First vertex"
 #         vertex c
@@ -124,7 +116,7 @@
 #
 # Delete a vertex and all edges connected to it:
 # <pre><tcl>
-#     $graph delete c
+#     $graph delete* c
 #     $graph describe
 # </tcl></pre>
 #
@@ -255,8 +247,7 @@ body ::tycho::AbstractGraph::constructor {args} {
     # Define the "vertex" entity
     definetype vertex \
             -override 1 \
-	    -leafonly 0 \
-	    -description ""
+	    -leafonly 0
 }
 
 ###################################################################
@@ -607,7 +598,7 @@ body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
 # Return the number of edges in the graph.
 #
 body ::tycho::AbstractGraph::numberofedges {} {
-    expr [array size _info] - [array size _vertices]
+    expr [llength [names vertex]] - [array size _vertices]
 }
 
 ########################################################################
@@ -1000,7 +991,7 @@ body ::tycho::AbstractGraph::vertexdelete {vertex} {
 # as the argument and compare the result with the empty list.
 #
 body ::tycho::AbstractGraph::vertices {{pattern *}} {
-    return [array names _vertices $pattern]
+    array names _vertices $pattern
 }
 
 #####################################################################
