@@ -1187,7 +1187,7 @@ proc ptkEditText {title cmd string} {
 	-command "$w.tframe.text yview"
     pack $w.tframe.vscroll -side right -fill y
 
-    text $w.tframe.text -wrap word -width 60 -height 7 \
+    text $w.tframe.text -wrap word -width 60 -height 12 \
 	-setgrid true -yscrollcommand "$w.tframe.vscroll set" \
 	-relief raised -bd 2
 
@@ -1203,5 +1203,5 @@ proc ptkEditText {title cmd string} {
 #  editing long strings.
 
 proc ed_EditTextExecute {cmd textWidget} {
-    eval [format $cmd \"[$textWidget get @0,0 end]\"]
+    eval [format $cmd \"[$textWidget get 0.0 end]\"]
 }
