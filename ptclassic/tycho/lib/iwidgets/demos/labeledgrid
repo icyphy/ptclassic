@@ -22,6 +22,7 @@ set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "createQuery $w" \
 	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
 $w options labeledgrid {
+	usual
 	rename -labelfont -font font Font
 }
 
