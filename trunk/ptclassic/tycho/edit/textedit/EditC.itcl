@@ -130,10 +130,16 @@ body ::tycho::EditC::evaluate {} {
     global env tycho
     saveQuery
 
-    if {$compiler == {}} {
-        set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+    if {$compiler == {} || ![winfo exists $compiler]} {
+        #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+        set compiler [::tycho::CompileCTcl [::tycho::autoName .compiler]]
     }
-    $compiler configure -view $this
+
+    #$compiler configure -view $this
+    # Parse so we get .widgetname instead of ::.widgetname
+    regexp {(.*)::(.+)$} $this tmp tmp newthis
+    $compiler configure -view $newthis
+
     $compiler compile [list $file]
     #delete object $compiler
 }
