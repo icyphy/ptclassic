@@ -169,11 +169,6 @@ ptkTkSetup(funcArray, size)
     			 ptkRPCFileProc, (ClientData) &RPCdata);
 #endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */
 
-    /* Add tkPtimageImageType and ptimage formats for  *
-     * robust image rendering in Tk, written by X. Mei */
-    Tk_CreateImageType(&tkPtimageImageType);
-    Tk_CreatePtimageImageFormat(&tkPtImgFmtPPM);
-
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
     if (Tcl_EvalFile(ptkInterp, buf) != TCL_OK) {
