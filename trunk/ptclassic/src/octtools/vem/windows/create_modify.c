@@ -527,7 +527,6 @@ vemStatus (*delFunc)();		/* Deletion function */
  */
 {
     relRecord passedArg;
-    enum st_retval relFunc();
 
     passedArg.theFct = fctId;
     passedArg.delFunc = delFunc;
