@@ -24,8 +24,8 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		float m = magnitude%0;
-		float p = phase%0;
+		double m = magnitude%0;
+		double p = phase%0;
 		x%0 << m * cos(p);
 		y%0 << m * sin(p);
 	}

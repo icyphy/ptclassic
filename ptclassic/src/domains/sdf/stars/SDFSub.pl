@@ -19,11 +19,11 @@ defstar {
 		type { float }
 	}
 	go {
-		float diff;
-		diff = float(pos%0);
+		double diff;
+		diff = double(pos%0);
 		MPHIter nexti(neg);
 		for(int i=neg.numberPorts(); i>0; i--)
-			diff -= float((*nexti++)%0);
+			diff -= double((*nexti++)%0);
 		output%0 << diff;
 	}
 }

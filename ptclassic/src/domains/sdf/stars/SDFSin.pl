@@ -16,7 +16,7 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		output%0 << sin (float(input%0));
+		output%0 << sin (double(input%0));
 	}
 }
 

@@ -15,6 +15,6 @@ defstar {
 		type{float}
 	}
 	go {
-		output%0 << cos (float(input%0));
+		output%0 << cos (double(input%0));
 	}
 }

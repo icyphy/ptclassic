@@ -39,14 +39,14 @@ TRUE if input is a power measurment, FALSE if it's an amplitude measurement.
 		}
 	}
 	private {
-		float gain;
+		double gain;
 	}
 	start {
 		if (int(inputIsPower)) gain=10.0;
 		else gain = 20.0;
 	}
 	go {
-		float f = input%0;
+		double f = input%0;
 		if (f <= 0.0)
 			output%0 << double(min);
 		else {

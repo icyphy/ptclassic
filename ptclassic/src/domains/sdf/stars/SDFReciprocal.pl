@@ -34,7 +34,7 @@ The sign of the output is determined by the sign of the input.
 		if(double(input%0) == 0.0)
 		    output%0 << double(magLimit);
 		else {
-		    float t = 1/double(input%0);
+		    double t = 1/double(input%0);
 		    if (t>double(magLimit))
 			output%0 << double(magLimit);
 		    else if (t < - double(magLimit))

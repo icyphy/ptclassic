@@ -57,7 +57,7 @@ is performed.
 		desc { = 1 for forward, = -1 for inverse. }
 	}
 	protected {
-		float* data;
+		double* data;
 		int fftSize;
 	}
 // Code for the FFT function
@@ -81,13 +81,13 @@ is performed.
  * power of 2 (this is not checked for!?)
  */
 
-static void fft_rif(float *data, int nn, int isign)
+static void fft_rif(double *data, int nn, int isign)
 {
 	int	n;
 	int	mmax;
 	int	m, j, istep, i;
 	double	wtemp, wr, wpr, wpi, wi, theta;
-	float	tempr, tempi;
+	double	tempr, tempi;
 
 	data--;
 	n = nn << 1;
@@ -150,13 +150,13 @@ static void fft_rif(float *data, int nn, int isign)
 			return;
 		}
 		LOG_DEL; delete data;
-		LOG_NEW; data = new float[2*fftSize];
+		LOG_NEW; data = new double[2*fftSize];
 		input.setSDFParams (int(size), int(size)-1);
 		output.setSDFParams (fftSize, fftSize-1);
 	}
 	go {
 // load up the array
-		float* p = data;
+		double* p = data;
 // note: particle at maximum delay is the first one
 		for (int i = int(size)-1; i >= 0; i--) {
 			Complex t = input%i;

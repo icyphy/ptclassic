@@ -28,6 +28,6 @@ an out of bounds value is received.
 		int i = int(input%0);
 		if (i < 0 || i > values.size())
 			Error::abortRun(*this, ": out of bounds input value");
-		else output%0 << float(values[i]);
+		else output%0 << values[i];
 	}
 }
