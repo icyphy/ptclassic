@@ -122,7 +122,8 @@ Shape boxShape = {
 
 /* FIXME: packetColor should become messageColor!!! */
 
-static octObject *facetPtr, wiringLayer;
+static octObject *facetPtr;
+static octObject wiringLayer = {OCT_UNDEFINED_OBJECT};
 static octObject floatColorLayer = {OCT_UNDEFINED_OBJECT},
 		 intColorLayer = {OCT_UNDEFINED_OBJECT},
 		 complexColorLayer = {OCT_UNDEFINED_OBJECT},

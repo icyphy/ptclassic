@@ -216,8 +216,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-	octObject facet;
-	char* fullName;
+	octObject facet = {OCT_UNDEFINED_OBJECT};
+	char *fullName;
 	char *command;
 
 /** Begin here. **/
@@ -288,7 +288,8 @@ lsList cmdList;
 long userOptionWord;
 {
     static dmTextItem item = {"Star or Target name", 1, 40, NULL, NULL};
-    octObject facet, inst;
+    octObject facet = {OCT_UNDEFINED_OBJECT},
+	      inst = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
 
     ViInit("profile");
@@ -385,7 +386,7 @@ int	permB;
 {
     int		linkCnt = 0;
     char	linkArgs[1024];
-    octObject	inst;
+    octObject	inst = {OCT_UNDEFINED_OBJECT};
     vemStatus	status;
     RPCArg	*theArg;
 

@@ -211,7 +211,7 @@ POct::~POct() {
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
 int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
-    octObject prop;			// has some non-dynamic members
+    octObject prop = {OCT_UNDEFINED_OBJECT};	// has some non-dynamic members
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -237,7 +237,7 @@ int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
 int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
-    octObject prop;			// has some non-dynamic members
+    octObject prop = {OCT_UNDEFINED_OBJECT};	// has some non-dynamic members
 
     // Set up the Prop
     // This step may not be necessary (see above).
