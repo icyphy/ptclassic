@@ -49,9 +49,10 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	int word = $ref(input);
-	int i;
-	for(i=0 ; i < $val(nBits) ; i++) {
+	int word;
+	int i = 0;
+	word = $ref(input);
+	for(; i < $val(nBits); i++) {
  	    $ref(output,i) = (word & 1);
 	    word >>= 1;
 	}

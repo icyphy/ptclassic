@@ -38,8 +38,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		numSample = output.numXfer();
 	}
 	codeblock (body) {
-	int i;
-	for (i = 0; i < $val(numSample); i++) {
+	int i = 0;
+	for ( ; i < $val(numSample); i++) {
 		$ref(output, i).real = $ref(input, i);
 		$ref(output, i).imag = 0;
 	}

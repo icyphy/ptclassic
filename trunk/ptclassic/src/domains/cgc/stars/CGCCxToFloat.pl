@@ -39,9 +39,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		addInclude("<math.h>");
 	}
 	codeblock (body) {
-	int i;
-	double p,q;
-	for (i = 0; i < $val(numSample); i++) {
+	int i = 0;
+	double p, q;
+	for ( ; i < $val(numSample); i++) {
 		p = $ref(input, i).real;
 		q = $ref(input, i).imag;
 		$ref(output, i) = sqrt(p*p + q*q);

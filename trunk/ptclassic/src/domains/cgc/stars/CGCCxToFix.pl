@@ -76,9 +76,9 @@ minimum for negative magnitudes).
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
 
-@     {	int i;
-@	double p,q;
-@	for (i = 0; i < $val(numSample); i++) {
+@     {	int i = 0;
+@	double p, q;
+@	for (; i < $val(numSample); i++) {
 @		p = $ref(input, i).real;
 @		q = $ref(input, i).imag;
 @		p = sqrt(p*p+q*q);
