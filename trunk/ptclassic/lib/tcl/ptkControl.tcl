@@ -151,16 +151,23 @@ proc ptkRunControl { name octHandle } {
     ptkRunControlInit $name $ctrlPanel "Run $name" "Control panel for $name"
     set ptkOctHandles($name) $octHandle
 
+    # Ensure panel is not shown until it is fully constructed
+    wm withdraw $ctrlPanel
+
     # Animation is off by default
     ptkGrAnimation 0
 
+    # Build subframe of user-selected "visible parameters"
+    frame $ctrlPanel.vparams
+    ptkBuildVParams $ctrlPanel.vparams $octHandle
+
     frame $ctrlPanel.options
-	checkbutton $ctrlPanel.options.debug -text "Debug" \
-	    -variable ptkDebug($name) -relief flat \
-	    -command "ptkSetOrClearDebug $name $octHandle"
 	checkbutton $ctrlPanel.options.script -text "Script" \
 	    -variable ptkScriptOn($name) -relief flat \
 	    -command "ptkToggleScript $name $octHandle"
+	checkbutton $ctrlPanel.options.debug -text "Debug" \
+	    -variable ptkDebug($name) -relief flat \
+	    -command "ptkSetOrClearDebug $name $octHandle"
 	pack append $ctrlPanel.options \
 	    $ctrlPanel.options.debug {right padx 20} \
 	    $ctrlPanel.options.script {right padx 20}
@@ -227,6 +234,7 @@ proc ptkRunControl { name octHandle } {
 
     # Newer syntax for pack command used below
     pack $ctrlPanel.msg -fill both
+    pack $ctrlPanel.vparams -fill x
     pack $ctrlPanel.options
     if {[ptkGetStringProp $octHandle usescript] == "1"} {
 	set ptkScriptOn($name) 1
@@ -246,12 +254,16 @@ proc ptkRunControl { name octHandle } {
     wm protocol $ctrlPanel WM_DELETE_WINDOW \
 	"ptkRunControlDel $name $octHandle $defNumIter"
 
-    bind $ctrlPanel.iter.entry <Return> \
-		"ptkGo $name $octHandle"
-    bind $ctrlPanel.iter.entry <Escape> "ptkAbort $name"
-    bind $ctrlPanel.iter.entry <space> "ptkPause $name $octHandle"
+    # These bindings should apply everywhere in the control panel,
+    # except in the tclScript subframe.
+    bind $ctrlPanel <Return> \
+	"if {\[string first {$ctrlPanel.tclScript} {%W}\] != 0} {ptkGo $name $octHandle}"
+    bind $ctrlPanel <Escape> \
+	"if {\[string first {$ctrlPanel.tclScript} {%W}\] != 0} {ptkAbort $name}"
+    bind $ctrlPanel <space> \
+	"if {\[string first {$ctrlPanel.tclScript} {%W}\] != 0} {ptkPause $name $octHandle}"
     bind $ctrlPanel <Control-d> \
-	"ptkRunControlDel $name $octHandle $defNumIter"
+	"if {\[string first {$ctrlPanel.tclScript} {%W}\] != 0} {ptkRunControlDel $name $octHandle $defNumIter}"
 
     focus $ctrlPanel.iter.entry
 
@@ -280,6 +292,9 @@ proc ptkRunControl { name octHandle } {
     }
 
     curuniverse $olduniverse
+
+    # Show the finished control panel
+    wm deiconify $ctrlPanel
 }
 
 #######################################################################
@@ -336,12 +351,12 @@ proc ptkSetOrClearDebug { name octHandle } {
 	        $w.debug.left.buttons {top fill expand} \
 	        $w.debug.left.runcount {top fill expand}
 	    frame $w.debug.anim
-	    checkbutton $w.debug.anim.gr -text "Graphical Animation" \
-	        -variable ptkGrAnimationFlag -relief flat \
-	        -command {ptkGrAnimation $ptkGrAnimationFlag}
 	    checkbutton $w.debug.anim.tx -text "Textual Animation" \
 	        -variable ptkTxAnimationFlag -relief flat \
 	        -command {ptkTxAnimation $ptkTxAnimationFlag}
+	    checkbutton $w.debug.anim.gr -text "Graphical Animation" \
+	        -variable ptkGrAnimationFlag -relief flat \
+	        -command {ptkGrAnimation $ptkGrAnimationFlag}
 	    checkbutton $w.debug.anim.time -text "Time the Run" \
 	        -variable ptkTimeFlag -relief flat
 	    pack append $w.debug.anim \
@@ -371,6 +386,78 @@ proc ptkSetOrClearDebug { name octHandle } {
 	catch {pack forget $w.debug}
 	# Disable verbose Tcl errors
 	set ptkVerboseErrors 0
+    }
+}
+
+#######################################################################
+# Procedure to build the display of "visible" universe parameters
+# Each parameter has a subframe of myFrame that is named like "p_ParamName".
+# (It'd be easier if we could use just the parameter name as the frame name,
+# but Tk doesn't like names that begin with uppercase letters.)
+#
+proc ptkBuildVParams { myFrame octHandle } {
+    set visibleList [ptkGetStringProp $octHandle "VisibleParameters"]
+    # quick exit if feature not in use
+    if {[llength $visibleList] == 0} { return }
+    # set width depending on longest visible name
+    set labWidth 5
+    foreach pname $visibleList {
+	set plen [string length $pname]
+	if {$plen > $labWidth} { set labWidth $plen }
+    }
+    incr labWidth 2
+    # insert entries into the control panel
+    set univParamList [lindex [ptkGetParams $octHandle NIL] 1]
+    if {$univParamList == "NIL"} { set univParamList {} }
+    foreach param $univParamList {
+	set pname [lindex $param 0]
+	if {[lsearch -exact $visibleList $pname] >= 0} {
+	    set subFrame $myFrame.p_$pname
+	    frame $subFrame
+	    label $subFrame.label -text "$pname:" -width $labWidth -anchor w
+	    entry $subFrame.entry -relief sunken
+	    $subFrame.entry insert end [lindex $param 2]
+	    pack $subFrame.label -side left
+	    pack $subFrame.entry -side left -fill x -expand 1
+	    pack $subFrame -side top -fill x -padx 10 -pady 5
+	}
+    }
+}
+
+#######################################################################
+# Procedure to update Oct from entries in the "visible" universe parameters
+#
+proc ptkUpdateVParams { myFrame octHandle } {
+    # Extract parameter names and values from the widget tree
+    set pNames {}
+    set pValues {}
+    foreach frm [winfo children $myFrame] {
+	if [regsub {^p_} [winfo name $frm] {} pName] {
+	    lappend pNames $pName
+	    lappend pValues [$frm.entry get]
+	}
+    }
+    if {[llength $pNames] == 0} { return }
+    # Updating the Oct settings for the universe parameters
+    # requires constructing a new list of all the parameters.
+    # We avoid marking the facet dirty unnecessarily.
+    set updateNeeded 0
+    set oldParamList [lindex [ptkGetParams $octHandle NIL] 1]
+    if {$oldParamList == "NIL"} { set oldParamList {} }
+    set newParamList {}
+    foreach param $oldParamList {
+	set pIndex [lsearch -exact $pNames [lindex $param 0]]
+	if {$pIndex >= 0} {
+	    set newVal [lindex $pValues $pIndex]
+	    if {$newVal != [lindex $param 2]} {
+		set param [lreplace $param 2 2 $newVal]
+		set updateNeeded 1
+	    }
+	}
+	lappend newParamList $param
+    }
+    if {$updateNeeded} {
+	ptkSetParams $octHandle NIL $newParamList
     }
 }
 
@@ -711,8 +798,8 @@ proc ptkGo {name octHandle} {
 
     # catch errors and reset the run flag.
     if {[catch {
-# this is wrong:
-#        curuniverse $name
+	# Update any visible parameter entries into the Oct database.
+	ptkUpdateVParams $ctrlPanel.vparams $octHandle
 
         # Allow a target-specific procedure to execute.
 	# Again, the correct target may not be set yet.
