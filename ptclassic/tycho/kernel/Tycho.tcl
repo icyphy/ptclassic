@@ -372,6 +372,7 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 # Builder uses tycho_version.
+# If you change ::tycho_version, then update $TYCHO/lib/mac/tycho-mac. 
 global ::tycho_version
 set tycho_version 0.2.1devel
 
