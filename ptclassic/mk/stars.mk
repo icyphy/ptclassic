@@ -68,6 +68,7 @@ CGCT = $(OBJDIR)/domains/cgc/targets
 CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
 CGT = $(OBJDIR)/domains/cg/targets
 SDFT = $(OBJDIR)/domains/sdf/targets
+VHDLT = $(OBJDIR)/domains/vhdl/targets
 
 BDFDIR = $(CROOT)/src/domains/bdf
 CGCDIR = $(CROOT)/src/domains/cgc
@@ -79,6 +80,7 @@ CGDDFDIR = $(CROOT)/src/domains/cg
 DDFDIR = $(CROOT)/src/domains/ddf
 VHDLFDIR = $(CROOT)/src/domains/vhdlf
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
+VHDLDIR = $(CROOT)/src/domains/vhdl
 MDSDFDIR = $(CROOT)/src/domains/mdsdf
 CPDIR = $(CROOT)/src/domains/cp
 PNDIR = $(CROOT)/src/domains/pn
@@ -262,17 +264,24 @@ endif
 
 ifdef VHDL
 	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars \
-		$(VHDLBDIR)/kernel $(VHDLBDIR)/stars 
+		$(VHDLBDIR)/kernel $(VHDLBDIR)/stars \
+		$(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
 	CG = 1
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
 	PALETTES += PTOLEMY/src/domains/vhdlb/icons/vhdlb.pal
-	STARS += $(LIBDIR)/vhdlfstars.o $(LIBDIR)/vhdlbstars.o
-	LIBS += -lvhdlfstars -lvhdlf -lvhdlbstars -lvhdlb
+	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
+	STARS += $(LIBDIR)/vhdlfstars.o $(LIBDIR)/vhdlbstars.o \
+		$(LIBDIR)/vhdlstars.o
+	LIBS += -lvhdlfstars -lvhdlf -lvhdlbstars -lvhdlb \
+		-lvhdlstars -lvhdl -lvhdltargets
 	LIBFILES += $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 		$(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlb.$(LIBSUFFIX)
+		$(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdl.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
 endif
 
 ifdef MDSDF
