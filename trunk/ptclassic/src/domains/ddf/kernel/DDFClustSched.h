@@ -141,6 +141,13 @@ private:
 	// This flag indicates whether an iteration should consist
 	// of running until deadlock.  By default, it is FALSE.
 	int runUntilDeadlock;
+	
+	// Flags associated with blocks.
+	enum {
+	  visit = 0,
+	  firings = 1,
+	  iter = 2
+	};
 };
 
 #endif
