@@ -13,6 +13,7 @@ static const char file_id[] = "EventHorizon.cc";
 #include "CircularBuffer.h"
 #include "Domain.h"
 #include "Scheduler.h"
+#include "Geodesic.h"
  
 /**************************************************************************
 Version identification:
@@ -208,6 +209,19 @@ void ToEventHorizon :: initialize()
 		ghostAsPort()->initialize();
 }
 
+// Allocate a geodesic appropriate for the inner or outer domain.
+Geodesic* ToEventHorizon::allocateGeodesic()
+{
+    StringList nm;
+    nm << "Node_" << asPort()->name();
+    const char* dName = isItOutput() ? wormhole->insideDomain()
+	: asPort()->parent()->parent()->domain();
+    Domain* d = Domain::named(dName);
+    Geodesic* g = &d->newGeo();
+    g->setNameParent(hashstring(nm),asPort()->parent());
+    return g;
+}
+
 /**************************************************************************
 
 	methods for FromEventHorizon
@@ -233,6 +247,19 @@ void FromEventHorizon :: initialize()
 }
 
 int FromEventHorizon :: ready() { return TRUE ;}
+
+// Allocate a geodesic appropriate for the inner or outer domain.
+Geodesic* FromEventHorizon::allocateGeodesic()
+{
+    StringList nm;
+    nm << "Node_" << asPort()->name();
+    const char* dName = isItInput() ? wormhole->insideDomain()
+	: asPort()->parent()->parent()->domain();
+    Domain* d = Domain::named(dName);
+    Geodesic* g = &d->newGeo();
+    g->setNameParent(hashstring(nm),asPort()->parent());
+    return g;
+}
 
 /**************************************************************************
 

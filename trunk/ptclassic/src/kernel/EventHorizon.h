@@ -118,6 +118,9 @@ public:
 	// return the scheduler of the outer domain.
 	Scheduler* outerSched();
 
+	// Allocate a geodesic appropriate for the inner or outer domain.
+	virtual Geodesic* allocateGeodesic() = 0;
+
 protected:
 	// Access the myBuffer of the porthole
 	CircularBuffer* buffer() { return asPort()->myBuffer; }
@@ -142,6 +145,7 @@ protected:
 	// TimeMark of the current data, which is necessary for interface
 	// of two domains. 
 	double timeMark;
+
 private:
 	// my direction
         int inOrOut;
@@ -162,6 +166,9 @@ public:
 	ToEventHorizon(PortHole* p) : EventHorizon(p) {}
 
 	void initialize(); 
+
+	// Allocate a geodesic appropriate for the inner or outer domain.
+	/*virtual*/ Geodesic* allocateGeodesic();
 protected:
 
 	// trasfering data from outside to Universal EventHorizon
@@ -183,6 +190,9 @@ public:
 	FromEventHorizon(PortHole* p) : EventHorizon(p) {}
 
 	void initialize(); 
+
+	// Allocate a geodesic appropriate for the inner or outer domain.
+	/*virtual*/ Geodesic* allocateGeodesic();
 protected:
 
 	//transfer data from Universal EventHorizon to outside
