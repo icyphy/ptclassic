@@ -28,126 +28,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Date of creation:	18 April 1996
 */
 
-/***********************************************************************
-
-			WORMHOLE BEHAVIOR
-
-Defining a wormhole amounts to defining three classes:
-
-SRWormhole, an SRStar that contains a foreign domain
-
-SRtoUniversal, an InSRPort that attaches to SRWormholes and moves information
-	into foreign domains--a ToEventHorizon
-
-SRfromUniversal, an OutSRPort that attaches to SRWormholes and moves
-	information from foreign domains---a FromEventHorizon
-
-A few confusing things:
-
-  isItInput and isItOutput indicate the direction of the porthole ON THE
-  OUTSIDE OF THE WORMHOLE.  Thus, both ports in a toUniversal and
-  fromUniversal indicate the same direction, even though one is a "to"
-  and the other is a "from."  This wierdness is used by transferData()
-  to determine when it is responsible for moving particles.
-
-  EventHorizon::moveFromGhost is mis-named--it should be moveToGhost, as
-  it moves particles FROM its own buffer TO the port given as an argument.
-
-  FromEventHorizon::transferData() doesn't always--in one case, it's being
-  called from inside a wormhole and does not.
-
-There are four cases for information flow:
-
-    Outside domain: SR        Inside Domain: XXX
-			  |--SRWormhole-----------
-			  |
-1.  ---->   SRtoUniversal | XXXfromUniversal ---->     (isItInput = TRUE)
-			  |
-			  |-----------------------
-
-   It's the responsibility of SRtoUniversal to "push" particles across
-   the boundary to the XXXfromUniversal port.  To do this,
-
-   1. Place the particle in the SRtoUniversal's myBuffer
-      CircularBuffer.  The XXXfromUniversal will own this particle
-      (i.e., call die() on it).  Since the OutSRPorts in the SR domain
-      nominally own the particles, a clone is made.
-
-   2. Set the SRtoUniversal::tokenNew flag to TRUE, indicating a new
-      particle is ready to be transfered.
-
-   3. Call ToEventHorizon::transferData().  This moves the particle
-      from the SRtoUniversal's myBuffer across the event horizon.
-
-      If the tokenNew flag is TRUE, transferData() calls moveFromGhost
-      to move the particle from the SRtoUniversal's myBuffer to the
-      XXXfromUniversal's myBuffer.  It then calls the
-      XXXfromUniversal's sendData(), which moves the particles "into
-      the domain" from the buffer.  E.g., in the SDF domain, moves a
-      particle from the XXXfromUniversal's buffer to the attached
-      Geodesic.
-
-   These must happen before the SRWormhole fires, but exactly when
-   depends on the domain.  In the SR domain, these are done inside
-   SRWormhole::go() just before Wormhole::run() is called.
-
-   ----------------------------------------------------------------------
-
-    Outside domain: SR        Inside Domain: XXX
-			  |--SRWormhole-----------
-			  |
-2.  <---- SRfromUniversal | XXXtoUniversal   <----     (isItOutput = TRUE)
-			  |
-			  |-----------------------
-
-   The SRfromUniversal must "pull" particles across the boundary from
-   the XXXtoUniversal port.  To do this,
-
-   1. Call FromEventHorizon::transferData() on the SRfromUniversal.
-      If there is a particle to transfer, this moves an outgoing
-      particle from the XXXtoUniversal's myBuffer to the
-      SRfromUniversal's myBuffer and sets the
-      SRfromUniversal::newToken flag.
-
-   2. Remove the particle from SRfromUniversal::myBuffer and send it
-      on its way.
-
-   ----------------------------------------------------------------------
-
-    Outside domain: XXX       Inside Domain: SR
-			   |--SRWormhole-----------
-			   |
-3.  ---->   XXXtoUniversal | SRfromUniversal ---->     (isItInput = TRUE)
-			   |
-			   |-----------------------
-
-   The XXXtoUniversal object will "push" particles into the
-   SRfromUniversal.  The new particle, if any, will be moved into the
-   SRfromUniversal::myBuffer, and SRfromUniversal::sendData() will be
-   called.  To make this work:
-
-   1. Make SRfromUniversal::sendData() move a particle from its
-      myBuffer into the domain.
-
-   ----------------------------------------------------------------------
-
-    Outside domain: XXX       Inside Domain: SR
-			   |--SRWormhole-----------
-			   |
-4.  <---- XXXfromUniversal | SRtoUniversal   <----
-			   |
- 			   |-----------------------
-
-    The XXXfromUniversal will "pull" particles from the SRtoUniversal
-    by calling FromEventHorizon::tranferData(), which calls
-    SRtoUniversal::receiveData().  To make this work:
-
-    1. Make SRtoUniversal::receiveData() move the incoming particle,
-       if any, into the SRtoUniversal::myBuffer.  The event horizon
-       will own this particle, so cloning is necessary in the SR case.
-
-************************************************************************/
-
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -167,6 +47,12 @@ There are four cases for information flow:
 
 ********************************************************************/
 
+
+// Prepare for simulation
+//
+// @Description Identify the wormhole as reactive to the SR scheduler
+// and call Wormhole::setup()
+
 void SRWormhole::setup()
 {
   // SR Wormholes are reactive--need at least one present input to fire
@@ -174,6 +60,12 @@ void SRWormhole::setup()
 
   Wormhole::setup();
 }
+
+// Produce outputs in an instant
+//
+// @Description Push the contents of the input ports across the Event
+// Horizon into the foreign domain, run the foreign galaxy, and pull the
+// output tokens back across the boundary.
 
 void SRWormhole::go()
 {
@@ -207,6 +99,8 @@ void SRWormhole::go()
 
 }
 
+// Call wrapup on the foreign domain's target
+
 void SRWormhole::wrapup()
 {
   myTarget()->wrapup();
@@ -225,13 +119,14 @@ SRWormhole::~SRWormhole()
   freeContents();
 }
 
-// cloner -- clone the inside and make a new wormhole from that.
+// Clone the wormhole
 Block * SRWormhole::clone() const
 {
   LOG_NEW; return new SRWormhole(gal.clone()->asGalaxy(),
 				 myTarget()->cloneTarget());
 }
 
+// Make an empty copy of the wormhole
 Block * SRWormhole::makeNew() const
 {
   LOG_NEW; return new SRWormhole(gal.makeNew()->asGalaxy(),
@@ -252,16 +147,17 @@ double SRWormhole :: getStopTime()
 **************************************************************************/
 
 // Move an incoming particle into myBuffer, possibly transfering it
-// across an event horizon boundary:
+// across an event horizon boundary
 //
-// This is called in two cases:
-//
-//   * When the SRtoUniversal is OUTSIDE of a wormhole.  In which case,
+// @Description This is called in two cases:
+// <UL>
+// <LI> When the SRtoUniversal is OUTSIDE of a wormhole.  In which case,
 //     the particle is also move across the boundary
 //
-//   * When the SRtoUniversal is INSIDE a wormhole.  Here, the outside
+// <LI> When the SRtoUniversal is INSIDE a wormhole.  Here, the outside
 //     domain will move the particle (transferData() does nothing)
-//
+// </UL>
+
 void SRtoUniversal::receiveData()
 {
   if ( present() ) {
@@ -296,27 +192,32 @@ void SRtoUniversal::receiveData()
 
 }
 
+// Initialize the port and the event horizon
 void SRtoUniversal::initialize()
 {
   InSRPort::initialize();
   ToEventHorizon::initialize();		
 }
 
+// Pass the isItInput query to the event horizon
 int SRtoUniversal::isItInput() const
 {
   return EventHorizon::isItInput();
 }
 
+// Pass the isItOutput query to the event horizon
 int SRtoUniversal::isItOutput() const
 {
   return EventHorizon::isItOutput();
 }
 
+// Return myself cast to an EventHorizon
 EventHorizon * SRtoUniversal::asEH()
 {
   return this;
 }
 
+// Return the number of firings
 int SRtoUniversal::onlyOne() const
 {
   return TRUE;
@@ -331,13 +232,16 @@ int SRtoUniversal::onlyOne() const
 // Move a particle from myBuffer into the output port, if one has been placed
 // there by the wormhole
 //
+// @Description
+//
 // This is called in two cases:
+// <UL>
+// <LI> This is on the OUTSIDE of a wormhole.  In this case, transferData()
+//     is called to pull the particle across the boundary and into myBuffer
 //
-// * This is on the OUTSIDE of a wormhole.  In this case, transferData()
-//   is called to pull the particle across the boundary and into myBuffer
-//
-// * This is on the INSIDE of a wormhole.  In this case, the particle
-//   has already been moved into the buffer and transferData() does nothing.
+// <LI> This is on the INSIDE of a wormhole.  In this case, the particle
+//     has already been moved into the buffer and transferData() does nothing.
+// </UL>
 
 void SRfromUniversal::sendData()
 {
@@ -382,11 +286,13 @@ int SRfromUniversal::isItOutput() const
   return EventHorizon::isItOutput();
 }
 
+// Return myself cast to an EventHorizon
 EventHorizon * SRfromUniversal::asEH()
 {
   return this;
 }
 
+// Return the number of firings
 int SRfromUniversal::onlyOne() const
 {
   return TRUE;
