@@ -12,7 +12,7 @@ $Id$
 *******************************************************************/
 
 #include "BDFStar.h"
-#include "BDFConnect.h"
+#include "BDFPortHole.h"
 
 /*******************************************************************
 
@@ -20,8 +20,26 @@ $Id$
 
 ********************************************************************/
 
-// BDF-specific initialize
-void BDFStar :: prepareForScheduling() {}
+BDFStar :: BDFStar() 
+: sdf(0), sdfCtx(0) {}
+
+int BDFStar :: isSDF() const { return sdf;}
+int BDFStar :: isSDFinContext() const { return sdfCtx;}
+
+void BDFStar :: initialize() {
+	DataFlowStar::initialize();
+	// determine SDF-ness
+	BDFStarPortIter nextp(*this);
+	BDFPortHole *p;
+	int sdf = TRUE;
+	int sdfCtx = TRUE;
+	while ((p = nextp++) != 0) {
+		if (TorF(p->relType())) {
+			sdf = FALSE;
+			if (p->far() && !p->atBoundary()) sdfCtx = FALSE;
+		}
+	}
+}
 
 // The following is defined in BDFDomain.cc -- this forces that module
 // to be included if any BDF stars are linked in.
@@ -30,8 +48,6 @@ extern const char BDFdomainName[];
 const char* BDFStar :: domain () const { return BDFdomainName;}
 
 ISA_FUNC(BDFStar,DataFlowStar);
-
-int BDFStar::isSDF() const { return FALSE;}
 
 inline int wormEdge(PortHole& p) {
 	PortHole* f = p.far();
@@ -57,7 +73,7 @@ int BDFStar :: notRunnable () {
 	BlockPortIter nextp(*this);
 	BDFPortHole *p;
 	// Check to see whether the requisite repetitions have been met.
-	if (repetitions.numerator <= int(noTimes))
+	if (reps() <= int(noTimes))
 		return 2;
 
 	// Step through all the input ports, checking to see whether

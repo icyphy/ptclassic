@@ -21,7 +21,7 @@ $Id$
 
 #include "BDFBool.h"
 #include "Star.h"
-#include "Connect.h"
+#include "PortHole.h"
 
 class BDFSList;
 class BDFScheduler;
@@ -88,7 +88,7 @@ public:
 		return r;
 	}
 	BDFSNode* operator++() { return next();}
-	void reset(int back = 0) { nxt = ref.first;}
+	void reset(int /*back*/ = 0) { nxt = ref.first;}
 private:
 	const BDFSList& ref;
 	BDFSNode* nxt;

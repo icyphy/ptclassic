@@ -37,16 +37,15 @@ Target("simulate-BDF","DataFlowStar",
 		"schedulePeriod for interface with a timed domain."));
 }
 
-Block* BDFTarget::clone() const {
-	LOG_NEW;
-	return &(new BDFTarget)->copyStates(*this);
+Block* BDFTarget::makeNew() const {
+	LOG_NEW; return new BDFTarget;
 }
 
 BDFTarget::~BDFTarget() {
 	delSched();
 }
 
-void BDFTarget::start() {
+void BDFTarget::setup() {
 	BDFScheduler* s;
 	if (int(loopScheduler)) {
 		LOG_NEW; s = new BDFClustSched(logFile);
@@ -54,20 +53,14 @@ void BDFTarget::start() {
 		LOG_NEW; s = new BDFScheduler;
 	}
 	setSched(s);
-	s->schedulePeriod = float(double(schedulePeriod));
-}
-
-int BDFTarget::setup(Galaxy& g) {
-	int status = Target::setup(g);
+	s->schedulePeriod = schedulePeriod;
+	Target::setup();
 	const char* file = logFile;
 	// just return status, unless we want a log file
 	// with the default scheduler.
-	if (int(loopScheduler) || !status || *file == 0)
-		return status;
+	if (int(loopScheduler) || Scheduler::haltRequested() || *file == 0)
+		return;
 	// create a file with the schedule in it
 	pt_ofstream o(logFile);
-	if (!o) return FALSE;
-	o << mySched()->displaySchedule();
-	o << "\n";
-	return TRUE;
+	if (o) o << scheduler()->displaySchedule() << "\n";
 }

@@ -85,7 +85,7 @@ public:
 	StringList displaySchedule();
 
 	// return the number of repetitions for the indicated star.
-	int repetitions(Star&);
+	int reps(Star&);
 
 	// save boolean values for a star
 	void saveBooleans(Star& s);
@@ -97,10 +97,10 @@ public:
 
 protected:
 	// prepare galaxy for scheduling
-	int prepareGalaxy(Galaxy&);
+	int prepareGalaxy();
 
 	// check stars for compatible domains
-	int checkStars(Galaxy&);
+	int checkStars();
 
 	// compute the BDF schedule (the biggie)
 	int computeSchedule(Galaxy&);
@@ -139,7 +139,7 @@ private:
 	int notRunnable (Star& atom, int useKnownBools = TRUE);
 
 	// compute repetitions for all stars
-	int repetitions (Galaxy&);
+	int repetitions ();
 
 	// subroutine of repetitions
 	int reptConnectedSubgraph (Block&);

@@ -11,14 +11,14 @@ $Id$
 This file contains definitions of BDF-specific PortHole classes.
 
 ******************************************************************/
-#ifndef _BDFConnect_h
-#define _BDFConnect_h 1
+#ifndef _BDFPortHole_h
+#define _BDFPortHole_h 1
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 
 /*****************************************************************
 BDF: Synchronous Data Flow generalized to handle booleans
@@ -52,26 +52,6 @@ enum BDFRelation {
 
 class BDFPortHole : public DFPortHole
 {
-private:
-	// if given, points to an associated boolean signal;
-	// tokens are only produced/consumed when that signal is true
-	BDFPortHole* pAssocPort;
-
-	// "relation" specifies the relation of this porthole with the
-	// assocPort porthole (if it is non-null).  There are five
-	// possibilities for BDF ports:
-	// BDF_NONE - no relationship
-	// BDF_TRUE - produces/consumes data only when assocBoolean is true
-	// BDF_FALSE - produces/consumes data only when assocBoolean is false
-	// BDF_SAME - signal is logically the same as assocBoolean
-	// BDF_COMPLEMENT - signal is the logical complemnt of assocBoolean
-
-	// for the latter two cases data are always moved.
-
-	BDFRelation relation;
-
-	void removeRelation();
-
 public:
 	BDFPortHole() 
 	: pAssocPort(0), relation(BDF_NONE) {}
@@ -124,6 +104,26 @@ public:
 
 	// table for use of "reversals" function
 	static BDFRelation reversals[4];
+private:
+	// if given, points to an associated boolean signal;
+	// tokens are only produced/consumed when that signal is true
+	BDFPortHole* pAssocPort;
+
+	// "relation" specifies the relation of this porthole with the
+	// assocPort porthole (if it is non-null).  There are five
+	// possibilities for BDF ports:
+	// BDF_NONE - no relationship
+	// BDF_TRUE - produces/consumes data only when assocBoolean is true
+	// BDF_FALSE - produces/consumes data only when assocBoolean is false
+	// BDF_SAME - signal is logically the same as assocBoolean
+	// BDF_COMPLEMENT - signal is the logical complemnt of assocBoolean
+
+	// for the latter two cases data are always moved.
+
+	BDFRelation relation;
+
+	void removeRelation();
+
 };
 
 	///////////////////////////////////////////
@@ -265,7 +265,7 @@ public:
 inline int TorF(BDFRelation r) { return r == BDF_TRUE || r == BDF_FALSE;}
 inline int SorC(BDFRelation r) { return r == BDF_SAME || r == BDF_COMPLEMENT;}
 
-inline int reverse(BDFRelation r) {
+inline BDFRelation reverse(BDFRelation r) {
 	return (r == BDF_NONE) ? r : BDFPortHole::reversals[r];
 }
 

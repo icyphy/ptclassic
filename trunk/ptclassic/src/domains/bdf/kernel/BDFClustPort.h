@@ -24,24 +24,9 @@ have a SAME or COMPLEMENT relationship to the original.
 
 class BDFCluster;
 
-#include "BDFConnect.h"
+#include "BDFPortHole.h"
 
 class BDFClustPort : public BDFPortHole {
-private:
-	// the real port
-	DFPortHole& pPort;
-
-	// the external link
-	BDFClustPort* pOutPtr;
-
-	// true if I am a bag port
-	unsigned char bagPortFlag;
-
-	// true if I am a feedforward-only port (after marking)
-	unsigned char feedForwardFlag;
-
-	// true if I control some other port
-	unsigned char ctlFlag;
 public:
 	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = 0);
 	~BDFClustPort() {}
@@ -56,6 +41,12 @@ public:
 	// set/return the control bit
 	int isControl() const { return ctlFlag;}
 	void setControl(int val) { ctlFlag = val ? 1 : 0;}
+
+	// am I a self-loop?
+	int selfLoop() const { 
+		PortHole* p = PortHole::far();
+		return p && parent() == p->parent();
+	}
 
 	// my assocPort is guaranteed to be a BDFClustPort so this
 	// cast is safe.
@@ -100,6 +91,21 @@ public:
 	void setRelation(BDFRelation r, BDFClustPort* assoc = 0) {
 		BDFPortHole::setRelation(r,assoc);
 	}
+private:
+	// the real port
+	DFPortHole& pPort;
+
+	// the external link
+	BDFClustPort* pOutPtr;
+
+	// true if I am a bag port
+	unsigned char bagPortFlag;
+
+	// true if I am a feedforward-only port (after marking)
+	unsigned char feedForwardFlag;
+
+	// true if I control some other port
+	unsigned char ctlFlag;
 };
 
 // determine whether two signals have a fixed relation or not.  It
