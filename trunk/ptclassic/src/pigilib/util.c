@@ -339,10 +339,9 @@ char *item;
     DupSheetNode *p;
 
     for (p = *ds; p != NULL; p = p->next) {
-        /* moreinfo is NULL for universes. */
-        if (p->moreinfo && strcmp(p->moreinfo, item2) == 0) {
+      if (strcmp(p->info, item) == 0) {
 	    return(TRUE);
-	}
+	  }
     }
     return(FALSE);
 }
@@ -356,7 +355,8 @@ char *item2;
 
     for (p = *ds; p != NULL; p = p->next) {
 	if (strcmp(p->info, item) == 0) {
-	  if (strcmp(p->moreinfo, item2) == 0) {
+        /* moreinfo is NULL for universes. */
+        if (p->moreinfo && strcmp(p->moreinfo, item2) == 0) {
 	    return(TRUE);
 	  }
 	}
