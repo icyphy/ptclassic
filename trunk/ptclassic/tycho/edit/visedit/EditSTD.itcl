@@ -47,6 +47,9 @@ class ::tycho::EditSTD {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Set the machine type.
+    method setMachineType {type}
+
     # Clear the display, discarding the current items.
     method clear {}
 
@@ -138,9 +141,6 @@ body ::tycho::EditSTD::constructor {args} {
     # Initialize the variables.
     set canvas [component graphics canvasName]
 
-    # Initialize the machine type as Moore.
-    set machineType Moore
-
     # Initialize the io portNames array elements.
     set portNames(in)  ""
     set portNames(out) ""
@@ -164,7 +164,27 @@ body ::tycho::EditSTD::constructor {args} {
     # such as portNames(in) and portNames(out).
     $this reload
 
+    # If no machine type is specified yet, initialize it.
+    if {![info exists machineType]} {
+	set w [$this windowName].editMachineType
+	::tycho::DialogWindow $w -title "Edit the Machine Type"\
+		-text "Press button to choose the machine type:"
+	$w addButton moore -text "Moore"\
+		-command "$this setMachineType Moore; destroy $w"
+	$w addButton mealy -text "Mealy"\
+		-command "$this setMachineType Mealy; destroy $w"
+	$w centerOnScreen
+	tkwait window $w
+    }
+
     component graphics undoEnable 1
+}
+
+#######################################################################
+#### setMachineType
+#
+body ::tycho::EditSTD::setMachineType {type} {
+    set machineType $type
 }
 
 #######################################################################
@@ -800,8 +820,6 @@ body ::tycho::EditSTD::ptkCompile {} {
 
     # set the name for the FSM galaxy.
     set name [file tail [file rootname $file]]
-
-puts "outer domain = [domain]"
 
     # Create a galaxy :
     defgalaxy $name {
