@@ -56,7 +56,7 @@ after processing the input is sent to the \fIsize\fR output.
 	}
 	output {
 		name {outData}
-		type {anytype}
+		type {=inData}
 		desc { Particles that are de-queued on demand. }
 	}
 	output {
@@ -69,9 +69,6 @@ after processing the input is sent to the \fIsize\fR output.
 	}
 	protected {
 		Queue* queue[NUMINPUTS];	// maximum of NUMINPUTS inputs
-	}
-	constructor {
-		inData.inheritTypeFrom(outData);
 	}
 	defstate {
 		name {curSize}
@@ -111,10 +108,8 @@ after processing the input is sent to the \fIsize\fR output.
 			curSize += 1;
 			Particle& pp = p->get();
 			Particle* newp = pp.clone();
-			*newp = pp;
 			queue[i]->put(newp);
 		    }
-		    p->dataNew = FALSE;
 		}
 	   }
 	   // Produce outData only if the demand input is new.

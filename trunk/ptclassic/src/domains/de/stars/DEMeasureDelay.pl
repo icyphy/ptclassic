@@ -32,14 +32,11 @@ sent to the \fIoutput\fR port upon the second arrival.
 	}
 	output {
 		name { output }
-		type { ANYTYPE }
+		type { =input }
 	}
 	hinclude { "PriorityQueue.h" }
 	protected {
 		PriorityQueue firstArrivalQ;
-	}
-	constructor {
-		input.inheritTypeFrom(output);
 	}
 	start {
 		firstArrivalQ.initialize();
@@ -69,7 +66,6 @@ sent to the \fIoutput\fR port upon the second arrival.
 		}
 		// no match, register the event into the queue
 		Particle* newp = value.clone();
-		*newp = value;
 		firstArrivalQ.levelput(newp, arrivalTime);
 				
 	}

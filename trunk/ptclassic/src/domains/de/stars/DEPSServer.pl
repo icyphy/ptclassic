@@ -21,16 +21,13 @@ will be delayed by more than the nominal service time.
 	}
 	output {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
 	defstate {
 		name {nomServiceTime}
 		type {float}
 		default {"1.0"}
 		desc { "Nominal service time" }
-	}
-	constructor {
-		input.inheritTypeFrom(output);
 	}
 	code {
 		struct token {
@@ -98,7 +95,6 @@ will be delayed by more than the nominal service time.
 		// Create a token.
 		Particle& pp = input.get();
 		Particle* newp = pp.clone();
-		*newp = pp;
 		t = new token;
 		t->pp = newp;
 		t->serviceNeeded = double(nomServiceTime);
@@ -112,7 +108,6 @@ will be delayed by more than the nominal service time.
 		// the completion time of the service.
 		refireAtTime(arrivalTime + (t->serviceNeeded)*numberInService);
 
-		input.dataNew = FALSE;
 	   }
 
 	}
