@@ -218,7 +218,7 @@ body tycho::Glimpse::glimpseSearch {} {
     set nm [::tycho::autoName .index]
     ::tycho::IndexBrowser $nm \
             -file $glimpseOutputFile \
-            -width 100
+            -width 100 -closewindow 0
     $nm centerOnScreen
 }
 
