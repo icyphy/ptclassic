@@ -342,8 +342,8 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
       MDSDFStar& ms = *((MDSDFStar*)s);
       int startRow = ms.rowIndex;
       int startCol = ms.colIndex;
-      int endRow;
-      int endCol;
+      int endRow = 0;
+      int endCol = 0;
       int numTimesThisStar = 0;
 
       do {
