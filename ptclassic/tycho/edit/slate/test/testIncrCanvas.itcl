@@ -432,6 +432,14 @@ test IncrCanvas-delete.12 {Delete complex item by tag} {
 } {}
 _update
 
+_twoitems
+test IncrCanvas-delete.21 {Delete multiple items by tag} {
+    .c addtag foo all
+    .c delete foo
+    .c.canvas find all
+} {}
+_update
+
 ############################################################################
 #### dtag{}
 
