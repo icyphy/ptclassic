@@ -28,7 +28,7 @@ typedef char Matrix;
 #define	mxGetPr(pm)		0
 #define	mxSetPr(pm,p)
 #define mxGetPi(pm)		0
-#define	mxGetPi(pm,p)
+#define	mxSetPi(pm,p)
 #define	mxGetNzmax(pm)		0
 #define	mxSetNzmax(pm,n)
 #define mxGetIr(pm)		0
