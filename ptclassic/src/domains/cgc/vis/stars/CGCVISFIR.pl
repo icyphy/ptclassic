@@ -84,30 +84,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	    memalign(sizeof(double),sizeof(double)*$starSymbol(NUMPACK));
 	  float* $starSymbol(result) = (float *)
 	    memalign(sizeof(double),sizeof(float)*$starSymbol(NUMPACK));
-	  short* $starSymbol(shift_taparray) = (short *)
-	    memalign(sizeof(double),sizeof(short)*$starSymbol(NUMPACK)*$val(tappadlength));
+	  short* $starSymbol(shift_taparray) =
+	    (short*)memalign(sizeof(double),sizeof(short)*
+			     $starSymbol(NUMPACK)*$val(tappadlength));
 	}
 	initCode {
           addInclude("<vis_proto.h>");
 	  addDeclaration(mainDecl);
 	}
 	codeblock(localDecl) {
-	  int outerloop, innerloop, numloop;
-	  int genindex;
-	  int taprowindex, tapcolindex;
-	  short* indexcount;
-	  float datahi, datalo;
-          float tappairhi, tappairlo;
-          float splithi, splitlo;
-          float packedhi, packedlo;
-          double tapvalue;
-	  double *tapptr[4];
-	  double pairlohi, pairlolo;
-	  double pairhilo, pairhihi;
-	  double pairlo, pairhi, pair;
-	  double packedOut;
-	  double *packedaccum;
 	  double intmp;
+          double *tapptr[4],tapvalue;
+          double pairlohi,pairlolo,pairhilo,pairhihi;
+          double pairlo,pairhi,pair,packedOut,*packedaccum;
+          float packedhi,packedlo,datahi,datalo;
+          float tappairhi,tappairlo,splithi,splitlo;
+          int outerloop,innerloop,numloop,genindex;
+	  int taprowindex, tapcolindex;
+	  short *indexcount;
 	}
 	codeblock(filter) {
 	  vis_write_gsr(8);	  
@@ -121,8 +115,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 	  
 	  /* fill taparrays*/
-	       for(taprowindex=0;taprowindex<$starSymbol(NUMPACK);taprowindex++){
-		 indexcount = $starSymbol(shift_taparray) + ($val(tappadlength)+1)*(taprowindex);
+	       for(taprowindex=0;taprowindex<$starSymbol(NUMPACK);
+		   taprowindex++){
+		 indexcount = $starSymbol(shift_taparray) +
+		   ($val(tappadlength)+1)*(taprowindex);
 		 for(tapcolindex=0;tapcolindex<$val(taplength);tapcolindex++){
 		   /* scale taps, check under/overflow, and cast to short */
 			intmp = $val(scale)*$ref2(taps,tapcolindex);
@@ -163,7 +159,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		 datalo = vis_read_lo((double) $ref2(signalIn,outerloop));
 
 		 /* calculate four outputs*/
-		      for(innerloop=0;innerloop<$starSymbol(NUMPACK);innerloop++){
+		      for(innerloop=0;innerloop<$starSymbol(NUMPACK);
+			  innerloop++){
 			/* set up tap pairs for each shifted taparray*/
 			     tapvalue = *tapptr[innerloop]++;
 			tappairhi = vis_read_hi(tapvalue);
@@ -179,7 +176,8 @@ limitation of liability, and disclaimer of warranty provisions.
 			     pairlo = vis_fpadd32(pairlolo,pairlohi);
 			pairhi = vis_fpadd32(pairhilo,pairhihi);
 			pair = vis_fpadd32(pairhi,pairlo);
-			$starSymbol(accumpair)[innerloop] = vis_fpadd32($starSymbol(accumpair)[innerloop],pair);
+			$starSymbol(accumpair)[innerloop] =
+			  vis_fpadd32($starSymbol(accumpair)[innerloop],pair);
 		      }  
 	       }
 
@@ -187,7 +185,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	       for(genindex=0;genindex<$starSymbol(NUMPACK);genindex++){
 		 splithi = vis_read_hi($starSymbol(accumpair)[genindex]);
 		 splitlo = vis_read_lo($starSymbol(accumpair)[genindex]);
-		 $starSymbol(result)[genindex] = vis_fpadd32s(splithi,splitlo); 
+		 $starSymbol(result)[genindex] =
+		   vis_fpadd32s(splithi,splitlo); 
 	       }
 	  
 	  packedaccum = (double *) $starSymbol(result);
@@ -210,10 +209,5 @@ limitation of liability, and disclaimer of warranty provisions.
 	wrapup {
 	  addCode(freeit);
 	}
-}	
-
-
-
-
-
+}
 
