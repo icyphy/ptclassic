@@ -1,4 +1,4 @@
-# Definition of a basic window with a menu bar and dismiss button
+ Definition of a basic window with a menu bar and dismiss button
 #
 # @Author: Edward A. Lee
 # @Contributors: Joel King
@@ -651,7 +651,9 @@ body ::tycho::File::help {} {
 # Insert the specified data.
 #
 body ::tycho::File::insertData {data} {
-    error "Sorry, insert data not implemented yet."
+    # FIXME: Under itcl2.1b, if this method signals an error, 
+    # then we can't bring up a html viewer.
+    # error "Sorry, insert data not implemented yet."
 }
 
 #####################################################################
