@@ -32,14 +32,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Creation Date: Sat Nov  4 17:25:01 PST 1995
 */
 
-
 #ifndef _MISC_H
 #define _MISC_H   "$Id$"
 
 #include <stdlib.h>
+#include <thread.h>
 #include <udpam.h>
 
-#ifdef SOLARIS
 #define LockEP(endpoint)  \
       if (mutex_lock(&endpoint->lock) != 0) { \
           perror("mutex_lock error\n"); \
@@ -60,7 +59,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
           perror("mutex_lock error\n"); \
           exit(-1); \
       }    
-#endif /* SOLARIS */
 
 /*
  * TxFree FIFO management functions:
