@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)_makefile	1.1 02/23/98
+# @Version: $Id$
 #
 # @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/%metapkg%/pakman/demos
+VPATH =		$(ROOT)/util/pakman/demos
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
