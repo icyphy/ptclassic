@@ -97,15 +97,9 @@ int DecomScheduler::genSched(DecomGal* cgal)
 	}
 
 	// Step 2. Joe's clustering algorithm.
-	//         We no longer need to call this twice.
+	//         We no longer need to call this twice, or call genSubScheds.
 
 	cgal->cluster();
-
-	// recursive application of the decomposition.
-	if (!cgal->genSubScheds()) {
-		invalid = TRUE;
-		return FALSE;
-	}
 
 	// Now, cgal is a compact form to be expanded for more looping.
 	//
@@ -168,26 +162,17 @@ int DecomScheduler::topLevelSchedule(LSGraph &g)
 StringList DecomScheduler::displaySchedule(int depth) {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
-	SDFStar* c;
-	while ((c = next++) != 0) {
-		if (c->isA("LSCluster")) {
-			LSCluster* ls = (LSCluster*) c;
-			sch += ls->displaySchedule(depth);
-		} else {
-			sch += ((SDFCluster*) c)->displaySchedule(depth);
-		}
+	SDFBaseCluster* c;
+	while ((c = (SDFBaseCluster*)next++) != 0) {
+		sch += c->displaySchedule(depth);
 	}
 	return sch;
 }
 
 void DecomScheduler::genCode(Target& t, int depth) {
 	SDFSchedIter next(mySchedule);
-	SDFStar* c;
-	while ((c = next++) != 0) {
-		if (c->isA("LSCluster")) {
-			((LSCluster*) c)->genCode(t,depth);
-		} else {
-			((SDFCluster*) c)->genCode(t,depth);
-		}
+	SDFBaseCluster* c;
+	while ((c = (SDFBaseCluster*)next++) != 0) {
+		c->genCode(t,depth);
 	}
 }
