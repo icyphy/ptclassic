@@ -41,9 +41,14 @@
 # <p>
 # Here is an example of how to use the Exec:
 # <tcl><pre>
-#     ::tycho::Exec .x -command {make all}
-#     .x centerOnScreen
+#     set win [::tycho::autoName .execExample]
+#     ::tycho::Exec $win -command {make all}
+#     $win centerOnScreen
+#     ::tycho::Dialog::wait $win
+#     ::tycho::inform "We waited until the Exec window was closed"
 # </pre></tcl>
+# In the above example, we bring up the Exec window and then wait  
+# until the user closes it.
 #
 class ::tycho::Exec {
     inherit ::tycho::Query
