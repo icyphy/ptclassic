@@ -1,8 +1,8 @@
 static const char file_id[] = "SRWormhole.cc";
 
-/*  Version $Id$
+/*  Version @(#)SRWormhole.cc	1.3 4/22/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -1,8 +1,8 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "SRScheduler.cc";
 
-/*  Version $Id$
+/*  Version @(#)SRScheduler.cc	1.5 4/22/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
