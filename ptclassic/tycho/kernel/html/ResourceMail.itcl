@@ -50,19 +50,22 @@ class ::tycho::ResourceMail {
     ###################################################################
     ####                         public methods                    ####
 
-    # Close the resource.
+    # Close the resource. Calls mailinitiate to send out the message.
     method close {}
-
-    # Return the end of file status
-    method eof {}
 
     # Read a string from a streamable resource
     method gets {{varName {}}}
+    
+    # Get the progress of sending mail
+    method getprogress {} {return $progress}
 
-    # Test if the file is currently open
+    # Not open by default
     method isopen {} {return 0}
 
-    # Open the resource.
+    # if there's timeout on protocol, we can't connect to the mail server.
+    method mailtimeout {oldstate}
+
+    # Open the resource. Enable puts.
     method open {{path {}}}
 
     # Write a string to a streamable resource.
@@ -72,23 +75,8 @@ class ::tycho::ResourceMail {
     # Return a string containing the data in a streamable resource 
     method read {}
 
-    # Return 1 if this resource is streamable
-    method streamable {}
-
-    # Write to the file
-    method write {data}
-
     ###################################################################
     ####                           public procs                    ####
-
-    # Get a cached copy of the data
-    method cachefile {}
-
-    # Change the permissions of a resource
-    proc chmod {permissions path}
-
-    # Return the content type of the current file
-    proc contenttype {path}
 
     # See if the server or hostname exists
     proc exists {path}
@@ -99,20 +87,20 @@ class ::tycho::ResourceMail {
     # Split up URL
     proc splitURL {path}
 
-    # Return the type of a given file
-    proc type {path}
-
     ###################################################################
     ####                         protected methods                 ####
 
     # Puts a string to console of the debug option is set
     protected method debugputs {string}
 
-    # Initiate a connection on the mail server
-    method mailinitiate {url}
+    # Initiate a connection on the mail server. Called by close.
+    protected method mailinitiate {{url {}}}
 
-    # File event handler for mail server.
-    method mailhandler {}
+    # File event handler for mail server. Called by mailinitiate.
+    protected method mailhandler {}
+
+    # File event handler for mail server. Called by mailinitiate.
+    protected method mailabort {message}
 
 
     ###################################################################
@@ -120,6 +108,9 @@ class ::tycho::ResourceMail {
 
     ###################################################################
     ####                        protected variables                ####
+
+    # The progress, can be used with the statusbar
+    protected variable progress 0.0
 
     # The url this object is accessing
     protected variable currentURL {}
@@ -134,12 +125,30 @@ class ::tycho::ResourceMail {
     # The names are derived from mail daemon (ESMTP Sendmail 8.8.5)
     protected variable state {DISCONNECTED}
 
+    # The content of mail to be sent.
+    protected variable mailbuffer {}
+
+    # Attribute of the recipient
+    protected variable username
+    protected variable hostname
+    protected variable port
+
+    # FIXME: Attribute of the user. This is set inside the constructor,
+    # but should be moved to toplevel Tycho!
+    protected variable myname {}
+    protected variable myhost {}
 
     ###################################################################
     ####                         private variables               ####
     
+    # Debug status. Print if 1
+    private variable debug 0
+
     # True if the file is open
     private variable fileIsOpen 0
+
+    # Timeout for sending/receiving protocol message. Default 2 seconds
+    private variable timeout 2000
 }
 
 
@@ -150,6 +159,22 @@ class ::tycho::ResourceMail {
 #
 body ::tycho::ResourceMail::constructor {args} {
     eval configure $args
+
+    # FIXME: This is very system dependent!
+    # FIXME: Following is for UNIX
+    if [info exists env(USER)] {set myname $env(USER)}
+    if [info exists env(HOST)] {set myhost $env(HOST)}
+    catch {set myname [exec whoami]}
+    catch {set myhost [lindex [exec uname -a] 1]}
+
+    # FIXME: Following is for NT
+    if [info exists env(USERNAME)] {set myname $env(USERNAME)}
+    if [info exists env(USERDOMAIN)] {set myhost $env(USERDOMAIN)}
+
+    if {$myname=={} || $myhost=={}} {
+        error "Sorry, I cannot detect your username or hostname. \
+                Mail will not run on this platform."
+    }
 }
 
 #######################################################################
@@ -167,13 +192,12 @@ body ::tycho::ResourceMail::destructor {} {
 #### close
 body ::tycho::ResourceMail::close {} {
     if !$fileIsOpen {
-	openerror "File \"$this\" is not open (close)"
+	error "File \"$this\" is not open."
     }
-    set fileIsOpen 0
-    if { $fileid != "" } {
-        ::close $fileid
-        set fileid ""
-    }
+
+    # Initiate sending to the server
+    mailinitiate
+
 }
 
 #####################################################################
@@ -181,34 +205,27 @@ body ::tycho::ResourceMail::close {} {
 # Open a connection for mail on port 25.
 #
 body ::tycho::ResourceMail::open {{path {}}} {
-    set url [path]
+    if {$path=={}} {
+        set currentURL [path]
+    }
 
-    ::puts "URL: $url"
-
-    if { ! [exists $url] } {
+    if { ! [exists $currentURL] } {
 	error "File $url does not exist"
     }
 
-    # Open the cache file
+    if { $fileIsOpen} {error "File is already open!"}
+
     set fileIsOpen 1
+    set mailbuffer {}
+    set progress 0.0
+    return 1
 }
 
 #####################################################################
 #### puts
 body ::tycho::ResourceMail::puts {string} {
-
-}
-
-#####################################################################
-#### streamable
-body ::tycho::ResourceMail::streamable {} {
-    return 1
-}
-
-#####################################################################
-#### write
-body ::tycho::ResourceMail::write {string} {
-
+    if {!$fileIsOpen} {error "File is not open."}
+    lappend mailbuffer $string
 }
 
 #########################################################################
@@ -256,10 +273,11 @@ body ::tycho::ResourceMail::debugputs {string} {
 #### mailinitiate
 # Opening a mail connection, and set the fileevent.
 #
-body ::tycho::ResourceMail::mailinitiate {url} {
+body ::tycho::ResourceMail::mailinitiate {{url {}}} {
     # Parse URL into hostname, port, and path
-    set currentURL $url
-    ::tycho::assign username hostname port [splitURL $url]
+    if {$url!={}} {set currentURL $url}
+
+    ::tycho::assign username hostname port [splitURL $currentURL]
 
     if {[catch {socket -async $hostname $port} socketid]} {
 	catch {unset $socketid}
@@ -267,15 +285,13 @@ body ::tycho::ResourceMail::mailinitiate {url} {
     }
 
     # <tt>DISCONNECTED, HELO, MAILFROM, RCPTTO, DATA1, DATA2 and QUIT.</tt>
-    set state HELO
+    set state CONNECT
 
     # Set up the file events for incoming data
     ::fileevent $socketid w {}
     ::fileevent $socketid readable \
 	    "@scope ::tycho::ResourceMail [list $this mailhandler]"
 
-    # Request the URL
-    # FIXME: Need to figure out how to set the Accept-Encoding field
     ::fconfigure $socketid -blocking no    ;#-translation crlf
     ::fconfigure $socketid -translation auto
 }
@@ -287,21 +303,9 @@ body ::tycho::ResourceMail::mailinitiate {url} {
 # The following is the handshake protocol between the client and
 # the server. When the mailhandler gets the expected state from
 # the server, it'll send out the right data.
-#
-# <pre>
-# State          Expect from Server             Send/"Action"
+# <pre>State          Expect from Server             Send/"Action"
 # -----          ------------------             -----------
 #
-# 220-hofmann.CS.Berkeley.EDU Sendmail 8.6.11/8.6.6.Beta11 \
-#        ready at Mon, 2 Jun 1997 18:15:06 -0700
-# 220 ESMTP spoken here
-# DISCONNECTED                                  "THIS IS AN ERROR HERE!"
-# HELO           220 <hostname> ESMTP ...       HELO <hostname>
-# MAILFROM       250 <host> Hello <host>        MAIL FROM: <username@hostname>
-# RCPTTO         250 <username> Recipient ok    DATA
-# DATA1          354 Enter mail...              <subject, body, .>
-# DATA2          250 ...Message accepted        QUIT
-# QUIT           221 Accepted for delivery      "Close status is okay"
 # </pre>
 body ::tycho::ResourceMail::mailhandler {} {
     if {[::eof $socketid] && $state!="DISCONNECTED"} {
@@ -310,12 +314,147 @@ body ::tycho::ResourceMail::mailhandler {} {
     }
     # Line will contain the status
     ::gets $socketid line
-    ::puts "LINE: $line"
 
+    # This returns the status number. 200-299 is okay (just like HTTP)
+    set status [lindex $line 0]
 
+    if {$status>=400} {
+        error "Error on mailto:$username@$hostname, $line, socket($socketid)"
+    }
+
+    debugputs "$state $line"
+
+    # The following is a state machine
+    switch -- $state {
+        DISCONNECTED {
+            mailabort "DISCONNECTED: Error, should not expect incoming message"
+            set progress -1
+        }
+
+        CONNECT {
+            # 220 = "okay to transmit, protocol good"
+            #
+            #Sample: 
+            #220-hofmann.CS.Berkeley.EDU Sendmail 8.6.11/8.6.6.Beta11 
+            #                 ready at Tue, 3 Jun 1997 10:10:17 -0700
+            if [regexp -nocase {^22[0-9] .*} $line] {
+                ::puts $socketid "HELO $myhost"
+                set state HELO
+                after $timeout "eval $this mailtimeout $state"
+            } elseif {$status<200 || $status>=300} {
+                mailabort "CONNECT: Protocol failed"
+            }
+            set progress 0.1
+        }
+
+        HELO {
+            #250 hofmann.CS.Berkeley.EDU Hello tycho.EECS.Berkeley.EDU 
+            #                    [128.32.240.250], pleased to meet you
+            if [regexp -nocase {^25[0-9] .*Hello ([^\ ^\,]+).*} \
+                    $line _ myhost] {
+                # FIXME need to check for myhost!!!
+                ::puts $socketid "MAIL FROM: $myname@$myhost"
+                set state MAILFROM
+                after $timeout "eval $this mailtimeout $state"
+            } elseif {$status<200 || $status>=300} {
+                mailabort "HELO"
+            }
+            set progress 0.2
+        }
+        
+        MAILFROM {
+            #250 kchang@tycho.EECS.Berkeley.EDU... Sender ok
+            if [regexp {^25[0-9] .+Sender ok} $line] {
+                ::puts $socketid "RCPT TO: $username"
+                set state RCPTTO
+                after $timeout "eval $this mailtimeout $state"
+            } elseif {$status<200 || $status>=300} {
+                mailabort "MAILFROM:"
+            }
+            set progress 0.3
+        }
+
+        RCPTTO {
+            #250 <user>... Recipient ok
+            if [regexp -nocase {^25[0-9] .+Recipient ok} $line] {
+                ::puts $socketid "DATA"
+                set state DATA1
+                # FIXME: This will give an error because sending the entire
+                # text takes a while on a slow network
+                #after $timeout "eval $this mailtimeout $state"
+            } elseif {$status<200 || $status>=300} {
+                mailabort "RCPTTO"
+            }
+            set progress 0.4
+        }
+
+        DATA1 {
+            #354 Enter mail, end with "." on a line by itself
+            if [regexp -nocase {^35[0-9] Enter mail} $line] {
+                set bufferlines [llength $mailbuffer]
+                set line 0
+                # Dump the mail buffer to data
+                foreach i $mailbuffer {
+                    incr line
+                    ::puts $socketid $i
+                    set progress [expr 0.4 + (($line/$bufferlines)/2.5)]
+                }
+                ::puts $socketid "."
+                set state DATA2
+                after $timeout "eval $this mailtimeout $state"
+            } else {
+                mailabort "DATA1"
+            }
+        }
+
+        DATA2 {
+            #250 LAA14447 Message accepted for delivery
+            if [regexp -nocase {^25[0-9] .+Message accept} $line] {
+                ::puts $socketid "QUIT"
+                set state QUIT
+                after $timeout "eval $this mailtimeout $state"
+            } else {
+                mailabort "DATA2"
+            }
+            set progress 0.9
+        }
+
+        QUIT {
+            set fileIsOpen 0
+            set state DISCONNECTED
+            ::fileevent $socketid readable {}
+            ::close $socketid
+            set progress 1.0
+            return
+        }
+    }
+    # The following is required because Tcl will buffer all output
+    ::flush $socketid
 }
 
+#########################################################################
+#### mailtimeout
+# After certain amount of time, we hope that the state has transitioned.
+# Otherwise, there's a timeout on the network or on the server, and
+# we have to stop the transaction. This method will compare the oldstate
+# with the current state.
+#
+body ::tycho::ResourceMail::mailtimeout {oldstate} {
+    if {$oldstate==$state} {
+        error "Timeout on mailto:$username@$hostname"
+    }
+}
 
+#########################################################################
+#### mailabort
+# When the protocol fails, output an error message, and close socket
+#
+body ::tycho::ResourceMail::mailabort {message} {
+    catch {::close $socketid}
+    set state DISCONNECTED
+    set fileIsOpen 0
+    error $message
+}
 
 #########################################################################
 #### splitURL
