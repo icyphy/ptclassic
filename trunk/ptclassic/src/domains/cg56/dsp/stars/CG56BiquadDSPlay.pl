@@ -12,8 +12,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
         explanation {
-Second order IIR filter (Biquad).  This biquad is tailored to use the
-coefficients from the DSPlay filter design tool.
+Second order IIR filter (Biquad).
+This biquad is tailored to use the coefficients from the DSPlay filter
+design tool.
 If DSPlay gives the coefficients: A B C D E then define the parameters
 as follows:
 .sp 0.5
