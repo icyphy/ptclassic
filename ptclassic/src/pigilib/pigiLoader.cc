@@ -225,9 +225,14 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	// 2. build up the include path
 	//    -- don't forget to add a space after each -I directive
         //    -- if running under cfront, include -I$PTOLEMY/src/compat/cfront 
-        //    -- if running under egcs, include -I$PTOLEMY/src/compat/cfront
-#if !defined(__GNUG__) || ( defined(__GNUG__) && defined(PT_EGCS))
+#if !defined(__GNUG__) 
 	cmd << "-I" << ptSrcDir << "/compat/cfront ";
+#endif
+        //    -- if running under egcs, include -I$PTOLEMY/src/compat/cfront
+#if defined(__GNUG__) && defined(PT_EGCS)
+        // Define PT_EGCS so that when we incrementally link a star,
+        // we don't try to include sysent.h while in std.h
+	cmd << "-DPT_EGCS -I" << ptSrcDir << "/compat/cfront ";
 #endif
 	cmd << "-I" << ptDomainDir << "/kernel ";
 	cmd << "-I" << ptDomainDir << "/stars ";
