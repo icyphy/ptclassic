@@ -34,7 +34,7 @@ They are registered with Tcl calling registerTclFns().
 #include "local.h"
 #include "rpc.h"
 #include "exec.h"
-#include "ganttIfc.c"
+#include "ganttIfc.h"
 #include "handle.h"
 /*******************************************************************
  * Command to highlight an object given its name. Call as
