@@ -44,7 +44,9 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+# These are tests that don't work in Itcl 3.0
+TCL_SRCS = \
+	testResourceFTP.itcl
 
 SIMPLE_TESTS = \
 	testCacheManager.itcl \
@@ -54,7 +56,6 @@ SIMPLE_TESTS = \
 # tkwait{}. Too bad....
 GRAPHICAL_TESTS = \
 	testHTML.itcl \
-	testResourceFTP.itcl \
 	testResourceHTTP.itcl \
 	testResourceRemote.itcl
 
