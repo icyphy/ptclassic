@@ -43,6 +43,12 @@ static char SccsId[]="$Id$";
 #include "windows.h"
 #include "vemDM.h"
 #include "rpcServer.h"
+#include "vemRPC.h"
+#include "serverUtils.h"
+#include "vemUtil.h"
+#include "vemMain.h"		/* Pick up vemPrompt() */
+
+#include "serverVem.h"
 
 #include <fcntl.h>
 #include <sys/file.h>
@@ -53,232 +59,8 @@ extern struct RPCApplication *RPCApplication;
 
 int RPCFloatingPointSame = 0;
 
-
-/*
- * process a remote VEM request
- *
- * This routine receives the VEM function request from the application and
- * calls the proper VEM routine to deal with it.
- *
- * Arguments:
- *   application - number of the application
- *                 integer from 0 to RPCMaxApplications - 1
- *   functionNumber - number of the function (see rpcInternal.h)
- *
- * Returns:
- *   RPC_OK    - everything succeeded
- *   RPC_ERROR - something went wrong
- *
- */
-rpcStatus
-RPCVEMRequest(application, functionNumber)
-int application;
-long functionNumber;
-{
-    rpcStatus status;
-    STREAM receiveStream, sendStream;
-
-    receiveStream = RPCApplication[application].ReceiveStream;	/* grab the streams */
-    sendStream = RPCApplication[application].SendStream;
-
-    switch (functionNumber) {
-	
-	case VEM_MESSAGE_FUNCTION:
-	    status = RPCvemMessage(receiveStream, sendStream);
-	    break;
-
-	case VEM_PROMPT_FUNCTION:
-	    status = RPCvemPrompt();
-	    break;
-
-	case VEM_INITIALIZE_APPLICATION_FUNCTION:
-	    status = RPCVemInitializeApplication(application, receiveStream, sendStream);
-	    break;
-
-	case VEM_SEND_MENU_FUNCTION:
-	    status = RPCvemSendMenu(application, receiveStream, sendStream);
-	    break;
-
-	case VEM_COMMAND_FUNCTION:
-	    status = RPCvemCommand(application);
-	    break;
-
-	case VEM_OPEN_WINDOW_FUNCTION:
-	    status = RPCvemOpenWindow(application, receiveStream, sendStream);
-	    break;
-
-	case VEM_OPEN_RPC_WINDOW_FUNCTION:
-	    status = RPCvemOpenRPCWindow(application, receiveStream, sendStream);
-	    break;
-	    
-	case VEM_FLUSH_TECH_INFO_FUNCTION:
-	    status = RPCvemFlushTechInfo(receiveStream);
-	    break;
-	    
-	case VEM_SET_DISPLAY_TYPE_FUNCTION:
-	    status = RPCvemSetDisplayType(receiveStream);
-	    break;
-	    
-	case VEM_GET_DISPLAY_TYPE_FUNCTION:
-	    status = RPCvemGetDisplayType(sendStream);
-	    break;
-	    
-	case WN_FLUSH_FUNCTION:
-	    status = RPCvemWnFlush(sendStream);
-	    break;
-
-	case WN_QREGION_FUNCTION:
-            status = RPCvemWnQRegion(receiveStream, sendStream);
-	    break;
-	    
-	case WN_GET_OPTIONS_FUNCTION:
-            status = RPCvemWnGetOptions(receiveStream, sendStream);
-	    break;
-	    
-	case WN_SET_OPTIONS_FUNCTION:
-            status = RPCvemWnSetOptions(receiveStream, sendStream);
-	    break;
-	    
-	case WN_TURN_OFF_LAYER_FUNCTION:
-            status = RPCvemWnTurnOffLayer(receiveStream, sendStream);
-	    break;
-	    
-	case WN_TURN_ON_LAYER_FUNCTION:
-            status = RPCvemWnTurnOnLayer(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_NEW_SEL_SET_FUNCTION:
-	    status = RPCvemNewSelSet(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_FREE_SEL_SET_FUNCTION:
-	    status = RPCvemFreeSelSet(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_CLEAR_SEL_SET_FUNCTION:
-	    status = RPCvemClearSelSet(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_ADD_SEL_SET_FUNCTION:
-	    status = RPCvemAddSelSet(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_DEL_SEL_SET_FUNCTION:
-	    status = RPCvemDelSelSet(receiveStream, sendStream);
-	    break;
-	    
-	case VEM_ZOOM_SEL_SET_FUNCTION:
-	    status = RPCvemZoomSelSet(receiveStream, sendStream);
-	    break;
-
-	case REG_INIT_FUNCTION:
-	    status = RPCvemRegInit(receiveStream, sendStream);
-	    break;
-	    
-	case REG_NEXT_FUNCTION:
-	    status = RPCvemRegNext(receiveStream, sendStream);
-	    break;
-	    
-	case REG_END_FUNCTION:
-	    status = RPCvemRegEnd(receiveStream, sendStream);
-	    break;
-
-        case REG_OBJ_START_FUNCTION:
-            status = RPCregObjStart(receiveStream, sendStream);
-            break;
-
-        case REG_OBJ_NEXT_FUNCTION:
-            status = RPCregObjNext(receiveStream, sendStream);
-            break;
-
-        case REG_OBJ_FINISH_FUNCTION:
-            status = RPCregObjFinish(receiveStream, sendStream);
-            break;
-
-        case REG_FIND_ACTUAL_FUNCTION:
-            status = RPCregFindActual(receiveStream, sendStream);
-            break;
-
-        case REG_FIND_IMPL_FUNCTION:
-            status = RPCregFindImpl(receiveStream, sendStream);
-            break;
-
-        case REG_FIND_NET_FUNCTION:
-            status = RPCregFindNet(receiveStream, sendStream);
-            break;
-	    
-        case REG_ERROR_STRING_FUNCTION:
-            status = RPCregErrorString(receiveStream, sendStream);
-            break;
-	    
-        case DM_MESSAGE_FUNCTION:
-	    status = RPCdmMessage(receiveStream, sendStream);
-	    break;
-	    
-        case DM_MULTI_WHICH_FUNCTION:
-	    status = RPCdmMultiWhich(receiveStream, sendStream);
-	    break;
-	    
-	case DM_WHICH_ONE_FUNCTION:
-	    status = RPCdmWhichOne(receiveStream, sendStream);
-	    break;
-
-	case DM_MULTI_TEXT_FUNCTION:
-	    status = RPCdmMultiText(receiveStream, sendStream);
-	    break;
-
-	case DM_CONFIRM_FUNCTION:
-	    status = RPCdmConfirm(receiveStream, sendStream);
-	    break;
-
-	case VEM_COMPLETE_FUNCTION:
-	    status = RPCVemRemoteFunctionComplete(application, sendStream);
-	    break;
-	    
-        case VU_FIND_SPOT_FUNCTION:
-            status = RPCvuFindSpot(receiveStream, sendStream);
-            break;
-	    
-        case VU_FIND_LAYER_FUNCTION:
-            status = RPCvuFindLayer(receiveStream, sendStream);
-            break;
-	    
-        case RPC_CLEAN_EXIT_FUNCTION:
-            status = RPCcleanExit(application, receiveStream);
-            break;
-
-        case RPC_X_GET_DEFAULT_FUNCTION:
-            status = RPCXGetDefault(receiveStream, sendStream);
-            break;
-
-        case RPC_EXIT_VEM_FUNCTION:
-            status = RPCExitVem(receiveStream, sendStream);
-            break;
-
-        case RPC_REGISTER_DEMON_FUNCTION:
-            status = RPCRegisterDemon(receiveStream, sendStream, application);
-            break;
-
-        case RPC_FILE_OPEN_FUNCTION:
-            status = RPCfileOpen(receiveStream, sendStream);
-            break;
-
-        case VEM_BUF_LOCK_FUNCTION:
-            status = RPCbufLock(receiveStream, sendStream);
-            break;
-
-	default:
-	    (void) sprintf(RPCErrorBuffer, "illegal VEM function number (%d)\n",
-		    functionNumber);
-	    vemMessage(RPCErrorBuffer, MSG_DISP);
-	    return RPC_ERROR;
-    }
-
-    RPCFLUSH(sendStream, RPC_ERROR);
-    
-    return status;
-}
-
+/* Forward decls */
+rpcStatus RPCvemPrompt();
 
 
 /*
@@ -321,7 +103,8 @@ STREAM sendStream, receiveStream;
     if (version != RPC_VERSION) {
 	char buf[1024];
 
-	(void) sprintf(buf, "RPC Error: librpc.a (RPC Version %d) out of date with respect to vem (RPC Version %d)\n",
+	(void) sprintf(buf,
+		       "RPC Error: librpc.a (RPC Version %ld) out of date with respect to vem (RPC Version %ld)\n",
 		version, RPC_VERSION);
         vemMessage(buf, MSG_DISP);
         return RPC_ERROR;
@@ -1621,7 +1404,7 @@ STREAM readStream;
     RPCASSERT(RPCReceiveLong(&status, readStream), RPC_ERROR);
 
     /* tell the USER that the application closed */
-    (void) sprintf(buffer, "\n%s running on %s exited with status %d\n",
+    (void) sprintf(buffer, "\n%s running on %s exited with status %ld\n",
 	    RPCApplication[application].name,
 	    RPCApplication[application].host,
 	    status);
@@ -1649,6 +1432,7 @@ STREAM receiveStream, sendStream;
     octEnd();
     exit(0);
     /*NOTREACHED*/
+    return RPC_ERROR;
 }
 
 
@@ -1812,6 +1596,7 @@ octObject *cl;
 
 rpcStatus
 RPCbufLock(receiveStream, sendStream)
+STREAM receiveStream, sendStream;
 {
     long id;
 #ifndef NOWAIT
@@ -1827,4 +1612,230 @@ RPCbufLock(receiveStream, sendStream)
     (void) bufLock((octId) id);
 #endif
     return RPC_OK;
+}
+
+/*
+ * process a remote VEM request
+ *
+ * This routine receives the VEM function request from the application and
+ * calls the proper VEM routine to deal with it.
+ *
+ * Arguments:
+ *   application - number of the application
+ *                 integer from 0 to RPCMaxApplications - 1
+ *   functionNumber - number of the function (see rpcInternal.h)
+ *
+ * Returns:
+ *   RPC_OK    - everything succeeded
+ *   RPC_ERROR - something went wrong
+ *
+ */
+rpcStatus
+RPCVEMRequest(application, functionNumber)
+int application;
+long functionNumber;
+{
+    rpcStatus status;
+    STREAM receiveStream, sendStream;
+
+    receiveStream = RPCApplication[application].ReceiveStream;	/* grab the streams */
+    sendStream = RPCApplication[application].SendStream;
+
+    switch (functionNumber) {
+	
+	case VEM_MESSAGE_FUNCTION:
+	    status = RPCvemMessage(receiveStream, sendStream);
+	    break;
+
+	case VEM_PROMPT_FUNCTION:
+	    status = RPCvemPrompt();
+	    break;
+
+	case VEM_INITIALIZE_APPLICATION_FUNCTION:
+	    status = RPCVemInitializeApplication(application, receiveStream, sendStream);
+	    break;
+
+	case VEM_SEND_MENU_FUNCTION:
+	    status = RPCvemSendMenu(application, receiveStream, sendStream);
+	    break;
+
+	case VEM_COMMAND_FUNCTION:
+	    status = RPCvemCommand(application);
+	    break;
+
+	case VEM_OPEN_WINDOW_FUNCTION:
+	    status = RPCvemOpenWindow(application, receiveStream, sendStream);
+	    break;
+
+	case VEM_OPEN_RPC_WINDOW_FUNCTION:
+	    status = RPCvemOpenRPCWindow(application, receiveStream, sendStream);
+	    break;
+	    
+	case VEM_FLUSH_TECH_INFO_FUNCTION:
+	    status = RPCvemFlushTechInfo(receiveStream);
+	    break;
+	    
+	case VEM_SET_DISPLAY_TYPE_FUNCTION:
+	    status = RPCvemSetDisplayType(receiveStream);
+	    break;
+	    
+	case VEM_GET_DISPLAY_TYPE_FUNCTION:
+	    status = RPCvemGetDisplayType(sendStream);
+	    break;
+	    
+	case WN_FLUSH_FUNCTION:
+	    status = RPCvemWnFlush(sendStream);
+	    break;
+
+	case WN_QREGION_FUNCTION:
+            status = RPCvemWnQRegion(receiveStream, sendStream);
+	    break;
+	    
+	case WN_GET_OPTIONS_FUNCTION:
+            status = RPCvemWnGetOptions(receiveStream, sendStream);
+	    break;
+	    
+	case WN_SET_OPTIONS_FUNCTION:
+            status = RPCvemWnSetOptions(receiveStream, sendStream);
+	    break;
+	    
+	case WN_TURN_OFF_LAYER_FUNCTION:
+            status = RPCvemWnTurnOffLayer(receiveStream, sendStream);
+	    break;
+	    
+	case WN_TURN_ON_LAYER_FUNCTION:
+            status = RPCvemWnTurnOnLayer(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_NEW_SEL_SET_FUNCTION:
+	    status = RPCvemNewSelSet(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_FREE_SEL_SET_FUNCTION:
+	    status = RPCvemFreeSelSet(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_CLEAR_SEL_SET_FUNCTION:
+	    status = RPCvemClearSelSet(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_ADD_SEL_SET_FUNCTION:
+	    status = RPCvemAddSelSet(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_DEL_SEL_SET_FUNCTION:
+	    status = RPCvemDelSelSet(receiveStream, sendStream);
+	    break;
+	    
+	case VEM_ZOOM_SEL_SET_FUNCTION:
+	    status = RPCvemZoomSelSet(receiveStream, sendStream);
+	    break;
+
+	case REG_INIT_FUNCTION:
+	    status = RPCvemRegInit(receiveStream, sendStream);
+	    break;
+	    
+	case REG_NEXT_FUNCTION:
+	    status = RPCvemRegNext(receiveStream, sendStream);
+	    break;
+	    
+	case REG_END_FUNCTION:
+	    status = RPCvemRegEnd(receiveStream, sendStream);
+	    break;
+
+        case REG_OBJ_START_FUNCTION:
+            status = RPCregObjStart(receiveStream, sendStream);
+            break;
+
+        case REG_OBJ_NEXT_FUNCTION:
+            status = RPCregObjNext(receiveStream, sendStream);
+            break;
+
+        case REG_OBJ_FINISH_FUNCTION:
+            status = RPCregObjFinish(receiveStream, sendStream);
+            break;
+
+        case REG_FIND_ACTUAL_FUNCTION:
+            status = RPCregFindActual(receiveStream, sendStream);
+            break;
+
+        case REG_FIND_IMPL_FUNCTION:
+            status = RPCregFindImpl(receiveStream, sendStream);
+            break;
+
+        case REG_FIND_NET_FUNCTION:
+            status = RPCregFindNet(receiveStream, sendStream);
+            break;
+	    
+        case REG_ERROR_STRING_FUNCTION:
+            status = RPCregErrorString(receiveStream, sendStream);
+            break;
+	    
+        case DM_MESSAGE_FUNCTION:
+	    status = RPCdmMessage(receiveStream, sendStream);
+	    break;
+	    
+        case DM_MULTI_WHICH_FUNCTION:
+	    status = RPCdmMultiWhich(receiveStream, sendStream);
+	    break;
+	    
+	case DM_WHICH_ONE_FUNCTION:
+	    status = RPCdmWhichOne(receiveStream, sendStream);
+	    break;
+
+	case DM_MULTI_TEXT_FUNCTION:
+	    status = RPCdmMultiText(receiveStream, sendStream);
+	    break;
+
+	case DM_CONFIRM_FUNCTION:
+	    status = RPCdmConfirm(receiveStream, sendStream);
+	    break;
+
+	case VEM_COMPLETE_FUNCTION:
+	    status = RPCVemRemoteFunctionComplete(application, sendStream);
+	    break;
+	    
+        case VU_FIND_SPOT_FUNCTION:
+            status = RPCvuFindSpot(receiveStream, sendStream);
+            break;
+	    
+        case VU_FIND_LAYER_FUNCTION:
+            status = RPCvuFindLayer(receiveStream, sendStream);
+            break;
+	    
+        case RPC_CLEAN_EXIT_FUNCTION:
+            status = RPCcleanExit(application, receiveStream);
+            break;
+
+        case RPC_X_GET_DEFAULT_FUNCTION:
+            status = RPCXGetDefault(receiveStream, sendStream);
+            break;
+
+        case RPC_EXIT_VEM_FUNCTION:
+            status = RPCExitVem(receiveStream, sendStream);
+            break;
+
+        case RPC_REGISTER_DEMON_FUNCTION:
+            status = RPCRegisterDemon(receiveStream, sendStream, application);
+            break;
+
+        case RPC_FILE_OPEN_FUNCTION:
+            status = RPCfileOpen(receiveStream, sendStream);
+            break;
+
+        case VEM_BUF_LOCK_FUNCTION:
+            status = RPCbufLock(receiveStream, sendStream);
+            break;
+
+	default:
+	    (void) sprintf(RPCErrorBuffer,
+			   "illegal VEM function number (%ld)\n",
+			   functionNumber);
+	    vemMessage(RPCErrorBuffer, MSG_DISP);
+	    return RPC_ERROR;
+    }
+
+    RPCFLUSH(sendStream, RPC_ERROR);
+    
+    return status;
 }
