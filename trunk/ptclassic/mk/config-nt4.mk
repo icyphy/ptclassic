@@ -43,8 +43,6 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
-# Under NT, build a static ptcl first
-
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
 #include $(ROOT)/mk/config-g++.shared.mk
