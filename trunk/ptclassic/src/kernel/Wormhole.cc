@@ -133,8 +133,6 @@ void Wormhole :: buildEventHorizons () {
 			fromPort.setPort(ghostName(galp),&selfStar,type);
 			
 			to.ghostConnect (from);
-			fromPort.inheritTypeFrom (realGalp);
-			toPort.inheritTypeFrom (fromPort);
 			fromPort.connect(realGalp,0);
 			if (far) far->connect(toPort,numDelays,delayValues);
 		}
@@ -156,8 +154,6 @@ void Wormhole :: buildEventHorizons () {
 			toPort.setPort(ghostName(galp),&selfStar,type);
 			
 			to.ghostConnect (from);
-			toPort.inheritTypeFrom (realGalp);
-			fromPort.inheritTypeFrom (toPort);
 			realGalp.connect(toPort,0);
 			if (far) fromPort.connect(*far,numDelays,delayValues);
 		}
