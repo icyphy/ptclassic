@@ -23,6 +23,10 @@ alias optlink \
 alias optdifflink \
 'if ( ! -e \!:2 ) echo `pwd`: making link \!:1 \!:2 ; if ( ! -e \!:2 ) ln -s \!:1 \!:2 '
 
+# Quiet versions of pushd and popd.
+alias pushd 'pushd \!* > /dev/null'
+alias popd 'popd \!* > /dev/null'
+
 # Make the top-level directories
 optmkdir bin.$ARCH
 optmkdir lib.$ARCH
@@ -102,10 +106,6 @@ endif
 
 # Make thread and CP directories (currently specific to sun)
 if ($ARCH =~ sun?*) then
-	mkarch pigiRpc.cp
-	cd pigiRpc.cp
-	oplink ../../src/pigiRpc/makefile
-	cd ..
 	mkarch thread/lwp
 	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
 endif
