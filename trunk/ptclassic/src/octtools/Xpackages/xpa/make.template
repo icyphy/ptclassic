@@ -43,8 +43,9 @@ include $(CONFIG)
 HDRS		= Xres.h \
 		xpa.h
 
-LIBCSRCS	= xpa.c \
-		xpa_test.c
+LIBCSRCS	= xpa.c
+
+OTHERSRCS	= xpa_test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -54,9 +55,20 @@ LIB = 		libxpa.$(LIBSUFFIX)
 
 EXPHDR =	xpa.h
 
+DRIVER =	xpa_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ = 	xpa_test.o
+
+DRVRLIBS =	-lxpa -lport -lerrtrap -luprintf -lX11
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "run $(DRIVER)"
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
