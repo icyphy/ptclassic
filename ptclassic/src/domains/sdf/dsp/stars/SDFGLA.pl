@@ -2,15 +2,33 @@ defstar {
   name { GLA }
   domain { SDF }
   desc {  
-Use the generalized Lloyd algorithm to yield a codebook from input  
+Use the Generalized Lloyd Algorithm (GLA) to yield a codebook from input  
 training vectors.  Note that each input matrix will be viewed as a
 row vector in row by row. Each row of output matrix represent a
 codeword of the codebook. 
   }
   version { $Id$ }
   author { Bilung Lee }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF dsp library }
+  input {
+    name { input }
+    type { FLOAT_MATRIX_ENV }
+    desc{ 
+Input matrix will be viewed as a row vector in row major ordering to
+represent a training vector.
+    }
+  }
+  output {
+    name { output }
+    type { FLOAT_MATRIX_ENV }
+    desc { Output codebook, ie, (sizeCodebook)*(dimension) matrix. }
+  }
   defstate {
     name { dimension }
     type { int }
@@ -41,67 +59,59 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
     name { maxIteration }
     type { int }
     default { 100 }
-    desc { The upper limited times of Lloyd iterations. }
+    desc { The upper limit on the iterations in the Lloyd algorithm. }
   }
   defstate {
     name { saveFile }
     type { string }
     default { "" }
-    desc { File to save final codebook values. }
-  }
-  input {
-    name { input }
-    type { FLOAT_MATRIX_ENV }
-    desc{ 
-Input matrix will be viewed as a row vector in row major ordering to
-represent a training vector.
-    }
-  }
-  output {
-    name { output }
-    type { FLOAT_MATRIX_ENV }
-    desc{ Output codebook, ie, (sizeCodebook)*(dimension) matrix. }
+    desc { File to save the final codebook. }
   }
   ccinclude { "Matrix.h" }
   code {
-// Code for NN function which is to find the index of nearest neighbor
-// in the codebook for the training vector, and find the squared error
-// (squared distance) between the training vector and its nearest neighbor.
+     // Code for NN function which is to find the index of nearest neighbor
+     // in the codebook for the training vector, and find the squared error
+     // (squared distance) between the training vector and its nearest neighbor.
+
      static void NN(int& index, double& distance,
                     const double* trnVector, const double* codebook,
 		    const double* halfCodewordPower,
 		    int sizeCodebook, int dimension) {
-/*
- * If X=input vector, and Yi=i_th codeword.
- * Find the nearest neighbor codeword Yi to maximize X'*Yi-Ai
- * ( ' means transpose ), where Ai=||Yi||^2/2 and should have
- * already been stored in the array halfCodewordPower[numCodewords].
- */
+
+	// If X=input vector, and Yi=i_th codeword.
+	// Find the nearest neighbor codeword Yi to maximize X'*Yi-Ai
+	// (' means transpose ), where Ai=||Yi||^2/2 and should have
+	// already been stored in the array halfCodewordPower[numCodewords].
+
 	index = 0;
 	distance = 0;
-	for ( int j=0; j<dimension; j++ )
+	for ( int j=0; j<dimension; j++ ) {
 	    distance += trnVector[j]*codebook[j];
+	}
 	distance -= halfCodewordPower[0];
 
-	double sum = 0;
-	for ( int i = 1; i<sizeCodebook; i++ ) {
-	    for ( j=0; j<dimension; j++ )
+	double sum = 0.0;
+	for ( int i = 1; i < sizeCodebook; i++ ) {
+	    for ( int j = 0; j < dimension; j++ )
 	        sum += trnVector[j]*codebook[i*dimension+j];
 	    sum -= halfCodewordPower[i];
 	    if ( sum > distance ) {
 	       distance = sum;
 	       index = i;
 	    }
-	    sum = 0;
+	    sum = 0.0;
 	}
-// The distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
-// squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. Therefore we
-// need to calculate the true squared distance before return. 
+
+	// Distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
+	// squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. So, we
+	// need to calculate the true squared distance before return. 
 	distance *= -2;
-	for (i=0; i<dimension;i++)
-	  distance += trnVector[i]*trnVector[i];
-     }  // end of NN function
-  } 	 // end of code
+	for (int k = 0; k < dimension; k++) {
+	  distance += trnVector[k] * trnVector[k];
+	}
+     }	// end of NN function
+  }	// end of code
+
   protected {
     double* codebook;
     double* trnSet;
@@ -109,6 +119,7 @@ represent a training vector.
     double* centroid;
     double* halfCodewordPower;
   }
+
   constructor {
     codebook = 0;
     trnSet = 0;
@@ -116,31 +127,54 @@ represent a training vector.
     centroid = 0;
     halfCodewordPower = 0;
   }
+
   destructor {
-    LOG_DEL; delete [] codebook;
-    LOG_DEL; delete [] trnSet;
-    LOG_DEL; delete [] numPart;
-    LOG_DEL; delete [] centroid;
-    LOG_DEL; delete [] halfCodewordPower;
+    delete [] codebook;
+    delete [] trnSet;
+    delete [] numPart;
+    delete [] centroid;
+    delete [] halfCodewordPower;
   }
+
   setup {
     if ( int(sizeCodebook) > int(sizeTrnSet) ) {
-	Error::abortRun(*this,"The size of codebook must be smaller than",
-			      "the size of training set");
+	Error::abortRun(*this,
+			"The size of codebook must be smaller than ",
+			"the size of training set");
 	return;
     }
-    input.setSDFParams(int(sizeTrnSet), int(sizeTrnSet)-1);
-  }
-  go {
-//  Define a 2-dimension array for storing input training vectors
-    delete [] trnSet;
-    LOG_NEW; trnSet = new double[int(sizeTrnSet)*int(dimension)];
 
-//  Get the input training vectors and store them in the 2-dimension array
+    input.setSDFParams(int(sizeTrnSet), int(sizeTrnSet)-1);
+
+    //  Allocate an array for storing the generated codebook
+    delete [] codebook;
+    codebook = new double[int(sizeCodebook)*int(dimension)];
+
+    //  Allocate an array for storing the training vectors
+    delete [] trnSet;
+    trnSet = new double[int(sizeTrnSet)*int(dimension)];
+
+    //  Allocate an array to counter how many input training vectors
+    //  are closest to the i_th codeword
+    delete [] numPart;
+    numPart = new int[int(sizeCodebook)];
+
+    //  Allocate an array to store the centroids of the codebook
+    delete [] centroid;
+    centroid = new double[int(sizeCodebook)*int(dimension)];
+
+    // halfCodewordPower[i] store the value of Ai=||Yi||^2/2.
+    delete [] halfCodewordPower;
+    halfCodewordPower = new double[int(sizeCodebook)];
+  }
+
+  go {
+    //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
     FloatMatrix zerovector(1, int(dimension));
     zerovector = 0;
-    for (int i=0; i<int(sizeTrnSet); i++) {
+    int i;
+    for (i = 0; i < int(sizeTrnSet); i++) {
       const FloatMatrix* vectorp;
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
       vectorp = (const FloatMatrix *)inpkt.myData();
@@ -154,154 +188,159 @@ represent a training vector.
 		       "must equal to the parameter 'dimension'.");
 	return;
       }
-      for (int j=0; j<int(dimension); j++) 
-	trnSet[i*int(dimension)+j] = vectorp->entry(j);
+      int rowloc = i * int(dimension);
+      for (int j = 0; j < int(dimension); j++) {
+	trnSet[rowloc + j] = vectorp->entry(j);
+      }
     }
  
-//  Allocate a array for storing the generated codebook
-    delete [] codebook;
-    LOG_NEW; codebook = new double[int(sizeCodebook)*int(dimension)];
-
-/*
- *  Initialize the initial codebook using random code, ie, we take 
- *  every Kth training vector among the input traing vectors, where
- *  K = sizeTrnSet/sizeCodebook.
- */
+    // Initialize the initial codebook using random code, ie, we take 
+    // every Kth training vector among the input traing vectors, where
+    // K = sizeTrnSet/sizeCodebook.
     const int K = int(sizeTrnSet)/int(sizeCodebook);
-    for (i=0; i<int(sizeCodebook); i++) {
-      for (int j=0; j<int(dimension); j++)
-	codebook[i*int(dimension)+j] = trnSet[i*K*int(dimension)+ j];
+    for (i = 0; i < int(sizeCodebook); i++) {
+      int rowloc = i * int(dimension);
+      for (int j = 0; j < int(dimension); j++) {
+        codebook[rowloc + j] = trnSet[K * rowloc + j];
+      }
     }
- 
-/*
- *  The numPart[i] store the number of how many input training vectors
- *  are closest to the i_th codeword in the codebook after using the 
- *  nearest neighbor condition to partition the training set.
- */
-    delete [] numPart;
-    LOG_NEW; numPart = new int[int(sizeCodebook)];
-    for (i=0; i<int(sizeCodebook); i++)
+
+    //  numPart[i] stores the number of how many input training vectors
+    //  are closest to the i_th codeword in the codebook after using the 
+    //  nearest neighbor condition to partition the training set.
+    for (i = 0; i < int(sizeCodebook); i++) {
       numPart[i] = 0;
-
-/*
- *  The 1-dimension array centroid[int(sizeCodebook)*int(dimension)]
- *  store the centroid of each partitioned cluster of training set.
- */
-    delete [] centroid;
-    LOG_NEW; centroid = new double[int(sizeCodebook)*int(dimension)];
-    for (i=0; i<int(sizeCodebook); i++) {
-      for (int j=0; j<int(dimension); j++)
-        centroid[i*int(dimension)+j] = 0;
     }
 
-//  halfCodewordPower[i] store the value of Ai=||Yi||^2/2.
-    LOG_NEW; halfCodewordPower = new double[int(sizeCodebook)];
-//  Set halfCodewordPower[i] for the initial codebook.
-    for (i=0; i<int(sizeCodebook); i++ ) {
-      halfCodewordPower[i] = 0;
-      for ( int j=0; j<int(dimension); j++ )
-        halfCodewordPower[i] += codebook[i*int(dimension)+j]*codebook[i*int(dimension)+j];
-      halfCodewordPower[i]=halfCodewordPower[i]/2;
+    //  The centroid[int(sizeCodebook)*int(dimension)] array stores
+    //  the centroid of each partitioned cluster of training set.
+    for (i = 0; i < int(sizeCodebook); i++) {
+      int rowloc = i * int(dimension);
+      for (int j = 0; j < int(dimension); j++) {
+        centroid[rowloc + j] = 0;
+      }
     }
+
+    // Set halfCodewordPower[i] for the initial codebook.
+    for (i = 0; i < int(sizeCodebook); i++ ) {
+      double sum = 0.0;
+      int rowloc = i * int(dimension);
+      for ( int j=0; j<int(dimension); j++ ) {
+        double entry;
+	entry = codebook[rowloc + j];
+        sum += entry * entry;
+      }
+      halfCodewordPower[i] = sum/2;
+    }
+
+    //  Run Lloyd iteration for the initial codebook.
 
     int count = 0;
     int index = 0;
     double distance = 0;
     double oldDistortion = 0;
     double distortion = 0;
-//  Run Lloyd iteration for the initial codebook.
-    for (i=0; i<int(sizeTrnSet); i++) {
-      NN(index,distance,&(trnSet[i*int(dimension)]),codebook,halfCodewordPower,int(sizeCodebook),int(dimension));
+
+    for (i = 0; i < int(sizeTrnSet); i++) {
+      NN(index, distance, &(trnSet[i*int(dimension)]), codebook,
+         halfCodewordPower, int(sizeCodebook), int(dimension));
       (numPart[index])++;
       distortion += distance;
-      for (int j=0; j<int(dimension); j++)
+      for (int j = 0; j < int(dimension); j++) {
         centroid[index*int(dimension)+j] += trnSet[i*int(dimension)+j];
+      }
     }
+
     count++;
 
     do {
-//  Reset the improved codebook to the centroid of the partitioned cluser set.
-      for (i=0; i<int(sizeCodebook); i++) {
-        if (numPart[i] != 0) {
-          for (int j=0; j<int(dimension); j++)
-            codebook[i*int(dimension)+j] = centroid[i*int(dimension)+j]/numPart[i];
-        }
-        else {
-//  If numPart[i]=0, ie, the i_th partitioned cluster set is empty,
-//  then just keep the i_th original codeword.
+      int i;
+      //  Reset the improved codebook to the centroid of partitioned cluser set
+      for (i = 0; i < int(sizeCodebook); i++) {
+	int rowloc = i * int(dimension);
+	//  Update ith code word
+	//  Avoid division-by-zero error when numPart[i] is not zero
+        if ( numPart[i] ) {
+          for (int j = 0; j < int(dimension); j++) {
+            codebook[rowloc + j] = centroid[rowloc + j] / numPart[i];
+	  }
         }
       }
 
-//  Reset the contents of array numPart to 0.
-      for (i=0; i<int(sizeCodebook); i++)
+      //  Reset the contents of array numPart to 0.
+      for (i = 0; i < int(sizeCodebook); i++) {
 	numPart[i] = 0;
-
-//  Reset the contents of array centroid to 0.
-      for (i=0; i<int(sizeCodebook); i++)
-        for (int j=0; j<int(dimension); j++)
-          centroid[i*int(dimension)+j]  = 0;
-
-//  Precompute Ai=||Yi||^2/2 for the given codebook and store them in 
-//  the array halfCodewordPower.
-      for (i=0; i<int(sizeCodebook); i++ ) {
-	halfCodewordPower[i] = 0;
-        for ( int j=0; j<int(dimension); j++ )
-          halfCodewordPower[i] += codebook[i*int(dimension)+j]*codebook[i*int(dimension)+j];
-        halfCodewordPower[i]=halfCodewordPower[i]/2;
       }
 
-//  Reset the value of oldDistortion and Distortion.
+      //  Reset the contents of array centroid to 0.
+      for (i = 0; i < int(sizeCodebook); i++) {
+	int rowloc = i * int(dimension);
+        for (int j = 0; j < int(dimension); j++) {
+          centroid[rowloc + j] = 0;
+	}
+      }
+
+      //  Precompute Ai=||Yi||^2/2 for the given codebook and store them in 
+      //  the array halfCodewordPower.
+      for (i = 0; i < int(sizeCodebook); i++ ) {
+	double power = 0.0;
+	int rowloc = i * int(dimension);
+        for ( int j = 0; j < int(dimension); j++ ) {
+	  double entry = codebook[rowloc + j];
+	  power += entry * entry;
+        }
+        halfCodewordPower[i] = power/2;
+      }
+
+      //  Reset the value of oldDistortion and Distortion.
       oldDistortion = distortion;
       distortion = 0;
 	
-/*
- *  Lloyd iteration :
- *  For a given codebook, partition the training set into cluster sets
- *  using the nearest neighbor condition, and find the average distortion
- *  for the codebook. Then find the centroid of each partitioned cluster set.
- */
-      for (i=0; i<int(sizeTrnSet); i++) {
-	NN(index,distance,&(trnSet[i*int(dimension)]),codebook,halfCodewordPower,int(sizeCodebook),int(dimension));
+      // Lloyd iteration :
+      // For a given codebook, partition the training set into cluster sets
+      // using the nearest neighbor condition, and find the average distortion
+      // for the codebook. Then find centroid of each partitioned cluster set.
+      for (i = 0; i < int(sizeTrnSet); i++) {
+	NN(index, distance, &(trnSet[i*int(dimension)]), codebook,
+	   halfCodewordPower, int(sizeCodebook), int(dimension));
 	(numPart[index])++;
 	distortion += distance;
-	for (int j=0; j<int(dimension); j++)
-	  centroid[index*int(dimension)+j] += trnSet[i*int(dimension)+j];
+	int t_rowloc = i * int(dimension);
+	int c_rowloc = index * int(dimension);
+	for (int j = 0; j < int(dimension); j++) {
+	  centroid[c_rowloc + j] += trnSet[t_rowloc + j];
+        }
       }
     } while ( (oldDistortion-distortion)/oldDistortion>double(thresholdRatio)
 	      && (++count)<int(maxIteration) );
 
     // allocate dynamic memory for output which will be automatically deleted
     FloatMatrix& result = *(new FloatMatrix(int(sizeCodebook),int(dimension)));
-    for (i=0; i<int(sizeCodebook)*int(dimension); i++)
+    for (i = 0; i < int(sizeCodebook)*int(dimension); i++)
         result.entry(i) = codebook[i];
     output%0 << result;
-
-    // deallocate dynamic memory
-    LOG_DEL; delete [] codebook;
-    LOG_DEL; delete [] trnSet;
-    LOG_DEL; delete [] numPart;
-    LOG_DEL; delete [] centroid;
-    LOG_DEL; delete [] halfCodewordPower;
   } 
+
   wrapup {
     const char* sf = saveFile;
-    if (sf != NULL && *sf != 0) {
+    if (sf != 0 && *sf != 0) {
       const char* saveFileName = expandPathName(sf);
       // open the file for writing
-      FILE* fp;
-      if (!(fp = fopen(saveFileName,"w"))) {
-      // File cannot be opened
-         Error::warn(*this,"Cannot open saveTapsFile for writing: ",
-                           saveFileName, ". Taps not saved.");
-      } else {
-         for (int i=0; i<int(sizeCodebook); i++) {
-           for (int j=0; j<int(dimension); j++)
-             fprintf(fp,"%e ",codebook[i*int(dimension)+j]);
+      FILE* fp = fopen(saveFileName, "w");
+      if ( fp ) {
+         for (int i = 0; i < int(sizeCodebook); i++) {
+           for (int j = 0; j < int(dimension); j++) {
+             fprintf(fp, "%e ", codebook[i*int(dimension)+j]);
+	   }
            fprintf(fp,"\n");
          }
       }
+      else {
+         Error::warn(*this, "Cannot open '", saveFile,
+		     "' for writing: codebook not saved.");
+      }
       fclose(fp);
-      LOG_DEL; delete [] saveFileName;
+      delete [] saveFileName;
     }
   }	//end of wrapup method
 }
