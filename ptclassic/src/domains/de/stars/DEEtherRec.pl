@@ -78,8 +78,8 @@ giving the time at which the particle should be sent to the output.
 		dataValid = 1;
 	    }
 	}
-	setup {
-	    DEEther::setup();
+	begin {
+	    DEEther::begin();
 
 	    firstFiring = 1;
 

@@ -72,8 +72,8 @@ is broadcast to all receivers on the medium.
 	    // flag determining that the next particle(s) should be broadcast
 	    int broadcast;
 	}
-	setup {
-	    DEEther::setup();
+	begin {
+	    DEEther::begin();
 	    broadcast = 0;
 	    latestDuration = 0.0;
 	}
