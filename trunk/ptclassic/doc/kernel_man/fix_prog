@@ -1,0 +1,173 @@
+$Id$
+Programmer's Manual for the Fixed-point capabilities in Ptolemy
+
+Authors: Alireza Khazeni and Asawaree Kalavade
+
+Introduction
+------------
+In fixed-point notation the partition between the integer part and the 
+fractional part, the binary point, is constrained to lie at a fixed 
+position in the bit pattern. The binary point determines a trade-off 
+between precision and range.  When the binary point is defined
+at the right of the bit pattern there is no fractional part; only 
+integer values are allowed.
+
+Constructing Fixed-point variables
+----------------------------------
+Variables of type "fix" are defined by specifying the wordlength and
+the position of the binary point. 
+At the user's level, the precision parameter is specified in the form of
+a dot notation.  For example, a fixed-point variable with precision 3.5 
+has a total word length of 8 bits, with 3 bits to the left and 5 
+bits to the right of the binary point. By default, the variables are
+represented in 2's compliment form. The number of bits to the left
+of the binary point includes the sign bit.
+At the programmer's level the precision of a Fix object is specified 
+by two parameters: the total number of bits in the word and the number 
+of integer bits (the number of bits to the left of the binary point). 
+The constructor for this Fix object looks like Fix(8, 3).
+Unsigned Fix objects are also supported by explicitly using the keyword
+"unsigned" in the appropriate constructor.  For example Fix(3, 1)
+makes a Fix object that holds a maximum value of 3.5 and a minimum 
+of -4, whereas Fix(3, 1, "unsigned") makes an object that holds a 
+Fix object with a maximum value 7.5 and a minimum of 0. 
+ 
+Use of the Fix types in Ptolemy
+-------------------------------
+  Fix types are available in Ptolemy as a type of Particle.  The
+conversion from an int or a double to a Fix takes place using the 
+the Fix::Fix(double) constructor which makes a Fix object with
+the default word length of 24 bits and the number of integer bits as 
+needed required by the value.    
+  To use the Fix type in a star, the type of the portholes must be 
+declared as "fix". Stars that receive and/or transmit fixed-point data
+types have parameters specifying the precision of the input and/or output
+in bits. For example: 
+
+        inmulti {
+                name { input }
+                type { fix }
+        }
+        defstate {
+                name { InputPrecision }
+                type { string }
+                default { "2.14" }
+                desc { Precision of the input in bits. }
+        }
+
+This means that the inputs to the star are cast into a fixed-point
+notation with 2 bits to the left of the binary point and 14 bits to the right.
+To make use of the precision given, two functions are provided in Fix.cc:
+get_length(), and get_intBits(). The get_length() function reads the precision
+string and returns the total length in bits. For the example shown above it 
+is 2 + 14 = 16.  The get_intBits() function reads the string and
+returns the number of bits to the left of the binary point, which is 2 in 
+the example shown above. These functions are shown in the following example:  
+
+        start {
+                const char* IP;
+                IP = InputPrecision;
+                in_IntBits = get_intBits (IP);
+                in_len = get_length (IP);
+        }
+
+in_IntBits and in_len can be used in the constructors of the 
+Fix class.
+  At this point it should be again added that since the Fix class is based on 
+2's complement notation, by default the precision parameters like 
+InputPrecision 
+shown above must always have at least one bit to the left of the binary point
+to allow for the sign bit unless the constructor for an unsigned Fix object
+is used (the one that has the keyword "unsigned" as a parameter).  Of course 
+having only one bit to the left of the binary point only allows fractions 
+to be represented unless it is an unsigned object.
+
+  Besides portholes, state variables can also be declared as fix or fixarray. 
+The value of the state variables and their precision in bits can
+currently be specified using two different notations:
+1. Specifying only a value by itself in the dialog box creates a
+fixed-point number with the default precision which has a total word length
+of 24 bits with the number of range bits as required by the value.
+For example, the number 1.0 creates a fixed-point object with
+precision 2.22, and a value like 0.5 would create one with precision
+1.23 and etc.  
+
+2. The alternative way of specifying the value and the precision of
+this parameter is to use the parenthesis notation which is
+interpreted as (value, precision).  For example, filling the dialog
+box of this parameter by (2.546, 3.5) creates a fixed-point
+object by casting the double 2.546 to the precision 3.5. 
+
+The Fix type's assignment and overflow handling
+-----------------------------------------------
+Once a Fix object is created using one of the constructors that 
+take precision parameters as arguments, its precision does not change 
+as long as the object exists.  Even during the assignment of Fix objects, 
+the assignment operator is overloaded so that it checks to see if the 
+value of the object to the right of the assignment would fit into the 
+precision of the left hand object.  If it doesn't, then it overflows
+and calls the overflow handler.  However, if a Fix object is created
+using the constructor that takes no arguments, then that object is
+an uninitialized one and can accept any assignment.  Therefore, 
+the assignment would not simply copy the protected members of one 
+object to the other unless the left hand object is an uninitialized
+one.
+
+ The way a Fix object is handled during an overflow depends 
+on the specifications and the behavior of the object itself rather 
+than a global variable.  The class Fix has a private data field that 
+is initialized during the construction of Fix objects.  This way,
+whenever a Fix object overflows, the overflow_handler looks at
+this field and uses the right method to handle the overflow
+of that object.  This data field is set to saturate by default, 
+and can be set explicitly to any other desired overflow handling
+method using a function called set_ovflow(<keyword>).  The keywords 
+for overflow handling methods are :
+"saturate"(default), "zero_saturate", "wrapped", "warning".
+
+As an example of how the overflow parameter is set, look at the "Ramp"
+demo in the Fixed-point demos. 
+From SDFAddFix:
+	...
+	defstate {
+		name { OverflowHandler }
+		type { string }
+		default { "saturate" }
+		desc {}
+	}
+	...
+	protected {
+		const char* OV;
+	}
+	setup {
+		OV = OverflowHandler;
+	}
+	go {
+		...
+		Fix sum(out_len, out_IntBits);
+		sum.set_ovflow(OV);
+	}
+
+Explicitly casting inputs
+-------------------------
+Another parameter that is found in some stars is "ArrivingPrecision".
+When set to NO, it implies that the input particles are cast to the 
+precision specified in the corresponding state. When set to YES, the 
+input particles are not explicitly cast; they are used as they are. 
+This state is used in the star code to either explicitly cast inputs or not.
+SDFGainFix::
+	defstate {
+		name { ArrivingPrecision }
+		type { int }
+		default { "YES" }
+		desc {}
+	}
+	...
+	go {
+		...
+		if(int(ArrivingPrecision))
+			fixIn = Fix(input%0);
+		else
+			fixIn = Fix(in_len, in_intBits, Fix(input%0));
+		...
+	}
