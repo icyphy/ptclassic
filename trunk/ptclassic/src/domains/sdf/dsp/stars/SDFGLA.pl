@@ -138,7 +138,8 @@ represent a training vector.
 
 //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension))); // MEMORY LEAK
+    // FIXME: Memory Leak: vector never deallocated
+    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension)));
     for (int i=0; i<int(sizeTrnSet); i++) {
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
       vector = *(const FloatMatrix *)inpkt.myData();
