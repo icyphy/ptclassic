@@ -41,9 +41,6 @@ static const char file_id[] = "POct.cc";
 
 #include "SimControl.h"
 
-// Fixme: Is this needed?  - aok
-// #include "ConstIters.h"
-
 #include <stdio.h>
 #include <string.h>
 
@@ -184,52 +181,7 @@ POct::~POct() {
         }
 }
 
-// Return a "usage" error
-int POct::usage(const char* msg) {
-	strcpy(interp->result,"wrong # args: should be \"");
-	strcat(interp->result,msg);
-	strcat(interp->result,"\"");
-	return TCL_ERROR;
-}
-
-// Return a static result.  Typical usage: return staticResult("foo")
-int POct::staticResult( const char* value) {
-	Tcl_SetResult(interp, (char*)value, TCL_STATIC);
-	return TCL_OK;
-}
-
-// Return a StringList result.
-// We arrange for Tcl to copy the value.
-int POct::result(StringList& value) {
-        const char* str = value;
-        // VOLATILE will tell Tcl to copy the value, so it is safe
-        // if the StringList is deleted soon.
-        Tcl_SetResult(interp, (char*)str,TCL_VOLATILE);
-        return TCL_OK;
-}
-
-// Return a String result.
-// We arrange for Tcl to copy the value.
-int POct::result(char* value) {
-        Tcl_SetResult(interp, value,TCL_VOLATILE);
-        return TCL_OK;
-}
-
-// Return an Integer result.
-// We arrange for Tcl to copy the value.
-int POct::result(int value) {
-	char str[64];
-        sprintf( str, "%d", value);
-        Tcl_SetResult(interp, str,TCL_VOLATILE);
-        return TCL_OK;
-}
-
-void POct::addResult(const char* value) {
-	// cast-away-const needed to interface with Tcl.
-	Tcl_AppendElement(interp,(char*)value);
-}
-
-
+/////////////////////////////////////////////////////////////////////
 // ------ Helper functions, not used directly as TCL commands -----
 
 // Sets Bus Parameters in the Oct data base
