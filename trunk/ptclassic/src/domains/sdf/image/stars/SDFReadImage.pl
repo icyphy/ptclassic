@@ -46,37 +46,24 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 
 	method {
 		name { genFileName }
-		type { "void" }
-		arglist { "(char* outstr, const char* str, const int d)" }
+		type { "char *" }
+		arglist { "(const char* str, const int d)" }
 		access { protected }
 		code {
-			char* p = outstr;
-			const char* q = expandPathName(str);
-			const char* qorig = q;
+			char* filename = expandPathName(str);
 			char num[16];
-
 			sprintf(num, "%d", d);
-			int len = strlen(num);
-			// Replace '#' with a string containing num's value
-			while ( *q ) {
-				if (*q == '#') {
-					strcpy(p, num);
-					p += len;
-					q++;
-				}
-				else {
-					*p++ = *q++;
-				}
-			}
-			*p = 0;			// null terminate string
-			delete [] qorig;
+			char* newname = subCharByString(filename, '#', num);
+			delete [] filename;
+			return newname;
 		} // end genFileName()
 	}
 
 	go {
 		// Open file containing the image.
-		char fullName[512];
-		genFileName(fullName, fileName, int(frameId));
+		char expandedName = genFileName(fileName, int(frameId));
+		StringList fullname = expandedName;
+		delete [] expandedName;
 		FILE* fp = fopen(fullName, "r");
 		if (fp == (FILE*) NULL) {
 			Error::abortRun(*this, "File not opened: ", fullName);

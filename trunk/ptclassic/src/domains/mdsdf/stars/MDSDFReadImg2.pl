@@ -57,7 +57,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     default { 0 }
     desc    { Starting frame ID value. }
   }
-  ccinclude { "SubMatrix.h", <std.h>, <stdio.h> }
+  ccinclude { "SubMatrix.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h" }
   setup {
     // set the dimensions of the output
     imageOutput.setMDSDFParams(int(height),int(width));
@@ -65,38 +65,24 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
   }
   method {
     name { genFileName }
-    type { "void" }
-    arglist { "(char* outstr, const char* str, const int d)" }
+    type { "char *" }
+    arglist { "(const char* str, const int d)" }
     access { protected }
     code {
-      const char* expandedName = expandPathName(str);
-
+      char *filename = expandPathName(str);
       char num[16];
       sprintf(num, "%d", d);
-      int len = strlen(num);
-
-      const char* q = expandedName;
-      char* p = outstr;
-      // Replace '#' with 'num's value.
-      while (*q != '\000') {
-	if (*q == '#') {
-	  strcpy(p, num);
-	  p += len;
-	  q++;
-	}
-	else {
-	  *p++ = *q++;
-	}
-      }
-      *p = '\000';
-      delete [] expandedName;
+      char *newname = subCharByString(filename, '#', num);
+      delete [] filename;
+      return newname;
     } // end genFileName()
   }
 
   go {
     // Open file containing the image.
-    char fullName[512];
-    genFileName(fullName, fileName, int(frameId));
+    char *expandedName = genFileName(fileName, int(frameId));
+    StringList fullName = expandedName;
+    delete [] expandedName;
     FILE* fp = fopen(fullName, "r");
     if (fp == 0) {
       Error::abortRun(*this, "cannot open '", fullName, "' for reading.");
