@@ -3,6 +3,7 @@ defcore {
 	domain { ACS }
 	coreCategory { FPCGC }
 	corona { XMGraph }
+        version {$Id$}
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
