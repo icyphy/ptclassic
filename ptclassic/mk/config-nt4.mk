@@ -78,13 +78,12 @@ OPTIMIZER =	#-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
 
-# PT_NO_ITCL  : Used by ptcl to avoid including Itcl
 # PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
 # PT_ERRNO_IS_A_FUNCTION: Used by src/octtools/internal.h
 # USE_SIGACTION: Used by src/octtools/Xpackages/iv/timer.c
 # HAS_TERMIOS: Used by src/octtools/Packages/iv/ivGetLine.c
 
-LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
+LOCALCCFLAGS =	-g -DPTNT -DUSE_DIRENT_H \
 		-DNO_SYS_SIGLIST -DPT_ERRNO_IS_A_FUNCTION $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
