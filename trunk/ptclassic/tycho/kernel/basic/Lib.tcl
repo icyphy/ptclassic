@@ -103,7 +103,7 @@
 ::tycho::register filenames "makefile" Makefile makefile GNUmakefile
 
 ########### contents modes	
-::tycho::register contents "vemfacet" [file join schematic {contents;}]
+::tycho::register contents "vemfacet" [file join schematic {contents;} ]
 
 
 ### MODES
