@@ -64,6 +64,11 @@ public:
         // assignment from a Fix
         Fix& operator=(const Fix& rvalue) { return val = rvalue;}
 
+	// assignment from a FixState
+	FixState& operator=(const FixState& arg) {
+		val = arg.val; return *this;
+	}
+
         // casting to a Fix
         operator Fix() { return val;}
 	// convert to double (not done as cast because of ambiguity)
