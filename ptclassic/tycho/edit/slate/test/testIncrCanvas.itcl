@@ -136,22 +136,22 @@ _twoitems
 test IncrCanvas-addtag.1 {Pass simple item by ID} {
     .s addtag new withtag $r
     list [.s find withtag new] [lsort [.s itemcget $r -tags]] \
-} [list $r {foo new}]
+} [list $r {foo new} ]
 
 test IncrCanvas-addtag.2 {Pass simple item by tag} {
     .s addtag zoo withtag foo
     list [.s find withtag zoo] [lsort [.s itemcget $r -tags]]
-} [list $r {foo new zoo}]
+} [list $r {foo new zoo} ]
 
 test IncrCanvas-addtag.11 {Pass complex item by ID} {
     .s addtag moo withtag $f
     list [.s find withtag moo] [lsort [.s itemcget $f -tags]]
-} [list $f {bar moo}]
+} [list $f {bar moo} ]
 
 test IncrCanvas-addtag.12 {Pass complex item by tag} {
     .s addtag roo withtag bar
     list [.s find withtag roo] [lsort [.s itemcget $f -tags]]
-} [list $f {bar moo roo}]
+} [list $f {bar moo roo} ]
 
 # Tests on hierarchical items
 test IncrCanvas-addtag.21 {Add to the actual root} {

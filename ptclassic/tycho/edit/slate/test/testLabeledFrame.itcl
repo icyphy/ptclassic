@@ -52,7 +52,7 @@ proc _frame {args} {
     set f [.s create LabeledFrame 40 40 80 80 \
 	    -color green -tags foo \
 	    -text Hello \
-	    -graphics {rectangle 20 20 80 80; line 20 20 80 80; line 20 80 80 20}]
+	    -graphics {rectangle 20 20 80 80; line 20 20 80 80; line 20 80 80 20} ]
     eval .s itemconfigure $f $args
 }
 
@@ -108,7 +108,7 @@ set f [.s create LabeledFrame 140 140 180 180 \
         -tags foo \
         -text Foo \
         -textanchor s \
-        -graphics {line 0 0 100 100}]
+        -graphics {line 0 0 100 100} ]
 update
 foreach {opt val} {\
         -relief sunken \
