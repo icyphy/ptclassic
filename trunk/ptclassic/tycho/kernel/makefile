@@ -77,6 +77,7 @@ ITCL_SRCS = \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
 	Stack.itcl \
+	Subpanel.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
 	WelcomeMessage.itcl \
