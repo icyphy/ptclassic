@@ -271,9 +271,17 @@ TclpCopyFile(src, dst)
 	    return CopyFileAtts(src, dst, &srcStatBuf);
 
         case S_IFIFO:
+#ifdef __CYGWIN32__
+#define NO_MKFIFO
+#endif
+#if NO_MKFIFO
+	    fprintf(stderr, "tclUnixFCmd.c: Sorry, mkfifo not yet implemented");
+	    return TCL_ERROR;
+#else
 	    if (mkfifo(dst, srcStatBuf.st_mode) < 0) {
 		return TCL_ERROR;
 	    }
+#endif
 	    return CopyFileAtts(src, dst, &srcStatBuf);
 
         default:
