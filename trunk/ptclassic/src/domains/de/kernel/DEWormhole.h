@@ -54,6 +54,7 @@ class DEWormhole : public Wormhole, public DEStar {
 public:
 
 	void setup();
+	void begin() { Wormhole::begin(); }
 	void go();
 	void wrapup();
 
@@ -62,24 +63,26 @@ public:
 
 	// constructor
 	DEWormhole(Galaxy &g,Target* t = 0) : Wormhole(*this,g,t) {
-		buildEventHorizons ();
+		buildEventHorizons();
 	}
 
 	// destructor
-	~DEWormhole() { freeContents();}
+	~DEWormhole() { freeContents(); }
 
 	// return my scheduler
-	Scheduler* scheduler() const { return myTarget()->scheduler();}
+	Scheduler* scheduler() const { return myTarget()->scheduler(); }
 
 	// print method
-	StringList print(int verbose) const { return Wormhole::print(verbose);}
+	StringList print(int verbose) const {
+		return Wormhole::print(verbose);
+	}
 
 	// clone -- allows interpreter to make copies
 	Block* clone() const;
 	Block* makeNew() const;
 
 	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE;}
+	int isItWormhole() const { return TRUE; }
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
@@ -87,12 +90,12 @@ public:
 	}
 
 	// state initialize
-	void initState() { gal.initState() ;}
+	void initState() { gal.initState(); }
 
 protected:
 	// redefine getStopTime() : 
 	// return the currentTime if syncMode of the scheduler is set (default)
-	// otherwise     the stopTime.
+	// otherwise return the stopTime.
 	double getStopTime();
 
 	// redefine sumUp()
