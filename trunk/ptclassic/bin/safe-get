@@ -2,20 +2,33 @@
 # safe-get: arg is the name of the SCCS file
 # always does cd to proper place before doing the get.
 # Set execute permission if it is set for the SCCS file.
-# This is invoked by Gnu make because the makefiles
+# This is invoked by GNU make because the makefiles
 # set the variable $GET to equal "safe-get".
 # Note that Gnu make adds a "-G filename" option
 # to the end, so typical usage is:
 # 	safe-get SCCS/s.filename -G filename
 #
-# CAVEAT: This assumes the filename to be got is the first
-# argument.  This may not be the case.  The first argument
-# may be an option to pass to get.  Any options that come
-# after the filename are discarded.
+# The file name is the first argument that does not start with a dash.
+# GNU make 3.71 outputs the get statement in the following format (which 
+# should work):
+# 	safe-get -Gfilename SCCS/s.filename
+# If the first argument is -G, then the first and second args are skipped,
+# so the following should work:
+#	safe-get -G filename SCCS/s.filename  
+# However, the following would fail:
+#	safe-get -anarg -G filename SCCS/s.filename
+# 
 #
 # $Id$
 
-set fullname = $1
+# If the first arg is -G then skip the first and second args
+if ( $1 == "-G" ) then
+	shift;shift
+endif
+
+# fullname is the first arg that does not start with a dash
+set fullname = `echo $* | awk '{for(i=1;i<=NF;i++) if ($i !~ /^-/) {print $i;exit}	}' - `
+
 # get is in /usr/sccs on some systems
 if (-r /usr/sccs/get) set path = (/usr/sccs $path)
 
