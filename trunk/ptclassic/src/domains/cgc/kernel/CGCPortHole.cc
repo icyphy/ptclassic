@@ -162,6 +162,9 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 		}
 	}
 
+	if ((!statBuf) && (maxBuf > numXfer()))
+		giveUpStatic();
+
 	// set the flags
 	setFlags();
 	CGCPortHole* p = realFarPort();
@@ -171,6 +174,8 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 		CGCPortHole* outp;
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
+			if ((!statBuf) && (maxBuf > inp->numXfer()))
+				inp->giveUpStatic();
 			inp->setFlags();
 			// access to the past Particles
 			if (inp->usesOldValues() ||
@@ -178,6 +183,8 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 				inp->asLinearBuf = FALSE;
 		}
 	} else {
+		if ((!statBuf) && (maxBuf > p->numXfer()))
+			p->giveUpStatic();
 		p->setFlags();
 		if (p->usesOldValues() ||
 			(p->numInitDelays() % p->numXfer() != 0)) {

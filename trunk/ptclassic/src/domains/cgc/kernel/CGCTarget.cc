@@ -381,6 +381,9 @@ int CGCTarget :: allocateMemory() {
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
 	
+	int statBuf = useStaticBuffering();
+	if (loop) statBuf = 0;
+
 	GalStarIter nextStar(g);
 	CGCStar* s;
 	while ((s = (CGCStar*)nextStar++) != 0) {
@@ -388,34 +391,9 @@ int CGCTarget :: allocateMemory() {
 		BlockPortIter next(*s);
 		CGCPortHole* p;
 		while ((p = (CGCPortHole*) next++) != 0) {
-			// for loop scheduler, giveup linear buffering if
-			// rate change occurs.
-			if (loop) {
-				if (p->far() && (!p->atBoundary())) {
-					int nMe = p->numXfer();
-					CGCPortHole* farP = p->realFarPort();
-					int nFar = farP->numXfer();
-					if ((nMe < nFar) || (nMe%nFar != 0) ||
-					    (p->numInitDelays() > 0) || 
-					    p->usesOldValues() ) {
-						p->giveUpStatic();
-						farP->giveUpStatic();
-					    }
-				}
-			}
+			p->finalBufSize(statBuf);
 		}
 	}
-
-	nextStar.reset();
-	while ((s = (CGCStar*)nextStar++) != 0) {
-		if (s->isItFork()) continue;
-		BlockPortIter next(*s);
-		CGCPortHole* p;
-		while ((p = (CGCPortHole*) next++) != 0) {
-			p->finalBufSize(useStaticBuffering());
-		}
-	}
-
 	return TRUE;
 }
 
