@@ -71,6 +71,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if(float(top) <= float(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
+	    // the cast on the string state label and position must
+	    // be (const char *) because a (char *) cast has not been
+	    // defined for string states but bar.setup wants (char *)
 	    bar.setup(this,
 		(const char *) label,
 		input.numberPorts(),
