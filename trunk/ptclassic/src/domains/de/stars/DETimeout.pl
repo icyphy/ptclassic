@@ -3,7 +3,7 @@ defstar
     name { Timeout }
     derivedFrom { TimeoutStar }
     domain { DE }
-    descriptor { Detect a timeout condition and generate an alarm. }
+    descriptor { Detect a time-out condition and generate an alarm. }
     version { $Id$ }
     author { T. M. Parks }
     copyright
@@ -33,7 +33,8 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	name { alarm }
 	type { = Set }
-	desc { Indicates that the timer has reached timeout. }
+	desc { Indicates that the timer has reached time-out, and that
+	       its value is equal to the event which last started the timer. }
     }
 
     go
