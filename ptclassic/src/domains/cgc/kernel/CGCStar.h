@@ -40,10 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "CGCPortHole.h"
+#include "Attribute.h"
+
 class CGCTarget;
 
-// Attributes.
+// New attribute bit definition
+const bitWord AB_VARPREC  = 0x40;
+
 const Attribute ANY = {0,0};
+
+// New attribute for ports and states of type FIX/FIXARRAY.
+// These attributes are ignored for ports/states of other types.
+
+// fixed point precision may change at runtime;
+// declare a precision variable holding the actual precision
+const Attribute A_VARPREC   = {AB_VARPREC,0};
+// fixed point precision does not change at runtime (the default)
+const Attribute A_CONSTPREC = {0,AB_VARPREC};
+
 
 class CGCStar : public CGStar {
 public:
@@ -59,6 +73,11 @@ public:
 
 	// run this star or spliceClust if there are any splice stars
 	int run();
+
+	// redefine the setTarget method in order to set the symbolic precision
+	// of fix stars and portholes as soon as the symbol lists become fully
+	// initialized
+	/* virtual */ int setTarget(Target* t);
 
 	// class identification
 	int isA(const char*) const;
@@ -89,6 +108,20 @@ protected:
 	CGCTarget* targ() {
 		return (CGCTarget*)target();
 	}
+
+	// Handle additional macro expansions for fix support (currently, only
+	// the $precision macro is recognized).
+	/*virtual*/
+	StringList expandMacro(const char* func, const StringList& argList);
+
+	// Expand a $precision macro to a reference of a precision variable for
+	// ports/states of type FIX/FIXARRAY with attribute A_VARPREC (it is an
+	// error to ask for the precision of other ports or states).
+	// The variable is of type fix_prec, a structure containing the tags "len"
+	// and "intb" that hold the actual precision of the associated fix.
+	StringList expandFixPrecisionMacro(const char* label);
+	// for ports or array with offset specification
+	StringList expandFixPrecisionMacro(const char* label, const char* offset);
 
 	// Virtual functions. Expand State or PortHole reference macros.
 	// If "name" is a state, add it to the list of referenced states.
@@ -128,6 +161,9 @@ protected:
 	// are not visible from the user.
 	void moveDataBetweenShared();
 
+	// construct symbolic precision for state or port with given name
+	Precision newSymbolicPrecision(int length,int intBits, const char* name);
+
 private:
 	// Generate declarations for PortHoles and States.
 	StringList declareBuffer(const CGCPortHole*);
@@ -142,7 +178,6 @@ private:
 	// form a cluster of this star and spliced stars
 	// initially put myself in spliceClust.
 	SequentialList spliceClust;
-
 };
 
 #endif
