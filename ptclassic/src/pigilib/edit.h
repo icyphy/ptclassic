@@ -29,7 +29,6 @@ $Id$
 
 extern int EditParams();
 extern int EditFormalParams();
-extern int DefineParams();
 extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();
 extern int RpcEditHardware();

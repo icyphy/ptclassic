@@ -253,35 +253,6 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     return(1);
 }
 
-/* DefineParams 8/4/91 - eal
-Define the formal parameter list and default values for a Universe
-or galaxy.
-*/
-int
-DefineParams(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet;
-
-    ViInit("define-params");
-    ErrClear();
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-    } else if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
-	if (!EditFormalParamList(&facet)) {
-	    PrintErr(ErrGet());
-	}
-    } else {
-	PrintErr("Cursor must be over a universe or a galaxy schematic");
-    }
-    ViDone();
-}
-
-
 /* EditParams  5/27/88 4/24/88
 Edit parameters.
 Changed 9/93 to use the POct code and the TCL/Tk tools - aok
