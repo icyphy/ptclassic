@@ -1,3 +1,4 @@
+static const char *file_id = "StringList.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -27,10 +28,7 @@ StringList&
 StringList :: operator = (const StringList& sl) {
 	// check for assignment to self and do nothing
 	if (this != &sl) {
-		if (size()) {
-			deleteAllStrings();
-			initialize ();
-		}
+		if (size()) deleteAllStrings();
 		totalSize = sl.totalSize;
 		put(sl.newCopy());
 	}
@@ -40,10 +38,7 @@ StringList :: operator = (const StringList& sl) {
 // Assignment operator, string argument
 StringList&
 StringList :: operator = (const char* s) {
-	if (size()) {
-		deleteAllStrings();
-		initialize ();
-	}
+	if (size()) deleteAllStrings();
 	totalSize = strlen(s);
 	put(savestring(s));
 	return *this;
@@ -65,9 +60,6 @@ StringList::StringList (const StringList& s) {
 	totalSize = s.totalSize;
 	put(s.newCopy());
 }
-
-// Destructor
-StringList::~StringList() { deleteAllStrings(); }
 
 // Add another StringList to the StringList
 StringList&
@@ -110,7 +102,7 @@ StringList :: operator += (double f)
 // Make a new (concatenated together) copy of the StringList string.
 char*
 StringList :: newCopy () const {
-	char* s = new char[totalSize+1];
+	LOG_NEW; char* s = new char[totalSize+1];
 	char* out = s;
 	StringListIter next(*this);
 	const char* p;
@@ -135,13 +127,11 @@ StringList :: consolidate () {
 	// Allocate new memory
 	char* s = newCopy();
 	deleteAllStrings();
-	initialize();
 	put(s);
 	return s;
 }
 
-// for use in destructor: delete all substrings
-// we don't delete the nodes because the base class destructor does that.
+// for use as destructor: delete all substrings
 
 void StringList::deleteAllStrings() {
 	totalSize = 0;
@@ -149,8 +139,9 @@ void StringList::deleteAllStrings() {
 	// the result
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
-		delete next++;
+		LOG_DEL; delete next++;
 	}
+	SequentialList::initialize();
 }
 
 // print a StringList on a UserOutput
