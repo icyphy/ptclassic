@@ -89,28 +89,30 @@ class ::tycho::IDoc {
     ####                            options                               ####
 
     # The color of Itcl options.
-    itk_option define -optioncolor optionColor OptionColor white {
+    itk_option define -optioncolor optionColor OptionColor \
+            [::tycho::preference get edittext textForeground] {
     }
   
     # The color of public constructs.
-    itk_option define -publiccolor publicColor PublicColor white {
+    itk_option define -publiccolor publicColor PublicColor \
+            [::tycho::preference get edittext textForeground] {
     }
     
     # The color of protected constructs.
-    itk_option define -protectedcolor protectedColor ProtectedColor white {
+    itk_option define -protectedcolor protectedColor ProtectedColor \
+            [::tycho::preference get edittext textForeground] {
     }
     
     # The color of private constructs.
-    itk_option define -privatecolor privateColor PrivateColor white {
+    itk_option define -privatecolor privateColor PrivateColor \
+            [::tycho::preference get edittext textForeground] {
     }
 
-    # The default head font -- currently an X font, but should
-    # be made symbolic in Tk 8.0
+    # The default head font -- an X font which should be made symbolic in Tk 8.0
     itk_option define -headfont headFont Font [::tycho::font \
             {New Century Schoolbook} 18 Roman]
 
-    # The default body font -- currently an X font, but should
-    # be made symbolic in Tk 8.0
+    # The default body font -- an X font which should be made symbolic in Tk 8.0
     itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
 
     constructor {args} {}
@@ -161,7 +163,7 @@ class ::tycho::IDoc {
     # Bind a description to <enter>ing a label.
     private method bindDesc {item label}
   
-    # Bind an explanation to double clicking a label.
+    # Bind an explanation to button 1 clicking a label.
     private method bindExpl {item label}
 
     # Display the contents of myClass in contents widget.
@@ -413,11 +415,11 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
     switch $top {
         1 {
             $myHtmlTop clear
-            $myHtmlTop insertData $data
+            $myHtmlTop insertData "<html>$data</html>"
         }
         0 {
             $myHtmlBottom clear
-            $myHtmlBottom insertData $data
+            $myHtmlBottom insertData "<html>$data</html>"
         }
     }
 }
@@ -481,7 +483,7 @@ body ::tycho::IDoc::bindDesc {item label} {
 
 ###########################################################################
 #### bindExpl
-# bind to the double click event on the given label
+# bind to the button 1 click event on the given label
 # the display of the explanation of the given item in HTML
 # the explanation includes extra information besides the
 # actual explanation field of the item
@@ -491,7 +493,7 @@ body ::tycho::IDoc::bindExpl {item label} {
     # format explanation
     set expl [formatExpl $item]
 
-    # bind explanation to double click
+    # bind explanation to button 1 click
     $myContents bind $label <Button-1> \
             [code "$this putHtml {$expl} {0}"]
 }
@@ -510,7 +512,7 @@ body ::tycho::IDoc::display {} {
             -text [$myClass modelcget -name] \
             -font [$this cget -headfont]
 
-    $myContents bind class <Double-Button-1> \
+    $myContents bind class <Button-1> \
             [code "$this putHtml \{[$myClass get annotation explanation]\}"]
 
     # Class description is optional
@@ -553,7 +555,7 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -text $method \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $method $method\m
                 bindExpl $method $method\m
                 lappend subnames $method\m
@@ -575,7 +577,7 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -text $method \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $method $method\p
                 bindExpl $method $method\p
                 lappend subnames $method\p
@@ -597,7 +599,7 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -text $method \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $method $method\p
                 bindExpl $method $method\p
                 lappend subnames $method\p
@@ -632,7 +634,7 @@ body ::tycho::IDoc::displayVar {protection} {
                         -text $variable \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -optioncolor]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $variable $variable\v
                 bindExpl $variable $variable\v
                 lappend subnames $variable\v
@@ -653,7 +655,7 @@ body ::tycho::IDoc::displayVar {protection} {
                         -text $variable \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $variable $variable\v
                 bindExpl $variable $variable\v
                 lappend subnames $variable\v
@@ -675,7 +677,7 @@ body ::tycho::IDoc::displayVar {protection} {
                         -text $variable \
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
-                # setup bindings on <Enter> and <Double-Click>
+                # setup bindings on <Enter> and <B1-Click>
                 bindDesc $variable $variable\v
                 bindExpl $variable $variable\v
                 lappend subnames $variable\v
@@ -694,7 +696,7 @@ body ::tycho::IDoc::displayVar {protection} {
 #####################################################################
 #### formatExpl
 # Format the explanation of the given item in HTML. This is usually
-# bound to a double click on an item in the contents widget.
+# bound to a button 1 click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
 #
 body ::tycho::IDoc::formatExpl {item} {
@@ -710,7 +712,7 @@ body ::tycho::IDoc::formatExpl {item} {
             lappend paramlist "$parameter $default"
         }
     }
-    set html "$item $paramlist\n $expl"
+    set html "$item <i>$paramlist</i><p> $expl"
 }
 
 #####################################################################
