@@ -105,6 +105,7 @@ SDFDIR = $(CROOT)/src/domains/sdf
 SRDIR = $(CROOT)/src/domains/sr
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
 VHDLDIR = $(CROOT)/src/domains/vhdl
+FSMDIR = $(CROOT)/src/domains/fsm
 
 # Tcl/Tk stars can be used in pigiRpc but not ptcl, for this we define TK
 
@@ -495,6 +496,14 @@ ifdef CG
 	LIBS += -lcgstars -lcg
 	LIBFILES += $(LIBDIR)/libcgstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcg.$(LIBSUFFIX)
+endif
+
+ifdef FSM
+	CUSTOM_DIRS += $(FSMDIR)/kernel $(FSMDIR)/stars
+	STARS += $(LIBDIR)/fsmstars.o
+	LIBS += -lfsmstars -lfsm
+	LIBFILES += $(LIBDIR)/libfsmstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libfsm.$(LIBSUFFIX)
 endif
 
 ifdef SDFFULL
