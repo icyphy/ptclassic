@@ -340,13 +340,24 @@ if ( $?noconsole ) set prog = ($prog -noconsole)
 if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
 # If selectPtolemy is set then we are just running itkwish
-if ($?selectPtolemy && ! $?tychodebug) then
+if ($?selectPtolemy ) then
 	# Can't use && here, as since if we are running just 'tycho'
 	# then the program name will be 'itkwish' which is not necessarily
 	# executable.
-	if (! -x $prog) then
-		echo "Program does not exist: $prog"
-		exit 3
+
+	# If we call 'tycho -ptiny' then $prog will have one arg
+	# If we call 'tycho -ptiny -nowelcome' then $prog will have two args
+	if ( $#prog == 1 ) then
+		if (! -x $prog) then
+			echo "Program does not exist: $prog"
+			exit 3
+		endif
+	else
+		if (! -x $prog[1]) then
+			echo "Program does not exist: $prog"
+			exit 3
+		endif
+			
 	endif
 endif
 
