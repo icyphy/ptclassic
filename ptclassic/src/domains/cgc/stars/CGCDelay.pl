@@ -32,15 +32,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc { Number of delay samples. }
     }
 
-    codeblock (declarations)
-    {
+    codeblock (declarations) {
 	/* static so that buffer will be initialized to zero */
 	double $starSymbol(buffer)[$val(delay)];
 	int $starSymbol(index);
     }
 
-    codeblock (init)
-    {
+    codeblock (init) {
 	$starSymbol(index) = 0;
     {
 	int i;
@@ -49,22 +47,25 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
 
-    codeblock (main)
-    {
+    codeblock (main) {
 	$ref(output) = $starSymbol(buffer)[$starSymbol(index)];
 	$starSymbol(buffer)[$starSymbol(index)] = $ref(input);
 	if ( ++$starSymbol(index) >= $val(delay) )
 	    $starSymbol(index) -= $val(delay);
     }
 
-    initCode
-    {
+    setup {
+	if (!(int) delay) forkInit(input,output);
+    }
+
+    initCode {
+	if (!(int) delay) return;
 	addDeclaration(declarations);
 	addCode(init);
     }
 
-    go
-    {
+    go {
+	if (!(int) delay) return;
 	addCode(main);
     }
 }
