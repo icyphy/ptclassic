@@ -22,10 +22,21 @@ special routines to generate the sub universes.
 #include "CGSpread.h"
 #include "KnownBlock.h"
 #include "SDFConnect.h"
+#include "ConstIters.h"
+
+void makeStatesEqual(SDFStar* org, SDFStar* newS) {
+	CBlockStateIter nexts(*org);
+	BlockStateIter nextd(*newS);
+	const State* srcStatePtr;
+	State *destStatePtr;
+	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
+		destStatePtr->setValue(srcStatePtr->getInitValue());
+}
 
 // clone a star
 SDFStar* cloneStar(SDFStar* org) {
 	SDFStar* newS = (SDFStar*) org->clone();
+	makeStatesEqual(org, newS);
 	/* NOT DEFINED YET newS->copyStates(*org); */
 	if (org->numberMPHs() <= 0) return newS;
 	
