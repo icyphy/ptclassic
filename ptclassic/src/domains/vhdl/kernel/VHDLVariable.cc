@@ -78,3 +78,14 @@ VHDLVariableList* VHDLVariableList :: newCopy() {
 
   return newVariableList;
 }
+
+// Allocate memory for a new VHDLVariable and put it in the list.
+void VHDLVariableList :: put(StringList name, StringList type,
+			     StringList initVal) {
+  if (this->inList(name)) return;
+  VHDLVariable* newVar = new VHDLVariable;
+  newVar->name = name;
+  newVar->type = type;
+  newVar->initVal = initVal;
+  this->put(*newVar);
+}

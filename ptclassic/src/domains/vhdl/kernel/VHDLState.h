@@ -48,12 +48,15 @@ class VHDLState : public VHDLObj {
   // Destructor.
   ~VHDLState();
 
-/*
-  // Name.
-//  StringList name;
-  // Data type.
+  // Last reference to this state.
+  StringList lastRef;
+  // First reference to this state.
+  StringList firstRef;
+  // Initial value.
+  StringList initVal;
+  // Type.
   StringList type;
-*/
+
   // Last firing to access this state.
   int lastFiring;
 

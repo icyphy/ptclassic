@@ -97,6 +97,8 @@ class VHDLGenericList : public VHDLObjList
   // Return a pointer to a new copy of the list.
   VHDLGenericList* newCopy();
 
+  // Allocate memory for a new VHDLGeneric and put it in the list.
+  void put(StringList, StringList);
 };
 
 class VHDLGenericListIter : public VHDLObjListIter {

@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "VHDLPortHole.h"
+/*
 #include "VHDLPort.h"
 #include "VHDLGeneric.h"
 #include "VHDLVariable.h"
@@ -46,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLState.h"
 #include "VHDLPortMap.h"
 #include "VHDLGenericMap.h"
+*/
 
 class VHDLTarget;
 

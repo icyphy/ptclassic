@@ -97,6 +97,8 @@ class VHDLPortList : public VHDLObjList
   // Return a pointer to a new copy of the list.
   VHDLPortList* newCopy();
 
+  // Allocate memory for a new VHDLPort and put it in the list.
+  void put(StringList, StringList, StringList);
 };
 
 class VHDLPortListIter : public VHDLObjListIter {
