@@ -95,15 +95,21 @@ public:
 protected:
 	// dummy default constructor so derived classes can be made.
 	HashEntry() {}
+#ifdef aix_xlC
+	// destructor frees the stringkey string.  Only HashTable
+	// may delete a HashEntry.
+	~HashEntry();
+#endif
 
 private:
 	// constructor can be invoked only by HashTable class
 	HashEntry(HashTable* t,HashEntry** b,const char* k);
 
+#ifndef aix_xlC
 	// destructor frees the stringkey string.  Only HashTable
 	// may delete a HashEntry.
 	~HashEntry();
-
+#endif
 	HashEntry *nextPtr;	// Pointer to next entry in this
 				// hash bucket, or NULL for end of
 				// chain.
