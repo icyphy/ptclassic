@@ -35,7 +35,7 @@ ROOT =		../../../..
 # Where we are
 VPATH = 	../../../../src/octtools/tkoct/oct2ptcl
 # Get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 OBJS = 		misc.o oct2ptcl.o

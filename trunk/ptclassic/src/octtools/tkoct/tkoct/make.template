@@ -13,7 +13,7 @@ ROOT =		../../../..
 # Where we are
 VPATH =		../../../../src/octtools/tkoct/tkoct
 # Get configuration info
-CONFIG = 	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG = 	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 OBJS =		appinit.o tkoctTk.o toct.o tkoctDraw.o tkhFont.o toctFacet.o
