@@ -82,7 +82,10 @@ const int linkingNotSupported =
 // Neal Becker says:
 //   I am pleased to note that on linux-ELF systems the RTLD_GLOBAL flag is
 //   now supported.  You need the package ld.so-1.7.12 or later.
-#define DLOPEN_FLAGS RTLD_LAZY|RTLD_GLOBAL
+// #define DLOPEN_FLAGS RTLD_LAZY|RTLD_GLOBAL
+// RTLD_GLOBAL flag is removed because it could cause problems with 
+// temporary linking and permanent linking.
+#define DLOPEN_FLAGS RTLD_LAZY
 #else
 // defined(sun)
 #define DLOPEN_FLAGS RTLD_LAZY
