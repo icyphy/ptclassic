@@ -68,6 +68,8 @@ public:
     /*virtual*/ Nebula* asNebula() { return this; }
     
     /*virtual*/ int isSDFinContext() const;
+
+    /* virtual*/ int generateSchedule();
 };
 #endif
 

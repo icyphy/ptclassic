@@ -48,7 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern int setPortIndices(Galaxy&);
 
 Nebula::Nebula(Star& self) : selfStar(self), master(NULL),
-sched(0),sinkNebula(0),sourceNebula(0) {};
+sched(0) {};
 
 /*virtual*/ Nebula::~Nebula() {
     LOG_DEL; delete sched;
@@ -132,6 +132,39 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 
 	addGalaxy(g,newPorts);
 
+	// Connect the interal ports to dummy sink and source
+	// nodes.  Add the Nebula ports corresponding to the galaxy ports
+	int sources = 0, sinks = 0;
+	BlockPortIter galaxyPorts(*g);
+	PortHole* port;
+	while((port = galaxyPorts++) != NULL) {
+	    int index = ((PortHole&)port->realPort()).index();
+	    PortHole* nebulaPort = newPorts[index];
+	    if (nebulaPort) {
+		PortHole* realFar = (PortHole*) &nebulaPort->
+		    asNebulaPort()->real().far()->realPort();
+		Nebula* dummyNebula = newNebula();
+		Star* dummyStar = &dummyNebula->star();
+		PortHole* dummyPort = clonePort(realFar,dummyStar);
+		dummyPort->asNebulaPort().setNebAlias(nebulaPort);
+		StringList name;
+		if (nebulaPort->isItInput()) {
+		    name << "sourceNebula" << sources++;	
+		    connect(dummyPort,nebulaPort);
+		}
+		else {
+		    name << "sinkNebula" << sinks++;
+		    connect(nebulaPort,dummyPort);
+		}
+		dummyStar->setName(hashstring(name));       
+		addNebula(dummyNebula);
+		PortHole* fatNebulaPort =
+		    clonePort(&nebulaPort->asNebulaPort().real(),&star());
+		fatNebulaPort->asNebulaPort().setNebAlias(nebulaPort);
+		newPorts[index] = fatNebulaPort;
+	    }
+	}
+
 	// now connect up the Nebula ports to match the real ports.
 	// There may be fewer Nebula  ports than real ports if there
 	// are self-loops, for such cases, ptable[i] will be null.
@@ -167,43 +200,6 @@ void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
 	} else if (!flattenGalaxy((Galaxy*)b)) {
 	    Nebula* c = newNebula();
 	    c->setMasterBlock(b,newPorts);
-	    BlockPortIter galaxyPorts(*b);
-	    PortHole* port;
-	    while((port = galaxyPorts++) != NULL) {
-		int index = ((PortHole&)port->realPort()).index();
-		PortHole* nebulaPort = newPorts[index];
-		if (nebulaPort) {
-		    PortHole* realFar = (PortHole*) &nebulaPort->
-			asNebulaPort()->real().far()->realPort();
-		    if (nebulaPort->isItInput()) {
-			if (!sourceNebula) {
-			    sourceNebula = &newNebula()->star();
-			    c->addNebula(sourceNebula->asNebula());
-			    const char* name = "sourceNebula";
-			    sourceNebula->setName(hashstring(name));
-			}
-			PortHole* sourcePort =
-			    clonePort(realFar,sourceNebula);
-			connect(sourcePort,nebulaPort);
-		    }
-		    else {
-			if (!sinkNebula) {
-			    sinkNebula = &newNebula()->star();
-			    c->addNebula(sinkNebula->asNebula());
-			    const char* name = "sinkNebula";
-			    sinkNebula->setName(hashstring(name));
-			}
-			PortHole* sinkPort =
-			    clonePort(realFar,sinkNebula);
-			connect(nebulaPort,sinkPort);
-		    }
-		    PortHole* fatNebulaPort =
-			clonePort(&nebulaPort->asNebulaPort().real(),
-				  &c->star());
-		    fatNebulaPort->asNebulaPort().setNebAlias(nebulaPort);
-		    newPorts[index] = fatNebulaPort;
-		}
-	    }
 	    addNebula(c);
 	}
 	else {
