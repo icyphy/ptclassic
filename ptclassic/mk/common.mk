@@ -81,7 +81,9 @@ whatToBuild:	all
 #
 UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
 
-UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) -I$(VPATH) $(INCL) -c 
+UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
+					$(ARCHFLAGS) $(LOCALCCFLAGS) \
+					$(USERFLAGS) -I$(VPATH) $(INCL) -c 
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
