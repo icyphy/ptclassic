@@ -40,6 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFStar.h"
 #include "Error.h"
 
+extern const Attribute P_GLOBAL = {PB_GLOBAL,0};
+extern const Attribute P_LOCAL = {0,PB_GLOBAL};
+
 CGCPortHole :: ~CGCPortHole() {
 	LOG_DEL; delete bufName;
 }

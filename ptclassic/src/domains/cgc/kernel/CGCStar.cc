@@ -41,6 +41,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ComplexState.h"
 #include <ctype.h>
 
+// Attributes.
+extern const Attribute A_GLOBAL = {AB_GLOBAL,0};
+extern const Attribute A_LOCAL = {0,AB_GLOBAL};
+
 // The following is defined in CGCDomain.cc -- this forces that module
 // to be included if any CGC stars are linked in.
 extern const char CGCdomainName[];
@@ -361,8 +365,14 @@ void CGCStar :: updateOffsets()
 	addCode(code2);
 }
 
+// Compare.
+int operator ==(bitWord b, Attribute a)
+{
+    return b == a.eval(b);
+}
+
 // Declare PortHole data structures.
-StringList CGCStar::declarePortHoles()
+StringList CGCStar::declarePortHoles(Attribute a)
 {
     StringList dec;	// declarations
 
@@ -370,15 +380,18 @@ StringList CGCStar::declarePortHoles()
     BlockPortIter portIter(*this);
     while ((port = (CGCPortHole*)portIter++) != NULL)
     {
-	dec << declareBuffer(port);
-	dec << declareOffset(port);
+	if (port->attributes() == a)
+	{
+	    dec << declareBuffer(port);
+	    dec << declareOffset(port);
+	}
     }
 
     return dec;
 }
 
 // Generate initialization code for PortHole data structures.
-StringList CGCStar::initCodePortHoles()
+StringList CGCStar::initCodePortHoles(Attribute a)
 {
     StringList code;	// initialization code
 
@@ -386,15 +399,18 @@ StringList CGCStar::initCodePortHoles()
     BlockPortIter portIter(*this);
     while ((port = (CGCPortHole*)portIter++) != NULL)
     {
-	code << initCodeBuffer(port);
-	code << initCodeOffset(port);
+	if (port->attributes() == a)
+	{
+	    code << initCodeBuffer(port);
+	    code << initCodeOffset(port);
+	}
     }
 
     return code;
 }
 
 // Declare State data structures.
-StringList CGCStar::declareStates()
+StringList CGCStar::declareStates(Attribute a)
 {
     StringList dec;	// declarations
 
@@ -402,14 +418,15 @@ StringList CGCStar::declareStates()
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	dec << declareState(state);
+	if (state->attributes() == a)
+	    dec << declareState(state);
     }
 
     return dec;
 }
 
 // Generate initialization code for State data structures.
-StringList CGCStar::initCodeStates()
+StringList CGCStar::initCodeStates(Attribute a)
 {
     StringList code;	// initialization code
 
@@ -417,7 +434,8 @@ StringList CGCStar::initCodeStates()
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	code << initCodeState(state);
+	if (state->attributes() == a)
+	    code << initCodeState(state);
     }
 
     return code;
