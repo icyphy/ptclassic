@@ -194,7 +194,7 @@ char **strPtr;
 
     if (dir == NULL) {
 	ERR_IF2((tmp = RPCXGetDefault("vem", "technology")) == NULL,
-	    "UGetTechDir: can not read .Xdefaults 'vem.technology'");
+	    "UGetFullTechDir: can not read .Xdefaults 'vem.technology'");
 	ERR_IF1(!UMalloc(&dir, strlen(tmp) + 32));
 	sprintf(dir, "%s/ptolemy", tmp);
     }
