@@ -53,14 +53,14 @@ LIB=libcgcvisstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # put base stars first
 PL_SRCS= \
- CGCPackVis64.pl \
- CGCUnpackVis64.pl \
- CGCQuadAdd16.pl \
- CGCQuadSub16.pl \
- CGCQuadMult16x16.pl \
- CGCQuadFir.pl \
- CGCQuadBiquad.pl \
- CGCQuadFFTCx.pl
+ CGCVISAddSh.pl \
+ CGCVISBiquad.pl \
+ CGCVISFFTCx.pl \
+ CGCVISFIR.pl \
+ CGCVISMpyDblSh.pl \
+ CGCVISPackSh.pl \
+ CGCVISSubSh.pl \
+ CGCVISUnpackSh.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
