@@ -41,6 +41,7 @@ SRCS= \
  CG56DC.pl \
  CG56Fork.pl \
  CG56Gain.pl \
+ CG56DownSample.pl \
  CG56DummySource.pl \
  CG56DummySink.pl \
  CG56UpSample.pl
