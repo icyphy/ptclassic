@@ -69,11 +69,15 @@ extern "C" double pow(double,double);
 // return an expanded version of the filename argument, which may
 // start with "~", "~user", or "$var".  The returned value points
 // to static storage and is wiped out by the next call.
-const char* expandPathName(const char*);
+char* expandPathName(const char*);
 
 // return a new, unique temporary file name.  It lives on the heap
 // and may be deleted when no longer needed.
 char* tempFileName();
+
+// return a new string that is formed by replacing each character
+// "target" in string "str" with string "substr"
+char* subCharByString(const char *str, char target, const char *substr);
 
 inline char* savestring (const char* txt) {
 	INC_LOG_NEW; return strcpy (new char[strlen(txt)+1], txt);
@@ -82,6 +86,7 @@ inline char* savestring (const char* txt) {
 // Save the string in a systemwide hash table, if it is not there
 // already, and return a pointer to the saved copy.  Subsequent
 // hashstrings with the same string return the same address.
+// Do not delete strings returned by hashstring
 
 const char* hashstring(const char*);
 
