@@ -19,6 +19,8 @@ Date of last revision:
 #include "ParNode.h"
 #include "DataStruct.h"
 #include "UserOutput.h"
+#include "DynamicGalaxy.h"
+#include "BaseMultiTarget.h"
 
 ////////////////////////
 // class NodeSchedule //
@@ -69,10 +71,38 @@ public:
 
 class UniProcessor : public DoubleLinkList {
 
+friend class ParProcessors;
+
 private:
 	// Memory management for NodeSchedules: list of free NodeSchedules.
 	NodeSchedule* freeNodeSched;
 	int numFree;		// debugging purpose.
+
+	// galaxy of blocks assigned to this processor
+	DynamicGalaxy* subGal;
+
+	// my id
+	int index;
+
+	// create special stars and connect them
+	SDFStar* makeSpread(PortHole* srcP, ParNode* sN);
+	SDFStar* makeCollect(PortHole* destP, ParNode* dN);
+	void makeReceive(int pindex, PortHole* rP,int delay,ParNode*,EGGate*);
+	void makeSend(int pindex, PortHole* sP, ParNode*, EGGate*);
+
+	// set the cloned star pointer of the Send/Receive node in OSOP option.
+	void matchReceiveNode(SDFStar*, PortHole*, ParNode*);
+	void matchSendNode(SDFStar*, PortHole*, ParNode*);
+
+	// Depending on OSOPReq(), make connections
+	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
+			     SequentialList&);
+	void makeGenConnect(PortHole* p, ParNode*, SDFStar* org, SDFStar* far,
+			     SequentialList&);
+
+        // Check whether the user want to assign all invocations of a star
+        // into the same processor or not.
+        int OSOPreq() { return mtarget->getOSOPreq(); }
 
 protected:
 	// The time when the processor available
@@ -81,6 +111,9 @@ protected:
 	// The schedule of the currently executed node.
 	NodeSchedule* curSchedule;
 
+	// target pointer
+	BaseMultiTarget* mtarget;
+
 	// sum of idle time
 	int sumIdle;
 
@@ -88,14 +121,34 @@ protected:
 	void putFree(NodeSchedule*);	// put into the pool of free NodeSched.
 	void clearFree();		// remove all created NodeSchedules.
 	
+	// sub-universe creation
+	void makeConnection(ParNode* dN, ParNode* sN, PortHole* ref);
+	void makeBoundary(ParNode* sN, PortHole* ref);
+
+	// Simulate the schedule: obtain the buffer requirement.
+	void simRunSchedule();
+
 public:
 	// constructor
 	UniProcessor() : availTime(0), curSchedule(0), numFree(0),
-			 freeNodeSched(0) {}
+			 freeNodeSched(0), subGal(0) {}
 	~UniProcessor();
+
+	// return the galaxy
+	Galaxy* myGalaxy() { return subGal; }
+
+	// set the target pointer
+	void setTarget(BaseMultiTarget* t) { mtarget = t; }
+
+	// create the galaxy
+	void createSubGal();
 
 	// return the size of the node
 	int size() { return mySize(); }
+	int myId() { return index; }
+
+	// schedule a Communication node
+	void scheduleCommNode(ParNode*, int start);
 
 	// add node to the processor
 	void addNode(ParNode* node, int start);
@@ -110,13 +163,14 @@ public:
 
 	// check whether the node can be filled in an idle slot.
 	// return -1 if failed. Otherwise, return the schedule time.
-	int filledInIdleSlot(ParNode*, int start);
+	int filledInIdleSlot(ParNode*, int start, int limit = 0);
 
 	// append a Node to the end of the schedule
 	void appendNode(ParNode* n, int val);
 
   	// display the schedule
 	StringList display(int makespan);
+	StringList displaySubUniv() { return subGal->printRecursive(); }
 
 	// write Gantt chart
 	int writeGantt(UserOutput&);
@@ -164,6 +218,9 @@ public:
 	NodeSchedule* next() 
 		{ return (NodeSchedule*) DoubleLinkIter::nextLink(); }
 	NodeSchedule* operator++() { return next(); }
+
+	ParNode* nextNode() { NodeSchedule* ns = next();
+			      return ns? ns->getNode(): 0; }
 
 	// Reset the iter to the beginning of the schedule.
 	void reset() { DoubleLinkIter::reset();}
