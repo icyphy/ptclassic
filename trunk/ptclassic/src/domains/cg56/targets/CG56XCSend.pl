@@ -4,6 +4,7 @@ defstar {
 	desc { S56X to CGC send star }
 	version { $Id$ }
 	author { Jose Pino }
+	derivedFrom { S56XCGCBase }
 	copyright {
 Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
@@ -20,32 +21,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {ANYTYPE}
 	}
 
-	state {
-		name {wordCnt}
-		type {int}
-                attributes {A_NONCONSTANT|A_NONSETTABLE|A_SHARED|A_YMEM}
-                default {0}
-	}
-
-        codeblock(interrupt) {
-$label(SAVEPC)  equ     *       ;save program counter
-;
-; DMA Send Request Interrupt
-;
-	org	p:i_hstcm8		; Host command 8
-STARTW	movep	x:m_htx,$ref(wordCnt)	; Allow DSP writes to host port
-	nop
-	org	p:$label(SAVEPC)	;restore program counter
-        }
-	
-	codeblock(wordCntCB) {
-$label(initial_wait)
-	move	$ref(wordCnt),a	; get word count
-	tst 	a
-	jeq	$label(initial_wait)
-	jclr	#m_dma,x:m_hsr,$label(initial_wait)
-	}
-
 	codeblock(sendOne) {
 $label(wait)
 	jclr	#m_htde,x:m_hsr,$label(wait) ;wait for host port available
@@ -53,23 +28,13 @@ $label(wait)
 	}
 
 	codeblock(sendMany) {
-	move #$addr(input),r0	;read starting location address
+	move	#$addr(input),r0	;read starting location address
 	do	a,$label(WHL)
 $label(wait)
 	jclr	#m_htde,x:m_hsr,$label(wait) ;wait for host port available
 	movep	$mem(input):(r0)+,x:m_htx
 $label(WHL)
 	nop
-	}
-
-	codeblock(resetWordCnt) {
-	move	#0,a
-	move	a,$ref(wordCnt)
-	nop
-	}
-
-	initCode {
-		addCode(interrupt,CODE,"STARTW");
 	}
 
 	go {

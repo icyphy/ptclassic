@@ -20,35 +20,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	type {ANYTYPE}
     }
 
-    codeblock(DSPStartWrite,"const char* filePrefix") {
-        /* get the DSP parameters */
-        if (ioctl(dsp->fd,DspGetParams, &dspParams) == -1) {
-                fprintf(stderr,"Read failed on S-56X parameters");
-                exit(1);
-        }
-        dspParams.startWrite = qckLodGetIntr(dsp->prog,"STARTW");
-        if (dspParams.startWrite == -1) {
-                fprintf(stderr,"No STARTW label in @filePrefix.lod");
-                exit(1);
-        }
-	/* set the DSP parameters */
-	if (ioctl(dsp->fd,DspSetParams, &dspParams) == -1) {
-		fprintf(stderr,"Write failed on S-56X parameters");
-		exit(1);
-	}
-    }
-   
     codeblock(receiveData,"int numXfer,const char* command") {
     char buffer[@(numXfer*3)];
     int status;
     int i;
+    /* blocking read */
     status = read(dsp->fd,buffer,@(numXfer*3));
     if (status == 0) {
-	fprintf(stderr,"DSP read ioctl premature EOF\n");
+	perror("DSP read ioctl premature EOF");
 	exit(1);
     }
     if (status == -1) {
-	fprintf(stderr,"DSP read ioctl timeout\n");
+	perror("DSP read ioctl timeout");
 	exit(1);
     }
     for (i = 0; i < @numXfer; i++) {
@@ -56,11 +39,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (value & 0x00800000) value |= 0xff000000;
         @command;
     }
-    }
-    
-    initCode {
-        CGCS56XBase::initCode();
-        addMainInit(DSPStartWrite(S56XFilePrefix),"STARTW");
     }
 
     go {
