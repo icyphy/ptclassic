@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Jose Luis Pino, initial version based on SilageSimTarget
+ Programmer: Jose Luis Pino
 
 
 *******************************************************************/
@@ -37,6 +37,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGCTarget.h"
+#include "SDFScheduler.h"
+
+// This structure represents a communication star pair.  This target
+// can function as a helper target to allow for simulation wormholes.  The
+// outer star is optional -- it is the CGCStar which will receives
+// the communication from the inner CGStar.  This outer star is NULL iff
+// the inner star is a CGC star.  In other words, the outer star is
+// optional when this target is used standalone, not as a helper
+// target.
+//
+//             Wormhole
+//          |-------------|
+//          |             |
+//        X-|-O I-...-I O-|-X 
+//          |             |
+//          |     ...-I O-|-X     KEY: X stars external to the wormhole
+//          |             |            O 'outer' stars, optional, must be CGC
+//          |-------------|            I 'inner' stars, may be any CG
+//
+
+class CommPair {
+public:
+    CGCStar* outer;
+    CGStar* inner;
+};
+
+typedef CommPair (*CommPairF) (PortHole&,int);
 
 class CGCTargetWH : public CGCTarget {
 public:
@@ -60,7 +87,11 @@ public:
     /*virtual*/ void allWormOutputCode();
 
     int linkFiles();
-	
+    
+    // This method allows CGCTargetWH to be used as a helper target to
+    // another wormhole target.
+    int prepareCGCWorm(SDFSchedule& inputs, SDFSchedule& outputs,
+		       CommPairF incoming, CommPairF outgoing, Galaxy&);
 protected:
     int connectStar(Galaxy& galaxy);
 
