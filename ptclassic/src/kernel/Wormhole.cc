@@ -1,3 +1,4 @@
+static const char file_id[] = "Wormhole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -56,11 +57,14 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
 }
 
 // function to form the name for the inner event horizon
+// hashstring is efficient here because repeated porthole names like
+// "input" and "output" are so common
+
 const char* ghostName(const GenericPort& galp) {
-	const char* gname = galp.readName();
-	char* n = new char[strlen(gname)+7];
-	strcpy (n, gname);
-	return strcat (n, "(ghost)");
+	char buf[80];
+	strcpy (buf, galp.readName());
+	strcat (buf, "(ghost)");
+	return hashstring(buf);
 }
 
 // function to build the event horizons connecting the inner galaxy
@@ -111,7 +115,7 @@ void Wormhole :: buildEventHorizons () {
 	BlockMPHIter mpi(gal);
 	MultiPortHole* mp;
 	while ((mp = mpi++) != 0) {
-		WormMultiPort* wp = new WormMultiPort(this, *mp);
+		LOG_NEW; WormMultiPort* wp = new WormMultiPort(this, *mp);
 		wp->setPort(mp->readName(), &selfStar, mp->myType());
 		selfStar.addPort(*wp);
 	}
