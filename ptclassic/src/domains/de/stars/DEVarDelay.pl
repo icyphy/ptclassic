@@ -1,56 +1,33 @@
-ident
-{
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990-%Q% The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  T. M. Parks
- Date of creation: 1/11/91
-
- This star delays its input by a variable amount.
- The "delay" parameter gives the initial delay,
- and the delay is changed using the "newDelay" input.
-
-**************************************************************************/
-}
-
 defstar
 {
     name { VarDelay }
     domain { DE }
     derivedFrom { Delay }
-    descriptor
-    {
+    descriptor {
 This star delays its input by a variable amount.
 The "delay" parameter gives the initial delay,
 and the delay is changed using the "newDelay" input.
     }
     version { $Id$ }
     author { T. M. Parks }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
 
-    input
-    {
+    input {
 	name { newDelay }
 	type { float }
     }
 
-    constructor
-    {
+    constructor {
 	// state is no longer constant
 	delay.clearAttributes(A_CONSTANT);
     }
 
-    go
-    {
+    go {
 	if (newDelay.dataNew)
 	    delay = newDelay.get();
 
