@@ -203,36 +203,73 @@ void ListIter::reset() {
     ref = 0;
 }
 
+// This routine has been re-implemented and optimized for speed
+// because of its heavy usage.  The if-structure is organized
+// so that necessary ifs are executed, but for cases where only
+// a few ifs are needed, the minimum number of ifs is done for
+// the most common cases, with rarer cases taking decreasing
+// priority in the if-structure.
 Pointer ListIter::next() {
-    if (!startAtHead) {
-	if (list->lastNode == 0) {
-	  ref = 0;
-	  return 0;
-	}
-	else if (ref == list->lastNode) {
-	  ref = 0;
-	  return 0;
-	}
-	else if (ref == 0) {
-	  return 0;
-	}
-	else {
+  // Necessary check, distinguishes fundamentally different
+  // behavior.  Else-branch taken exactly once when next called
+  // after ListIter creation or after ListIter reset.
+  if (!startAtHead) {
+    // Next rarer case, check for ListIter reaching end of list.
+    // Else-branch taken once per list traversal, if allowed to
+    // traverse to the end.
+    if (ref != list->lastNode) {
+      // Next rarer case, check for null ref.  Happens if next
+      // called after reaching end of list or after a next call
+      // where null list->lastNode is found.
+      if (ref) {
+	// Rarest case, check for null list->lastNode.  Must
+	// pass through all if-checks in order to finally reach
+	// code to step forward in list.  Need to know that there
+	// is an end and that traversal will ultimately terminate.
+        if (list->lastNode) {
 	  ref = ref->next;
 	  return ref->e;
 	}
-    }
-    else {
-	startAtHead = FALSE;
-	if (list->lastNode) {
-	    ref = list->lastNode->next;
-	    return ref->e;
-	}
+	// Null list->lastNode.
 	else {
-	    ref = 0;
-	    return 0;
+	  ref = 0;
+	  return 0;
 	}
+      }
+      // Null ref.
+      else {
+	return 0;
+      }
     }
-    return 0;
+    // End of list reached, ref == list->lastNode.
+    else {
+      ref = 0;
+      return 0;
+    }
+  }
+  // Starting at the head of the list, so enter the list at the
+  // node pointed to by list->lastNode->next.
+  else {
+    startAtHead = FALSE;
+    // Rarest case, check for null list->lastNode.  Must
+    // pass through all if-checks in order to finally reach
+    // code to step forward in list.  Need to know that there
+    // is an end and that traversal will ultimately terminate.
+    // Also, in this case, hedges against dereferencing a
+    // null list->lastNode.
+    if (list->lastNode) {
+      ref = list->lastNode->next;
+      return ref->e;
+    }
+    // Null list->lastNode.
+    else {
+      ref = 0;
+      return 0;
+    }
+  }
+  // Should never be reached.  Included for safety in case
+  // preceding if-structure is broken by future changes.
+  return 0;
 }
 
 void ListIter::reconnect(const SequentialList& l) {
