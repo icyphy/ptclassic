@@ -43,7 +43,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // output to every output it drives.
 //
 // <P>This makes multiple passes through the stars in a galaxy
-// to allow all the arrays to be  allocated statically.
+// to allow all the arrays to be allocated statically.
+//
+// <P> Stars with no outputs are given a vertex with an empty
+// port pointer.
 
 SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 {
@@ -58,16 +61,18 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   GalStarIter nextStar(g);
 
   // Count the number of vertices by summing the number of outputs on each
-  // star
+  // star.  Stars with no outputs are treated as if they had one.
 
   numvertices = 0;
 
   // nextStar.reset();
+
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
-    while ( nextOutput++ ) {
+    nextOutput++;
+    do {
       numvertices++;
-    }
+    } while ( nextOutput++ );
   }
 
   // Record the star and port for each vertex
@@ -76,20 +81,32 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   ports = new OutSRPort * [ numvertices ];
 
   vs = 0;
-  nextStar.reset();  
+  nextStar.reset();
+
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
-    while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+
+    // This odd iteration structure registers one vertex for a star
+    // with no outputs (i.e., the initial nextOutput++ returns NULL)
+
+    op = (OutSRPort *)(nextOutput++);
+    do {
       stars[vs] = s;
       ports[vs] = op;
       vs++;
-    }
+      op = (OutSRPort *)(nextOutput++);
+    } while ( op != NULL );
   }
 
   // We'd better have gone through exactly all the vertices
   assert( vs == numvertices );
 
-  // Calculate the edge counts for each vertex
+  // Calculate the edge counts for each vertex by iterating over all
+  // outputs.  At each output, find its vertex (vd), then look at all the
+  // inputs driving this star, find their vertices, and add the edge counts.
+
+  // Again, if there are no outputs on the star, the first op is NULL and
+  // treated normally.
   
   fEdgeCount = new int[numvertices];
   bEdgeCount = new int[numvertices];
@@ -100,7 +117,8 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   nextStar.reset();
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
-    while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+    op = (OutSRPort *)(nextOutput++);
+    do {
       vd = vertexOfStarPort( s, op );
 
       // We should be able to find this (destination) vertex
@@ -129,7 +147,9 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 	  //	       << " has no far port\n";
 	}
       }
-    }
+      op = (OutSRPort *)(nextOutput++);
+    } while ( op != NULL );
+
   }
 
   // Form the edge lists
@@ -156,7 +176,8 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   nextStar.reset();
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
-    while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+    op = (OutSRPort *)(nextOutput++);
+    do {
       vd = vertexOfStarPort(s, op );
 
       // We should have been able to find the output vertex
@@ -180,7 +201,8 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
 	}
       }
-    }
+      op = (OutSRPort *)(nextOutput++);
+    } while ( op != NULL );
   }
 
   // We should have entered all the vertices we found previously
@@ -238,8 +260,12 @@ StringList SRDependencyGraph::displayGraph() const
   out << "Vertices: " << numvertices << "\n";
 
   for ( int v = 0 ; v < numvertices ; v++ ) {
-    out << v << ": " << stars[v]->name()
-	<< " " << ports[v]->name() << "\n  -> ";
+    out << v << ": " << stars[v]->name() << " ";
+    if ( ports[v] ) {
+      out << ports[v]->name() << "\n  -> ";
+    } else {
+      out << "(fictitious)\n  -> ";
+    }
     for ( int e = 0 ; e < fEdgeCount[v] ; e++ ) {
       out << fEdge[v][e] << " ";
     }
