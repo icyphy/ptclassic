@@ -110,7 +110,7 @@ extern "C" SIG_PF ptSignal(int sig, SIG_PF handler)
     return old;
 }
 
-#endif PTSOL2 PTSUN4
+#endif /*PTSOL2 PTSUN4*/
 
 #if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA) || defined(PTAIX) || defined(SA_RESTART)
 void ptSafeSig( int SigNum ) {
