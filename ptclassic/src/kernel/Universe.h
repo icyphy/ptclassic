@@ -29,16 +29,15 @@ public:
 		type(t), scheduler(s), gal(*g) {}
 
 	// initialize and/or generate schedule
-	void initSched() {
-		gal.initState();
-		scheduler->setup(gal);
+	int initSched() {
+		return scheduler->setup(gal);
 	}
 
 	// run, until stopping condition
 	void run() { scheduler->run(gal);}
 
-	// wrapup simulation
-	void wrapup() {scheduler->wrapup(gal);}
+	// end simulation
+	void endSimulation() {wrapupGal(gal);}
 
 	// set the stopping condition.  A hack.
 	void setStopTime(float limit) {scheduler->setStopTime(limit);}
@@ -53,6 +52,8 @@ protected:
 	const char* type;
 	Scheduler* scheduler;
 	Galaxy& gal;
+private:
+	void wrapupGal (Galaxy& g);
 };
 
 	//////////////////////////////
