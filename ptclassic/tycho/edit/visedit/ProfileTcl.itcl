@@ -33,61 +33,6 @@
 
 
 #######################################################################
-#### options
-#
-
-######## Options repeated from base class
-
-# Canvas background color.
-option add *ProfileTcl.canvasColor \
-        [ptkColor antiqueWhite3 white] widgetDefault
-
-# Default canvas foreground color.
-option add *ProfileTcl.canvasForeground black widgetDefault
-
-# Default height of the canvas widget, in pixels.
-option add *ProfileTcl.canvasHeight 500 widgetDefault
-
-# Default width of the canvas widget, in pixels.
-option add *ProfileTcl.canvasWidth 600 widgetDefault
-
-# Specify types of titles in the order in which they appear on the screen.
-option add *ProfileTcl.titleTypes {title subtitle author version copyright}
-
-# Default font list
-option add *ProfileTcl.defaultFont {{helvetica 14 medium r}} widgetDefault
-
-# Title fonts lists
-option add *ProfileTcl.authorFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *ProfileTcl.copyrightFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *ProfileTcl.versionFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *ProfileTcl.subtitleFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *ProfileTcl.titleFont {{times 24 bold i} {helvetica 24 bold i}} widgetDefault
-
-# Colors for title text
-option add *ProfileTcl.authorColor red widgetDefault
-option add *ProfileTcl.copyrightColor black widgetDefault
-option add *ProfileTcl.subtitleColor blue widgetDefault
-option add *ProfileTcl.titleColor black widgetDefault
-option add *ProfileTcl.versionColor black widgetDefault
-
-#### linkColor option
-option add *ProfileTcl.linkColor [ptkColor blue black] widgetDefault
-option add *ProfileTcl.lineColor [ptkColor gray40 black] widgetDefault
-
-# Default start position in the horizontal direction (in pixels).
-option add *ProfileTcl.startx 10 widgetDefault
-
-# Default start position (below title) in the vertical direction (in pixels).
-option add *ProfileTcl.starty 5 widgetDefault
-
-# Default vertical spacing (as a fraction of a nominal default)
-option add *ProfileTcl.spacingy 1.0 widgetDefault
-
-# Default horizontal spacing (as a fraction of a nominal default)
-option add *ProfileTcl.spacingx 1.0 widgetDefault
-
-#######################################################################
 #### ProfileTcl
 # A code profiler for Tcl and Itcl code, using the TclX extension.
 # To start profiling a section of code, hit the "Start Profiling" button.

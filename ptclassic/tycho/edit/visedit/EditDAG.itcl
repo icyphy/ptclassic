@@ -30,63 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-
-######## Options repeated from base class
-
-# Canvas background color.
-option add *EditDAG.canvasColor \
-        [ptkColor antiqueWhite3 white] widgetDefault
-
-# Default canvas foreground color.
-option add *EditDAG.canvasForeground black widgetDefault
-
-# Default height of the canvas widget, in pixels.
-option add *EditDAG.canvasHeight 500 widgetDefault
-
-# Default width of the canvas widget, in pixels.
-option add *EditDAG.canvasWidth 600 widgetDefault
-
-# Specify types of titles in the order in which they appear on the screen.
-option add *EditDAG.titleTypes {title subtitle author version copyright}
-
-# FIXME: Pending better handling of fonts:
-
-# Default font list
-option add *EditDAG.defaultFont {{helvetica 14 medium r}} widgetDefault
-
-# Title fonts lists
-option add *EditDAG.authorFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditDAG.copyrightFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditDAG.versionFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditDAG.subtitleFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditDAG.titleFont {{times 24 bold i} {helvetica 24 bold i}} widgetDefault
-
-# Colors for title text
-option add *EditDAG.authorColor red widgetDefault
-option add *EditDAG.copyrightColor black widgetDefault
-option add *EditDAG.subtitleColor blue widgetDefault
-option add *EditDAG.titleColor black widgetDefault
-option add *EditDAG.versionColor black widgetDefault
-
-######## New options
-
-#### linkColor option
-option add *EditDAG.linkColor [ptkColor blue black] widgetDefault
-option add *EditDAG.lineColor [ptkColor gray40 black] widgetDefault
-
-# Default start position in the horizontal direction (in pixels).
-option add *EditDAG.startx 10 widgetDefault
-
-# Default start position (below title) in the vertical direction (in pixels).
-option add *EditDAG.starty 5 widgetDefault
-
-# Default vertical spacing (as a fraction of a nominal default)
-option add *EditDAG.spacingy 1.0 widgetDefault
-
-# Default horizontal spacing (as a fraction of a nominal default)
-option add *EditDAG.spacingx 1.0 widgetDefault
 
 #######################################################################
 #### EditDAG
@@ -278,6 +221,9 @@ class ::tycho::EditDAG {
     # Draw a line from the specified node to one or all of its parents.
     protected method drawParentLines {node {parent {}}}
 
+    # Access the "diagram" preferences
+    protected method preference {mode args}
+
     # Show information about the current node, if any
     protected method showCurrentNodeInfo {state {invert 0}}
 
@@ -405,9 +351,17 @@ body ::tycho::EditDAG::constructor {args} {
     # The following is done once in the constructor because it's fairly
     # expensive.
     set defaultfont [::tycho::.tychoFonts findFont \
-            [option get $itk_component(hull) defaultFont EditDAG]]
+	    [preference get defaultFont]]
 
     eval itk_initialize $args
+    eval preference exclude $this $args
+
+    # Subscribe to the preferences
+    preference subscribe $this \
+	    -spacingx spacingx \
+	    -spacingy spacingy \
+	    -startx startx \
+	    -starty starty
 }
 
 
@@ -720,7 +674,7 @@ body ::tycho::EditDAG::redrawGraph {} {
     selectionClear
     catch {unset nametable}
 
-    set titleTypes [option get $itk_component(hull) titleTypes EditDAG]
+    set titleTypes [preference get titleTypes]
 
     # The following sets the depth attribute of each node.
     set depthsort [$mygraph depthSort]
@@ -956,8 +910,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     set color [ptkColor $cnt(color) black]
     if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
         # FIXME: cache the option for efficiency.
-	set color [ptkColor [option get $itk_component(hull) \
-                linkColor EditDAG] black]
+	set color [preference get linkColor]
     }
 
     # Since we are only creating a top-level item, we can call the
@@ -1024,7 +977,7 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
     } {
         set parents $parent
     }
-    set linecolor [option get $itk_component(hull) lineColor EditDAG]
+    set linecolor [preference get lineColor]
     foreach par $parents {
         set bbox [$mygraph attribute bbox $par]
         set x1 [lindex $bbox 0]
@@ -1047,6 +1000,16 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
                 $childx $childy \
                 -tags line -fill $linecolor
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "diagram" preferences.
+#
+body ::tycho::EditDAG::preference {mode args} {
+    eval ::preference $mode "diagram" $args
 }
 
 #######################################################################

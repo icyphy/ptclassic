@@ -43,63 +43,6 @@
 # _ Subtrees should be collapsible.
 
 #######################################################################
-#### options
-
-######## Options repeated from base class
-
-# Canvas background color.
-option add *EditForest.canvasColor \
-        [ptkColor antiqueWhite3 white] widgetDefault
-
-# Default canvas foreground color.
-option add *EditForest.canvasForeground black widgetDefault
-
-# Default height of the canvas widget, in pixels.
-option add *EditForest.canvasHeight 300 widgetDefault
-
-# Default width of the canvas widget, in pixels.
-option add *EditForest.canvasWidth 400 widgetDefault
-
-# Specify types of titles in the order in which they appear on the screen.
-option add *EditForest.titleTypes {title subtitle author version copyright}
-
-# FIXME: Pending better handling of fonts:
-# Default font list
-option add *EditForest.defaultFont {{helvetica 14 medium r}} widgetDefault
-
-# Title fonts lists
-option add *EditForest.authorFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditForest.copyrightFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditForest.versionFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditForest.subtitleFont {{times 16 bold r} {helvetica 16 bold r}} widgetDefault
-option add *EditForest.titleFont {{times 24 bold i} {helvetica 24 bold i}} widgetDefault
-
-# Colors for title text
-option add *EditForest.authorColor red widgetDefault
-option add *EditForest.copyrightColor black widgetDefault
-option add *EditForest.subtitleColor blue widgetDefault
-option add *EditForest.titleColor black widgetDefault
-option add *EditForest.versionColor black widgetDefault
-
-######## New options
-
-#### linkColor option
-option add *EditForest.linkColor [ptkColor blue black] widgetDefault
-option add *EditForest.lineColor [ptkColor gray40 black] widgetDefault
-
-# Default start position in the horizontal direction (in pixels).
-option add *EditForest.startx 10 widgetDefault
-
-# Default start position (below title) in the vertical direction (in pixels).
-option add *EditForest.starty 5 widgetDefault
-
-# Default horizontal offset for children (in pixels).
-option add *EditForest.indent 50 widgetDefault
-
-# Default vertical spacing (as a multiplier of font height)
-option add *EditForest.vertspacing 1.2 widgetDefault
-
-#######################################################################
 #### EditForest
 # A forest is a data structure that includes any number of trees. A
 # tree is a data structure with nodes that are either a root or have
@@ -286,8 +229,7 @@ body ::tycho::EditForest::redrawGraph {} {
     selectionClear
     catch {unset nametable}
 
-    set titleTypes \
-            [option get $itk_component(hull) titleTypes EditForest]
+    set titleTypes [preference get titleTypes]
     set ycoord [expr [eval bottomOf $titleTypes]+$itk_option(-starty)]
     set xcoord $itk_option(-startx)
     foreach root [lsort [$mygraph roots]] {
@@ -352,7 +294,7 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
                 $startx $ydest \
                 $x1 $ydest \
                 -width 2.0 -tags line -fill \
-                [option get $itk_component(hull) lineColor EditForest]
+                [preference get lineColor]
     }
     set newpntloc [list \
             [expr $x1+$xincr/2] \

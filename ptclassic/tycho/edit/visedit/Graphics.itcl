@@ -43,39 +43,6 @@
 # - Support canvas itemconfigure method and modify the stored create
 #   command accordingly.
 
-#######################################################################
-#### options
-
-# Canvas background color.
-option add *Graphics.canvasColor \
-        [ptkColor antiqueWhite3 white] widgetDefault
-
-# Default canvas foreground color.
-option add *Graphics.canvasForeground black widgetDefault
-
-# Default height of the canvas widget, in pixels.
-option add *Graphics.canvasHeight 500 widgetDefault
-
-# Default width of the canvas widget, in pixels.
-option add *Graphics.canvasWidth 600 widgetDefault
-
-# Specify types of titles in the order in which they appear on the screen.
-option add *Graphics.titleTypes {title subtitle author version copyright}
-
-# FIXME: Pending better handling of fonts:
-# Title fonts lists
-option add *Graphics.authorFont {{helvetica 16 bold i} {times 16 bold i}} widgetDefault
-option add *Graphics.copyrightFont {{helvetica 14 medium r} {times 14 medium r}} widgetDefault
-option add *Graphics.versionFont {{helvetica 14 medium r} {times 14 medium r}} widgetDefault
-option add *Graphics.subtitleFont {{helvetica 16 bold r} {times 16 bold r}} widgetDefault
-option add *Graphics.titleFont {{helvetica 24 bold r} {times 24 bold r}} widgetDefault
-
-# Colors for title text
-option add *Graphics.authorColor firebrick widgetDefault
-option add *Graphics.copyrightColor black widgetDefault
-option add *Graphics.subtitleColor blue widgetDefault
-option add *Graphics.titleColor black widgetDefault
-option add *Graphics.versionColor black widgetDefault
 
 #######################################################################
 #### Graphics
@@ -289,6 +256,9 @@ class ::tycho::Graphics {
     # If the argument is non-null, return it.  Otherwise, return the selection.
     protected method itemlist {{items {}}}
 
+    # Access the "graphics" preferences
+    protected method preference {mode args}
+
     # Register the creation, undo, deletion, and edit commands for an item.
     protected method register {id create undo remove {edit {}}}
 
@@ -493,6 +463,13 @@ body ::tycho::Graphics::constructor {args} {
     menubar disable Redo
 
     eval itk_initialize $args
+    eval preference exclude $this $args
+
+    # Subscribe to the preferences
+    preference subscribe $this \
+	    -canvasheight canvasHeight \
+	    -canvaswidth  canvasWidth \
+	    -canvascolor  canvasColor
 
     # Prevent shadowing of bindings in the File class.
     bind $slate <Control-x> { }
@@ -1346,8 +1323,7 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
     set name [::tycho::autoName .query]
     if !$newcategory {
         if $readOnly {bell; return}
-        set titleTypes \
-                [option get $itk_component(hull) titleTypes Graphics]
+        set titleTypes [preference get titleTypes]
         set categories {}
         foreach cat $titleTypes {
             if {[$slate find withtag $cat] == {}} {
@@ -1399,15 +1375,15 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
 body ::tycho::Graphics::titleSet {category text} {
     # Define the order in which title categories appear by specifying tags
     # that should come before them.
-    set titleTypes [option get $itk_component(hull) titleTypes Graphics]
+    set titleTypes [preference get titleTypes]
     set idx [lsearch -exact $titleTypes $category]
     if {$idx >= 0} {
         set below [lrange $titleTypes 0 [incr idx -1]]
     } {
         set below $titleTypes
     }
-    set font [option get $itk_component(hull) ${category}Font Graphics]
-    set color [option get $itk_component(hull) ${category}Color Graphics]
+    set font [preference get ${category}Font]
+    set color [preference get ${category}Color]
     centeredText $text $category $below $color $font
 }
 
@@ -1681,6 +1657,16 @@ body ::tycho::Graphics::paste {} {
             }
         }
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "graphics" preferences.
+#
+body ::tycho::Graphics::preference {mode args} {
+    eval ::preference $mode "graphics" $args
 }
 
 #######################################################################
