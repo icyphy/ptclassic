@@ -40,7 +40,8 @@ OPTIMIZER =
 TKCFLAGS = $(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
 	-I$(PTOLEMY)/src/domains/cgc/tcltk/lib -I$(PTOLEMY)/src/ptklib \
 	-I$(ROOT)/src/domains/cgc/rtlib
-TKLOADLIBES = -L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
+TKLOADLIBES = $(SHARED_COMPILERDIR_FLAG) \
+	-L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
 	$(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 # We are not assuming GNU make, so we can't include common.mk,
