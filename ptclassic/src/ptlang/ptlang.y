@@ -41,9 +41,8 @@ Programmer: J. T. Buck and E. A. Lee
 #include <ctype.h>
 #include <sys/types.h>
 #include <time.h>
-/* #include <malloc.h> */ /* Can't include malloc.h here, it conflicts with
-			   * stdlib.h under SunSoft cc 3.x and 4.x
-			   */
+#include <malloc.h>
+
 /* Symbols for special characters*/
 #define LPAR '('
 #define RPAR ')'
@@ -136,7 +135,6 @@ int stateMarks[NSTATECLASSES];
 /* external functions */
 char* save();			/* duplicate a string */
 char* savelineref();
-char* malloc();
 char* ctime();
 time_t time();
 void exit();
