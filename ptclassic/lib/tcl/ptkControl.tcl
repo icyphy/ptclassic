@@ -519,7 +519,7 @@ proc ptkStop { name } {
     halt
     global ptkOctHandles
     if {[info exists ptkOctHandles($name)]} {
-	after 2000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
+	after 60000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
     }
 }
 
@@ -539,7 +539,7 @@ proc ptkAbort { name } {
     halt
     global ptkOctHandles
     if {[info exists ptkOctHandles($name)]} {
-	after 2000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
+	after 60000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
     }
 }
 
@@ -649,7 +649,7 @@ proc ptkGo {name octHandle} {
     # out of the way first, and make sure the change in 
     # button relief gets displayed
     set ptkRunFlag($name) ACTIVE
-    update
+    update idletasks
 
     # catch errors and reset the run flag.
     if {[catch {
