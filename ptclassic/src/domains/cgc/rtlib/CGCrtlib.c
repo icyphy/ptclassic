@@ -199,7 +199,15 @@ double value;
     double word_scale = (double) (1L << FIX_BITS_PER_WORD);
     int overflow;
     int sign = (value < 0);
+    FIX_WORD *initp = dst_r;
+    int iwords = FIX_WORDS_PER_FIX;
     if (sign) value = -value;
+
+    /* Initialize the entire fix before assigning it */
+    while (iwords--) {
+      *initp = (FIX_WORD)0;
+      initp++;
+    }
 
     /* rescale and add correcting value for rounding */
     value = pFIX_TwoRaisedTo(FIX_BITS_PER_WORD-dst_i) * value +
