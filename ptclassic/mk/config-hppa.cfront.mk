@@ -62,7 +62,7 @@ SYSLIBS =	-lm /usr/lib/end.o
 LINKFLAGS =	-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
-LINKFLAGS_D =	-L$(LIBDIR)
+LINKFLAGS_D =	-L$(LIBDIR) -g
 
 #
 # Directories to use
