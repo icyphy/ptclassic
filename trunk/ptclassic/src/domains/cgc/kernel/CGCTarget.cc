@@ -61,18 +61,16 @@ extern const char CGCdomainName[];
 #define MAINLOOP (*getStream("mainLoop"))
 #define MAINCLOSE (*getStream("mainClose"))
 
-#define CONVERSION_TABLE_ROWS 15
-
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
-//  static TypeConversionTable cgcCnvTable[7] = {
+//  static TypeConversionTable cgcCnvTable[] = {
 //   {  COMPLEX, 	FIX, 		"CxToFix"	},
 // So, we create a class and let it do the work.
 
 class CGCConversionTable: public ConversionTable {
 public:
-  CGCConversionTable():ConversionTable(CONVERSION_TABLE_ROWS) {
+  CGCConversionTable() {
     tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
     tblRow(  COMPLEX, 	ANYTYPE,	"CxToFloat"	);
@@ -91,6 +89,7 @@ public:
   }
 };
 static CGCConversionTable cgcConversionTable;
+
 // Add code to the beginning of a CodeStream instead of the end.
 void prepend(StringList code, CodeStream& stream)
 {
@@ -142,7 +141,6 @@ HLLTarget(name, starclass, desc, assocDomain) {
 
 	// Initialize type conversion table
 	typeConversionTable = &cgcConversionTable;
-	typeConversionTableRows = CONVERSION_TABLE_ROWS;
 }
 
 StringList CGCTarget::comment(const char* text, const char* b,

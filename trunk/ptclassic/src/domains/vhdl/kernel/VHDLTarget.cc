@@ -42,7 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "ConversionTable.h"
 
-#define CONVERSION_TABLE_ROWS 15
 
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
@@ -52,7 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // So, we create a class and let it do the work.
 class VHDLConversionTable: public ConversionTable {
 public:
-  VHDLConversionTable():ConversionTable(CONVERSION_TABLE_ROWS) {
+  VHDLConversionTable() {
     tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
     tblRow(  COMPLEX, 	ANYTYPE,	"CxToFloat"	);
@@ -111,7 +110,6 @@ HLLTarget(name, starclass, desc, assocDomain) {
 
   // Initialize type conversion table
   typeConversionTable = &vhdlConversionTable;
-  typeConversionTableRows = CONVERSION_TABLE_ROWS;
 }
 
 // Clone
