@@ -30,7 +30,7 @@
 # maintained.
 
 
-DIRS = libgslider
+DIRS = libgslider ptplay
 PTOLEMY = ../..
 
 MAKEVARS =	\
