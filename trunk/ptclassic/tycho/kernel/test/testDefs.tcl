@@ -133,3 +133,26 @@ proc removeobj {name} {
 
 # How long windows are kept around, in milliseconds
 set duration 4000
+
+############################################################################
+#### openAllFiles 
+# Open up the files that are passed in as arguments, then destroy
+# the windows after a short wait
+#
+proc openAllFiles {args} {
+    global VERBOSE
+    global duration
+    foreach testfile $args {
+	if {$VERBOSE == 1} {
+	    puts "$testfile"
+	}
+	if [ file exists [::tycho::expandPath $testfile]] {
+	    set win [::tycho::File::openContext $testfile]
+	    #	wm deiconify $win
+	    puts $win
+	    after [expr {2 * $duration}] removeobj $win 
+	    update
+	}
+    }
+
+}
