@@ -99,7 +99,7 @@ class ::tycho::ListBrowser {
     method clearSelection {}
 
     # Complete the partially entered item.
-    method complete {{case 0}}
+    method complete {}
 
     # Goto the specified item in the listbox.
     method goto {item}
@@ -130,6 +130,13 @@ class ::tycho::ListBrowser {
 
     # Fill the listbox with items.
     protected method updateListbox {}
+
+    ##################################################################
+    ####                   protected variables                    ####
+    
+    # True if completion is case sensitive.
+    protected variable caseSensitiveCompletion \
+            [::tycho::preference get dialogs caseSensitiveCompletion]
 
     ##################################################################
     ####                   private variables                      ####
@@ -340,7 +347,10 @@ body ::tycho::ListBrowser::clearSelection {} {
 # string.  For example, if the pattern is "Foo" and we have "FooBarBaz" and
 # "FooBarFrob", then the pattern is increased to "FooBar".
 #
-body ::tycho::ListBrowser::complete {{case 0}} {
+body ::tycho::ListBrowser::complete {} {
+
+    set case $caseSensitiveCompletion
+
     if {$uselastpattern} {
 	scroll 1 selection
 	return
@@ -358,7 +368,7 @@ body ::tycho::ListBrowser::complete {{case 0}} {
     foreach name [$itk_component(listbox) get 0 end] {
         if $case {
             set nm $name
-        } {
+        } else {
             set nm [string tolower $name]
         }
 	if [string match $pattern $nm] {
