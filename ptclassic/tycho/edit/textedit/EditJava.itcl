@@ -181,7 +181,7 @@ body ::tycho::EditJava::evaluate {} {
 body ::tycho::EditJava::fileTemplate {{newClassName {}}} {
     global TYCHO
     set fileTemplate \
-	    [file join $TYCHO editors textedit templates JavaTemplate.java]
+	    [file join $TYCHO edit textedit templates JavaTemplate.java]
     ::tycho::EditProgram::fileTemplate $fileTemplate $newClassName
     set className $newClassName
 

@@ -216,7 +216,7 @@ body ::tycho::EditHTML::fileTemplate {} {
 
     # The location of the template file.  Non-UCB users might want
     # to edit this file for their own use.
-    set filename $TYCHO/editors/textedit/templates/HTMLTemplate.html
+    set filename $TYCHO/edit/textedit/templates/HTMLTemplate.html
 
     if {$filename != "" && $filename != "NoName"} {
 	if {[file exists $filename]} {
