@@ -70,14 +70,19 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
+	History.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
+	HyperGraph.itcl \
 	IndexBrowser.itcl \
+	KeyedGraph.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
 	Model.itcl \
+	MultiGraph.itcl \
+	NamedData.itcl \
 	Object.itcl \
 	Parameters.itcl \
 	Preferences.itcl \
@@ -96,9 +101,12 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	TWidget.itcl \
 	Tycho.tcl \
+	TypedData.itcl \
+	UndirectedGraph.itcl \
 	Uninstantiable.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
+	WidgetPreferences.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
 
