@@ -77,6 +77,8 @@ makefile:	make.template
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
+makefiles:	makefile
+
 TAGS:		$(SRCS)
 		etags $(SRCS)
 
