@@ -1,7 +1,15 @@
 #! /bin/sh -f
 # ptplay for hppa 
 # $Id$
-if [ ! -e /opt/audio/bin/audio_editor ]; then
+if [ -e /opt/audio/bin/audio_editor ]; then
+    # HPUX10 should have /opt/audio
+    echo "If the sound is to low in volume, run /opt/audio/bin/AudioCP"
+    /opt/audio/bin/audio_editor $1
+elif [ -e /usr/audio/bin/audio_editor ]; then
+    # HPUX9
+    # Tom Lane pointed out that /usr/audio/bin/audio_editor exists
+    /usr/audio/bin/audio_editor $1
+else
     # Original HPUX9 source by Stefan Detroch of Imec.
     # Requires the player program found in /usr/audio (HPUX9) or 
     # /opt/audio/src/player (HPUX10) to be compiled
@@ -15,7 +23,4 @@ if [ ! -e /opt/audio/bin/audio_editor ]; then
     player $SOUNDFILE -u -pri urgent
     rm -f $SOUNDFILE
 else
-    # HPUX10 should have /opt/audio
-    echo "If the sound is to low in volume, run /opt/audio/bin/AudioCP"
-    /opt/audio/bin/audio_editor $1
-fi
+
