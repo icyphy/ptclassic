@@ -22,6 +22,8 @@ VPATH         = $(ROOT)/src/pigilib
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
+PTCLHDRS = $(ROOT)/src/ptcl
+
 HDRS	      = compile.h \
 		edit.h \
 		err.h \
@@ -54,7 +56,8 @@ HDRS	      = compile.h \
 		TclObj.h \
 		POct.h \
 		PVem.h \
-		TclStarIfc.h
+		TclStarIfc.h \
+		BarGraph.h
 
 
 LIBCSRCS      = main.c \
@@ -91,7 +94,8 @@ LIBCPPSRCS    = kernelCalls.cc \
 		TclObj.cc \
 		POct.cc \
 		PVem.cc \
-		TclStarIfc.cc
+		TclStarIfc.cc \
+		BarGraph.cc
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
@@ -104,11 +108,14 @@ all:	makefile $(LIB)
 
 install: makefile $(LIBDIR)/$(LIB)
 
+# Directory containing utilities for BarGraph
+PTKDIR = $(ROOT)/src/ptklib
+
 # include the X11, oct and tcl headers for C++ as well as C
 # Note that some X11 installs have bogus (old versions) of the tcl/tk
 # headers, thus we must search the tcl/tk includes before the X11 includes
-INCL=	-I$(KERNDIR) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
-	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+INCL= -I$(KERNDIR) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
+ -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR)
 
 C_INCL=-I$(OCTTOOLS)/include -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
