@@ -907,10 +907,10 @@ void Fix:: overflow_handler (int rsign, int shift)
     case ovf_saturate:			// saturate
 	if (rsign) {
 	    Bits[0] = 0x8000;
-	    for (int i=1; i < words(); i++)  Bits[i] = 0; }
+	    for (i=1; i < words(); i++)  Bits[i] = 0; }
 	else {
 	    Bits[0] = 0x7fff;
-	    for (int i=1; i < words(); i++)  Bits[i] = 0xffff;
+	    for (i=1; i < words(); i++)  Bits[i] = 0xffff;
 	}
 	applyMask(FALSE);
 	break;
