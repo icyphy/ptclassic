@@ -47,6 +47,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
    a makefile because the makefile refers to Mathematica files that they
    do not have.  A negative side effect of this is that if these files
    change, then this file will not be automatically recompiled (cxh) */
+
+/* Create typedefs to define Mathematica 2.2 as Mathematica 3.0 types */
+#define USING_OLD_TYPE_NAMES 1
+
+/* mathlink.h is a C include file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <mathlink.h>
+#ifdef __cplusplus
+}
+#endif
 
 #endif
