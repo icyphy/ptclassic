@@ -123,6 +123,9 @@ class ::tycho::View {
     # Invoke a command on the tool bar, if it exists.
     method toolbar {args}
 
+    # Return the name of my view window.
+    method windowName {} {return $itk_component(hull)}
+
     ###################################################################
     ####                         public procs                      ####
 
