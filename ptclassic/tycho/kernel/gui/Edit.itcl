@@ -48,17 +48,9 @@
 class tycho::Edit {
     inherit File
 
-    #### save
-    # Save text to a file (by default, the file given by the -file option).
-    method save {{name ""}} {}
-
     #### insertFile
     # Insert the contents of a file at the insertion cursor.
     method insertFile {} {}
-
-    #### revert
-    # Revert to previously saved file contents.
-    method revert {} {}
 
     #### keybindings
     # Access documentation about key bindings.
@@ -67,6 +59,25 @@ class tycho::Edit {
     #### mousebindings
     # Access documentation about mouse bindings.
     method mousebindings {} {}
+
+    #### revert
+    # Revert to previously saved file contents.
+    method revert {} {}
+
+    #### save
+    # Save text to a file (by default, the file given by the -file option).
+    method save {{name ""}} {}
+
+    #### seename
+    # Thin wrapper for "seename" in the text widget.
+    method seename {name}
+
+    #########################################################################
+    #### protected methods
+
+    #### textwidget
+    # Return the name of the type of text widget to use.
+    method textwidget {} {return EditText}
 
     constructor {args} {}
     destructor {}
@@ -78,7 +89,7 @@ body tycho::Edit::constructor {args} {
 
     # The text widget.
     itk_component add text {
-	EditText $itk_component(childsite).text \
+	[textwidget] $itk_component(childsite).text \
 		-markmodified "$this markModified"
     } {
 	# FIXME: add all pertinent options from EditText
@@ -178,7 +189,7 @@ body tycho::Edit::constructor {args} {
 	    -label "Fill Region" \
 	    -accelerator "M-q" \
 	    -underline 2 \
-	    -command "$itk_component(text) fillRegion"
+	    -command "$itk_component(text) fillSelection"
     
     $itk_component(formatMenu) add command \
 	    -label "Right Fill Column" \
@@ -237,6 +248,18 @@ body tycho::Edit::save {{name ""}} {
     }
     markUnmodified
     return 1
+}
+
+#####################################################################
+#### seename
+# This method just calls seename for the text widget.  In the default
+# plain text widget, this just finds the first occurrence in the text
+# of the string given by the argument, and makes sure it is visible.
+# In other implementations, it may find hypertext points or procedure
+# definitions or things of that sort.
+#
+body tycho::Edit::seename {name} {
+    $itk_component(text) seename $name
 }
 
 #####################################################################
