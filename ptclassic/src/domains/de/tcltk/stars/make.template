@@ -51,7 +51,8 @@ TCL_SRCS= \
   $(TCL_SCRIPT_DIR)/tkScript.tcl \
   $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
   $(TCL_SCRIPT_DIR)/tkSlider.tcl \
-  $(TCL_SCRIPT_DIR)/tkText.tcl
+  $(TCL_SCRIPT_DIR)/tkText.tcl \
+  tkLogicAnalyzer.tcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

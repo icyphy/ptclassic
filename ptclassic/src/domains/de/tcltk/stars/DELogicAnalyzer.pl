@@ -3,17 +3,39 @@ defstar {
     domain {DE}
     derivedFrom { TclScript }
     desc {
-Generate a plot with the logic analyzer program that uses two parameter
-for each token: Time stamp and Token value.
+Generate a distinct plot for each porthole with the logic analyzer program.
+It uses two parameters to plot each token: Time stamp (arrival time) and 
+Token value.
     }
     version { $Id$}
-    author { Eduardo N. Spring }
+    author { Eduardo N. Spring and Jose Luis Pino }
     copyright {
 Copyright (c) 1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
+    explanation {
+The star reads a tcl/tk source file. It contains three settable parameters as
+follows: 
+yRange - takes n pairs of numbers in form of (a,b) (c,d) ... where n is the 
+number of portholes and a,b,.. are any real or integer numbers. If we enter 
+only one pair, it replicates and applies it to all other portholes. There
+should be at least one pair entered in order to get a plot.
+PlotStyle - determins the plotting style. There are only three different
+plotting styles: zero order hold, connect and dot. It takes n number of strings
+in form of: zero dot connect ... in any desired order where n is the number of
+portholes. If only one string is entered, it replicates and applies to all 
+portholes. There should be at least one entry in order to get a plot.
+PlotLabels - determins the plot window's title. It takes n number of strings
+in form of: string1 string2 ... where n is the number of portholes. By entring
+default (only once) it uses the portholes' names as the titles.
+The star passes all these parameters to tcl/tk source file which makes all
+required widgets. Then upon each fire by star, it calls goTcl procedure which
+passes the token's value and arrival time to tcl/tk plot and plots the
+corresponding point. Then upon user's request conects the points or draws
+zero hold.
+    }
     location { DE tcltk library }
     defstate {
 	name { WindowName }
@@ -52,7 +74,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this, "Outputs not supported");
 	    return;
 	}
-	tcl_file = "~spring/proj1/tkLogicAnalyzer.tcl";
+	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkLogicAnalyzer.tcl";
 	if (PlotLabels.size() < 1 || (strcmp(PlotLabels[0],"default") ==0)) {
 	    PlotLabels.resize(input.numberPorts());
 	    StringList names;
