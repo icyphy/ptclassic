@@ -132,15 +132,15 @@ body ::tycho::FontDialog::constructor {args} {
     # The font family menu
     choice family {Font family:} [lsort [::tycho::FontManager::family]] \
 	    Helvetica \
-	    "$this updateDisplay"
+	    -command "$this updateDisplay"
 
     # The font size menu
     choice size {Font size:} [::tycho::FontManager::size] 12 \
-	    "$this updateDisplay"
+	    -command "$this updateDisplay"
 
     # The font style menu
     choice style {Font style:} {Roman Italic Bold {Bold Italic}} Roman \
-	    "$this updateDisplay"
+	    -command "$this updateDisplay"
 
     # Here we add a sample of the font.
     # FIXME: This should be a separate window: the size changes
