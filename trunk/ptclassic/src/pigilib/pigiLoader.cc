@@ -265,6 +265,7 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	cmd << "-I" << ptDomainDir << "/dsp/stars ";
 	cmd << "-I" << ptDomainDir << "/image/stars ";
 	cmd << "-I" << ptDomainDir << "/tcltk/stars ";
+	cmd << "-I" << ptDomainDir << "/matrix/stars ";
 	cmd << "-I" << ptSrcDir << "/kernel ";
 	cmd << "-I" << srcDir << " ";
 
@@ -287,6 +288,7 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 }
 
 // Replace the last occurrence of the "src" sub-directory with "obj.$ARCH"
+// in the directory srcDirStr (note that srcDirStr is not a path name)
 static char* genObjDir (const char* srcDirStr) {
 	int len = strlen(srcDirStr);
 	char* srccopy = savestring(srcDirStr);
@@ -296,12 +298,12 @@ static char* genObjDir (const char* srcDirStr) {
 	// Search for a sub-directory named "src"
 	if ( len >= 4 ) {
 
-	  // 1. Check for src sub-directory at end of path name
+	  // 1. Check for src sub-directory at end of directory name
 	  int i = len - 4;
 	  char *srcloc = &srccopy[i];
 	  found = ( strcmp(srcloc, "/src") == 0 );
 
-	  // 2. If not found, then check for src sub-directory in path name
+	  // 2. If not found, check for src sub-directory in directory name
 	  if ( ! found ) {
 	    while ( i-- ) {
 	      if ( *srcloc == '/' && ( strncmp(srcloc, "/src/", 5) == 0 ) ) {
@@ -312,7 +314,7 @@ static char* genObjDir (const char* srcDirStr) {
 	    }
 	  }
 
-	  // 2. If found, substitute "/src" subdirectory with "/obj.$ARCH"
+	  // 3. If found, substitute "/src" subdirectory with "/obj.$ARCH"
 	  if ( found ) {
 	    *srcloc = 0;
 	    StringList temp = srccopy;
