@@ -46,7 +46,7 @@ HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormC
 OBJS= DDFConnect.o DDFScheduler.o DDFStar.o DDFWormhole.o DDFWormConnect.o \
  DDFDomain.o
 
-all:	makefiles $(LIB)
+all:	makefile $(LIB)
 
 $(LIB):	$(OBJS)
 	rm -f $(LIB)
@@ -54,7 +54,7 @@ $(LIB):	$(OBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefiles $(DESTDIR)/$(LIB)
+install:	makefile $(DESTDIR)/$(LIB)
 
 $(DESTDIR)/$(LIB):	$(LIB)
 		rm -f $(DESTDIR)/$(LIB)
@@ -70,7 +70,7 @@ sources:	$(SRCS) $(HDRS) make.template
 depend:	
 		makedepend -I$(SDFDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
 
-makefiles:	make.template
+makefile:	make.template
 		rm -f makefile
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
 		make -f make.template sources depend
