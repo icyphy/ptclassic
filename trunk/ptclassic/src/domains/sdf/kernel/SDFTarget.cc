@@ -55,7 +55,7 @@ Target(nam,"SDFStar",desc,assocDomain)
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
 	addState(loopScheduler.setState
-		("loopScheduler(DEF,CLUST,ACYLOOP)",this,"ACYLOOP",
+		("loopScheduler",this,"ACYLOOP #choices: DEF, CLUST,ACYLOOP",
 		"SDF Schedulers:\n"
 		"\tDEF - The default SDF scheduler\n"
 		"\tCLUST - J. Buck's loop scheduler\n"
@@ -76,9 +76,10 @@ SDFTarget::~SDFTarget() {
 void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
+	pt_ofstream o;
 
 	// create a file with the schedule in it
-	pt_ofstream o(logFile);
+	if (!logFile.null()) o.open(logFile);
 
 	const char* tmpname = loopScheduler;
 
