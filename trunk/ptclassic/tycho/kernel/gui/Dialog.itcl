@@ -404,6 +404,7 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
 	if { [info exists TY_TESTING] && $TY_TESTING == 1 } {
             if { [info exists TY_TEST_SCRIPT] } {
                 regsub -all %0 $TY_TEST_SCRIPT $instance temp_script
+		after 1000
                 uplevel #0 $temp_script
             } else {
                 return $instance
