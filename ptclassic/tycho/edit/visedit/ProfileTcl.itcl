@@ -79,6 +79,9 @@ body ::tycho::ProfileTcl::constructor {args} {
     addTool off -text {Display Profile} -command "$this profileDisplay"
     addTool cancel -text {Cancel Profile} -command "$this profileCancel"
 
+    disableTool off
+    disableTool cancel
+
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10
     addInfo real {Real time} 0 10
@@ -104,6 +107,9 @@ body ::tycho::ProfileTcl::constructor {args} {
 #
 body ::tycho::ProfileTcl::profileCancel {} {
     profile off results
+    disableTool off
+    disableTool cancel
+    enableTool on
 }
 
 #######################################################################
@@ -157,6 +163,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         array donesearch results $id
         incr depth
     }
+    disableTool off
+    disableTool cancel
+    enableTool on
     component graphics redrawForest
 }
 
@@ -166,6 +175,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 #
 body ::tycho::ProfileTcl::profileStart {} {
     profile -commands on
+    enableTool off
+    enableTool cancel
+    disableTool on
 }
 
 #######################################################################
