@@ -89,7 +89,7 @@ item vertex1 -slatetype IconFrame -anchor center -hsize 60 -text Plotter -border
 }
 item edge5 -slatetype Net -toaspect terminal -start s -tags edge -fill black -shape line -state 0 -coords {400.0 41.0 400.0 99.2 486.0 99.2} -smooth off -arrow none -beta 30 -fromaspect s -capstyle projecting -alpha 12 -end e -width 1 -joinstyle miter -autoshape 1
 }
-vertex vertex0 -maxValue 0.5 -label SquareWave -master edit/cts/stars.tim#source.squarewave -icon edit/cts/icons.tim#source.squarewave -minValue -0.5 -class SquareWave -frequency 0.25 {
+vertex vertex0 -maxValue 0.5 -label SquareWave -master edit/cts/stars.tim#source.squarewave -icon edit/cts/icons.tim#source.squarewave -minValue -0.5 -class SquareWave -frequency 0.5 {
     port output -datatype float
 }
 vertex vertex2 -initialState 0.0 -master edit/cts/stars.tim#dynamic.integral -label Integrator -icon edit/cts/icons.tim#dynamic.integral -class Integrator {
