@@ -65,7 +65,7 @@ and pass the result to the output.
 		double scale = Scale;
 		for(int travel = 0; travel < width*height; travel++) {
 			diff = float(ptr1[travel]) - float(ptr2[travel]);
-			diff = abs(diff*scale);
+			diff = fabs(diff*scale);
 			if (diff < 0.5)		ptr1[travel] = (unsigned char) 0;
 			else if (diff > 254.5) ptr1[travel] = (unsigned char) 255;
 			else ptr1[travel] = (unsigned char) (diff + 0.5);
