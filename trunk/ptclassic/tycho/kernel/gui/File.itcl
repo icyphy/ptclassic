@@ -480,10 +480,11 @@ body ::tycho::File::constructor {args} {
         
         $myMenubar addMenuItem "Class Diagram" Help -underline 0 -command \
                 {::tycho::File::openContext $TYCHO/doc/tychoClasses.dag}
+
         $myMenubar addMenuItem "Glimpse" Help -underline 0 -command { \
                 set w [::tycho::autoName .glimpse]; \
-                ::tycho::Glimpse $w; \
-                $w centerOnScreen}
+                ::tycho::Glimpse $w -geometry +0+0;\
+                wm deiconify $w}
     }
 
     # The following initialize options and then invoke any
