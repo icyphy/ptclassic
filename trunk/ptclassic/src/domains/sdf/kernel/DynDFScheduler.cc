@@ -339,7 +339,7 @@ int DynDFScheduler :: lazyEval(DataFlowStar* s) {
 		DataFlowStar* srcStar = peerStar(*wp);
 		// if dynamic, enable lazy evaluation.
 		lazyDepth++;
-		int lzStatus;
+		int lzStatus = TRUE;
 		while (wp->numTokens() < nwait &&
 		       (lzStatus = lazyEval(srcStar) != 0))
 			;	// empty loop body
