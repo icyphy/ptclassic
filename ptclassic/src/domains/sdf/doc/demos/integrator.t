@@ -1,7 +1,8 @@
 .\" $Id$
 .NA integrator
 .SD
-Demonstrate the features of the integrator star.
+Demonstrate the features of the integrator star,
+such as limiting, leakage, and resetting.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

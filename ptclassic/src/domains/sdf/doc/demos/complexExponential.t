@@ -1,7 +1,7 @@
 .\" $Id$
 .NA complexExponential
 .SD
-Generate and plot a complex exponential
+Generate and plot a complex exponential.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

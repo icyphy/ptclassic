@@ -1,11 +1,11 @@
 .\" $Id$
 .NA MC_DCT
 .SD
- A universe that does motion compensation and DCT image coding.
+ A universe that performs motion compensation and DCT encoding of video.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "November 12, 1992"
+.SV $Revision$ $Date$
 .AL "P. E. Haskell"
 .LD
  This universe reads images from a file and performs motion compensation,

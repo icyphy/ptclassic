@@ -1,7 +1,8 @@
 .\" $Id$
 .NA ColorImage
 .SD
-A universe that displays a color image.
+A universe that converts an RGB color image to YUV and back,
+and then displays it on the workstation screen.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

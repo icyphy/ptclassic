@@ -1,7 +1,10 @@
 .\" $Id$
 .NA powerSpectrum
 .SD
- Compare three methods for estimating a power spectrum.
+Compare three methods for estimating a power spectrum of
+a signal with three sinusoids plus colored noise.  The three
+methods are the periodogram method, the autocorrelation
+method, and Burg's method. 
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -83,7 +86,7 @@ a spectral estimate.
 .Ir "Makhoul, J."
 .Ir "Kay, S. M."
 .Ir "Haykin, S."
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.

@@ -1,7 +1,7 @@
 .\" $Id$
 .NA overlapAdd/FFT
 .SD
-Convolution implemented in the frequency domain using overlap and add.
+Convolution is implemented in the frequency domain using overlap and add.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe

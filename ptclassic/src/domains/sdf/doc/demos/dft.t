@@ -1,7 +1,8 @@
 .\" $Id$
 .NA dft
 .SD
-Compute a discrete Fourier transform of a finite signal
+Compute a discrete Fourier transform of a finite signal using the FFT star.
+The magnitude and phase (unwrapped) are plotted.
 .DE
 .LO "~ptolemy/src/domains/sdf/utilities"
 .DM SDF Universe

@@ -1,7 +1,10 @@
 .\" $Id$
 .NA doppler
 .SD
-Doppler shift
+A sine wave is subjected to four successive amounts of doppler shift.
+The doppler shift is accomplished by the phaseShift galaxy,
+which forms an analytic signal (using a Hilbert transform)
+that modulates a complex exponential.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -23,7 +26,7 @@ The remaining samples are not shifted at all.
 .pp
 The doppler shift is accomplished by the phaseShift galaxy,
 which forms an analytic signal (using a Hilbert transform)
-which modulates a complex exponential.
+that modulates a complex exponential.
 .Ie "phase shift"
 .Ie "analytic signal"
 .Ie "Hilbert transform"

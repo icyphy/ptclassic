@@ -1,15 +1,16 @@
 .\" $Id$
 .NA linearPrediction
 .SD
- Two mechanisms for linear prediction are compared.
+This demo performs linear prediction on a test signal consisting
+of three sinusoids in colored, Gaussian noise.
+Two mechanisms (Burg's algorithm and an LMS adaptive filter)
+for linear prediction are compared.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ "October 31, 1990"
 .AL "E. A. Lee"
 .LD
- This demo performs linear prediction on a test signal consisting
-of three sinusoids in colored, Gaussian noise.
 .Ie "linear prediction"
 .Ie "prediction, linear"
 .Ie "system identification"

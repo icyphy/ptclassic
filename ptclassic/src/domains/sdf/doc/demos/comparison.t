@@ -1,7 +1,7 @@
 .\" $Id$
 .NA comparison
 .SD
-Comparing two signals.
+Compare two sinusoidal signals using the Test star.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

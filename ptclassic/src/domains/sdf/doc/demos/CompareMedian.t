@@ -1,7 +1,8 @@
 .\" $Id$
 .NA CompareMedian
 .SD
-A universe that median filters an image.
+A universe that median filters an image to reduce artifacts
+due to interleaved scanning of video sequences.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

@@ -2,6 +2,7 @@
 .NA askXmit
 .SD
 Synthesize an amplitude-shift keyed (ASK) signal
+with a 100% excess bandwidth raised cosine pulse.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

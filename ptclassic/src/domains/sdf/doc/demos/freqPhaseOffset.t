@@ -1,7 +1,7 @@
 .\" $Id$
 .NA freqPhaseOffset
 .SD
-Impose frequency jitter and phase offset on a sinusoid.
+Impose frequency jitter and phase offset on a sinusoid using the "freqPhase" SDF block.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

@@ -1,7 +1,8 @@
 .\" $Id$
 .NA dtft
 .SD
-Demonstrate the DTFT star.
+Demonstrate the DTFT star, showing how it is different from the FFTCx star.
+Specifically, the range, number, and spacing of frequency samples is arbitrary.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

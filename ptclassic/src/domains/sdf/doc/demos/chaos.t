@@ -1,7 +1,8 @@
 .\" $Id$
 .NA chaos
 .SD
-A simple demonstration of chaos.
+This is simple demonstration of chaos, in which the phase-space
+plot of the famous Henon map is given.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

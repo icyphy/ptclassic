@@ -1,7 +1,8 @@
 .\" $Id$
 .NA gaussian
 .SD
-Histogram and autocorrelation of a Gaussian noise source
+Generate a Gaussian white noise signal, and plot its
+histogram and estimated autocorrelation.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

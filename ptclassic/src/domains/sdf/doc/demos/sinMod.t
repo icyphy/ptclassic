@@ -1,7 +1,7 @@
 .\" $Id$
 .NA sinMod
 .SD
-Sinusoidal modulator
+Modulate a sinusoid my multiplying by another sinusoid.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

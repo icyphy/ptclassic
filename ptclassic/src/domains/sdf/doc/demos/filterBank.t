@@ -1,7 +1,8 @@
 .\" $Id$
 .NA filterBank
 .SD
-Discrete Wavelet Transform Filter Bank
+This universe implements an eight-level perfect reconstruction one-dimensional
+filter bank based on the biorthogonal wavelet decomposition.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -14,8 +15,7 @@ Discrete Wavelet Transform Filter Bank
 .Ie "perfect reconstruction"
 .Ie "wavelet transform"
 .Ie "wavelets"
- This universe implements an eight-level perfect reconstruction one-dimensional
-filter bank based on bi-orthogonal wavelet decomposition [1].
+The biorthogonal wavelet decomposition is described in [1].
 .Ir "Herley, C."
 .Ir "Vetterli, M."
  This filter bank is a form of subband coder, in which the sample rate
@@ -55,9 +55,9 @@ has been studied in great detail in the literature [4].
 .pp
  All analysis stages are identical, as are all synthesis stages.
  There are, in all, only four unique FIR filters used.
- The impulse response of the analysis filters form a pair of bi-orthogonal
+ The impulse response of the analysis filters form a pair of biorthogonal
 wavelets.
- Bi-orthogonality is not quite as strong of a condition as is orthogonality,
+ Biorthogonality is not quite as strong of a condition as is orthogonality,
 and the reader is referred to Vetterli \fIet al.\fR for more details [1].
 .pp
  Concerning the schematic layout,
@@ -77,7 +77,7 @@ adjusted to optimize the dynamic range of the image.
  It runs much more quickly.
 .SA
 sfb
-.UH REFERENCES
+.UH References
 .ip [1]
 M. Vetterli and C. Herley,
 ``Wavelets and Filter Banks: Theory and Design,''

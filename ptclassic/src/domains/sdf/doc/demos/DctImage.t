@@ -1,8 +1,8 @@
 .\" $Id$
 .NA DctImage
 .SD
- A universe that performs discrete cosine transform (DCT) coding
-of am image sequence.
+A universe that performs discrete cosine transform (DCT) coding
+of an image sequence.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

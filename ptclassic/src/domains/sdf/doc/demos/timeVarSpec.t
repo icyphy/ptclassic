@@ -1,7 +1,8 @@
 .\" $Id$
 .NA timeVarSpec
 .SD
- A time-varying spectrum is displayed.
+A time-varying spectrum is computed using the autocorrelation
+method and displayed using a waterfall plot.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

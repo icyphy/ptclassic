@@ -1,7 +1,9 @@
 .\" $Id$
 .NA allPole
 .SD
-A universe showing two ways to implement an all-pole filter.
+Two realizations of an all-pole filter are shown to be equivalent.
+One uses an FIR filter in a feedback path, the other uses the
+BlockAllPole star.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

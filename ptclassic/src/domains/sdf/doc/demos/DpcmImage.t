@@ -1,7 +1,7 @@
 .\" $Id$
 .NA DpcmImage
 .SD
- A universe that performs differential pulse code modulation (DPCM)
+A universe that performs differential pulse code modulation (DPCM)
 on an image sequence.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"

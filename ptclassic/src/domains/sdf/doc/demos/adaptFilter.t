@@ -1,7 +1,8 @@
 .\" $Id$
 .NA adaptFilter
 .SD
-A demo of the LMS adaptive filter star
+An LMS adaptive filter converges so that its transfer function
+matches that of a fixed FIR filter.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

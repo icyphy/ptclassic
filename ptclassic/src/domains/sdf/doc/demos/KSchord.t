@@ -1,7 +1,7 @@
 .\" $Id$
 .NA KSchord
 .SD
- Simulation of plucked strings using the Karplus-Strong algorithm
+ Simulation of plucked string sounds using the Karplus-Strong algorithm
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -26,7 +26,7 @@ die out fairly rapidly, so that the underlying lower tones prevail in the end.
 .Ir "sound synthesis"
 .Ir "plucked string"
 .Ir "Moore, R."
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 R. Moore,
 \fIElements of Computer Music\fR,
