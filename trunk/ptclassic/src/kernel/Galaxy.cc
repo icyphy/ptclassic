@@ -79,12 +79,9 @@ Galaxy :: operator StringList () {
 	out += "Number of blocks: ";
 	out += numberBlocks();
 	out += "\n";
-	if (numberPorts()>0) out += "Ports in the Galaxy:\n";
-	   for(int i = numberPorts(); i>0; i--)
-		out += StringList(nextPort());
-
+	out += printPorts("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
-	for(i = numberBlocks(); i>0; i--)
+	for(int i = numberBlocks(); i>0; i--)
 		out += StringList(nextBlock());
 	return out;
 }
