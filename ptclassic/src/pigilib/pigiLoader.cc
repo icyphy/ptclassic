@@ -47,6 +47,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <ctype.h>
 #include "pt_fstream.h"
+#ifdef hppa
+#ifndef __GNUG__
+#include <fcntl.h>		// For open().
+#endif /* __GNUG__ */
+#endif /*hppa*/
 
 // FIXME: required to fix a bug in the Sun4 errno.h file
 //      remove when Sun fixes it.
@@ -86,7 +91,8 @@ extern char *sys_errlist[];
 #endif /* ! __GNUG__ */
 #endif /* mips */
 
-#ifdef __hppa__
+// __hppa__ is not defined under hppa cfront
+#ifdef hppa
 #define ARCH "snake"
 #endif
 
@@ -278,7 +284,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	sprintf (plName, "%s/%s%s.%s", srcDir, idomain, name,
 		 preprocSuffix[preproc]);
 	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
-	char *sourceFile = preproc ? plName : ccName;
+	const char *sourceFile = (preproc ? plName : ccName);
 // check existence of file.
 	int fd = open (sourceFile, 0);
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
