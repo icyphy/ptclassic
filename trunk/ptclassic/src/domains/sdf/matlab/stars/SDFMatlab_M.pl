@@ -46,12 +46,32 @@ The pound characters are used to maintain compatibility with Ptolemy syntax.
 		type { FLOAT_MATRIX_ENV }
 	}
 	defstate {
+		name { MatlabSetUp }
+		type { string }
+		default { "" }
+		desc {
+The Matlab command to execute during the setup procedure of the Matlab star.
+During the setup procedure, there is no data passing into or out of the star.
+}
+	}
+	defstate {
 		name { MatlabFunction }
 		type { string }
 		default { "" }
 		desc {
-The Matlab command to execute.
-The values of the input ports will be passed as arguments to this function.
+The Matlab command to execute each time the star fires.
+The values of the input and output ports may be accessed using the
+Ptolemy notation input#i and output#i, where i is the port number,
+as explained above.
+}
+	}
+	defstate {
+		name { MatlabWrapUp }
+		type { string }
+		default { "" }
+		desc {
+The Matlab command to execute during the wrapup procedure of the Matlab star.
+During the wrapup procedure, there is no data passing into or out of the star.
 }
 	}
 
@@ -154,6 +174,16 @@ The values of the input ports will be passed as arguments to this function.
 			matlabOutputNames, numOutputs);
 	}
 
+	begin {
+		char* setupCommand = (char*) MatlabSetUp;
+		if ( setupCommand && *setupCommand ) {
+		  int err = matlabInterface.EvaluateUserCommand(setupCommand);
+		  if ( err ) {
+		    Error::abortRun( *this, matlabInterface.GetErrorString() );
+		  }
+		}
+	}
+
 	go {
 		// call the go method of the parent star
 		SDFMatlab::go();
@@ -180,6 +210,16 @@ The values of the input ports will be passed as arguments to this function.
 		  if ( oerror ) {			// non-zero means error
 		    Error::abortRun( *this, "Could not convert the Matlab ",
 				     "output matrices to Ptolemy matrices" );
+		  }
+		}
+	}
+
+	wrapup {
+		char* wrapupCommand = (char*) MatlabSetUp;
+		if ( wrapupCommand && *wrapupCommand ) {
+		  int err = matlabInterface.EvaluateUserCommand(wrapupCommand);
+		  if ( err ) {
+		    Error::abortRun( *this, matlabInterface.GetErrorString() );
 		  }
 		}
 	}
