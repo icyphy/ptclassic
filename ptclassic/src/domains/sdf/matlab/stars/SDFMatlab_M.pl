@@ -132,6 +132,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		buildMatlabCommand(commandString, matlabInputNames, numInputs,
 				   (char *) MatlabFunction, matlabOutputNames,
 				   numOutputs);
+		LOG_DEL; delete [] matlabCommand;
 		LOG_NEW; matlabCommand = new char[commandString.length() + 1];
 		strcpy(matlabCommand, (char *) commandString);
 	}
