@@ -27,7 +27,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-# Important!  Do not run this makefile while in ~ptolemy/src/utils.  Instead
+# Important!  Do not run this makefile while in ~ptolemy/src/compat.  Instead
 # run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
