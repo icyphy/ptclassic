@@ -87,6 +87,11 @@ public:
 	/* virtual */ void initCode();
 	/* virtual */ int myExecTime();
 
+	// add a splice star to the spliceClust list.  If atEnd
+	// is true, append it to the end, otherwise prepend it.
+	void addSpliceStar(ACSStar* s, int atEnd);
+
+
 
 protected:
 

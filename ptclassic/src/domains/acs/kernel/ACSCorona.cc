@@ -99,7 +99,7 @@ void ACSCorona::addCores() {
 	const char* domainName;
 	const char* category;
 	ACSCore* core;
-	const char* srcdir = getSrcDirectory();
+//	const char* srcdir = getSrcDirectory();
 
 	initCoreFlag = 1;
 
@@ -175,5 +175,15 @@ Error::abortRun(*this, className(), ".myExecTime(): currentCore not set.");
 	}
 	return 0;
 }
-		
+	
 
+	
+// add a splice star to the spliceClust list.  If atEnd
+// is true, append it to the end, otherwise prepend it.
+void ACSCorona :: addSpliceStar(ACSStar* s, int atEnd) {
+	if ( currentCore ) {
+		currentCore->addSpliceStar(s,atEnd);
+	} else {
+Error::abortRun(*this, className(), ".addSpliceStar(ACSStar* s, int atEnd): currentCore not set.");
+	}
+}
