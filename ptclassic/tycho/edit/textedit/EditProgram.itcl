@@ -322,10 +322,10 @@ body ::tycho::EditProgram::fillSelection {} {
 # then it is simply displayed, not regenerated.
 #
 # This is a dummy implementation, it merely copies the current file into
-# a .htm file and displays it.  Child classes will probably redefine this
+# a .html file and displays it.  Child classes will probably redefine this
 # method
 body ::tycho::EditProgram::gendocBuffer {} {
-   return [gendocBufferInternal {set docfile $root.htm} \
+   return [gendocBufferInternal {set docfile $root.html} \
             {exec cp $tail $docfile}]
 
 }
@@ -642,7 +642,7 @@ body ::tycho::EditProgram::uncommentSelection {} {
 #
 body ::tycho::EditProgram::gendoc {file} {
     return [::tycho::EditProgram::gendocFileInternal $file \
-            {set docfile $root.htm} \
+            {set docfile $root.html} \
             {exec cp $tail $docfile}]
 }
 
@@ -780,7 +780,8 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
                 warnings:\n$retval"
     }
     if [file exists $fulldoc] {
-        return [::tycho::File::openContext $fulldoc]
+        set window [::tycho::File::openContext $fulldoc]
+	$window reload
     }
 }
 
