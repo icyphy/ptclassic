@@ -765,6 +765,7 @@ StringList VHDLBTarget :: sanitizedShortName (const NamedObj& obj) const {
 /////////////////////////////////////////
 
 int VHDLBTarget :: codeGenInit() {
+  if (! galaxy()) return FALSE;
 
   // Set all geodesics to contain a symbolic name that can be
   // used as the VHDLB variable representing the buffer.  That
