@@ -1,8 +1,7 @@
-# Makefile for CG domain support
+# Makefile for domains/cg56
 # Copyright (c) 1990 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# Programmer:  J. T. Buck
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
@@ -12,7 +11,7 @@
 
 include ../../../topdomain.mk
 
-DIRS = kernel stars targets
+DIRS = kernel stars dsp targets
 
 ME = cg56
 
