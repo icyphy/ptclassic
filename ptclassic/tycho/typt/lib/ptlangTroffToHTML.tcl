@@ -59,7 +59,7 @@ proc ptlangTroffToHTML {args} {
                     regsub -all "<" $lineIn {\&lt;} lineIn
                     regsub -all "\\\\fI" $lineIn <i> lineIn
                     regsub -all "\\\\fB" $lineIn <b> lineIn
-                    regsub -all "\\\\fR" $lineIn </i></b> lineIn
+                    regsub -all "\\\\fR|\\\\fP" $lineIn </i></b> lineIn
                     regsub -all {\\\\} $lineIn {\\} lineIn
                     regsub -all {REFERENCES} $lineIn {References} lineIn
 
