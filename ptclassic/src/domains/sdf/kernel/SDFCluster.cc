@@ -318,6 +318,7 @@ int SDFClusterGal::indirectPath(SDFCluster* src, SDFCluster* dst) {
 	SDFClustPortIter nextP(*src);
 	SDFClustPort* p;
 	while ((p = nextP++) != 0) {
+		if (p->far() == 0) continue;
 		SDFCluster* peer = p->far()->parentClust();
 		if (p->isItOutput() && peer != dst && findPath(peer,dst))
 			return TRUE;
@@ -336,7 +337,7 @@ int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
 	SDFClustPortIter nextP(*start);
 	SDFClustPort* p;
 	while ((p = nextP++) != 0) {
-		if (p->isItInput()) continue;
+		if (p->isItInput() || p->far() == 0) continue;
 		SDFCluster* peer = p->far()->parentClust();
 		if (peer == dst) return TRUE;
 		if (stopList.member(peer)) continue;
