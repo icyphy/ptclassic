@@ -338,7 +338,7 @@ def_value *val;		/* Returned value                        */
 
     tmp = text;
     for (idx = 0;  idx < 4;  idx++) {
-	if (spot = strchr(tmp, ',')) {
+	if ( (spot = strchr(tmp, ',')) ) {
 	    size = spot - tmp;
 	    STRNMOVE(fields[idx], tmp, size);
 	    fields[idx][size] = '\0';
@@ -419,7 +419,7 @@ def_value *val;		/* Old useful value (modified) */
  */
 {
     char *spot;
-    int bits, on_bits, m_flag;
+    int bits, on_bits = 0, m_flag;
 
     spot = &(text[0]);
     bits = m_flag = 0;
