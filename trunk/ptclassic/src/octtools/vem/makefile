@@ -123,7 +123,7 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 
 # Objects (*.o and *.$(LIBSUFFIX) files) that are locally produced
 VEMOBJECTS =	$(OBJECTS) dialogs/libdialogs.$(LIBSUFFIX) \
-	rpc/librpcserver$(LIBSUFFIX)
+	rpc/librpcserver.$(LIBSUFFIX)
 
 # This rule uses GNU make specific directives $(@D) $(@F) 
 $(VEMOBJECTS):
@@ -132,7 +132,7 @@ $(VEMOBJECTS):
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
 	)
 
-VEMLIBS = rpc/librpcserver$(LIBSUFFIX) dialogs/libdialogs$(LIBSUFFIX) \
+VEMLIBS = rpc/librpcserver.$(LIBSUFFIX) dialogs/libdialogs.$(LIBSUFFIX) \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
