@@ -92,7 +92,7 @@ of performing run-time advancement.  This is not currently handled.
 	if ( int(useCircular) ) {
 	    input.setAttributes(P_CIRC);
 	} else {
-	    const Attribute P_NONCIRC = { 0, PB_CIRC};	// bogus
+	    static Attribute P_NONCIRC = { 0, PB_CIRC};	// bogus
 	    input.setAttributes(P_NONCIRC);
 	}
 
