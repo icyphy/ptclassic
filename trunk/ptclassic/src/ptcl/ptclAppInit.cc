@@ -53,7 +53,9 @@ the [incr Tcl] (itcl) extension and the Ptolemy/PTcl facilities.
  */
 
 #include "tcl.h"
+#ifndef PT_NO_ITCL
 #include "itcl.h"
+#endif
 #include "Linker.h"
 
 EXTERN int		Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -153,10 +155,12 @@ int Tcl_AppInit(Tcl_Interp *interp)
      * where "Mod" is the name of the module.
      */
 
+#ifndef PT_NO_ITCL
     // Add [incr Tcl] (itcl) facilities
     if (Itcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
+#endif
     // Add PTcl commands
     if (Ptcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
