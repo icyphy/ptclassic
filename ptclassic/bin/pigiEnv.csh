@@ -73,10 +73,10 @@ while ($#argv)
 			set resfile = pigiXRes9.cp
 			breaksw
 		case -ptiny:
-			setenv PIGIBASE ptinyRpc
+			setenv PIGIBASE pigiRpc.ptiny
 			breaksw
 		case -ptrim:
-			setenv PIGIBASE ptrimRpc
+			setenv PIGIBASE pigiRpc.ptrim
 			breaksw
 		case -*:
 			echo Bad option: $argv[1]
