@@ -107,6 +107,8 @@ ifndef TK
 	CODESIGN=
 endif 
 
+# Motorola DSP assembly code generation domains
+
 ifdef CG96
 	CUSTOM_DIRS += $(CG96DIR)/kernel $(CG96DIR)/stars \
 		$(CG96DIR)/targets $(CG96DIR)/dsp/stars
@@ -581,9 +583,14 @@ endif
 ifdef HOF
 	CUSTOM_DIRS += $(HOFDIR)/kernel $(HOFDIR)/stars
 	STARS += $(LIBDIR)/hofstars.o
-	LIBS +=	-lhofstars -lhof
-	LIBFILES += $(LIBDIR)/libhofstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libhof.$(LIBSUFFIX)
+	LIBS +=	-lhofstars
+	LIBFILES += $(LIBDIR)/libhofstars.$(LIBSUFFIX)
+	HOFLIB = 1
+endif
+
+ifdef HOFLIB
+	LIBS +=	-lhof
+	LIBFILES += $(LIBDIR)/libhof.$(LIBSUFFIX)
 endif
 
 ifeq ($(USE_SHARED_LIBS),yes) 
