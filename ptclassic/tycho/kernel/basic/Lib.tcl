@@ -35,7 +35,7 @@
 
 # Register the standard context-sensitive editors
 namespace ::tycho {
-
+    global ptolemypresent
     ############# text editors (alphabetical except the first one)
 
     ::tycho::File::registerExtensions {} \
@@ -83,13 +83,6 @@ namespace ::tycho {
             {Tcl editor} "text"
 
     ########### graphical editors (alphabetical)
-
-    if {[uplevel #0 info commands ptkOpenFacet] != {} && \
-            [uplevel #0 info commands pvOpenWindow] != {}} {
-        set ptolemypresent 1
-    } {
-        set ptolemypresent 0
-    }
     ::tycho::File::registerExtensions {.dag} \
             {::tycho::view EditDAG {-file {%s}}} \
             {DAG editor} "graphics"
