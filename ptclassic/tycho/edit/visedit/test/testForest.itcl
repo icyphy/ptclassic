@@ -1,9 +1,12 @@
 # $Id$
 catch {delete object foo}
 ::tycho::Forest foo
-foo add a aa
-foo add c cc a
-foo add d dd a
+foo add a {}
+foo add c {} a
+foo add d {} a
 ::tycho::post [foo describe]
 
-# Should post: {{a aa {} {c d}} {c cc a {}} {d dd a {}}}
+# Should post: {d {} a} {a {} {}} {c {} a}
+
+::tycho::post [foo depthFirstSort]
+# Should post: a c d
