@@ -163,8 +163,8 @@ if {![info exists tychoConsoleWindow]} {
 }
 set tychoOpenFiles 0
 
-# Source ~/.tycho if it exists.  ~/.tycho contains user modifications.
-set tychostartfile [glob -nocomplain ~/.tycho]
+# Source ~/.tycho/tychoorc if it exists.
+set tychostartfile [glob -nocomplain ~/.tycho/tychoorc]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
 	[file readable $tychostartfile]} {
@@ -199,9 +199,7 @@ if {![info exists TychoVersionInfo]} {
 }
 # To disable the welcome message, set the global variable
 # tychoWelcomeMessage to zero before sourcing this file.
-# This can be done in your .tycho file.
-# FIXME: This should be implemented as a command-line option
-# rather than a global variable.
+# This can be done in your .tycho/tychoorc file.
 #
 if {$tychoWelcomeWindow != 0} {
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
