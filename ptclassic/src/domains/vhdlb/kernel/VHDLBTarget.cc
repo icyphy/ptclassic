@@ -63,7 +63,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /////////////////////////////////////////
 
 VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
-                   const char* desc) : HLLTarget(name,starclass,desc) 
+			 const char* desc) : HLLTarget(name,starclass,desc) 
 { }
 
 /////////////////////////////////////////
@@ -71,19 +71,9 @@ VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
 /////////////////////////////////////////
 
 StringList VHDLBTarget :: sectionComment(const StringList s) {
-	StringList out = "\n-- ";
-	out << s;
-	out << "\n\n";
-	return out;
-}
-
-/////////////////////////////////////////
-// offsetName
-/////////////////////////////////////////
-
-StringList VHDLBTarget::offsetName(VHDLBPortHole* p) {
-  StringList out = sanitizedFullName(*p);
-  out << "_ix";
+  StringList out = "\n-- ";
+  out << s;
+  out << "\n\n";
   return out;
 }
 
@@ -92,10 +82,10 @@ StringList VHDLBTarget::offsetName(VHDLBPortHole* p) {
 /////////////////////////////////////////
 
 void VHDLBTarget :: headerCode () {
-        StringList code = "Generated VHDLB code for target ";
-        code << fullName();
-	StringList vhdlCode = "";
-	vhdlCode << sectionComment(code);
+  StringList code = "Generated VHDLB code for target ";
+  code << fullName();
+  StringList vhdlCode = "";
+  vhdlCode << sectionComment(code);
 }
 
 /////////////////////////////////////////
@@ -110,7 +100,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   /* Temporarily store upper-level code:  ensure bottom-up code gen order */
   tempCode = vhdlCode;
-  
+
   /* If top level, className = "InterpGalaxy", so use universe name instead */
   if(!strcmp(galaxy.className(),"InterpGalaxy")) {
     blockName = galaxy.name();
@@ -118,7 +108,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   else {
     blockName = galaxy.className();
   }
-  
+
   /* Skip this galaxy if code has already been generated for it */
   StringListIter galaxyNext(galaxyList);
   const char* pgalaxy;
@@ -126,16 +116,17 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   while ((pgalaxy = galaxyNext++) != 0) {
     if (!strcmp(blockName,pgalaxy)) isNewGal = 0;
   }
-  if(isNewGal == 0) { /* don't repeat galaxy code generation */
+  /* don't repeat galaxy code generation */
+  if(isNewGal == 0) {
     return TRUE;
   }
   else {
     galaxyList << blockName;
   }
-  
+
   vhdlCode = "\n";
   vhdlCode << "entity " << blockName << " is\n";
-  
+
   /* Define the generic interface list, if any */
   CBlockStateIter galStateIter(galaxy);
   const State* st;
@@ -143,7 +134,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   while ((st = galStateIter++) != 0) {
     if(genericList.numPieces() > 1) genericList << "; ";
-    genericList << st.name() << ": ";
+    genericList << sanitize(st.name()) << ": ";
     if(!strcmp(st->type(), "INT")) {
       genericList << "INTEGER";
     }
@@ -164,7 +155,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   StringList phTypeDecl = "";
   StringList inputs = "";
   StringList outputs = "";
-  
+
   while ((ph = galPortIter++) != 0) {
     const PortHole* phAlias;
     if(ph->alias()) {
@@ -210,20 +201,20 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     vhdlCode << outputs << ");\n";
   }
   vhdlCode << "end " << blockName << ";\n\n";
-  
+
   StringList signals = "";
   StringList processes = "";
   StringList parts = "";
   StringList components = "";
-  
+
   StringList partName = "";
   StringList partList = "";
   StringList partDecl = "";
-  
+
   StringList componentName = "";
   StringList componentList = "";
   StringList componentDecl = "";
-  
+
   StringList wormProcs = "";
   StringList wormParts = "";
 
@@ -234,15 +225,15 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       VHDLBStar* s = (VHDLBStar*) b;
       if (s->amIFork()) continue;
     }
-    
+
     /* Generate component declaration */
     componentName = (*b).className();
     componentDecl = indent(1);
     componentDecl << "component " << (*b).className();
-    
+
     /* Generate process declaration */
     processes << indent(1) << sanitizedName(*b) << ":" << (*b).className();
-    
+
     /* Generate part declaration */
     partName = (*b).className();
     partDecl = indent(1);
@@ -259,12 +250,12 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     /* check whether the part is included or not. */
     StringListIter partNext(partList);
     const char* ppart;
-    
+
     int isNewPart = 1;
     while ((ppart = partNext++) != 0) {
       if (!strcmp(partName,ppart)) isNewPart = 0;
     }
-    
+
     if(isNewPart == 1) { /* add new part */
       partList << partName;
       parts << partDecl;
@@ -274,7 +265,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     StringList generics = "";
     StringList portDecl = "";
     StringList ports = "";
-    
+
     /* Find the names of the parameters and their values */
     CBlockStateIter stIter(*b);
     const State* st;
@@ -305,7 +296,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     if(genericDecl.numPieces() > 1) {
       componentDecl << " generic(" << genericDecl << ");";
     }
-    
+
     /* Find the names of the geodesics of all the outputs. */
     CBlockPortIter phIter(*b);
     const VHDLBPortHole* ph;
@@ -395,7 +386,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       else {
 	portDecl << "BIT";
       }
-      
+
       /* Port maps for process declarations */
       if(ports.numPieces() > 1) ports << ", ";
       ports << sanitize(ph->name()) << " => ";
@@ -414,19 +405,19 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     if(portDecl.numPieces() > 1) {
       componentDecl << " port(" << portDecl << ");";
     }
-    
+
     processes << ";\n";
     componentDecl << " end component;\n";
-    
+
     /* check whether the component is included or not. */
     StringListIter compNext(componentList);
     const char* pcomp;
-    
+
     int isNewComp = 1;
     while ((pcomp = compNext++) != 0) {
       if (!strcmp(componentName,pcomp)) isNewComp = 0;
     }
-    
+
     if(isNewComp == 1) { /* add new component */
       componentList << componentName;
       components << componentDecl;
@@ -446,7 +437,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     wormParts << indent(1);
     wormParts << "for all:dataOut use entity work.dataOut(dataOut_behavior); end for;\n";
   }
-  
+
   /* Generate the architecture definition */
   vhdlCode << "architecture " << blockName << "_structure of " << blockName << " is\n";
   vhdlCode << components;
@@ -476,142 +467,141 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   return TRUE;
 }
 
+/////////////////////////////////////////
+// setup
+/////////////////////////////////////////
+
 void VHDLBTarget :: setup () {
 
-    Galaxy* gal = galaxy();
-    codeGenInit();
+  Galaxy* gal = galaxy();
+  codeGenInit();
 
-    // Initializations
-    galId = 0;
-    include << "";
-    mainDeclarations << "";
-    mainInitialization << "";
+  // Initializations
+  galId = 0;
+  include << "";
+  mainDeclarations << "";
+  mainInitialization << "";
 
-    galaxyList.initialize();
-    includeFiles.initialize();
-    globalDecls.initialize();
+  galaxyList.initialize();
+  includeFiles.initialize();
+  globalDecls.initialize();
 
-    StringList galaxyList = "";
-    galaxyList.initialize();
-    vhdlCode.initialize();
+  StringList galaxyList = "";
+  galaxyList.initialize();
+  vhdlCode.initialize();
 
-    CGTarget::setup();
+  CGTarget::setup();
 
-// to remove pre-existing output files
-	removeOldFiles = "";
-	changeOptions  = "";
-	changeOptions << "cd " << expandPathName(destDirectory) << "; ";
+  // to remove pre-existing output files
+  removeOldFiles = "";
+  changeOptions  = "";
+  changeOptions << "cd " << expandPathName(destDirectory) << "; ";
 
-// Data structure declaration
-	StringList leader = "Code from Universe: ";
-	leader << gal->fullName();
-	galFunctionDef(*gal);
+  // Data structure declaration
+  StringList leader = "Code from Universe: ";
+  leader << gal->fullName();
+  galFunctionDef(*gal);
 
-// Assemble all the code segments
-	StringList runCode = include;
-	runCode << sectionComment(leader) << mainInitialization << vhdlCode;
-	vhdlCode = runCode;
+  // Assemble all the code segments
+  StringList runCode = include;
+  runCode << sectionComment(leader) << mainInitialization << vhdlCode;
+  vhdlCode = runCode;
 
-// Display the code and write it to a file
-        writeFile(vhdlCode, ".vhdl", 1);
+  // Display the code and write it to a file
+  writeFile(vhdlCode, ".vhdl", 1);
 }
 
-// The following was copied from Target.cc before this method was removed
-// Method to set a file name for writing.
-// Prepends dirFullName to fileName with "/" between.
-// Always returns a pointer to a string in new memory.
-// It is up to the user to delete the memory when no longer needed.
-// If dirFullName or fileName is NULL then it returns a
-// pointer to a new copy of the string "/dev/null".
-char* VHDLBTarget :: writeFileName(const char* fileName) {
-	if((const char*)destDirectory && *(const char*)destDirectory && fileName && *fileName) {
-		StringList fullName = (const char*)destDirectory;
-		fullName << "/";
-		fullName << fileName;
-		return fullName.newCopy();
-	}
-	return savestring("/dev/null");
-}
+/////////////////////////////////////////
+// run
+/////////////////////////////////////////
 
 int VHDLBTarget :: run () {
-
-/*
-	system(removeOldFiles);
-        system(runOptions);
-	system(changeOptions);
-*/
-    return TRUE;
+  return TRUE;
 }
+
+/////////////////////////////////////////
+// wrapup
+/////////////////////////////////////////
 
 void VHDLBTarget :: wrapup () {
-	if(Scheduler::haltRequested()) return ;
-	Target::wrapup();
-// remove all files created in this run???
+  if(Scheduler::haltRequested()) return ;
+  Target::wrapup();
 }
 
+/////////////////////////////////////////
+// copy constructor:  VHDLBTarget
+/////////////////////////////////////////
 
-// copy constructor
 VHDLBTarget :: VHDLBTarget (const VHDLBTarget& src) :
 HLLTarget(src.name(), "VHDLBStar", src.descriptor())
 { }
 
-// clone
+/////////////////////////////////////////
+// clone:  makeNew
+/////////////////////////////////////////
+
 Block* VHDLBTarget :: makeNew () const {
-	LOG_NEW; return new VHDLBTarget(*this);
+  LOG_NEW; return new VHDLBTarget(*this);
 }
 
+/////////////////////////////////////////
+// setGeoNames
+/////////////////////////////////////////
+
 void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
-    // Assign names for each geodesic according to port connections.
-    // Output port names take priority, so we do the inputs first,
-    // and let output names overwrite input names if necessary.
-    // The galaxy name will only be used at the top level of the
-    // aliases, so we can greatly shorten the names by resolving
-    // the aliases upward.
-    GalStarIter nextIns(galaxy);
-    GalStarIter nextOuts(galaxy);
-    Star* b;
-    while ((b = nextIns++) != 0) {
-      BlockPortIter nextPort(*b);
-      VHDLBPortHole* p;
-      GenericPort *gp, *gn;
-      while ((p = (VHDLBPortHole*)nextPort++) != 0) {
-	if ((p->isItInput())) {
-	  gn = p;
-	  while(gp = gn->aliasFrom()) gn = gp;
-	  StringList s = sanitizedShortName(*gn);
-	  p->setGeoName(savestring(s));
-	}
-      }
-    }
-    while ((b = nextOuts++) != 0) {
-      BlockPortIter nextPort(*b);
-      VHDLBPortHole* p;
-      GenericPort *gp, *gn;
-      while ((p = (VHDLBPortHole*)nextPort++) != 0) {
-	if ((p->isItOutput())) {
-	  gn = p;
-	  while(gp = gn->aliasFrom()) gn = gp;
-	  StringList s = sanitizedShortName(*gn);
-	  p->setGeoName(savestring(s));
-	}
+
+  // Assign names for each geodesic according to port connections.
+  // Output port names take priority, so we do the inputs first,
+  // and let output names overwrite input names if necessary.
+  // The galaxy name will only be used at the top level of the
+  // aliases, so we can greatly shorten the names by resolving
+  // the aliases upward.
+
+  GalStarIter nextIns(galaxy);
+  GalStarIter nextOuts(galaxy);
+  Star* b;
+  while ((b = nextIns++) != 0) {
+    BlockPortIter nextPort(*b);
+    VHDLBPortHole* p;
+    GenericPort *gp, *gn;
+    while ((p = (VHDLBPortHole*)nextPort++) != 0) {
+      if ((p->isItInput())) {
+	gn = p;
+	while(gp = gn->aliasFrom()) gn = gp;
+	StringList s = sanitizedShortName(*gn);
+	p->setGeoName(savestring(s));
       }
     }
   }
+  while ((b = nextOuts++) != 0) {
+    BlockPortIter nextPort(*b);
+    VHDLBPortHole* p;
+    GenericPort *gp, *gn;
+    while ((p = (VHDLBPortHole*)nextPort++) != 0) {
+      if ((p->isItOutput())) {
+	gn = p;
+	while(gp = gn->aliasFrom()) gn = gp;
+	StringList s = sanitizedShortName(*gn);
+	p->setGeoName(savestring(s));
+      }
+    }
+  }
+}
 
 /////////////////////////////////////////
 // sanitizedFullName
 /////////////////////////////////////////
 
 StringList VHDLBTarget :: sanitizedFullName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL && obj.parent()->parent() != NULL) {
-                out = sanitizedFullName(*obj.parent());
-                out << "_";
-                out << sanitizedName(obj);
-        } else {
-                out = sanitizedName(obj);
-        }
-        return out;
+  StringList out;
+  if(obj.parent() != NULL && obj.parent()->parent() != NULL) {
+    out = sanitizedFullName(*obj.parent());
+    out << "_";
+    out << sanitizedName(obj);
+  } else {
+    out = sanitizedName(obj);
+  }
+  return out;
 }
 
 /////////////////////////////////////////
@@ -619,14 +609,14 @@ StringList VHDLBTarget :: sanitizedFullName (const NamedObj& obj) const {
 /////////////////////////////////////////
 
 StringList VHDLBTarget :: sanitizedShortName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL)
-                out = sanitizedName(*obj.parent());
-        else
-		out = "XX";
-        out << "_";
-        out << sanitizedName(obj);
-        return out;
+  StringList out;
+  if(obj.parent() != NULL)
+    out = sanitizedName(*obj.parent());
+  else
+    out = "XX";
+  out << "_";
+  out << sanitizedName(obj);
+  return out;
 }
 
 /////////////////////////////////////////
@@ -635,23 +625,18 @@ StringList VHDLBTarget :: sanitizedShortName (const NamedObj& obj) const {
 
 int VHDLBTarget :: codeGenInit() {
 
-	// Set all geodesics to contain a symbolic name that can be
-	// used as the VHDLB variable representing the buffer.
-	// That name will
-	// be of the form "gal1_gal2_star_output", which designates
-	// the output port that actually produces the data.
-	//
-	// ALERT: FORM OF NAME SHOULD CHANGE ######
-	//
-	setGeoNames(*galaxy());
+  // Set all geodesics to contain a symbolic name that can be
+  // used as the VHDLB variable representing the buffer.  That
+  // name will be of the form "gal1_gal2_star_output", which
+  // designates the output port that actually produces the data.
 
-	GalStarIter nextStar(*galaxy());
-	nextStar.reset();
-        VHDLBStar* s;
-	while ((s = (VHDLBStar*) nextStar++) != 0) {
-		if (s->amIFork()) continue;
-		s->initCode();
-	}
-
-        return TRUE;
+  setGeoNames(*galaxy());
+  GalStarIter nextStar(*galaxy());
+  nextStar.reset();
+  VHDLBStar* s;
+  while ((s = (VHDLBStar*) nextStar++) != 0) {
+    if (s->amIFork()) continue;
+    s->initCode();
+  }
+  return TRUE;
 }
