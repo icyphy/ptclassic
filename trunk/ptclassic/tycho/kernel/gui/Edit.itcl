@@ -268,9 +268,6 @@ class ::tycho::Edit {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
-    # Configure the popup menu depending on the current context
-    protected method configureContextMenu {}
-
     # Return the region of text tagged with the given tag within which
     # the "current" mark sits.
     protected method getTaggedText {tag}
@@ -667,14 +664,6 @@ body ::tycho::Edit::constructor {args} {
 
     # Create the context-sensitive popup menu
     contextmenu create $itk_component(text) 
-
-    # Entries for cross-linking
-    contextmenu add {Open source} -type cascade -state disabled
-    contextmenu add {Open documentation} -type cascade -state disabled
-
-    # Entries for developer information FIXME
-    contextmenu add {Name of this widget...} -command \
-	    "::tycho::post $this"
 }
 
 
@@ -1878,74 +1867,6 @@ body ::tycho::Edit::writeSpellText {filename} {
 #####################################################################
 ####                     protected methods                       ####
 
-
-#####################################################################
-#### configureContextMenu
-# Configure the popup menu according to context. For the Edit widget,
-# this method enables the hyperlink entries and the evaluate
-# entry if there is a selection, and disables them otherwise.
-#
-# FIXME: The code scans the code index file to find the selected
-# word. This is so slow as to be almost useless, and need to be
-# fixed! In addition, hyperjumps into code do not work because
-# the needed information is not in the index files.
-#
-body ::tycho::Edit::configureContextMenu {} {
-    if { [$itk_component(text) tag ranges sel] == "" } {
-	# No selection, so disable entries
-	contextmenu disable {Open source}
-	contextmenu disable {Open documentation}
-    } else {
-	# There is a selection, so see if the index files contain
-	# something, and if they do, enable the entries.
-	# FIXME
-	set f [open [::tycho::expandPath \
-		[file join \$TYCHO lib idx codeDoc.idx]]]
-	set index [read $f]
-	close $f
-	# Remove comments.
-	regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $index {} index
-	set index [lindex $index 1]
-
-	set selection [$itk_component(text) get sel.first sel.last]
-
-	# Clear the submenu
-	contextmenu clear {Open documentation}
-
-	# Find links and add to submenu
-	set linksfound 0
-	foreach entry $index {
-	    set desc [lindex $entry 0]
-	    set link [lindex $entry 1]
-	    set point [lindex $entry 2]
-	    if { [string match [lindex $desc 0] $selection] } {
-		# Add the doc link
-		contextmenu add "HTML: [lrange $desc 1 end]" \
-			{Open documentation} \
-			-command "$this hyperJump $link \"$point\""
-
-		# Add a source link
-		set link [file split $link]
-		set path [lrange $link 0 [expr [llength $link] - 4]]
-		set file [join [concat \
-			[linit [split [lindex $link end] .]] "itcl"] .]
-		set link [eval file join $path $file]
-		# FIXME: Give this a point at which to open
-		contextmenu add "Source: [lrange $desc 1 end]" \
-			{Open source} \
-			-command "$this hyperJump $link"
-
-		set linksfound 1
-	    }
-	}
-
-	# Enable submenus
-	if { $linksfound } {
-	    contextmenu enable {Open documentation}
-	    contextmenu enable {Open source}
-	}
-    }
-}
 
 #####################################################################
 #### getTaggedText

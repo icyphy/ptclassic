@@ -173,6 +173,9 @@ class ::tycho::HTML {
     # Access the "viewhtml" preferences
     protected method preference {mode args}
 
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
+
     ###################################################################
     ####                      protected variables                  ####
 
@@ -755,6 +758,29 @@ body ::tycho::HTML::render {obj {html {}}} {
 #
 body ::tycho::HTML::preference {mode args} {
     eval ::preference $mode "viewhtml" $args
+}
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. For HTML viewers, this
+# looks for a corresponding itcl file and offers to open that if it
+# finds one.
+#
+body ::tycho::HTML::configureContextMenu {} {
+    ::tycho::TWidget::configureContextMenu
+
+    if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
+	set link [file split $itk_option(-file)]
+	set path [lrange $link 0 [expr [llength $link] - 4]]
+	set fname [join [concat \
+		[linit [split [lindex $link end] .]] "itcl"] .]
+	set link [eval file join $path $fname]
+
+	if { [file exists $link] } {
+	    contextmenu add "Open source" \
+		    -command "$this hyperJump $link"
+	}
+    }
 }
 
 #########################################################################
