@@ -133,3 +133,7 @@ XV_INSTALL=install
 # -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
 #    and MATLABLIBIDR is undefined
 MATLABDIR= $(ROOT)/src/compat/matlab
+
+# Directory for general compatiblity include files.  Mainly function
+# declarations to quiet gcc -Wall down
+PTCOMPAT_INCSPEC =	-I$(ROOT)/src/compat/ptolemy
