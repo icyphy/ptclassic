@@ -1,4 +1,4 @@
-static const char file_id[] = "EGConnect.cc";
+static const char file_id[] = "EGGate.cc";
 
 /******************************************************************
 Version identification:
@@ -15,7 +15,7 @@ $Id$
 #pragma implementation
 #endif
 
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "EGNode.h"
 #include "SDFStar.h"
 
@@ -107,7 +107,7 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 	EGGateLink *prev = 0;
 	EGGateLink *cur = p->getLink();
 	while (cur != 0) {
-		p = cur->myNode();
+		p = cur->gate();
 		if (p->farEndMaster() != master) {
 			ret = 1;
 			return prev;
@@ -115,7 +115,7 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 
 		if (p->farEndInvocation() == invocation) {
 			while (cur != 0) {
-				p = cur->myNode();
+				p = cur->gate();
 				if (p->farEndInvocation() != invocation) {
 					ret=1;
 					return prev;
@@ -195,7 +195,7 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 			// save the arc -- we'll use it to insert the other
 			// endpoint (this is our convention).
 			if (update) {
-				p->myNode()->addSamples(pgate->samples());
+				p->gate()->addSamples(pgate->samples());
 			} else { LOG_DEL; delete pgate; }
 			return;
 		}

@@ -9,8 +9,8 @@ $Id$
  
 *******************************************************************/
 
-#ifndef _EGConnect_h
-#define _EGConnect_h
+#ifndef _EGGate_h
+#define _EGGate_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -25,7 +25,7 @@ class DataFlowStar;
 
 ///////////////////////////////////////////////////////////////
 //
-// EGConnect.h
+// EGGate.h
 //
 // Dataflow is maintained by Gate's and Arc's. Each ExpandedGraph 
 // node has a list of ancestors and descendants -- these are lists 
@@ -44,13 +44,6 @@ class DataFlowStar;
 // reside in ancestor and descendant lists of  EGNode's.
 
 class EGArc {
-private :
-	// The number of samples passed along the arc.
-	int arc_samples;
-
-	// The delay on the arc.
-	int arc_delay;
-
 public :
 	// Constructor with the number of samples and delay
 	// to be placed on the arc.
@@ -64,6 +57,13 @@ public :
 
 	// Add x samples to the arc.
 	void addSamples(int x) { arc_samples+=x; }
+
+private :
+	// The number of samples passed along the arc.
+	int arc_samples;
+
+	// The delay on the arc.
+	int arc_delay;
 };
 
 ////////////////////////
@@ -75,28 +75,6 @@ public :
 //
 
 class EGGate {
-private:
-	// the EG node for which this is a gate.
-	EGNode *parent;
-
-	// the arc which connects this gate to a gate in another node
-	EGArc *arc;
-
-	// a pointer to the far end gate, accross the arc
-	EGGate *far;
-
-	// pointer to my link
-	EGGateLink* myLink;
-
-	// pointer to the original porthole aliased from.
-	PortHole* pPort;
-
-	// Since a PortHole in the original block may need multiple
-	// Gates in the corresponding EGNode, we maintain the index
-	// of each Gate, which represents the order of the Gates 
-	// associated with the same PortHole
-	int index;
-
 public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
 		parent(n), pPort(p), arc(0), far(0) {}
@@ -154,6 +132,28 @@ public:
 
 	// allocate & set up an arc between this gate and "dest"
 	void allocateArc(EGGate *dest,int no_samples,int no_delays);
+
+private:
+	// the EG node for which this is a gate.
+	EGNode *parent;
+
+	// the arc which connects this gate to a gate in another node
+	EGArc *arc;
+
+	// a pointer to the far end gate, accross the arc
+	EGGate *far;
+
+	// pointer to my link
+	EGGateLink* myLink;
+
+	// pointer to the original porthole aliased from.
+	PortHole* pPort;
+
+	// Since a PortHole in the original block may need multiple
+	// Gates in the corresponding EGNode, we maintain the index
+	// of each Gate, which represents the order of the Gates 
+	// associated with the same PortHole
+	int index;
 };   
 
 class EGGateList;
@@ -165,16 +165,16 @@ class EGGateList;
 class EGGateLink : public DoubleLink
 {
 friend class EGGateList;
-
-private:
-	EGGateList* myList;
 public:
-	EGGate* myNode() { return (EGGate*) e; }
+	EGGate* gate() { return (EGGate*) e; }
 	EGGateLink* nextLink() { return (EGGateLink*) next; }
 
 	EGGateLink(EGGate* e) : DoubleLink(e), myList(0) {}
 
 	void removeMeFromList();
+
+private:
+	EGGateList* myList;
 };
 
 //////////////////////////
@@ -193,14 +193,6 @@ public:
 
 class EGGateList : public DoubleLinkList
 {
-private:
-	// Search the list for the first entry pointing to "master"   
-	EGGate* findMaster(DataFlowStar *master);
-
-	// Search the list for the point where "node" should be inserted
-	// into the list.
-	EGGateLink* findInsertPosition(EGNode *n, int delay, int& ret);
-
 public:
 	DoubleLink* createLink(EGGate* e)
 		{ INC_LOG_NEW; EGGateLink* tmp = new EGGateLink(e);
@@ -227,6 +219,14 @@ public:
 
 	// print out the list
 	StringList printMe();
+
+private:
+	// Search the list for the first entry pointing to "master"   
+	EGGate* findMaster(DataFlowStar *master);
+
+	// Search the list for the point where "node" should be inserted
+	// into the list.
+	EGGateLink* findInsertPosition(EGNode *n, int delay, int& ret);
 };
 
 /////////////////////////////////////
@@ -237,9 +237,6 @@ public:
 //
 
 class EGGateLinkIter : public DoubleLinkIter {
-private:
-	DataFlowStar* refMaster;
-	
 public:
 	EGGateLinkIter(const EGGateList& l) : 
 		DoubleLinkIter(l), refMaster(0) {}
@@ -251,6 +248,9 @@ public:
 	// return the next gate connected to a new master that is not
 	// the same as the argument master.
 	EGGate* nextMaster(DataFlowStar*);
+
+private:
+	DataFlowStar* refMaster;
 };
 
 #endif
