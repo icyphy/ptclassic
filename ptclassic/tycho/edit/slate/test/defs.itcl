@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,7 +34,7 @@
 #### Define a proc that can be used to create a new canvas
 #
 proc _icanvas {} {
-    catch {delete object .s}
+    catch {itcl::delete object .s}
     ::tycho::icanvas .s
     pack .s
     wm deiconify .
@@ -45,7 +45,7 @@ proc _icanvas {} {
 #### Define a proc that can be used to create a new slate
 #
 proc _slate {} {
-    catch {delete object .s}
+    catch {itcl::delete object .s}
     ::tycho::slate .s
     pack .s
     wm deiconify .
@@ -67,7 +67,7 @@ proc _update {} {
 #### Define a proc that creates a clean slate
 #
 proc _clean {} {
-    if { [::info which -command .s] == "" } {
+    if { [::info commands .s] == "" } {
 	_slate
     }
     .s delete all
@@ -101,7 +101,7 @@ proc _hieritem {} {
 #
 proc _done {} {
     _update
-    catch {delete object .s}
+    catch {itcl::delete object .s}
     # wm iconify .
 }
 
