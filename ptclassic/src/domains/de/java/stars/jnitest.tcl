@@ -17,19 +17,20 @@ proc createjava_$starID {starID} {
     global env
 
     # Look for a CLASSPATH and add to it
+    # FIXME: this should be a tycho proc
     if [info exists env(CLASSPATH)] {
 	# FIXME: this won't work under windows.
 	set classpath $env(CLASSPATH):$env(TYCHO)/src/tyjni
     } else {
-	if [info exists env(JAVAHOME)] {
-	    set classpath $env(JAVAHOME)/lib/classes.zip:$env(TYCHO)/src/tyjni
-	} else
+	if [info exists env(JAVA_HOME)] {
+	    set classpath $env(JAVA_HOME)/lib/classes.zip:$env(TYCHO)/src/tyjni
+	} else {
 	    set classpath $env(TYCHO)/src/tyjni
 	}
     }
 
     # jnicreatejvm is defined in $PTOLEMY/tycho/src/tyjni/tyjni.c
-    jnicreatejvm $classpath
+    ::tycho::jnicreatejvm $classpath
     puts " I have a JavaVM now"
 }
 
@@ -49,7 +50,7 @@ proc loadlib_$starID {starID} {
 #
 proc new_$starID {starID} {
     set inputvals [grabInputsNumber_$starID]
-    setOutputFactorial_$starID [jnifac [lindex $inputvals 0]] 
+    setOutputFactorial_$starID [::tycho::jnifac [lindex $inputvals 0]] 
 }
     
 #######################################################################
@@ -63,6 +64,6 @@ proc new_$starID {starID} {
 #
 proc destroyjava_$starID {starID} {
     # jnidestroyjvm is defined in $PTOLEMY/tycho/src/tyjni/tyjni.c
-    jnidestroyjvm
+    ::tycho::jnidestroyjvm
     puts " I have destroyed the JavaVM"
 }
