@@ -498,7 +498,7 @@ body ::tycho::TopLevel::configure {args} {
 	if [::info exists _subscribedOptions($option)] {
 	    regexp {^([^\.]+)\.(.+)$} \
 		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    ::tycho::stylesheet unsubscribe $this $sheet $option
 	    unset _subscribedOptions($option)
 	}
     }
@@ -811,7 +811,7 @@ body ::tycho::TopLevel::itk_initialize {args} {
 	if [::info exists _subscribedOptions($option)] {
 	    regexp {^([^\.]+)\.(.+)$} \
 		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    ::tycho::stylesheet unsubscribe $this $sheet $option
 	    unset _subscribedOptions($option)
 	}
     }
