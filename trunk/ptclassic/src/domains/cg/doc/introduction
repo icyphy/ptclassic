@@ -40,7 +40,7 @@ multiprocessor architectures can be supported with automated task
 partitioning and synchronization. 
 .pp
 In the following sections, we will introduce the methods and data
-structures needed to write new code generation targets.  However,
+structures needed to write new code generation stars and targets.  However,
 we will not document what is needed to write a new code generation
 domain.  We will first introduce what is needed to write a new
 code generation star, introducing the concepts of \fIcode blocks\R,
