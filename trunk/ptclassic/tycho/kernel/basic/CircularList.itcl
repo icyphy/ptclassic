@@ -113,8 +113,10 @@ body ::tycho::CircularList::append {element {after {}}} {
 # Reinitialize the list.
 #
 body ::tycho::CircularList::clear {} {
-    unset forward
-    unset backward
+    # If clear is run on a newly constructed CircularList, then
+    # forward and backward might not be set
+    catch {unset forward}
+    catch {unset backward}
     set first {}
     set last {}
 }
