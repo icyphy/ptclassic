@@ -1147,7 +1147,10 @@ void cvtCodeBlock( src_in, dst_in, extendB)
 		    }
 		}
 		cvtCodeBlockExpr( src_expr, src-src_expr-1, &dst);
-	    } else if ( isalpha(c) ) {
+	    } else if ( isalpha(c) || (c == '_')) {
+		    /* underscores are ok in the names of identifiers
+		     * after a '@'.  Jeurgen Weiss 9/96
+		     */
 		    for ( src_expr=src-1; c=*src++, isalnum(c); )
 			;
 		    cvtCodeBlockExpr( src_expr, src-src_expr-1, &dst);
