@@ -74,7 +74,7 @@ void CGWormhole :: setup() {
 
 void CGWormhole :: go() {
 	// set the currentTime of the inner domain.
-	target->setCurrentTime(targetPtr->scheduler()->currentTime);
+	target->setCurrentTime(targetPtr->scheduler()->now());
 
 	// run
 	Wormhole::run();
