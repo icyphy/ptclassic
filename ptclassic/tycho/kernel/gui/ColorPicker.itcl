@@ -150,7 +150,7 @@ body ::tycho::ColorPicker::constructor {args} {
 
     itk_component add pickcolor {
         button $itk_component(topgrid).pickcolor \
-                -text Pick \
+                -text "List..." \
                 -command "$this _browser" \
                 -pady 3 -padx 8
     }
@@ -268,7 +268,20 @@ body ::tycho::ColorPicker::_newhsv {} {
 #
 body ::tycho::ColorPicker::_newrgb {} {
     set rgb [$itk_component(topgrid) get rgb]
-    if ![regexp {^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$} $rgb] {
+    if [string match {*(invalid)} $rgb] {
+        return
+    }
+    # Attempt to make sense of what's in the box
+    set rgb [string trimleft $rgb " "]
+    if ![string match #* $rgb] {
+        if { [regexp {^[0-9a-fA-F]+$} $rgb] || [string length $rgb] == 6 } {
+            set rgb #$rgb
+        }
+    }
+    if { ![regexp {^#[0-9a-fA-F]+$} $rgb] || [string length $rgb] != 7 } {
+        if { $rgb != "" } {
+            $itk_component(topgrid) assign rgb "$rgb (invalid)"
+        }
         return
     }
     $itk_component(topgrid) assign color {}
@@ -285,12 +298,22 @@ body ::tycho::ColorPicker::_newrgb {} {
 #
 body ::tycho::ColorPicker::_newcolor {} {
     set color [$itk_component(topgrid) get color]
+    if [string match {*(unknown)} $color] {
+        return
+    }
     if { $color != "" } {
         $itk_component(topgrid) assign hue {}
         $itk_component(topgrid) assign saturation {}
         $itk_component(topgrid) assign value {}
         set rgb [::tycho::color -lookup $color]
-        _setrgb $rgb
+        # Helpfully, the color manager returns black if
+        # it doesn't understand the color name. About
+        # all we can do is provide an indication...
+        if { $rgb == "#000000" } {
+            $itk_component(topgrid) assign color "$color (unknown)"
+        } else {
+            _setrgb $rgb
+        }
     }
 }
 
