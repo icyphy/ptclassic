@@ -119,6 +119,6 @@ $label(term)
 	}
 	exectime {
 		if ( thresholds.size() == 1 ) return 6;
-	        return 13 + 4*int(thresholds.size());
+	        return 11 + 4*int(thresholds.size());
 	}
 }
