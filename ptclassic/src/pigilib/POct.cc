@@ -1021,7 +1021,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
     }
 
     // Read domain from facet
-    char *domain;
+    char *domain;		// not dynamic memory: returned via HashString
     if (!GOCDomainProp(facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1029,9 +1029,9 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
 
     // "domain" is now set to be the default domain
     int nDomains = numberOfDomains();
-    if(nDomains == 0) {
+    if (nDomains == 0) {
         Tcl_AppendResult(interp, 
-			 "No domains supported by for this facet.",
+			 "No domains supported by this facet.",
                          (char *) NULL);
         return TCL_ERROR;
     }
@@ -1040,7 +1040,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
 
     if (nDomains == 1) {
 	// Only one element means that no ordering need be done.
-	Tcl_AppendElement ( interp, (char *)nthDomainName(0) );
+	Tcl_AppendElement(interp, (char *)nthDomainName(0));
 	return TCL_OK;
     }
 
@@ -1052,6 +1052,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
             Tcl_AppendElement(interp, domain);
 	}
     }
+
     // Now add the rest of the domain choices to the output list
     for (i = 0; i < nDomains; i++) {
         // Only add it if it has not already been used
@@ -1112,7 +1113,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
     }
 
     // Read the domain from the facet
-    char *domain;
+    char *domain;		// not dynamic memory: returned via HashString
     if (!GOCDomainProp(facet, &domain, DEFAULT_DOMAIN)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
 	return TCL_ERROR;
@@ -1203,7 +1204,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     char* target = aV[2];
 
     // Set the domain to be that of the passed facet
-    char *domain;
+    char *domain;		// not dynamic memory: returned via HashString
     if (!GOCDomainProp(facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1239,6 +1240,9 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
 	Tcl_AppendResult(interp, " } ", (char *) NULL);
     }
 
+    // Clean up memory
+    delete [] pList.array;		// allocated by GetTargetParams via new
+
     return TCL_OK;
 }
 
@@ -1269,7 +1273,7 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
     char* target = aV[2];
 
     // Set the domain to be that of the passed facet
-    char *domain;
+    char *domain;		// not dynamic memory: returned via HashString
     if (!GOCDomainProp(facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
