@@ -1027,12 +1027,12 @@ body ::tycho::Slate::itemcget {id option} {
 		[@scope ::tycho::$picttype($id) [list set primary($id)]]]
 
     } elseif { [@scope ::tycho::$picttype($id) \
-	    [list ::info exists [string trimleft $option -]($id)]] } {
+	    [list ::info exists optiondefault($option)]] } {
 	# Read the value directly from the class
 	return [@scope ::tycho::$picttype($id) \
 		[list set [string trimleft $option -]($id)]]
     } else {
-	error "Invalid option $option"
+	error "unknown option $option"
     }
 }
 
@@ -1080,9 +1080,20 @@ body ::tycho::Slate::itemconfigure {id args} {
 
     } elseif { [llength $args] == 1 } {
 	set option [lindex $args 0]
-	set value [$this itemcget $id $option]
-	return [list $option {} {} {} $value]  ;# default value is bogus
+	if { [@scope ::tycho::$picttype($id) \
+		[list ::info exists optiondefault($option)]] } {
+	    # Read its value
+	    set value [@scope ::tycho::$picttype($id) \
+		    [list set [string trimleft $option -]($id)]]
+	    # Read default value
+	    set default [@scope ::tycho::$picttype($id) \
+		    [list set optiondefault($option)]]
+	    
+	    return [list $option {} {} $default $value]
 
+	} else {
+	    error "unknown option \"$option\""
+	}
     } else {
 	foreach {option value} $args {
 	    if { ! [string compare $option -tags] } {
@@ -1106,7 +1117,12 @@ body ::tycho::Slate::itemconfigure {id args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-		$this call $id [string trimleft $option -] $value
+		if { [@scope ::tycho::$picttype($id) \
+			[list ::info exists optiondefault($option)]] } {
+		    $this call $id [string trimleft $option -] $value
+		} else {
+		    error "unknown option \"$option\""
+		}
 	    }
 	}
     }
