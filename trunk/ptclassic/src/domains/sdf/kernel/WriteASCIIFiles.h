@@ -35,8 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *************************************************************************/
 
-#ifndef _WriteFiles_h
-#define _WriteFiles_h 1
+#ifndef _WriteASCIIFiles_h
+#define _WriteASCIIFiles_h 1
 
 #ifdef __GNUG__
 #pragma interface

@@ -1,4 +1,4 @@
-static const char file_id[] = "WriteFiles.cc";
+static const char file_id[] = "WriteASCIIFiles.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -39,7 +39,7 @@ to an ASCII file.
 #include <stdlib.h>
 #include "type.h"
 #include "miscFuncs.h"
-#include "WriteFiles.h"
+#include "WriteASCIIFiles.h"
 
 /*
 Save an array of double precision floating-point numbers to an ASCII file
