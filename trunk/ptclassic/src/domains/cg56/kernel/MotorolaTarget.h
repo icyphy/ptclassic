@@ -107,8 +107,6 @@ public:
 		return assemblerOptions;
 	}
 
-	/* virtual */ const char* domain();
-
 protected:
 	// Target parameters (states)
 	StringState xMemMap;
