@@ -62,8 +62,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code {
-#define TWO (2)
-#define THREE (3)
 #define NUMPACK (4)
 #define UPPERBOUND (32767) 
 #define LOWERBOUND (-32768)
@@ -75,7 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  short *outarray;
 	  double *inarray;
 	  float *result_filt;
-	  short n0,d0;
+	  short n0;
 	  double scaledown,s1,s2;
 	  float *result;
 	}
@@ -88,7 +86,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  result_filt = 0;
 	  result = 0;
 	  scaledown = s1 = s2 = 0;
-	  n0 = d0 = 0;
+	  n0 = 0;
 	}
 	destructor {
 	  free(numerator);
@@ -113,12 +111,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(result_filt);
 	  free(result);
 	  result = (float *) memalign(sizeof(float),sizeof(float));
-          numerator = (short *) memalign(sizeof(float),sizeof(short)*TWO);
-          denominator = (short *) memalign(sizeof(float),sizeof(short)*TWO);
-	  state = (short *) memalign(sizeof(float),sizeof(short)*TWO);
+          numerator = (short *) memalign(sizeof(float),sizeof(short)*2);
+          denominator = (short *) memalign(sizeof(float),sizeof(short)*2);
+	  state = (short *) memalign(sizeof(float),sizeof(short)*2);
 	  inarray = (double *) memalign(sizeof(double),sizeof(double));
 	  outarray = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
-	  result_filt = (float *) memalign(sizeof(double),sizeof(float)*TWO);
+	  result_filt = (float *) memalign(sizeof(double),sizeof(float)*2);
 
 	  // find largest coefficient
 	  norm = fabs(dentaps[0]) > fabs(dentaps[1]) ? fabs(dentaps[0]) :fabs(dentaps[1]);
@@ -132,49 +130,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	  else
 	    scaledown = 1.0;
 
-	  // initialize d0 and n0
-	       d0 = (short) (scale*scaledown);
-	  n0 = scale*scaledown*numtaps[0];
-	  //if (intmp <= (double)(LOWERBOUND)){
-	  //  n0 = (short)(LOWERBOUND);
-	  //}
-	  //else if (intmp >= (double)(UPPERBOUND)){
-	  //  n0 = (short)(UPPERBOUND);
-	  //}
-	  //else{ 
-	  //  n0 = (short)(intmp);
-	  //}
+	  // initialize n0
+	       n0 = scale*scaledown*numtaps[0];
 
 	  // initialize denominator array
 	  indexcount = denominator;
 	  for(i=0;i<2;i++){
 	    *indexcount++ = scale*scaledown*dentaps[i];
-	    //if (intmp <= (double)(LOWERBOUND)){
-	    //  *indexcount++ = (short)(LOWERBOUND);
-	    //}
-	    //else if (intmp >= (double)(UPPERBOUND)){
-	    //  *indexcount++ = (short)(UPPERBOUND);
-	    //}
-	    //else{ 
-	    //  *indexcount++ = (short)(intmp);
-	    //}
 	  }
 
 	  // initialize num array
 	  indexcount = numerator;
 	  for(i=0;i<2;i++){
 	    *indexcount++ = scale*scaledown*numtaps[i+1];
-	    //if (intmp <= (double)(LOWERBOUND)){
-	    //  *indexcount++ = (short)(LOWERBOUND);
-	    //}
-	    //else if (intmp >= (double)(UPPERBOUND)){
-	    //  *indexcount++ = (short)(UPPERBOUND);
-	    //}
-	    //else{ 
-	    //  *indexcount++ = (short)(intmp);
-	    //}
-
 	  }
+
+	  // initialize states
 	  s1 = double(state1);
 	  s2 = double(state2);
 	}
@@ -226,27 +197,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    result_den = (short *) result;
 	    result_num = (result_den +1);
 	    next_state_dbl = (double)(1/scaledown)*(invalue[numloop] - *result_den);
-	    //if (next_state_dbl <= (double)(LOWERBOUND)){
-	    //  next_state_sh = (short)(LOWERBOUND);
-	    //}
-	    //else if (next_state_dbl >= (double)(UPPERBOUND)){
-	    //  next_state_sh = (short)(UPPERBOUND);
-	    //}
-	    //else{ 
-	      next_state_sh = (short) next_state_dbl;
-	    //}
+	    next_state_sh = (short) next_state_dbl;
+	    
+	    // find output
 	    out_dbl = (double)(n0*next_state_sh/scale + *result_num);
-	    //if (out_dbl <= (double)(LOWERBOUND)){
-	    //  outarray[numloop] = (short)(LOWERBOUND);
-	    //}
-	    //else if (out_dbl >= (double)(UPPERBOUND)){
-	    //  outarray[numloop] = (short)(UPPERBOUND);
-	    //}
-	    //else{ 
-	      outarray[numloop] = (short) out_dbl;
-	    //}
-	    // update states
-		 s2 = (double)s1;
+	    outarray[numloop] = (short) out_dbl;
+	    s2 = (double) s1;
 	    s1 = (double) next_state_sh;
 	  }
 	  outvalue = (double *) outarray;
