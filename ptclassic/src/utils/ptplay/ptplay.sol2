@@ -1,2 +1,3 @@
 #!/bin/csh -f
-cat $1 > /dev/audio
+#cat $1 > /dev/audio
+cat $1 | /usr/sww/bin/play
