@@ -1,4 +1,4 @@
-\documentstyle[12pt,latexinfo,Almagest]{book}
+\documentstyle[12pt,ptinfo,Almagest]{book}
 \begin{document}
 
 \comment version $Id$
@@ -7,26 +7,33 @@
 
 \begin{iftex}
 
-\input{title}
-\maketitle
+\date{$Date$}
 
-\clearpage
-\pagestyle{empty}
-\vspace*{\fill}
-
-\input{copyright}
-
-\clearpage
-\pagestyle{plain}
 \pagenumbering{roman}
+\markboth{Contents}{The Almagest}
 \tableofcontents
-
-\clearpage
-\pagestyle{headings}
-\pagenumbering{Chapter}
 
 \end{iftex}
 
+\node Top
+
+\comment No page number for parts.
+\cleardoublepage
+\renewcommand{\thepage}{}
+\node The Ptolemy Kernel
+\part{The Ptolemy Kernel}
+
+
+\pagenumbering{Chapter}
 \include{kernel}
+
+\comment No page number for parts.
+\cleardoublepage
+\renewcommand{\thepage}{}
+\node Code Generation
+\part{Code Generation}
+
+\pagenumbering{Chapter}
+\include{codeGen}
 
 \end{document}
