@@ -127,19 +127,19 @@ body ::tycho::ProfileTcl::profileDisplay {} {
             set len [llength $entry]
             if {$len > $maxdepth} {set maxdepth $len}
             if {$len == $depth} {
-                # Since we have to have TclX here anyway, use lassign & keylget
+                # Since we have to have TclX here anyway, use lassign
                 lassign $results($entry) count real cpu
                 set parent [join [lrange $entry 1 end] +]
                 if {$parent == {}} {
                     set color white
                 } {
                     set fst [component graphics graph]
-                    set parcontents [$fst contents $parent]
-                    set partime [keylget parcontents cpu]
+                    array set parcontents [$fst contents $parent]
+                    set partime $parcontents(cpu)
                     if {$partime > 0} {
                         set fraction [expr $cpu*10/$partime]
                         # FIXME: Handle colors better.
-                        set colors [list black darkblue blue cyan purple magenta red orange yellow white white]
+                        set colors [list black navyblue blue cyan purple magenta red orange yellow white white]
                         set color [lindex $colors $fraction]
                     } {
                         set color black
@@ -151,12 +151,12 @@ body ::tycho::ProfileTcl::profileDisplay {} {
                     set open 1
                 }
                 set contents [list \
-                        [list label [lindex $entry 0]] \
-                        [list color $color] \
-                        [list count $count] \
-                        [list real $real] \
-                        [list cpu $cpu] \
-                        [list open $open]]
+                        label [list [lindex $entry 0]] \
+                        color $color \
+                        count $count \
+                        real $real \
+                        cpu $cpu \
+                        open $open]
                 component graphics add [join $entry +] $contents $parent
             }
         }
@@ -189,12 +189,8 @@ body ::tycho::ProfileTcl::updateTimes {} {
     set node [component graphics current]
     if {$node == {}} {return}
     set fst [component graphics graph]
-    set contents [$fst contents $node]
-    # Use TclX commands, since TclX is required to be present anyway.
-    set count [keylget contents count]
-    set real [keylget contents real]
-    set cpu [keylget contents cpu]
-    addInfo count {Call count} $count
-    addInfo real {Real time} $real
-    addInfo cpu {CPU time} $cpu
+    array set contents [$fst contents $node]
+    addInfo count {Call count} $contents(count)
+    addInfo real {Real time} $contents(real)
+    addInfo cpu {CPU time} $contents(cpu)
 }
