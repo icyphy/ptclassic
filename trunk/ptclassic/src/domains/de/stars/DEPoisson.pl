@@ -31,7 +31,7 @@ given as parameters.
 		default {"1.0"}
 		desc { The magnitude of samples generated. }
 	}
-	hinclude { <NegativeExpntl.h> }
+	hinclude { <NegExp.h> }
 	ccinclude { <ACG.h> }
 	protected {
 		NegativeExpntl *random;
