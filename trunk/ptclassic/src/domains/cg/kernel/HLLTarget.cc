@@ -1,4 +1,4 @@
-static const char file_id[] = "BaseCTarget.cc";
+static const char file_id[] = "HLLTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -14,19 +14,19 @@ a universe.
 
 *******************************************************************/
 
-#include "BaseCTarget.h"
+#include "HLLTarget.h"
 #include "KnownTarget.h"
 #include "pt_fstream.h"
 #include <ctype.h>
 
 // constructor
-BaseCTarget::BaseCTarget(const char* nam, const char* startype,
+HLLTarget::HLLTarget(const char* nam, const char* startype,
 	const char* desc) : CGTarget(nam, startype, desc),
 	unique(0)
 {
 }
 
-void BaseCTarget::wrapup() {
+void HLLTarget::wrapup() {
     char* codeFileName = writeFileName("code.output");
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
@@ -34,7 +34,7 @@ void BaseCTarget::wrapup() {
 }
 
 // Routines for writing code: schedulers may call these
-void BaseCTarget::beginIteration(int repetitions, int depth) {
+void HLLTarget::beginIteration(int repetitions, int depth) {
 	myCode << indent(depth);
 	if (repetitions == -1)          // iterate infinitely
 		myCode << "while(1) {\n";
@@ -45,7 +45,7 @@ void BaseCTarget::beginIteration(int repetitions, int depth) {
 	}
 }
 
-void BaseCTarget::endIteration(int, int depth) {
+void HLLTarget::endIteration(int, int depth) {
 	myCode << indent(depth) << "}\n";
 }
 
@@ -54,13 +54,13 @@ void BaseCTarget::endIteration(int, int depth) {
 // changed to '_' so that the resulting name is a legitimate C or C++
 // identifier.  For all names that begin with a numeric character,
 // the character 'x' is prepended.
-StringList BaseCTarget :: sanitizedName (const NamedObj& obj) const {
+StringList HLLTarget :: sanitizedName (const NamedObj& obj) const {
         const char *s = obj.name();
 	return sanitize(s);
 }
 
 
-StringList BaseCTarget :: sanitize(const char* s) const {
+StringList HLLTarget :: sanitize(const char* s) const {
         LOG_NEW; char *snm = new char [strlen(s) + 2];
         char *n = snm;
 	if(isdigit(*s)) *(n++) = 'x';
@@ -74,7 +74,7 @@ StringList BaseCTarget :: sanitize(const char* s) const {
         return out;
 }
 
-StringList BaseCTarget :: sanitizedFullName (const NamedObj& obj) const {
+StringList HLLTarget :: sanitizedFullName (const NamedObj& obj) const {
         StringList out;
         if(obj.parent() != NULL) {
 		Block* b = obj.parent();

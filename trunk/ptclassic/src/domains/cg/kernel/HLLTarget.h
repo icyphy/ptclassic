@@ -1,5 +1,5 @@
-#ifndef _BaseCTarget_h
-#define _BaseCTarget_h 1
+#ifndef _HLLTarget_h
+#define _HLLTarget_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -24,10 +24,10 @@ targets, combining the features they have in common.
 #include "StringState.h"
 #include "IntState.h"
 
-class BaseCTarget : public CGTarget {
+class HLLTarget : public CGTarget {
 public:
 	// constructor
-	BaseCTarget(const char* nam, const char* startype, const char* desc);
+	HLLTarget(const char* nam, const char* startype, const char* desc);
 	void wrapup ();
 	Block* makeNew() const = 0;
 
