@@ -7,12 +7,14 @@
 ROOT = ../..
 VPATH = $(ROOT)/src/preproc
 BINDIR = $(ROOT)/bin.$(ARCH)
-YFLAGS = -v
+YFLAGS =
 CFLAGS = -O
 
 all:	ptlang
 
 ptlang:	ptlang.o
+
+ptlang.o:	ptlang.y
 
 install:	$(BINDIR)/ptlang
 
