@@ -15,9 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	explanation {
 	}
-	inmulti {
+	input {
 	  name{ input }
-	  type{ ANYTYPE }
+	  type{ float }
 	}
 	defstate {
 	  name { title }
