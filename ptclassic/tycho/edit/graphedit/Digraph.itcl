@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: Edward A. Lee, John Reekie
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,12 +31,71 @@
 #### Digraph
 #
 # The _Digraph_ model is a standard directed graph.  It extends the
-# _AbstractGraph_ superclass with concrete methods to add and delete
-# vertices and edges, and provides methods for a number of common 
-# algorithms on directed graphs.
+# _AbstractGraph_ superclass with concrete methods for a number
+# of common algorithms on directed graphs.
 #
-# Because the graph is directed, adjacent vertices are known as
-# "parent" or "child" vertices.
+# Here are some examples of its use; see <a 
+# href="AbstractGraph">AbstractGraph</a> for examples of
+# the basics of graph construction. First, create a graph
+# that looks like this:
+# <pre>
+#   d----+
+#        v
+#   a--->b&lt;==>c
+#   |         ^
+#   +---------+
+# </pre>
+# <tcl><pre>
+#     catch {delete object $graph}
+#     set graph [::tycho::Digraph [::tycho::autoName graph]]
+#     $graph read string {
+#         vertex a
+#         vertex b
+#         vertex c
+#         vertex d
+#         edge a b
+#         edge b c
+#         edge a c
+#         edge c b
+#         edge d b
+#     }
+#     $graph describe
+# </tcl></pre>
+#
+# Get the children of a vertex:
+# <pre><tcl>
+#     $graph children a
+# </tcl></pre>
+#
+# Get the parents of a vertex:
+# <pre><tcl>
+#     $graph parents b
+# </tcl></pre>
+#
+# Test if the graph is acyclic:
+# <pre><tcl>
+#     $graph acyclic
+# </tcl></pre>
+#
+# Get the roots of the graph:
+# <pre><tcl>
+#     $graph roots
+# </tcl></pre>
+#
+# Get the topological sort of the graph:
+# <pre><tcl>
+#     $graph topologicalSort
+# </tcl></pre>
+#
+# Get a depth-sort of the graph:
+# <pre><tcl>
+#     $graph depthSort
+# </tcl></pre>
+#
+# Get the graph in a grid layout (Not working!):
+# <pre><tcl>
+#     $graph gridLayout
+# </tcl></pre>
 #
 class ::tycho::Digraph {
     inherit ::tycho::AbstractGraph
@@ -53,17 +112,23 @@ class ::tycho::Digraph {
     # Get the children of a vertex
     method children {vertex}
 
-    # Add an edge and options to the graph
-    method connect {source target args}
+    # Add an edge and attributes to the graph
+    method edge {vertex1 vertex2 args}
 
-    # Perform a depth-first search of the graph
-    method depthFirst {{roots {}}}
+    # Return all attributes of an edge
+    method edgeattrs {vertex1 vertex2}
 
-    # Perform a depth-sort of the graph
-    method depthSort {{roots {}}}
+    # Get an attribute or attributes of an edge
+    method edgecget {vertex1 vertex2 attribute}
+
+    # Configure the edge with one or more attributes
+    method edgeconfigure {vertex1 vertex2 args}
 
     # Remove an edge from the graph
-    method disconnect {source target}
+    method edgedelete {vertex1 vertex2}
+
+    # Return edges matching a pair of connection patterns
+    method edges {{pattern1 *} {pattern2 *}}
 
     # Get the "leaves" of the graph
     method leaves {}
@@ -74,29 +139,41 @@ class ::tycho::Digraph {
     # Get the roots of the graph
     method roots {}
 
-    # Return the topological sort of a graph
-    method topologicalSort {{leaves {}}}
+    #################################################################
+    ####                   protected methods                     ####
 
-    # Traverse the graph: simple version
-    method traverse1 {}
-
-    # Traverse the graph: less simple version
-    method traverse2 {}
-
-    # Traverse the graph: recursive simulation
-    method traverse3 {}
+    # Edges cannot be nested
+    protected method edgein {context args} {
+    	_nesterror edge $context [list $vertex1 $vertex2]
+    }
+    
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Digraph::constructor {args} {
+    # Define the "edge" link: no name, two links
+    defineLink edge \
+	    -named 0 \
+	    -lcount 2 \
+	    -description ""
+
     # Evaluate options
     eval configure $args
 }
 
 ########################################################################
 #### acyclic
+#
+# Test if the graph is acyclic. This is a based on Tarjan's
+# algorithm for strongly-connected components (simplified a lot!).
+# See Sedgewick.
 #
 body ::tycho::Digraph::acyclic {} {
     # Don't traverse if we don't have to
@@ -106,7 +183,7 @@ body ::tycho::Digraph::acyclic {} {
 
     # The mark for each vertex is initialized to 0
     foreach v [array names _vertices] {
-	set _cache($v.visited) 0
+	set _cache($v,visited) 0
     }
 
     # Initialize the traversal stack with the roots of the graph
@@ -123,21 +200,21 @@ body ::tycho::Digraph::acyclic {} {
 	# Read the vertex on the top of the stack
 	set current [lindex $stack end]
 
-	switch -exact $_cache($current.visited) {
+	switch -exact $_cache($current,visited) {
 	    "0" {
 		# The vertex has not been seen, so mark it but leave
 		# it on the stack
 		incr count
-		set _cache($current.visited) $count
+		set _cache($current,visited) $count
 		
 		# Check the children
 		foreach child [children $current] {
-		    if { ! $_cache($child.visited) } {
+		    if { ! $_cache($child,visited) } {
 			# If not seen, put it on the stack
 			lappend stack $child
 		    } else {
 			# If its index is lower, we have a cycle
-			if { $_cache($child.visited) <= $count } {
+			if { $_cache($child,visited) <= $count } {
 			    set _cache(acyclic) 0
 			    return 0
 			}
@@ -153,7 +230,7 @@ body ::tycho::Digraph::acyclic {} {
 		# This vertex is still on the stack. Remove
 		# it from the stack and mark it as "done."
 		set stack [lreplace $stack end end]
-		set _cache($current.visited) $N
+		set _cache($current,visited) $N
 	    }
 	}
     }
@@ -170,238 +247,26 @@ body ::tycho::Digraph::acyclic {} {
 # if the vertex does not exist.
 #
 body ::tycho::Digraph::children {vertex} {
-	return $_adjacency($vertex.children) 
+    return $_adjacency($vertex,children) 
 }
 
 ########################################################################
-#### connect
+#### edge
 #
 # Add a new edge to the graph, and return the inverse command.
-# The edge is specified by two vertices; additional arguments are a
-# flat option-value list for the edge. Flag an error if the edge
-# already exists, but not if the two vertices do not exist. 
+# By default, this method just adds a link between the
+# two named edges.  Flag an error if the edge
+# already exists, but not if any of the connected vertices do not exist. 
 #
-body ::tycho::Digraph::connect {source target args} {
-    #
-    # The edge matrices are stored as
-    #
-    #     _edges:       source^target |-> {source target}
-    #     _edgeoptions: source^target |-> {option value ...}
-    # 
-
-    if { [::info exists _edges($source^$target)] } {
-	error "Edge ($source, $target) already exists in $dataname"
-    }
-    set modified 1
-
+body ::tycho::Digraph::edge {vertex1 vertex2 args} {
+    _verifynot edge [list $vertex1 $vertex2]
+    
     # Record the edge
-    adjacencyadd $source $target
-    set _edges($source^$target) [list $source $target]
+    set inverse [_link edge {} [list $vertex1 $vertex2] $args]
 
-    # Record its options
-    array set temp [concat $edgeoptions $args]
-    set _edgeoptions($source^$target) [array get temp]
+    # Add links to the adjacency matrix
+    _adjacencyadd $vertex1 $vertex2
     
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Return the inverse command
-    return [list disconnect $source $target]
-}
-
-########################################################################
-#### depthFirst
-#
-# Perform a depth-first search of the graph and return the vertices
-# in the order visited. This is a non-recursive implementation, and is
-# adapted from Sedgewick, Chapter 29. The "stack" in this algorithm
-# is a Tcl list, with the "top" of the stack being the _end_ of the list.
-#
-# If there is no argument, then the graph is assumed to a) be directed
-# and b) have at least one root vertex (with no parents). The graph
-# is searched from the root nodes. If an argument is supplied, then
-# it must be a list of nodes from which to start searching. If nothing
-# is known about the structure of the graph, then all vertices should be
-# supplied, since that will guarantee that all vertices are reached.
-#
-# This method can be used to perform naive reachability, by giving
-# a single vertex as argument and examining the result list.
-#
-body ::tycho::Digraph::depthFirst {{roots {}}} {
-    # If we already have it, just return it
-    set cacheindex depthfirst.[join $roots -]
-    if { [::info exists _cache($cacheindex)] } {
-	return $_cache($cacheindex)
-    }
-
-    # The traversal "stack" and result list
-    set stack {}
-    set result {}
-
-    # Initialize visited flags to 0
-    foreach v [array names _vertices] {
-	set _cache($v.visited) 0
-    }
-
-    # Push start vertices onto the stack
-    if { $roots == "" } {
-	set roots [roots]
-    }
-    set stack $roots
-
-    # Keep looking until we run out of vertices
-    while { $stack != "" } {
-	# Get first on stack
-	set current [lindex $stack end]
-	set stack [lreplace $stack end end]
-
-	# Remember it
-	lappend result $current
-
-	# Put each non-visited child onto the stack and mark it
-	foreach child [children $current] {
-	    if { ! $_cache($child.visited) } {
-		lappend stack $child
-		set _cache($child.visited) 1
-	    }
-	}
-    }
-
-    # Remember the search in case it's needed later
-    set _cache($cacheindex) $result
-    return $result
-}
-
-########################################################################
-#### depthSort
-#
-# Perform a sort of the graph and return the vertices in a list of 
-# lists, where each sublist contains vertices of the corresponding 
-# depth. If the graph contains a cycle, then the sort will be as
-# though an arbitrary edge in each cycle were deleted.
-#
-# The sort works by initializing each vertex with the number of
-# parents it has. When the node is seen by a parent, the count is
-# is decremented. When the count reaches zero, the vertex has been
-# seen by all its parents, and should therefore go into the layer
-# following the one in which its last parent is. After processing
-# all the children of the current layer, the algorithm moves onto
-# the nodes in the next layer.
-#
-# If the graph has cycles, the algorithm will still function, returning
-# a sort of a similar acyclic graph (the same graph with cycles
-# broken). If the second argument is supplied, it is a list of starting
-# vertices -- this may be needed for cyclic graphs.
-# 
-body ::tycho::Digraph::depthSort {{roots {}}} {
-    # If we already have it, just return it
-    set cacheindex depthsort.[join $roots -]
-    if { [::info exists _cache($cacheindex)] } {
-	return $_cache($cacheindex)
-    }
-
-    # The current vertices and  result list
-    if { $roots == {} } {
-	set roots [roots]
-    }
-    set current $roots
-    set result [list $current]
-
-    # Initialize visited flags to the number of parents
-    foreach v [array names _vertices] {
-	set _cache($v.visited) [llength [parents $v]]
-    }
-    
-    # A counter that tells us whether we are done
-    set count [expr [llength [vertices *]] - [llength $current]]
-
-    # Keep looking until we run out of vertices
-    while { 1 } {
-	# The next layer of vertices
-	set next {}
-	
-	# Foreach in the current "layer," decrement the count of each
-	# child that has not already been done. If it has been seen by all
-	# its parents, add it to the next layer.
-	foreach v $current {
-	    foreach w [children $v] {
-		if { $_cache($w.visited) } {
-		    incr _cache($w.visited) -1
-		    if { ! $_cache($w.visited) } {
-			lappend next $w
-			incr count -1
-		    }
-		}
-	    }
-	}
-
-	# If all vertices are processed, we're done
-	if { ! $count } {
-	    lappend result $next
-	    break
-	} elseif { $next == "" } {
-	    # If there are no next vertices, there's a cycle. To break
-	    # it, choose a child of a vertex of the current layer
-	    # which is still "live," and decrement its count (i.e. break
-	    # a link. We know we're done when "count" reaches zero.
-	    if { ! $count } {
-		# We're done
-		break
-	    } else {
-		# There's a cycle, so choose a child of a vertex
-		# of the current layer, decrement its count (i.e. delete
-		# an edge), and try again
-		# FIXME: Does this really work???
-		set x ""
-		foreach v $current {
-		    foreach w [children $v] {
-			if { $_cache($w.visited) > 0 } {
-			    set x $w
-			    incr _cache($x.visited) -1
-			    break
-			}
-		    }
-		    if { $x != "" } {
-			break
-		    }
-		}
-		continue
-	    } else {
-		# Done
-		break
-	    }
-	}
-
-	# Move on to the next layer
-	lappend result $next
-	set current $next
-    }
-    set _cache($cacheindex) $result
-    return $result
-}
-
-########################################################################
-#### disconnect
-#
-# Remove an edge from the graph, and return the inverse command. Flag an
-# error if the edge does not exist.
-#
-body ::tycho::Digraph::disconnect {source target} {
-    if { ! [::info exists _edges($source^$target)] } {
-	error "Edge ($source, $target) unknown in $dataname"
-    }
-    set modified 1
-
-    # Remember the inverse
-    set inverse [list connect $source $target $_edgeoptions($source^$target)]
-
-    # Delete the edge
-    adjacencydelete $source $target
-    unset _edges($source^$target)
-
-    # Delete the options(s)
-    unset _edgeoptions($source^$target)
-
     # Clear any cached structural information
     catch {unset _cache}
 
@@ -410,18 +275,85 @@ body ::tycho::Digraph::disconnect {source target} {
 }
 
 ########################################################################
+#### edgeattrs
+#
+# Return a list containing the attributes of the edge as a flat
+# attribute-value list. An error will result if the edge does
+# not exist.
+#
+body ::tycho::Digraph::edgeattrs {vertex1 vertex2} {
+    _verify edge [list $vertex1 $vertex2]
+    _attributes edge [list $vertex1 $vertex2]
+}
+
+########################################################################
+#### edgecget
+#
+# Get an attribute of an edge. An error will occur if the edge does not
+# exist or the attribute does not exist.
+#
+body ::tycho::Digraph::edgecget {vertex1 vertex2 attribute} {
+    _verify edge [list $vertex1 $vertex2]
+    _cget edge [list $vertex1 $vertex2] $attribute
+}
+
+########################################################################
+#### edgeconfigure
+#
+# Configure the edge and return the inverse command. An error will
+# occur if the edge does not exist. The argument list
+# is a flat list of attribute-value pairs.
+#
+body ::tycho::Digraph::edgeconfigure {vertex1 vertex2 args} {
+    _verify edge [list $vertex1 $vertex2]
+    _configure edge [list $vertex1 $vertex2] $args
+}
+
+########################################################################
+#### edgedelete
+#
+# Remove an edge from the graph, and return the inverse command. This
+# default method works for simple directed graphs.
+#
+body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
+    _verify edge [list $vertex1 $vertex2]
+
+    # Delete it from the adjacency list
+    _adjacencydelete $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Delete the data and return the inverse command
+    _delete edge [list $vertex1 $vertex2]
+}
+
+########################################################################
+#### edges
+#
+# Return a list containing the edges of the graph with source and target
+# vertex names that match the given patterns. The result is a flat list
+# of source-target pairs. If no arguments are supplied, return all edges.
+# To test for the presence of a single edge, provide its source and 
+# target vertices as the arguments and compare the result with the empty
+# list.
+#
+body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
+    set result {}
+    foreach quad \
+	    [array names _info [list edge * * [list $pattern1 $pattern2]]] {
+	eval lappend result [lindex $quad 3]
+    }
+    return $result
+}
+
+########################################################################
 #### leaves
 #
 # Return the "leaves" of the graph.
 #
 body ::tycho::Digraph::leaves {} {
-    set result {}
-    foreach v [array names _vertices] {
-    	if { $_adjacency($v.children) == "" } {
-	    lappend result $v
-	}
-    }
-    return $result
+    _graphleaves
 }
 
 ########################################################################
@@ -431,7 +363,7 @@ body ::tycho::Digraph::leaves {} {
 # if the vertex does not exist.
 #
 body ::tycho::Digraph::parents {vertex} {
-	return $_adjacency($vertex.parents) 
+    return $_adjacency($vertex,parents) 
 }
 
 ########################################################################
@@ -440,261 +372,5 @@ body ::tycho::Digraph::parents {vertex} {
 # Return the roots of the graph.
 #
 body ::tycho::Digraph::roots {} {
-    set result {}
-    foreach v [array names _vertices] {
-    	if { $_adjacency($v.parents) == "" } {
-	    lappend result $v
-	}
-    }
-    return $result
-}
-
-########################################################################
-#### topologicalSort
-#
-# Perform a topological sort of the graph and return the vertices
-# in the order visited. This method works backwards through the graph starting
-# with the "leaf" nodes. Because this is a non-recursive implementation,
-# we use an explicit "stack" to simulate the recursive call stack. Each
-# vertex on the stack is marked as follows:
-# <ol>
-# <li>0: Not visited yet.
-# <li>1: Visited and placed into the topological sort
-# <li>2: Visited but not yet placed into the topological sort.
-# </ol>
-#
-# A vertex marked 2 is thus on the stack waiting for the "return
-# from the recursive call" to place it into the result.
-#
-# This algorithm is a non-recursive adaptation of the reverse
-# topological sort given in Chapter 32 of Sedgewick. It will work even
-# if the graph is cyclic, although the returned list will then be
-# some "approximation" of a sort -- nonetheless, it might be useful for
-# laying out cyclic graphs.
-# If a second argument is supplied, this algorithm will return the sort
-# of vertices from which vertices in that list can be reached.
-#
-# FIXME: If the graph is cyclic, the sort should break at
-# a "backwards" edge.
-#
-body ::tycho::Digraph::topologicalSort {{leaves {}}} {
-    # If we already have it, just return it
-    if { [::info exists _cache(topologicalsort)] } {
-	return $_cache(topologicalsort)
-    }
-
-    # The traversal "stack" and result list
-    set stack {}
-    set _cache(topologicalsort) {}
-
-    # Initialize visited flags to 0
-    foreach v [array names _vertices] {
-	set _cache($v.visited) 0
-    }
-
-    # Push all leaves onto the stack. If there are none, use all
-    # vertices.
-    if { $leaves == {} } {
-	set leaves [leaves]
-	if { $leaves == {} } {
-	    set leaves [vertices]
-	}
-    }
-    set stack $leaves
-    
-    # Keep looking until we run out of vertices
-    while { $stack != "" } {
-	# Get first on stack
-	set current [lindex $stack end]
-	
-	if { $_cache($current.visited) == 2 } {
-	    # We've already done this one and are "returning"
-	    set stack [lreplace $stack end end]
-	    set _cache($current.visited) 1
-	    lappend _cache(topologicalsort) $current
-
-	} elseif { $_cache($current.visited) == 0 } {
-	    # Leave the current node on the stack before its parents
-	    set _cache($current.visited) 2
-
-	    # Put each non-visited parent onto the stack and mark it
-	    foreach parent [parents $current] {
-		if { ! $_cache($parent.visited) } {
-		    lappend stack $parent
-		}
-	    }
-	} else {
-	    # Just ignore this one, since we got to it through a different path
-	    set stack [lreplace $stack end end]
-	}
-    }
-    return $_cache(topologicalsort)
-}
-
-########################################################################
-#### traverse1
-#
-# Perform a depth-first search of the graph, and return nodes in the
-# order visited. This is a non-recursive implementation adapted
-# from Sedgewick, Chapter 29. The "stack" in this algorithm is a Tcl
-# list, with the "top" of the stack being the _end_ of the list.
-#
-# This method illustrates the "simple" version of a non-recursive
-# depth-first traversal. It is mainly intended to be an explanatory
-# model for other graph algorithms. No caching is done in order to make
-# timing measurements simpler. The method will not work on graphs
-# with no roots.
-#
-body ::tycho::Digraph::traverse1 {} {
-    # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v.visited) 0
-    }
-
-    # Initialize the traversal stack with the roots of the graph
-    set stack [roots]
-    
-    # Initialize the result to empty
-    set result {}
-
-    # Keep processing vertices until there are none left
-    while { $stack != "" } {
-	# Get a vertex off the top of the stack
-	set current [lindex $stack end]
-	set stack [lreplace $stack end end]
-
-	# If we've already seen it, ignore it
-	if { $_cache($current.visited) } {
-	    continue
-	}
-
-	# Mark the vertex
-	set _cache($current.visited) 1
-
-	# Process the vertex here
-	lappend result $current
-
-	# Add the child vertices to the stack for processing
-	eval lappend stack [children $current]
-    }
-    # Return the accumulated result
-    return $result
-}
-
-########################################################################
-#### traverse2
-#
-# This traversal is the same as traverse1{}, but marks vertices _before_
-# they are placed on the stack. This saves having vertices pushed
-# onto and taken back off the stack.  No caching is done in order to make
-# timing measurements simpler. Preliminary timing indicates
-# no performance improvement.
-#
-body ::tycho::Digraph::traverse2 {} {
-    # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v.visited) 0
-    }
-
-    # Initialize the traversal stack with the roots of the graph
-    set stack [roots]
-    foreach v $stack {
-	set _cache($v.visited) 1
-    }
-
-    # Initialize the result to empty
-    set result {}
-
-    # Keep processing vertices until there are none left
-    while { $stack != "" } {
-	# Get a vertex off the top of the stack
-	set current [lindex $stack end]
-	set stack [lreplace $stack end end]
-
-	# Process the vertex here
-	lappend result $current
-
-	# Mark each non-visited child and place it onto the stack
-	foreach child [children $current] {
-	    if { ! $_cache($child.visited) } {
-		lappend stack $child
-		set _cache($child.visited) 1
-	    }
-	}
-    }
-    # Return the accumulated result
-    return $result
-}
-
-########################################################################
-#### traverse3
-#
-# Perform a depth-first search of the graph. This version of the
-# depth-first traversal allows processing to be performed on
-# "entering" _and_ "leaving" a vertex. The returned value is
-# a list containing the vertex name on "entry" and a "!" before the
-# vertex name on exit.
-#
-# Again, this method is intended only as a model for implementation
-# of other algorithms. It will not work on graphs with no roots.
-# No caching is done in order to make timing measurements simpler.
-# This method is substantially slower than the simpler methods, and
-# should be used only when some processing is needed on "exit" from
-# processing a vertex.
-#
-body ::tycho::Digraph::traverse3 {} {
-    # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v.visited) 0
-    }
-
-    # Initialize the traversal stack with the roots of the graph
-    set stack [roots]
-    
-    # Initialize the result to empty
-    set result {}
-
-    # Keep processing vertices until there are none left
-    while { $stack != "" } {
-	# Read the vertex on the top of the stack
-	set current [lindex $stack end]
-
-	# Switch on the visited flag. For time-critical methods,
-	# use if-statements instead, as they will be a little faster.
- 	switch -exact /$_cache($current.visited) {
- 	    "/0" {
- 		# The vertex has not been seen, so mark it but leave
- 		# it on the stack
- 		set _cache($current.visited) 1
-		
- 		# This is where we do "entry" processing
- 		lappend result $current
-	
- 		# Put each unmarked child onto the stack
- 		foreach child [children $current] {
- 		    if { ! $_cache($child.visited) } {
- 			lappend stack $child
- 		    }
- 		}
- 	    }
- 	    "/1" {
- 		# This vertex is still on the stack, and hasn't been
- 		# processed by some other path through the graph. Remove
- 		# it from the stack and mark it as "done."
- 		set stack [lreplace $stack end end]
- 		set _cache($current.visited) -1
-		
- 		# Here is where we do "exit" processing
- 		lappend result !$current
- 	    }
- 	    "/-1" {
- 		# This vertex has already been processed, by some other
- 		# path through the graph. Remove it from the stack,
- 		# but don't do anything else with it.
- 		set stack [lreplace $stack end end]
- 	    }
- 	}
-    }
-    # Return the result
-    return $result
+    _graphroots
 }
