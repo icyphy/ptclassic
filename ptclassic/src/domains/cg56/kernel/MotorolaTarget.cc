@@ -185,14 +185,14 @@ int staticCode(CGStar& star)
 void MotorolaTarget::writeFiring(Star& s, int level)
 {
     CGStar& star = (CGStar&)s;
-    int threshold = (int)subFire;
+    int threshold = int(subFire);
 
     if (threshold >= 0 && star.reps() > threshold && staticCode(star))
     {
-	if (star.index() < 0) setStarIndices(*galaxy());
+	if (star.index() < 0 && galaxy()) setStarIndices(*galaxy());
 
-	StringList label;
-	label << star.className() << separator << star.index();
+	StringList label = star.className();
+	label << separator << star.index();
 
 	// Generate procedure definition.
 	if (procedures.put("",label))
