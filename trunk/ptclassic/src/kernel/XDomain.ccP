@@ -44,7 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "<T>Scheduler.h"
 #include "<T>Wormhole.h"
-#include "<T>Geodesic.h"
 
 extern const char <T>domainName[] = "<T>";
 
@@ -60,9 +59,6 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new <T>toUniversal;}
-
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new <T>Geodesic;}
 
 	// constructor
 	<T>Domain() : Domain("<T>") {}
