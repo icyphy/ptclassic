@@ -138,6 +138,8 @@ int LinProcMemory::performAllocation() {
 		unsigned addr;
 		if (!circBufAlloc(r->size(),addr)) {
 			StringList m = r->print();
+			m << "\nInsufficient memory, needed " << int(r->size())
+			  << " words";
 			Error::abortRun("Memory allocation failure (circ): ", m);
 			return FALSE;
 		}
@@ -148,6 +150,8 @@ int LinProcMemory::performAllocation() {
 		unsigned addr;
 		if (!firstFitAlloc(r->size(),addr)) {
 			StringList m = r->print();
+			m << "\nInsufficient memory, needed " << int(r->size())
+			  << " words";
 			Error::abortRun("Memory allocation failure: ", m);
 			return FALSE;
 		}
