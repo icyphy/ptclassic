@@ -55,7 +55,7 @@ class Target;
 class Scheduler {
 public:
 	// Constructor
-	Scheduler() : myTarget(0), myGalaxy(0), stopBeforeDeadFlag(0) {}
+	Scheduler() :  stopBeforeDeadFlag(0), myTarget(0), myGalaxy(0) {}
 
 	// connect a galaxy to the scheduler
 	virtual void setGalaxy(Galaxy& g);
