@@ -3,8 +3,8 @@ defstar {
 	domain {CGC}
 	desc {
 Plot Y input(s) vs. X input(s) with dynamic updating.
-Two styles are currently supported: style = 0 causes
-points to be plotted, whereas style = 1 causes connected
+Two styles are currently supported: "dot" causes
+points to be plotted, whereas "connect" causes connected
 lines to be plotted. Drawing a box in the plot will
 reset the plot area to that outlined by the box.
 There are also buttons for zooming in and out, and for
@@ -64,9 +64,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 	        name {style}
-		type {int}
-		default {"0"}
-		desc {Plot style (0 for points, 1 for lines)}
+		type {string}
+		default {"dot"}
+		desc {Plot style is dot or connect}
 	}
 	defstate {
 	        name {updateSize}
@@ -110,7 +110,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // instances of the star.  Should this be fixed?
 	  addCode(srcTclFile,"tkSetup");
 
-	  addCode(createPlot(xMin,xMax,yMin,yMax,Y.numberPorts()),"tkSetup");
+	  int plotstyle = 0;
+	  if (strcmp(style,"connect")) plotstyle = 1;
+	  addCode(createPlot(xMin,xMax,yMin,yMax,Y.numberPorts(),plotstyle),
+		  "tkSetup");
 	}
 	go {
 	  for (int i = 0; i < X.numberPorts(); i++) {
@@ -127,7 +130,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 	}
 	codeblock (createPlot,
-		   "double xMin, double xMax, double yMin, double yMax, int numsets") {
+		   "double xMin, double xMax, double yMin, double yMax, int numsets, int plotstyle") {
 	  ptkInitPlot(&$starSymbol(plotwin));
 	  $starSymbol(xMin) = @xMin;
 	  $starSymbol(xMax) = @xMax;
@@ -142,7 +145,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			   @xMin,@xMax, @yMin,@yMax,
 			   @numsets,
 			   $val(updateSize),
-			   $val(style),
+			   @plotstyle,
 			   $val(persistence)) == 0) {
 	    errorReport(ptkPlotErrorMsg());
 	  }
