@@ -358,9 +358,9 @@ extern int unlink(const char *);
 extern const int sys_nerr;
 extern const char *const sys_errlist[];
 #else
+extern int sys_nerr;
 extern char *sys_errlist[];
 #endif /* PTNBSD_386 */
-extern int sys_nerr;
 extern int errno;
 #endif /* NEED_SYS_ERRLIST */
 
