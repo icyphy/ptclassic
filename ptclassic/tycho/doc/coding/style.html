@@ -105,12 +105,12 @@ All programming languages have a global namespace.  In itcl, it's class
 names, global variables, and procedure names.  Choose names carefully.
 In particular,
 <ul>
-<li> All class names should begin with "G".
+<li> All class names should begin with "Ty".
 <li> All <a href="#global">global variables</a> in Tycho should begin
-     with "gal" and should be documented. The documentation is
+     with "ty" and should be documented. The documentation is
      temporarily being collected in the file "doc"
      in the main Tycho directory.
-<li> All procedure names should begin with "gal" unless they already
+<li> All procedure names should begin with "ty" unless they already
      existed in pigi, in which case they should begin with "ptk" and
      should be backward compatible.
 </ul>
@@ -148,7 +148,7 @@ There appears to be one circumstance in which global variables
 are needed.  A Tk checkbutton object generally has a global
 variable associated with it.  There appears to be no way to
 use a common variable for this (that I have found).
-The name of the global variable should begin with "gal",
+The name of the global variable should begin with "ty",
 and its existence should be documented, as explained
 <a href="#names">above</a>.
 
