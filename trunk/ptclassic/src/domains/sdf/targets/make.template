@@ -23,8 +23,9 @@ INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
 OBJS = $(LIBSRCS:.cc=.o)
 LIB = libcompileSDF.a
+EXTRA_DESTS = CompileTarget.o
 
-all:	makefile $(LIB) CompileTarget.o
+all:	makefile $(LIB) $(EXTRA_DESTS)
 
 # "make install" does nothing extraordinary
 install:	all $(LIBDIR)/$(LIB)
