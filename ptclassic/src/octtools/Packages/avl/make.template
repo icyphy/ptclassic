@@ -49,7 +49,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libavl.a
+LIB = 		libavl.$(LIBSUFFIX)
 
 EXPHDR =	avl.h
 
