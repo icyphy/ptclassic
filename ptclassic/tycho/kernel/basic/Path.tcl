@@ -177,7 +177,8 @@ proc ::tycho::mkdir { args } {
 # use of $TYCHO.
 #
 proc ::tycho::relativePath {srcFile dstFile} {
-    if { [file pathtype $dstFile] != "absolute" } {
+    if { [string index $dstFile 0] != "$" && \
+	    [file pathtype $dstFile] != "absolute" } {
 	return $dstFile
     }
     set srcList [file split [::tycho::expandPath $srcFile]]
@@ -192,6 +193,7 @@ proc ::tycho::relativePath {srcFile dstFile} {
     }
 
     set results {}
+
     if {$equalCount < [llength $srcList]} {
 	set srcLength [llength $srcList]
 	set dstLength [llength $dstList]
