@@ -188,7 +188,7 @@ and disclaimer of warranty provisions, push the button below. "
     pack [canvas .version.bm -width 6c -height 7.5c -bg [ptkColor bisque]] \
 	-side left
     global ptolemy
-    .version.bm create bitmap 3c 3.75c -bitmap @$ptolemy/tcl/lib/Ptolemy.xbm
+    .version.bm create bitmap 3c 3.75c -bitmap @$ptolemy/lib/tcl/Ptolemy.xbm
 
     wm geometry . +200+300
     tkwait visibility .
