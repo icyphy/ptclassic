@@ -13,7 +13,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = uniprocessor multiprocessor NOWam
+DIRS = uniproc multiproc NOWam
 
 ME = cgc/targets
 
