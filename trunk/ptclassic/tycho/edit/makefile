@@ -1,9 +1,9 @@
 # Makefile for Tycho's editors package directory
 #
-# $Id$
+# @(#)makefile	1.17 04/29/98
 # Author: Christopher Hylands
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -47,4 +47,4 @@ EXTRA_SRCS = pkgIndex.tcl
 MISC_FILES = $(DIRS)
 
 # Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+include $(ROOT)/mk/no-compile.mk
