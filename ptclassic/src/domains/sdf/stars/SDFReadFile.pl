@@ -47,18 +47,20 @@ repeated, or the file contents can be padded with zeros.
 
     protected {
 	istream* input;
+	char* expandedFileName;
     }
 
     constructor {
 	input = 0;
+	expandedFileName = 0;
     }
 
     setup {
 	// open input file
 	LOG_DEL; delete input;
-	char *expandedFileName = expandPathName(fileName);
-	LOG_NEW; input = new ifstream(expandedFileName);
 	delete [] expandedFileName;
+	expandedFileName = expandPathName(fileName);
+	LOG_NEW; input = new ifstream(expandedFileName);
 	if (!(*input))
 		Error::abortRun(*this, "can't open file ", fileName);
     }
@@ -73,7 +75,7 @@ repeated, or the file contents can be padded with zeros.
 	    else if (periodic)		// close and re-open file
 	    {
 		LOG_DEL; delete input;
-                LOG_NEW; input = new ifstream(expandPathName(fileName));
+                LOG_NEW; input = new ifstream(expandedFileName);
          	if (!(*input)) {
 		    Error::abortRun(*this, "cannot re-open file ", fileName);
 		    return;
@@ -92,5 +94,6 @@ repeated, or the file contents can be padded with zeros.
 
     destructor {
 	LOG_DEL; delete input;
+	delete [] expandedFileName;
     }
 }
