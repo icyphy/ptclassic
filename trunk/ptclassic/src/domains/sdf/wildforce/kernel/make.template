@@ -49,7 +49,7 @@ INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 #Library name
 PTLIB = libsdfwildforce.$(LIBSUFFIX)
 
-HDRS= IntArray.h
+HDRS= WFIntArray.h
 
 SRCS= $(HDRS:.h=.cc)
 
