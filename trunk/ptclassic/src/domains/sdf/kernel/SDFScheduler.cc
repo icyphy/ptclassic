@@ -218,7 +218,9 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 	do {
                 passValue = 2;
                 numDeferredBlocks = 0;
+		int numAddedThisPass;
 
+		numAddedThisPass = 0;
                 nextStar.reset();
                 while ((s = nextStar++) != 0) {
                         SDFStar& atom = *(SDFStar*)s;
@@ -226,15 +228,24 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 
                         do {
                                 runResult = addIfWeCan(atom,deferredFiring);
+				if (runResult == 0) numAddedThisPass++;
                         } while (repeatedFiring && (runResult == 0));
                 }
 
                 // If the deferred firing option is set, we must now schedule
-                // the deferred blocks
+                // the deferred blocks.  We permit them to be "re-deferred",
+		// unless no stars at all were added in the most recent pass.
+
+		// use of "deferAgain" is intended to produce the minimum
+		// buffer sizes between stars.
+
+		int deferAgain = deferredFiring;
+		if (numAddedThisPass == 0) deferAgain = 0;
 
                 for (int i=0; i<numDeferredBlocks; i++) {
                         SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
-                        addIfWeCan (atom);
+                        if (addIfWeCan (atom,deferAgain) == 0)
+				deferAgain = deferredFiring;
                 }
 
 	} while (passValue == 0);
