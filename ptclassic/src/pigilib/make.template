@@ -4,8 +4,9 @@
 #
 # Copyright (c) 1989 The Regents of the University of California.
 #			All Rights Reserved.
-# Written by: E. Goei
+# Originally written by: E. Goei
 # Date of creation: 5/23/90
+# Current version by J. Buck
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -30,7 +31,8 @@ GNUINCLUDE    = /usr/gnu/lib/g++-include
 
 # Linker variables
 LINKER        = g++
-LDFLAGS	      = -L$(OCTTOOLS)/lib.$(ARCH) -L$(ROOT)/lib.$(ARCH)
+LDIR          = $(ROOT)/lib.$(ARCH)
+LDFLAGS	      = -L$(OCTTOOLS)/lib.$(ARCH) -L$(LDIR) -u_UserMain
 LIBS	      = -lsdf -lddf -lde \
 		-lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport -lX11 -lm
@@ -55,27 +57,7 @@ HDRS	      = compile.h \
 		palette.h \
 		octMacros.h
 
-OBJS	      = main.o \
-		util.o \
-		compile.o \
-		paramStructs.o \
-		vemInterface.o \
-		edit.o \
-		exec.o  \
-		err.o \
-		ganttIfc.o \
-		octIfc.o \
-		icon.o \
-		misc.o \
-		mkTerm.o \
-		mkIcon.o \
-		palette.o \
-		kernelCalls.o \
-		XOutput.o \
-		xfunctions.o \
-		options.o
-
-SRCS	      = main.c \
+LIBCSRCS      = main.c \
 		util.c \
 		compile.c \
 		paramStructs.c \
@@ -90,30 +72,49 @@ SRCS	      = main.c \
 		mkTerm.c \
 		mkIcon.c \
 		palette.c \
-		kernelCalls.cc \
 		xfunctions.c \
-		XOutput.cc \
 		options.c
 
-TARGET	      = pigiRpc
 
-all:	$(TARGET)
+LIBCPPSRCS    = kernelCalls.cc XOutput.cc
 
-$(TARGET): makefile $(OBJS) $(ROOT)/lib.$(ARCH)/libptolemy.a 
-	$(LINKER) $(LDFLAGS) $(OBJS) \
+
+LIBSRCS = $(LIBCSRCS) $(LIBCPPSRCS)
+
+SRCS = 	$(LIBSRCS) defpalettes.c
+LIBOBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
+
+all:	makefile libpigi.a pigiRpc
+
+libpigi.a:	$(LIBOBJS)
+	rm -f libpigi.a
+	ar cq libpigi.a $(LIBOBJS)
+	ranlib libpigi.a
+
+pigiRpc:	defpalettes.o libpigi.a $(LDIR)/libptolemy.a \
+		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a
+	$(LINKER) $(LDFLAGS) defpalettes.o libpigi.a \
 	    ../domains/ddf/stars/*.o \
 	    ../domains/de/stars/*.o \
 	    ../domains/sdf/stars/*.o \
-	    $(LIBS) -o $(TARGET)
+	    $(LIBS) -o pigiRpc
 
-INSTALLED     = $(ROOT)/bin.$(ARCH)/$(TARGET)
-install: $(INSTALLED)
+DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
+DESTBIN = $(ROOT)/bin.$(ARCH)/pigiRpc
 
-$(INSTALLED):	$(TARGET)
-	@echo Installing $(TARGET) in $(ROOT)/bin
-	rm -f $(INSTALLED)
-	cp $(TARGET) $(INSTALLED)
-	strip $(INSTALLED)
+$(DESTLIB):	libpigi.a
+		@echo Installing pigi library
+		rm -f $(DESTLIB)
+		cp libpigi.a $(DESTLIB)
+		ranlib $(DESTLIB)
+
+$(DESTBIN):	pigiRpc
+		@echo Installing pigiRpc
+		rm -f $(DESTBIN)
+		cp pigiRpc $(DESTBIN)
+		strip $(DESTBIN)
+
+install: makefile $(DESTLIB) $(DESTBIN)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -127,10 +128,9 @@ depend:
 			   -I$(OCTTOOLS)/include $(SRCS)
 
 makefile:	make.template
-		rm -f makefile
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
 		make -f make.template sources depend
-		ln -s $(VPATH)/makefile makefile
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
