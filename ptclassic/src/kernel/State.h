@@ -105,7 +105,7 @@ public:
         }
 
 	// set the initial value
-	setValue(const char*  s) { initValue = s;}
+	void setValue(const char*  s) { initValue = s;}
 
 	// get the initial value
 	const char* getInitValue () const { return initValue;}
