@@ -46,11 +46,11 @@ set reallyExit 0
 
 test remove.0 {create a test universe} {
     namespace pitcl {
-        defgalaxy y {
+        defGalaxy y SDF {
             addBlock z Ramp
             galaxyPort out z.output
         }
-        addUniverse x
+        addUniverse x SDF
         addBlock a y
         addBlock b Ramp
         addBlock c Add
@@ -66,19 +66,19 @@ test remove.0 {create a test universe} {
 #### remove
 
 test remove.1 {remove a simple star} {
-    ::pitcl::curgalaxy .x
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove b
     ::pitcl::blocks
 } {a c d e}
 
 test remove.2 {remove a galaxy by relative name} {
-    ::pitcl::curgalaxy .x
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove a
     ::pitcl::blocks .x
 } {c d e}
 
 test remove.3 {remove a galaxy by absolute name} {
-    ::pitcl::curgalaxy .main
+    ::pitcl::currentGalaxy .main
     ::pitcl::remove .x.e
     ::pitcl::blocks .x
 } {c d}
@@ -87,13 +87,13 @@ set univlist [::pitcl::univlist]
 set loc [lsearch -exact $univlist .x]
 set newunivlist [lreplace $univlist $loc $loc]
 test remove.4 {remove a universe} {
-    ::pitcl::curgalaxy .x
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove .x
-    list [::pitcl::univlist] [::pitcl::curgalaxy]
+    list [::pitcl::univlist] [::pitcl::currentGalaxy]
 } [list $newunivlist .main]
 
 test remove.5 {attempt to remove main} {
-    ::pitcl::addUniverse .main
+    ::pitcl::addUniverse .main SDF
     ::pitcl::addBlock a Ramp
     ::pitcl::remove .main
     ::pitcl::blocks .main

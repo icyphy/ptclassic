@@ -85,12 +85,12 @@ extern char DEFAULT_DOMAIN[];
 /////////////////////////////////////////////////////////////////////////////
 //// constructor
 //
-PTcl::PTcl(Tcl_Interp* i) : universe(0), currentGalaxy(0),
-currentTarget(0), interp(i), stopTime(0.0), lastTime(1.0), definingGal(0)
+PTcl::PTcl(Tcl_Interp* i) : universe(0), curgalaxy(0),
+curtarget(0), interp(i), stopTime(0.0), lastTime(1.0), definingGal(0)
 {
     KnownBlock::setDefaultDomain(DEFAULT_DOMAIN);
     // Start up in the default domain.
-    curDomain = KnownBlock::defaultDomain();
+    curdomain = KnownBlock::defaultDomain();
     reset(1,0);
     if (!interp) {
         interp = Tcl_CreateInterp();
@@ -129,26 +129,26 @@ PTcl::~PTcl() {
 //
 int PTcl::addBlock(int argc,char** argv) {
     if (argc != 3) return usage("addBlock <name> <class>");
-    InterpGalaxy* saveGal = currentGalaxy;
-    currentGalaxy = getParentGalaxy(argv[1]);
-    if (currentGalaxy) {
+    InterpGalaxy* saveGal = curgalaxy;
+    curgalaxy = getParentGalaxy(argv[1]);
+    if (curgalaxy) {
         const char* root = rootName(argv[1]);
-        if (currentGalaxy->blockWithName(root)) {
+        if (curgalaxy->blockWithName(root)) {
             InfString msg = "Block ";
-            msg << root << " already exists in " << fullName(currentGalaxy);
+            msg << root << " already exists in " << fullName(curgalaxy);
             result(msg);
-            currentGalaxy = saveGal;
+            curgalaxy = saveGal;
             return TCL_ERROR;
         }
-        if (!currentGalaxy->addStar(root, argv[2])) {
-            currentGalaxy = saveGal;
+        if (!curgalaxy->addStar(root, argv[2])) {
+            curgalaxy = saveGal;
             return TCL_ERROR;
         }
     } else {
-        currentGalaxy = saveGal;
+        curgalaxy = saveGal;
         return TCL_ERROR;
     }
-    currentGalaxy = saveGal;
+    curgalaxy = saveGal;
     return TCL_OK;
 }
 
@@ -158,18 +158,17 @@ int PTcl::addBlock(int argc,char** argv) {
 // a period (as in ".foo") or can omit the period (as in "foo").  In either
 // case, the full name of the resulting universe has a leading period (".foo").
 // If a universe with the given name already exists, it is cleared.
-// The second argument, if given, is the domain of the new universe.
-// This defaults to the current domain.
+// The second argument is the domain of the new universe.
 //
 int PTcl::addUniverse(int argc,char** argv) {
-    if (argc > 3 || argc < 2) {
-        return usage("newuniverse <name> ?<dom>?");
+    if (argc != 3) {
+        return usage("addUniverse <name> <domain>");
     }
-    if (argc == 3) curDomain = hashstring(argv[2]);
+    curdomain = hashstring(argv[2]);
     const char* nm = argv[1];
     if (*nm == '.') nm++;
     const char* name = hashstring(nm);
-    newUniv(name, curDomain);
+    newUniv(name, curdomain);
     return TCL_OK;
 }
 
@@ -431,16 +430,16 @@ int PTcl::connected(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//// curgalaxy
+//// currentGalaxy
 // Return the full name of current galaxy or universe if no argument is
 // given. If a name is given and a galaxy or universe exists with that
 // name, make that the current galaxy. If there is no such galaxy,
 // return an error.
 //
-int PTcl::curgalaxy(int argc,char** argv) {
+int PTcl::currentGalaxy(int argc,char** argv) {
     if (argc == 1) {
-        if (currentGalaxy != NULL) {
-            InfString nm = fullName(currentGalaxy);
+        if (curgalaxy != NULL) {
+            InfString nm = fullName(curgalaxy);
             result(nm);
         }
         return TCL_OK;
@@ -452,9 +451,9 @@ int PTcl::curgalaxy(int argc,char** argv) {
         if (b->isA("InterpUniverse")) {
             InterpUniverse* u = (InterpUniverse*) b;
             universe = u;
-            currentGalaxy = u;
-            curDomain = u->domain();
-            currentTarget = u->myTarget();
+            curgalaxy = u;
+            curdomain = u->domain();
+            curtarget = u->myTarget();
             return TCL_OK;
         }
 
@@ -463,62 +462,166 @@ int PTcl::curgalaxy(int argc,char** argv) {
             Tcl_AppendResult(interp, "No such galaxy: ",argv[1], (char*) NULL);
             return TCL_ERROR;
         }
-        currentGalaxy = (InterpGalaxy*) b;
-        curDomain = currentGalaxy->domain();
+        curgalaxy = (InterpGalaxy*) b;
+        curdomain = curgalaxy->domain();
         if (b->isItWormhole()) {
             // A wormhole has a target too.
-            currentTarget = ((Runnable*)b)->myTarget();
+            curtarget = ((Runnable*)b)->myTarget();
         }
         return TCL_OK;
-    } else return usage("curgalaxy ?<name>?");
+    } else return usage("currentGalaxy ?<name>?");
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//// defgalaxy
-// Define a master galaxy.  The first argument is the name of the galaxy,
-// i.e. the name that is registered on the knownlist for use by *addBlock*.
-// The optional second argument is a set of galaxy building commands.
-// If it is not given, an empty galaxy is defined.  Otherwise, the
-// commands are executed in the ::pitcl namespace to construct the
-// galaxy.  Note that if errors occur during the execution of these
-// galaxy defining commands, then a partially constructed galaxy
-// will be on the knownlist.
+//// defGalaxy
+// Define a master galaxy. The first argument is the name of the
+// galaxy, i.e. the name that is registered on the knownBlocks list for
+// use by *addBlock*. The second argument is the domain of the galaxy.
+// The galaxy can only be used in this domain, and the inside of the
+// galaxy is also in this domain; to define a wormhole (a galaxy that
+// is used in a domain different from its internals), use the
+// *defWormhole* command. The third argument is a set of galaxy
+// building commands. If it is not given, an empty galaxy is defined.
+// Otherwise, the commands are executed in the ::pitcl namespace to
+// construct the galaxy. Note that if errors occur during the execution
+// of these galaxy defining commands, then a partially constructed
+// galaxy will be on the knownBlocks list.
 //
-// FIXME: Change the name.
-//
-int PTcl::defgalaxy(int argc,char ** argv) {
-    if (argc < 2 || argc > 3) {
-        return usage("defgalaxy <galname> ?{<galaxy-building-commands>}?");
+int PTcl::defGalaxy(int argc,char ** argv) {
+    if (argc < 3 || argc > 4) {
+        return usage(
+            "defGalaxy <galname> <domain> ?{<galaxy-building-commands>}?");
     }
     // Prevent recursive calls.
     if (definingGal) {
-        Tcl_SetResult(interp, "already defining a galaxy!", TCL_STATIC);
+        Tcl_SetResult(interp, "already defining a galaxy or wormhole!",
+               TCL_STATIC);
         return TCL_ERROR;
     }
-    const char* galname = hashstring(argv[1]);
-    const char* outerDomain = curDomain;
     definingGal = TRUE;
-    currentGalaxy = new InterpGalaxy(galname,curDomain);
-    currentGalaxy->setBlock (galname, 0);
-    currentTarget = 0;
+
+    // Save current state.
+    Target* prevtarget = curtarget;
+    InterpGalaxy* prevgal = curgalaxy;
+    const char* prevdomain = curdomain;
+
+    const char* galname = hashstring(argv[1]);
+    curdomain = hashstring(argv[2]);
+    Domain* id = Domain::named(curdomain);
+
     int status;  // return value
-    currentGalaxy->addToKnownList("ptcl defgalaxy command",
-            outerDomain, currentTarget);
-    InfString cmd = "namespace ::pitcl {";
-    cmd << argv[2] << "}";
-    if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
-        Tcl_AppendResult(interp, 
-                "Error in defining galaxy ", galname, (char*)NULL);
+
+    if (!id) {
+        InfString msg = "No such domain: ";
+        msg << curdomain;
+        result(msg);
+        status = TCL_ERROR;
+    } else {
+        // Domain is OK.
+        curgalaxy = new InterpGalaxy(galname,curdomain);
+        curgalaxy->setBlock (galname, 0);
+        curtarget = 0;   // parent target, by default.
+        curgalaxy->addToKnownList("pitcl defGalaxy command",
+                curdomain, curtarget);
+        InfString cmd = "namespace ::pitcl {";
+        cmd << argv[3] << "}";
+        if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
+            Tcl_AppendResult(interp, 
+                    "Error in defining galaxy ", galname, (char*)NULL);
+        }
     }
-    currentGalaxy = universe;
-    currentTarget = universe->myTarget();
+    curgalaxy = prevgal;
+    curtarget = prevtarget;
     definingGal = FALSE;
-    curDomain = outerDomain;
-    if (! currentTarget) {
-        Tcl_AppendResult(interp, "Error in restoring outer universe target",
-               (char*) NULL);
+    curdomain = prevdomain;
+    return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// defWormhole
+// Define a master wormhole. The first argument is the name of the
+// wormhole, i.e. the name that is registered on the knownBlocks list
+// for use by *addBlock*. The second argument is the external domain of
+// the wormhole. This is the domain within which the wormhole can be
+// used. The third argument is the internal domain of the wormhole.
+// This can be the same as the outer domain, and a wormhole will still
+// be created. The fourth argument is a set of galaxy building
+// commands. If it is not given, an empty wormhole is defined.
+// Otherwise, the commands are executed in the ::pitcl namespace to
+// construct the wormhole. Note that if errors occur during the
+// execution of these wormhole defining commands, then a partially
+// constructed wormhole will be on the knownBlocks list.
+//
+// NOTE: In the predecessor interface, ptcl, defgalaxy was used for
+// wormholes and galaxies. But that approach relied far too much on on
+// the current state, and precluded incremental construction of
+// wormholes.
+//
+int PTcl::defWormhole(int argc,char ** argv) {
+    if (argc < 4 || argc > 5) {
+        return usage(
+            "defWormhole <wormname> <outerdomain> <innerdomain> ?{<galaxy-building-commands>}?");
+    }
+    // Prevent recursive calls.
+    if (definingGal) {
+        Tcl_SetResult(interp, "already defining a galaxy or wormhole!",
+                TCL_STATIC);
         return TCL_ERROR;
     }
+    definingGal = TRUE;
+
+    // Save current state.
+    Target* prevtarget = curtarget;
+    InterpGalaxy* prevgal = curgalaxy;
+    const char* prevdomain = curdomain;
+
+    int status;  // return value
+
+    const char* galname = hashstring(argv[1]);
+    const char* outerDomain = hashstring(argv[2]);
+    curdomain = hashstring(argv[3]);    // inner domain
+    Domain* id = Domain::named(curdomain);
+    if (!id) {
+        InfString msg = "No such domain: ";
+        msg << curdomain;
+        result(msg);
+        status = TCL_ERROR;
+    } else {
+        // inner domain is OK.
+        // Check the outer domain.
+        Domain* od = Domain::named(outerDomain);
+        if (!od) {
+            InfString msg = "No such domain: ";
+            msg << outerDomain;
+            result(msg);
+            status = TCL_ERROR;
+        } else {
+            // Outer domain is OK.
+            // Create the inside galaxy.
+            curgalaxy = new InterpGalaxy(galname,curdomain);
+            curgalaxy->setBlock (galname, 0);   // Null parent
+            // Create a default target.
+            curtarget =
+                   KnownTarget::clone(KnownTarget::defaultName(curdomain));
+            // Register the new wormhole on the knownBlocks list.
+            // The fact that a target is specified here forces
+            // a wormhole to be made.
+            curgalaxy->addToKnownList("pitcl defWormhole command",
+                   outerDomain, curtarget);
+
+            // Execute the galaxy construction commands, if any.
+            InfString cmd = "namespace ::pitcl {";
+            cmd << argv[4] << "}";
+            if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
+                Tcl_AppendResult(interp, 
+                        "Error in defining galaxy ", galname, (char*)NULL);
+            }
+        }
+    }
+    curgalaxy = prevgal;
+    curtarget = prevtarget;
+    definingGal = FALSE;
+    curdomain = prevdomain;
     return status;
 }
 
@@ -919,20 +1022,20 @@ int PTcl::remove(int argc,char** argv) {
         if (delcurrent) {
             if (delmain) {
                 // Deleted "main", remake it.
-                newUniv("main", curDomain);
+                newUniv("main", curdomain);
             } else {
                 // Make "main" the current universe.
                 const InterpUniverse* u = univs.univWithName("main");
                 if (!u) {
                     // This shouldn't happend, but if main has been deleted,
                     // remake it.
-                    newUniv("main", curDomain);
+                    newUniv("main", curdomain);
                     result("main universe somehow got deleted!  Recreating");
                     return TCL_ERROR;
                 } else {
-                    currentGalaxy = (InterpGalaxy*) u;
-                    curDomain = currentGalaxy->domain();
-                    currentTarget = u->myTarget();
+                    curgalaxy = (InterpGalaxy*) u;
+                    curdomain = curgalaxy->domain();
+                    curtarget = u->myTarget();
                 }
             }
         }
@@ -1082,8 +1185,8 @@ void PTcl::galTopBlockIter(const Block* b, int deep, int fullname) {
 //
 const Block* PTcl::getBlock(const char* name) {
     // Return immediately on standard cases.
-    if (!name || *name == 0 || strcmp(name,"this") == 0) return currentGalaxy;
-    if (strcmp(name,"target") == 0) return currentTarget;
+    if (!name || *name == 0 || strcmp(name,"this") == 0) return curgalaxy;
+    if (strcmp(name,"target") == 0) return curtarget;
 
     // Determine whether a leading dot is provided.
     int absolute = 0;
@@ -1111,8 +1214,8 @@ const Block* PTcl::getBlock(const char* name) {
     // If not absolute, search the current galaxy, the known list,
     // and the targets, in that order.
     if (!absolute) {
-        b = currentGalaxy->blockWithName(firstname);
-        if (!b) b = KnownBlock::find(firstname, curDomain);
+        b = curgalaxy->blockWithName(firstname);
+        if (!b) b = KnownBlock::find(firstname, curdomain);
         // Used to search universes also.  Now require absolute name.
         // if (!b) b = univs.univWithName(firstname);
         if (!b) b = KnownTarget::find(firstname);
@@ -1154,7 +1257,7 @@ const Block* PTcl::getParentBlock(const char* name) {
     const char* p = strrchr (name, '.');
     if (p == NULL) {
         // No dot in the name.  Current galaxy is the context.
-        return currentGalaxy;
+        return curgalaxy;
     }
     // Copy all but the last dot and name into a buffer.
     // The input buffer is always long enough.
@@ -1218,6 +1321,43 @@ GenericPort* PTcl::getPort(const char* portname) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// knownBlocks
+// Return a list of the available blocks in the specified domain, or (if no
+// domain is given) the current domain.
+//
+int PTcl::knownBlocks (int argc,char** argv) {
+    if (argc > 2)
+    return usage ("knownBlocks ?<domain>?");
+    const char* dom = curdomain;
+    if (argc == 2) {
+        dom = argv[1];
+        if (!KnownBlock::validDomain(dom)) {
+            Tcl_AppendResult(interp, "No such domain: ", dom, (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    KnownBlockIter nextB(dom);
+    const Block* b;
+    while ((b = nextB++) != 0) addResult(b->name());
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// knownDomains
+// Return a list of the available domains.
+//
+int PTcl::knownDomains(int argc,char **) {
+    if (argc > 1)
+    return usage("knownDomains");
+    int n = Domain::number();
+    for (int i = 0; i < n; i++) {
+        const char* domain = Domain::nthName(i);
+        if (KnownBlock::validDomain(domain)) addResult(domain);
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// makeEntry
 // Add this object to the table of PTcl objects.
 //
@@ -1238,9 +1378,9 @@ void PTcl::makeEntry() {
 void PTcl::newUniv(const char* name, const char* dom) {
     univs.delUniv(name);
     universe = new InterpUniverse(name, dom);
-    currentGalaxy = universe;
-    curDomain = universe->domain();
-    currentTarget = universe->myTarget();
+    curgalaxy = universe;
+    curdomain = universe->domain();
+    curtarget = universe->myTarget();
     univs.put(*universe);
 }
 
@@ -1385,7 +1525,7 @@ const Block* PTcl::getSubBlock(const char* name, const Block* gal) {
 int PTcl::node(int argc,char ** argv) {
     if (argc != 2)
     return usage("node <nodename>");
-    if (!currentGalaxy->addNode (argv[1]))
+    if (!curgalaxy->addNode (argv[1]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1394,7 +1534,7 @@ int PTcl::node(int argc,char ** argv) {
 int PTcl::delnode(int argc,char ** argv) {
     if (argc != 2)
     return usage("delnode <nodename>");
-    if (!currentGalaxy->delNode (argv[1]))
+    if (!curgalaxy->delNode (argv[1]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1403,7 +1543,7 @@ int PTcl::delnode(int argc,char ** argv) {
 int PTcl::nodeconnect(int argc,char ** argv) {
     if (argc != 4 && argc != 5)
     return usage("nodeconnect <star> <port> <node> ?<delay>?");
-    if (!currentGalaxy->nodeConnect(argv[1],argv[2],argv[3],argv[4]))
+    if (!curgalaxy->nodeConnect(argv[1],argv[2],argv[3],argv[4]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1412,7 +1552,7 @@ int PTcl::nodeconnect(int argc,char ** argv) {
 int PTcl::disconnect(int argc,char ** argv) {
     if (argc != 3)
     return usage("disconnect <star> <port>");
-    if(! currentGalaxy->disconnect(argv[1],argv[2]))
+    if(! curgalaxy->disconnect(argv[1],argv[2]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1421,7 +1561,7 @@ int PTcl::disconnect(int argc,char ** argv) {
 int PTcl::newstate(int argc,char ** argv) {
     if (argc != 4)
     return usage("newstate <name> <type> <defvalue>");
-    if (!currentGalaxy->addState(argv[1],argv[2],argv[3]))
+    if (!curgalaxy->addState(argv[1],argv[2],argv[3]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1430,7 +1570,7 @@ int PTcl::newstate(int argc,char ** argv) {
 int PTcl::setstate(int argc,char ** argv) {
     if (argc != 4)
     return usage("setstate <star> <name> <value>\nor setstate this <name> <value>");
-    if (!currentGalaxy->setState(argv[1],argv[2],argv[3]))
+    if (!curgalaxy->setState(argv[1],argv[2],argv[3]))
     return TCL_ERROR;
     return TCL_OK;
 }
@@ -1651,18 +1791,6 @@ int PTcl::wrapup(int argc,char **) {
     return checkErrorAbort();
 }
 
-// domains: list domains
-int PTcl::domains(int argc,char **) {
-    if (argc > 1)
-    return usage("domains");
-    int n = Domain::number();
-    for (int i = 0; i < n; i++) {
-        const char* domain = Domain::nthName(i);
-        if (KnownBlock::validDomain(domain))
-        addResult(domain);
-    }
-    return TCL_OK;
-}
 
 // set (change) the seed of the random number generation
 int PTcl::seed(int argc,char ** argv) {
@@ -1695,27 +1823,6 @@ int PTcl::animation (int argc,char** argv) {
     textAnimationOn();
     else
     textAnimationOff();
-    return TCL_OK;
-}
-
-// knownlist shows the available blocks in the current domain, or (if an
-// argument is given) the supplied domain.
-int PTcl::knownlist (int argc,char** argv) {
-    if (argc > 2)
-    return usage ("knownlist ?<domain>?");
-    const char* dom = curDomain;
-    if (argc == 2) {
-        dom = argv[1];
-        if (!KnownBlock::validDomain(dom)) {
-            Tcl_AppendResult(interp, "No such domain: ", dom,
-            (char *) NULL);
-            return TCL_ERROR;
-        }
-    }
-    KnownBlockIter nextB(dom);
-    const Block* b;
-    while ((b = nextB++) != 0)
-    addResult(b->name());
     return TCL_OK;
 }
 
@@ -1760,7 +1867,7 @@ int PTcl::reset(int argc,char** argv) {
     return usage ("reset ?<name>?");
     const char* nm = "main";
     if (argc == 2) nm = hashstring(argv[1]);
-    newUniv(nm, curDomain);
+    newUniv(nm, curdomain);
     return TCL_OK;
 }
 
@@ -1802,44 +1909,14 @@ static int legalTarget(const char* domName, const char* targetName) {
     return FALSE;
 }
 
-// display or change the domain.  If on top level, the existing target
-// is not legal for the new domain, it reverts to to the default for the
-// new domain.
-// NOTE: This changes the current domain globally.
-// FIXME: Probably defgalaxy should restore the domain after it is done.
-
-int PTcl::domain(int argc,char ** argv) {
-    if (argc > 2)
-    return usage ("domain ?<newdomain>?");
-    if (argc == 1) {
-        Tcl_AppendResult(interp,curDomain,(char*)NULL);
-        return TCL_OK;
-    }
-    
-    // check to see if domain already matches.  If so do nothing.
-    if (strcmp(currentGalaxy->domain(), argv[1]) == 0) return TCL_OK;
-    
-    // change the domain.
-    if (! currentGalaxy->setDomain (argv[1]))
-    return TCL_ERROR;
-    curDomain = currentGalaxy->domain();
-    
-    // check to see if existing target is legal for the new domain,
-    // if not, revert to default target.
-    if (!definingGal) {
-        if (!legalTarget(curDomain, universe->myTarget()->name())) {
-            universe->newTarget ();
-            currentTarget = universe->myTarget();
-        }
-    }
-    return TCL_OK;
-}
-
 // display or change the target
+// NOTE: This can only change the target of a universe.
+// If it changes the target of a galaxy, the galaxy may fail to be
+// converted into a wormhole.
 int PTcl::target(int argc,char ** argv) {
     if (argc == 1) {
         const char *targName = "No target";
-        if (currentTarget) targName = currentTarget->name();
+        if (curtarget) targName = curtarget->name();
         return staticResult(targName);
     }
     else if (argc > 2) {
@@ -1847,20 +1924,20 @@ int PTcl::target(int argc,char ** argv) {
     }
     else {
         const char* tname = hashstring(argv[1]);
-        if (!legalTarget(curDomain, tname)) {
+        if (!legalTarget(curdomain, tname)) {
             Tcl_AppendResult(interp, tname,
-            " is not a legal target for domain ", curDomain,
+            " is not a legal target for domain ", curdomain,
             (char*) NULL);
             return TCL_ERROR;
         }
         int status;
         if (!definingGal) {
             status = universe->newTarget(tname);
-            currentTarget = universe->myTarget();
+            curtarget = universe->myTarget();
         } else {
-            LOG_DEL; delete currentTarget;
-            currentTarget = KnownTarget::clone(tname);
-            status = (currentTarget != 0);
+            LOG_DEL; delete curtarget;
+            curtarget = KnownTarget::clone(tname);
+            status = (curtarget != 0);
         }
         return status ? TCL_OK : TCL_ERROR;
     }
@@ -1877,7 +1954,7 @@ int PTcl::targets(int argc,char** argv) {
             return TCL_ERROR;
         }
     } else
-    domain = curDomain;
+    domain = curdomain;
     const int MAX_NAMES = 40;
     const char *names[MAX_NAMES];
     int n = KnownTarget::getList (domain, names, MAX_NAMES);
@@ -1890,12 +1967,12 @@ int PTcl::targets(int argc,char** argv) {
 int PTcl::targetparam(int argc,char ** argv) {
     if (argc != 2 && argc != 3)
     return usage("targetparam <name> ?<value>?");
-    if (!currentTarget) {
+    if (!curtarget) {
         Tcl_AppendResult(interp, "Target has not been created yet.",
         (char*) NULL);
         return TCL_ERROR;
     }
-    State* s = currentTarget->stateWithName(argv[1]);
+    State* s = curtarget->stateWithName(argv[1]);
     if (!s) {
         Tcl_AppendResult(interp, "No such target parameter: ", argv[1],
         (char*) NULL);
@@ -1924,16 +2001,16 @@ int PTcl::targetparam(int argc,char ** argv) {
 // use the fourth argument to set the value of the pragma.
 //
 int PTcl::pragma(int argc,char ** argv) {
-    if (!currentTarget) {
+    if (!curtarget) {
         Tcl_AppendResult(interp,"No current target!",(char*) NULL);
         return TCL_ERROR;
     }
     if (argc == 3) {
-        return staticResult(currentTarget->pragma(argv[1],argv[2]));
+        return staticResult(curtarget->pragma(argv[1],argv[2]));
     } else if (argc == 4) {
-        return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3]));
+        return staticResult(curtarget->pragma(argv[1],argv[2],argv[3]));
     } else if (argc == 5) {
-        return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3],argv[4]));
+        return staticResult(curtarget->pragma(argv[1],argv[2],argv[3],argv[4]));
     } else {
         return usage("pragma ?<parentname>? ?<blockname>? ?<pragmaname>? ?<pragmavalue>?");
     }
@@ -2198,12 +2275,11 @@ static InterpTableEntry funcTable[] = {
     ENTRY(connect),
     ENTRY(connected),
     ENTRY(cont),
-    ENTRY(curgalaxy),
-    ENTRY(defgalaxy),
+    ENTRY(currentGalaxy),
+    ENTRY(defGalaxy),
+    ENTRY(defWormhole),
     ENTRY(delnode),
     ENTRY(disconnect),
-    ENTRY(domain),
-    ENTRY(domains),
     ENTRY(exit),
     ENTRY(galaxyPort),
     ENTRY(getAnnotation),
@@ -2217,7 +2293,8 @@ static InterpTableEntry funcTable[] = {
     ENTRY(isGalaxy),
     ENTRY(isMultiPort),
     ENTRY(isWormhole),
-    ENTRY(knownlist),
+    ENTRY(knownBlocks),
+    ENTRY(knownDomains),
     ENTRY(link),
     ENTRY(listobjs),
     ENTRY(matlab),
@@ -2231,6 +2308,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(pragmaDefaults),
     ENTRY(ports),
     ENTRY(portsContained),
+    ENTRY(print),
     ENTRY(remove),
     ENTRY(renameuniv),
     ENTRY(registerAction),

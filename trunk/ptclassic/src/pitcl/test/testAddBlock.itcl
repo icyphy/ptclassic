@@ -45,7 +45,7 @@ set reallyExit 0
 # Create an empty universe.
 
 test addBlock.0 {create a test universe for addBlock} {
-    ::pitcl::addUniverse x
+    ::pitcl::addUniverse x SDF
 } {}
 
 ######################################################################
@@ -58,7 +58,7 @@ test addBlock.1 {create a simple block with the same name as the universe} {
 
 test addBlock.2 {create a block within a galaxy using relative naming} {
     namespace ::pitcl {
-        defgalaxy y {
+        defGalaxy y SDF {
             addBlock z Ramp
             galaxyPort out z.output
         }
@@ -68,7 +68,7 @@ test addBlock.2 {create a block within a galaxy using relative naming} {
 
 test addBlock.3 {create a block within a galaxy instance using absolute naming} {
     namespace ::pitcl {
-        curgalaxy .main
+        currentGalaxy .main
         addBlock .x.w y
         blocks -fullname -deep .x
     }
@@ -81,7 +81,7 @@ test addBlock.1 {try to add a block that already exists} {
 
 test addBlock.4 {create a block within a master galaxy using absolute naming} {
     namespace ::pitcl {
-        curgalaxy .main
+        currentGalaxy .main
         addBlock y.y Xgraph
         blocks -fullname -deep y
     }
@@ -89,7 +89,7 @@ test addBlock.4 {create a block within a master galaxy using absolute naming} {
 
 test addBlock.2 {create a block within a new galaxy using abosolute naming} {
     namespace ::pitcl {
-        defgalaxy yy {
+        defGalaxy yy SDF {
             addBlock yy.z Ramp
         }
         blocks yy

@@ -48,23 +48,23 @@ set reallyExit 0
 
 test connected.0 {create a test universe} {
     namespace ::pitcl {
-        defgalaxy cm {
+        defGalaxy cm SDF {
             addBlock x Ramp
             galaxyPort o x.output
         }
-        defgalaxy bm {
+        defGalaxy bm SDF {
             addBlock c cm
             galaxyPort o bm.c.o
         }
-        defgalaxy em {
+        defGalaxy em SDF {
             addBlock y XMgraph
             galaxyPort i y.input
         }
-        defgalaxy dm {
+        defGalaxy dm SDF {
             addBlock e em
             galaxyPort i e.i
         }
-        addUniverse a
+        addUniverse a SDF
         addBlock b bm
         addBlock d dm
         connect b.o d.i
@@ -259,7 +259,7 @@ test connected.41 {deep connection of a top-level galaxy port within a multiport
 
 test connected.42 {create a strange test universe} {
     namespace ::pitcl {
-        defgalaxy am {
+        defGalaxy am SDF {
             addBlock x Ramp
             addBlock y Add
             addBlock z Xgraph
@@ -267,7 +267,7 @@ test connected.42 {create a strange test universe} {
             connect x.output y.input
             connect y.output z.input
         }
-        addUniverse b
+        addUniverse b SDF
         addBlock b Ramp
         addBlock a am
         connect b.output a.i
