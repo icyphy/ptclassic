@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	// Inherit the setup method
 	go {
-		SDFQuantIdx :: go();
+		SDFQuant :: go();
 		stepNumber%0 << int(quantizationLevel);
 	}
 }
