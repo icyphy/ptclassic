@@ -2,9 +2,9 @@
 #
 # Authors: Joel R. King, Edward A. Lee
 #
-# Version: @(#)Mathematica.itcl    $Id$\t$Date$
+# Version: $Id$
 #
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,7 +39,21 @@
 class ::tycho::Mathematica {
     inherit ::tycho::Console
 
+    #### help
+    # Open a help window.
+    method help {}
+
     #### textWidget
     # Return the name of the type of text widget to use.
     method textWidget {} {return ::tycho::MathematicaText}
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::Mathematica::help {} {
+    global TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/MathematicaHelp.html
 }

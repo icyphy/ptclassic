@@ -39,7 +39,22 @@
 class ::tycho::Matlab {
     inherit ::tycho::Console
 
+    #### help
+    # Open a help window.
+    method help {}
+
     #### textWidget
     # Return the name of the type of text widget to use.
     method textWidget {} {return ::tycho::MatlabText}
 }
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::Matlab::help {} {
+    global TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/MatlabHelp.html
+}
+
