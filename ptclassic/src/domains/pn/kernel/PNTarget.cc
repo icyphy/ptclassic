@@ -32,20 +32,22 @@ MTDFTarget::~MTDFTarget()
 }
 
 // Make a new MTDFTarget object.
-Block* MTDFTarget::clone() const
+Block* MTDFTarget::makeNew() const
 {
     LOG_NEW; return new MTDFTarget;
 }
 
 // Initialization.
-void MTDFTarget::start()
+void MTDFTarget::setup()
 {
-    if (!mySched()) { LOG_NEW; setSched(new MTDFScheduler); }
+    if (!scheduler()) { LOG_NEW; setSched(new MTDFScheduler); }
+    Target::setup();
 }
 
 // End simulation.
 void MTDFTarget::wrapup()
 {
-    ((MTDFScheduler*)mySched())->deleteThreads();
+    MTDFScheduler* sched = (MTDFScheduler*)scheduler();
+    sched->deleteThreads();
     Target::wrapup();
 }

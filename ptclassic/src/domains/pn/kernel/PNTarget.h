@@ -29,12 +29,13 @@ public:
     ~MTDFTarget();
 
     // Make a new MTDFTarget object.
-    virtual Block* clone() const;
+    /* virtual */ Block* makeNew() const;
 
-    virtual void start();
+    // Initialization.
+    /* virtual */ void setup();
 
     // End simulation.
-    virtual void wrapup();
+    /* virtual */ void wrapup();
 };
 
 #endif
