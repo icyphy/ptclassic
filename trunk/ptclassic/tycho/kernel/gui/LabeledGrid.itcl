@@ -198,6 +198,7 @@ body iwidgets::Labeledgrid::constructor {args} {
     set _curcol() 0
     set _height() 1
     set _type() "group"
+    set _children() {}
 
     set unique [incr widgetCounter]
     
@@ -403,7 +404,7 @@ body iwidgets::Labeledgrid::assign {id args} {
 	} else {
 	    # Not a shared group
 	    foreach {t v} $value {
-		assign $t $v
+		assign $id.$t $v
 	    }
 	}
     } else {
@@ -872,7 +873,6 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 # optionmenu here because it doesn't support tab traversal.
 # ------------------------------------------------------------------
 body iwidgets::Labeledgrid::_optionmenu {id path var args} {
-puts [list $id $path $var $args]
     # Extract arguments
     array set opts {-entries {} -command {}}
     array set opts $args
