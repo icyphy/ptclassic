@@ -26,9 +26,8 @@ menu places a body template at the current point in the buffer.
 The <A NAME="Java Editor File Template"><CODE>File Template</CODE>
 command</A> in the <CODE>Special</CODE> menu copies the file <A
 HREF="../../templates/JavaTemplate.java"><CODE>$TYCHO/editors/textedit/templates/JavaTemplate.java</CODE></A>
-into the editor and substitutes in a class name based on the file
-name.  For example, if the file is named <CODE>Elvis.java</CODE>, then
-the class name <CODE>Elvis</CODE> will be substituted in.
+into the editor does some substitions described
+<A HREF="#java file template substitution">below</A>.
  <P>
 The <A NAME="Java Editor Generate doc"><CODE>Generate doc</CODE> command</A>
 in the "Special" menu asks the user if they would like to save the buffer
@@ -38,6 +37,34 @@ for the current file.
 The <CODE>appletview</CODE> choice in the <CODE>Special</CODE> menu
 brings up the <CODE>appletviewer</CODE> program and loads the file being
 edited into <CODE>appletviewer</CODE>
+
+<H2><A NAME="java file template subsitution">Java file template
+substitution</A></H2>
+When the Java template file is substituted into a Java editor, certain
+substitions occur.
+<P>
+The string <CODE>ClassName</CODE> in the template file is substituted
+with a class name based on the name of the file.
+For example, if the file is named <CODE>Elvis.java</CODE>, then
+the class name <CODE>Elvis</CODE> will be substituted everywhere 
+<CODE>ClassName</CODE> appears.
+ <P>
+The java <CODE>package</CODE> is updated accordingly if the file is located
+in a directory below <CODE>$TYCHO/java</CODE>.  For example, if the pathname
+to the file was <CODE>$TYCHO/java/devel/mystuff/Elvis.java</CODE>, then
+the <CODE>package</CODE> line would look like:
+<PRE>
+package devel.mystuff;
+</PRE>
+If the file is not below <CODE>$TYCHO/java</CODE>, then the
+<CODE>package</CODE> line is commented out.
+ <P>
+The <CODE>@author</CODE> java doc tag is updated to use the
+<I>userName</I> preference which contains the full name of the user.
+This preference can be updated by mousing on the Help button on the
+upper left of most Tycho windows and then clicking on
+<CODE>Preferences</CODE>. The <CODE>userName</CODE> preference is under the
+<CODE>Miscellaneous</CODE> preferences.
 
 <H2><A NAME="javadoc tags">Javadoc tags</A></H2>
 
