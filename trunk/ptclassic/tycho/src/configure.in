@@ -199,12 +199,12 @@ else
 	           AC_MSG_WARN([ Failed to find javac, perhaps Java is not installed?])
 	    fi
 	    if test ! -d "$JAVAHOME"; then
-	            AC_MSG_WARN(["$JAVAHOME" is not a directory, using the default /opt/jdk1.1.1])
-		    if test -d "/opt/jdk1.1.1"; then
-			    JAVAHOME=`cd /opt/jdk1.1.1; pwd`	
+	            AC_MSG_WARN(["$JAVAHOME" is not a directory, using the default /opt/jdk1.1.4])
+		    if test -d "/opt/jdk1.1.4"; then
+			    JAVAHOME=`cd /opt/jdk1.1.4; pwd`	
 		    else
 			    AC_MSG_ERROR([
-  Java directory /opt/jdk1.1.1 doesn't exist.
+  Java directory /opt/jdk1.1.4 doesn't exist.
   Try --with-java=DIR, or set the JAVA_HOME environment variable.
   If you don't have java, try --without-java. If you are building within Tycho,
   try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
