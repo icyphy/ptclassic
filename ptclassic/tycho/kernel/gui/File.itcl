@@ -77,6 +77,10 @@ class ::tycho::File {
     # Defines the interval (in minutes) between auto-save operations.
     itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
 
+    #### -data option
+    # Specifies initial data to display.
+    itk_option define -data data Data {}
+
     #### -file variable
     # Specify the name of the file associated with the data being edited.
     # NOTE: This should really be a public variable, not an itk option.
@@ -126,8 +130,12 @@ class ::tycho::File {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    #### insertData
+    # Insert data.
+    method insertData {data}
+
     #### insertFile
-    # Insert the contents of a file at the insertion cursor.
+    # Insert the contents of a file.
     method insertFile {}
 
     #### markModified
@@ -190,7 +198,7 @@ class ::tycho::File {
     proc callAutoSave {obj} {}
 
     #### displayData
-    # Display the data as if it were stored in the file by the given name.
+    # Display data as if it were stored in the file by the given name.
     proc displayData {data filename} {}
 
     #### emergencySave
@@ -294,6 +302,14 @@ class ::tycho::File {
 #########################################################################
 #########################################################################
 ####                          option configure                       ####
+
+#########################################################################
+#### -data configuration
+# Specifies initial data to display.
+#
+configbody ::tycho::File::data {
+    insertData $itk_option(-data)
+}
 
 #########################################################################
 #### -file configuration
@@ -699,6 +715,14 @@ body ::tycho::File::help {} {
 }
 
 #####################################################################
+#### insertData
+# Insert the specified data.
+#
+body ::tycho::File::insertData {data} {
+    error "Sorry, insert data not implemented yet."
+}
+
+#####################################################################
 #### insertFile
 # Open a file browser to query the user for a filename, and then
 # insert the contents of that file at the insertion cursor.
@@ -933,13 +957,13 @@ body ::tycho::File::displayData {data filename} {
     set base [file tail $filename]
     if {[info exists editors] && [info exists editors($ext)]} {
 	set name [uplevel #0 [list \
-		$editors($ext) [autoName .file] -text $data]]
+		$editors($ext) [autoName .file] -data $data]]
     } elseif {[info exists editorsBase] && [info exists editorsBase($base)]} {
 	set name [uplevel #0 [list \
-		$editorsBase($base) [autoName .file] -text $data]]
+		$editorsBase($base) [autoName .file] -data $data]]
     } else {
 	set name [uplevel #0 [list \
-		Edit [autoName .edit] -text $data]]
+		Edit [autoName .edit] -data $data]]
     }
     $name centerOnScreen
     return $name
