@@ -45,6 +45,8 @@ PL_SRCS= \
  SDFIIR.pl \
  SDFLMS.pl \
  SDFLMSCx.pl \
+ SDFLMSPlot.pl \
+ SDFLMSPlotCx.pl \
  SDFLMSLeak.pl \
  SDFLattice.pl \
  SDFLevDur.pl \
