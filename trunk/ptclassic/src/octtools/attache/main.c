@@ -35,6 +35,7 @@ static char SccsId[]="$Id$";
 #include "io.h"
 #include "internal.h"
 #include "edit.h"
+#include "attache.h"
 
 /* This flag is necessary to allow inspectFacet to be callable from 
  * the attache executable or from another program that attache has been
@@ -47,6 +48,7 @@ optionStruct optionList[] = {
     { 0,	0,	0						}
 };
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -80,7 +82,7 @@ char *argv[];
 
     octEnd();
 
-    exit(RET_OK);
+    return RET_OK;
 }
 
 
