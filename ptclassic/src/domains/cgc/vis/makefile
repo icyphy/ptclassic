@@ -12,7 +12,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = stars targets
+DIRS = stars
 
 ME = cgc/vis
 
