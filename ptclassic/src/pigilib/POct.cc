@@ -583,6 +583,68 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
+// OCT commands to retrieve data from the Oct database
+int POct::ptkFacetContents (int aC,char** aV) {
+    octObject facet;
+
+    if (aC != 3) return  
+            usage ("ptkFacetContents <OctObjectHandle> <List_of_Types>");
+
+    if (strcmp(aV[1],"NIL")==0)  return result(" { } ");
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Convert the Type list into an appropriate Oct Mask
+    int typeC;
+    char **typeV;
+    if (Tcl_SplitList( interp, aV[2], &typeC, &typeV ) != TCL_OK){
+	Tcl_AppendResult(interp, "Cannot parse list of types: ", aV[2],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+    octObjectMask mask = 0; 
+    for (int i=0; i< typeC; i++) {
+	if (strcasecmp(typeV[i],"FACET")==0)  mask |= OCT_FACET_MASK;
+	else if (strcasecmp(typeV[i],"TERM")==0)  mask |= OCT_TERM_MASK;
+	else if (strcasecmp(typeV[i],"NET")==0)  mask |= OCT_NET_MASK;
+	else if (strcasecmp(typeV[i],"INSTANCE")==0)  mask |= OCT_INSTANCE_MASK;
+	else if (strcasecmp(typeV[i],"PROP")==0)  mask |= OCT_PROP_MASK;
+	else if (strcasecmp(typeV[i],"BAG")==0)  mask |= OCT_BAG_MASK;
+	else if (strcasecmp(typeV[i],"POLYGON")==0)  mask |= OCT_POLYGON_MASK;
+	else if (strcasecmp(typeV[i],"BOX")==0)  mask |= OCT_BOX_MASK;
+	else if (strcasecmp(typeV[i],"CIRCLE")==0)  mask |= OCT_CIRCLE_MASK;
+	else if (strcasecmp(typeV[i],"PATH")==0)  mask |= OCT_PATH_MASK;
+	else if (strcasecmp(typeV[i],"LABEL")==0)  mask |= OCT_LABEL_MASK;
+	else if (strcasecmp(typeV[i],"LAYER")==0)  mask |= OCT_LAYER_MASK;
+	else if (strcasecmp(typeV[i],"POINT")==0)  mask |= OCT_POINT_MASK;
+	else if (strcasecmp(typeV[i],"EDGE")==0)  mask |= OCT_EDGE_MASK;
+	else if (strcasecmp(typeV[i],"FORMAL")==0)  mask |= OCT_FORMAL_MASK;
+	else if (strcasecmp(typeV[i],"CHANGE_LIST")==0)  mask |= OCT_CHANGE_LIST_MASK;
+	else if (strcasecmp(typeV[i],"CHANGE_RECORD")==0)  mask |= OCT_CHANGE_RECORD_MASK;
+    }
+    // Free the memory used by typeV as it was allocated by SplitList
+    free ((char *) typeV);
+
+    // Use created mask to generate the desired oct object and return them
+    Tcl_AppendResult(interp, " { ", NULL );
+    octGenerator gen;
+    octObject contentObj;
+    char contentStr[16];
+    octInitGenContents( &facet , mask, &gen );
+    while (octGenerate(&gen, &contentObj) == OCT_OK) {
+	ptkOctObj2Handle ( &contentObj, contentStr );
+	Tcl_AppendResult(interp, contentStr, " ", NULL );
+    }
+    Tcl_AppendResult(interp, " } ", NULL );
+    octFreeGenerator(&gen);
+    
+    return TCL_OK;
+}
+
 // Basic Vem Facet Type checking command
 int POct::ptkIsStar (int aC,char** aV) {
     octObject facet;
@@ -720,6 +782,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkCompile),
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
+	ENTRY(ptkFacetContents),
 	ENTRY(ptkIsStar),
 	ENTRY(ptkIsGalaxy),
 	ENTRY(ptkIsBus),
