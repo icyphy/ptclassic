@@ -443,7 +443,7 @@ class ::tycho::SmartLine {
     set optiondefault(-smooth)    off
     set optiondefault(-start) 	  "e"
     set optiondefault(-state) 	  0
-    set optiondefault(-width) 	  2
+    set optiondefault(-width) 	  1
 }
 
 

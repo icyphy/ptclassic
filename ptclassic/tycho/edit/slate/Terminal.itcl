@@ -185,13 +185,13 @@ class ::tycho::Terminal {
 
     set optiondefault(-anchor)    {50 50}
     set optiondefault(-arrowshape) {}
-    set optiondefault(-blobsize)  5
+    set optiondefault(-blobsize)  3
     set optiondefault(-direction) {1 0}
     set optiondefault(-fill)      black
-    set optiondefault(-length)    40
+    set optiondefault(-length)    25
     set optiondefault(-style)     arrow
     set optiondefault(-type)      input
-    set optiondefault(-width)     2
+    set optiondefault(-width)     1
 }
 
 ##########################################################################
