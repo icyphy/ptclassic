@@ -93,7 +93,7 @@ public:
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
 	// classes derived therefrom.
-	addPort(PortHole& p) {ports.put(p);}
+	void addPort(PortHole& p) {ports.put(p);}
 
 	// Retrieve the PortHole with the given name
 	PortHole *portWithName(const char* name) const;
@@ -114,7 +114,7 @@ public:
 	virtual Scheduler* mySched() const;
 
         // Add  State to the block
-        addState(State& s) {states.put(s);}
+        void addState(State& s) {states.put(s);}
 
 	// Initialize the State
         virtual void initState();
@@ -129,14 +129,16 @@ public:
         virtual State *stateWithName(const char* name) const;
 
         // Re-Define State
-        setState(const char* stateName, const char* expression) {
+        void setState(const char* stateName, const char* expression) {
                         stateWithName(stateName)->setValue(expression);}
 
 	// Return reference to Block as a Star.  Error if it's not.
-	virtual Star& asStar() const;
+	virtual const Star& asStar() const;
+	virtual Star& asStar();
 
 	// Return reference to Block as a Galaxy.  Error if it's not.
-	virtual Galaxy& asGalaxy() const;
+	virtual Galaxy& asGalaxy();
+	virtual const Galaxy& asGalaxy() const;
 
 	// Return my domain (e.g. SDF, DE, etc.)
 	virtual const char* domain() const;
@@ -152,7 +154,7 @@ protected:
 	
 	// This function saves the given MultiPortHole so portWithName
 	// can find it.
-	addPort(MultiPortHole& p) {multiports.put(p);}
+	void addPort(MultiPortHole& p) {multiports.put(p);}
 
         // stateWithName can find a state.
         StateList states;
