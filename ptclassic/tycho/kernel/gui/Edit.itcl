@@ -54,10 +54,6 @@ class ::tycho::Edit {
     ###################################################################
     ####                      public methods                       ####
 
-    #### altFile
-    # Prompt the user for a file name and load this into the current editor.
-    method altFile {}
-
     #### focusin
     # Call this to give the text subwindow the focus.
     method focusin {}
@@ -88,7 +84,7 @@ class ::tycho::Edit {
 
     #### reload
     # Reload the current file. 
-    method reload {{askuser 1} {filename "defaultfileforreloadmethod"}}
+    method reload {}
 
     #### save
     # Save text to a file (by default, the file given by the -file option).
@@ -258,38 +254,6 @@ body ::tycho::Edit::constructor {args} {
 ####                      public methods                       ####
 
 ###################################################################
-#### altFile
-# Query the user for a filename, insert it into the current editor.
-#
-body ::tycho::Edit::altFile {} {
-    if {$modified} {
-	if [askuser "Do you want modifications saved before opening new \
-		file?"] {
-	    # update changes since last save
-	    $this save 
-	}
-    }
-    set topwin [winfo toplevel $itk_component(hull)]
-    # unmap the revcontrol window.
-    if {[winfo exists $topwin.revcontrol]} {
-	wm withdraw $topwin.revcontrol
-    }
-    set prevfile $itk_option(-file)
-    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
-	    -text "Alternate file to load:"]
-    if {$filename != {}} {
-	$this busy
-	$this reload 0 $filename
-	$itk_component(text) setInsert 1.0
-	windowMenuRemoveAll $prevfile
-	$this configure -file $filename
-	update idletasks
-	$this unBusy
-	update
-    }
-}
-
-###################################################################
 #### focusin
 # Hand the focus to the text window.
 #
@@ -343,16 +307,14 @@ body ::tycho::Edit::help {} {
 body ::tycho::Edit::insertFile {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .filebr] \
 	    -text {File to Insert}]
-    $this busy
     $itk_component(text) readFile $filename
     markModified
-    update 
-    $this unBusy
 }
 
 #####################################################################
 #### loadFile
-# Load the specified file.
+# Load the specified file, if it exists.  Otherwise, do nothing.
+# If the file exists but is not readable, flag an error.
 #
 body ::tycho::Edit::loadFile {loadfile} {
     # Read contents from the specified file, unless the name is "NoName".
@@ -361,10 +323,6 @@ body ::tycho::Edit::loadFile {loadfile} {
 	    if [file readable $loadfile] {
 		$itk_component(text) initFile $loadfile
 	    } else {
-		# FIXME: This error does not cause the object to be
-		# properly deleted.  This window will remain in existence,
-		# but cannot be accessed.  Using centerOnScreen, for example,
-		# causes a core dump.
 		error "File $loadfile is not readable"
 	    }
 	}
@@ -374,36 +332,32 @@ body ::tycho::Edit::loadFile {loadfile} {
 ###################################################################
 #### reload
 # Reload the current file. If the contents are modified, then we 
-# ask the user if they want to procede.
+# ask the user if they want to proceed.
 #
-body ::tycho::Edit::reload {{askuser 1} {filename \
-	"defaultfileforreloadmethod"}} {
-    if {$filename == "NoName" || $filename == ""} {
+body ::tycho::Edit::reload {} {
+    if {$file == "NoName" || $file == ""} {
 	return 
-    }
-    if {$filename == "defaultfileforreloadmethod"} {
-	set filename $file
     }
     # Save the position of the cursor.
     set ins [$itk_component(text) returnInsert]
-    if {$modified && $askuser} {
-	if {![askuser "This file has been modified. Reload anyway?"]} {
+    if {$modified} {
+	if {![askuser "This file has been modified. Proceed anyway?"]} {
 	    return 
 	}
     }
     $itk_component(hull) configure -readonly 0
     $itk_component(text) deleteRange 1.0 end
-    $this loadFile $filename
+    $this loadFile $file
     $itk_component(text) setInsert $ins
     $itk_component(text) center
     markUnmodified
-    if {[file writable $filename]} {
+    if {[file writable $file]} {
 	$itk_component(hull) configure -readonly 0
     } else {
 	$itk_component(hull) configure -readonly 1
     }
     # change title 
-    wm title $itk_component(hull) $filename 
+    wm title $itk_component(hull) $file 
 }
 
 ###################################################################
@@ -422,7 +376,6 @@ body ::tycho::Edit::save {{name ""}} {
 	set filename $name
     }
     if {$filename != "" && $filename != "NoName"} {
-	$this busy
 	set fd [open $filename w+]
 	puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
 	close $fd
@@ -434,7 +387,6 @@ body ::tycho::Edit::save {{name ""}} {
 	removeBackupFiles
     }
     markUnmodified
-    $this unBusy
     return 1
 }
 
