@@ -111,17 +111,18 @@ non-zero integer (not necessarily 1).
 	// General cases
 
 	codeblock(prepareAndLoop) {
-	clr	b	#<$addr(input#1)+1,r0	; r0 = address of input block
-	move	$ref(input#1),a	b,y0
+	clr	b	$ref(input#1),a			; b = FALSE
+	move	#<$addr(input#1)+1,r0	b,y0	; r0 = input block address
+	move	a,b
 	}
 
 	codeblock(logicAndOpAndLoad,"int numinputs") {
-	do	#@numinputs-1, $label(AndLoop)
+	do	#@numinputs-2,$label(AndLoop)
 	tst	b	x:(r0)+,b	; test previous and load next input
-	teq	y0,a			; if previous = 0, then a = 0
+	teq	y0,a			; if previous = 0, then a = FALSE
 $label(AndLoop)
-	tst	b
-	teq	y0,a			; if previous = 0, then a = 0
+	tst	b	x:(r0)+,b	; test previous and load next input
+	teq	y0,a			; if previous = 0, then a = FALSE
 	}
 
 	codeblock(logicOrOp) {
@@ -252,7 +253,8 @@ $label(Xor)
 		    pairsOfCycles += 2;
 		    // fall through
 		  case ANDID:
-		    pairsOfCycles += 2*numinputs + 1;
+		    if ( numinputs == 2 ) pairsOfCycles += 3;
+		    else if ( numinputs > 2 ) pairsOfCycles += 2*numinputs + 3;
 		    break;
 
 		  case NORID:
