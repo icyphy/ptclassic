@@ -137,7 +137,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    {
 		LOG_NEW; threads = new PNThreadScheduler;
 	    }
-	    LOG_NEW; new DataFlowProcess(*threads, *star);
+	    LOG_NEW; DataFlowProcess* p = new DataFlowProcess(*star);
+	    threads->add(p);
+	    p->initialize();
 	}
     }
 
