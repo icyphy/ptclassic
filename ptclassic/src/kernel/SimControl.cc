@@ -79,6 +79,7 @@ typedef void (*SIG_PF)(int);
 #include "SimAction.h"
 #include "SimControl.h"
 #include "PtGate.h"
+#include "ptsignals.h"
 #include <sys/time.h>
 #include <signal.h>
 
@@ -254,6 +255,15 @@ void SimControl::setPollFlag() {
         CriticalSection region(gate);
         pollflag = 1;
 }
+
+        // Get the value of the Poll Flag
+        // (turn off signal blocking for a second to allow the signal
+        //  to come through if it had been blocked)
+int SimControl::getPollFlag() {
+	ptReleaseSig(SIGALRM);
+        ptBlockSig(SIGALRM);
+        return pollflag;
+}
 	
 	// register a function to be called if the poll flag is set.
 	// Returns old handler if any.
@@ -278,6 +288,10 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_usec = micro_seconds;
 	// Turn on the poll flag when the timer expires
 	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
+	// Make the signal safe from interrupting system calls
+        ptSafeSig(SIGALRM);
+	// Block the signal so that it will not interrupt system calls
+	ptBlockSig(SIGALRM);
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
 	// Start the timer

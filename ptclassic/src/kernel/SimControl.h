@@ -98,7 +98,7 @@ public:
 		poll = 8 };
 
 	static int haltRequested () {
-		if ( (flagValues() | pollflag) != 0) processFlags();
+		if ( flagValues() | getPollFlag() ) processFlags();
 		return haltStatus();
 	}
 
@@ -126,7 +126,10 @@ public:
 	static SimHandlerFunction setInterrupt(SimHandlerFunction f);
 
         // Set the Poll Flag true
-	static void SimControl::setPollFlag();
+	static void setPollFlag();
+
+        // Get the value of the poll flag 
+	static int getPollFlag();
 
 	// register a function to be called if the poll flag is set.
 	// Returns old handler if any.
