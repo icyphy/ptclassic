@@ -28,7 +28,7 @@ SRCS=BlackHole.cc ComplexDC.cc ComplexFIR.cc \
  FloatThresh.cc IIDUniform.cc IIDGaussian.cc IntRamp.cc \
  Printer.cc Sin.cc Xgraph.cc XYgraph.cc Sqrt.cc \
  AdaptFilter.cc FIR.cc IIR.cc FloatImpulse.cc FloatRect.cc BiQuad.cc \
- UpSample.cc DownSample.cc
+ UpSample.cc DownSample.cc Commutator.cc Distributor.cc Cut.cc WaveForm.cc
 
 OBJS=BlackHole.o ComplexDC.o ComplexFIR.o \
  ComplexFFT.o ComplexPolar.o ComplexProduct.o ComplexSum.o \
@@ -37,7 +37,7 @@ OBJS=BlackHole.o ComplexDC.o ComplexFIR.o \
  FloatThresh.o IIDUniform.o IIDGaussian.o IntRamp.o \
  Printer.o Sin.o Xgraph.o XYgraph.o Sqrt.o \
  AdaptFilter.o FIR.o IIR.o FloatImpulse.o FloatRect.o BiQuad.o \
- UpSample.o DownSample.o
+ UpSample.o DownSample.o Commutator.o Distributor.o Cut.o WaveForm.o
 
 HDRS=BlackHole.h ComplexDC.h ComplexFIR.h \
  ComplexFFT.h ComplexPolar.h ComplexProduct.h ComplexSum.h \
@@ -46,7 +46,7 @@ HDRS=BlackHole.h ComplexDC.h ComplexFIR.h \
  FloatThresh.h IIDUniform.h IIDGaussian.h IntRamp.h \
  Printer.h Sin.h Xgraph.h XYgraph.h Sqrt.h \
  AdaptFilter.h FIR.h IIR.h FloatImpulse.h FloatRect.h BiQuad.h \
- UpSample.h DownSample.h
+ UpSample.h DownSample.h Commutator.h Distributor.h Cut.h WaveForm.h
 
 all:		makefile $(OBJS)
 
