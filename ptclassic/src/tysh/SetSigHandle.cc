@@ -63,14 +63,14 @@ setSignalHandlers(void)
     {
         if (setCoreLimitRelease() != 0) 
             returnValue = 1; 
-        if (setReleaseHandlers() != 0)
+        if (setHandlers(signalHandlerRelease) != 0)
 	    returnValue = 2;
     }
     else
     {
         if (setCoreLimitDebug() != 0) 
             returnValue = 3; 
-        if (setDebugHandlers() != 0)
+        if (setHandlers(signalHandlerDebug) != 0)
 	    returnValue = 4;
     }
 
