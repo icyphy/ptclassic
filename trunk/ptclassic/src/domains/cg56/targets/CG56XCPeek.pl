@@ -24,7 +24,7 @@ protected {
 	}
 
 codeblock(receiveData) {
-	move	$ref(value),x0
+	move	$ref(buffer),x0
 	move	x0,$ref(output)
 }
 
