@@ -124,6 +124,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	char	buf[32];
 	coeffsd.initialize();
 	coeffsn.initialize();
+
         int i;
 	double b0, scaleDenom, scaleNumer;
 
