@@ -512,6 +512,10 @@ body ::tycho::File::constructor {args} {
 	    -command "::tycho::IndexBrowser $nm \
 	    -file \$TYCHO/lib/idx/codeDoc.idx \
             -width 80; $nm centerOnScreen"
+
+    addMenuItem "Class Diagram" Help -underline 0 \
+	    -command {::tycho::File::openContext $TYCHO/doc/tychoClasses.dag}
+
     
     # Bindings
     bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
