@@ -54,8 +54,9 @@ struct ParamStruct {
 typedef struct ParamStruct ParamType;
 
 struct ParamListStruct {
-    int length;		/* length of array */
-    ParamType* array;	/* points to first element */
+    int length;			/* length of array */
+    ParamType* array;		/* points to first element */
+    char* dynamic_memory;	/* pointer to allocated string memory */
 };
 typedef struct ParamListStruct ParamListType;
 
