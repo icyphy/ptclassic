@@ -72,12 +72,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 	    addGlobal("int $starSymbol(invCount);");
-	    addGlobal("int $starSymbol(ids)[1][$val(tapSize)];");
+	    addGlobal("int $starSymbol(ids)[$val(tapSize)];");
 
 	    // define a pointer to the taps, for compatibility with
 	    // the bar chart routines
 	    addGlobal("double* $starSymbol(taps_ptr);");
-	    addCode("$starSymbol(taps_ptr) = $ref(taps);");
+	    addGlobal("int* $starSymbol(ids_ptr);");
+	    addCode("$starSymbol(taps_ptr) = $ref(taps);","tkSetup");
+	    addCode("$starSymbol(ids_ptr) = $starSymbol(ids);","tkSetup");
 
 	    // initialize backup values to equal taps initial values.
 	    addGlobal("double $starSymbol(backup)[$val(tapSize)] = { ");
@@ -107,7 +109,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			    $val(tapSize),
 			    $ref(fullScale),
 			    -$ref(fullScale),
-			    $starSymbol(ids)) == 0)
+			    &$starSymbol(ids_ptr)) == 0)
 		    errorReport("Cannot update bar graph.");
 	    }
 	}
@@ -123,7 +125,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			 $val(tapSize),		/* number of data points */
 			 $ref(fullScale),	/* top of scale */
 			 -$ref(fullScale),	/* bottom of scale */
-			 $starSymbol(ids),	/* array to store item ids */
+			 &$starSymbol(ids_ptr),	/* array to store item ids */
 			 "$val(geometry)",	/* shape and position, window*/
 			 $val(width),		/* width, in cm */
 			 $val(height)) == 0)
@@ -196,7 +198,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			    $val(tapSize),
 			    $ref(fullScale),
 			    -$ref(fullScale),
-			    $starSymbol(ids)) == 0)
+			    &$starSymbol(ids_ptr)) == 0)
 		    errorReport("Cannot redraw bar graph");
 		return TCL_OK;
 	    }
