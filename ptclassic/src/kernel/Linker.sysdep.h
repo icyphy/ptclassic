@@ -326,7 +326,10 @@ extern "C" {
 #ifdef PTHPPA
 #include <nlist.h>
 #include <stdlib.h>
+#ifndef PTHPUX10
+// HPUX10.01 gets this right, HPUX9.x needs nlist declared.
 extern "C" {int nlist(char *, struct nlist *);};
+#endif
 #endif //PTHPPA
 
 #include <std.h>
