@@ -23,6 +23,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	name {output}
 	type {int}
     }
+    state {
+        name { saturation }
+	type { int }
+	default { "YES" }
+	desc { If true, use saturation arithmetic }
+    }
     constructor {
 	noInternalState();
     }
@@ -48,8 +54,11 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock(finalDifference) {
 	sub	x0,a
     }
-    codeblock(saveResult) {
+    codeblock(saveResultSat) {
 	move	a,$ref(output)
+    }
+    codeblock(saveResultNoSat){
+	move	a1,$ref(output)
     }
     go { 
 	int numNegInputs = neg.numberPorts();
@@ -71,7 +80,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    addCode(finalDifference);	
 	}
-	addCode(saveResult);
+	if (int(saturation)) addCode(saveResultSat);
+	else addCode(saveResultNoSat);
     }
     exectime {
 	int instructionCycles = 0;
