@@ -48,7 +48,7 @@ static const char file_id[] = "TclObj.cc";
 #include "TclObj.h"
 
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 #include "StringList.h"
 

@@ -45,7 +45,7 @@ static const char file_id[] = "POct.cc";
 // #include "ConstIters.h"
 
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 extern "C" {
 #define Pointer screwed_Pointer
