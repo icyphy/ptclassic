@@ -105,7 +105,7 @@ SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
-LIB=libpigi.a
+LIB=libpigi.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 

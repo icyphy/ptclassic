@@ -28,7 +28,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 TCL_SCRIPT_DIR = $(ROOT)/src/domains/sdf/tcltk/stars
 
 # Library name
-LIB=libdetclstars.a
+LIB=libdetclstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

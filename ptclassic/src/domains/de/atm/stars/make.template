@@ -22,7 +22,7 @@ ATM = $(ROOT)/src/domains/sdf/atm/kernel
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(ATM)
 
 # Library name
-LIB=libdeatmstars.a
+LIB=libdeatmstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../doc/stars

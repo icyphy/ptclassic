@@ -44,7 +44,7 @@ SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libmdsdf.a
+LIB=libmdsdf.$(LIBSUFFIX)
 
 # Library sources
 SRCS= \

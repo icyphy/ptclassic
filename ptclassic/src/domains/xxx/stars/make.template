@@ -20,7 +20,7 @@ XXXDIR = $(ROOT)/src/domains/xxx/kernel
 INCL = -I$(XXXDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libxxxstars.a
+LIB=libxxxstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

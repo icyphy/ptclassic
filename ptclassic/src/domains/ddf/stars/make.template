@@ -31,7 +31,7 @@ DDFLastOfN.pl \
 DDFRepeater.pl \
 DDFSelf.pl
 
-LIB =libddfstars.a
+LIB =libddfstars.$(LIBSUFFIX)
 
 SRCS=$(PL_SRCS:.pl=.cc)
 OBJS=$(SRCS:.cc=.o)

@@ -30,7 +30,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libvhdlb.a
+LIB=libvhdlb.$(LIBSUFFIX)
 
 # Header files
 HDRS= VHDLBPortHole.h VHDLBStar.h VHDLBTarget.h \

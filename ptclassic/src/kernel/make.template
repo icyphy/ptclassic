@@ -20,7 +20,7 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # Library name
-LIB=libptolemy.a
+LIB=libptolemy.$(LIBSUFFIX)
 
 # No extra directories to include
 INCL =

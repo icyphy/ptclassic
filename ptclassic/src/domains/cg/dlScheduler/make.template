@@ -25,7 +25,7 @@ HDRS =  DLNode.h DLGraph.h DLScheduler.h DLParProcs.h
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libDL.a
+LIB = libDL.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 

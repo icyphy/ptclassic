@@ -41,7 +41,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libhof.a
+LIB=libhof.$(LIBSUFFIX)
 
 # Library sources
 SRCS= \

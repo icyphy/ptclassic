@@ -29,7 +29,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libcg56.a
+LIB=libcg56.$(LIBSUFFIX)
 
 # Header files
 HDRS= CG56PortHole.h CG56Wormhole.h CG56Star.h CG56Target.h \

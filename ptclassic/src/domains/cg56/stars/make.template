@@ -21,7 +21,7 @@ CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(CG56DIR) -I$(CGDIR) -I$(KERNDIR)
 
-LIB = libcg56stars.a
+LIB = libcg56stars.$(LIBSUFFIX)
 STAR_MK=cg56stars
 DOMAIN=CG56
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)

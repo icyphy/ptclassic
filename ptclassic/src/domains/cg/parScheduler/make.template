@@ -26,7 +26,7 @@ HDRS =  ParNode.h ParGraph.h ParScheduler.h \
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libPar.a
+LIB = libPar.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 

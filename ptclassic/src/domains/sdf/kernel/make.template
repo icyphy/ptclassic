@@ -22,7 +22,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libsdf.a
+LIB=libsdf.$(LIBSUFFIX)
 
 # Header files
 HDRS= DynDFScheduler.h EGGate.h EGNode.h ExpandedGraph.h \

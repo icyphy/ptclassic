@@ -25,7 +25,7 @@ INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(TCL_INCDIR) \
  -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libhofstars.a
+LIB=libhofstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

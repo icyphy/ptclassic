@@ -20,7 +20,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(MATLABDIR)/extern/include
 
 # Library name
-LIB=libsdfmatrixstars.a
+LIB=libsdfmatrixstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

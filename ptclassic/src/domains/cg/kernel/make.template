@@ -27,7 +27,7 @@ LOOPDIR=$(ROOT)/src/domains/sdf/loopScheduler
 INCL= -I$(KERNDIR) -I$(SDFDIR) -I$(LOOPDIR)
 
 # Library name
-LIB=libcg.a
+LIB=libcg.$(LIBSUFFIX)
 
 # .h files with matching cc files
 H_WITH_MATCH= \

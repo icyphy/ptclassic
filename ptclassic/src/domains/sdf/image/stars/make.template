@@ -21,7 +21,7 @@ IMAGE = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
 
 # Library name
-LIB=libsdfimagestars.a
+LIB=libsdfimagestars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

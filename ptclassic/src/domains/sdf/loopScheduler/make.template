@@ -25,7 +25,7 @@ SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 INCL =-I$(SDFKERNEL) -I$(KERNDIR)
 
 OBJS = $(SRCS:.cc=.o)
-LIB = libLS.a
+LIB = libLS.$(LIBSUFFIX)
 
 all:	makefile $(LIB) 
 

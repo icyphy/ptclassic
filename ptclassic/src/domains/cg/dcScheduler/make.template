@@ -29,7 +29,7 @@ HDRS =   DCCluster.h DCClusterList.h DCClustArcList.h \
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libDC.a
+LIB = libDC.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 

@@ -50,7 +50,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libgslider.a
+LIB = 		libgslider.$(LIBSUFFIX)
 
 EXPHDR =	gslider.h
 

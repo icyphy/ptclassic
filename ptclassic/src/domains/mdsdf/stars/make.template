@@ -23,7 +23,7 @@ MDSDFDIR = $(ROOT)/src/domains/mdsdf/kernel
 INCL = -I$(SDFKERNDIR) -I$(MDSDFDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libmdsdfstars.a
+LIB=libmdsdfstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
