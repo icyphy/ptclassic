@@ -257,7 +257,7 @@ and Hipass types.
 	     double *filtertaps, char *filtername)
 	    {
 	      if (strcasecmp(filtername, "LOW") == 0){
-		$sharedSymbol(CGCParametrciEq,lowpass)
+		$sharedSymbol(CGCParametricEq,lowpass)
 		  (parametric, filtercoeff);
 	      }
 	      else if (strcasecmp(filtername, "HI") == 0){
