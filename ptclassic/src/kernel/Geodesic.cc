@@ -101,7 +101,7 @@ PortHole* Geodesic :: setSourcePort (GenericPort& sp, int numDelays,
 	originatingPort = &sp.newConnection();
 	portHoleConnect();
 	numInitialParticles = numDelays;
-	initValues = initDelayVales;
+	initValues = initDelayValues;
 	return originatingPort;
 }
 
