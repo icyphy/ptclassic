@@ -43,19 +43,37 @@ class ::tycho::GraphLayout {
     ####                        options                          ####
 
     # The "primary" view of this model
-    itk_option define -primaryview primaryView PrimaryView {}
+    public variable primaryview {}
 
-    # The graph this model represents
-    itk_option define -graph graph Graph {}
-	
+    # The graph this model represents -- is this needed?
+    public variable graph {}
+
     #################################################################
     ####                     public methods                      ####
+
+    # Describe the layout
+    method describe {{prefix {}}}
+
+    # Remove a vertex from the selection
+    method deselect {vertex}
+
+    # Add a vertex to the selection
+    method select {vertex}
+
+    # Clear the selection
+    method selectionclear {foo}
 
     # Add a vertex to the graph
     method vertex {vertex coords args}
 
     # Start a move interaction on vertices
-    method vertexclick {tag x y}
+    method vertexclick {tag x y args}
+
+    # Configure a vertex
+    method vertexconfigure {vertex args}
+
+    # Set the coordinates of the vertex
+    method vertexcoords {vertex x y}
 
     # Continue a move interaction on vertices
     method vertexdrag {tag x y}
@@ -66,42 +84,9 @@ class ::tycho::GraphLayout {
     # Terminate a move interaction on vertices
     method vertexrelease {tag x y}
 
-    # Configure a vertex
-    method vertexconfigure {vertex args}
-
     #################################################################
     ####                  protected methods                      ####
     
-    # Stub to add a tag to all indicated vertices and names.
-    protected method addtag {tag args}
-    
-    # Stub to delete a tag from all items.
-    protected method dtag {tag}
-    
-    # Stub to move an item
-    protected method move {tag x y}
-    
-    # Stub to start moving an item
-    protected method moveclick {tag x y}
-    
-    # Stub to continue moving an item
-    protected method movedrag {tag x y}
-    
-    # Stub to stop moving an item
-    protected method moverelease {tag x y}
-    
-    # Stub to reshape an item
-    protected method reshape {tag x y args}
-    
-    # Stub to start reshaping an item
-    protected method reshapeclick {tag x y args}
-    
-    # Stub to continue reshaping an item
-    protected method reshapedrag {tag x y args}
-    
-    # Stub to stop reshaping an item
-    protected method reshaperelease {tag x y args}
-
     #################################################################
     ####                 protected variables                     ####
     
@@ -133,14 +118,65 @@ body ::tycho::GraphLayout::constructor {args} {
 }
 
 ########################################################################
-#### move
+#### describe
 #
-# Move a vertex or edge. This is just an empty stub. No
-# inverse command is returned, so this method can be called
-# via a publish{} and the command will not be recorded.
+# Return a string that describes the layout.
+# See the <a href="Interchange.html"> Interchange</a> class.
 #
-body ::tycho::GraphLayout::move {tag x y} {
+body ::tycho::GraphLayout::describe {{prefix {}}} {
+    # First call my primary view to update layout
+    $primaryview updateLayout
+
+    # Call the superclass
+    chain $prefix
+}
+
+########################################################################
+#### deselect
+#
+# Remove a vertex from the selection. Does not return an inverse
+# command, since selection and deselection are not undoable commands.
+#
+body ::tycho::GraphLayout::deselect {name} {
+puts "deselect $name"
     return ""
+}
+
+########################################################################
+#### select
+#
+# Add an item to the selection. Does not return an inverse
+# command, since selection and deselection are not undoable commands.
+#
+body ::tycho::GraphLayout::select {name} {
+puts "select $name"
+    return ""
+}
+
+########################################################################
+#### selectionclear
+#
+# Clear the selection. Does not return an inverse
+# command, since selection and deselection are not undoable commands.
+#
+body ::tycho::GraphLayout::selectionclear {foo} {
+    return ""
+}
+
+########################################################################
+#### vertex
+#
+# Add a new vertex to the model and return the inverse command. The
+# value is the _initial_ coordinates only.
+#
+body ::tycho::GraphLayout::vertex {vertex coords args} {
+    _verifynot vertex $vertex
+
+    # Add a vertex to the graph -- ??
+    # $graph vertex $vertex
+
+    # Add the layout here
+    _entity vertex {} $vertex [concat [list $coords] $args]
 }
 
 ########################################################################
@@ -154,26 +190,54 @@ body ::tycho::GraphLayout::move {tag x y} {
 # remember who they are. This method must _not_ be called
 # via publish{}.
 #
-body ::tycho::GraphLayout::vertexclick {tag x y} {
+body ::tycho::GraphLayout::vertexclick {tag x y args} {
     # Get the vertices, and start a move sequence on them
     set vertices [$primaryview withtag $tag]
     set _scratch(movevertices) $vertices
-    publish moveclick $tag $x $y
-    
+
+    # Make sure that all views have the objects tagged right
+    # FIXME: Inefficient!
+    #    notify dtag $tag
+    #    eval notify addtag $tag $vertices
+    notify moveclick $tag $x $y
+
+    set _scratch(startx) $x
+    set _scratch(starty) $y
+
     # Get completely-connected edges, add a tag, and start a move sequence
-    set _scratch(moveedges) [eval $graph subgraphEdges $vertices]
-    publish addtag $this.edge $_scratch(moveedges)
-    publish moveclick $this.edge $x $y
+    # set _scratch(moveedges) [eval $graph subgraphEdges $vertices]
+    # notify addtag $this.edge $_scratch(moveedges)
+    # notify moveclick $this.edge $x $y
     
     # Get partially-connected edges and start a reshape sequence on them
-    set _scratch(inputedges) [eval $graph subgraphInputs $vertices]
-    foreach edge $_scratch(inputedges) {
-        publish reshapeclick $edge $x $y end
-    }
-    set _scratch(outputedges) [eval $graph subgraphOutputs $vertices]
-    foreach edge $_scratch(outputedges) {
-        publish reshapeclick $edge $x $y start
-    }
+    # set _scratch(inputedges) [eval $graph subgraphInputs $vertices]
+    # foreach edge $_scratch(inputedges) {
+    #    notify reshapeclick $edge $x $y end
+    #}
+    #set _scratch(outputedges) [eval $graph subgraphOutputs $vertices]
+    #foreach edge $_scratch(outputedges) {
+    #    notify reshapeclick $edge $x $y start
+    #}
+}
+
+########################################################################
+#### vertexconfigure
+#
+# Configure a vertex and return the inverse command.
+#
+body ::tycho::GraphLayout::vertexconfigure {vertex args} {
+    _verify vertex $vertex
+    _configure vertex $vertex $args
+}
+
+########################################################################
+#### vertexcoords
+#
+# Set the coordinates of a vertex.
+#
+body ::tycho::GraphLayout::vertexcoords {vertex x y} {
+    _verify vertex $vertex
+    _assign vertex $vertex [list $x $y]
 }
 
 ########################################################################
@@ -186,16 +250,16 @@ body ::tycho::GraphLayout::vertexclick {tag x y} {
 #
 body ::tycho::GraphLayout::vertexdrag {tag x y} {
     # Move the vertices and fully-connected edges
-    publish movedrag $tag $x $y
-    publish movedrag $this.edge $x $y
+    notify movedrag $tag $x $y
+    #notify movedrag $this.edge $x $y
     
     # reshape the partially-connected edges.
-    foreach edge $_scratch(inputedges) {
-        publish reshapedrag $edge $x $y end
-    }
-    foreach edge $_scratch(outputedges) {
-        publish reshapedrag $edge $x $y start
-    }	
+#     foreach edge $_scratch(inputedges) {
+#         notify reshapedrag $edge $x $y end
+#     }
+#     foreach edge $_scratch(outputedges) {
+#         notify reshapedrag $edge $x $y start
+#     }	
 }
 
 ########################################################################
@@ -210,21 +274,21 @@ body ::tycho::GraphLayout::vertexdrag {tag x y} {
 #
 body ::tycho::GraphLayout::vertexmove {tag x y} {
     # Move the vertices
-    publish move $tag $x $y
+    notify move $tag $x $y
     set vertices [$primaryview withtag $tag]
     
     # Move completely-connected edges
-    foreach edge [eval $graph subgraphEdges $vertices] {
-        publish move $edge $x $y
-    }
-    
-    # Get partially-connected edges and reshape sequence them
-    foreach edge [eval $graph subgraphInputs $vertices] {
-        publish reshape $edge $x $y end
-    }
-    foreach edge [eval $graph subgraphOutputs $vertices] {
-        publish reshape $edge $x $y start
-    }
+#     foreach edge [eval $graph subgraphEdges $vertices] {
+#         notify move $edge $x $y
+#     }
+#     
+#     # Get partially-connected edges and reshape sequence them
+#     foreach edge [eval $graph subgraphInputs $vertices] {
+#         notify reshape $edge $x $y end
+#     }
+#     foreach edge [eval $graph subgraphOutputs $vertices] {
+#         notify reshape $edge $x $y start
+#     }
 }
 
 ########################################################################
@@ -235,20 +299,20 @@ body ::tycho::GraphLayout::vertexmove {tag x y} {
 #
 body ::tycho::GraphLayout::vertexrelease {tag x y} {
     # Terminate move of vertices and fully-connected edges
-    publish moverelease $tag $x $y
-    publish moverelease $this.edge $x $y
+    notify moverelease $tag $x $y
+    # notify moverelease $this.edge $x $y
     
-    # Terminate the reshape of partially-connected edges
-    foreach edge $_scratch(inputedges) {
-        publish reshaperelease end $edge $x $y
-    }
-    foreach edge $_scratch(outputedges) {
-        publish reshaperelease start $edge $x $y
-    }
-    
-    # Remove the edge tag
-    publish dtag $this.edge
-    
+#     # Terminate the reshape of partially-connected edges
+#     foreach edge $_scratch(inputedges) {
+#         notify reshaperelease end $edge $x $y
+#     }
+#     foreach edge $_scratch(outputedges) {
+#         notify reshaperelease start $edge $x $y
+#     }
+#     
+#     # Remove the edge tag
+#     notify dtag $this.edge
+#     
     # Construct the undo and redo commands. Don't use "tag"
     # because objects may become untagged.
     set deltax [expr $x - $_scratch(startx)]
@@ -257,36 +321,15 @@ body ::tycho::GraphLayout::vertexrelease {tag x y} {
     set redo [list sequence]
     lappend redo [list addtag $this.move $_scratch(movevertices)]
     lappend redo [list vertexmove $this.move $deltax $deltay]
-    lappend redo [dtag $this.move]
+    lappend redo [list dtag $this.move]
     
     set undo [list sequence]
     lappend undo [list addtag $this.move $_scratch(movevertices)]
     lappend undo [list vertexmove $this.move -$deltax -$deltay]
-    lappend undo [dtag $this.move]
+    lappend undo [list dtag $this.move]
     
     # Add the constructed commands to the history
     appendHistory $redo $undo 1
-}
-
-########################################################################
-#### vertex
-#
-# Add a new vertex to the model and return the inverse command. The
-# value is the _initial_ coordinates only.
-#
-body ::tycho::GraphLayout::vertex {vertex coords args} {
-    _verifynot vertex $vertex
-    _entity vertex $vertex $coords $args
-}
-
-########################################################################
-#### vertexconfigure
-#
-# Configure a vertex and return the inverse command.
-#
-body ::tycho::GraphLayout::vertexconfigure {vertex args} {
-    _verify vertex $vertex
-    _configure vertex $vertex $args
 }
 
 
@@ -294,72 +337,3 @@ body ::tycho::GraphLayout::vertexconfigure {vertex args} {
     #################################################################
     ####                  protected methods                      ####
 
-########################################################################
-#### addtag
-#
-body ::tycho::GraphLayout::addtag {tag args} {
-	return ""
-}
-
-########################################################################
-#### dtag
-#
-body ::tycho::GraphLayout::dtag {tag} {
-	return ""
-}
-
-########################################################################
-#### move
-#
-body ::tycho::GraphLayout::move {tag x y} {
-	return ""
-}
-
-########################################################################
-#### moveclick
-#
-body ::tycho::GraphLayout::moveclick {tag x y} {
-	return ""
-}
-
-########################################################################
-#### movedrag
-#
-body ::tycho::GraphLayout::movedrag {tag x y} {
-	return ""
-}
-
-########################################################################
-#### moverelease
-#
-body ::tycho::GraphLayout::moverelease {tag x y} {
-	return ""
-}
-
-########################################################################
-#### reshape
-#
-body ::tycho::GraphLayout::reshape {tag x y arg} {
-	return ""
-}
-
-########################################################################
-#### reshapeclick
-#
-body ::tycho::GraphLayout::reshapeclick {tag x y arg} {
-	return ""
-}
-
-########################################################################
-#### reshapedrag
-#
-body ::tycho::GraphLayout::reshapedrag {tag x y arg} {
-	return ""
-}
-
-########################################################################
-#### reshaperelease
-#
-body ::tycho::GraphLayout::reshaperelease {tag x y arg} {
-	return ""
-}
