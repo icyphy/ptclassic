@@ -131,6 +131,7 @@ Block* Block::clone() const {
 int
 Block::portNames (const char** names, int* io, int nMax) const {
 	int n = numberPorts();
+	int count = 0;
 	if (n > nMax) n = nMax;
 	BlockPortIter next(*this);
 	for (int i = n; i>0; i--) {
@@ -138,14 +139,16 @@ Block::portNames (const char** names, int* io, int nMax) const {
 		if (hidden(p)) continue;
 		*names++ = p.readName();
 		*io++ = p.isItOutput();
+		count++;
 	}
-	return ports.size();
+	return count;
 }
 
 // Return the names of the multiports within the block.  Omit hidden ports.
 int
 Block::multiPortNames (const char** names, int* io, int nMax) const {
 	int n = numberMPHs();
+	int count = 0;
 	if (n > nMax) n = nMax;
 	BlockMPHIter next(*this);
 	for (int i = n; i>0; i--) {
@@ -153,8 +156,9 @@ Block::multiPortNames (const char** names, int* io, int nMax) const {
 		if (hidden(p)) continue;
 		*names++ = p.readName();
 		*io++ = p.isItOutput();
+		count++;
 	}
-	return multiports.size();
+	return count;
 }
 
 State *
