@@ -49,7 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	//////////////////////////////
 
 class BDFWormhole : public Wormhole, public BDFStar {
-
 private:
 	// time interval between samples.
 	double space;
@@ -61,15 +60,16 @@ private:
 	double arrivalTime;
 
 protected:
+	void setup();
+	void go();
+
 	// redefine the getStopTime() 
 	double getStopTime();
 
 	// no need of sumUp method.
 
 public:
-	void setup();
 	void begin() { Wormhole::begin(); }
-	void go();
 	void wrapup();
 
 	// Constructor
