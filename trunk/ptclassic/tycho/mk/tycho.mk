@@ -30,8 +30,35 @@
 # Date of creation: 7/31/96
 # Author: Christopher Hylands
 
+# This makefile should be included at the top of every Tycho makefile.
+# This makefile uses the ROOT makefile variable.
+
+
+# The home of the Java Developer's Kit (JDK)
+# Generating Java documentation uses this makefile variable
+JAVAHOME = 	/opt/SUNWjws/JDK
+
+########## You should not have to change anything below this line ######
+
+
+# The 'javac' compiler.
+JAVAC = 	$(JAVAHOME)/bin/javac
+
+# Flags to pass to javac.
+JFLAGS = 	-g
+
+# The 'javadoc' program
+JAVADOC = 	$(JAVAHOME)/bin/javadoc
+
+# Flags to pass to javadoc.
+JDOCFLAGS = 	-author -version # -doctype MIF
+
+
+
+# The destination directory for any libraries created.
+# Usually this is an architecture dependent library.
+LIBDIR =	$(ROOT)/lib.$(PTARCH)
 
 # Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
 #ITCLSH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/itclsh
 ITCLSH =	itclsh
-LIBDIR =	$(ROOT)/lib.$(PTARCH)
