@@ -81,7 +81,7 @@ static float c_b240 = (float) .5;
 /*                   imd = 0   terminates program */
 /* ----------------------------------------------------------------------- */
 
-int main(void)
+int main()
 {
     FILE *fin, *fout;
 
@@ -89,21 +89,21 @@ int main(void)
     int i__1;
 
     /* Builtin functions */
-    double atan(double);
-    double sin(double), cos(double);
+    double atan();
+    double sin(), cos();
 
     /* Local variables */
     static float beta;
     static int otcd1, otcd2;
     static float c;
-    extern /* Subroutine */ int chebc_(int *nf, float *dp, float *df, int *n, float *x0, float *xn);
+    extern /* Subroutine */ int chebc_();
     static float g[512];
     static int i, j, k, n;
     static float alpha;
     static char input[STRSIZE];
     static char fname[STRSIZE];
     static float w[512];
-    extern /* Subroutine */ int cheby_(int *nf, float *w, int *n, int *ieo, float *dp, float *df, float *x0, float *xn);
+    extern /* Subroutine */ int cheby_();
     static float dplog;
     static float c1;
     static float c3;
@@ -111,11 +111,11 @@ int main(void)
     static float twopi, x0, fc, df, fh, fl;
     static int nf;
     static float dp, pi;
-    extern /* Subroutine */ int flchar_(int *nf, int *itype, int *jtype, float *fc, float *fl, float *fh, int *n, int *ieo, float *g, int *otcd2);
+    extern /* Subroutine */ int flchar_();
     static float xn;
-    extern /* Subroutine */ int hammin_(int *nf, float *w, int *n, int *ieo, float *alpha, float *beta), kaiser_(int *nf, float *w, int *n, int *ieo, float *beta), triang_(int *nf, float *w, int *n, int *ieo);
+    extern /* Subroutine */ int hammin_(), kaiser_(), triang_();
     static char answer[1];
-    extern /* Subroutine */ int outimp_(float *g, int *n, int *nf, int *ieo, FILE *ioutd);
+    extern /* Subroutine */ int outimp_();
     static int ieo;
     static float att;
 
@@ -496,7 +496,11 @@ L70:
 /* triangular window */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int triang_(int *nf, float *w, int *n, int *ieo)
+/* Subroutine */ int triang_(nf, w, n, ieo)
+     int *nf;
+     float *w;
+     int *n;
+     int *ieo;
 {
     /* System generated locals */
     int i__1;
@@ -535,13 +539,19 @@ L70:
 /* window is w(n) = alpha + beta * cos( twopi*(n-1) / (nf-1) ) */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int hammin_(int *nf, float *w, int *n, int *ieo, float *alpha, float *beta)
+/* Subroutine */ int hammin_(nf, w, n, ieo, alpha, beta)
+     int *nf;
+     float *w;
+     int *n;
+     int *ieo;
+     float *alpha;
+     float *beta;
 {
     /* System generated locals */
     int i__1;
 
     /* Builtin functions */
-    double atan(double), cos(double);
+    double atan(), cos();
 
     /* Local variables */
     static int i;
@@ -579,20 +589,25 @@ L70:
 /* kaiser window */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int kaiser_(int *nf, float *w, int *n, int *ieo, float *beta)
+/* Subroutine */ int kaiser_(nf, w, n, ieo, beta)
+     int *nf;
+     float *w;
+     int *n;
+     int *ieo;
+     float *beta;
 {
     /* System generated locals */
     int i__1;
     float r__1;
 
     /* Builtin functions */
-    double sqrt(double);
+    double sqrt();
 
     /* Local variables */
     static float xind;
     static int i;
     static float xi, bes;
-    extern double ino_(float *x);
+    extern double ino_();
 
 
 /*   nf = filter length in samples */
@@ -628,7 +643,8 @@ L70:
 /* bessel function for kaiser window */
 /* ----------------------------------------------------------------------- */
 
-  double ino_(float *x)
+  double ino_(x)
+     float *x;
 {
     /* System generated locals */
     float ret_val;
@@ -668,17 +684,23 @@ L70:
 /* one of the three parameters nf,dp and df is unspecified */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int chebc_(int *nf, float *dp, float *df, int *n, float *x0, float *xn)
+/* Subroutine */ int chebc_(nf, dp, df, n, x0, xn)
+     int *nf;
+     float *dp;
+     float *df;
+     int *n;
+     float *x0;
+     float *xn;
 {
     /* System generated locals */
     float r__1;
 
     /* Builtin functions */
-    double atan(double), cos(double), cosh(double);
+    double atan(), cos(), cosh();
 
     /* Local variables */
     static float x, c0, c1, c2, pi;
-    extern double arccos_(float *x), coshin_(float *x);
+    extern double arccos_(), coshin_();
 
 
 /* nf = filter length (in samples) */
@@ -742,19 +764,27 @@ L70:
 /* dolph chebyshev window design */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int cheby_(int *nf, float *w, int *n, int *ieo, float *dp, float *df, float *x0, float *xn)
+/* Subroutine */ int cheby_(nf, w, n, ieo, dp, df, x0, xn)
+     int *nf;
+     float *w;
+     int *n;
+     int *ieo;
+     float *dp;
+     float *df;
+     float *x0;
+     float *xn;
 {
     /* System generated locals */
     int i__1, i__2;
 
     /* Builtin functions */
-    double atan(double), cos(double), cosh(double), sin(double);
+    double atan(), cos(), cosh(), sin();
 
     /* Local variables */
     static float beta, f;
     static int i, j;
     static float p, alpha, x, c1, c2, twopi, pi[1024], xi, pr[1024], xj;
-    extern double arccos_(float *x), coshin_(float *x);
+    extern double arccos_(), coshin_();
     static float fnf, pie, sum, twn;
 
 
@@ -848,13 +878,14 @@ L70:
 /* function for hyperbolic inverse cosine of x */
 /* ----------------------------------------------------------------------- */
 
-  double coshin_(float *x)
+  double coshin_(x)
+     float *x;
 {
     /* System generated locals */
     float ret_val;
 
     /* Builtin functions */
-    double sqrt(double), log(double);
+    double sqrt(), log();
 
     ret_val = log(*x + sqrt(*x * *x - (float) 1.));
     return ret_val;
@@ -866,13 +897,14 @@ L70:
 /* function for inverse cosine of x */
 /* ----------------------------------------------------------------------- */
 
-  double arccos_(float *x)
+  double arccos_(x)
+     float *x;
 {
     /* System generated locals */
     float ret_val;
 
     /* Builtin functions */
-    double sqrt(double), atan(double);
+    double sqrt(), atan();
 
     /* Local variables */
     static float a;
@@ -905,13 +937,14 @@ L70:
 /* function for hyperbolic cosine of x */
 /* ----------------------------------------------------------------------- */
 
-  double cosh_(float *x)
+  double cosh_(x)
+     float *x;
 {
     /* System generated locals */
     float ret_val;
 
     /* Builtin functions */
-    double exp(double);
+    double exp();
 
     ret_val = (exp(*x) + exp(-(double) (*x))) / (float) 2.;
     return ret_val;
@@ -923,13 +956,23 @@ L70:
 /* subroutine to determine filter characteristics */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int flchar_(int *nf, int *itype, int *jtype, float *fc, float *fl, float *fh, int *n, int *ieo, float *g, int *otcd2)
+/* Subroutine */ int flchar_(nf, itype, jtype, fc, fl, fh, n, ieo, g, otcd2)
+     int *nf;
+     int *itype;
+     int *jtype;
+     float *fc;
+     float *fl;
+     float *fh;
+     int *n;
+     int *ieo;
+     float *g;
+     int *otcd2;
 {
     /* System generated locals */
     int i__1, i__2;
 
     /* Builtin functions */
-    double atan(double), cos(double);
+    double atan(), cos();
 
     /* Local variables */
     static float resp[2048], sumi, twni;
@@ -937,7 +980,7 @@ L70:
     static float f1, f2, db, pi;
     static int nr;
     static float xi, xj;
-    extern /* Subroutine */ int ripple_(int *nr, float *rideal, float *flow, float *fhi, float *resp, float *f1, float *f2, float *db);
+    extern /* Subroutine */ int ripple_();
     static float sum, xnr, twn;
 
 /*    nf = filter length in samples */
@@ -1066,7 +1109,15 @@ L70:
 /* point where the transition region crosses the measured ripple bound */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int ripple_(int *nr, float *rideal, float *flow, float *fhi, float *resp, float *f1, float *f2, float *db)
+/* Subroutine */ int ripple_(nr, rideal, flow, fhi, resp, f1, f2, db)
+     int *nr;
+     float *rideal;
+     float *flow;
+     float *fhi;
+     float *resp;
+     float *f1;
+     float *f2;
+     float *db;
 {
     /* System generated locals */
     int i__1;
@@ -1198,7 +1249,12 @@ L70:
 /*    the output of the program. */
 /* ----------------------------------------------------------------------- */
 
-/* Subroutine */ int outimp_(float *g, int *n, int *nf, int *ieo, FILE *ioutd)
+/* Subroutine */ int outimp_(g, n, nf, ieo, ioutd)
+     float *g;
+     int *n;
+     int *nf;
+     int *ieo;
+     FILE *ioutd;
 {
     /* System generated locals */
     int i__1;

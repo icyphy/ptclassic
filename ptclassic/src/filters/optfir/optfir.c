@@ -62,7 +62,7 @@ main()
   /* Local variables */
   static float edge[20], delf;
   static int nodd;
-  extern double wate_(float *, float *, float *, int *, int *);
+  extern double wate_();
   static float temp;
   static double attn;
   static int nrox;
@@ -71,7 +71,7 @@ main()
   static char input[STRSIZE];
   static char fname[STRSIZE];
   static int nfmax, nfilt, idist;
-  extern /* Subroutine */ remez_(float *, int *);
+  extern /* Subroutine */ remez_();
   static int jtype;
   static double svrip;
   static float change;
@@ -82,7 +82,7 @@ main()
   static double ripple;
   static char answer[1];
   static int nm1;
-  extern double eff_(float *, float *, int *, int *, int *);
+  extern double eff_();
   static int neg;
   static float fup;
   static int kup;
@@ -734,14 +734,18 @@ L520:
 
 /*<       Function Eff(freq,fx,lband,jtype,idist) > */
 double 
-eff_(float *freq, float *fx, int *lband, int *jtype, int
-     *idist)
+eff_(freq, fx, lband, jtype, idist)
+     float *freq;
+     float *fx;
+     int *lband;
+     int *jtype;
+     int *idist;
 {
   /* System generated locals */
   float ret_val;
 
   /* Builtin functions */
-  double sin(double);
+  double sin();
 
   /* Local variables */
   static float x;
@@ -780,8 +784,12 @@ L1:
 
 /*<       Function Wate(freq,fx,wtx,lband,jtype) > */
 double 
-wate_(float *freq, float *fx, float *wtx, int *lband, int *
-      jtype)
+wate_(freq, fx, wtx, lband, jtype)
+     float *freq;
+     float *fx;
+     float *wtx;
+     int *lband;
+     int *jtype;
 {
   /* System generated locals */
   float ret_val;
@@ -820,21 +828,23 @@ L2:
 
 /*<       Subroutine Remez(edge,nbands) > */
 /* Subroutine */ int 
-remez_(float *edge, int *nbands)
+remez_(edge, nbands)
+     float *edge;
+     int *nbands;
 {
   /* Builtin functions */
-  double cos(double), acos(double);
+  double cos(), acos();
 
   /* Local variables */
   static double dden;
   static float delf, devl;
-  extern /* Subroutine */ int ouch_(void);
+  extern /* Subroutine */ int ouch_();
   static float comp;
   static int luck;
   static double dnum;
   static int klow;
   static double a[100];
-  extern double d_(int *, int *, int *);
+  extern double d_();
   static int j, k, l;
   static double p[100], q[100], dtemp;
   static float gtemp;
@@ -845,7 +855,7 @@ remez_(float *edge, int *nbands)
   static int jchnge, nu, nz;
   static float xt;
   static int itrmax, jm1, nm1, jp1;
-  extern double gee_(int *, int *);
+  extern double gee_();
   static int kid;
   static float fsh;
   static int kkk, jet;
@@ -1495,7 +1505,10 @@ L545:
 
 /*<       Double Precision Function D(k,n,m) > */
 double 
-d_(int *k, int *n, int *m)
+d_(k, n, m)
+     int *k;
+     int *n;
+     int *m;
 {
   /* System generated locals */
   double ret_val;
@@ -1543,13 +1556,15 @@ d_(int *k, int *n, int *m)
 
 /*<       Function Gee(k,n) > */
 double 
-gee_(int *k, int *n)
+gee_(k, n)
+     int *k;
+     int *n;
 {
   /* System generated locals */
   float ret_val;
 
   /* Builtin functions */
-  double cos(double);
+  double cos();
 
   /* Local variables */
   static double c, d;
@@ -1590,7 +1605,7 @@ gee_(int *k, int *n)
 
 /*<       Subroutine Ouch > */
 /* Subroutine */ int 
-ouch_(void)
+ouch_()
 {
 printf("********** FAILURE TO CONVERGE **********\n");
 printf("Probable cause is machine rounding error\n");
