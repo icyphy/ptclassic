@@ -1,5 +1,5 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.4
-# with egcs
+# with egcs or gcc-2.95.1
 
 # $Id$
 
