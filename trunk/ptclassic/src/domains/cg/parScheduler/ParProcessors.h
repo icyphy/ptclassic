@@ -60,15 +60,13 @@ public:
 	// return size
 	int size()	{ return numProcs; }
 
-	// sort the processor indices with finish time.
-	void sortWithFinishTime();
-
 	// get the i-th processor. Processors are indexed from 0 to
 	// numProcs-1. Should be redefined.
 	virtual UniProcessor* getProc(int num);
 
 	// map targets to each processor
-	void mapTargets();
+	// The optional argument directs the mapping.
+	void mapTargets(IntArray* a = 0);
 
 	// get makespan
 	int getMakespan(); 
@@ -107,14 +105,14 @@ protected:
   	// pattern of processor availability (PPA) is stored in indices.
   	IntArray pIndex;
 
-	// processor indices
-	IntArray pId;
-
 	// A list of communication nodes
 	EGNodeList SCommNodes;
 
 	// The number of interprocessor communications in the schedule.
 	int commCount;
+
+	// schedule a node of a data-parallel star or a wormhole.
+	void scheduleParNode(ParNode*);
 
 	// makes send and receive nodes for IPC.
 	void findCommNodes(ParGraph*, EGNodeList& );
