@@ -46,9 +46,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor
 AsmTarget :: AsmTarget(const char* nam, const char* desc,
-		  const char* stype, ProcMemory* m) :
-		CGTarget(nam,stype,desc), mem(m), interruptFlag(FALSE)
-{ initStates();}
+    const char* stype, ProcMemory* m) :
+    CGTarget(nam,stype,desc), mem(m), interruptFlag(FALSE) { 
+	initStates();
+	addStream("mainLoop",&mainLoop);
+	addStream("trailer",&trailer);
+}
 
 // all AsmTargets permit AnyAsmStar.
 const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
@@ -61,6 +64,12 @@ void AsmTarget :: initStates() {
 	filePrefix.setAttributes(A_SETTABLE);
 	displayFlag.setAttributes(A_SETTABLE);
 	runFlag.setAttributes(A_SETTABLE);
+}
+
+void AsmTarget :: setup() {
+	mainLoop.initialize();
+	trailer.initialize();
+	CGTarget::setup();
 }
 
 void AsmTarget :: headerCode() {
@@ -160,6 +169,14 @@ AsmTarget::allocReq(AsmStar& star) {
 }
 
 // Routines to modify the galaxy to permit use of the loop scheduler.
+
+void AsmTarget :: mainLoopCode() {
+	switchCodeStream(galaxy(),&mainLoop);
+        if (inWormHole()) allWormInputCode();
+        compileRun((SDFScheduler*) scheduler());
+        if (inWormHole()) allWormOutputCode();
+	switchCodeStream(galaxy(),&trailer);
+}
 
 inline int hasCirc(PortHole* p) {
 	return (p->attributes() & PB_CIRC) != 0;
@@ -312,13 +329,20 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 }
 
 /*virtual*/ void AsmTarget::frameCode() {
-    if (procedures.numPieces() > 0) {
-	StringList heading = "\n\n\nProcedures Begin\n\n";
-	StringList tail = "\n\n\nProcedures End\n\n";
-	myCode << comment(heading) <<  procedures << comment(tail);
-    }
-    StringList memMap = mem->printMemMap("","");
-    myCode << comment(memMap);
+        // Generate Code.  Iterate an infinite number of times if
+        // target is inside a wormhole
+        int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+        beginIteration(iterations,0);
+	myCode << mainLoop;
+        endIteration(iterations,0);
+	myCode << trailer;
+	if (procedures.numPieces() > 0) {
+	    StringList heading = "\n\n\nProcedures Begin\n\n";
+	    StringList tail = "\n\n\nProcedures End\n\n";
+	    myCode << comment(heading) <<  procedures << comment(tail);
+	}
+	StringList memMap = mem->printMemMap("","");
+	myCode << comment(memMap);
 }
 
 /*virtual*/ void AsmTarget :: writeCode() {
