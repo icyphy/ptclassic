@@ -210,58 +210,58 @@ else
 INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
 
 $(BASENAME): $(PT_DEPEND)
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME)
 
 $(BASENAME).ptrim: $(PT_DEPEND)
-	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
 
 $(BASENAME).ptiny: $(PT_DEPEND)
-	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
 $(BASENAME).debug: $(PT_DEPEND)
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
 
 $(BASENAME).ptrim.debug: $(PT_DEPEND)
-	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
 
 $(BASENAME).ptiny.debug: $(PT_DEPEND)
-	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
 
 $(BASENAME).ptrim.debug.purify: $(PT_DEPEND)
-	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
 
 $(BASENAME).ptiny.debug.purify: $(PT_DEPEND)
-	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
 $(BASENAME).debug.quantify: $(PT_DEPEND)
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
 
 $(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
-	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
 
 $(BASENAME).ptiny.debug.quantify: $(PT_DEPEND)
-	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
 
 $(BASENAME).ptrim.debug.purecov: $(PT_DEPEND)
-	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
 
 $(BASENAME).ptiny.debug.purecov: $(PT_DEPEND)
-	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
 $(BINDIR)/$(BASENAME): $(BASENAME) 
-	make FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
 
 $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim 
-	make PTRIM=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptrim
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptrim
 
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
-	make PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
 endif #ALLBINARIES
 
