@@ -42,14 +42,8 @@ and pass the result to the output.
         Packet inPkt1, inPkt2;
         (input1%0).getPacket(inPkt1);
         (input2%0).getPacket(inPkt2);
-        if (!StrStr(inPkt1.myData()->dataType(), "GrayI")) {
-            Error::abortRun(*this, inPkt1.typeError("GrayI"));
-            return;
-        }
-        if (!StrStr(inPkt2.myData()->dataType(), "GrayI")) {
-            Error::abortRun(*this, inPkt2.typeError("GrayI"));
-            return;
-        }
+	TYPE_CHECK(inPkt1,"GrayImage");
+	TYPE_CHECK(inPkt2,"GrayImage");
         GrayImage* inImage1 = (GrayImage*) inPkt1.writableCopy();
         GrayImage* inImage2 = (GrayImage*) inPkt2.myData();
 
