@@ -32,6 +32,12 @@
 
 # This makefile is an autoconf makefile, not a standard Ptolemy makefile
 
+# If this file is named tycho/src/tcl.mk, DON'T EDIT IT.  Instead,
+# do 'cd $TYCHO; make config_tclexts', which will create 
+# tycho/obj.$PTARCH/tcl.mk. 
+# tycho/src/tcl.mk exists so we can run 'make sources' in the
+# tycho/src directory.
+
 SHELL = 	/bin/sh
 
 # Don't set srcdir or VPATH in this file or you will override the values
