@@ -111,6 +111,16 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
  	echo freebsd
  	exit 0 ;;
 
+    i[3456789]86:*NT:4.*:*)
+	# The NT4 port does not yet exist
+	echo nt4
+	exit 0;;
+
+    i[3456789]86:*NT:5.*:*)
+	# The NT5 port does not yet exist
+	echo nt5
+	exit 0;;
+
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
