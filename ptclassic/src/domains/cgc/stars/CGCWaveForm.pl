@@ -79,7 +79,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 0 }
 		attributes { A_NONSETTABLE }
 	}
-	start {
+	setup {
 		pos = 0;
 		size = value.size();
 	}
