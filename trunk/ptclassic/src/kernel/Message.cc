@@ -1,3 +1,4 @@
+static const char file_id[] = "Packet.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -65,7 +66,7 @@ int PacketData::errorConvert(const char* arg) const {
 
 // clone -- try to catch some errors for folks who don't redefine it.
 PacketData* PacketData::clone() const {
-	PacketData* p = new PacketData;
+	LOG_NEW; PacketData* p = new PacketData;
 	if (strcmp(dataType(),p->dataType()) != 0)
 		Error::abortRun("PacketData class ",dataType(),
 				"doesn't redefine clone()!");
@@ -79,8 +80,9 @@ static Packet dummy;
 // have to handle dummyPacket specially (it cannot be deleted)
 void Packet::unlinkData() {
 	d->refCount--;
-	if (d != &dummyPacket && d->refCount == 0)
-		delete d;
+	if (d != &dummyPacket && d->refCount == 0) {
+		LOG_DEL; delete d;
+	}
 }
 
 extern const DataType PACKET = "PACKET";
@@ -183,7 +185,7 @@ Particle* PacketSample::clone() {
 }
 
 Particle* PacketSample::useNew() {
-	return new PacketSample;
+	LOG_NEW; return new PacketSample;
 }
 
 // We assign "dummy" to the packet before returning it to the Plasma.

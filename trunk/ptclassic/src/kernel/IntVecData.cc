@@ -1,3 +1,4 @@
+static const char file_id[] = "IntVecData.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -17,7 +18,7 @@ Methods for class IntVecData
 
 void IntVecData::init(int l,const int *srcData) {
 	len = l;
-	data = new int[l];
+	LOG_NEW; data = new int[l];
 	for (int i = 0; i < l; i++)
 		data[i] = *srcData++;
 }
@@ -26,9 +27,9 @@ const char* IntVecData::dataType() const { return "IntVecData";}
 
 ISA_FUNC(IntVecData,PacketData);
 
-PacketData* IntVecData::clone() const { return new IntVecData(*this);}
+PacketData* IntVecData::clone() const { LOG_NEW; return new IntVecData(*this);}
 
-IntVecData::~IntVecData() { delete data;}
+IntVecData::~IntVecData() { LOG_DEL; delete data;}
 
 StringList IntVecData::print() const {
 	StringList out = "{";

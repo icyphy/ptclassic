@@ -1,3 +1,4 @@
+static const char file_id[] = "KnownTarget.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -81,7 +82,7 @@ void KnownTarget::addEntry (Target& target, const char* name, int isOnHeap) {
 	KnownTargetEntry* kb = findEntry (target.readName());
 	if (kb) {
 		// delete the target if it was on the heap
-		if (kb->onHeap) delete kb->targ;
+		if (kb->onHeap) { LOG_DEL; delete kb->targ;}
 		kb->targ = &target;
 		kb->onHeap = isOnHeap;
 		kb->dynLinked = Linker::isActive();
@@ -89,7 +90,7 @@ void KnownTarget::addEntry (Target& target, const char* name, int isOnHeap) {
 
 	// otherwise create a new entry
 	else {
-		KnownTargetEntry* nkb = new KnownTargetEntry;
+		LOG_NEW; KnownTargetEntry* nkb = new KnownTargetEntry;
 		nkb->targ = &target;
 		nkb->next = allTargets;
 		nkb->onHeap = isOnHeap;

@@ -1,3 +1,5 @@
+#include "logNew.h"
+REGISTER_FILE;
 /**********************************************************************
 Version identification:
 $Id$ (<T>Domain.cc)
@@ -28,23 +30,23 @@ class <T>Domain : public Domain {
 public:
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		return *new <T>Wormhole(innerGal,innerTarget);
+		LOG_NEW; return *new <T>Wormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
-	PortHole& newInPort() { return *new In<T>Port;}
+	PortHole& newInPort() { LOG_NEW; return *new In<T>Port;}
 
 	// new output porthole
-	PortHole& newOutPort() { return *new Out<T>Port;}
+	PortHole& newOutPort() { LOG_NEW; return *new Out<T>Port;}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { return *new <T>fromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new <T>fromUniversal;}
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { return *new <T>toUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new <T>toUniversal;}
 
 	// new node (geodesic)
-	Geodesic& newNode() { return *new <T>Geodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new <T>Geodesic;}
 
 	// constructor
 	<T>Domain() : Domain("<T>") {}

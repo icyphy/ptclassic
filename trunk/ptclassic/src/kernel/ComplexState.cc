@@ -1,3 +1,4 @@
+static const char file_id[] = "ComplexState.cc";
 
 #ifdef __GNUG__
 #pragma implementation
@@ -44,7 +45,7 @@ StringList ComplexState :: currentValue() const {
 }
 
 // clone
-State* ComplexState :: clone () const { return new ComplexState;}
+State* ComplexState :: clone () const {LOG_NEW; return new ComplexState;}
 
 void ComplexState  :: initialize() {
 	const  char* specialChars =  "*+-/(),";

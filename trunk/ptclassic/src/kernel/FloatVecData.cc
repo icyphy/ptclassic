@@ -1,3 +1,4 @@
+static const char file_id[] = "FloatVecData.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -17,7 +18,7 @@ Methods for class FloatVecData
 
 void FloatVecData::init(int l,const float *srcData) {
 	len = l;
-	data = new float[l];
+	LOG_NEW; data = new float[l];
 	for (int i = 0; i < l; i++)
 		data[i] = *srcData++;
 }
@@ -26,9 +27,9 @@ const char* FloatVecData::dataType() const { return "FloatVecData";}
 
 ISA_FUNC(FloatVecData,PacketData);
 
-PacketData* FloatVecData::clone() const { return new FloatVecData(*this);}
+PacketData* FloatVecData::clone() const { LOG_NEW; return new FloatVecData(*this);}
 
-FloatVecData::~FloatVecData() { delete data;}
+FloatVecData::~FloatVecData() { LOG_DEL; delete data;}
 
 StringList FloatVecData::print() const {
 	StringList out = "{";

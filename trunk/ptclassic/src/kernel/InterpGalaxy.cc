@@ -1,3 +1,4 @@
+static const char file_id[] = "InterpGalaxy.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -148,7 +149,7 @@ InterpGalaxy::delStar(const char* starname) {
 		return 0;
 	}
 // delete the object
-	delete st;
+	LOG_DEL; delete st;
 // add action to list.  Yes, when we clone, a star will be created and
 // then deleted.
 	actionList += "s";
@@ -170,12 +171,12 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	Plasma* pla = ph->setPlasma();
 	DataType dType = pla ? pla->type() : ph->myType();
 	if (ph->isItMulti()) {
-		GalMultiPort *p = new GalMultiPort(*ph);
+		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
 		p->setAlias(*ph);
 	}
 	else {
-		GalPort *p = new GalPort(*ph);
+		LOG_NEW; GalPort *p = new GalPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
 		p->setAlias(*ph);
 	}
@@ -373,7 +374,7 @@ InterpGalaxy::setDomain (const char* name) {
 
 // clone function: uses copy constructor.
 Block*
-InterpGalaxy::clone() const { return new InterpGalaxy(*this);}
+InterpGalaxy::clone() const { LOG_NEW; return new InterpGalaxy(*this);}
 
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
 // the action strings to be combined into one string.  This will break
@@ -563,24 +564,25 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 void InterpGalaxy :: zero () {
 	// delete permanent nodes
 	NodeListIter nextn(nodes);
-	for (int i = nodes.size(); i > 0; i--)
-		delete nextn++;
-
+	for (int i = nodes.size(); i > 0; i--) {
+		LOG_DEL; delete nextn++;
+	}
 	// delete component blocks
 	GalTopBlockIter nextb(*this);
-	for (i = numberBlocks(); i > 0; i--)
-		delete nextb++;
-
+	for (i = numberBlocks(); i > 0; i--) {
+		LOG_DEL; delete nextb++;
+	}
 	// delete ports
 	BlockPortIter nextp(*this);
-	for (i = numberPorts(); i > 0; i--)
-		delete nextp++;
+	for (i = numberPorts(); i > 0; i--) {
+		LOG_DEL; delete nextp++;
+	}
 
 	// delete states
 	BlockStateIter nexts(*this);
-	for (i = numberStates(); i > 0; i--)
-		delete nexts++;
-
+	for (i = numberStates(); i > 0; i--) {
+		LOG_DEL; delete nexts++;
+	}
 	// Clear action list
 	actionList.initialize();
 }

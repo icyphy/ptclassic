@@ -1,3 +1,4 @@
+static const char file_id[] = "Histogram.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -21,13 +22,13 @@ $Id$
 void intVec::resize(int newSize) {
 	if (newSize == xsize) return;
 	int* oldData = data;
-	data = new int[newSize];
+	LOG_NEW; data = new int[newSize];
 	int ncopy = min(newSize, xsize);
 	for (int i = 0; i < ncopy; i++)
 		data[i] = oldData[i];
 	for (i = ncopy; i < newSize; i++)
 		data[i] = 0;
-	delete oldData;
+	LOG_DEL; delete oldData;
 	xsize = newSize;
 }
 
@@ -70,7 +71,7 @@ int Histogram::getData(int binno, int& count, double& binCtr) {
 }
 
 XHistogram :: XHistogram () {
-	display = new XGraph;
+	LOG_NEW; display = new XGraph;
 	hist = 0;
 	optstring = 0;
 }
@@ -81,8 +82,8 @@ void XHistogram :: initialize(Block* parent, double binW, const char* options,
 	sprintf (buf, "-bar -nl -brw %g %s", binW/2, options);
 	optstring = savestring(buf);
 	display->initialize(parent, 1, optstring, title, saveFile);
-	delete hist;
-	hist = new Histogram(binW);
+	LOG_DEL; delete hist;
+	LOG_NEW; hist = new Histogram(binW);
 }
 
 void XHistogram :: addPoint(float y) {
@@ -98,14 +99,14 @@ void XHistogram :: terminate() {
 		binno++;
 	}
 	display->terminate();
-	delete hist;
+	LOG_DEL; delete hist;
 	hist = 0;
-	delete optstring;
+	LOG_DEL; delete optstring;
 	optstring = 0;
 }
 
 XHistogram :: ~XHistogram() {
-	delete display;
-	delete hist;
-	delete optstring;
+	LOG_DEL; delete display;
+	LOG_DEL; delete hist;
+	LOG_DEL; delete optstring;
 }

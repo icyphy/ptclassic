@@ -1,3 +1,4 @@
+static const char file_id[] = "DataStruct.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -18,20 +19,22 @@ inline anyway).
 
 void SingleLinkList :: insert(Pointer a)
 {
-	if (lastNode)	// List not empty
-		lastNode->next = new SingleLink(a,lastNode->next);
+	if (lastNode) {	// List not empty
+		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
+	}
 	else	{	// List empty
-		lastNode = new SingleLink(a,0);
+		LOG_NEW; lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
 	}
 }
 
 void SingleLinkList :: append(Pointer a)
 {
-	if (lastNode) 	// List not empty
-		lastNode = lastNode->next = new SingleLink(a,lastNode->next);
+	if (lastNode) {	// List not empty
+		LOG_NEW; lastNode = lastNode->next = new SingleLink(a,lastNode->next);
+	}
 	else {		// List empty
-		lastNode = new SingleLink(a,0);
+		LOG_NEW; lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
 	}
 }
@@ -44,7 +47,7 @@ Pointer SingleLinkList :: getAndRemove()
 	if (f == lastNode) lastNode = 0; // List now empty
 	else lastNode->next = f->next;
 
-	delete f;
+	LOG_DEL; delete f;
 	return r;
 }
 
@@ -67,11 +70,11 @@ void SingleLinkList :: initialize()
 	while (l != lastNode ) {
 		SingleLink *ll=l;
 		l = l->next;
-		delete ll;
+		LOG_DEL; delete ll;
 	}
 
 	// Delete the last node in the list
-	delete lastNode;
+	LOG_DEL; delete lastNode;
 
 	// and mark the list empty
 	lastNode = 0;
@@ -86,7 +89,7 @@ int SingleLinkList::remove (Pointer x) {
 	if (lastNode->next == lastNode) {
 		if (lastNode->e != x) return 0;
 		// only element matches, zero the list
-		delete lastNode;
+		LOG_DEL; delete lastNode;
 		lastNode = 0;
 		return 1;
 	}
@@ -97,7 +100,7 @@ int SingleLinkList::remove (Pointer x) {
 		if (f->e == x) {
 			g->next = f->next;
 			if (f == lastNode) lastNode = g;
-			delete f;
+			LOG_DEL; delete f;
 			return 1;
 		}
 		f = f->next;

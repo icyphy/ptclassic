@@ -1,3 +1,4 @@
+static const char file_id[] = "FixSample.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -26,7 +27,7 @@ static Plasma fixPlasma(fixproto);
 
 extern const DataType FIX = "FIX";
 
-Particle* FixSample :: useNew () { return new FixSample;}
+Particle* FixSample :: useNew () { LOG_NEW; return new FixSample;}
 
 Particle* FixSample :: clone () {
 	Particle* p = fixPlasma.get();

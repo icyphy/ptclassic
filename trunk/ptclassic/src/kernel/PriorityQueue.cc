@@ -1,3 +1,4 @@
+static const char file_id[] = "PriorityQueue.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -38,7 +39,7 @@ LevelLink* PriorityQueue :: getFreeLink() {
 		freeLinkHead = temp->next;
 		numFreeLinks--;
 	} else {
-		temp = new LevelLink;
+		LOG_NEW; temp = new LevelLink;
 	}
 	return temp;
 }
@@ -57,9 +58,9 @@ void PriorityQueue :: clearFreeList() {
 	while (freeLinkHead->next) {
 		temp = freeLinkHead;
 		freeLinkHead = freeLinkHead->next;
-		delete temp;
+		LOG_DEL; delete temp;
 	}
-	delete freeLinkHead;
+	LOG_DEL; delete freeLinkHead;
 	numFreeLinks = 0;
 }
 
