@@ -265,6 +265,8 @@ public:
 	int node(int argc,char** argv);
 	int nodeconnect(int argc,char** argv);
 	int numports(int argc,char** argv);
+	int pragma(int argc,char** argv);
+	int pragmaDefaults(int argc,char** argv);
 	int print(int argc,char** argv);
 	int renameuniv(int argc,char** argv);
 	int registerAction(int argc,char** argv);
@@ -278,7 +280,6 @@ public:
 	int star(int argc,char** argv);
 	int statevalue(int argc,char** argv);
 	int target(int argc,char** argv);
-	int targetHint(int argc,char** argv);
 	int targetparam(int argc,char** argv);
 	int targets(int argc,char** argv);
 	int topblocks(int argc,char** argv);
