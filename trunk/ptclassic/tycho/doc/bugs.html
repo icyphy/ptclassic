@@ -220,6 +220,46 @@ some of the biggies.
 <li> Most bindings in the File menu do not work.
 </ul>
 
+<h3><a href="../editors/visedit/EditDAG.itcl">EditDAG</a></h3>
+<ul>
+<li> addArc does not work. 
+ <P>Karl-Hermann Wieners &lt;kwieners@TechFak.Uni-Bielefeld.DE&gt; writes"
+<PRE>
+    Problem is, if I have selected a node with
+    slate/canvas id 54 as parent and item 52 as child, addArc simply calls
+    Graphics::selected, which returns {52 54}, irrespective of the selection
+    order.
+    As addArc takes the first element of the selection to be the parent, thing
+    get mixed up.
+    Tiny example:
+    -open DAG editor
+    -add root, name it "root1"
+    -add another root, "root2"
+    -select root2 by Button-1, root1 as child by Shift-Button-1
+    -do add arc, and root1 is now parent!
+    
+    
+    Besides, making a root node child of another root node isn't properly
+    handled by Graph::addArc. The former root (now child) is still on the
+    rootlist. IMHO, addArc must check, if the child node is on the rootlist, an
+   d
+    if so, remove it.
+    Example:
+    in tycho/MainConsole, type
+    >  tycho::Graph test
+    test
+    >  test add root1 {} {}
+    >  test add root2 {} {}
+    >  test addArc root1 root2
+    root1
+    >  test roots
+    root1 root2
+    >  test describe
+    {root1 {} {}} {root2 {} root1}
+
+</PRE>
+
+</ul>
 <h3><a href="../editors/visedit/TclProfile.itcl">TclProfile</a></h3>
 <ul>
 <li> The TclProfile probably won't work under Windows unless TclX is
@@ -228,6 +268,7 @@ won't help much.
 
 <li> Sometimes 4 colons instead of 2 colons are printed.
 </ul>
+
 
 <h2><a name="bugs in gendoc">Bugs in the documentation generator</a></h2>
 
