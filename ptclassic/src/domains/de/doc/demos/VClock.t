@@ -1,7 +1,7 @@
 .\" $Id$
 .NA VClock
 .SD
-Models a network with four inputs and a virtual clock buffer.
+Model a network with four inputs and "virtual clock" buffer service.
 .DE
 .SV $Revision$ 11/9/92
 .AL "Paul Haskell."
@@ -10,14 +10,24 @@ The
 .c Poisson
 and
 .c PseudoCell
-blocks provide four random input streams of data cells.
+stars provide four random input streams of data cells.
 The
 .c VirtClock
-star queues and outputs the arriving cells in "virtual clock"
-fashion.
-The output graph shows the length of the longest virtual
-clock queue, the output times, and the cell-loss times.
-
+star implements four queues and the "virtual clock" queue
+service discipline.
+The virtual clock discipline is similar to the "round-robin"
+queue service discipline.
+With round-robin service, time is divided into slots, and in
+each timeslot, the queue for one input channel is served.
+All input channels are served in turn.
+The virtual clock discipline differs in that if a queue is empty,
+the next queue in sequence is served immediately rather than
+in the next timeslot.
+.pp
+The output graph shows the length of the longest input
+queue vs. time, the output times for successfully
+delivered data cells, and the times at which cell losses occurred.
+.pp
 See
 H. Zhang and S. Keshav,
 "Comparison of Rate-Based Service Disciplines,"
