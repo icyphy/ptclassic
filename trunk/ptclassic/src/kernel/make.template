@@ -38,14 +38,14 @@ LIB=libptolemy.a
 
 # Library sources
 LIBCCSRCS=AutoForkNode.cc \
- Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
- Fraction.cc Galaxy.cc Domain.cc Linker.cc DataStruct.cc checkConnect.cc \
- InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
- Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
- Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
+ Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc DataStruct.cc \
+ Display.cc Domain.cc Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc   \
+ InterpGalaxy.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
+ Output.cc Particle.cc PriorityQueue.cc Star.cc StringList.cc \
+ Tokenizer.cc Universe.cc Wormhole.cc WormConnect.cc \
+ checkConnect.cc expandPath.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc Display.cc Geodesic.cc
-
+ KnownState.cc State.cc StringState.cc 
 LIBCSRCS=gnulib3a.c
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
@@ -55,10 +55,10 @@ SRCS=$(LIBSRCS) interpmain.cc
 # Header files
 HDRS= AutoForkNode.h \
  Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
- Display.h Domain.h Fraction.h Galaxy.h Geodesic.h InterpGalaxy.h \
- Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h NamedObj.h \
- Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
- Scheduler.h SpaceWalk.h Star.h StringList.h Tokenizer.h Topology.h \
+ Display.h Domain.h Fraction.h Galaxy.h GalIter.h Geodesic.h InterpGalaxy.h \
+ InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
+ NamedObj.h Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
+ Scheduler.h Star.h StringList.h Tokenizer.h Topology.h \
  Universe.h WormConnect.h Wormhole.h dataType.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h 
@@ -112,18 +112,18 @@ Interpreter.o:	Interpreter.cc
 # Commands to make some sources from templates
 
 FloatState.h FloatState.cc : ScalarState.hP ScalarState.ccP
-	genclass -2 Float val double val ScalarState;
-	sed 's/"Float"/"FLOAT"/' Float.double.ScalarState.h > FloatState.h;
-	sed 's/"Float"/"FLOAT"/;s/"double"/"float"/' Float.double.ScalarState.cc > FloatState.cc;
-	rm Float.double.ScalarState.h;
-	rm Float.double.ScalarState.cc;
+	cd $(VPATH); genclass -2 Float val double val ScalarState;\
+	sed 's/"Float"/"FLOAT"/' Float.double.ScalarState.h > FloatState.h;\
+	sed 's/"Float"/"FLOAT"/;s/"double"/"float"/' Float.double.ScalarState.cc > FloatState.cc;\
+	rm Float.double.ScalarState.h;\
+	rm Float.double.ScalarState.cc
 
 IntState.h IntState.cc : ScalarState.hP ScalarState.ccP
-	genclass -2 Int val int val ScalarState;
-	sed 's/"Int"/"INT"/' Int.int.ScalarState.h > IntState.h;
-	sed 's/"Int"/"INT"/' Int.int.ScalarState.cc > IntState.cc;
-	rm Int.int.ScalarState.h;
-	rm Int.int.ScalarState.cc;
+	cd $(VPATH); genclass -2 Int val int val ScalarState;\
+	sed 's/"Int"/"INT"/' Int.int.ScalarState.h > IntState.h;\
+	sed 's/"Int"/"INT"/' Int.int.ScalarState.cc > IntState.cc;\
+	rm Int.int.ScalarState.h;\
+	rm Int.int.ScalarState.cc
 
 
 FloatArrayState.h FloatArrayState.cc : ArrayState.hP ArrayState.ccP
