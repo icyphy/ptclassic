@@ -74,6 +74,10 @@ class ::tycho::Edit {
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
 
+    #### setInsert
+    # Set the insertion point to the value of position.
+    method setInsert {position}
+
     #### loadFile
     # Directly load the contents of the file.
     method loadFile {loadfile} 
