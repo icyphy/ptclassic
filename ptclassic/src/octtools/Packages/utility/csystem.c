@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@ util_csystem(s)
 char *s;
 {
     register SIGNAL_FN (*istat)(), (*qstat)();
-#ifdef _IBMR2
+#if defined(_IBMR2) || defined(SYSV)
     int status;    
 #else
     union wait status;
@@ -56,7 +56,7 @@ char *s;
     if (w == -1) {		/* check for no children ?? */
 	retval = -1;
     } else {
-#ifdef _IBMR2
+#if defined(_IBMR2) || defined(SYSV)
 	retval = status;
 #else
 	retval = status.w_status;
