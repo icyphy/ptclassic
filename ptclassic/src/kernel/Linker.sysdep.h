@@ -138,7 +138,11 @@ const int linkingNotSupported =
 // As of 4/95 the linker patch was PHSS_5083* for hpux9.x
 // gcc-2.7.2 under HPUX10.01 cannot create shared libraries, so this
 // might not work.
+#if defined(PT_EGCS)
+#define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -Xlinker +s -lstdc++ -o"
+#else
 #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -Xlinker +s -lg++ -lstdc++ -o"
+#endif //PT_EGCS
 // HPPA really, really wants shared library permissions to be 555.
 #define READONLY_SHAREDLIBS
 #include <dl.h>
