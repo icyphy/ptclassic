@@ -57,7 +57,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 installColors:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
   		-o installColors \
-		$(LIBS) -lX11 -lm 
+		$(LIBS) $(X11_LIBSPEC) -lm 
 
 DEST = $(BINDIR)/installColors
 
