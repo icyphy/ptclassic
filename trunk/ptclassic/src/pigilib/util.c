@@ -179,9 +179,9 @@ char **strPtr;
 	    "UGetFullTechDir: cannot read .Xdefaults 'vem.technology'");
 	ERR_IF1(!UMalloc(&dir, strlen(tmp) + 32));
 	sprintf(dir, "%s/ptolemy", tmp);
+	free(tmp);
     }
     *strPtr = dir;
-    free(tmp);
     return (TRUE);
 }
     
