@@ -12,7 +12,7 @@ group source -label {Source Stars} {
 #        attribute value -default 0.0 -type number -label value
 #        port out -datatype float
 #    }
-    star const \
+    star Const \
             -label {Const} \
             -icon {edit/cts/icons.tim#source.const} {
         attribute Value -default 1.0 -type number -label Value
@@ -21,8 +21,8 @@ group source -label {Source Stars} {
 }
 
 group sink -label {Sink Stars} {
-    star plot \
-            -label {Plot} \
+    star Plot \
+            -label {Plotter} \
             -icon {edit/cts/icons.tim#sink.plotter} {
         attribute YMin -default "-1.0" -label "Y minimum" -type number
         attribute YMax -default "1.0" -label "Y maximum" -type number
@@ -31,8 +31,8 @@ group sink -label {Sink Stars} {
 }
 
 group dynamic -label {Dynamic Stars} {
-    star integral \
-            -label {IntegraRK4} \
+    star IntegraRK4 \
+            -label {Integral} \
             -icon {edit/cts/icons.tim#dynamic.integral} {
         attribute InitState -default "0.0" -label "Initial State" -type number
         port input -datatype float
@@ -41,14 +41,14 @@ group dynamic -label {Dynamic Stars} {
 }
 
 group arithmetic -label {Basic Arithmetic} {
-    star add \
-            -label Add \
+    star Add \
+            -label Add_2 \
             -icon {edit/graphedit/icons.tim#arithmetic.add} {
         port input -composite 1
         port output -composite 0
     }
-    star add_3 \
-            -label Add \
+    star Add_3 \
+            -label Add_3 \
             -icon {edit/cts/icons.tim#arithmetic.add_3} {
         port input -composite 1
         port output -composite 0
@@ -65,15 +65,15 @@ group arithmetic -label {Basic Arithmetic} {
 #        port in -composite 1
 #        port out -composite 0
 #    }
-    star gain_left \
-            -label Gain \
+    star Gain_left \
+            -label Gain_Left \
             -icon {edit/cts/icons.tim#arithmetic.gain_left} {
         attribute Gain -default "1.0" -type number -label Gain
         port input -composite 0
         port output -composite 0
     }
-    star gain_right \
-            -label Gain \
+    star Gain_right \
+            -label Gain_Right \
             -icon {edit/cts/icons.tim#arithmetic.gain_right} {
         attribute Gain -default "1.0" -type number -label Gain
         port input -composite 0
