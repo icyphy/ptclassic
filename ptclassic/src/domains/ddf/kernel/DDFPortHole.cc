@@ -24,6 +24,8 @@ Code for DDF-type portholes and multiportholes.
 
 **************************************************************************/
 
+void DDFPortHole :: moveData() {}
+
 int InDDFPort :: isItInput () const { return TRUE;}
 
 void InDDFPort :: grabData () { getParticle();}

@@ -32,6 +32,8 @@ class DDFPortHole : public PortHole
 	int varying;	// flag to be set if dynamic
 
 public:
+	DDFPortHole() : varying(0) {}
+
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
         PortHole& setPort(const char* portName,
@@ -51,7 +53,7 @@ public:
 	// Since DDFStars will not be heavily used in a system, we 
 	// include them in this base class.
 	void imageConnect();			// connect with imagePort
-	virtual void moveData() = 0;	// move them to imagePort
+	virtual void moveData();	// move them to imagePort
 	Geodesic* imageGeo;
 	PortHole* imagePort;
 };
