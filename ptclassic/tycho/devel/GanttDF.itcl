@@ -120,9 +120,6 @@ class ::tycho::GanttVSM {
     # Repository of schedule information
     private variable schedInfo {}
 
-    # Store firing sequence as a list of <name, start, end>
-    private variable fireSeq {}
-    
     # Store hierarchy
     private variable schedHier {}
 
@@ -131,6 +128,9 @@ class ::tycho::GanttVSM {
 
     # display data required by view <type, proc, <name, start, end>+>
     private variable ddata {}
+
+    # Flag to indicate whether we have already parsed the schedule 
+    private variable createDone 0
 }
 
 #######################################################################
@@ -162,7 +162,8 @@ configbody ::tycho::GanttVSM::file {
 	# strip off any extraneous information before schedule 
 	# information starts
 	set schedInfo [lindex $schedInfo [expr [llength $schedInfo] - 1]]
-	set schedHier {}
+	# reset the create done flag
+	set createDone 0
     }
 }
 #######################################################################
@@ -185,6 +186,7 @@ configbody ::tycho::GanttVSM::schedule {
     # if schedule file not read then prefer to use -schedule option
     if {$filename == ""} {
 	set schedInfo $itk_option(-schedule)
+	set createDone 0
     }
 }
 
@@ -212,10 +214,9 @@ body ::tycho::GanttVSM::destructor {} {
 #
 body ::tycho::GanttVSM::create {} {
 
-    puts "in create"
     # Create may have already been called once, if so no need to parse
     # again.
-    if {$schedHier != {}} {
+    if {$createDone} {
 	return $schedHier
     }
 
@@ -277,8 +278,9 @@ body ::tycho::GanttVSM::create {} {
 	
 	incr curindex
     }
-    
+  
     set schedHier $hierarchy
+    set createDone 1
     return $hierarchy
 }
 
@@ -288,9 +290,9 @@ body ::tycho::GanttVSM::create {} {
 #
 body ::tycho::GanttVSM::getDisplayData {} {
     
-    puts "in getDisplayData"
     set parent [winfo parent $itk_component(hull)]
     set time 0
+    set end 0
 
     set me [getID]
     set sched [getSchedule]
@@ -299,20 +301,20 @@ body ::tycho::GanttVSM::getDisplayData {} {
 	lappend ddata [string trimleft $me "proc"] 
 	foreach item $sched {
 	    switch [lindex $item 0] {
-		totalIdleTime { 
-		    set end [expr $time + [lindex $item 1]]
+		idle { 
+		    set end [expr $time + [lindex [lindex $item 1] 1]]
 		    lappend ddata [list idle $time $end]
-		    set time $end
 		}
 		fire {
 		    set name [lindex $item 1]
 		    set end [expr $time + [lindex [lindex $item 2] 1]]
 		    lappend ddata [list $name $time $end]
-		    set time $end
 		}
 	    }
+	    set time $end
 	}
     }
+    
     return $ddata
 }
 
@@ -337,16 +339,12 @@ body ::tycho::GanttVSM::getMakespan {} {
 	return 0
     }
     
-    # initialize number of processor to one
-    set numprocs 1
     set makespan 1
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "makespan"} {
-	    set makespan [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "makespan"} {
+	    set makespan [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $makespan
@@ -367,12 +365,10 @@ body ::tycho::GanttVSM::getNumProcs {} {
     # initialize number of processor to one
     set numprocs 1
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "numberOfProcessors"} {
-	    set numprocs [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "numberOfProcessors"} {
+	    set numprocs [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $numprocs
@@ -393,12 +389,10 @@ body ::tycho::GanttVSM::getSchedName {} {
     # Set the ID to an empty string 
     set name ""
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "scheduler"} {
-	    set name [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "scheduler"} {
+	    set name [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $name
@@ -428,16 +422,13 @@ body ::tycho::GanttVSM::getTarget {} {
     # Set the target name to an empty string  
     set target ""
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "target"} {
-	    set target [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "target"} {
+	    set target [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $target
-    
 }
 
 #######################################################################
@@ -455,16 +446,13 @@ body ::tycho::GanttVSM::getUniverse {} {
     # Set the universe name to an empty string 
     set universe ""
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "galaxy"} {
-	    set universe [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "galaxy"} {
+	    set universe [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $universe
-    
 }
 
 #######################################################################
@@ -480,14 +468,12 @@ body ::tycho::GanttVSM::getUtilization {} {
     }
     
     # initialize number of processor to one
-    set numprocs 1
+    set utilization 0
 
-    set curindex 0
-    while {$curindex < [llength $schedInfo]} {
-	if {[lindex [lindex $schedInfo $curindex] 0] == "utilization"} {
-	    set utilization [lindex [lindex $schedInfo $curindex] 1] 
+    foreach item $schedInfo {
+	if {[lindex $item 0] == "utilization"} {
+	    set utilization [lindex $item 1] 
 	}
-	incr curindex
     }
     
     return $utilization
