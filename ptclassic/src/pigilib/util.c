@@ -14,6 +14,7 @@ Utility functions.
 #include "util.h"
 #include "rpc.h"
 #include "octIfc.h"
+#include "vemInterface.h"
 
 
 /* UMalloc  12/10/88

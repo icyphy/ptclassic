@@ -60,7 +60,6 @@ octObject *destPtr, *srcPtr;
     octObject srcItem, destItem;
     octStatus status;
     int32 num;
-    octPoint *points;
 
     octInitGenContents(srcPtr, OCT_ALL_MASK, &gen);
     while ((status = octGenerate(&gen, &srcItem)) == OCT_OK) {

@@ -144,7 +144,7 @@ Find a name starting at facet under cursor.  Name can have '.' between
 components and all components in heirarchy will be marked.
 */
 int 
-RpcFindName(spot, cmdList, userOptionWord)
+RpcFindName(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -152,7 +152,6 @@ long userOptionWord;
     static RgbValue color = {65535, 0, 0};
     static dmTextItem item = {"Name", 1, 100, NULL, NULL};
     octObject facet;
-    vemStatus status;
 
     ViInit("find-name");
     ErrClear();

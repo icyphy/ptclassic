@@ -39,3 +39,4 @@ extern boolean DupSheetAdd();
 extern boolean DupSheetIsDup();
 extern char* setCurDomainS();
 extern char* setCurDomainF();
+extern char* setCurDomainInst();

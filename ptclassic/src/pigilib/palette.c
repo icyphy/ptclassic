@@ -67,7 +67,7 @@ octCoord *leftMar, *width, *dx, *dy;
 #define dxDef 200
 #define dyDef 150
 
-    octObject obj, bb;
+    octObject obj;
 
     if (ohGetByPropName(cursorPtr, &obj, "leftMargin") == OCT_NOT_FOUND) {
 	obj.contents.prop.type = OCT_INTEGER;
