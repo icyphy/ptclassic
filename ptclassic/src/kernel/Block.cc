@@ -74,31 +74,30 @@ Target* Block :: target() const {
 
 // print all port names in the block, omitting hidden ports
 
-StringList
-Block :: printPorts (const char* type, int verbose) const {
-	StringList out;
+StringList Block :: printPorts (const char* type, int verbose) const {
+    StringList out;
 // first the ports
-	if (numberPorts()) {
-		if (verbose)
-			out << "Ports in the " << type << ":\n";
-		else out << "Ports:\n";
-		CBlockPortIter next(*this);
-		const PortHole* p;
-		while ((p = next++) != 0)
-			if (!hidden(*p)) out += p->print(verbose);
-	}
+    if (numberPorts()) {
+	if (verbose)
+	    out << "Ports in the " << type << ":\n";
+	else out << "Ports:\n";
+	CBlockPortIter next(*this);
+	const PortHole* p;
+	while ((p = next++) != 0)
+	    if (!hidden(*p)) out += p->print(verbose);
+    }
 // next the multiports
-	if (numberMPHs()) {
-		if (verbose)
-			out << "MultiPortHoles in the " << type << "\n";
-		else
-			out << "MultiPorts:\n";
-		CBlockMPHIter next(*this);
-		const MultiPortHole* mp;
-		while ((mp = next++) != 0)
-			if (!hidden(*mp)) out += mp->print(verbose);
-	}
-	return out;
+    if (numberMPHs()) {
+	if (verbose)
+	    out << "MultiPortHoles in the " << type << "\n";
+	else
+	    out << "MultiPorts:\n";
+	CBlockMPHIter next(*this);
+	const MultiPortHole* mp;
+	while ((mp = next++) != 0)
+	    if (!hidden(*mp)) out += mp->print(verbose);
+    }
+    return out;
 }
 
 // Return the block which defines the lexical scope of our states

@@ -351,12 +351,13 @@ const State* State :: lookup (const char* name, Block* blockIAmIn) {
 }
 
 // put info.
-StringList
-State::print(int) const {
-	StringList  out;
-	return out << fullName() << " type: " << type()
-		   << "\n initial value: " << myInitValue
-		   << "\n current value: " << currentValue() << "\n";
+StringList State::print(int verbose) const {
+    StringList  out;
+    out << "\t" << name() << " type: " << type() << "\n";
+    if (verbose)
+	out << "\t initial value: " << myInitValue
+	    << "\n\t current value: " << currentValue() << "\n";
+    return out;
 };
 
 // change current value.  We use the initialization parser to do the job.
