@@ -35,7 +35,7 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/utils/pakman
+VPATH =		$(ROOT)/util/pakman
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -60,7 +60,7 @@ MISC_FILES = demos doc bin test adm tclIndex
 REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/utils/pakman
+TYDOC_DESC =	Index of classes in tycho/util/pakman
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS) tclIndex
