@@ -24,10 +24,9 @@ limitation of liability, and disclaimer of warranty provisions.
         defstate {
                 name { outputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
-Precision of the output, in bits.  The complex number is cast to a double
-and then converted to this precision.  If the value of the double cannot
+Precision of the output, in bits.  If the value of the double cannot
 be represented by the number of bits specified in the precision parameter,
 then a error message is given. }
         }
@@ -51,16 +50,16 @@ keywords are: "truncate" (default), "round". }
                 Masking = masking;
                 outIntBits = Fix::get_intBits(OutputPrecision);
                 outLen = Fix::get_length(OutputPrecision);
-                if(strcmp(Masking, "truncate") == 0)
-                  Fix::Set_MASK(Fix::mask_truncate);
-                else if (strcmp(Masking, "round") == 0)
-                  Fix::Set_MASK(Fix::mask_truncate_round);
-                else {
-                  Error::abortRun(*this, ": not a valid function for masking");
-                }
         }
 	go {
                 Fix out(outLen, outIntBits, (double)(input%0));
+                if(strcmp(Masking, "truncate") == 0)
+                  out::Set_MASK(Fix::mask_truncate);
+                else if (strcmp(Masking, "round") == 0)
+                  out::Set_MASK(Fix::mask_truncate_round);
+                else {
+                  Error::abortRun(*this, ": not a valid function for masking");
+                }
                 output%0 << out;
 	}
 }
