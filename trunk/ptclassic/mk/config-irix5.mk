@@ -18,8 +18,8 @@ include $(ROOT)/mk/config-g++.mk
 #
 # IRIX5.x does not have a ranlib
 RANLIB = 	true
-# Use gcc everywhere _except_ in octtools
-CC =		gcc
+# For the time being, use cc 
+CC =		cc
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
 
@@ -32,6 +32,7 @@ MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
 #     -cckr   The traditional K&R/Version7 C with SGI extensions
+# Note that -cckr will not work with gcc
 CFLAGS =	-G 0 -cckr $(OPTIMIZER)
 
 #
