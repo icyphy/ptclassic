@@ -121,6 +121,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 
     initCode{
+	char	buf[32];
 	coeffs.initialize();
 	double b0, scaleDenom, scaleNumer;
 
@@ -150,7 +151,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		    return;
                 }
 		else {
-                    coeffs<<"\t.q15\t"<<temp<<"\n";
+		    sprintf(buf,"%.15f",temp);
+                    coeffs<<"\t.q15\t"<<buf<<"\n";
                 }
             }
 	    else {
@@ -172,7 +174,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		    return;
                 }
 		else {
-                    coeffs<<"\t.q15\t"<<temp<<"\n";
+		    sprintf(buf,"%.15f",temp);
+                    coeffs<<"\t.q15\t"<<buf<<"\n";
                 }
             }
 	    else {
@@ -180,7 +183,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
             }
 	}
 	delays[numState]=double(0);
-	coeffs<<"$starSymbol(cfe):\n";
+	addCode(coeffs,"TISubProcs");
     }
 
     go {
@@ -190,7 +193,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	else {
 		addCode(std(int(numState -2),int(numState-1)));
 	}
-	addCode(coeffs);
     }
 
     codeblock(one) {
@@ -204,7 +206,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	pac
 	sacb
 	addb
-	BCNDD	$starSymbol(cfe),UNC
 	clrc	ovm
 	SACH	*
     }
@@ -233,7 +234,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	lta	*,ar1	; acc	contains resultB/2
 	sacb		; these two inst. are used to
 	addb		; saturate acc in case of overflws
-	bcndd	$starSymbol(cfe),UNC
 	clrc	ovm
 	sach	*	
 	}
