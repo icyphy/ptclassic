@@ -286,8 +286,10 @@ void StructTarget :: trailerCode() {
     myCode << "\n\t-- Cluster " << cl->name << "\n";
     myCode << "entity " << cl->name << " is\n";
 
-    addGenericRefs(cl, level);
-    addPortRefs(cl, level);
+    //    addGenericRefs(cl, level);
+    //    addPortRefs(cl, level);
+    myCode << addGenericRefs(cl->genericList(), level);
+    myCode << addPortRefs(cl->portList(), level);
 
     myCode << indent(level) << "end " << cl->name << ";\n";
     myCode << "\n";
@@ -894,84 +896,6 @@ const char* StructTarget :: portAssign() {
 }
 
 ISA_FUNC(StructTarget,VHDLTarget);
-
-// Add in generic refs here from genericList.
-void StructTarget :: addGenericRefs(VHDLCluster* cl, int level) {
-  if ((*(cl->firingList)).head()) {
-    StringList opener, body, closer;
-
-    level++;
-    opener << indent(level) << "generic(\n";
-
-    VHDLFiringListIter nextFiring(*(cl->firingList));
-    VHDLFiring* nfiring;
-    int genCount = 0;
-    while ((nfiring = nextFiring++) != 0) {
-      if ((*(nfiring->genericList)).head()) {
-	VHDLGenericListIter nextGeneric(*(nfiring->genericList));
-	VHDLGeneric* ngen;
-	while ((ngen = nextGeneric++) != 0) {
-	  level++;
-	  if (genCount) {
-	    body << ";\n";
-	  }
-	  body << indent(level) << ngen->name << ": " << ngen->type;
-	  if (strlen(ngen->defaultVal) > 0) {
-	    body << " := " << ngen->defaultVal;
-	  }
-	  genCount++;
-	  level--;
-	}
-      }
-    }
-    
-    closer << "\n";
-    closer << indent(level) << ");\n";
-    level--;
-
-    if (genCount) {
-      myCode << opener << body << closer;
-    }
-  }
-}
-
-// Add in port refs here from portList.
-void StructTarget :: addPortRefs(VHDLCluster* cl, int level) {
-  if ((*(cl->firingList)).head()) {
-    StringList opener, body, closer;
-
-    level++;
-    opener << indent(level) << "port(\n";
-
-    VHDLFiringListIter nextFiring(*(cl->firingList));
-    VHDLFiring* nfiring;
-    int portCount = 0;
-    while ((nfiring = nextFiring++) != 0) {
-      if ((*(nfiring->portList)).head()) {
-	VHDLPortListIter nextPort(*(nfiring->portList));
-	VHDLPort* nport;
-	while ((nport = nextPort++) != 0) {
-	  level++;
-	  if (portCount) {
-	    body << ";\n";
-	  }
-	  body << indent(level) << nport->name << ": " << nport->direction
-	       << " " << nport->type;
-	  portCount++;
-	  level--;
-	}
-      }
-    }
-    
-    closer << "\n";
-    closer << indent(level) << ");\n";
-    level--;
-
-    if (portCount) {
-      myCode << opener << body << closer;
-    }
-  }
-}
 
 // Add in sensitivity list of input ports.
 // Do this explicitly for sake of synthesis.

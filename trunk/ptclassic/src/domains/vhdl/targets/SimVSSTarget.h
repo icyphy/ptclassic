@@ -120,12 +120,6 @@ private:
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
 
-	// Add in generic refs here from genList.
-	StringList addGenericRefs(VHDLGenericList* genList);
-
-	// Add in port refs here from portList.
-	StringList addPortRefs(VHDLPortList* portList);
-
 	// Add in signal declarations here from signalList.
 	StringList addSignalDeclarations(VHDLSignalList* signalList);
 
