@@ -200,6 +200,7 @@ $(LIBDIR)/$(LIB):	$(LIB) $(EXP)
 
 .SUFFIXES: .class .java
 .java.class:
+	rm -f `basename .java`.class
 	CLASSPATH=$(CLASSPATH) $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
@@ -209,6 +210,7 @@ jclass:	$(JSRCS) $(JCLASS)
 jhtml: doc/codeDoc/tree.html
 doc/codeDoc/tree.html:	$(JSRCS) 
 	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi
+	rm -f doc/codeDoc/*.html
 	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS)
 	@for x in doc/codeDoc/*.html; do \
 		echo "Fixing paths in $$x"; \
