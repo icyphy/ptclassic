@@ -42,7 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	default {"0"}
 	desc {Minimum value in input matrix.}
     }
-    ccinclude { <string.h>, "Matrix.h" }
+    ccinclude { <string.h>, "Matrix.h", "ptdspHistogram.h" }
     protected {
         int max, min;
         int *histBuf, *cumulativeHistBuf;
@@ -85,15 +85,19 @@ limitation of liability, and disclaimer of warranty provisions.
           // valid input matrix
           int height = inMatrix.numRows();
           int width  = inMatrix.numCols();
-          LOG_NEW; int *matrix = new int[height*width];
 
-	  int maxentry = height*width;
-          for (int j = 0; j < maxentry; j++) {
-	    matrix[j] = inMatrix.entry(j);
-          }
+
+	  // FIXME
+	  // Sets matrix to the vector representing the FloatMatrix inMatrix 
+	  // This only works because in the underlying implementation of 
+	  // FloatMatrix, inMatrix[0] for example, which returns the 1st row of the 
+	  // matrix, also returns the entire vector representing the matrix. 
+	  // A method should be added to the FloatMatrix class to do this instead
+	  // of relying on this current operation
+	  const int * matrix = inMatrix[0];
 
 	  // Compute the histBuf
-	  histogram(histBuf, matrix, width*height, min, max);
+	  Ptdsp_Histogram(matrix, width*height, histBuf, min, max);
 
 	  // Compute cumulative histogram
 	  int histlen = max - min + 1;
@@ -131,37 +135,10 @@ limitation of liability, and disclaimer of warranty provisions.
           }
 
           output%0 << result;
-          LOG_DEL; delete [] matrix;
 	}  // end of valid input matrix.
         
     } 
 
-    // Procedure to compute the histogram.
-    method {
-        name {histogram}
-        access { private }
-        arglist {"(int *hist, int *matrix, int size, int min, int max)"}
-        type {void}
-        code {
-          // Initialize the histogram buffer to zero
-	  int histlen = max - min + 1;
-          for (int j = 0; j < histlen; j++) {
-            hist[j] = 0;
-          }  
-
-          // Compute the histogram
-          int index = 0;
-          for (int i = 0; i < size; i++) {
-            // If the value is larger than max, then is counted into max
-            index = (matrix[i]>max) ? max : matrix[i]; 
-            // If the value is smaller than min, then is counted into min
-            index = (matrix[i]<min) ? min : matrix[i]; 
-
-            hist[index-min]++;
-          }
-
-        }
-    }  //end of method histogram.
     destructor {
 	delete [] histBuf;
 	delete [] cumulativeHistBuf;
