@@ -145,7 +145,7 @@ proc makeRunWindow {} {
     frame .low -bd 10
 
     # quit button
-    button .quit -text DISMISS -command "ptkStop cgc_prog; exit"
+    button .quit -text DISMISS -command "ptkStop cgc_prog; requestExit"
 
     # overall structure
     pack append . \
@@ -163,6 +163,11 @@ proc makeRunWindow {} {
     bind .numberIters.entry <Return> "focus .; ptkGo"
     bind .numberIters.entry <Escape> "ptkStop cgc_prog"
     bind . <Escape> "ptkStop cgc_prog"
+}
+
+# procedure to handle an exit request
+proc requestExit {} {
+    handleExit
 }
 
 # procedure to stop a run
