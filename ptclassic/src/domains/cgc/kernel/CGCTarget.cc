@@ -468,8 +468,8 @@ static struct cnv_tb cnv_table[7] = {
   {  "COMPLEX", "FIX", 		"CxToFix"	},
   {  "COMPLEX", "ANYTYPE",	"CxToFloat"	},
   {  "FIX",     "COMPLEX",	"FixToCx"	},
-  {  "FIX",	  "FIX",		"FixToFix"	},
-  {  "FIX",	  "ANYTYPE",	"FixToFloat"	},
+  {  "FIX",	"FIX",		"FixToFix"	},
+  {  "FIX",	"ANYTYPE",	"FixToFloat"	},
   {  "ANYTYPE", "COMPLEX",	"FloatToCx"	},
   {  "ANYTYPE", "FIX",		"FloatToFix"	}
 };
@@ -521,8 +521,8 @@ int CGCTarget::modifyGalaxy()
  */  
 		    if (((!strcmp(port->type(),cnv_table[i].src)) ||
 			 (!strcmp(cnv_table[i].src,ANYTYPE))) &&
-			((!strcmp(port->type(),cnv_table[i].src)) ||
-			 (!strcmp(cnv_table[i].src,ANYTYPE))) ){
+			((!strcmp(port->resolvedType(),cnv_table[i].dst)) ||
+			 (!strcmp(cnv_table[i].dst,ANYTYPE))) ){
 
 #ifdef NEVER
 		    if (((port->type() == cnv_table[i].src) ||
