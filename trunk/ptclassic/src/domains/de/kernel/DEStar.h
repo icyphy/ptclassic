@@ -74,7 +74,7 @@ protected:
 	OutDEPort feedbackOut;
 
 	// access the feedback arc.
-	void repeat(float when);	// send next event.
+	void refireAtTime(float when);	// send next event.
 	int canGetFired();		// can it be fired?
 
 public:
@@ -117,7 +117,7 @@ public:
 	Particle* fetchData(InDEPort& p);
 
 	// go to the next execution. Usually called at the end of go().
-	void goToNext() {if (numEvent > 0) repeat(completionTime) ;}
+	void goToNext() {if (numEvent > 0) refireAtTime(completionTime) ;}
 
 	// constructor
 	DEPriorityStar();
