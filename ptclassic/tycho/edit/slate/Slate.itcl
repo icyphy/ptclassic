@@ -150,7 +150,7 @@ class ::tycho::Slate {
     ####                         public methods                    ####
 
     # Add a tag to picts using a search spec
-    method addtag {tag searchSpec args}
+    method addtag {add searchSpec args}
 
     # Get aspects of a picture
     method aspect {id args}
@@ -688,21 +688,21 @@ body ::tycho::Slate::describe {id args} {
 body ::tycho::Slate::dtag {tag {delete {}}} {
     if { [string match {[0-9]*} $tag] } {
 	# A canvas item.
-	eval $canvas dtag $id $delete
-    } elseif { [string match {_*} $id] } {
+	eval $canvas dtag $tag $delete
+    } elseif { [string match {_*} $tag] } {
 	# A picture. Make sure _delete exists.
 	if { $delete != "" } {
-	    set tagged($delete) [ldelete $tagged($delete) $id]
-	    $canvas dtag $id $delete
+	    set tagged($delete) [ldelete $tagged($delete) $tag]
+	    $canvas dtag $tag $delete
 	}
     } else {
 	# Doing it by tag..
 	if { $delete == "" } {
-	    set delete $id
+	    set delete $tag
 	}
-	$canvas dtag $id $delete
+	$canvas dtag $tag $delete
 	if { [::info exists tagged($delete)] } {
-	    set tagged($delete) [lsubtract $tagged($delete) $tagged($id)]
+	    set tagged($delete) [lsubtract $tagged($delete) $tagged($tag)]
 	}
     }
 }
