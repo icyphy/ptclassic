@@ -65,6 +65,9 @@ class ::tycho::PtRunWindow {
     # The domain library
     public variable domainLibrary
 
+    # Set if editing a toplevel actor
+    public variable isToplevel 1
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -162,25 +165,47 @@ configbody ::tycho::PtRunWindow::helpfile {
     }
 }
 
+#######################################################################
+#### -isToplevel
+#
+configbody ::tycho::PtRunWindow::isToplevel {
+    if [info exists itk_component(buttonPanel)] {
+	if $isToplevel {
+	    pack $itk_component(buttonPanel) \
+		    -side right -expand no -padx 2 -pady 4
+	} else {
+	    pack forget $itk_component(buttonPanel)
+	}
+    }
+}
+
 ######################################################################
 #### -simulation
-# COnfigure the controlled simulation
+# Configure the controlled simulation
 #
 configbody ::tycho::PtRunWindow::simulation {
-    $itk_component(buttonPanel) configure -simulation $simulation
+    if [info exists itk_component(buttonPanel)] {
+	$itk_component(buttonPanel) configure -simulation $simulation
+    }
 }
 
 #######################################################################
 #### constructor
 #
 body ::tycho::PtRunWindow::constructor {args} {
-    # Create the control buttons
+    # Initialize args
+    eval itk_initialize $args
+
+     # Create the control buttons
     itk_component add buttonPanel {
-        ::tycho::PtButtonPanel $itk_interior.buttonPanel
+	::tycho::PtButtonPanel $itk_interior.buttonPanel \
+		-simulation $simulation
     } {
 	keep -background -cursor -padx -pady
     }
-    pack $itk_component(buttonPanel) -side right -expand no -padx 2 -pady 4
+    if { $isToplevel } {
+	pack $itk_component(buttonPanel) -side right -expand no -padx 2 -pady 4
+    }
 
     # Create the time parameters
     set OLD {
@@ -199,10 +224,7 @@ body ::tycho::PtRunWindow::constructor {args} {
 	trace variable iterationcounter($this) "w" "$this _counttrace"
     }
 
-    # Initialize args
-    eval itk_initialize $args
-
-    # Set the command name
+   # Set the command name
     # FIXME ????
     set cmd ::tycho::$_simulationName
 

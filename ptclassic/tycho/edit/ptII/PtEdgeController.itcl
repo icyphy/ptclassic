@@ -538,13 +538,19 @@ body ::tycho::PtEdgeController::release {args} {
         }
 
 	# Create the link in the Ptolemy II simulation
-	set src [$graph attrget $_edgename -from]
-	set tgt [$graph attrget $_edgename -to]
+	set rname [$graph attrget $_edgename -relation]
+	set pname [itemname $_target]
+        puts ###$pname
+	$simulation link $rname [lindex $pname 0] [lindex $pname 1]
+	#### $simulation addEdge $rname $_edgename
 
-	puts "#### $_edgename: [$graph describe $_edgename] ####"
-	$simulation connect $_edgename \
-		[lindex $src 0] [lindex $src 1] \
-		[lindex $tgt 0] [lindex $tgt 1]
+	#set src [$graph attrget $_edgename -from]
+	#set tgt [$graph attrget $_edgename -to]
+
+	#puts "#### $_edgename: [$graph describe $_edgename] ####"
+	#$simulation connect $_edgename \
+	#	[lindex $src 0] [lindex $src 1] \
+	#	[lindex $tgt 0] [lindex $tgt 1]
 
 	# The graph has been modified (I think...), so notify any
 	# subscriber to the graph
@@ -648,7 +654,8 @@ body ::tycho::PtEdgeController::_cleanup {} {
 body ::tycho::PtEdgeController::_initdrag:edge {x y} {
     set edgeitem1 [$slate find withtag current]
     set edgename1 [itemname $edgeitem1]
-    
+    set relation [$graph attrget $edgename1 -relation]
+
     # Get a unique junction name
     set junctionname [$graph uniqueid junction]
     
@@ -661,8 +668,10 @@ body ::tycho::PtEdgeController::_initdrag:edge {x y} {
             -tags "junction"
     set junctionitem [slateid $junctionname]
 
-    # Create the junction vertex
-    $graph publish add vertex $junctionname
+    # Create the junction vertex and add it to the simulation
+    $graph publish add vertex $junctionname \
+	    -relation $relation
+    $simulation addJunction $relation $junctionname
 
     # Get two unique edge names
     set edgename2 [$graph uniqueid edge]
@@ -679,7 +688,8 @@ body ::tycho::PtEdgeController::_initdrag:edge {x y} {
     # Add the new edge
     $graph publish add edge $edgename2 \
 	    -from $junctionname \
-	    -to [$graph attrget $edgename1 -to]
+	    -to [$graph attrget $edgename1 -to] \
+	    -relation $relation
     $layout publish add item $edgename2 \
 	    -slatetype Net \
 	    -coords [concat $start2 $end2] \
@@ -687,7 +697,8 @@ body ::tycho::PtEdgeController::_initdrag:edge {x y} {
             -end [$slate itemcget $edgeitem1 -end] \
             -fromfeature $out \
             -tags "edge"
-    
+    $simulation addEdge $relation $edgename2
+
     # Modify the old edge
     $graph publish attrset $edgename1 -to $junctionname
     set x0 [lindex $end2 0]
@@ -717,7 +728,9 @@ body ::tycho::PtEdgeController::_initdrag:edge {x y} {
         }
     }
     # Now create the edge
-    $graph publish add edge $_edgename -from $junctionname
+    $graph publish add edge $_edgename \
+	    -from $junctionname \
+	    -relation $relation
     $layout publish add item $_edgename \
             -slatetype Net \
             -coords [concat [$slate feature $junctionitem $joinat] $x $y] \
@@ -725,6 +738,7 @@ body ::tycho::PtEdgeController::_initdrag:edge {x y} {
             -end $joinat \
             -fromfeature $joinat \
             -tags "edge"
+    $simulation addEdge $relation $_edgename
 
     set _feature "end"
     set _edgeitem [slateid $_edgename]
@@ -810,8 +824,17 @@ body ::tycho::PtEdgeController::_initdrag:terminal {x y} {
     # Get a unique name for the edge/net
     set _edgename [$graph uniqueid edge]
     
+    # Create the new relation and add a single link
+    set rname [::tycho::autoName Relation]
+    set portname [itemname $source]
+    $simulation addRelation $rname
+    $simulation link $rname [lindex $portname 0] [lindex $portname 1]
+    $simulation addEdge $rname $_edgename
+
     # Create the new edge
-    $graph publish add edge $_edgename -$end [itemname $source]
+    $graph publish add edge $_edgename \
+	    -$end $portname \
+	    -relation $rname
 
     # Create the new net
     $layout publish add item $_edgename \

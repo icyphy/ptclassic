@@ -42,6 +42,9 @@ class ::tycho::PtGraphEditor {
     #################################################################
     ####                        options                          ####
 
+    # Set only if editing a top-level actor
+    public variable isToplevel 1
+
     #################################################################
     ####                     public methods                      ####
 
@@ -176,6 +179,25 @@ class ::tycho::PtGraphEditor {
 
 	# Make it draw the data
 	# $clone layout load
+    }
+
+    protected variable isToplevelVar 1
+    method _toggleToplevel {} {
+	puts "Toggling top-level: $isToplevelVar"
+	$this configure -isToplevel $isToplevelVar
+    }
+}
+
+#######################################################################
+#### -isToplevel
+#
+configbody ::tycho::PtGraphEditor::isToplevel {
+    if [info exists itk_component(runWindow)] {
+	puts "$itk_component(runWindow) configure -isToplevel $isToplevel"
+	$itk_component(runWindow) configure -isToplevel $isToplevel
+    }
+    if { $_simulation != "" } {
+	$_simulation configure -isToplevel $isToplevel
     }
 }
 
@@ -315,7 +337,8 @@ body ::tycho::PtGraphEditor::constructor {args} {
     set _iconLibrary [::tycho::PtIconLibrary::getRoot]
     set _simulation [uplevel #0 ::tycho::PtSimulation #auto \
 	    -graph $_graph \
-	    -domainLibrary $_domainLibrary]
+	    -domainLibrary $_domainLibrary \
+	    -isToplevel $isToplevel]
     
     # More setting up......
     $vertexcontroller configure \
@@ -338,7 +361,8 @@ body ::tycho::PtGraphEditor::constructor {args} {
     itk_component add runWindow {
 	::tycho::PtRunWindow $itk_component(controlFrame).runWindow \
 		-simulation $_simulation \
-		-domainLibrary $_domainLibrary
+		-domainLibrary $_domainLibrary \
+		-isToplevel $isToplevel
     } {
 	keep -background -cursor -font
     }
@@ -688,6 +712,8 @@ body ::tycho::PtGraphEditor::insertData {data} {
 	    [$itk_component(runWindow) component domain] \
 	    $vertexcontroller \
 	    $edgecontroller
+    configure -isToplevel [$_simulation cget -isToplevel]
+    puts !!!!!$isToplevel
 }
 
 #####################################################################
@@ -745,21 +771,21 @@ body ::tycho::PtGraphEditor::_initializeMenubar {menubar} {
 	    -label "Unselect" -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
 
-    # Build a menu for stars
-    $menubar addMenu stars -label Stars -underline 0
-    $menubar menuconfigure stars -tearoff 1
+    # Build a PtII menu
+    $menubar addMenu ptolemyII -label "Ptolemy II" -underline 0
+    $menubar menuconfigure ptolemyII -tearoff 1
 
-    $menubar command editparameters stars \
-            -label "Edit Parameters..." \
-            -underline 5 \
-            -command "eval $this editparameters sel"
-
-    $menubar separator starsep1 stars
+    set JUNK {
+	$menubar command editparameters ptolemyII \
+		-label "Edit Parameters..." \
+		-underline 5 \
+		-command "eval $this editparameters sel"
+    }
 
     # Add a Devel menu for development use
     $menubar addMenu devel -label Devel -underline 0
 
-    $menubar add separator develsep1 devel
+    ## $menubar add separator develsep1 devel
 
     $menubar command showlayout devel \
 	    -label "Show layout" \
@@ -790,23 +816,30 @@ body ::tycho::PtGraphEditor::_initializeMenubar {menubar} {
         \$_nm_ insertData \[$this model access graph history get\]; \
         \$_nm_ markUnmodified"
 
-    $menubar add separator develsep3 devel
+    set JUNK {
+	$menubar add separator develsep3 devel
 
-    $menubar command clone devel \
-	    -label "Clone..." \
-            -command "$this clone"
-
+	$menubar command clone devel \
+		-label "Clone..." \
+		-command "$this clone"
+    }
 
     ##### Ptolemy II stuff from here on
 
-    $menubar add separator starbar stars
-    $_iconLibrary addToMenu $menubar stars "$this newActor"
+    $menubar add checkbutton isToplevel ptolemyII \
+	    -variable [scope isToplevelVar] \
+	    -label "Is top-level" \
+	    -command "$this _toggleToplevel"
 
-    $menubar add separator develsepctedit devel
+    $menubar add separator ptsep ptolemyII
 
-    $menubar command run devel \
-	    -label "Run..." \
-            -command "$this openControlPanel [model access graph]"
+    $_iconLibrary addToMenu $menubar ptolemyII "$this newActor"
 
+    set JUNK {
+	$menubar add separator develsepctedit devel
+
+	$menubar command run devel \
+		-label "Run..." \
+		-command "$this openControlPanel [model access graph]"
+    }
 }
-

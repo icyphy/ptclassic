@@ -69,11 +69,23 @@ class ::tycho::PtSimulation {
     # The domain library
     public variable domainLibrary
 
-     ###################################################################
+    # Set if toplevel actor
+    public variable isToplevel 1
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Add a new actor to the graph
     method addActor {name uniqueName}
+
+    # Add an edge to a relation
+    method addEdge {relation edgename}
+
+    # Add a junction to a relation
+    method addJunction {relation junctionname}
+
+    # Add a new port to the graph
+    method addPort {name uniqueName}
 
     # Add a new relation to the graph
     method addRelation {name}
@@ -91,6 +103,11 @@ class ::tycho::PtSimulation {
 
     # Construct a simulation
     method constructSimulation {}
+
+    # Get the edges of a relation
+    method edges {relation} {
+	return $_edges($relation)
+    }
 
     # Get the actor with the given name
     method getActor {name} {
@@ -112,8 +129,23 @@ class ::tycho::PtSimulation {
         return $_directorName
     }
 
+    # Get the port with the given name
+    method getPort {name} {
+	return $_ports($name)
+    }
+
+    # Get the junctions in a relation
+    method junctions {relation} {
+	return $_junctions($relation)
+    }
+
     # Add a link to a relation
-    method link {edgename actor port}
+    method link {relation actor port}
+
+    # Get the links of a relation
+    method links {relation} {
+	return $_links($relation)
+    }
 
     # Respond to changes in the graph
     method notify {method args}
@@ -123,6 +155,11 @@ class ::tycho::PtSimulation {
 
     # Accept and remember the graph describing the simulation
     method perform {graph}
+
+    # Get the names of all I/O ports
+    method ports {} {
+	return [array names _ports]
+    }
 
     # Get a relation by name
     method getRelation {name} {
@@ -211,12 +248,44 @@ class ::tycho::PtSimulation {
     # The map from names to relations
     private variable _relations
 
+    # The map from names to I/O ports
+    private variable _ports
+
+    # List of edges for each relation
+    private variable _edges
+
+    # List of links for each relation
+    private variable _links
+
+    # List of junctions for each relation
+    private variable _junctions
+
     ### FIXME
     public method getToplevelActor {} {
 	return $_toplevelActor
     }
     public method getManager {} {
 	return $_manager 
+    }
+}
+
+#######################################################################
+#### -isToplevel
+#
+configbody ::tycho::PtSimulation::isToplevel {
+    puts "tycho::PtSimulation::isToplevel = $isToplevel"
+    if { $_toplevelActor != "" } {
+	if $isToplevel {
+	    if { $_manager == "" } {
+		set _manager [java::new ptolemy.actor.Manager]
+		$_toplevelActor setManager $_manager
+		debug "Manager: $_manager"
+	    }
+	} else {
+	    set _manager ""
+	    $_toplevelActor setManager [java::null]
+	    debug "Manager: null"
+	}
     }
 }
 
@@ -252,9 +321,47 @@ body ::tycho::PtSimulation::addActor {name uniqueName} {
     set actor [$domainLibrary createActor $_domain $_toplevelActor \
 	    $name $uniqueName]
     if { $actor != "" } {
-	puts "$actor: [$actor toString]"
+	puts "actor: $actor ([$actor toString])"
 	set _actors($uniqueName) $actor
     }
+}
+
+########################################################################
+#### addEdge
+#
+# Add an edge to a relation
+#
+body ::tycho::PtSimulation::addEdge {relation edgename} {
+    lappend _edges($relation) $edgename
+}
+
+########################################################################
+#### addJunction
+#
+# Add a junction to a relation
+#
+body ::tycho::PtSimulation::addJunction {relation junctionname} {
+    lappend _junctions($relation) $junctionname
+}
+
+########################################################################
+#### addPort
+#
+# Add a new port to the graph
+#
+body ::tycho::PtSimulation::addPort {name uniqueName} {
+    puts "addPort $name $uniqueName"
+
+    # Get the port
+    set port [java::new ptolemy.actor.TypedIOPort $_toplevelActor $uniqueName]
+
+    # Mess around...
+    if { $name == "Out" } {
+	$port setOutput 1
+    }
+    
+    puts "port: $port ([$port toString])"
+    set _ports($uniqueName) $port
 }
 
 ########################################################################
@@ -270,6 +377,9 @@ body ::tycho::PtSimulation::addRelation {name} {
 
     puts "$relation: [$relation toString]"
     set _relations($name) $relation
+    set _edges($name) {}
+    set _links($name) {}
+    set _junctions($name) {}
 }
 
 ########################################################################
@@ -314,189 +424,27 @@ body ::tycho::PtSimulation::connect {edgename source out target in} {
 }
 
 ########################################################################
-#### constructSimulation
-#
-# Construct a new simulation
-#
-body ::tycho::PtSimulation::constructSimulation {} {
-    puts ::tycho::PtSimulation::constructSimulation
-
-    puts "Vertices = [array names _actors]"
-
-    # Generate the stars from vertices
-    foreach v [$graph vertices] {
-        # Is it a junction or a vertex? Currently, we can
-        # tell only by looking at the name, but this is
-        # obviously lame...
-        # FIXME
-        if [string match {junction*} $v] {
-            # do nothing
-
-        } else {
-            # Otherwise assume it represents a star.
-
-	    # See if it already exists
-	    if [info exists _actors($v)] {
-		puts "$v exists ($_actors($v))"
-	    } else {
-		puts "$v does not exist! Aborting."
-		return
-	    }
-
-	    set STUFF {
-		# Get the class name.
-		set type ptolemy.domains.ct.lib.CT[$graph attrget $v -class]
-
-		# Create the star
-		global $v
-		debug "set $v \[java::new $type \$system $type\]"
-		set result [set $v [java::new $type $system $v]]
-		debug " -> $result"
-
-		# Set its parameters. Get the star master.
-		set m [split [$graph attrget $v -master] #]
-		set libname [lindex $m 0]
-		set starname [split [lindex $m 1] "."]
-		set library [::tycho::model dereference \
-			[::tycho::model locate $libname]]
-            
-		# Get the attributes of the star and set them
-		foreach attr [$library match attribute $starname] {
-		    set val [$graph attrget $v -$attr]
-
-		    # Now try and set it
-		    debug "\$[set v] setParam [string trim $attr -] $val"
-		    set result [[set $v] setParam [string trim $attr -] $val]
-		    debug " -> $result"
-		}
-	    }   
-	}
-    }
-
-    # Generate the edges
-    foreach e [$graph edges] {
-        # If the edge is already done, forget it
-        if [info exists done($e)] {
-            continue
-        }
-
-        # Get the names etc
-        set from [$graph attrget $e -from]
-        set fromname [join $from .]
-        set to [$graph attrget $e -to]
-        set toname [join $to .]
-        debug "$from -> $to"
-
-        # If the input port is a junction, then it's part
-        # of a complex net, and we ignore it for now
-        if [string match {junction*} $from] {
-            continue
-        }
-
-        # If, however, the output port is a junction, it must
-        # be the first edge in set of junctions and edges
-        # that form a relation. Create a new net, then traverse
-        # the edges and junctions and link all connected ports.
-        if [string match {junction*} $to] {
-            # Create the relation
-            set rname $to
-            debug "set $rname \[\$system newRelation $rname\]"
-            set result [set $rname [$system newRelation $rname]]
-            debug " -> $result"
-
-            # Link the first edge (the only input!)
-            set fromvertex [lindex $from 0]
-            set fromport [lindex $from 1]
-	    set fromport [lindex [split $fromport -] 0]
-
-            debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
-            set result [set $fromname [[set $fromvertex] \
-                    getPort $fromport]]
-            debug " -> $result"
-
-            debug "\$\{[set fromname]\} link \$[set rname]"
-            set result [[set $fromname] link [set $rname]]
-            debug " -> $result"
-
-            # Find edges
-            set es {}
-            set js [list $to]
-            while { $js != "" } {
-                set j [lindex $js 0]
-                set js [lreplace $js 0 0]
-                foreach e [$graph edges $j] {
-                    # If the end is a junction, add to the list
-                    set q [$graph attrget $e -from]
-                    set r [$graph attrget $e -to]
-                    if [string match {junction*} $r] {
-                        lappend js $r
-                    } else {
-                        # Any other edges are output edges
-                        lappend es $e
-                    }
-                }
-            }
-
-            # Link each output edge from the relation to its port
-            foreach e $es {
-                set to [$graph attrget $e -to]
-                set toname [join $to .]
-                set tovertex [lindex $to 0]
-                set toport [lindex $to 1]
-		set toport [lindex [split $toport -] 0]
-
-                debug "set $toname \[\$[set tovertex] getPort $toport\]"
-                set result [set $toname [[set $tovertex] \
-                        getPort $toport]]
-                debug " -> $result"
-
-                debug "\$\{[set toname]\} link \$[set rname]"
-                set result [[set $toname] link [set $rname]]
-                debug " -> $result"
-            }
-            continue
-        }
- 
-        # Otherwise, we are creating a simple link
-        set fromvertex [lindex $from 0]
-        set fromport [lindex $from 1]
-	set fromport [lindex [split $fromport -] 0]
-
-        set tovertex [lindex $to 0]
-        set toport [lindex $to 1]
-	set toport [lindex [split $toport -] 0]
-
-        # Get the actual ports
-        debug "set from \[$_actors($fromvertex) getPort $fromport\]"
-        set result [set from \
-            [$_actors($fromvertex) getPort $fromport]]
-        debug " -> $result"
-
-        debug "set to \[$_actors($tovertex) getPort $toport\]"
-        set result [set to [$_actors($tovertex) getPort $toport]]
-        debug " -> $result"
-
-        # Make the connection, dude
-        debug "set $e \[ \
-            $_toplevelActor connect $from $to \
-            $e\]"
-        set result [set $e [ \
-            $_toplevelActor connect $from $to \
-            $e]]
-        debug " -> $result"
-    }
-}
-
-########################################################################
 #### link
 #
 # Link a relation to a port
 #
-body ::tycho::PtSimulation::link {edgename actor port} {
-    puts "link $edgename $actor $port"
+body ::tycho::PtSimulation::link {relation actor port} {
 
-    set javaPort [$_actors($actor) getPort $port]
-    $javaPort link $_relations($edgename)
+    # If there's an actor, assume the port belongs to it
+    if { [info exists _actors($actor)] } {
+	puts "$actor.$port link $relation"
+	set javaPort [$_actors($actor) getPort $port]
+        $javaPort link $_relations($relation)
+        lappend _links($relation) [list $actor $port]
+    } elseif { [info exists _ports($actor)] }  {
+        # It appears to be an I/O port
+	puts "$actor link $relation"
+        set javaPort $_ports($actor)
+        $javaPort link $_relations($relation)
+        lappend _links($relation) $actor
+    } else {
+        puts "Warning: unable to link $relation to $actor.$port"
+    }
 }
 
 ########################################################################
