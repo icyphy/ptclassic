@@ -208,12 +208,12 @@ proc ptkRunControl { name octHandle } {
 		
 	button $ctrlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
-	button $ctrlPanel.panel.stop -text "STOP <Escape>" \
-		-command "ptkStop $name" -width 14
+	button $ctrlPanel.panel.abort -text "ABORT <Escape>" \
+		-command "ptkAbort $name" -width 14
 	pack append $ctrlPanel.panel \
 	    $ctrlPanel.panel.gofr {left fill} \
 	    $ctrlPanel.panel.pause {left fill} \
-	    $ctrlPanel.panel.stop {right fill}
+	    $ctrlPanel.panel.abort {right fill}
 
     # The debug panel will be filled with buttons when debugging is
     # turned on.  It starts out off always.
@@ -246,30 +246,40 @@ proc ptkRunControl { name octHandle } {
     wm protocol $ctrlPanel WM_DELETE_WINDOW \
 	"ptkRunControlDel $name $octHandle $defNumIter"
 
+    bind $ctrlPanel.iter.entry <Return> \
+		"ptkGo $name $octHandle"
+    bind $ctrlPanel.iter.entry <Escape> "ptkAbort $name"
+    bind $ctrlPanel.iter.entry <space> "ptkPause $name $octHandle"
+    bind $ctrlPanel <Control-d> \
+	"ptkRunControlDel $name $octHandle $defNumIter"
+
+    focus $ctrlPanel.iter.entry
+
     set olduniverse [curuniverse]
 
     # EAL: The following call was here for a long time, but appears
     # to be entirely redundant, since ptkCompile creates a new universe.
     # newuniverse $name
 
+    # Allow a target-specific procedure to customize the control panel
+    # Note that we want this to happen before ptkCompile in case an error is
+    # reported inside ptkCompile.  Hence must get target name the hard way.
+
+    set targetToBe [lindex [ptkGetTargetNames $octHandle] 0]
+    set targetcust ${targetToBe}-ControlPanel
+    if {[info proc $targetcust] == $targetcust} {
+      $targetcust $name $octHandle $ctrlPanel
+    }
+
     if {[catch {ptkCompile $octHandle} msg] == 1} {
 	# An error has occurred.
 	ptkClearRunFlag $name $octHandle
 	# Mark an error
 	set ptkRunFlag($name) ERROR
-	ptkImportantMessage .error $msg
+	if {$msg != ""} { ptkImportantMessage .error $msg }
     }
 
     curuniverse $olduniverse
-
-    bind $ctrlPanel.iter.entry <Return> \
-		"ptkGo $name $octHandle"
-    bind $ctrlPanel.iter.entry <Escape> "ptkStop $name"
-    bind $ctrlPanel.iter.entry <space> "ptkPause $name $octHandle"
-    bind $ctrlPanel <Control-d> \
-	"ptkRunControlDel $name $octHandle $defNumIter"
-
-    focus $ctrlPanel.iter.entry
 }
 
 #######################################################################
@@ -309,12 +319,12 @@ proc ptkSetOrClearDebug { name octHandle } {
 	    frame $w.debug.left
 	    frame $w.debug.left.buttons
 	    button $w.debug.left.buttons.step -text "STEP" \
-		-command "ptkStep $name $octHandle" -width 9
-	    button $w.debug.left.buttons.abort -text "ABORT" \
-		-command "ptkAbort $name" -width 9
+		-command "ptkStep $name $octHandle" -width 10
+	    button $w.debug.left.buttons.earlyend -text "EARLY END" \
+		-command "ptkEarlyEnd $name" -width 10
 	    pack append $w.debug.left.buttons \
 	        $w.debug.left.buttons.step {left fill expand} \
-	        $w.debug.left.buttons.abort {left fill expand}
+	        $w.debug.left.buttons.earlyend {left fill expand}
 	    frame $w.debug.left.runcount -bd 10
 	    label $w.debug.left.runcount.lbl -text "Count:"
 	    label $w.debug.left.runcount.cnt -width 10
@@ -540,8 +550,10 @@ proc ptkRunControlDel { name octHandle defNumIter } {
 }
 
 #######################################################################
-# basic procedure to stop a run
-proc ptkStop { name } {
+# stop a run early without error
+# This amounts to an invasive change of simulation behavior
+# and is recommended only for experts
+proc ptkEarlyEnd { name } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -553,17 +565,19 @@ proc ptkStop { name } {
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
     halt
-    global ptkOctHandles
-
-# The following call is very dangerous -- it can cause the universe
-# to be deleted while it is still running if the dismiss button is pressed.
-#    if {[info exists ptkOctHandles($name)]} {
-#	after 60000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
-#    }
 }
 
 #######################################################################
-# procedure to stop a run without running wrapup
+# a number of places call ptkStop where they really ought to call
+# ptkAbort; provide synonym for backwards compatibility
+proc ptkStop { name } {
+    ptkAbort $name
+}
+
+#######################################################################
+# procedure to stop a run without running wrapup;
+# any run-control-window script will see an error from "run",
+# and will be terminated if it doesn't catch the error
 proc ptkAbort { name } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
@@ -575,26 +589,8 @@ proc ptkAbort { name } {
 	$ptkRunFlag($name) != {PAUSED}} return
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) ABORT
-    halt
-    global ptkOctHandles
-# The following call is very dangerous -- it can cause the universe
-# to be deleted while it is still running if the dismiss button is pressed.
-#    if {[info exists ptkOctHandles($name)]} {
-#	after 60000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
-#    }
+    abort
 }
-
-#######################################################################
-# Safety net: if after some time the ptkRunFlag has not been reset,
-# then reset it.
-# The following proc is very dangerous -- it can cause the universe
-# to be deleted while it is still running if the dismiss button is pressed.
-#proc ptkForceReset { trigger name octHandle } {
-#    global ptkRunFlag
-#    if {[info exists ptkRunFlag($name)] && $ptkRunFlag($name) == $trigger} {
-#	ptkClearRunFlag $name $octHandle
-#    }
-#}
 
 #######################################################################
 # procedure to pause a run
@@ -653,8 +649,7 @@ proc ptkCondTime {script} {
 	} 1]
 	set timeInSec [expr [lindex $elapsedTime 0]/1000000.0]
 	ptkMessage \
-	    "The run of [curuniverse] took $timeInSec seconds\
-             not including compile or wrapup"
+	    "The run of [curuniverse] took $timeInSec seconds"
     } {
 	eval $script
     }
@@ -733,13 +728,7 @@ proc ptkGo {name octHandle} {
 	    # of iterations, finishing by invoking
 	    # wrapup if no error occurred.
             set numIter [$w.iter.entry get]
-	    ptkCondTime "run $numIter"
-
-    	    if {[info exists ptkRunFlag($name)] &&
-    	        $ptkRunFlag($name) != {ABORT}} { wrapup } {
-    	        # Mark an error if the system was aborted
-    	        set ptkRunFlag($name) ERROR
-	    }
+	    ptkCondTime "run $numIter; wrapup"
 	}
 
         # we have finished running
@@ -749,6 +738,9 @@ proc ptkGo {name octHandle} {
 	ptkClearRunFlag $name $octHandle
 	# Mark an error
 	set ptkRunFlag($name) ERROR
-	error $msg
+	# Report the error, unless it was just caused by a user abort
+	if {$msg != "" && $msg != "Aborted"} {
+	    ptkImportantMessage .error $msg
+	}
     }
 }
