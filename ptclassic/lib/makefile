@@ -34,13 +34,17 @@ VPATH = $(ROOT)/lib
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-MISC_FILES = CompileMake.template README gantt.me \
+EXTRA_SRCS = CompileMake.template README gantt.me \
 	interpreter.help oct2ps.pro pigiDebugRpc pigiRpcConsole \
 	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.xdb \
 	pigiRpcShell \
 	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
 	vem.bindings.7-3 vem.bindings.8-0 vem.bindings.8-1
+
+MISC_FILES = 	Vem Vem-8.1 Vem-8.2 app-defaults bw_patterns bw_postscript \
+		cg56 cg96 cgc cm5 colors defaultContent \
+		gantt.help matlab rename tcl tech technology vem xpole-1.4.6
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
