@@ -193,7 +193,7 @@ body ::tycho::ColorPicker::constructor {args} {
     bind swatch <ButtonPress-1> "\[winfo toplevel %W\] click %W"
 
     # The text samples
-    itk_component add black {
+    itk_component add blacktext {
         label $itk_component(sampleinside).black \
                 -text "Black text" \
                 -foreground black \
@@ -202,7 +202,7 @@ body ::tycho::ColorPicker::constructor {args} {
     } {
         keep -cursor
     }
-    itk_component add white {
+    itk_component add whitetext {
         label $itk_component(sampleinside).white \
                 -text "White text" \
                 -foreground white \
@@ -211,9 +211,9 @@ body ::tycho::ColorPicker::constructor {args} {
     } {
         keep -cursor
     }
-    pack $itk_component(black) \
+    pack $itk_component(blacktext) \
             -side top -expand yes -fill x -padx 12
-    pack $itk_component(white) \
+    pack $itk_component(whitetext) \
             -side top -expand yes -fill x -padx 12
 
     # Add the close button
@@ -343,8 +343,8 @@ body ::tycho::ColorPicker::click {widget} {
 #
 body ::tycho::ColorPicker::_setrgb {rgb} {
     $itk_component(sampleinside) configure -bg $rgb
-    $itk_component(black) configure -bg $rgb
-    $itk_component(white) configure -bg $rgb
+    $itk_component(blacktext) configure -bg $rgb
+    $itk_component(whitetext) configure -bg $rgb
 
     $itk_component(topgrid) assign rgb $rgb
 }
