@@ -86,6 +86,9 @@ proc NodeDrop { w x y } {
 
     setProc $dot($node,name) $procnum
 
+    # Update the node data.
+    set dot($node,procnum) $procnum
+
     set newx [expr ($procnum * 100) + 100 + ($x - $leftX)]
 
     # Figure out the bounds of this node based on its input
@@ -281,7 +284,7 @@ proc ReadFile { f } {
 
     # Establish a default value for the startline, deadline
     set dot(startline) 0
-    set dot(deadline) 550
+    set dot(deadline) 500
 
     # Open the file and get its file ID
     set fileId [open $f RDONLY]
@@ -425,6 +428,7 @@ proc DisplayGraph {} {
     set dot(.view.c,canvasBottom) $canvasBottom
 
     frame .view
+    frame .view.bottom
     canvas .view.new -width 300 -height $initHeight -scrollregion \
 	    " $canvasLeft $canvasTop $canvasRight $canvasBottom " \
 	    -background green \
@@ -438,6 +442,13 @@ proc DisplayGraph {} {
 	    -command [list .view.c xview]
     scrollbar .view.yscroll -orient vertical \
 	    -command [list .view.c yview]
+    set padx [expr [.view.xscroll cget -width] + 2* \
+	    ([.view.xscroll cget -bd] + \
+	    [.view.xscroll cget -highlightthickness])]
+    set pady [expr [.view.yscroll cget -width] + 2* \
+	    ([.view.yscroll cget -bd] + \
+	    [.view.yscroll cget -highlightthickness])]
+    frame .view.pad -width $padx -height $pady
 
     set dot(.view.c,nodeName) "No node selected"
     label .view.nodeName -textvariable dot(.view.c,nodeName)
@@ -453,7 +464,10 @@ proc DisplayGraph {} {
     pack .view.procsUsed -side bottom -fill x
     pack .view.lastFinish -side bottom -fill x
     pack .view.throughput -side bottom -fill x
-    pack .view.xscroll -side bottom -fill x
+
+    pack .view.bottom -side bottom -fill x
+    pack .view.pad -in .view.bottom -side right
+    pack .view.xscroll -in .view.bottom -side bottom -fill x
     pack .view.c -side left -fill both -expand true
     pack .view.yscroll -side right  -fill y
     pack .view -side top -fill both -expand true
@@ -637,6 +651,9 @@ proc DisplayGraph {} {
 
 	# Register the initial proc placements
 	setProc $dot($node,name) $procnum
+
+	# Update the node data.
+	set dot($node,procnum) $procnum
     }
 
     foreach conn $dot(connList) {
@@ -1253,6 +1270,7 @@ proc CreateConn { conn } {
 
     # Create a line for the connection
     set connID [.view.c create line $xs $ys $xd $yd \
+	    -fill blue \
 	    -width 2 -arrow last -tag "conn $conn"]
     # Associate the line ID and the conn with each other
     set dot($connID,conn) $conn
@@ -1428,6 +1446,8 @@ proc RightPackAll {} {
 }
 
 # Top-level script to set up and display the graph.
+frame .menubar
+
 button .spread -text Spread -command "SpreadAll"
 button .upPack -text UpPack -command "UpPackAll"
 button .downPack -text DownPack -command "DownPackAll"
@@ -1435,14 +1455,17 @@ button .leftPack -text LeftPack -command "LeftPackAll"
 button .rightPack -text RightPack -command "RightPackAll"
 button .setAll -text Times -command "setAllTimes"
 button .done -text Done -command "requestExit"
-pack .done -side bottom
+
+pack .done -in .menubar -side right
+pack .spread -in .menubar -side left
+pack .upPack -in .menubar -side left
+pack .downPack -in .menubar -side left
+pack .leftPack -in .menubar -side left
+pack .rightPack -in .menubar -side left
+pack .setAll -in .menubar -side left
+
+pack .menubar -side bottom
 ReadFile $GRAPH_FILE
 DisplayGraph
-pack .spread -side left
-pack .upPack -side left
-pack .downPack -side left
-pack .leftPack -side left
-pack .rightPack -side left
-pack .setAll -side left
 
 # END
