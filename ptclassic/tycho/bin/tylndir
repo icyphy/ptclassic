@@ -1,7 +1,14 @@
 #! /bin/sh
 
-# lndir - create shadow link tree
+# tylndir - create shadow link tree
+# tylndir creates a shadow link tree.  tylndir is different from
+# lndir in that it handles SCCS directories, and won't create subdirectories
+# for directories named 'junk' or 'adm'
 #
+# $Id$
+
+# tylndir is based on lndir:
+
 # Time stamp <89/11/28 18:56:54 gildea>
 # By Stephen Gildea <gildea@bbn.com> based on
 #  XConsortium: lndir.sh,v 1.1 88/10/20 17:37:16 jim Exp
@@ -15,7 +22,7 @@
 #
 # 	%  mkdir /usr/local/src/new-X
 #	%  cd /usr/local/src/new-X
-# 	%  lndir ../X
+# 	%  tylndir ../X
 #
 # Note: does not link files beginning with "."  Is this a bug or a feature?
 #
@@ -75,7 +82,7 @@ do
 	then
 		ln -s $DIRFROM/$file .
 	else
-		if [ $file != RCS ]
+		if [ $file != RCS -a $file != SCCS -a $file != junk -a $file != adm -a $file != "itclhtml" -a file != "javahtml" ]
 		then
 			echo `pwd`/$file:
 			if [ ! -d $file ]
