@@ -121,7 +121,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXINPUTS:\\fR \t
+\\f\\n(SXINPUTS:\\fR
 ..
 
 .de OH
@@ -131,7 +131,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXOUTPUTS:\\fR \t
+\\f\\n(SXOUTPUTS:\\fR
 ..
 
 .de PE
@@ -146,7 +146,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXSTATES:\\fR \t
+\\f\\n(SXSTATES:\\fR
 ..
 
 .de NE
@@ -154,6 +154,7 @@ delim off
 .if \\n(Fe .br
 .if \\n(Fe .ti -0.5i
 .nr Fe 1
+\t
 ..
 
 .de DF
@@ -169,7 +170,7 @@ delim off
 .de AL \" Author list
 .ta 1i
 .lp
-\\f\\n(SXAUTHOR(S):\\fI\t\\$1
+\\f\\n(SXAUTHOR:\\fI\t\\$1
 ..
 
 .de AC \" Acknowlegements info
@@ -199,116 +200,117 @@ delim off
 .na
 .if \\n(Ic .ta 1i 5i
 .lp
+.ne 1.5i
 .if !\\n(Ic \\f\\n(SXLOCATION:\\fR	\\$1
-.if \\n(Ic \\f\\n(SXLOCATION:\\fR \\$1		\\fR
+.if \\n(Ic \\f\\n(SXLOCATION:\\fR	\\$1	\\fR
 .nr Im 0
 .\"
 .if \\n(Ic .if '\\$1'DE main library' \{\
-.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'DE main palette' \{\
-.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'DE logic library' \{\
-.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'~ptolemy/src/domains/de/demo' \{\
-.Ps /usr/users/ptolemy/src/domains/de/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/de/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .\"
 .if \\n(Ic .if '\\$1'DDF library' \{\
-.Ps /usr/users/ptolemy/src/domains/ddf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/ddf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'~ptolemy/src/domains/ddf/demo' \{\
-.Ps /usr/users/ptolemy/src/domains/ddf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/ddf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .\"
 .if \\n(Ic .if '\\$1'CG56 arithmetic library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'CG56 control library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'CG56 demo library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'CG56 dsp library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/dsp/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/dsp/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'CG56 nonlinear functions library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'CG56 signal sources library' \{\
-.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .\"
 .if \\n(Ic .if '\\$1'SDF comm library' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF comm palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF communications palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF conversion palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF dsp library' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF dsp palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF image library' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF image palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF main library' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF non-linear palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF nonlinear palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF sources palette' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .\"
 .if \\n(Ic .if '\\$1'SDF comm library (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF comm palette (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF communications palette (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF conversion palette (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF dsp library (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF main library (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF nonlinear palette (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'SDF sources palette (galaxy)' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .\"
 .if \\n(Ic .if '\\$1'~ptolemy/src/domains/sdf/demo' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if '\\$1'~ptolemy/src/domains/sdf/utilities' \{\
-.Ps /usr/users/ptolemy/src/domains/sdf/utilities/\\*(NM.ps 1i
+.Ps /usr/users/ptolemy/src/domains/sdf/utilities/\\*(NM.ps 0.9i
 .nr Im 1 \}
 .if \\n(Ic .if !\\n(Im .Ps \\$1.ps
 .ad
@@ -318,7 +320,7 @@ delim off
 .\" $1 is the file, $2 is width/height in inches.  The ".sp -1" backs us up
 .\" one line so things come out where you'd expect.
 .de Ps
-	PSINCLUDE:\\$1:\w@\h@\\$2@@
+		PSINCLUDE:\\$1:\w@\h@\\$2@@
 .sp -1
 ..
 
