@@ -66,7 +66,8 @@ class ::tycho::BuilderDialog {
 #
 body ::tycho::BuilderDialog::constructor {args} {
     global TYCHO
-    displayer configure -title "Tycho Build Manager"
+    displayer configure -title "Tycho Build Manager" \
+	    -menupadx 10
 
     $myMenubar addMenu Build -underline 0
     $myMenubar add {Full (10 Minutes)} Build -underline 0 \
