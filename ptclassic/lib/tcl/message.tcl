@@ -108,6 +108,13 @@ proc ptkMessage {text} {
     global ptkMessageWindowNum
     set w .message$ptkMessageWindowNum
     incr ptkMessageWindowNum
+    ptkInform $w $text
+}
+
+###################################################################
+# Inform the user of something in a window with the specified name
+#
+proc ptkInform {w text} {
     ptkSafeDestroy $w
     toplevel $w
     wm title $w "Ptolemy Message"
