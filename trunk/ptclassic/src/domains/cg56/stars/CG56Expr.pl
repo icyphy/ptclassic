@@ -43,6 +43,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
     go
     {
+	StringList code;
+	code << expr << '\n';
 	addCode(expr);
     }
 
