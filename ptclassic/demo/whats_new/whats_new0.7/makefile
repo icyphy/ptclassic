@@ -40,7 +40,15 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	index.html
+	compatibility.html \
+	fsm.html \
+	index.html \
+	minorchanges.html \
+	newstars.html \
+	newwork.html \
+	ptrecursion.html \
+	typesys.html
+
 
 MISC_FILES =
 
