@@ -68,7 +68,7 @@ void ACSKnownCategory::addEntry( const char* category ) {
 }
 
 // Get the whole category list.
-const StringList ACSKnownCategory::Categories() {
+const StringList ACSKnownCategory::getCategories() {
 	return *allCategories;
 }
 
