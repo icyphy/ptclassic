@@ -57,6 +57,9 @@ class ::tycho::EditC {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Add a Tcl package initialization function
+    method addTclInitialization {}
+
     # Compile the C file and load it into Tcl
     method compileAndLoad {}
 
@@ -89,8 +92,12 @@ class ::tycho::EditC {
 body ::tycho::EditC::constructor {args} {
 
     eval itk_initialize $args
-    
-    # Set up menu entries for compiling.
+
+    # Add menu entries for templates
+    menubar add {Add Tcl Initialization} Special -underline 0 \
+            -command "$this addTclInitialization"
+
+    # Set up menu entries for compiling
     menubar delete Evaluate
     menubar insert Compile Close  -underline 0 \
             -accelerator "C-x C-r" -command "$this evaluate"
@@ -100,6 +107,70 @@ body ::tycho::EditC::constructor {args} {
 
     # C does not have line-oriented comments, so there is no fill prefix.
     set fillPrefix ""
+}
+
+#######################################################################
+#### addTclInitialization
+# When a C file is loaded into Tcl, an initialization function with
+# a specific name is called.  See the Tcl load command for naming
+# details. This method checks whether such a function and inserts
+# it if it does not exist.
+#
+body ::tycho::EditC::addTclInitialization {} {
+    # Make sure the user know what's being modified
+    saveQuery
+
+    # Figure out the initialization proc name
+    set basename [file rootname [file tail $itk_option(-file)]]
+    set initProcName "[string toupper\
+            [string range $basename 0 0]][string tolower\
+            [string range $basename 1 end]]_Init"
+
+    # Search for tcl.h and initProcName
+    set sawInclude 0
+    set sawInitProcName 0
+    # catch all of this incase the file does not yet exist
+    if ![catch {set fd [open $itk_option(-file) r]}] {
+        while {[gets $fd linein] >= 0} {
+            if [regexp {#include [<"](tcl|tk|itcl).h[">]} $linein] {
+                set sawInclude 1 
+            }
+            if [regexp $initProcName $linein] {
+                set sawInitProcName 1
+                break
+            } 
+        }
+        close $fd
+    }
+
+    if { $sawInitProcName } {
+        # There is already an initialization, so just print to the
+        # status bar and be done with it.
+        putStatus "Initialization procedure already exists"
+    } else {
+        # Add a initialization procedure to the end of the file
+        set fd [open $itk_option(-file) a]
+        # Check to see if we need to add #include <tcl.h>
+        if {$sawInclude == 0 } { 
+            puts $fd "#ifndef _TCL\n#include <tcl.h>"
+            puts $fd "#endif"
+        }
+
+        puts $fd "/* Tcl initialization procedure added for\
+                the Tcl load command\n */"
+        puts $fd "int ${initProcName}\(Tcl_Interp *interp)\n\{"
+        puts $fd "    /* A sample Tcl command registration. */"
+        puts $fd "    /* Tcl_CreateCommand(interp, \"$basename\",\
+                Tcl_${basename}Cmd,"
+        puts $fd "                         (ClientData) NULL,\
+                (Tcl_CmdDeleteProc*) NULL);"
+        puts $fd "     */"
+        puts $fd "    return TCL_OK;\n\}"
+        close $fd
+        reload
+        putStatus "Initialization function added: \
+be sure to register your Tcl commands"
+    }
 }
 
 ####################################################################
@@ -135,10 +206,8 @@ body ::tycho::EditC::evaluate {} {
         set compiler [::tycho::CompileCTcl [::tycho::autoName .compiler]]
     }
 
-    #$compiler configure -view $this
-    # Parse so we get .widgetname instead of ::.widgetname
-    regexp {(.*)::(.+)$} $this tmp tmp newthis
-    $compiler configure -view $newthis
+    # Make sure we get .widgetname instead of ::.widgetname
+    $compiler configure -view [string trimleft $this ":"]
 
     $compiler compile [list $file]
     #delete object $compiler
