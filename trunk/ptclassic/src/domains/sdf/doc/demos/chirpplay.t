@@ -1,5 +1,5 @@
 .\" $Id$
-.NA fm
+.NA chirpplay
 .SD
 Chirp generator that plays on the workstation speaker.
 .DE
@@ -8,6 +8,9 @@ Chirp generator that plays on the workstation speaker.
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
+.Id "chrip generator"
+.Ir "audio, Sparcstation"
+.Ir "Sparcstation audio"
 This universe generates a chirp (a sinusoid with slowly increasing
 frequency) and plays it over the workstation speaker.
 It does this by writing its output to a temporary file and invoking

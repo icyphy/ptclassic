@@ -10,12 +10,15 @@ A universe showing two ways to implement an all-pole filter.
 .LD
 A noise signal is fed into two realizations
 of an all pole filter.
+.Ie "allpole filter"
+.Ie "filter, allpole"
 The lower one uses an
 .c FIR
 filter in a feedback loop.
 The upper one uses the
 .c BlockAllPole
 star.
+.Ie BlockAllPole
 The coefficients for the
 .c BlockAllPole
 star are supplied by the
