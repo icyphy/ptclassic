@@ -1389,6 +1389,9 @@ proc HMrender {win tag not param text} {
 # and image. Read in an image if we don't already have one and
 # call back to library for display.
 #
+# HMtag_image calls this and passes a label as the handle.
+# This function in turn calls HMgot_image
+#
 proc HMset_image {win handle src} {
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
