@@ -8,7 +8,7 @@
 
 # The optional argument is the directory of the domain documentation
 # The -index option generates an index only, printing nothing.
-# An implicit header file, ~ptolemy/doc/headers/shared, is prepended.
+# An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
 
 # The following files are assumed to present in the documentation directory:
 #	overall	  - The main documentation section.
@@ -17,6 +17,8 @@
 #	stars	  - A directory with star documentation
 #	demotitle - The title page for the demo section
 #	demos	  - A directory with demo documentation.
+#	targettitle - The title page for the target section.
+#	targets   - The directory with the target documentation.
 
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
@@ -24,11 +26,15 @@
 # On interrupt, remove temporary files
 onintr catch
 
+if (!($?PTOLEMY)) then
+	setenv PTOLEMY ~ptolemy
+endif
+
 # File structure information:
-set dirheader = ~ptolemy/doc/headers
+set dirheader = $PTOLEMY/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
-set contentscmd = ~ptolemy/doc/bin/contents
+set contentscmd = $PTOLEMY/doc/bin/contents
 set indexonly = 0
 
 if (!($?ALMAGEST_INDEX)) then
@@ -73,6 +79,17 @@ if ( -d demos ) then
 	endif
 	cd demos
 	# print all demos
+	cat -s * >> /tmp/pt$$
+	cd ..
+endif
+if ( -d targets ) then
+	if (-e targettitle) then
+		# set type for this section
+		echo '.ds TY "target' >> /tmp/pt$$
+		cat targettitle >> /tmp/pt$$
+	endif
+	cd targets
+	# print all targets
 	cat -s * >> /tmp/pt$$
 	cd ..
 endif
