@@ -271,8 +271,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	}
 	go {
-                addProcedure(replyHandler, "ReplyHandler");
-                addProcedure(errorHandler, "ErrorHandler");
+                addProcedure(replyHandler, "CGCNOWam_ReplyHandler");
+                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
 		addCode(block);
 	}
 
