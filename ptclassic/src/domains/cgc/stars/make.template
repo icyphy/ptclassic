@@ -112,6 +112,7 @@ PL_SRCS= \
  CGCIntToFloat.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
+ CGCIIR.pl \
  CGCIntToBits.pl \
  CGCLMSOscDet.pl \
  CGCLastOfN.pl \
