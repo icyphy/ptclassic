@@ -127,7 +127,7 @@ StringList AsmStar::lookupAddress(const char* name, const char* offset)
 	    addr.initialize();
 	}
     }
-    else if (port = (AsmPortHole*)genPortWithName(portName))
+    else if ( (port = (AsmPortHole*)genPortWithName(portName)) )
     {
 	// compute offset within buffer, circularly
 	off += port->bufPos();
