@@ -267,6 +267,8 @@ void ParScheduler::oldRun() {
 				CGWormhole* worm = s->myWormhole();
 				worm->downLoadCode(0);
 			} else {
+				CGTarget* t = (CGTarget*) mtarget->child(0);
+				s->setTarget(t);
 				mtarget->writeFiring(*s,1);
 			}
 		}
