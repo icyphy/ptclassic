@@ -28,7 +28,7 @@
 
 ROOT =	$(PTOLEMY)
 include $(ROOT)/mk/config-$(PTARCH).mk
-C_INCL =	-I$(ROOT)/src/domains/cgc/rtlib
+C_INCL =
 
 # $(CYSYSLIBS) is defined in config-$(PTARCH).mk or config-default.mk
 LDFLAGS = 	$(CSYSLIBS)
