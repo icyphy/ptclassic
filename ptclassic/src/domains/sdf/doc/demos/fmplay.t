@@ -3,7 +3,7 @@
 .SD
 Sound generator using FM modulation that plays on the workstation speaker.
 .DE
-.SV 1.2 "Februrary 8, 1991"
+.SV 1.2 "February 8, 1991"
 .AL "E. A. Lee and Tom Parks"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
@@ -15,7 +15,7 @@ invented by H. M. Chowning and described in
 The structure is identical to the \fIfm\fR demo system, which
 plots its output on the screen, but instead of plotting the output
 on the screen, it writes it to a file and invokes the "play" program
-on that file.  On a sparcstation equiped with a speaker, this will
+on that file.  On a sparcstation equipped with a speaker, this will
 produce sound.  This will also work on any other workstation if
 a compatible "play" program is in the users path.
 .ES
