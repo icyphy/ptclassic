@@ -250,8 +250,7 @@ void CGMultiTarget :: prepareChildren() {
 	t->setParent(this);
 	if (cgChild(i)) {
 	    t->stateWithName("file")->setInitValue(childFilePrefix);
-	    const char* expandedPathName =
-		expandPathName(destDirectory.initValue());
+	    char* expandedPathName = expandPathName(destDirectory.initValue());
 	    t->stateWithName("directory")
 		->setInitValue(hashstring(expandedPathName));
 	    delete [] expandedPathName;
