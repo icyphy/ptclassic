@@ -34,7 +34,7 @@
 # FIXME: this is for debugging on the mac and windows
 if { [info exists tyDebug] && "$tyDebug" == 1} {
     proc ::tclexit {} {
-	puts "You called tclexit.  $tyDebug was set to 1,\
+	puts "You called tclexit. tyDebug was set to 1,\
 		so we are not exiting"
     }
 } else {
