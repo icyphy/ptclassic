@@ -78,8 +78,6 @@ class Matrix : public Message {
 ///////////////////////////////
 
 class ComplexMatrix: public Matrix {
- protected:
-  Complex *data;       // made protected for SubMatrix class use
  public:
   // return data entry
   virtual Complex& entry(int element) const { return data[element]; }
@@ -91,10 +89,10 @@ class ComplexMatrix: public Matrix {
     else return Message::isA(typ);
   }
 
-  // constructor: makes an unitialized matrix with no data
+  // constructor: makes an un-initialized matrix with no data
   ComplexMatrix();
 
-  // constructor: makes an unitialized matrix with the given dimensions
+  // constructor: makes an un-initialized matrix with the given dimensions
   ComplexMatrix(int numRow, int numCol);
 
   // constructor:
@@ -150,14 +148,14 @@ class ComplexMatrix: public Matrix {
 
   // destructor
   ~ComplexMatrix();
+ protected:
+  Complex *data;       // made protected for SubMatrix class use
 };
 
 //////////////////////////
 // FixMatrix Message Class
 //////////////////////////
 class FixMatrix: public Matrix {
- protected:
-  Fix *data;             // made protected for SubMatrix class use
  public:
   // return data entry
   virtual Fix& entry(int element) const { return data[element]; } 
@@ -169,10 +167,10 @@ class FixMatrix: public Matrix {
     else return Message::isA(typ);
   }
 
-  // constructor: makes an unitialized matrix with no data
+  // constructor: makes an un-initialized matrix with no data
   FixMatrix();
 
-  // constructor: makes an unitialized matrix with the given dimensions
+  // constructor: makes an un-initialized matrix with the given dimensions
   FixMatrix(int numRow, int numCol);
 
   // constructor: 
@@ -227,6 +225,8 @@ class FixMatrix: public Matrix {
 
   // destructor
   ~FixMatrix();
+ protected:
+  Fix *data;             // made protected for SubMatrix class use
 };
 
 /////////////////////////////
@@ -234,8 +234,6 @@ class FixMatrix: public Matrix {
 /////////////////////////////
 
 class FloatMatrix: public Matrix {
- protected:
-  double *data;             // made protected for SubMatrix class use
  public:
   // return data entry
   virtual double& entry(int element) const { return data[element]; } 
@@ -247,10 +245,10 @@ class FloatMatrix: public Matrix {
     else return Message::isA(typ);
   }
 
-  // constructor: makes an unitialized matrix with no data
+  // constructor: makes an un-initialized matrix with no data
   FloatMatrix();
 
-  // constructor: makes an unitialized matrix with the given dimensions
+  // constructor: makes an un-initialized matrix with the given dimensions
   FloatMatrix(int numRow, int numCol);
 
   // constructor:
@@ -305,6 +303,8 @@ class FloatMatrix: public Matrix {
 
   // destructor
   ~FloatMatrix();
+ protected:
+  double *data;             // made protected for SubMatrix class use
 };
 
 
@@ -312,8 +312,6 @@ class FloatMatrix: public Matrix {
 // IntMatrix Message Class
 //////////////////////////
 class IntMatrix: public Matrix {
- protected:
-  int *data;             // made protected for SubMatrix class use
  public:
   // return data entry
   virtual int& entry(int element) const { return data[element]; } 
@@ -325,10 +323,10 @@ class IntMatrix: public Matrix {
     else return Message::isA(typ);
   }
 
-  // constructor: makes an unitialized matrix with no data
+  // constructor: makes an un-initialized matrix with no data
   IntMatrix();
 
-  // constructor: makes an unitialized matrix with the given dimensions
+  // constructor: makes an un-initialized matrix with the given dimensions
   IntMatrix(int numRow, int numCol);
 
   // constructor: 
@@ -383,6 +381,8 @@ class IntMatrix: public Matrix {
 
   // destructor
   ~IntMatrix();
+ protected:
+  int *data;             // made protected for SubMatrix class use
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -420,11 +420,11 @@ class MatrixEnvParticle : public Particle {
   void operator << (float f);
   void operator << (int i);
 
-  // These return an error.  Should be redined by derived classes as needed.
-  virtual void operator << (const ComplexMatrix& m);
-  virtual void operator << (const FixMatrix& m);
-  virtual void operator << (const FloatMatrix& m);
-  virtual void operator << (const IntMatrix& m);
+  // These return an error.  Should be redefined by derived classes as needed.
+  virtual void operator << (ComplexMatrix& m);
+  virtual void operator << (FixMatrix& m);
+  virtual void operator << (FloatMatrix& m);
+  virtual void operator << (IntMatrix& m);
 
   // compare particles
   int operator == (const Particle&);
@@ -443,7 +443,7 @@ class ComplexMatrixEnvParticle : public MatrixEnvParticle {
   ComplexMatrixEnvParticle();
 
   // load with data
-  void operator << (const ComplexMatrix& m);
+  void operator << (ComplexMatrix& m);
   void operator << (const Envelope& p);
 
   // particle copy
@@ -467,7 +467,7 @@ class FixMatrixEnvParticle : public MatrixEnvParticle {
   FixMatrixEnvParticle();
 
   // load with data
-  void operator << (const FixMatrix& m);
+  void operator << (FixMatrix& m);
   void operator << (const Envelope& p);
 
   // particle copy
@@ -492,7 +492,7 @@ class FloatMatrixEnvParticle : public MatrixEnvParticle {
   FloatMatrixEnvParticle();
 
   // load with data
-  void operator << (const FloatMatrix& m);
+  void operator << (FloatMatrix& m);
   void operator << (const Envelope& p);
 
   // particle copy
@@ -516,7 +516,7 @@ class IntMatrixEnvParticle : public MatrixEnvParticle {
   IntMatrixEnvParticle();
 
   // load with data
-  void operator << (const IntMatrix& m);
+  void operator << (IntMatrix& m);
   void operator << (const Envelope& p);
 
   // particle copy
