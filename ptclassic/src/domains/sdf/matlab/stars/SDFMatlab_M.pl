@@ -125,12 +125,12 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
 		  if ( matlabInputMatrices != 0 ) {
-		    LOG_DEL; delete [] matlabInputMatrices;
 		    for ( int k = 0; k < numInputs; k++ ) {
 		      if ( matlabInputMatrices[k] != 0 ) {
 			mxFreeMatrix(matlabInputMatrices[k]);
 		      }
 		    }
+		    LOG_DEL; delete [] matlabInputMatrices;
 		  }
 		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
 		  for ( int k = 0; k < numInputs; k++ ) {
@@ -146,12 +146,12 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
 		  if ( matlabOutputMatrices != 0 ) {
-		    LOG_DEL; delete [] matlabOutputMatrices;
 		    for ( int k = 0; k < numOutputs; k++ ) {
 		      if ( matlabOutputMatrices[k] != 0 ) {
 			mxFreeMatrix(matlabOutputMatrices[k]);
 		      }
 		    }
+		    LOG_DEL; delete [] matlabOutputMatrices;
 		  }
 		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
 		  for ( int k = 0; k < numOutputs; k++ ) {
