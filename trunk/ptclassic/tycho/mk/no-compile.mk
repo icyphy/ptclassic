@@ -48,6 +48,7 @@ ifdef DIRS
 	    fi ; \
 	done
 endif
+
 CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
 
 clean:
