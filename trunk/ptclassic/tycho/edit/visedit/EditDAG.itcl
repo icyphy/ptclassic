@@ -176,9 +176,6 @@ class ::tycho::EditDAG {
     # Redraw the graph.
     method redrawGraph {}
 
-    # Reload data from the current file.
-    method reload {}
-
     # Find the node in the DAG identified by "name".
     # FIXME: Implement this.
     # method seeFragment {name}
@@ -215,6 +212,9 @@ class ::tycho::EditDAG {
 
     # Draw a line from the specified node to one or all of its parents.
     protected method drawParentLines {node {parent {}}}
+
+    # Insert the specified data into the canvas.
+    method insertData {data}
 
     # Initialize the menu/status/tool bars
     protected method _initializeBars {menubar statusbar toolbar}
@@ -651,20 +651,20 @@ body ::tycho::EditDAG::modify {args} {
     redrawGraph
 }
 
-#######################################################################
-#### reload
-# Reload the current file. This is redefined in order to redraw the
-# graph. Also, the graph is checked to make sure that all referenced
+######################################################################
+#### insertData
+# Insert data into the current file. This is redefined in order to redraw
+# the graph. Also, the graph is checked to make sure that all referenced
 # parents and children are present, and that the graph is acyclic. It
 # is repaired if not by deleting the offending references.
 #
-body ::tycho::EditDAG::reload {} {
+body ::tycho::EditDAG::insertData {data} {
     undoBoundary
-    ::tycho::File::reload
+    chain $data
     verify repair
-    # Not sure why the time delay is needed here... but window doesn't
-    # map otherwise.
-    after 1 ::tycho::TWidget::evalIfExists $this redrawGraph
+
+    # Defer the actual drawing until the slate is mapped.
+    whenMapped slate "$this redrawGraph"
 }
 
 #######################################################################
