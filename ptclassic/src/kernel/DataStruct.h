@@ -57,8 +57,8 @@ friend class ListIter;
 protected:
     SingleLink *next,*previous;
     Pointer e;
-    inline SingleLink(Pointer,SingleLink*);
-    inline void remove();
+    SingleLink(Pointer,SingleLink*);
+    void remove();
 };
 
 class SequentialList
@@ -106,11 +106,11 @@ public:
 	inline int empty() const { return (lastNode == 0);}
 
 	// is arg a member of the list? (returns TRUE/FALSE)
-	inline int member(Pointer arg) const;
+	int member(Pointer arg) const;
 
 private:
 	// remove a link from the list
-        inline SingleLink* removeLink(SingleLink&);
+        SingleLink* removeLink(SingleLink&);
 
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
@@ -165,11 +165,11 @@ public:
 	inline ListIter(const SequentialList& l) : list(&l) { reset(); }
 
 	// reset to the beginning of a list
-        inline void reset();
+        void reset();
 
 	// next and operator++ are synonyms.  Return the next element,
 	// return 0 if there are no more.
-        inline Pointer next();
+        Pointer next();
     
 	inline Pointer operator++ (POSTFIX_OP) { return next();}
 
@@ -179,7 +179,7 @@ public:
         // remove the currently pointed to ref and update the
         // the ref pointer - if next hasn't been called, the lastNode
         // will be removed
-        inline void remove();
+        void remove();
 private:
 	const SequentialList* list;
 	SingleLink *ref;

@@ -96,7 +96,7 @@ public:
 	return port;
     }
     inline PortHole* operator++(POSTFIX_OP) { return BlockOutputIter::next();}
-    inline BlockPortIter::reset;
+    BlockPortIter::reset;
     BlockPortIter::remove;
 };
 
@@ -109,7 +109,7 @@ public:
 	return port;
     }
     inline PortHole* operator++(POSTFIX_OP) { return BlockInputIter::next();}
-    inline BlockPortIter::reset;
+    BlockPortIter::reset;
     BlockPortIter::remove;
 };
 
