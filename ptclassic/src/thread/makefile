@@ -147,6 +147,16 @@ gthreads_sol2: $(GT_OBJ)
 		COMP_ASM='$(GT_COMP_ASM) -traditional' \
 		all install;
 
+# Solaris2.5, with gcc
+gthreads_sol2.5: $(GT_OBJ)
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
+		CC=gcc \
+		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
+		COMP_ASM='$(GT_COMP_ASM) -traditional' \
+		all install;
+
 # Build library for sol2 using Sun's compiler.
 gthreads_sol2.cfront: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
