@@ -201,10 +201,15 @@ vol. 20:4, Sept. 1990.
 	constructor {
 		delayType = TRUE;
 
-		priList = (PriorityQueue*) 0;
-		queues = (Queue*) 0;
-		vTimeStamp = (float*) 0;
-		cellCount = (int*) 0;
+		// initialize variables
+		numStreams = 0;
+		vTime = 0.0;
+
+		// initialize pointers
+		vTimeStamp = 0;
+		cellCount = 0;
+		priList = 0;
+		queues = 0;
 
 		input.before(demand);
 		input.triggers(discard);
@@ -213,32 +218,11 @@ vol. 20:4, Sept. 1990.
 	}
 
 	setup {
-		wrapup();
-
-		vTime = 0.0;
-		numStreams = AvgRate.size();
-		LOG_NEW; priList = new PriorityQueue;
-		LOG_NEW; queues = new Queue[numStreams];
-		LOG_NEW; vTimeStamp = new float[numStreams];
-		LOG_NEW; cellCount = new int[numStreams];
-		for (int i = 0; i < numStreams; i++) {
-			vTimeStamp[i] = 0.0;
-			cellCount[i] = 0;
-		}
-	}
-
-	wrapup {
-		LOG_DEL; delete [] vTimeStamp;
-		vTimeStamp = (float*) 0;
-		LOG_DEL; delete [] cellCount;
-		cellCount = (int*) 0;
-
 		if (priList) {
 			while(priList->length()) {
 				LOG_DEL; delete (Tag*) priList->getFirstElem();
 			}
 			LOG_DEL; delete priList;
-			priList = (PriorityQueue*) 0;
 		}
 
 		if (queues) {
@@ -247,11 +231,44 @@ vol. 20:4, Sept. 1990.
 					LOG_DEL; delete (BufCell*) (queues[i]).get();
 			}	}
 			LOG_DEL; delete [] queues;
-			queues = (Queue*) 0;
+		}
+
+		LOG_DEL; delete [] vTimeStamp;
+		LOG_DEL; delete [] cellCount;
+
+		vTime = 0.0;
+		numStreams = AvgRate.size();
+
+		LOG_NEW; priList = new PriorityQueue;
+		LOG_NEW; queues = new Queue[numStreams];
+
+		LOG_NEW; vTimeStamp = new float[numStreams];
+		LOG_NEW; cellCount = new int[numStreams];
+		for (int i = 0; i < numStreams; i++) {
+			vTimeStamp[i] = 0.0;
+			cellCount[i] = 0;
 		}
 	}
 
-	destructor { wrapup(); }
+	destructor {
+		LOG_DEL; delete [] vTimeStamp;
+		LOG_DEL; delete [] cellCount;
+
+		if (priList) {
+			while(priList->length()) {
+				LOG_DEL; delete (Tag*) priList->getFirstElem();
+			}
+			LOG_DEL; delete priList;
+		}
+
+		if (queues) {
+			for(int i = 0; i < numStreams; i++) {
+				while((queues[i]).size()) {
+					LOG_DEL; delete (BufCell*) (queues[i]).get();
+			}	}
+			LOG_DEL; delete [] queues;
+		}
+	}
 
 // The LoseOne() method discards one cell from the given queue.
 // Other stars can override this method. Those stars can refer to the

@@ -47,21 +47,24 @@ still in service will be delayed by more than the nominal service time.
 	}
 	constructor {
 		delayType = TRUE;
+		numberInService = 0;
 	}
 	setup {
-		numberInService = 0;
-		tokensInService.initialize();
-	}
-	wrapup {
-		// remove any remaining tokens.
+		// Remove any remaining tokens
 		while (numberInService > 0) {
 			token* t = (token*)tokensInService.getAndRemove();
 			LOG_DEL; delete t;
 			numberInService--;
 		}
+		tokensInService.initialize();
 	}
 	destructor {
-		wrapup();
+		// Remove any remaining tokens
+		while (numberInService > 0) {
+			token* t = (token*)tokensInService.getAndRemove();
+			LOG_DEL; delete t;
+			numberInService--;
+		}
 	}
 	go {
 	   token* t;
