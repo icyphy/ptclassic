@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/sh -f
 # ptplay for hppa 
 # $Id$
 # Original source by Stefan Detroch of Imec
@@ -6,8 +6,8 @@
 # and installed in your path.
 # The publically avaible program 'sox' is used to normalize the volume.
 # sox is available via anonymous ftp
-
-set SCALE = `sox -t ul $1 -e stat |& grep Volume | awk '{print $3;}'`
-sox -v ${SCALE} -t ul $1 -t ul /tmp/mysound$$
-player /tmp/mysound$$ -u -pri urgent
-rm -f /tmp/mysound$$
+SCALE=`sox -t ul $1 -e stat |& grep Volume | awk '{print $3;}'`
+SOUNDFILE=/tmp/mysound$$
+sox -v $SCALE -t ul $1 -t ul $SOUNDFILE
+player $SOUNDFILE -u -pri urgent
+rm -f $SOUNDFILE
