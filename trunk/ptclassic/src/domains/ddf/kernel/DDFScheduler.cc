@@ -2,7 +2,6 @@
 #include "DDFScheduler.h"
 #include "Output.h"
 #include "StringList.h"
-#include "IntState.h"
 #include "FloatState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
@@ -36,9 +35,10 @@ static char* err2_1 = " needs too large input buffer size (>";
 static char* err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
 static char* err2_3 = "other semantic errors \n... (sorry for poor hints)...";
 static char* err2_4 = "\nYou may increase the buffer size by defining a ";
-static char* err2_5 = "IntState (bufferSize) \nin the DDF galaxy.";
+static char* err2_5 = "FloatState (bufferSize) \nin the DDF galaxy.";
 
-static int maxToken = 1024;
+#define MAXTOKEN 1024
+static int maxToken;
 static int lazyDepth;
 static int overFlow;
 static StringList msg;
@@ -114,16 +114,17 @@ int DDFScheduler :: setup (Block& b) {
 	galaxy.initialize();
 
 	// If user gives the option of numOverlapped, set it.
-	IntState* ist = (IntState*) galaxy.stateWithName("numOverlapped");
-	if (ist) numOverlapped = (int) (*ist);
+	FloatState* ist = (FloatState*) galaxy.stateWithName("numOverlapped");
+	if (ist) numOverlapped = int(double(*ist));
 
 	// If user gives the option of schedulePeriod, set it.
 	FloatState* fst = (FloatState*) galaxy.stateWithName("schedulePeriod");
 	if (fst) schedulePeriod = float ((double) *fst);
 
 	// If user gives the option of bufferSize, set it.
-	IntState* bst = (IntState*) galaxy.stateWithName("bufferSize");
-	if (bst) maxToken = (int) (*bst);
+	FloatState* bst = (FloatState*) galaxy.stateWithName("bufferSize");
+	if (bst) maxToken = int(double(*bst));
+	else	 maxToken = MAXTOKEN;
 
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
