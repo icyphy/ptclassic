@@ -609,6 +609,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
+    char *domain;
     dmWhichItem *items;
     octObject facet;
     char buf[MSG_BUF_MAX];
@@ -624,11 +625,11 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    if (!setCurDomainF(&facet)) {
-	PrintErr("Unknown domain found; correct the domain first");
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+	PrintErr(ErrGet());
 	ViDone();
     }
-    nTargets = KcDomainTargets(targetNames,MAX_NUM_TARGETS);
+    nTargets = KcDomainTargets(domain, targetNames, MAX_NUM_TARGETS);
 
     if(nTargets == 0) {
 	PrintErr("No targets supported by current domain.");
@@ -641,7 +642,7 @@ long userOptionWord;
 	    galFlag = 1;
 	    targetNames[nTargets] = defaultTarget = "<parent>";
     }
-    else defaultTarget = KcDefTarget();
+    else defaultTarget = KcDefTarget(domain);
 
     nChoices = nTargets + galFlag;
 
