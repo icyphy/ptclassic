@@ -18,37 +18,44 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     codeblock (tkSetup) {
-        /* Establish the Tk window for setting the value */
+      /* Establish the Tk window for setting the value   */
+      /* "position" is  a local variable which scale the */
+      /* volume from (0 - 10) to (0 - 100) for makeScale */ 
+      {	
+	int position;
+        position = $val(volume)*10;
         makeScale(".high",
 		  "$starSymbol(scale1)",
 		  "Record volume control",
-		  $val(volume),
-                  $starSymbol(setVolume));
+		  position,
+		  $starSymbol(setVolume));
 	displaySliderValue(".high", "$starSymbol(scale1)",
-			   "$val(volume)%");
+			   "$val(volume)");
+      }
     }
 
     codeblock (setVolumeDef) {
         static int $starSymbol(setVolume)(dummy, interp, argc, argv)
-            ClientData dummy;                   /* Not used. */
+	    ClientData dummy;                   /* Not used. */
             Tcl_Interp *interp;                 /* Current interpreter. */
             int argc;                           /* Number of arguments. */
             char **argv;                        /* Argument strings. */
         {
+	    audio_info_t info;
 	    static char buf[20];
-            if(sscanf(argv[1], "%d", &$ref(volume)) != 1) {
+	    int position;
+            if(sscanf(argv[1], "%d", &position) != 1) {
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
-	    /* set_parameters function defined in base class */
-	    $sharedSymbol(CGCStereoBase,set_parameters)
-	      ($starSymbol(ctlfile),
-	       "$val(encodingType)",
-	       "$val(inputPort)",
-	       $ref (volume),
-	       $ref (balance),
-	       1);
-	    sprintf(buf, "%5d%%", $ref(volume));
+	    /* conveying the value changes of record volume to audioctl */
+	    $ref(volume) = (int) position/10;
+	    AUDIO_INITINFO(&info);
+	    ioctl($starSymbol(ctlfile), AUDIO_GETINFO, (caddr_t)(&info));
+	    info.record.gain = AUDIO_MAX_GAIN*$ref(volume)/10;
+	    ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
+
+	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
             return TCL_OK;
         }
