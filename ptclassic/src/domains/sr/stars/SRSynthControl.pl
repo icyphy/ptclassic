@@ -53,7 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
   outmulti {
     name { velocity }
-    type { float }
+    type { int }
     desc { Velocity values for each voice }
   }
 
@@ -68,13 +68,6 @@ limitation of liability, and disclaimer of warranty provisions.
     type { float }
     default { "440.0" }
     desc { Frequency output for the A below Middle C }    
-  }
-
-  defstate {
-    name { velocityScale }
-    type { float }
-    default { "0.125" }
-    desc { Maximum pressure velocity output }
   }
 
   defstate {
@@ -112,9 +105,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
     // Array translating pitches to frequencies
     double frequencyOfPitch[128];
-
-    // Array translating MIDI velocities to floating velocities
-    double velocityOfVelocity[128];
 
     // Current pitch translation value.  Value multiplies all frequencies.
     double frequencyScale;
@@ -157,12 +147,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	frequencyOfPitch[pi] = double(AFreq) * exp((pi-56.0)*log(2.0)/12.0);
 	/*	cout << "Pitch " << pi << " frequency "
 	     << frequencyOfPitch[pi] << '\n'; */
-    }
-
-    // Fill the velocity array with scaled velocity values
-
-    for ( int v = 128 ; --v >= 0 ; ) {
-      velocityOfVelocity[v] = double(v) / 127.0 * double(velocityScale);
     }
 
     // Verify the number of ports
@@ -301,7 +285,11 @@ limitation of liability, and disclaimer of warranty provisions.
 
       for ( i = numVoices ; --i >= 0 ; ) {
 	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]] * frequencyScale;
-	velocityPort[i]->emit() << double(voiceVelocity[i]) / 256.0;
+	if ( voiceVelocity[i] != 0 ) {
+	  velocityPort[i]->emit() << int(voiceVelocity[i]);
+	} else {
+	  velocityPort[i]->makeAbsent();
+	}
       }
 
     }
