@@ -1,3 +1,4 @@
+static const char file_id[] = "SDFDomain.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -27,23 +28,23 @@ class SDFDomain : public Domain {
 public:
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		return *new SDFWormhole(innerGal,innerTarget);
+		LOG_NEW; return *new SDFWormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
-	PortHole& newInPort() { return *new InSDFPort;}
+	PortHole& newInPort() { LOG_NEW; return *new InSDFPort;}
 
 	// new output porthole
-	PortHole& newOutPort() { return *new OutSDFPort;}
+	PortHole& newOutPort() { LOG_NEW; return *new OutSDFPort;}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { return *new SDFfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new SDFfromUniversal;}
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { return *new SDFtoUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new SDFtoUniversal;}
 
 	// new node (geodesic)
-	Geodesic& newNode() { return *new SDFGeodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new SDFGeodesic;}
 
 	// constructor
 	SDFDomain() : Domain("SDF") {}

@@ -1,3 +1,4 @@
+static const char file_id[] = "SDFConnect.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -79,14 +80,14 @@ MultiPortHole& MultiSDFPort :: setPort (const char* s,
 }
 
 PortHole& MultiInSDFPort :: newPort () {
-	PortHole& p = *new InSDFPort;
+	LOG_NEW; PortHole& p = *new InSDFPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }
  
  
 PortHole& MultiOutSDFPort :: newPort () {
-	PortHole& p = *new OutSDFPort;
+	LOG_NEW; PortHole& p = *new OutSDFPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }
