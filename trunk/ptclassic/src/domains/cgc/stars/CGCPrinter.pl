@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	htmldoc {
-This star prints its input, which may be any supported type.
+This star prints its input, which may be int or float type.
 There may be multiple inputs: all inputs are printed together on
 the same line, separated by tabs.
 	}
@@ -64,10 +64,10 @@ codeblock (openfile) {
 		index = i;
 		if(fileOutput) {
 			addCode(
-"\tfprintf($starSymbol(fp),\"%f\\t\", $ref(input#index));\n");
+"\tfprintf($starSymbol(fp),\"%f\\t\", (double) ($ref(input#index)));\n");
 		} else {
 			addCode( 
-"\tprintf(\"%f\\t\", $ref(input#index));\n");
+"\tprintf(\"%f\\t\", (double) ($ref(input#index)));\n");
 		}
 	    }
 	    if (fileOutput) {
