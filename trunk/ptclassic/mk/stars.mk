@@ -166,8 +166,10 @@ ifdef CG56
 	endif
 	# Window and RaisedCosine stars in cg56/dsp/stars need ptdsp Library
 	PTDSPLIB = 1
-	# CG56 targets need CGCStar
+	# CG56 CGC targets need CGCStar
 	CGCLIB = 1
+	# CG56 CGC targets need CGCFix star
+	CGC = 1
 endif
 
 # Texas Instruments TMS320C50 Code Generation Domain
