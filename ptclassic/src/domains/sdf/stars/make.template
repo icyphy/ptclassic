@@ -96,6 +96,7 @@ PL_SRCS= \
  SDFTest.pl \
  SDFThresh.pl \
  SDFTrainer.pl \
+ SDFTranspose.pl \
  SDFUpSample.pl \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
