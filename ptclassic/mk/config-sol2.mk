@@ -150,6 +150,9 @@ XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 # Matlab architecture
 MATARCH = sol2
 
+# Mathematica architexture
+MATHEMATICAARCH = Solaris
+
 # Mathematica MathLink library
 MATHLINKLIBNAME = MLelf
 
