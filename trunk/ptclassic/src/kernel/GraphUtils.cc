@@ -52,26 +52,21 @@ int totalNumberOfStars(Galaxy& g) {
     return n;
 }
 
-/****
-
-Returns TRUE if Galaxy is acyclic; FALSE else.
-
-@Description
-Done by computing depth first search (dfs) on g.
-<p>
-If <code>ignoreTaggedArcs</code> is 0, then every arc is taken into account.
-if <code>ignoreTaggedArcs</code> is > 0, then arcs that have been tagged (at
-location <code>flags[tagLoc])</code> non-zero are ignored as 
-precedence arcs.
-
-@SideEffects
-It uses <code>flags[0]</code> for all Blocks in the Galaxy for keeping
-track of nodes that have been visited and haven't been visited; any previous
-value in <code>flags[0]</code> will be lost.
-
-@Returns TRUE or FALSE
-
-****/
+// Returns TRUE if Galaxy is acyclic; FALSE else.
+//
+// Done by computing depth first search (dfs) on g.
+//
+// If ignoreTaggedArcs is 0, then every arc is taken into account.
+// if ignoreTaggedArcs is > 0, then arcs that have been tagged (at
+// location flags[tagLoc]) non-zero are ignored as 
+// precedence arcs.
+// 
+// It uses flags[0] for all Blocks in the Galaxy for keeping
+// track of nodes that have been visited and haven't been visited; any previous
+// value in flags[0] will be lost.
+//
+// Return TRUE or FALSE
+//
 int isAcyclic(Galaxy* g, int ignoreTaggedArcs, int tagLoc)
 {
     // This is done by DFS.
@@ -131,43 +126,39 @@ int findBackEdge(Block* node, int flagLoc, int ignoreTaggedArcs, int tagLoc)
     return FALSE;
 }
 
-/****
-
-Find the source nodes in the Galaxy
-
-@Description
-A source node here is any node that has all of its input
-nodes marked.  This method is used in order to simulate
-the removal of nodes from the graph; a node is "removed"
-by marking it at <code>flags[flagLoc]</code> (by the function that calls
-this function).  If no node is marked, then this function will
-return the sources in the graph.  If nodes are marked, then
-the list returned by the function represents the sources
-in the graph that would result from removing the marked nodes
-and all their edges from the graph.
-<p>
-If <code>deletedNode</code> is specified, then the algorithm will assume that
-the only node deleted from the graph (from the last time this function
-was called ) was <code>deletedNode</code> and explore
-only the edges going out of <code>deletedNode</code>.  This will make
-this computation much more efficient when it is used in
-conjunction with functions like <code>isWellOrdered</code>
-because <code>isWellOrdered</code> deletes one node at a time
-and calls <code>findSources</code>
-after each deletion.  IN THIS CASE NOTE THAT THE FUNCTION WILL ONLY
-RETURN THOSE SOURCES FORMED BY THE DELETION OF 
-<code>deletedNode</code> AND NOT ALL SOURCES IN THE GRAPH.
-<p>
-To generalize this function, we could give a
-list of deleted nodes (instead of just one) and only explore the edges
-out of those from the list. 
-<p>
-Worst case running time: O(E) (when <code>deletedNode</code> is specified)
-
-@SideEffects
-The input list sources is filled with the source nodes
-
-****/
+// Find the source nodes in the Galaxy
+// 
+// A source node here is any node that has all of its input
+// nodes marked.  This method is used in order to simulate
+// the removal of nodes from the graph; a node is "removed"
+// by marking it at flags[flagLoc] (by the function that calls
+// this function).  If no node is marked, then this function will
+// return the sources in the graph.  If nodes are marked, then
+// the list returned by the function represents the sources
+// in the graph that would result from removing the marked nodes
+// and all their edges from the graph.
+//
+// If deletedNode is specified, then the algorithm will assume that
+// the only node deleted from the graph (from the last time this function
+// was called ) was deletedNode and explore
+// only the edges going out of deletedNode.  This will make
+// this computation much more efficient when it is used in
+// conjunction with functions like isWellOrdered
+// because isWellOrdered deletes one node at a time
+// and calls findSources
+// after each deletion.  IN THIS CASE NOTE THAT THE FUNCTION WILL ONLY
+// RETURN THOSE SOURCES FORMED BY THE DELETION OF 
+// deletedNode AND NOT ALL SOURCES IN THE GRAPH.
+//
+// To generalize this function, we could give a
+// list of deleted nodes (instead of just one) and only explore the edges
+// out of those from the list. 
+//
+// Worst case running time: O(E) (when deletedNode is specified)
+// 
+// SideEffects:
+// The input list sources is filled with the source nodes
+// 
 void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode)
 {
     Block *pred, *node;
@@ -196,8 +187,9 @@ void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deleted
     }
 }
 
-// Find the sink nodes in the Galaxy; symmetric to <code>findSources</code>
-void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode)
+// Find the sink nodes in the Galaxy; symmetric to findSources
+void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks,
+	       Block* deletedNode)
 {
     // symmetric to findSources; see comments therein
     Block *succ, *node;
