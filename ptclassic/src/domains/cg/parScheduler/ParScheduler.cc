@@ -88,18 +88,21 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	// finalize the schedule of wormholes.
 	if (inUniv) {
 		finalSchedule(galaxy);
-		createSubGals();
-	 	if (logstrm)
-			*logstrm << parProcs->displaySubUnivs();
 	}
  
+	// targetPtr setup for each processor
+	parProcs->mapTargets();
+
 	// delete logging stream
 	if (logstrm) {
 		logstrm->flush();
 	}
-	LOG_DEL; delete logstrm;
 
         return TRUE;
+}
+
+ParScheduler :: ~ParScheduler() {
+	LOG_DEL; delete logstrm;
 }
 
 /////////////////////////////
@@ -111,9 +114,10 @@ void ParScheduler :: setUpProcs(int num) {
 	avail.create(numProcs);
 }
 
-void ParScheduler :: createSubGals() {
+int ParScheduler :: createSubGals() {
 	exGraph->restoreHiddenGates();
 	parProcs->createSubGals();
+	return TRUE;
 }
 
 /////////////////////////////
@@ -190,15 +194,30 @@ int ParScheduler :: scheduleIt() { return FALSE; }
 // runOnce
 /////////////////////////////
 
-void ParScheduler::runOnce() {
+void ParScheduler::oldRun() {
 // run the schedule for each target
-	int iters = mtarget->getIters();
 	for (int i = 0; i < mtarget->nProcs(); i++) {
 		mtarget->setCurChild(i);
-		mtarget->beginIteration(iters,i);
 		parProcs->getProc(i)->run();
-		mtarget->endIteration(iters,i);
 	}
+}
+
+void ParScheduler :: compileRun() {
+	// step 1. sub-universe creation.
+	if (!createSubGals()) {
+		// in case of wormhole, we resort to the old routine.
+		// we will remove this later.
+		oldRun();
+		return;
+	}
+
+	if (logstrm) {
+		*logstrm << parProcs->displaySubUnivs();
+		logstrm->flush();
+	}
+
+	// run sub-universe in each processor to generate the code
+	parProcs->generateCode();
 }
 
 /////////////////////////////
@@ -245,14 +264,12 @@ void ParScheduler :: finalSchedule(Galaxy& galaxy) {
 
 StringList ParScheduler :: displaySchedule() {
 
-	Galaxy* galaxy = exGraph->myGalaxy();
-
 	StringList out;
 
 	// Display Wormhole schedules.
 
 	out += "*********** Wormhole Schedules ************\n";
-	GalStarIter next(*galaxy);
+	GalStarIter next(*myGal);
 	CGStar* s;
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {
