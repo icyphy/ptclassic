@@ -42,8 +42,9 @@ SRCS= \
  SDFBiQuad.pl \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
- SDFBlockFIR.pl \
  SDFBlockAllPole.pl \
+ SDFBlockFIR.pl \
+ SDFBlockLattice.pl \
  SDFBurg.pl \
  SDFBusToNum.pl \
  SDFCommutator.pl \
