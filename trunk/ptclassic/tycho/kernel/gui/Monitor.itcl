@@ -1,6 +1,6 @@
 # Ptolemy Tycho class that exec's a process and displays the output
 #
-# @Author: Christopher Kevin Chang
+# @Author: Christopher Hylands and Kevin Chang
 #
 # @Version: $Id$
 #
@@ -35,7 +35,7 @@
 # inherits from Exec, with tk widgets added. This function is added
 # for fully backward compatibility with the original Exec.
 # <p>
-# Here is an example of how to use the Exec:
+# Here is an example of how to use the Monitor:
 # <tcl><pre>
 #     set win [::tycho::autoName .execExample]
 #     ::tycho::Exec $win -command {make all}
@@ -70,7 +70,14 @@ class ::tycho::Monitor {
         $itk_component(history) configure -readonly 1
     }
     
+
     public method execProcessInMonitor {} {
+        # Clear both history logs
+        $itk_component(history) configure -readonly 0
+        $itk_component(history) clear
+        $itk_component(history) configure -readonly 1
+        $this clearHistory
+
         $this execProcess [get commandToExec] [get dirToExecFrom]
     }
 
@@ -116,6 +123,10 @@ body ::tycho::Monitor::constructor {args} {
 	    -text {Exec <Ret>} \
             -command "$this execProcessInMonitor"
 
+    $itk_component(hull) addButton stop \
+            -text {Stop} \
+            -command "$this killProcess"
+    
     $itk_component(bbox) buttonconfigure cancel \
 	    -text {Close <Esc>}
 
