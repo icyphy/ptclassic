@@ -32,9 +32,9 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
+#include "PNThread.h"
 #include "PNScheduler.h"
 #include "DataFlowStar.h"
-#include "PNThread.h"
 #include "GalIter.h"
 
 extern const char PNdomainName[];
@@ -42,9 +42,9 @@ extern const char PNdomainName[];
 // Constructor.
 PNScheduler::PNScheduler()
 {
-    threads = NULL;
     monitor = NULL;
     start = NULL;
+    threads = NULL;
 
     schedulePeriod = 1.0;
     setStopTime(0.0);
@@ -56,8 +56,7 @@ PNScheduler::PNScheduler()
 PNScheduler::~PNScheduler()
 {
     deleteThreads();
-    LOG_DEL; delete start;
-    LOG_DEL; delete monitor;
+    disableLocking();
 }
 
 
@@ -76,14 +75,11 @@ void PNScheduler::setup()
 	Error::abortRun(domain(), "Scheduler has no galaxy.");
 	return;
     }
-
-    // Any threads from the previous run will be deleted at this point.
+   
     deleteThreads();
-
     galaxy()->initialize();
-
+    disableLocking();
     enableLocking();
-
     createThreads();
 
     setCurrentTime(0.0);
@@ -136,19 +132,19 @@ void PNScheduler::createThreads()
 // Delete threads.
 void PNScheduler::deleteThreads()
 {
-    LOG_DEL; delete threads;
-    threads = NULL;
+    LOG_DEL; delete threads; threads = NULL;
 }
 
 
 // Enable locking.
 void PNScheduler::enableLocking()
 {
-    LOG_DEL; delete start;
-    LOG_DEL; delete monitor;
-
+    // Create new lock for this scheduler.
     LOG_NEW; monitor = new PNMonitor;
     LOG_NEW; start = new PNCondition(*monitor);
+
+    // Enable all registered PtGates.
+    // GateKeeper::enableAll(*monitor);
 
     // Enable locking on all portholes.
     GalStarIter nextStar(*galaxy());
@@ -159,12 +155,34 @@ void PNScheduler::enableLocking()
         PortHole* port;
         while ((port = nextPort++) != NULL)
         {
-            // Any threads from the previous run that are blocked
-            // will be deleted at this point.
-            port->disableLocking();
             port->enableLocking(*monitor);
         }
     }
+}
+
+
+// Disable locking.
+void PNScheduler::disableLocking()
+{
+    // Disable locking on all portholes.
+    GalStarIter nextStar(*galaxy());
+    Star* star;
+    while ((star = nextStar++) != NULL)
+    {
+        BlockPortIter nextPort(*star);
+        PortHole* port;
+        while ((port = nextPort++) != NULL)
+        {
+            port->disableLocking();
+        }
+    }
+
+    // Disable all registered PtGates.
+    // GateKeeper::disableAll();
+
+    // Delete the lock for this scheduler.
+    LOG_DEL; delete start; start = NULL;
+    LOG_DEL; delete monitor; monitor = NULL;
 }
 
 
@@ -174,11 +192,13 @@ double PNScheduler::getStopTime()
     return stopTime;
 }
 
+
 // Set the stopping time.
 void PNScheduler::setStopTime(double limit)
 {
     stopTime = limit;
 }
+
 
 // Set the stopping time when inside a Wormhole.
 void PNScheduler::resetStopTime(double limit)
@@ -187,6 +207,7 @@ void PNScheduler::resetStopTime(double limit)
     stopTime = limit;
     currentTime = stopTime - schedulePeriod;
 }
+
 
 double PNScheduler::delay(double when)
 {
