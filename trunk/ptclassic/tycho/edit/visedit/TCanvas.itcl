@@ -1,0 +1,653 @@
+# A widget containing a scrollable canvas and other graphics support.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: Known bugs:
+# - When scrollbars are added or removed, actions bound to <Configure>
+#   are triggered three times.  This can be very expensive.
+#
+
+#######################################################################
+#### TCanvas
+# This widget is the base class for Tycho widgets that interface to
+# the Tk Canvas. It creates a widget that contains a Slate with
+# optional scrollbars. It also includes a number of utility methods
+# for printing and generating images from the canvas, but assumes
+# nothing about how the canvas/slate might be used.
+#
+class ::tycho::TCanvas {
+    inherit ::tycho::File
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the height of the canvas widget, in pixels.
+    itk_option define -canvasheight canvasHeight CanvasHeight 300
+
+    # Specify the width of the canvas widget, in pixels.
+    itk_option define -canvaswidth canvasWidth CanvasWidth 400
+
+    # Specify what type of scrolling to use: bars, bars, or none.
+    itk_option define -scrolling scrolling Scrolling {auto}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Return the name of the Tk canvas, for interfacing to non-Itcl code.
+    # FIXME: This should go....
+    method canvasName {} {return $canvas}
+
+    # Open a dialog to export the canvas contents in one of various formats.
+    method export {}
+
+    # Generate a GIF file with the contents of the canvas.
+    method exportGif {filename}
+
+    # Generate an encapsulated postscript file with the contents of the canvas.
+    method exportEps \
+            {filename {orientation portrait} {colormode color} {pwidth {}}}
+
+    # Generate an X window dump file with the contents of the canvas.
+    method exportXwd {filename}
+
+    # Give the canvas the focus.
+    method focusin {}
+
+    # Print the contents of the canvas.
+    method print {}
+
+    # Query the user for the type of scrollbars to use.
+    method scrollQuery {}
+
+    # Set the scrolling style (use with scrollQuery).
+    method scrollSet {dialog}
+
+    # Update the scrollbars to reflect the current canvas contents.
+    method updateScrollbars {}
+
+    # Access the "graphics" preferences
+    protected method preference {mode args}
+
+    ###################################################################
+    ####                   protected variables                     ####
+    
+    # The name of the raw Tk canvas. Use with caution!
+    protected variable canvas {}
+
+    # The default file format for the export command.
+    protected common exportFormat eps
+
+    # An array of commands that will export the graphic some file format.
+    protected variable fileformats
+
+    # An object that manages editing of text items
+    protected variable lineeditor
+
+    # FIXME: The initial value of the following should be options
+
+    # Width of most recent print request.
+    protected common printWidth {}
+
+    # Color mode of most recent print request.
+    protected common printColor {color}
+
+    # Orientation of most recent print request.
+    protected common printOrient {landscape}
+
+    # The name of the slate contained within this widget
+    protected variable slate {}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # The updateScrollbars method schedules this method for execution.
+    private method configureScrollbars {}
+
+    ###################################################################
+    ####                   private procs                           ####
+
+    # Update the export dialog after a change in the file type.
+    private proc updateExportDialog {nm}
+
+    # Pending configuration command
+    private variable scheduledUpdate {}
+}
+
+#######################################################################
+#### -scrolling option configuration
+# If the value is "bars", then the canvas is equipped with scrollbars.
+# If the value is "auto", then the canvas is equipped with scrollbars
+# only when its contents are not all visible.
+# Otherwise, scrolling is turned off.  For the change to take effect
+# after configuring this option, call <code>updateScrollbars</code>.
+#
+configbody ::tycho::TCanvas::scrolling {
+    # Do not call updateScrollbars here because this configuration occurs
+    # too often.
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::TCanvas::constructor {args} {
+    global tcl_platform
+
+    # Set the view "type" for the Window menu
+    set viewType "graphics"
+
+    # Create a top frame to contain both the canvas and vertical 
+    # scrollbar and a bottom frame to hold the horizontal scrollbar and 
+    # some filler.
+    itk_component add top {
+	frame $itk_component(childsite).top
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(top) -fill both -expand yes -side top
+
+    # The canvas.
+    itk_component add slate {
+        uplevel #0 ::tycho::slate $itk_component(top).slate
+    } {
+        keep -cursor
+        rename -background -canvascolor canvasColor CanvasColor
+        rename -height -canvasheight canvasHeight CanvasHeight
+        rename -width -canvaswidth canvasWidth CanvasWidth
+    }
+    set slate $itk_component(slate)
+    set canvas [$slate component canvas]
+    pack $slate -expand yes -fill both -side left
+
+    # NOTE: This used to be bound to the hull of TopLevel, which caused
+    # Focusin to be called a very large number of times.
+    bind $slate <Map> "$this focusin; break"
+
+    # Create vertical scrollbar. This may not be packed.
+    itk_component add vsb {
+        scrollbar $itk_component(top).vsb \
+                -orient vertical \
+                -command "$slate yview"
+    } {
+        keep -background -cursor
+    }
+    
+    # Frame to hold the horizontal scrollbar and filler.
+    itk_component add bottom {
+	frame $itk_component(childsite).bottom
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(bottom) -fill both -side bottom \
+            -before $itk_component(top)
+
+    # Create horizontal scrollbar. This may not be packed.
+    itk_component add hsb {
+        scrollbar $itk_component(bottom).hsb \
+                -orient horizontal \
+                -command "$slate xview"
+    } {
+        keep -background -cursor
+    }
+
+    # Filler frame for the lower right corner.
+    itk_component add filler {
+	frame $itk_component(bottom).filler
+    } {
+	keep  -background -cursor
+    }
+
+    $slate configure \
+            -xscrollcommand "$itk_component(hsb) set" \
+            -yscrollcommand "$itk_component(vsb) set"
+
+    # Create and configure the widget's menu bar
+
+    menubar insert {Export} {Print...} -underline 1 \
+            -command "$this export"
+
+    menubar addMenu Format -underline 1
+
+    menubar add {Scrollbars...} Format -underline 0 \
+            -command "$this scrollQuery"
+
+    eval itk_initialize $args
+
+    # Subscribe to the preferences
+    preference subscribeoptions $this \
+	    -canvasheight canvasHeight \
+	    -canvaswidth  canvasWidth \
+	    -canvascolor  canvasColor
+
+    # Prevent shadowing of bindings in the Displayer class.
+    bind $slate <Control-x> {continue}
+    bind $slate <Control-x><0> {continue}
+    bind $slate <Control-x><k> {continue}
+    bind $slate <Control-x><o> {continue}
+    
+    bind $slate <Control-x><Control-c> {continue}
+    bind $slate <Control-x><Control-f> {continue}
+    bind $slate <Control-x><Control-r> {continue}
+    bind $slate <Control-x><Control-s> {continue}
+    bind $slate <Control-x><Control-w> {continue}
+    bind $slate <Control-x><Control-v> {continue}
+
+    # Repeat bindings for the File parent class because there seems to
+    # be no way for the slate to pass events to its containing megawidget.
+    bind $slate <Control-x><Control-f> \
+	    "$this ::tycho::File::openWinMethod; break"
+    bind $slate <Control-x><Control-s> "$this save; break"
+    bind $slate <Control-x><Control-v> "$this altFile; break"
+    bind $slate <Control-x><Control-w> "$this saveAs; break"
+    bind $slate <Control-x><Key-i> "$this insertFile; break"
+    bind $slate <Control-x><Key-p> "$this print; break"
+    bind $slate <Control-x><Control-r> "$this evaluate; break"
+    bind $slate <Control-x><Control-q> "$this toggleReadOnly; break"
+    bind $slate <Control-x><v> "$this revisionControl; break"
+
+    # Bind configure events to update the display.
+    # Interactivity is enabled only after the first configure event.
+    bind $itk_component(bottom) <Configure> \
+            "$this updateScrollbars"
+
+    # Set up export commands.  The mac does not have exec, so we 
+    # can't do everything.
+    if {$tcl_platform(platform) == "macintosh"} {
+	array set fileformats {
+	    eps exportEps
+	}
+    } else {
+	array set fileformats {
+	    eps exportEps
+	    gif exportGif
+	    xwd exportXwd
+	}
+    }
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::TCanvas::destructor {} {
+    if {$scheduledUpdate != {}} {
+        after cancel $scheduledUpdate
+    }
+}
+
+###################################################################
+###################################################################
+####                      public methods                       ####
+
+#######################################################################
+#### export
+# Open a print dialog for exporting the contents of the canvas in various
+# formats.
+#
+body ::tycho::TCanvas::export {} {
+    set nm [::tycho::autoName $prefix]
+    ::tycho::Query $nm \
+            -text {Export Graphics} -entrywidth 60 -queries [list \
+            [list line filename {Export to file:} $file] \
+            [list radio format {File format} \
+                    [array names fileformats] $exportFormat \
+                    -command [code updateExportDialog $nm]] \
+            [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+            [list radio color {Color mode} {color gray mono} $printColor] \
+            [list radio orient {Orientation} {landscape portrait} $printOrient]]
+
+    updateExportDialog $nm
+    set response [safeEval ::tycho::Dialog::wait $nm]
+    if {$response != {}} {
+        array set pp $response
+        set fn $pp(filename)
+        set exportFormat $pp(format)
+
+        switch -exact $exportFormat {
+            eps {
+                set printWidth $pp(width)
+                set printColor $pp(color)
+                set printOrient $pp(orient)
+                exportEps $fn $printOrient $printColor $printWidth
+            }
+            gif {
+                exportGif $fn
+            }
+            xwd {
+                exportXwd $fn
+            }
+        }
+    }
+}
+
+#######################################################################
+#### exportGif
+# Generate a GIF file with the contents of the canvas.
+# NOTE: Unix-only implementation.  Also, depends on the programs
+# xwdtopnm, ppmtogif, and xwd, which must be in your path.
+#
+body ::tycho::TCanvas::exportGif {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the Graphics exportGif method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
+    set fn1 [::tycho::tmpFileName]
+    exportXwd $fn1
+    # NOTE: -transparent color option should be added for the background.
+    if [catch { ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > \
+            $filename 2> /dev/null} msg] {
+        ::tycho::rm $fn1
+        error $msg
+    }
+    ::tycho::rm $fn1
+    # For some reason, the above leaves a non-readable file.    
+    # chmod might not be present, but if this fails, we should not die
+    catch {exec chmod +r $filename}
+    # FIXME: Should display the gif!
+}
+
+#######################################################################
+#### exportEps
+# Generate an encapsulated postscript file. The first argument (the
+# only one required) is the name of a file into which to write the
+# postscript. The second argument specifies the orientation, and should
+# be either "normal" (the default) or "rotated" (by 90 degrees). The
+# third argument specifies the color mode and should have value color
+# (the default, for full color output), gray (convert all colors to
+# their gray-scale equivalents) or mono (convert all colors to black or
+# white). The final argument optionally specifies the width of the
+# postscript image. It consists of a floating-point number followed by
+# c for centimeters, i for inches, m for millimeters, or p or nothing
+# for printer's points (1/72 inch). If it is not given, then the image
+# size is the same as on the screen.
+# <p>
+# NOTE: Currently postscript is generated for the entire image in a single
+# file.  It would be good to be able to break it down into subimages.
+# If the image does not fit on the page, then how it is cropped is
+# unpredictable.
+# <p>
+# NOTE: It would be nice to take advantage of the colormap option
+# in the canvas postscript command to be able to map colors for monochrome
+# printing.
+#
+body ::tycho::TCanvas::exportEps \
+        {filename {orientation portrait} {colormode color} {width {}}} {
+    if {$orientation != "portrait"} {
+	set rotate 1
+    } else {
+	set rotate 0
+    }
+    set bbox [$slate bbox all]
+    set cheight [expr [lindex $bbox 3]-[lindex $bbox 1]]
+    set cwidth [expr [lindex $bbox 2]-[lindex $bbox 0]]
+
+    if {$width != {}} {
+        set wopt "-pagewidth $width"
+    } {
+        set wopt {}
+    }
+    eval $slate postscript \
+            -file $filename \
+            -width $cwidth \
+            -height $cheight \
+            -rotate $rotate \
+            -colormode $colormode \
+            $wopt
+}
+
+#######################################################################
+#### exportXwd
+# Generate an X window dump with the contents of the canvas.
+# NOTE: The xwd program seems to consistently give a "BadMatch" error,
+# but works nonetheless, albeit a bit slowly.  Thus, we ignore the
+# error.
+# NOTE: Unix-only implementation.
+#
+body ::tycho::TCanvas::exportXwd {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the Graphics exportXwd method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
+    set id [winfo id $slate]
+    raiseWindow
+    # NOTE: Temporarily pass $prefix rather than $this until "info"
+    # is fixed in itcl.
+    ::tycho::safeUpdate $prefix
+    # NOTE: xwd always returns an error status.
+    catch {::tycho::invoke xwd -id $id -debug -out $filename >& /dev/null} msg
+    if ![file exists $filename] {
+        error $msg
+    }
+}
+
+#########################################################################
+#### focusin
+# Put the focus in the canvas.
+#
+body ::tycho::TCanvas::focusin {} {
+    focus [$slate component canvas]
+    displayer setCurrentView $this
+}
+
+#######################################################################
+#### print
+# Print the contents of the canvas.  It is first converted to postscript.
+# Then the user is queried for a print command.
+#
+body ::tycho::TCanvas::print {} {
+    set answer [safeEval ::tycho::query {Print Graphics} [list \
+        [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+        [list line cmd {Print command} $printCmd] \
+        [list radio color {Color mode} {color gray mono} $printColor] \
+        [list radio orient {Orientation} {landscape portrait} $printOrient] \
+    ]]
+    if {$answer != {}} {
+        array set pp $answer
+        # save for next time.
+        set printWidth $pp(width)
+        set printCmd $pp(cmd)
+        set printColor $pp(color)
+        set printOrient $pp(orient)
+        set tmpFile [::tycho::tmpFileName typr .eps]
+        exportEps $tmpFile $printOrient $printColor $printWidth
+        eval ::tycho::invoke $printCmd $tmpFile
+        ::tycho::rm $tmpFile
+    }
+}
+
+#####################################################################
+#### scrollQuery
+# Query the user for the type of scrollbars to use.
+#
+body ::tycho::TCanvas::scrollQuery {} {
+    set name [::tycho::autoName .query]
+    ::tycho::Query $name -okcommand "$this scrollSet $name"
+    switch -exact [cget -scrolling] {
+        bars {set default {Always use scrollbars}}
+        auto {set default {Automatic scrollbars}}
+        default {set default {Never use scrollbars}}
+    }
+    $name radio scrolling {} [list \
+            {Always use scrollbars} \
+            {Automatic scrollbars} \
+            {Never use scrollbars}] $default
+    $name centerOnScreen
+}
+
+#####################################################################
+#### scrollSet
+# Set the scrolling style of the child widget depending on the user's
+# response in the specified dialog box.
+#
+body ::tycho::TCanvas::scrollSet {dialog} {
+    set prevoption [cget -scrolling]
+    switch -exact [$dialog get scrolling] {
+        {Always use scrollbars} {set option bars}
+        {Automatic scrollbars} {set option auto}
+        default {set option none}
+    }
+    if {$option != $prevoption} {
+        configure -scrolling $option
+        updateScrollbars
+        markModified
+    }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "graphics" preferences.
+#
+body ::tycho::TCanvas::preference {mode args} {
+    eval ::tycho::preference $mode "graphics" $args
+}
+
+###################################################################
+###################################################################
+####                     protected methods                     ####
+
+#########################################################################
+#### updateScrollbars
+# Update the range of the scrollbars so that they cover the bounding box
+# of the contents of the canvas.  This should be called after each action
+# that changes the bounding the box of the items in the canvas or the size
+# of the canvas.
+#
+body ::tycho::TCanvas::updateScrollbars {} {
+    if {$scheduledUpdate == {}} {
+        set scheduledUpdate [after idle [code $this configureScrollbars]]
+    }
+}
+
+###################################################################
+###################################################################
+####                      private methods                      ####
+
+#########################################################################
+#### configureScrollbars
+# This method does the work of updateScrollbars, and should be called
+# via updateScrollbars.
+#
+body ::tycho::TCanvas::configureScrollbars {} {
+    set bwidth 0
+    set bheight 0
+    set bbox [$slate bbox all]
+    if {$itk_option(-scrolling) == {auto}} {
+        set cwidth [winfo width $slate]
+        if {$cwidth == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cwidth [cget -canvaswidth]
+        }
+        set cheight [winfo height $slate]
+        if {$cheight == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cheight [cget -canvasheight]
+        }
+	
+        if {$bbox != {}} {
+            # So that the scrollbars don't move to the edge of the contents
+            set marg 4
+            set bbox [list [expr [lindex $bbox 0] - $marg] \
+                    [expr [lindex $bbox 1] - $marg] \
+                    [expr [lindex $bbox 2] + $marg] \
+                    [expr [lindex $bbox 3] + $marg]]
+        }
+
+        if {$bbox != {}} {
+            set bwidth [expr [lindex $bbox 2] - [lindex $bbox 0]]
+            set bheight [expr [lindex $bbox 3] - [lindex $bbox 1]]
+        }
+    } {
+        set cwidth 1
+        set cheight 1
+    }
+    if {$itk_option(-scrolling) == {bars} || \
+            $bwidth > $cwidth || \
+            $bheight > $cheight} {
+        pack $itk_component(vsb) -side right -fill y -expand 0 \
+                -before $slate
+        pack $itk_component(hsb) -side left -fill x -expand 1
+        set fillwidth [winfo reqwidth $itk_component(vsb)]
+        $itk_component(filler) configure -width $fillwidth
+        pack $itk_component(filler) -side right -expand 0
+	
+        $slate configure -scrollregion $bbox
+
+	# Add scrollbar padding to status bar
+	statusbar configure -scrollbarpad 1
+    } {
+        if [winfo ismapped $itk_component(vsb)] {
+            pack forget $itk_component(vsb)
+            pack forget $itk_component(hsb)
+            pack forget $itk_component(filler)
+            # Unpack and repack bottom so that it shrinks
+            pack forget $itk_component(bottom)
+            pack $itk_component(bottom) -fill both -side bottom \
+                    -before $itk_component(top)
+
+	    # Remove scrollbar padding from status bar
+	    statusbar configure -scrollbarpad 0
+        }
+    }
+    set scheduledUpdate {}
+}
+
+###################################################################
+###################################################################
+####                      private procs                        ####
+
+#########################################################################
+#### updateExportDialog
+# Update the export dialog after a change in the file type.
+#
+body ::tycho::TCanvas::updateExportDialog {nm} {
+    set root [file rootname [$nm get filename]]
+    set ext [$nm get format]
+    $nm clear filename
+    $nm insert filename "$root.$ext"
+    if {$ext != {eps}} {
+        $nm disable color
+        $nm disable width
+        $nm disable orient
+    } {
+        $nm enable color
+        $nm enable width
+        $nm enable orient
+    }
+}
