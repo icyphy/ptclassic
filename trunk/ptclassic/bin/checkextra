@@ -47,8 +47,8 @@ if ( "$thisdir" == "stars" ) then
 		if ( -f $badiconfile ) then
 			echo -n "The following icons should be removed: "
 			cat $badiconfile
-			echo "ls -lR:"
-			ls -lR `cat $badiconfile`
+			echo ""
+			ls -laR `cat $badiconfile`
 			set iconretval = 1
 		endif
 		rm -f $badiconfile
