@@ -100,7 +100,7 @@ void DDFClustSched :: setup () {
   // If the entire galaxy is SDF, do SDFScheduling.
   if (amISDF) {
     if (!galaxy()) {
-      Error::abortRun("DDFClustSched: no galaxy!");
+      Error::abortRun("DDFClustSched has no galaxy to cluster");
       return;
     }
     clearHalt();
@@ -114,6 +114,10 @@ void DDFClustSched :: setup () {
 // Create SDF clusters.
 //
 void DDFClustSched::initStructures() {
+  if (!galaxy()) {
+    Error::abortRun("DDFClustSched has no galaxy to cluster");
+    return;
+  }
 
   if (restructured == FALSE) {
     LOG_DEL; delete cgal;
@@ -140,6 +144,10 @@ void DDFClustSched :: selectScheduler(SDFClusterGal& cgalaxy) {
 
   // check whether the galaxy is SDF or not
   if (amISDF) {
+    if (!galaxy()) {
+      Error::abortRun("DDFClustSched has no galaxy to cluster");
+      return;
+    }
     LOG_NEW; realSched = new SDFClustSched;
     realSched->setGalaxy(*galaxy());
     realSched->setup();
@@ -371,7 +379,7 @@ int DDFClustSched :: run() {
     return realSched->run();
   }
   if (!galaxy()) {
-    Error::abortRun("No galaxy to run");
+    Error::abortRun("DDFClustSched has no galaxy to run");
     return FALSE;
   }
   
