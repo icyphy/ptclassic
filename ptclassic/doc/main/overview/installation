@@ -13,35 +13,42 @@ tape to being able to run the system.
 .H2 "Basic \*(PT installation"
 .pp
 First note that the
-approximate disk space requirements are:
+approximate disk space requirements are (for the Sun-4 distribution;
+other distributions are roughly the same size):
 .(b
-	\*(PT: 28 Mbytes
-	\*(PT (after you optionally remake): 37 Mbytes
+	\*(PT: 30 Mbytes
+	\*(PT (after you optionally remake): 57 Mbytes
 	Gnu subset: 14 Mbytes
 .)b
 Steps to install \*(PT:
-(steps 2-3 are optional; you'll have to edit a couple of makefiles in
-~ptolemy/example and ~ptolemy/pigiExample if you don't do them).
-Steps 1-3 must be done as root.
 .ip 1.
-Create a user "ptolemy".
+Create a user ``ptolemy'', together with a home directory for the ``ptolemy''
+user.
 .ip 2.
-Create directory /usr/users (if not already there).
+Log in or su to user ``ptolemy''.
 .ip 3.
-ln -s ~ptolemy /usr/users/ptolemy
+Change your current directory to the
+.i parent
+of the ``ptolemy'' home directory (e.g. "cd ~ptolemy/..").
 .ip 4.
 Load the tape in your drive.
 .ip 5.
-Log in or su to user ptolemy.
-.ip 6.
 mt -f /dev/nrst8 rewind
-(This rewinds the tape.)
-.ip 7.
+(This rewinds the tape -- change the device name if your tape drive
+has a different name.)
+.ip 6.
 tar xf /dev/nrst8 
 (This reads the tape, and will take a while.)
+.ip 7.
+Create a symbolic link so that ``/usr/users/ptolemy'' points to ~ptolemy
+(optional \- as an alternative, you can change the definition of the
+PTOLEMY variable in the makefiles in ~ptolemy/src/example and
+in ~ptolemy/src/pigiExample).
 .ip 8.
 Edit ~ptolemy/.rhosts, adding a line for your system
-(This gives pigi permission to create a ptolemy process.)
+(This gives pigi permission to create an RPC server process with the
+.i rsh
+command ).
 The added line will be of the form "hostname ptolemy", you can
 find the correct hostname with the command "hostname".
 .H2 "GNU Installation"
@@ -103,3 +110,9 @@ then either your .rhosts is incorrect or networking is turned off
 on your workstation.
 If the latter is the problem,
 please ask your system administrator to enable networking.
+.pp
+If you succeed in invoking pigi, but graphs do not appear, but messages
+saying that the xgraph program could not be found appear instead,
+your path is set incorrectly.  Because pigi uses rsh, your path
+must be defined in your .cshrc file, not just in your .login file.
+The path must be defined even when ``prompt'' is not set.
