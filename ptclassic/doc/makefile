@@ -34,8 +34,17 @@ almagest print:
 	make prindex
 
 
-prtitle:
-	lpr title.ps; \
+prtitle: title.ps.Z
+	zcat title.ps.Z | lpr 
+
+title.ps.Z: title.ps
+	compress title.ps
+
+title.ps: title.fm
+	fmprint title.fm; \
+	echo "Waiting for postscript file to be created"; \
+	sleep 60; \
+	echo "Assuming postscript file has been created"
 
 prindex:
 	$(PTOLEMY)/doc/bin/prindex $(HOME)/Almagest.index
