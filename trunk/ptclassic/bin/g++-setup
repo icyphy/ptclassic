@@ -28,10 +28,14 @@ if ( ! $?PTARCH ) then
 endif
 
 # These variables are needed by the compiler
-setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/
-setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/include
-setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/g++-include:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/include
-setenv LIBRARY_PATH $PTOLEMY/gnu/$PTARCH/lib
+
+
+setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2.2/
+setenv COMPILER_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2.2
+setenv GCC_INCLUDE_DIR $PTOLEMY/gnu/$PTARCH/lib/gcc-lib
+setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2.2/include
+setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/g++-include:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2.2/include
+setenv LIBRARY_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib
 
 # This variable is needed to find the libraries
 if ($PTARCH =~ hppa*) then
