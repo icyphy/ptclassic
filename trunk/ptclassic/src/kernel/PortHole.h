@@ -152,6 +152,9 @@ public:
 		return attributeBits = attr.eval(attributeBits);
 	}
 
+	// return typePortPtr
+	GenericPort* typePort() const { return typePortPtr;}
+
 protected:
 	// set up alias pointers in pairs.  Protected so derived types may
 	// restrict who can be an alias.
@@ -162,9 +165,6 @@ protected:
 
 	// datatype of particles in this porthole
 	DataType type;
-
-	// return typePortPtr
-	GenericPort* typePort() const { return typePortPtr;}
 
 private:
 	// PortHole this is aliased to
