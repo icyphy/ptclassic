@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -1061,7 +1061,8 @@ tstReadWriteObjects()
 	obj.type = i;
 	if (obj.type == OCT_INSTANCE) {
 #if !defined(MCC_DMS)
-	    (void) sprintf(buffer, "%s/src/oct/tst/sample", CADROOT);
+	/*    (void) sprintf(buffer, "%s/src/oct/tst/sample", CADROOT);*/
+	    (void) sprintf(buffer, "%s/oct/tstdir/sample", CADROOT);
 #else
 	    (void) sprintf(buffer, "%s/sample", ptcGetWorkingWorkspace());
 #endif
