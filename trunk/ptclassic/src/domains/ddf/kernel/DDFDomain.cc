@@ -62,8 +62,12 @@ public:
 	// make all galaxy as wormholes
 	int isGalWorm()	{return TRUE;}
 
-	// constructor
-	DDFDomain() : Domain("DDF") {subDomains += "SDF" ;}
+	// constructor: permit BDF and SDF as subdomains.
+	DDFDomain() : Domain("DDF") {
+		// note: this order selects SDFFork, not BDFFork.
+		subDomains += "SDF";
+		subDomains += "BDF";
+	}
 };
 
 // declare a prototype
