@@ -74,14 +74,21 @@ fi
 # Create a dummy makefile so we can grab the makefile variables we want
 # We could add an echo_pl_srcs rule to common.mk, but then if the user
 # wanted to use -vars "FOO", they would have to edit common.mk
+# Under DEC alpha OSF1/3.2 awk can't handle more than 99 fields in input,
+# so we place each filename on its own line.
 echo $makevarlist |
 	awk 'BEGIN  { print "include make.template"
 				  print "echo_pl_srcs:"
 				  # Print a leading tab
-				  printf("	@echo ");
+				  printf("\t@for file in ");
 				}
 				{ for(i=1;i<=NF;i++)
-					printf("$(%s) ",$i) }' > $mymkfile
+					printf("$(%s) ",$i) }
+         END    { printf("; \\\n")					
+				  printf("\tdo \\\n")
+				  printf("\t\techo $$file; \\\n")
+				  printf("\tdone\n")
+				}' > $mymkfile
 
 # Run make, convert the output into C code
 # --no-print-directory is a gnu make specific argument
@@ -111,5 +118,5 @@ END   { # Print out leading and trailing lines
 cat $hdr $out1 $out2
 
 # Really we should use catch here to remove these files on interrupt
-rm -f $hdr $out1 $out2 $mymkfile
+#rm -f $hdr $out1 $out2 $mymkfile
 
