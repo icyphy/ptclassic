@@ -101,6 +101,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this,"yRange parameter values are invalid");
 	  }
 	  addInclude("\"ptkPlot_defs.h\"");
+	  addInclude("\"ptkPlot.h\"");
 	  addGlobal("ptkPlotWin $starSymbol(plotwin);");
 	  addGlobal("ptkPlotDataset $starSymbol(plotdataset);");
 
