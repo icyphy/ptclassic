@@ -30,6 +30,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
+/* Base class for stars used in a resource contention simulation in 
+  the DE domain. It defines several methods that must be provided in 
+  the derived stars.
+  */
 
 #ifdef __GNUG__
 #pragma implementation
@@ -47,7 +51,7 @@ FILE * DERCStar::fpfiring;
 
 DERCStar::DERCStar ()
 {
-    setDescriptor("Common Polis(resource contention) Software Scheduler");
+    setDescriptor("Base class for all resource contention stars");
     isRCStar = 1;  // override to true (false in DEStar)
 }
 
@@ -56,13 +60,6 @@ double DERCStar::getDelay ()
 {
     return 0;
 }
-
-
-SequentialList* DERCStar::getEvents ()
-{
-    return emittedEvents;
-}
-
 
 FILE* DERCStar::Openoverflow ( char *name )
 {
@@ -119,21 +116,6 @@ void DERCStar::Closeflow ()
         DERCStar::fpfiring = NULL;
     }
 }
-
-/*void DERCStar::emitEventToIntQ( int outputPort, double delay ) {
-    double emitTime; 
-    StarLLCell* temp = (StarLLCell*)storeList->getAndRemove();
-    if (temp == 0) temp = new StarLLCell(-1, -1);
-    if (needsSharedResource) { 
-        emitTime = now + (delay/clkFreq);
-    } else { 
-        emitTime = now + (1/clkFreq); }
-    temp->time = emitTime;
-    temp->outputPort = outputPort;
-    emittedEvents->append(temp);
-}*/
-
-
 
 static DERCStar proto;
 static RegisterBlock registerBlock(proto,"RCStar");
