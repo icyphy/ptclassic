@@ -1,8 +1,28 @@
 # Makefile for XXX domain support
 # Version identification:
 # $Id$
-# Copyright (c) 1990 The Regents of the University of California.
-#                       All Rights Reserved.
+# Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#
 # Date of creation: 9/14/90
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -18,59 +38,29 @@ VPATH = $(ROOT)/src/domains/xxx/kernel
 # get configuration info
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
-
-# Rule for compiling with g++
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -c $<
+INCL = -I$(KERNDIR)
 
 # Library name
 LIB=libxxx.a
 
 # Library sources
 SRCS= \
- XXXConnect.cc XXXScheduler.cc XXXStar.cc XXXWormhole.cc XXXWormConnect.cc \
+ XXXPortHole.cc XXXScheduler.cc XXXStar.cc XXXWormhole.cc \
  XXXDomain.cc
 
 # Header files
-HDRS= XXXConnect.h XXXScheduler.h XXXStar.h XXXUniverse.h \
- XXXWormhole.h XXXWormConnect.h
+HDRS= XXXPortHole.h XXXScheduler.h XXXStar.h XXXWormhole.h
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
 all:	makefile $(LIB)
 
-$(LIB):	$(OBJS)
-	rm -f $(LIB)
-	ar cq $(LIB) $(OBJS)
-	ranlib $(LIB)
-
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIB)
 
-$(LIBDIR)/$(LIB):	$(LIB)
-		rm -f $(LIBDIR)/$(LIB)
-		cp $(LIB) $(LIBDIR)
-		ranlib $(LIBDIR)/$(LIB)
-
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *#
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
-
-depend:	
-		cd $(VPATH); \
-		$(DEPEND) -I$(KERNDIR) $(SRCS)|cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Commands to make some sources from templates
 
