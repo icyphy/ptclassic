@@ -157,40 +157,40 @@ class ::tycho::EditBubbleAndArc {
 ####               constructor & destructor                          ####
 
 body ::tycho::EditBubbleAndArc::constructor {args} {
-    component graphics interactiveEnable 0
+    interactiveEnable 0
 
     # Disable and remove items in Edit menu
-    disableMenuItem "Cut" Edit
-    disableMenuItem "Copy" Edit
-    disableMenuItem "Paste" Edit
-    disableMenuItem "Edit Item" Edit
+    menubar disableMenuItem "Cut" Edit
+    menubar disableMenuItem "Copy" Edit
+    menubar disableMenuItem "Paste" Edit
+    menubar disableMenuItem "Edit Item" Edit
 
     # Renew items in Edit menu
-    addMenuItem {Delete} Edit -underline 0 \
+    menubar addMenuItem {Delete} Edit -underline 0 \
 	    -command "$this deleteItem selected"
 
     # Add an Special menu
-    addMenu Special left Window -underline 0
-    addMenuItem {Smooth Toggle} Special -underline 0 \
+    menubar addMenu Special left Window -underline 0
+    menubar addMenuItem {Smooth Toggle} Special -underline 0 \
 	    -command "$this smoothToggleArc selected"
-    addMenuItem {Add Point Downstream} Special -underline 0 \
+    menubar addMenuItem {Add Point Downstream} Special -underline 0 \
 	    -command "$this addPoint"
-    addMenuItem {Delete Point} Special -underline 0 \
+    menubar addMenuItem {Delete Point} Special -underline 0 \
 	    -command "$this deletePoint"
-    addMenuSeparator Special
-    addMenuItem "Get Info" Special -underline 0 \
+    menubar addMenuSeparator Special
+    menubar addMenuItem "Get Info" Special -underline 0 \
             -command "$this getInfo"
 
     # Add new commands into Edit menu.
-    addMenuSeparator Edit
-    addMenuItem {New Node} Edit -underline 4 -accelerator "N" \
+    menubar addMenuSeparator Edit
+    menubar addMenuItem {New Node} Edit -underline 4 -accelerator "N" \
 	    -command "$this newNode"
-    addMenuItem {New Arc} Edit -underline 4 -accelerator "A" \
+    menubar addMenuItem {New Arc} Edit -underline 4 -accelerator "A" \
 	    -command "$this newArc"
 
     # Initialize the variables.
     set create_item {}
-    set canvas [component graphics canvasName]
+    set canvas [canvasName]
 
     # Set up bindings for the canvas.
     $this setUpCanvasBindings
@@ -201,7 +201,7 @@ body ::tycho::EditBubbleAndArc::constructor {args} {
 
     eval itk_initialize $args
 
-    component graphics interactiveEnable 1
+    interactiveEnable 1
 }
 
 #######################################################################
@@ -231,9 +231,9 @@ body ::tycho::EditBubbleAndArc::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            disableMenuItem {Delete} Edit
+            menubar disableMenuItem {Delete} Edit
 	} {
-            enableMenuItem {Delete} Edit
+            menubar enableMenuItem {Delete} Edit
 	}
     }
 }
