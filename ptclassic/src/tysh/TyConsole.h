@@ -72,7 +72,7 @@ class TyConsole {
   // It should never return.
   void tyExit(int code);
 
-protected:
+private:
   // the Tcl interpreter for this console
   Tcl_Interp *tyInterp;
 
