@@ -10,7 +10,7 @@ with "< fileName", preferably specifying a complete path.
 Polyphase multirate filtering is also supported.
         }
         version { $Id$ }
-        author { E. A. Lee, A. Khazeni }
+        author { Edward A. Lee, Alireza Khazeni }
         copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -106,6 +106,8 @@ Networks, and Applications: A Tutorial'',
 Filter tap values.
 The default precision on these numbers is 1.23
 (i.e., 1 sign bit and 23 fractional bits).
+You can override the default precision by adding a precision specification
+surrounded by curly braces at the beginning of the string of array values.
 During computation of filter outputs, the precision of the filter taps
 is converted to the precision contained in the "TapsPrecision" parameter.
 		}
@@ -177,6 +179,7 @@ then overflow occurs and the overflow is taken care of by the method
 specified by this parameter.
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
+The "warning" option will generate a warning message whenever overflow occurs.
 		}
         }
         protected {
@@ -198,31 +201,15 @@ The keywords for overflow handling methods are:
                 phaseLength = taps.size() / i;
                 if ((taps.size() % i) != 0) phaseLength++;
 
-		if ( ! int(ArrivingPrecision) ) {
-                  const char* IP = InputPrecision;
-                  int In_len = Fix::get_length(IP);
-                  int In_intBits = Fix::get_intBits(IP);
-		  fixIn = Fix(In_len, In_intBits);
-		}
+		if ( ! int(ArrivingPrecision) )
+		  fixIn = Fix( ((const char *) InputPrecision) );
 
-                const char* TP = TapPrecision;
-                int Tap_len = Fix::get_length(TP);
-                int Tap_intBits = Fix::get_intBits(TP);
-		tap = Fix(Tap_len, Tap_intBits);
+		tap = Fix( ((const char *) TapPrecision) );
 
-                const char* AP = AccumulationPrecision;
-                int Accum_len = Fix::get_length(AP);
-                int Accum_intBits = Fix::get_intBits(AP);
-		Accum = Fix(Accum_len, Accum_intBits);
+		Accum = Fix( ((const char *) AccumulationPrecision) );
+		Accum.set_ovflow( ((const char *) OverflowHandler) );
 
-		// Set the overflow characteristic of the accumulator
-		const char* OV = OverflowHandler;
-		Accum.set_ovflow(OV);
-
-                const char* OP = OutputPrecision;
-                int Out_len = Fix::get_length(OP);
-                int Out_intBits = Fix::get_intBits(OP);
-		out = Fix(Out_len, Out_intBits);
+		out = Fix( ((const char *) OutputPrecision) );
         }
         go {
             int phase, tapsIndex;

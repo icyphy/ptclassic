@@ -2,7 +2,7 @@ defstar {
 	name { AddFix }	
 	domain {SDF}
 	desc {
-Output the sum of the fixed-piont inputs as a fixed-point value.
+Output the sum of the fixed-point inputs as a fixed-point value.
 	}
 	version { $Id$ }
         author { A. Khazeni }
@@ -55,32 +55,24 @@ then overflow occurs and the overflow is taken care of by the method
 specified by this parameter.
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
+The "warning" option will generate a warning message whenever overflow occurs.
 		}
         }
         protected {
 		Fix fixIn, sum;
         }
         setup {
-                if ( ! int(ArrivingPrecision) ) {
-                  const char* IP = InputPrecision;
-                  int in_IntBits = Fix::get_intBits(IP);
-                  int in_len = Fix::get_length(IP);
-                  fixIn = Fix(in_len, in_IntBits);
-		}
+                if ( ! int(ArrivingPrecision) )
+		  fixIn = Fix( ((const char *) InputPrecision) );
 
-                const char* OP = OutputPrecision;
-                int out_IntBits = Fix::get_intBits(OP);
-                int out_len = Fix::get_length(OP);
-                sum = Fix(out_len, out_IntBits);
-
-                const char* OV = OverflowHandler;
-                sum.set_ovflow(OV);  // Set the overflow characteristic of sum
+		sum = Fix( ((const char *) OutputPrecision) );
+		sum.set_ovflow( ((const char *) OverflowHandler) );
         }
         go {
                 MPHIter nexti(input);
                 PortHole *p;
 
-		// The current fixed-point class can always represent 0.0
+		// Fixed-point class in Ptolemy 0.5 can always represent 0.0
 		sum = 0.0;
                 while ((p = nexti++) != 0) {
                   if ( int(ArrivingPrecision) )
