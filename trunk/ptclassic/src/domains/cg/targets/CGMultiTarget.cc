@@ -45,16 +45,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGSpread.h"
 #include "CGCollect.h"
 #include "CGSend.h"
+#include "CGWormBase.h"
 #include "CGReceive.h"
 #include "Geodesic.h"
 #include "pt_fstream.h"
+#include "stdlib.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
 	MultiTarget(name,sClass,desc), parProcs(0)
 {
 	addState(childType.setState("childType",this,"default-CG",
-				    "child proc type"));
+				    "child proc types"));
+	addState(resources.setState("resources",this,"",
+	"define the specific resources of child targets (separated by ;)"));
 	addState(filePrefix.setState("filePrefix",this,"code_proc",
 				    "prefix for output code files"));
         addState(ganttChart.setState("ganttChart",this,"YES",
@@ -67,12 +71,13 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 				   "processor can overlap communication?"));
 	addState(useCluster.setState("useCluster",this,"NO",
 				   "Use Gil's declustering algorithm?"));
-	oldChildType[0] = 0;
+	addedStates.initialize();
 }
 
 CGMultiTarget::~CGMultiTarget() {
 	if (!inherited()) deleteChildren();
 	delSched();
+	addedStates.deleteAll();
 }
 
 Block* CGMultiTarget::makeNew() const {
@@ -86,10 +91,16 @@ Block* CGMultiTarget::makeNew() const {
 void CGMultiTarget::setup() {
 	// prepare child targets
 	prepareChildren();
+	if (SimControl :: haltRequested()) return;
 
 	//choose the right scheduler
 	chooseScheduler();
 	
+	// in case of heterogeneous targets, flatten the wormholes.
+	if (childType.size() > 1) {
+		flattenWorm();
+	}
+
 	ParScheduler* sched = (ParScheduler*) scheduler();
 	sched->setGalaxy(*galaxy());
 	sched->setUpProcs(nChildrenAlloc);
@@ -118,31 +129,80 @@ void CGMultiTarget::setup() {
 
 void CGMultiTarget :: prepareChildren() {
 	if (!inherited()) {
-	   if (nChildrenAlloc != int(nprocs) 
-			|| strcmp(childType,oldChildType) != 0) {
 		deleteChildren();
 		nChildrenAlloc = nprocs;
-		strcpy (oldChildType, childType);
 		StringList tname;
 		for (int i = 0; i < nChildrenAlloc; i++) {
-			Target* t = createChild();
+			Target* t = createChild(i);
 			if (!t) return;
 			addChild(*t);
 			tname.initialize();
 			tname << (const char*) filePrefix << i;
 			t->setNameParent(hashstring(tname),this);
 		}
-	   }
-	   for (int i = 0; i < nChildrenAlloc; i++) {
-		child(i)->initialize();
-	   }
+		resourceInfo();
+	   	for (i = 0; i < nChildrenAlloc; i++) {
+			child(i)->initialize();
+	   	}
 	}
 }
 
-Target* CGMultiTarget :: createChild() {
-	return KnownTarget::clone(childType);
+Target* CGMultiTarget :: createChild(int i) {
+	int ix = childType.size();
+	const char* temp;
+	if (i < ix) temp = childType[i];
+	else temp = childType[ix-1];
+	return KnownTarget::clone(temp);
 }
 
+// parse the resource parameter and adjust the resources parameter of
+// child targets.
+void CGMultiTarget :: resourceInfo() {
+	int sz = resources.size();
+	const char* item;
+	int start = TRUE;
+	int no = -1;
+	StringList added;
+	for (int i = 0; i < sz; i++) {
+		item = resources[i];
+		if (!strcmp(item, "")) return;
+		if (start) {
+			no = atoi(item);
+			StringList temp = no;
+			if (strcmp(item, temp) || 
+				(no < 0) || (no > nChildrenAlloc)) {
+				Error :: abortRun(item, ":unknown proc Id");
+				return;
+			}
+			added.initialize();
+			start = FALSE;
+		} else if (!strcmp(item, ";")) {
+			start = TRUE;
+		} else {
+			added << item;
+		}
+		if (start || (i == sz - 1)) {
+			// add resources to the child targets.
+			Target* t = child(no);
+			State* s = t->stateWithName("resources");
+			StringArrayState* as = 0;
+			if (!s) {
+				LOG_NEW; as = new StringArrayState;
+				addedStates.put(*as);
+				t->addState(as->setState("resources",t,"",""));
+			} else if (s->isA("StringArrayState")) {
+				as = (StringArrayState*) s;
+			} else {
+				Error::abortRun(*s,": not a StringArrayState");
+				return;
+			}
+			StringList cur = as->currentValue();
+			cur << added;
+			as->setInitValue(hashstring(cur));
+		} 
+	}
+}
+		
 // select the scheduler depending on the options.
 void CGMultiTarget :: chooseScheduler() {
 	delSched();
@@ -151,12 +211,56 @@ void CGMultiTarget :: chooseScheduler() {
 	} else if (int(overlapComm)) {
 		LOG_NEW; setSched(new DLScheduler(this, logFile, 0));
 	} else if (int(useCluster)) {
-		LOG_NEW; setSched(new DeclustScheduler(this, logFile));
+		if (childType.size() > 1) {
+			Error :: warn("Declustering technique can not be",
+			  "applied for heterogeneous targets.\n By default",
+			  "we use dynamic-level scheduling");
+			LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
+		} else if (resources.size() > 1) {
+			Error :: warn("Declustering technique can not be",
+			  "applied with resource restriction.\n By default",
+			  "we use dynamic-level scheduling");
+			LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
+		} else {
+			LOG_NEW; setSched(new DeclustScheduler(this, logFile));
+		}
 	} else {
 		LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
 	}
 }
 
+void CGMultiTarget :: flattenWorm() {
+	Galaxy* myGalaxy = galaxy();
+	GalStarIter next(*myGalaxy);
+	CGStar* s;
+	CGStar* prev = 0;
+	int changeFlag = FALSE;
+	while ((s = (CGStar*) next++) != 0) {
+		if (prev) {
+			myGalaxy->removeBlock(*prev);
+			LOG_DEL; delete prev;
+			prev = 0;
+		}
+		if (s->isItWormhole()) {
+			CGWormBase* w = s->myWormhole();
+			// if inside domain is a CG domain, explode wormhole.
+			if (w->isCGinside()) {
+				prev = s;
+				Galaxy* inG = w->explode();
+				myGalaxy->addBlock(*inG, inG->name());
+				changeFlag = TRUE;
+			}
+		}
+	}
+	if (prev) {
+		myGalaxy->removeBlock(*prev);
+		LOG_DEL; delete prev;
+	}
+
+	// recursive application of this routine.
+	if (changeFlag) flattenWorm();
+}
+				
 void CGMultiTarget :: setStopTime(double f) {
 	Target::setStopTime(f);
 
@@ -385,7 +489,8 @@ int CGMultiTarget::commTime(int, int, int nSamps, int type) {
 }
 
 // return the array of candidate processors
-IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched) {
+IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched,
+	DataFlowStar* s) {
 	
 	// clear the array.
 	int k = 0;
@@ -393,10 +498,14 @@ IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched) {
 	int temp = -1;
 
 	// Scan the processors. By default, include only one
-	// unused processor and all used processors.
+	// unused processor and all used processors which satisfy
+	// resource constraints.
 	for (int i = 0; i < parSched->size(); i++) {
 		UniProcessor* uni = parSched->getProc(i);
-		if (uni->getAvailTime()) {
+		CGTarget* t = uni->target();
+		if (s && t && !t->support(s)) continue;
+		else if (s && t && !childHasResources(*s, i)) continue;
+		else if (uni->getAvailTime()) {
 			canProcs[k] = i;
 			k++;
 		} else if (!flag) {
@@ -404,7 +513,7 @@ IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched) {
 			flag = 1;
 		}
 	}
-	if (temp > 0) { canProcs[k] = temp; k++; }
+	if (temp >= 0) { canProcs[k] = temp; k++; }
 	canProcs.truncate(k);
 	return &canProcs;
 }
