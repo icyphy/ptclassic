@@ -82,3 +82,13 @@ depend:
 		) \
 	    fi ; \
 	done
+
+doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
+	@echo "Updating $@"
+	rm -f $@
+	(cd doc/stars; \
+	domain=`echo $(dir $(ME)) | sed s=/$$==`; \
+	echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		ptolemyStarHTMLIndex \
+		\"\{Ptolemy $$domain $(notdir $(ME)) stars\}\"" | itclsh)
