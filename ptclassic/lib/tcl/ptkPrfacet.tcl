@@ -1,4 +1,3 @@
-#
 # VERSION: $Id$
 #
 #---------------------------------------------------------------------------
@@ -81,13 +80,21 @@ proc ptkPrintFacet {name} {
     #########################################################################
     # Print to file only
     #
-    pack [frame .print.f] -side bottom -fill x -padx 5 -pady 5
+    pack [entry .print.file -relief sunken ] \
+	-side bottom -padx 5 -pady 5 -fill x
+    bind .print.file <Return> "ptkPrfacet $name"
+    bind .print.file <Tab> "focus .print.size.b.height"
+    .print.file insert @0 ${name}.ps
+    # Guess about the number of characters in the window here.
+    # Tk returns useless numbers when asked about the width of the widget
+    set leftEdge [expr {[string length $name] - 41}]
+    if {$leftEdge < 0} {set leftEdge 0}
+    .print.file view $leftEdge
+    .print.file icursor end
+    pack [frame .print.f] -padx 5 -pady 5 -side bottom -fill x
     pack [checkbutton .print.f.on -text "To file only:" \
 	-variable ptkPrintToFile -relief flat] \
-	-side left
-    pack [entry .print.f.file -relief sunken -width 24] -side right
-    bind .print.f.file <Return> "ptkPrfacet $name"
-    .print.f.file insert @0 ${name}.ps
+	-side left -anchor w
 
     #########################################################################
     # Printer
@@ -97,6 +104,7 @@ proc ptkPrintFacet {name} {
 	 -side left -fill none -anchor nw
     pack [entry .print.p.printer -relief sunken -width 10] -side right
     bind .print.p.printer <Return> "ptkPrfacet $name"
+    bind .print.p.printer <Tab> "focus .print.file"
     pack .print.p -side bottom -anchor w -padx 5 -pady 5
     global env
     if [catch {set printer $env(PRINTER)}] {set printer lw}
@@ -129,6 +137,7 @@ proc ptkPrintFacet {name} {
 	 -side left -fill none -anchor nw
     pack [entry .print.size.b.height -relief sunken -width 10] -side right
     bind .print.size.b.height <Return> "ptkPrfacet $name"
+    bind .print.size.b.height <Tab> "focus .print.size.a.width"
     global ptkPrHeight
     .print.size.b.height insert @0 $ptkPrHeight
 
@@ -137,6 +146,7 @@ proc ptkPrintFacet {name} {
 	 -side left -anchor w -fill none
     pack [entry .print.size.a.width -relief sunken -width 10] -side right
     bind .print.size.a.width <Return> "ptkPrfacet $name"
+    bind .print.size.a.width <Tab> "focus .print.size.c.voffset"
     global ptkPrWidth
     .print.size.a.width insert @0 $ptkPrWidth
 
@@ -145,6 +155,7 @@ proc ptkPrintFacet {name} {
 	 -side left -anchor w -fill none
     pack [entry .print.size.c.voffset -relief sunken -width 10] -side right
     bind .print.size.c.voffset <Return> "ptkPrfacet $name"
+    bind .print.size.c.voffset <Tab> "focus .print.size.d.hoffset"
     global ptkPrVertOffset
     .print.size.c.voffset insert @0 $ptkPrVertOffset
 
@@ -153,6 +164,7 @@ proc ptkPrintFacet {name} {
 	 -side left -anchor w -fill none
     pack [entry .print.size.d.hoffset -relief sunken -width 10] -side right
     bind .print.size.d.hoffset <Return> "ptkPrfacet $name"
+    bind .print.size.d.hoffset <Tab> "focus .print.p.printer"
     global ptkPrHorOffset
     .print.size.d.hoffset insert @0 $ptkPrHorOffset
 
@@ -173,7 +185,7 @@ proc ptkPrfacet {name} {
     global ptkPrintToFile
     if {$ptkPrintToFile} {
 	append command " -TOFILE "
-	append command [.print.f.file get]
+	append command [.print.file get]
     }
 
     global ptkPortrait
@@ -200,7 +212,8 @@ proc ptkPrfacet {name} {
 
     append command " " $name
 
-    if {$ptkPrintToFile} {append command " > " [.print.f.file get]}
+    if {$ptkPrintToFile} {append command " > " [.print.file get]}
+    puts $command
     uplevel exec "$command"
     destroy .print
 }
