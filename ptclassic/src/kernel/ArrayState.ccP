@@ -147,7 +147,7 @@ void <T>ArrayState  :: initialize() {
 				parseError ("too many elements!");
 				break;
 			}
-			<C> * sPtr = *(<T>ArrayState *)(t.s);
+			const <C> *sPtr = ((const <T>ArrayState *)(t.s))->val;
 			for (int j = 0; j < sSiz; j++)
 				buf[i++] = *sPtr++;
 			break;

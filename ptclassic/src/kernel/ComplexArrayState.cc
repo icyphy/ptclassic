@@ -108,8 +108,9 @@ void ComplexArrayState  :: initialize() {
 				parseError ("too many elements!");
 				break;
 			}
+			const Complex *sPtr = ((const ComplexArrayState *)(t.s))->val;
 			for (int j = 0; j < sSiz; j++)
-				buf[i++] = (*(ComplexArrayState *)(t.s))[j];
+				buf[i++] = sPtr[j];
 			break;
 		default:
 			parseError ("syntax error in complex expression");
