@@ -87,8 +87,9 @@ const char* StringArrayState :: type() const { return "STRINGARRAY";}
 
 StringList StringArrayState :: currentValue() const { 
 	StringList s; 
-	for(int i = 0; i<size(); i++) {
-		s << val[i] << "\n";
+	if (size() != 0) s << val[0];
+	for(int i = 1; i<size(); i++) {
+		s << '\n' << val[i];
 	} 
 	return s;
 }
@@ -119,6 +120,7 @@ void StringArrayState  :: initialize() {
 	int numRepeats;
 	char* saveValue = 0;
 	ParseToken t;
+	lexer.skipwhite();
 	while(!lexer.eof() && i < MAXLEN && err == 0) {
 		lexer >> tokbuf;
 		char c = tokbuf[0];
@@ -188,6 +190,7 @@ void StringArrayState  :: initialize() {
 			buf[i++] = savestring(tokbuf);
 		}
 		saveValue = buf[i-1];
+		lexer.skipwhite();
 	}
 	if (!err) {
 		nElements  = i;
