@@ -85,7 +85,7 @@ struct TokenContext {
 };
 
 // Function to interpret escaped characters in strings
-static slash_interp(char c) {
+static int slash_interp(char c) {
 	switch (c) {
 	case 'n':	return '\n';
 	case 't':	return '\t';
@@ -126,6 +126,7 @@ Tokenizer::pop() {
 // Open a new file.
 // We use stdio to open the file to avoid error messages.  Return 1
 // for success, 0 for failure.
+int
 Tokenizer::fromFile(const char *filename) {
 	FILE *stdstrm = fopen (expandPathName(filename), "r");
 	if (stdstrm == NULL) return 0;
