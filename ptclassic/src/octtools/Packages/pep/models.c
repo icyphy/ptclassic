@@ -59,7 +59,7 @@ double s; /* separation */
 double w1; /* line1 width */ 
 double w2; /* line2 width */ 
 {
-    double s12;
+    double s12 = 0.0;
     double sw1;
     double sw2;
     double cap; /* capacitance */ 
@@ -89,7 +89,7 @@ double s; /* separation */
 double w1; /* line1 width */ 
 double w2; /* line2 width */ 
 {
-    double s12;
+    double s12 = 0.0;
     double sw1;
     double sw2;
     double cap; /* capacitance */ 
