@@ -85,13 +85,14 @@ public:
 	// compare this manual value with what the current scheduler
 	// calculates. If this manual value is smaller, signal an error.
 	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
-
+protected:
+	void setFlags();
 private:
 	int maxBuf;		// Final buffer size.
-	int manualFlag;		// set if buffer size is manually chosen.
-	int hasStaticBuf;	// set if static buffer is achieved.
-	int asLinearBuf;	// set if acts as a linear buf inside a star
-	int ownership;		// set if this porthole owns the buffer.
+	short manualFlag;	// set if buffer size is manually chosen.
+	short hasStaticBuf;	// set if static buffer is achieved.
+	short asLinearBuf;	// set if acts as a linear buf inside a star
+	short ownership;	// set if this porthole owns the buffer.
 
 	SequentialList& myDest() { return forkDests; }
 };
