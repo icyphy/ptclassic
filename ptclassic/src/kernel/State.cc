@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <std.h>
 #include <ctype.h>
+#include "InvokeInterp.h"
 #include "Tokenizer.h"
 #include "State.h"
 #include "Block.h"
@@ -212,14 +213,6 @@ StringList parseNestedExpression(State& state, const char* expression) {
     return parsedExpression;
 }
 
-// send a string to an external interpreter for evaluation
-const char*
-State :: externalInterpreter(const char* expression) {
-    parseError("no interpreter defined for the ! operator to evaluate ",
-	       expression);
-    return NULL;
-}
-
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 ParseToken
@@ -244,7 +237,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		lexer.setSpecial(tc);
 		// check for an error in parsing the file name
 		if (parsedFileName.length() == 0) return t;
-		// parse the contents of the file
+		// direct the lexer to parse the contents of the file
 		if (!lexer.fromFile(parsedFileName)) {
 			StringList msg;
 			msg << parsedFileName << ": " << why();
@@ -252,7 +245,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			t.tok = T_ERROR;
 			return t;
 		}
-		else lexer >> token;
+		else lexer >> token;	// overwrites '<' char in token buffer
 	}
 
 	// read tokens from the output of an external interpreter
@@ -267,7 +260,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		// enable special characters
 		lexer.setSpecial(tc);
 		// send the command to the external interpreter
-		const char* result = externalInterpreter(parsedCommand);
+		const char* result = interp.interpreter(parsedCommand);
 		// check for an error from the interpreter
 		if (result == 0) {
 			StringList msg;
@@ -278,7 +271,10 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			t.tok = T_ERROR;
 			return t;
 		}
-		else lexer.pushBack(result);
+		else {
+			lexer.pushBack(result);	// overwrites ! expr in state
+			lexer >> token;		// overwrites token buffer
+		}
 	}
 
 	if (*token == 0) {
