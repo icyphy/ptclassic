@@ -325,7 +325,7 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 # We cd up one level so that the zip file has the proper package name
 jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
-	(cd $(CLASSPATH); zip -qn .class $@ $(JPACKAGE_DIR)/*.class)
+	(cd $(CLASSPATH); $(JAR) -c0Mf $@ $(JPACKAGE_DIR)/*.class)
 
 jars: $(JARFILE) 
 $(JARFILE): $(JSRCS) $(JCLASS)
