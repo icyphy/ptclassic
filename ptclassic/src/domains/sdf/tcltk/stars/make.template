@@ -37,15 +37,19 @@ PL_SRCS= \
  SDFLMSCxTkPlot.pl \
  SDFTclScript.pl \
  SDFTkBarGraph.pl \
+ SDFTkButtons.pl \
  SDFTkMeter.pl \
+ SDFTkShowBooleans.pl \
  SDFTkShowValues.pl \
  SDFTkSlider.pl \
  SDFTkText.pl \
  SDFTkXYPlot.pl
 
 TCL_SRCS= \
+ tkButtons.tcl \
  tkMeter.tcl \
  tkScript.tcl \
+ tkShowBooleans.tcl \
  tkShowValues.tcl \
  tkSlider.tcl \
  tkText.tcl
