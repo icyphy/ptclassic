@@ -18,6 +18,7 @@ output buffer is initialized with the specified DC value.
 	output {
 		name {output}
 		type {FIX}
+		attributes{P_NOINIT}
 	}
 	state {
 		name {level}

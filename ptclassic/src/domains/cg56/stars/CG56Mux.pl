@@ -86,13 +86,12 @@ of performing run-time advancement.  This is not currently handled.
 	desc { "True if any input is not scalor." }
 	attributes {A_NONSETTABLE|A_NONCONSTANT}
     }
-    start {
+    setup {
 	output.setSDFParams(int(blockSize),int(blockSize)-1);
 	input.setSDFParams(int(blockSize),int(blockSize)-1);
 	if ( int(useCircular) ) {
 	    input.setAttributes(P_CIRC);
 	} else {
-	    static Attribute P_NONCIRC = { 0, PB_CIRC};	// bogus
 	    input.setAttributes(P_NONCIRC);
 	}
 
