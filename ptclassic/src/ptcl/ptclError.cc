@@ -55,6 +55,8 @@ static void p3(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error(cc* m1, cc* m2, cc* m3) {
+// If there is no active PTcl interpreter, use the standard error
+// stream cerr to report error.
 	if (PTcl::activeInterp == 0) {
 		cerr << "ERROR: ";
 		p3(m1,m2,m3);
