@@ -39,23 +39,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
 #include "CG56PortHole.h"
-#include "SDFWormhole.h"
+#include "CG56Wormhole.h"
 #include "AsmForkNode.h"
 
-extern const char CG56domainName[] = "CG56";
-
+extern const char CG56domainName[] = "CG56"; 
 class CG56Domain : public Domain {
 public:
 	// no fn to build a CG56-on-outside wormhole yet.
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		LOG_NEW; return *new SDFfromUniversal;
+		LOG_NEW; return *new CG56fromUniversal;
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		LOG_NEW; return *new SDFtoUniversal;
+		LOG_NEW; return *new CG56toUniversal;
 	}
 
 	// new node (geodesic)
