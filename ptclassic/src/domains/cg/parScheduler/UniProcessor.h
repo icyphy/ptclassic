@@ -94,11 +94,8 @@ friend class ParProcessors;
 friend class ProcessorIter;
 public:
 	// constructor
-	UniProcessor() : availTime(0), curSchedule(0), 
-			  targetPtr(0), freeNodeSched(0), numFree(0),
-	  subGal(0), parent(0) {
-		specialStars.initialize();
-	}
+	UniProcessor() : availTime(0), curSchedule(0), targetPtr(0), 
+			 freeNodeSched(0), numFree(0), subGal(0), parent(0) { }
 	~UniProcessor();
 
 	// return the galaxy
@@ -171,6 +168,13 @@ public:
 	NodeSchedule* getNodeSchedule(ParNode* n);
 	NodeSchedule* getCurSchedule() { return curSchedule; }
 
+	// Returns the sum of computation and communication on this processor
+	//      and sets the private data member load
+	int computeLoad();
+
+	// Returns the sum of computation and communication time on this proc
+	int getLoad() {return load;}
+
 	// prepare code-generation: galaxy initialization,
 	// copy schedule and simulate the schedule.
 	void prepareCodeGen();
@@ -219,20 +223,15 @@ private:
 	// galaxy of blocks assigned to this processor
 	DynamicGalaxy* subGal;
 
-	// list of special stars (CGWormStar)  to be deleted.
-	BlockList specialStars;
-
-	// list of portholes connected to the wormholes.
-	PortList wormPartners;
-
 	// Multiprocessor object of which I am a part of
 	ParProcessors* parent;
 
 	// my id
 	int index;
 
-	// clone a star
-	DataFlowStar* cloneStar(ParNode*);
+	// the sum of computation and communication on this processor
+	// set by computeLoad method
+	int load;
 
 	// create special stars and connect them
 	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN, int);
@@ -254,10 +253,6 @@ private:
 	// Convert a processor schedule to an SDF schedule for child target.
 	void convertSchedule(SDFScheduler* optS = 0);
 
-	// replace wormstars with wormholes before preparing code gen.
-	// and restrore the original wormhole connection after code gen.
-	void replaceWorms();
-	void restoreWorms();
 };
 
 /////////////////////////

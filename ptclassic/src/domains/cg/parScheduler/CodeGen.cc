@@ -44,19 +44,8 @@ special routines to generate the sub universes.
 #include "SDFPortHole.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
-#include "CGWormStar.h"
+#include "dataType.h"
 #include <string.h>
-
-static void copyActualStates(const Block& src, Block& dest) {
-	CBlockStateIter nexts(src);
-	BlockStateIter nextd(dest);
-	const State* srcStatePtr;
-	State *destStatePtr = 0;
-	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0) {
-		StringList temp = srcStatePtr->currentValue();
-		destStatePtr->setInitValue(hashstring(temp));
-	}
-}
 
 PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
@@ -64,39 +53,6 @@ PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	if (p->asClusterPort()) return &p->asClusterPort()->real();
 	return copyS->portWithName(p->name());
 }
-
-// clone a star
-DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
-	DataFlowStar* org = n->myMaster();
-	DataFlowStar* newS;
-	if (org->isItWormhole()) {
-	    int ix = n->profile()->profileIx(n->invocationNumber(),myId());
-	    LOG_NEW; newS =  new CGWormStar((CGStar*) org, ix,
-					    n->invocationNumber(), 1);
-	    return newS;
-	}
-	if (!target()->support(org)) {
-	    // FIXME: need documentation.  Are we remapping the
-	    // star into a different domain here?
-	    // FIXME: assumes target()->starType() ends in "Star"
-	    // and is preceded by the domain.
-	    // This needs to be fixed!
-	    const char* foo = target()->starType();
-	    // FIXME: assumes 14-letter max starType name!!!
-	    char temp[15];
-	    strcpy(temp, foo);
-	    int len = strlen(foo);
-	    temp[len-4] = 0;
-	    const char* sname = org->className() + 
-		strlen(org->domain());
-	    newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
-	} else {
-	    newS = (DataFlowStar*) org->clone();
-	}
-	copyActualStates(*org, *newS);
-	return newS;
-}
-
 
 			//////////////////////
 			// sub-Galaxy creation
@@ -108,6 +64,7 @@ void UniProcessor :: createSubGal() {
 	LOG_DEL; delete subGal;
 	LOG_NEW; subGal = new DynamicGalaxy;
 	subGal->setNameParent(targetPtr->name(), 0);
+	targetPtr->setGalaxy(*subGal);
 
 	// maintain the list of the SDF stars which we have considered
 	SequentialList touchedStars;
@@ -117,11 +74,13 @@ void UniProcessor :: createSubGal() {
 	SequentialList assignedFirstInvocs;
 	assignedFirstInvocs.initialize();
 	
+	static const char* domForClone;
+
 	// create SDF stars.
 	ProcessorIter pIter(*this);
 	ParNode* n;
 	while ((n = pIter.nextNode()) != 0) {
-		// the second condition checks whether it is a wormhole(or
+		// the second condition checks whether it is a macro node (or
 		// parallel star) node or not.
 		if (n->getType() || (n->getProcId() != myId())) continue;
 		
@@ -156,7 +115,8 @@ void UniProcessor :: createSubGal() {
 		    if (clusterSched) clusterSched->setTarget(*targetPtr);
 		}
 		else {
-		    copyS = cloneStar(n);
+		    copyS = n->copyStar(target(), myId(), 1);
+		    domForClone = copyS->domain();
 		    // add to the galaxy
 		    subGal->addBlock(*copyS, org->name());
 		    copyS->setTarget(targetPtr);
@@ -186,9 +146,12 @@ void UniProcessor :: createSubGal() {
 		DataFlowStar* org = pn->myMaster();
 		BlockPortIter piter(*org);
 		PortHole* p;
+		Block* black = 0;
+		Block* cst = 0;
 		while ((p = piter++) != 0) {
 			// wormhole boundary
 			if (p->atBoundary()) {
+			    if (p->far()) {
 				PortHole* cp = clonedPort(org, p);
 				PortHole* evep = p->far();
 				p->geo()->disconnect(*evep);
@@ -202,6 +165,38 @@ void UniProcessor :: createSubGal() {
 				subGal->addPort(gP->setPort(
 					p->name(),subGal,p->type()));
 				continue;
+			    } else {
+				// make a dummy connection to prevent
+				// error message when code generation
+				if (p->isItOutput()) {
+				   if (!black) {
+				      black = KnownBlock::clone("BlackHole",
+					   domForClone);
+				      if (!black) {
+					Error::abortRun("we need BlackHole",
+				        " star for dummy connection.");
+					return;
+				      }
+				   }
+				   PortHole* destP = 
+					black->portWithName("input");
+			           clonedPort(org,p)->connect(*destP, 0);
+				} else {
+				   cst = KnownBlock::clone("Const",
+					domForClone);
+				   if (!cst) {
+					Error::abortRun("we need Const",
+				        " star for dummy connection.");
+					return;
+				   }
+				   PortHole* srcP = 
+					cst->portWithName("output");
+			           srcP->connect(*(clonedPort(org,p)), 0);
+				}
+					
+				// TRY IT
+				continue;
+			    }
 			}
 
 			DataFlowStar* farS =(DataFlowStar*) p->far()->parent();
@@ -215,7 +210,6 @@ void UniProcessor :: createSubGal() {
 				makeGenConnect(p, pn, org, farS, touchedStars);
 			}
 			if (SimControl::haltRequested()) return;
-
 		}
 	}
 }
@@ -719,4 +713,3 @@ M:
 		n = n->getNextNode();
 	} while(n);
 }
-
