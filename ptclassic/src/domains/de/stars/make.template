@@ -36,7 +36,9 @@ SRCS=DEDelay.pl DEPoisson.pl DESampler.pl DEQueue.pl DEImpulse.pl \
 	DESwitch.pl DEMerge.pl DERouter.pl DEServer.pl DEExpDelay.pl \
 	DEUniDelay.pl DEClock.pl DEFilter.pl \
 	DEMeasureDelay.pl DEBlockingAsk.pl DEBlockingAccept.pl \
-	DEXhistogram.pl DEPSServer.pl DEDiscard.pl
+	DEXhistogram.pl DEPSServer.pl DEDiscard.pl \
+	DENull.pl DEPrinter.pl DERanGen.pl DEStatistics.pl \
+	DEStopTimer.pl DEUDCounter.pl
 
 CCS=DEDelay.cc DEPoisson.cc DESampler.cc DEQueue.cc DEImpulse.cc \
 	DEXMgraph.cc DEXgraph.cc DEBlackHole.cc DEFloatDC.cc DEFloatRamp.cc \
@@ -44,7 +46,9 @@ CCS=DEDelay.cc DEPoisson.cc DESampler.cc DEQueue.cc DEImpulse.cc \
 	DESwitch.cc DEMerge.cc DERouter.cc DEServer.cc DEExpDelay.cc \
 	DEUniDelay.cc DEClock.cc DEFilter.cc \
 	DEMeasureDelay.cc DEBlockingAsk.cc DEBlockingAccept.cc \
-	DEXhistogram.cc DEPSServer.cc DEDiscard.cc
+	DEXhistogram.cc DEPSServer.cc DEDiscard.cc \
+	DENull.cc DEPrinter.cc DERanGen.cc DEStatistics.cc \
+	DEStopTimer.cc DEUDCounter.cc
 
 OBJS=DEDelay.o DEPoisson.o DESampler.o DEQueue.o DEImpulse.o \
 	DEXMgraph.o DEXgraph.o DEBlackHole.o DEFloatDC.o DEFloatRamp.o \
@@ -52,7 +56,9 @@ OBJS=DEDelay.o DEPoisson.o DESampler.o DEQueue.o DEImpulse.o \
 	DESwitch.o DEMerge.o DERouter.o DEServer.o DEExpDelay.o \
 	DEUniDelay.o DEClock.o DEFilter.o \
 	DEMeasureDelay.o DEBlockingAsk.o DEBlockingAccept.o \
-	DEXhistogram.o DEPSServer.o DEDiscard.o
+	DEXhistogram.o DEPSServer.o DEDiscard.o \
+	DENull.o DEPrinter.o DERanGen.o DEStatistics.o \
+	DEStopTimer.o DEUDCounter.o
 
 HDRS=DEDelay.h DEPoisson.h DESampler.h DEQueue.h DEImpulse.h \
 	DEXMgraph.h DEXgraph.h DEBlackHole.h DEFloatDC.h DEFloatRamp.h \
@@ -60,7 +66,9 @@ HDRS=DEDelay.h DEPoisson.h DESampler.h DEQueue.h DEImpulse.h \
 	DESwitch.h DEMerge.h DERouter.h DEServer.h DEExpDelay.h \
 	DEUniDelay.h DEClock.h DEFilter.h \
 	DEMeasureDelay.h DEBlockingAsk.h DEBlockingAccept.h \
-	DEXhistogram.h DEPSServer.h DEDiscard.h
+	DEXhistogram.h DEPSServer.h DEDiscard.h \
+	DENull.h DEPrinter.h DERanGen.h DEStatistics.h \
+	DEStopTimer.h DEUDCounter.h
 
 all:		$(SRCS) $(CCS) makefile $(OBJS)
 
