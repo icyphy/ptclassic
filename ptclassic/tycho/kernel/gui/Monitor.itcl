@@ -91,7 +91,23 @@
 # </pre></tcl>
 class ::tycho::Monitor {
     inherit ::tycho::Query ::tycho::Exec
+    ###################################################################
+    ####                            options                        ####
+
+    # If non-zero, close widget if the subprocess exits with an ok status.
+    itk_option define -autodestroy autodestroy Autodestroy 0
+
+    # If non-zero, start the subprocess automatically
+    itk_option define -autostart autostart Autostart 0
+
+    # Command to be executed.
+    itk_option define -command command Command "make"
+
+    # Directory to execute the command in.
+    itk_option define -dir dir Dir {}
+
     constructor {args} {}
+
     destructor {}
 
     ###################################################################
@@ -115,26 +131,56 @@ class ::tycho::Monitor {
     public method setErrorCount {num}
     
     ###################################################################
-    ####                            options                        ####
-
-    # If non-zero, close widget if the subprocess exits with an ok status.
-    itk_option define -autodestroy autodestroy Autodestroy 0
-
-    # If non-zero, start the subprocess automatically
-    itk_option define -autostart autostart Autostart 0
-
-    # Command to be executed.
-    itk_option define -command command Command "make"
-
-    # Directory to execute the command in.
-    itk_option define -dir dir Dir {}
-
-    ###################################################################
-    ####                            options                        ####
+    ####                            public variables               ####
 
     public variable errorCount 0
     public variable errorList {}
     private variable previousErrorLine -1
+}
+
+
+#######################################################################
+#### -autodestroy configuration
+# If non-zero, destroy the widget if the process exits with an 'ok'
+# status
+#
+configbody ::tycho::Monitor::autodestroy {
+    if {$itk_option(-autodestroy) == 0} {
+        insert autoDestroy 0
+    } else {
+        insert autoDestroy 1
+    }
+}
+
+#######################################################################
+#### -autostart configuration
+# 
+configbody ::tycho::Monitor::autostart {
+    if {$itk_option(-autostart)==0} {
+        insert autoStart 0
+    } else {
+        insert autoStart 1
+    }
+}
+
+#######################################################################
+#### -command configuration
+# Command to be Executed.
+#
+configbody ::tycho::Monitor::command {
+    clear commandToExec
+    insert commandToExec $itk_option(-command)
+}
+
+#######################################################################
+#### -dir configuration
+# The directory that we should exec from.  If the value of this option
+# is {}, then we don't change the current directory.  Otherwise,
+# we cd to the value of this option.
+#
+configbody ::tycho::Monitor::dir {
+    clear dirToExecFrom
+    insert dirToExecFrom $itk_option(-dir)
 }
 
 #######################################################################
@@ -208,6 +254,15 @@ body ::tycho::Monitor::constructor {args} {
     # minimum size.
     wm minsize $prefix 10 10
 
+    # If we are running under the test suite, then autostart and autodestroy
+    global testsuite
+    if [info exists testsuite] {
+	#set itk_option(-autostart) 1
+	set itk_option(-autodestroy) 1
+	#configure -autostart 1
+	configure -autodestroy 1
+    }
+
     # If autostart is not equal to zero, then start the subprocess
     # This should be at the end of the constructor
     if {$itk_option(-autostart) == 1} {
@@ -266,10 +321,13 @@ body ::tycho::Monitor::jumpNextError {} {
     }
 }
 
+#######################################################################
+#### jumpToLine
 # This will open file context, and jump to entry number.
 # eLineNum = editor's line number (where error occured)
 # cLineNum = compiler's line number (where error reported)
 # fname = filename of the error source code.
+#
 body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
     # FIXME: directory could potentially be anywhere, specified in Makefile.
     # Name of our editor/viewer
@@ -288,6 +346,9 @@ body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
 }
 
 
+#######################################################################
+#### insertLine
+#
 body ::tycho::Monitor::insertLine {line} {
     set text $itk_component(history).text
     set monitorLine [lindex [split [$text index insert] .] 0]
@@ -327,13 +388,18 @@ body ::tycho::Monitor::insertLine {line} {
     $itk_component(history) center
     $itk_component(history) configure -readonly 1
 }
+
+#######################################################################
+#### setErrorCount
+#
 body ::tycho::Monitor::setErrorCount {count} {
     set errorCount $count
 }
 
 
-    
-
+#######################################################################
+#### execProcessInMonitor
+#
 body ::tycho::Monitor::execProcessInMonitor {} {
     # Initially we don't have error
     set errorCount 0
@@ -359,52 +425,3 @@ body ::tycho::Monitor::execProcessInMonitor {} {
         }
     }
 }
-
-#######################################################################
-#### -autodestroy configuration
-# If non-zero, destroy the widget if the process exits with an 'ok'
-# status
-configbody ::tycho::Monitor::autodestroy {
-    if {$itk_option(-autodestroy) == 0} {
-        insert autoDestroy 0
-    } else {
-        insert autoDestroy 1
-    }
-}
-
-#######################################################################
-#### -autostart configuration
-# 
-configbody ::tycho::Monitor::autostart {
-    if {$itk_option(-autostart)==0} {
-        insert autoStart 0
-    } else {
-        insert autoStart 1
-    }
-}
-
-#######################################################################
-#### -command configuration
-# Command to be Executed.
-#
-configbody ::tycho::Monitor::command {
-    clear commandToExec
-    insert commandToExec $itk_option(-command)
-}
-
-#######################################################################
-#### -dir configuration
-# The directory that we should exec from.  If the value of this option
-# is {}, then we don't change the current directory.  Otherwise,
-# we cd to the value of this option.
-#
-configbody ::tycho::Monitor::dir {
-    clear dirToExecFrom
-    insert dirToExecFrom $itk_option(-dir)
-}
-
-
-
-
-
-
