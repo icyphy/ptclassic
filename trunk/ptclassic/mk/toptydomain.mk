@@ -40,7 +40,7 @@ makefiles:
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
-		  $(MAKE) -f $(MFLAGS) $(MAKEVARS) \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../tycho/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
