@@ -34,9 +34,6 @@ static char SccsId[] = "$Id$";
 #include "topStd.h"
 #include "topMem.h"
 
-extern int sys_nerr;
-extern char *sys_errlist[];
-
 /*
  * Some global variables may or may not be useful.
  */
