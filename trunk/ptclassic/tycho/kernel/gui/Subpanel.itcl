@@ -35,68 +35,76 @@ option add *Subpanel.relief sunken widgetDefault
 option add *Subpanel.labelPos w widgetDefault
 option add *Subpanel.labelMargin 2 widgetDefault
 
+# FIXME:
+# Known bugs:
+# - configure -state closed does not close the drawer.
+# - the -opencallback and -closeback options do not work if specified
+#   at definition time.  They have to be configured after.
+
 #######################################################################
 #### Subpanel
 # This class defines a Subpanel widget that can be used within windows.
-# It mimics opening and closing a drawer.  It allows a user to create a
-# custom laid out panel and then embed it into the subpanel widget which
-# provides capabilities to open and close the panel.  
-# The Subpanel can be initially in an open or closed state.  The closed
-# state hides all of the widgets that are inside the panel, whereas the
-# open state displays the entire panel.  If the -childwidget option is
-# is specified then the user-specified widget is packed into the 
-# subpanel.  Note that one childwidget cannnot be packed into two 
-# different subpanels.  The -text option specifies the text that is to 
-# be inserted into the label portion of the subpanel.  The -opencallback 
-# option specifies a command (a name of a procedure) that is to be executed 
-# when the subpanel is opened. This should return the name of a widget to 
-# be packed into the subpanel.  The -closecallback option specifies the 
-# command (name of a procedure) that is executed when a subpanel is closed.  
-# The -state option specifies the state that the user would like the 
+# It mimics opening and closing a drawer.  The contents of the drawer can
+# be any Tk window that is a child of the top-level window containing the
+# subpanel.  
+# <p>
+# The subpanel can be initially in an open or closed state.
+# The <i>-childwidget</i> option specifies the widget to pack into the 
+# subpanel when the drawer is opened.
+# Note that one childwidget cannnot be packed into two 
+# different subpanels.  The <i>-text</i> option specifies the text that is to 
+# be inserted into the label portion of the subpanel.
+# The <i>-state</i> option specifies the state that the user would like the 
 # subpanel to have: either closed or open.  One can query the current state 
 # of the subpanel by using [cget -state].
-# NOTE: If both the childwidget and the opencallback options are
-#       are used then the one that is specified last will be used.
-#       The deletion of the embedded widget is left to the user of the
-#       subpanel.
-#       
-#
+# By default, the subpanel is initially closed.
 # <p>
 # Here is an example of how to use the Subpanel:
 # <tcl><pre>
-# tycho::Dismiss .w
+# ::tycho::Displayer .w
 # frame .w.options
-# frame .w.options.left
-# frame .w.options.right
-# pack .w.options.left -side left -anchor nw
-# pack .w.options.right -side left -anchor nw
-# checkbutton .w.options.left.debug -text "Debug mode" -relief flat
-# checkbutton .w.options.right.script -text "Use Script" -relief flat
-# pack .w.options.left.debug -side top -anchor nw
-# pack .w.options.right.script -side top -anchor nw
-# proc closePanel {} {
-#     puts "close"
-# }
-# tycho::Subpanel .w.s -text "Options" -childwidget .w.options
-# pack .w.s -side top -anchor nw
+# checkbutton .w.options.a -text A
+# checkbutton .w.options.b -text B
+# pack .w.options.a
+# pack .w.options.b
+# ::tycho::Subpanel .w.s -text "Options" -childwidget .w.options
+# pack .w.s -anchor w
 # wm deiconify .w
-# .w.s configure -closecallback "closePanel"
-# frame .w.new
-# frame .w.new.bframe
-# pack .w.new.bframe
-# button .w.new.bframe.button -text "push me"
-# pack .w.new.bframe.button
-# proc openPanel {} {
-#     set widget .w.new
-#     puts "open"
-#     return $widget
-# }
-# .w.s configure -opencallback "openPanel"
 # </pre></tcl>
+# <p>
+# This example first creates a window with a status bar (and a close
+# button), then creates a frame a populates it with checkbuttons.
+# It then creates a <code>Subpanel</code> that uses the frame with
+# checkbuttons as it's child widget.  When the "open" button is pushed,
+# that frame is packed.  When it is pushed again, that frame is unpacked.
+# <p>
+# As an alternative to the <i>-childwidget</i> option, the
+# -opencallback option specifies a command to execute when the subpanel
+# is opened. This should return the name of a widget to be packed into
+# the subpanel. Thus, the frame to display can be constructed
+# on-the-fly. The -closecallback option specifies the command that is
+# executed when a subpanel is closed.
+# <p>
+# For example,
+# <tcl><pre>
+# proc nb {} {
+#     button .x.b -text push
+#     return .x.b
+# }
+# ::tycho::Displayer .x
+# ::tycho::Subpanel .x.s -text "Button"
+# .x.s configure -opencallback nb
+# .x.s configure -closecallback "destroy .x.b"
+# pack .x.s -anchor w
+# wm deiconify .x
+# </pre></tcl>
+# <p>
+# If both the childwidget and the opencallback options are
+# are used then the one that is specified last will be used.
+# The deletion of the embedded widget is left to the creator.
 #
 class ::tycho::Subpanel { 
-    # FIXME: TychoWidget no longer exists.
-    inherit ::tycho::TychoWidget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}
