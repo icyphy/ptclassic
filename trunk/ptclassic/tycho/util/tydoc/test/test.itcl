@@ -37,7 +37,7 @@ catch {delete class ::tycho::DocSysTestSimple}
 catch {delete class ::tycho::DocSysTestChild}
 
 # This method is outside a class, and should end up in a separate file
-proc methodOutsideAClass {} {
+proc ::tycho::methodOutsideAClass {} {
     puts "foo"
 }
 
@@ -129,8 +129,16 @@ class ::tycho::DocSysTestSimple {
 # causing trouble with the index page.
 class ::tycho::DocSysTestChild {
     inherit DocSysTest DocSysTestSimple
+    ## constructor
+    #
+    # Here we test a constructor that has a body inside the class {}
+    #
+    constructor {} {
+	# Initialise the hierarchy tags
+    }
+
     # A destructor
-    destructor {} 
+    destructor {#Do some destruction} 
     
     #### publicTwoArgMethod
     # This public method takes two args, the second is optional
