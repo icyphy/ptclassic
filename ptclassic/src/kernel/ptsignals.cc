@@ -90,6 +90,27 @@ as a blank function and define ptBlockSig and ptReleaseSig as below.
 
 #include <signal.h>
 #include "compat.h" 
+#include "ptsignals.h"
+
+// When the POSIX thread library libgthreads is used,
+//  sigaction() must be used instead of signal() to register handlers.
+#if defined(PTSOL2) || defined(PTSUN4)
+
+extern "C" SIG_PF ptSignal(int sig, SIG_PF handler)
+{
+    struct sigaction action;
+
+    sigaction(sig, NULL, &action);
+
+    // These two casts are UGLY, but what else are you going to do?!
+    SIG_PF old = (SIG_PF)action.sa_handler;
+    action.sa_handler = (void (*)())handler;
+
+    sigaction(sig, &action, NULL);
+    return old;
+}
+
+#endif PTSOL2 PTSUN4
 
 #if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA) || defined(PTAIX) || defined(SA_RESTART)
 void ptSafeSig( int SigNum ) {
@@ -98,8 +119,8 @@ void ptSafeSig( int SigNum ) {
         pt_alarm_action.sa_flags |= SA_RESTART;
         sigaction( SigNum, &pt_alarm_action, NULL);
 }
-void ptBlockSig (int SigNum) {};
-void ptReleaseSig (int SigNum) {};
+void ptBlockSig (int) {};
+void ptReleaseSig (int) {};
 
 #else 
 #if defined(PTHPPA)
@@ -116,9 +137,9 @@ void ptReleaseSig( int SigNum ) {
 
 #else
 #if defined(PTSUN4)
-void ptBlockSig (int SigNum) {};
-void ptReleaseSig (int SigNum) {};
-void ptSafeSig( int SigNum ) {};
+void ptBlockSig(int) {};
+void ptReleaseSig(int) {};
+void ptSafeSig(int) {};
 
 #else
 /*default is no assignment*/
