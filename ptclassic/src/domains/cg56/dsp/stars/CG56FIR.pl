@@ -49,7 +49,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
 		}
 		desc { Filter tap values. }
-		attributes { A_NONCONSTANT|A_YMEM }
+		attributes { A_NONCONSTANT|A_YMEM|A_NOINIT }
 	}
 	state {
 		name {decimation}
@@ -117,42 +117,41 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }	    
 
 	setup {
+	      int interp = interpolation;
+ 	      int decimt = decimation;
+	      int oldSampleNum = int(ceil(double(tapsNum - decimt)/double(interp)));
               tapsNum=taps.size();
-              if (int(-(int(decimation)-int(tapsNum))/int(interpolation))>0)
-                   oldsample.resize(int(-(int(decimation)-int(tapsNum))/int(interpolation)));
+	      if (oldSampleNum>0)
+                   oldsample.resize(oldSampleNum);
               else
                    oldsample.resize(0);
+              input.setSDFParams(decimt, decimt-1);
+	      output.setSDFParams(interp, interp-1);
 
-
-              int modtemp=tapsNum%interpolation;
-              input.setSDFParams(decimation, decimation-1);
-	      output.setSDFParams(interpolation, interpolation-1);
-
-              if (decimation>1 && interpolation>1) 
+              if (decimt>1 && interp>1) 
 	              Error::abortRun (*this, ": Cannot both interpolate and decimate.");
-                
+	      
+              int modtemp=tapsNum%interp;
               if (modtemp !=0) {
-	             taps.resize(tapsNum+interpolation-modtemp);
+	             taps.resize(tapsNum+interp-modtemp);
 		     tapsNum=taps.size();
 	      }
-	      // FIXME: this should NOT be done this way (converted to
-	      // ASCII and back)!!!
-              StringList permuted;
-              for (int i=interpolation-1; i> -1; i--) {
-                    int j=i;
-                    while(j<tapsNum) {
-		            permuted += double(taps[j]);
-			    permuted +=" ";
-                            j +=interpolation;
-		    }
-              }
-	      taps.setCurrentValue(permuted);
-               
         }
-
         initCode {
-                oldsampleSize=oldsample.size();
-
+		int interp = interpolation;
+		StringList tapInit;
+		tapInit = "\torg\t$ref(taps)\n";
+		if (interp == 1)
+			for (int i = 0; i < taps.size() ; i++)
+				tapInit << "\tdc\t" << double(taps[i]) << '\n';
+		else
+			for (int i = 0; i < 64; i++)
+				for (int j = i; j < 128; j += 64)
+					tapInit << "\tdc\t"
+						<< double(taps[j]) << '\n';
+		tapInit << "\torg\tp:\n";
+		addCode(tapInit);
+		oldsampleSize=oldsample.size();
 		if (oldsampleSize>0) 
                      addCode(block);
         }
