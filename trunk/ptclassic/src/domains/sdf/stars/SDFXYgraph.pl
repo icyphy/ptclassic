@@ -3,7 +3,7 @@ defstar {
 	derivedFrom { Xgraph }
 	domain { SDF }
 	desc {
-Generates an X-Y plot with the xgraph program.
+Generates an X-Y plot with the pxgraph program.
 The X data is on "xInput" and the Y data is on "input".
 	}
 	version {$Id$}
@@ -16,12 +16,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	htmldoc {
-The input signal is plotted using the <i>xgraph</i></b> program, with one
+The input signal is plotted using the <i>pxgraph</i> program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
 <a name="graph, X-Y"></a>
-<a name="xgraph program"></a>
+<a name="pxgraph program"></a>
 	}
-	seealso {Xgraph XMgraph xgraph Xhistogram}
+	seealso {Xgraph XMgraph $PTOLEMY/src/pxgraph/pxgraph.htm Xhistogram}
 	input {
 		name { xInput }
 		type { anytype }
