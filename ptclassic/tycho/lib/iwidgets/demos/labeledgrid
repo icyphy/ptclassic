@@ -6,8 +6,8 @@
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 
-catch {delete class iwidgets::Query}
-source ../generic/query.itk
+catch {delete class iwidgets::Labeledgrid}
+source ../generic/labeledgrid.itk
 
 catch {delete class iwidgets::Widgettree}
 source ../generic/widgettree.itk
@@ -21,16 +21,16 @@ iwidgets::scrolledframe .f \
 set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "createQuery $w" \
 	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
-$w options query {
+$w options labeledgrid {
 	rename -labelfont -font font Font
 }
 
 foreach tag {simple double mixed boxed separated} label {
-    "A query with a single column of widgets"
-    "A query with two labeled columns of widgets"
-    "A query with mixed-span widgets"
-    "A query with boxed groups"
-    "A query with separated groups"
+    "A labeledgrid with a single column of widgets"
+    "A labeledgrid with two labeled columns of widgets"
+    "A labeledgrid with mixed-span widgets"
+    "A labeledgrid with boxed groups"
+    "A labeledgrid with separated groups"
 } {
     $w add node $tag -text $label
 }
@@ -45,7 +45,7 @@ raise .
 proc createQuery {win tag} {
     switch -exact $tag {
         "simple" {
-            $win add query simple.q -columnspan 4 -childspan 3 -labelcolor blue
+            $win add labeledgrid simple.q -columnspan 4 -childspan 3 -labelcolor blue
             set q [$win component simple.q]
 
             $q add entry foo -label "An entry" -initial "Some text"
@@ -65,7 +65,7 @@ proc createQuery {win tag} {
             $q add radiobutton gee.f -text "A longer name" -value loo
         }
         "double" {
-            $win add query double.q -columnspan 8 -childspan 3 -labelcolor blue
+            $win add labeledgrid double.q -columnspan 8 -childspan 3 -labelcolor blue
             set q [$win component double.q]
 
             $q add entry foo -label "An entry" -initial "Some text"
@@ -89,7 +89,7 @@ proc createQuery {win tag} {
         }
         "mixed" {
             # Layout from page 164 of Mullet and Sano
-            $win add query mixed.q -columnspan 4 -childspan 1 -labelcolor blue
+            $win add labeledgrid mixed.q -columnspan 4 -childspan 1 -labelcolor blue
 	    set q [$win component mixed.q]
 
             $q add entry name -label "Name:" -columnspan 3
@@ -116,7 +116,7 @@ proc createQuery {win tag} {
             $q add checkbutton interests.networking -text "Networking"
         }
         "boxed" {
-            $win add query boxed.q -columnspan 8 -childspan 3 \
+            $win add labeledgrid boxed.q -columnspan 8 -childspan 3 \
                     -childstyle boxed -labelcolor blue
             set q [$win component boxed.q]
 
@@ -153,7 +153,7 @@ proc createQuery {win tag} {
             $q add radiobutton radio.b -value E -text "Earth calling"
         }
        "separated" {
-            $win add query separated.q  -columnspan 3 \
+            $win add labeledgrid separated.q  -columnspan 3 \
                     -childstyle separated -childspan 3 -labelcolor blue
             set q [$win component separated.q]
 
@@ -184,7 +184,7 @@ proc createQuery {win tag} {
 }
 
 set junk {
-    $win add query boxed.q \
+    $win add labeledgrid boxed.q \
 	    -columnspan 8 -childspan 3 \
             -childstyle boxed -labelcolor blue {
 	
