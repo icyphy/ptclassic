@@ -71,9 +71,8 @@ if [ -z "$TYCHO" ]; then
 fi
 
 # Check for success.
-if [ -d "$TYCHO" ]; then
-    echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
-else
+if [ ! -d "$TYCHO" ]; then
+    echo "\$TYCHO == $TYCHO, which was not found" 
     echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
     echo " See tycho/doc/running.html for further information"
 fi
