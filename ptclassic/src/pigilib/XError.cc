@@ -1,3 +1,4 @@
+static const char file_id[] = "XError.cc";
 /*******************************************************************
 SCCS Version identification :
 $Id$
@@ -34,13 +35,13 @@ static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
 	if (!m3) m3 = "";
 	int l = strlen(status)+strlen(m1)+strlen(m2)+strlen(m3) + 1;
 	if (obj) l += strlen(obj) + 2;
-	char* buf = new char[l];
+	LOG_NEW; char* buf = new char[l];
 	if (obj)
 		sprintf (buf, "%s%s: %s%s%s", status, obj, m1, m2, m3);
 	else
 		sprintf (buf, "%s%s%s%s", status, m1, m2, m3);
 	PrintErr (buf);
-	delete buf;
+	LOG_NEW; delete buf;
 }
 
 void
@@ -92,14 +93,14 @@ static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 	if (!m3) m3 = "";
 	int l = strlen(m1)+strlen(m2)+strlen(m3)+1;
 	if (obj) l += strlen(obj) + 2;
-	char* buf = new char[l];
+	LOG_NEW; char* buf = new char[l];
 	if (obj)
 		sprintf (buf, "%s: %s%s%s", obj, m1, m2, m3);
 	else	sprintf (buf, "%s%s%s", m1, m2, m3);
 	if (ViGetErrWindows())
 		win_msg (buf);
 	else PrintCon (buf);
-	delete buf;
+	LOG_DEL; delete buf;
 }
 
 void

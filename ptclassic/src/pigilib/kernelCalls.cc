@@ -1,3 +1,4 @@
+static const char file_id[] = "kernelCalls.cc";
 /* 
 Version identification:
 $Id$
@@ -165,8 +166,8 @@ KcDomainOf(char* name) {
 // Delete the universe and make another
 extern "C" void
 KcClearUniverse(const char* name) {
-	delete universe;
-	universe = new InterpUniverse(name);
+	LOG_DEL; delete universe;
+	LOG_NEW; universe = new InterpUniverse(name);
 	currentGalaxy = universe;
 	LOG << "(reset)\n";
 	LOG << "# Creating universe '" << name << "'\n";
@@ -270,7 +271,7 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	}
 	else galTarget = 0;
 	saveGalaxy = currentGalaxy;
-	currentGalaxy = new InterpGalaxy(galname);
+	LOG_NEW; currentGalaxy = new InterpGalaxy(galname);
 	currentGalaxy->setBlock(galname, saveGalaxy);
 	// Set the domain of the galaxy
 	return currentGalaxy->setDomain(domain);
@@ -318,8 +319,8 @@ KcRun(int n) {
 extern "C" void
 KcEditSeed(int n) {
  	LOG << "(seed " << n << ")\n";
-	if (gen) delete gen;
-	gen = new ACG(n);
+	LOG_DEL; if (gen) delete gen;
+	LOG_NEW; gen = new ACG(n);
 }
 
 /* 5/17/90
@@ -499,7 +500,7 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 	       are nonsettable, we temperarily requests n ParamStructs
 	       at tempArray. 
 	    */
-	    ParamType* tempArray = new ParamStruct[n];
+	    LOG_NEW; ParamType* tempArray = new ParamStruct[n];
 	    if (!tempArray) {  // Out of memory error
 		return FALSE;
 	    }
@@ -519,14 +520,14 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 	       to pListPtr->array.
 	    */
 	    if (j) {
-		pListPtr->array = new ParamStruct[j];
+		LOG_NEW; pListPtr->array = new ParamStruct[j];
 		if (!pListPtr->array) { // out of memory error
 		    return FALSE;
 		}
 		for (i = 0; i < j; i++)
 		    pListPtr->array[i] = tempArray[i];
 	    }
-	    delete tempArray;
+	    LOG_DEL; delete tempArray;
 	}
 	pListPtr->length = j;
 	return TRUE;
@@ -621,7 +622,7 @@ KcProfile (char* name) {
 			accum_string (" ");
 		}
 		else accum_string ("Wormhole: ");
-		delete msg;
+		LOG_DEL; delete msg;
 		accum_string (name);
 		accum_string ("\n");
 	}
