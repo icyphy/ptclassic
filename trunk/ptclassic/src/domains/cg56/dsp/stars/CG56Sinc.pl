@@ -56,11 +56,11 @@ the range $(-0.22, 1.0)$.
 ; sin(x)/x = a + x^2 (b + c x^2)
 	move	$ref(input),x0
 	move	$ref(b),b                ; B=b
-	mpyr	x0,x0,a     $ref(c),x1   ; A=x^2  X1=c
+	mpy	x0,x0,a     $ref(c),x1   ; A=x^2  X1=c
 	move	a,y0                     ; Y0=x^2
-	macr	x1,y0,b     $ref(a),a    ; B=b+cx^2  A=a
+	mac	x1,y0,b     $ref(a),a    ; B=b+cx^2  A=a
 	move	b,x0                     ; X0=b+cx^2
-	macr	x0,y0,a                  ; A=a+x^2(b+cx^2)
+	macr	y0,x0,a                  ; A=a+x^2(b+cx^2)
 	asl	a
 	move	a,$ref(output)           
 	}

@@ -2,7 +2,7 @@ defstar {
 	name { RampInt }
 	domain { CG56 }
 	desc { Integer Ramp Generator }
-	version { $Id$ }
+	version { @(#)CG56RampInt.pl	1.2	2/27/96 }
 	author { Luis Javier Gutierrez and David G. Messerschmitt }
 	copyright{
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -25,12 +25,14 @@ integer if \fIsaturation\fR is "YES".
 		type { int }
 		default { 1 }
 		desc { Increment from one sample to the next }
+		attributes{ A_YMEM|A_CONSTANT }
 	}
 	state {
 		name { value }
 		type { int }
 		default { 0 }
 		desc { initial value output by RampInt }
+		attributes{ A_YMEM|A_CONSTANT }
 	}
 	state {
 		name { saturation }
@@ -60,7 +62,10 @@ integer if \fIsaturation\fR is "YES".
 	}
         codeblock(init) {
 	move	$ref(sum),a		; a holds the last sum
-	move	#$val(step),x0		; x0 is the step
+	move	$ref(step),x0		; x0 is the step
+; can't use move #$val(step),x0 because move immediate instructions
+; load 8 bit # in 8 most significant bits of X0 so if step is 8 
+; X0 will be 10000..0 instead of 0...01000
         }
         codeblock(add) {
 	add	x0,a	a,$ref(output)		; output last sum
