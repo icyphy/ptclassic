@@ -667,8 +667,8 @@ proc ed_Apply {facet number} {
    if $changeFlag {
 	ptkSetParams $facet $number $newParamArray
 	set paramArray($facet,$number) $newParamArray
-	puts "New: $newParamArray"
-   } else {puts "Old: $newParamArray"}
+#	puts "New: $newParamArray"
+   }
 }
 
 # **ed_NextEntry
