@@ -44,8 +44,8 @@ code segments.
 
 Since all code generation domains depends on the SDF domain, and 
 the same routine is needed by a specialized loop scheduler in the SDF
-domain ($(PTOLEMY)/src/domains/sdf/loopScheduler), the source of APEG 
-generation is placed in $(PTOLEMY)/src/domains/sdf/kernel.
+domain (\$PTOLEMY/src/domains/sdf/loopScheduler), the source of APEG 
+generation is placed in \$PTOLEMY/src/domains/sdf/kernel.
 
 An APEG graph (an ExpandedGraph class) consists of EGNodes and 
 EGGates. Class EGNode represents
@@ -506,8 +506,9 @@ invocations are traversed master by master.
 \node Parallel Schedulers
 \chapter{Parallel Schedulers}
 
-Base classes for parallel schedulers can be found in $(PTOLEMY)/src/domains/
-cg/parScheduler. All parallel schedulers use an APEG as the input. The
+Base classes for parallel schedulers can be found in 
+\$PTOLEMY/src/domains/cg/parScheduler.
+All parallel schedulers use an APEG as the input. The
 APEG for parallel schedulers is called ParGraph, which is derived from
 class ExpandedGraph. Class ParNode, derived from class EGNode, is a node
 in a ParGraph.
@@ -1869,7 +1870,7 @@ Returns the ParNode in the list.
 Dynamic Level Scheduling is one of the list scheduling algorithm where
 the priority of a node is not fixed during scheduling proceeds
 (\pxref{References}). The scheduling algorithm is implemented in
-$(PTOLEMY)/src/domains/cg/dlScheduler. All classes in that directory
+\$PTOLEMY/src/domains/cg/dlScheduler. All classes in that directory
 are derived from the base parallel scheduling classes described 
 above in this chapter.
 For example, DLNode class is derived from class ParNode, and redefines
@@ -2203,7 +2204,7 @@ is runnable at time \var{start}.
 Hu's level scheduling algorithm is a simple list scheduling algorithm, in
 which a node is assigned a fixed priority. No communication overhead is
 considered in the scheduling procedure. 
-The code lies in $(PTOLEMY)/src/domains/cg/HuScheduler. 
+The code lies in \$PTOLEMY/src/domains/cg/HuScheduler. 
 All classes except HuScheduler class in this directory 
 are derived from the classes for the dynamic level schedulers.
 
@@ -3124,7 +3125,7 @@ return just one of them.
 \chapter{Base Classes for Code Generation}
 
 This chapter explains the basic classes for code generation in
-$(PTOLEMY)/src/domains/cg/kernel directory. We do not cover all classes
+\$PTOLEMY/src/domains/cg/kernel directory. We do not cover all classes
 in that directory. We will concentrate on how to organize the code by
 which methods.
 
@@ -3321,14 +3322,14 @@ file to put a text. In a CodeBlock, the programmer uses the following macros
 to access the star variables without worrying about resource managements or
 name conflicts:
 
-$val(\var{name})			Value of a state
-$size(\var{name})			Buffer size of a state or a porthole
-$ref(\var{name})			Reference to a state or a porthole
-$ref(\var{name},\var{offset})		Reference with offset
-$label(\var{name})			Unique label inside a codeblock
-$codeblockSymbol(\var{name})		Another name for $label
-$starSymbol(\var{name})			Unique label inside a star
-$sharedSymbol(\var{list},\var{name})	Unique label for set list, name pair
+\$val(\var{name})			Value of a state
+\$size(\var{name})			Buffer size of a state or a porthole
+\$ref(\var{name})			Reference to a state or a porthole
+\$ref(\var{name},\var{offset})		Reference with offset
+\$label(\var{name})			Unique label inside a codeblock
+\$codeblockSymbol(\var{name})		Another name for \$label
+\$starSymbol(\var{name})			Unique label inside a star
+\$sharedSymbol(\var{list},\var{name})	Unique label for set list, name pair
 
 These macros are resolved after resources are allocated or unique symbols are
 generated. A CodeBlock defined in a CGStar is put to a CodeStream of
@@ -3367,7 +3368,7 @@ virtual char substChar() const;
 
 This method is a virtual protected method of the CGStar class to return the
 special character that introduces a macro in a code block. In the CGStar
-class, it returns ''$''. 
+class, it returns ''\$''. 
 
 \begin{example}
 virtual StringList expandMacro(const char* \var{func}, const StringList& \var{argList});
@@ -3396,7 +3397,7 @@ virtual StringList expandRef(const char* \var{name});
 virtual StringList expandRef(const char* \var{name}, const char* \var{offset});
 \end{example}
 
-These methods expands $val, $size, $ref, and $ref2 macros. We will redefine
+These methods expands \$val, \$size, \$ref, and \$ref2 macros. We will redefine
 the virtual methods in the derived classes. Particularly, we have to redefine
 the last two methods in the derived classes because in the CGStar class they
 generate error messages. The other macros deal with unique symbols in a
@@ -3502,7 +3503,7 @@ unique symbol. Otherwise, it creates a unique symbol with that name and
 puts it into the list.
 
 Recall that the CGStar class has two SymbolLists. The macros,
-$codeblockSymbol, $label, and $starSymbol, are resolved by \code{lookUp}
+\$codeblockSymbol, \$label, and \$starSymbol, are resolved by \code{lookUp}
 method of the \code{codeblockSymbol} and \code{starSymbol}, based on
 the scope of the symbol. If the symbol already exists in the SymbolList,
 it returns that unique symbol. Otherwise, it creates a unique symbol
@@ -3544,7 +3545,7 @@ void initialize();
 \end{example}
 
 Now, we can explain how to expand the last macro defined in the CGStar class:
-$sharedSymbol. The first argument of the macro determines the StringList
+\$sharedSymbol. The first argument of the macro determines the StringList
 and the second argument accesses the unique string in that StringList. It is
 done by calling the following protected method in the CGStar class.
 
@@ -3705,8 +3706,8 @@ int forkType() const;
 \end{example}
 
 This public method indicates the type of the current CGGeodesic. If it
-is at a Fork input, it is \code{F_SRC}. If it is at a Fork output, it is
-\code{F_DEST}.
+is at a Fork input, it is \code{F\_SRC}. If it is at a Fork output, it is
+\code{F\_DEST}.
 
 \begin{example}
 int forkDelay() const;
@@ -3716,7 +3717,7 @@ This method returns the amount of delay from the current Geodesic up to
 the fork buffer that this Geodesic refers to. If it is not associated
 with a fork buffer, it returns 0.
 
-We do not allocate a buffer to a CGGeodesic if it is \code{F_DEST}.
+We do not allocate a buffer to a CGGeodesic if it is \code{F\_DEST}.
 
 \begin{example}
 int localBufSize() const;
@@ -3733,7 +3734,7 @@ virtual int internalBufSize() const;
 \end{example}
 
 This method returns 0 with an error message if the schedule has not
-yet been run. If this Geodesic is a \code{F_SRC}, the minimum size
+yet been run. If this Geodesic is a \code{F\_SRC}, the minimum size
 is set to the maximum buffer requirements over all fork destinations.
 If there are delays or old values are used, we may want to use a
 larger size so that compile-time indexing is supportable. The buffer size
@@ -3785,7 +3786,7 @@ int display(const StringList& \var{stuff}, const char* \var{filename} = NULL);
 
 This method is defined in file CGDisplay.h. It displays a given string list
 (usually a code), \var{stuff}, using an editor, which is determined by
-an environment variable \code{PT_DISPLAY}. Two examples are \code{vi} and
+an environment variable \code{PT\_DISPLAY}. Two examples are \code{vi} and
 \code{xedit}. The the file name is given, the code is written to that file.
 If error occurs, return FALSE.
 
@@ -4610,7 +4611,7 @@ virtual StringList sanitizedFullName(const NamedObj& \var{b}) const;
 
 The first method takes a string argument and modifies it with a valid
 C++ identifier. If the string contains a non-alphanumeric character, it
-will replace it with '_'. If the string stars with a numeral, it
+will replace it with '\_'. If the string stars with a numeral, it
 prepends 'x' at the beginning. The second method calls the first method
 with the name of the argument object. The third method generates
 an identifier for the argument object that will be placed in \code{struct}
@@ -4838,7 +4839,7 @@ While class CGMultiTarget is the base multiprocessor target for all
 code generation domains, either homogeneous or heterogeneous, it
 models a fully-connected multiprocessor target. In the target list
 in pigi, "FullyConnected" target refers to this target. It is defined in
-$(PTOLEMY)/src/domains/cg/targets directory. It has a constructor with three
+\$PTOLEMY/src/domains/cg/targets directory. It has a constructor with three
 argument like its base class, MultiTarget. 
 
 To specify child targets, this class has the following three states.
@@ -4908,7 +4909,7 @@ StringState filePrefix;
 \end{example}
 
 Indicates the prefix of the file name generated for each processor.
-By default, it is set "code_proc", thus creating code_proc0, code_proc1, etc
+By default, it is set "code\_proc", thus creating code\_proc0, code\_proc1, etc
 for code files of child targets.
 
 \begin{example}
@@ -5285,7 +5286,7 @@ in all domains.
 
 In this chapter, we will explain the current implementation of C code
 generation domain. The source code can be found 
-$(PTOLEMY)/src/domains/cgc/kernel
+\$PTOLEMY/src/domains/cgc/kernel
 directory. We follow the general framework for code generation defined in
 CG kernel directory. 
 
@@ -5361,8 +5362,8 @@ If there are delays, or initial samples, on the arc, these samples are placed
 at the end of the buffer. The offset pointer of a
 porthole indicates the location of the last sample the next firing of its
 parent star will produce or consume. It is compatible with the SDF simulation
-domain: \code{$ref(porthole,num)} in CGC stars is now
-equivalent to \code{porthole%num} in SDF stars. 
+domain: \code{\$ref(porthole,num)} in CGC stars is now
+equivalent to \code{porthole\%num} in SDF stars. 
 We can set the offset pointer of an output porthole manually by the following
 public method of CGCPortHole class. 
 
@@ -5662,11 +5663,11 @@ StringList sanitizedFullName(const NamedObj& \var{b}) const;
 \end{example}
 
 In this method, the argument object is a porthole or a state of a star.
-We prefix 'g' followed by the galaxy index, followed by "_", followed
-by the name of the star, followed by another '_', followed by the star
-index, followed by yet another '_' to the name of the object. For example,
+We prefix 'g' followed by the galaxy index, followed by "\_", followed
+by the name of the star, followed by another '\_', followed by the star
+index, followed by yet another '\_' to the name of the object. For example,
 if star A has a state xx and the star index is 2 and the galaxy index is 1,
-the name of the state becomes "g1_A_2_xx".
+the name of the state becomes "g1\_A\_2\_xx".
 
 \begin{example}
 StringList correctName(const NamedObj& \var{b});
@@ -5747,7 +5748,7 @@ Otherwise, it declare a regular buffer.
 is not used and the size of buffer is greater than 1 . Portholes
 will use these index pointers to locate the buffer position. For a regular
 buffer, we declare an index pointer, named after the buffer name appended by
-"_ix". The name of index porthole is given by \code{offsetName} method 
+"\_ix". The name of index porthole is given by \code{offsetName} method 
 of CGCTarget class.
 
 \begin{example}
@@ -5755,18 +5756,18 @@ StringList offsetName(const CGCPortHole* \var{p});
 \end{example}
 
 This is a public method to assign an index pointer to the argument porthole.
-It appends '_' followed by "ix" at the end of the porthole name, by calling
+It appends '\_' followed by "ix" at the end of the porthole name, by calling
 the following public method of CGCTarget class:
 
 \begin{example}
 StringList appendedName(const NamedObj& \var{p}, const char* \var{add});
 \end{example}
 
-This  method is used to append '_' followed by
+This  method is used to append '\_' followed by
 \var{add} to the name of the object \var{p}.
 
 (4) Finally, we declare referenced states. A State is called \emph{referenced}
-only when we use $ref macro for the state at most once. CGCStar class
+only when we use \$ref macro for the state at most once. CGCStar class
 has the following members for referenced states:
 
 \begin{example}
@@ -5992,7 +5993,7 @@ StringList expandRef(const char* \var{name});
 StringList expandRef(const char* \var{name}, const char* \var{offset});
 \end{example}
 
-The above methods resolve macro $ref. The \var{name} argument is a
+The above methods resolve macro \$ref. The \var{name} argument is a
 state name or a porthole name. If it is a state name, we put the state
 in the \code{referencedStates} list. In the second method, the second 
 argument is the offset of the first argument (state or porthole). It can
