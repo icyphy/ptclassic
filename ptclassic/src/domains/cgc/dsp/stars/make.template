@@ -55,6 +55,7 @@ INCL = -I$(CGCSTARSDIR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) \
 # put base stars first, i.e., those that other stars are derived from
 PL_SRCS= \
  CGCBiquad.pl \
+ CGCFastFIR.pl \
  CGCFIR.pl \
  CGCGoertzelBase.pl \
  CGCLMS.pl \
