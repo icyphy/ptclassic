@@ -1,9 +1,9 @@
 defstar {
-	name {EtherSend}
-	domain {DE}
-	derivedfrom { DEEther }
+	name { EtherSend }
+	domain { DE }
+	derivedfrom { Ether }
 	version { $Id$ }
-	author { E. A. Lee and T. Parks }
+	author { Edward A. Lee and Tom M. Parks }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
