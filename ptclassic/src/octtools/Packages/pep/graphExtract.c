@@ -37,6 +37,7 @@ static char SccsId[]="$Id$";
 #include "fang.h"
 #include "harpoon.h"
 #include "tap.h"
+#include "errtrap.h"
 #include "pepint.h"
 
 #define  NODE_ALLOC    300;
@@ -139,7 +140,7 @@ octObject   *net;
                 TGener;           /*    terminal generator  */
   octObject     term1, term2;     /*    terminal  */
   octObject     path;             /*    path segment  */
-  double        res, pepPathRes();
+  double        pepPathRes();
   int           i;                /*    Loop counter  */
 
 /*   Initialize the graph, if it does not exist already  */
