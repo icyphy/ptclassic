@@ -30,6 +30,7 @@ $Id$
 
 class FixState : public FloatState {
 public:
+
 	void initialize();
 
 	const char* type() const; // return "FIX"
@@ -41,6 +42,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "FixState";}
 
 	State* clone () const; // { return new FixState;}
 };

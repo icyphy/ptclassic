@@ -64,6 +64,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "Star";}
 protected:
 	Target* targetPtr;
 private:

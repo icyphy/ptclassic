@@ -51,6 +51,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "ComplexState";}
 
 	State* clone () const;//  {return new ComplexState;}
 

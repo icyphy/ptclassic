@@ -89,6 +89,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "Universe";}
 
 protected:
 	// print, possibly recursively
