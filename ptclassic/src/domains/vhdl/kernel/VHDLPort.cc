@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLPort.h"
+#include "Error.h"
 
 // Constructors.
 VHDLPort :: VHDLPort() {
@@ -56,6 +57,27 @@ VHDLPort* VHDLPort :: newCopy() {
   newPort->mapping = this->mapping;
 
   return newPort;
+}
+
+void VHDLPort :: connect(VHDLSignal* newSignal) {
+  // If given a valid signal, connect it to this port.
+  if (newSignal) {
+    signal = newSignal;
+  }
+  else {
+    Error::error(*this, "Connecting newSignal is NULL");
+  }
+
+  // If this is an OUT port, set the signal's source.
+  if (!strcmp(direction,"OUT")) {
+    // Make sure there isn't already a source for the signal.
+    if (!(newSignal->getSource())) {
+      newSignal->setSource(this);
+    }
+    else {
+      Error::error(*this, "Attempt to drive newSignal that already has a source");
+    }
+  }
 }
 
 // Class identification.
