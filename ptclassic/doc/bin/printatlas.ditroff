@@ -1,0 +1,153 @@
+#! /bin/csh -f
+# $Id$
+
+# Create a Star Atlas entry.  Assumed to be started in
+# the "doc" subdirectory of a domain.
+
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
+
+# Command line options:
+#
+#	-index		Generate an index only, print nothing.
+#
+#	-preview	Preview domain via xditview, or nroff if DISPLAY
+#			environment variable isn't set.
+#
+# Remaining arguments are taken to be files to print options.
+#
+# An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
+
+# The following files are assumed to present in the documentation directory:
+#	startitle - The title page for the stars section.
+#	stars	  - A directory with star documentation
+#	demotitle - The title page for the demo section
+#	demos	  - A directory with demo documentation.
+
+# Index information is appended to the file $HOME/Almagest.index,
+# or to whatever ALAMAGEST_INDEX is set to.
+
+# On interrupt, remove temporary files
+onintr catch
+
+if (!($?PTOLEMY)) then
+	setenv PTOLEMY ~ptolemy
+endif
+
+# File structure information:
+set dirheader = $PTOLEMY/doc/headers
+set printcommand = ditroff
+set printoptions = "-me -tbl -eqn -P$PRINTER"
+set contentscmd = $PTOLEMY/doc/bin/contents
+set previewcommand = "xditview -"
+set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
+
+# Variables
+set indexonly = 0
+set preview = 0
+set icons = 0
+
+if (!($?ALMAGEST_INDEX)) then
+	setenv ALMAGEST_INDEX $HOME/Almagest.index
+endif
+
+while ($#argv)
+	switch ($argv[1])
+		case -index:
+			set indexonly = 1
+			shift
+			breaksw
+		case -preview:
+			set preview = 1
+			shift
+			breaksw
+		case -ps:
+			set ps = 1
+			shift
+			breaksw
+		case -*:
+			set printoptions = ($printoptions $argv[1])
+			shift
+			breaksw
+		default:
+			cd $1
+			shift
+			breaksw
+	endsw
+end
+
+
+soelim $dirheader/shared $dirheader/domain \
+	init title > /tmp/pt$$
+
+if ( -d targets ) then
+        if (-e targettitle) then
+                # set type for this section
+                echo '.ds TY "target' >> /tmp/pt$$
+                cat targettitle >> /tmp/pt$$
+        endif
+        cd targets
+        # print all targets
+        cat -s * >> /tmp/pt$$
+        cd ..
+endif
+
+if ( -d stars ) then
+	if (-e starstitle) then
+		# set type for this section
+		echo '.ds TY "star' >> /tmp/pt$$
+		cat starstitle >> /tmp/pt$$
+	endif
+	cd stars
+	# print all stars, sorted in dictionary order
+	foreach file (`ls -1 -d * | sort -f -d`)
+		cat -s $file >> /tmp/pt$$
+	end
+	cd ..
+endif
+
+if ( -d demos ) then
+	if (-e demotitle) then
+		# set type for this section
+		echo '.ds TY "demo' >> /tmp/pt$$
+		cat demotitle >> /tmp/pt$$
+	endif
+	cd demos
+	# print all demos
+	cat -s * >> /tmp/pt$$
+	cd ..
+endif
+
+if ($indexonly) then
+	# if only generating index, add -t option and throw away the output
+	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+else if ($preview) then
+	# if previewing, use either X windows or nroff
+	if ($?DISPLAY) then
+		$printcommand $printoptions -t /tmp/pt$$ | $previewcommand
+	else
+		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
+		more /tmp/ptnr$$
+	endif
+else if ($ps) then
+	# generate a postscript file to /tmp only.  nothing is printed
+        ($printcommand $printoptions -t /tmp/pt$$ | psdit > \
+                 /tmp/pt.$$.ps) >& /tmp/index$$
+        # $contentscmd /tmp/index$$
+        # $printcommand $printoptions -t $dirheader/shared title | psdit > \
+        #         /tmp/pt.$$.B.ps
+else
+	# otherwise just print it out
+	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
+	$contentscmd /tmp/index$$
+	$printcommand $printoptions $dirheader/shared title
+endif
+if (-r /tmp/index$$) cat /tmp/index$$ >>! $ALMAGEST_INDEX
+# /bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+exit 0
+
+catch:
+        # prevent the "no match" error message if there are no temporary files
+        set nonomatch
+	/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+        exit 1
