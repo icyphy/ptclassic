@@ -34,7 +34,35 @@ static char SccsId[]="$Id$";
 #include "tap.h"
 #include "symlib.h"
 
+
+      
+static int
+printProp(prop)
+octObject *prop;
+{
+    (void) printf("\t\t%s=", prop->contents.prop.name);
+    switch (prop->contents.prop.type) {
+	case OCT_INTEGER:
+	(void) printf("%ld\n", (long)prop->contents.prop.value.integer);
+	break;
+
+	case OCT_REAL:
+	(void) printf("%g\n", prop->contents.prop.value.real);
+	break;
+
+	case OCT_STRING:
+	(void) printf("%s\n", prop->contents.prop.value.string);
+	break;
+
+	default:
+	(void) printf("...\n");
+	break;
+    }
+    return 1;
+}
+
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char **argv;
@@ -423,31 +451,5 @@ char **argv;
 
     OH_ASSERT(octCloseFacet(&facet));
 
-    exit(0);
-}
-
-      
-static int
-printProp(prop)
-octObject *prop;
-{
-    (void) printf("\t\t%s=", prop->contents.prop.name);
-    switch (prop->contents.prop.type) {
-	case OCT_INTEGER:
-	(void) printf("%d\n", prop->contents.prop.value.integer);
-	break;
-
-	case OCT_REAL:
-	(void) printf("%g\n", prop->contents.prop.value.real);
-	break;
-
-	case OCT_STRING:
-	(void) printf("%s\n", prop->contents.prop.value.string);
-	break;
-
-	default:
-	(void) printf("...\n");
-	break;
-    }
-    return 1;
+    return 0;
 }
