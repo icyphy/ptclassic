@@ -63,10 +63,10 @@ void AsmTarget :: initStates() {
 	runDes     << "Download and run on " << fullName();
  	addState(displayFlag.setState("Display code?",this,"YES",
 		"display code if YES."));
-	addState(runFlag.setState(savestring(runPrompt),this,"NO",
-		savestring(runDes), A_NONSETTABLE|A_NONCONSTANT));
-	addState(targetHost.setState(savestring(hostPrompt),this, 
-		"localhost", savestring(hostDes), 
+	addState(runFlag.setState(hashstring(runPrompt),this,"NO",
+		hashstring(runDes), A_NONSETTABLE|A_NONCONSTANT));
+	addState(targetHost.setState(hashstring(hostPrompt),this, 
+		"localhost", hashstring(hostDes), 
 		A_NONSETTABLE|A_NONCONSTANT));
 	// change default value of destDirectory
 	destDirectory.setInitValue("~/DSPcode");
