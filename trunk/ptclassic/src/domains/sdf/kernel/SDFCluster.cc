@@ -226,6 +226,7 @@ SDFCluster* SDFClusterGal::fullSearchMerge() {
 		SDFClustPortIter nextPort(*c);
 		SDFClustPort *p;
 		while ((p = nextPort++) != 0) {
+			if (p->far() == 0) continue;
 			// check requirement 1: same rate and no delay
 			if (!p->fbDelay() &&
 			    p->numIO() == p->far()->numIO()) {
@@ -365,7 +366,7 @@ int SDFClusterGal :: markFeedForwardDelayArcs() {
 		SDFClustPortIter nextP(*c);
 		SDFClustPort* p;
 		while ((p = nextP++) != 0) {
-			if (p->isItInput()) continue;
+			if (p->isItInput() || p->far() == 0) continue;
 			if (p->numTokens() == 0) continue;
 			// this port has a delay on the arc.
 			SDFCluster* peer = p->far()->parentClust();
@@ -418,6 +419,7 @@ int SDFClusterGal::loopTwoClusts() {
 	SDFClustPort* p;
 	int r1 = c1->reps();
 	while ((p = nextPort++) != 0) {
+		if (p->far() == 0) continue;
 		if (p->numIO() == p->far()->numIO()) return FALSE;
 		if (p->fbDelay() && p->numTokens() < p->numIO()*r1)
 			return FALSE;
@@ -642,7 +644,7 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 	SDFClustPort* cp;
 	while ((cp = next++) != 0) {
 		SDFClustPort* pFar = cp->far();
-		if (pFar->parent() == this) {
+		if (pFar && pFar->parent() == this) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
 			SDFClustPort* p = pFar->inPtr();
@@ -694,7 +696,8 @@ int SDFClusterGal::isTree() {
 			SDFClustPortIter nextPort(*c);
 			SDFClustPort* p;
 			while ((p = nextPort++) != 0) {
-				if (p->far()->parentClust()->visited())
+				if (p->far() == 0 ||
+				    p->far()->parentClust()->visited())
 					continue;
 				if (p->isItInput()) nI++;
 				else nO++;
@@ -730,7 +733,7 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	SDFClustPort* p;
 	SequentialList zap;
 	while ((p = nextbp++) != 0)
-		if (p->far()->parent() == b) zap.put(p);
+		if (p->far() && p->far()->parent() == b) zap.put(p);
 	// zap is the list of connections between the two clusters.  These
 	// become internal connections so we zap them from both bags' lists
 	// of external pointers.
@@ -862,6 +865,7 @@ SDFCluster* SDFCluster::mergeCandidate() {
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0) {
 		SDFClustPort* pFar = p->far();
+		if (pFar == 0) continue;
 		SDFCluster* peer = pFar->parentClust();
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
