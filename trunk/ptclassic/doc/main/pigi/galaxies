@@ -32,6 +32,7 @@ into schematics just like stars.
 .BU
 Use \fIopen-facet\fP (or ``F'') to open the ``singen:schematic''
 you created earlier (using ``cp -r'').
+You must replace the default name ``untitled'' with ``singen''.
 .BU
 In the ``singen:schematic'' window, delete the Xgraph star and
 the wire attached to it.
@@ -66,17 +67,26 @@ Create an icon:
 Place cursor in ``singen:schematic'' window.
 .LE
 Execute \fImake-schem-icon\fP in the Pigi ``Extend'' menu.
+.IE make-schem-icon
 .LE
-Fill in the dialog box as follows:
+The dialog box should contain:
 .(c
 Palette name:  ./user.pal
 .)c
+This specifies the name of the palette that will contain your icon.
+By convention, we usually put galaxy icons in the palette called
+``user.pal'' in the current directory.
+Hence, this is the default name.
 .LE
 Click ``OK'' and wait until \fImake-schem-icon\fP is done.
+VEM informs you that it is done with a message in the VEM console
+window, which is likely to be buried by now.
+You must find it and bring it to the surface.
 .BU
 Open the palette called ``user.pal'' using \fIopen-palette\fP.  The
 newly created galaxy icon should appear in this palette along with
 a bright yellow dot called a \fBcursor\fP.  A \fBcursor\fP
+.IE cursor
 distinguishes a palette from other types of facets and it determines
 where the next icon will be placed.
 .BU

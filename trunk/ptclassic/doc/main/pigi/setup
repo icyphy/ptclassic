@@ -181,6 +181,10 @@ A useful command, defined in ~ptolemy/.cshrc, is ``term''.
 Typing this in any window, followed by a carriage return,
 opens a new terminal window with a reasonable size and color.
 You may change the size and location in the usual way.
+.UH "Removing windows."
+Most windows, including all pigi windows,
+can be removed by typing control-D with
+the mouse cursor in the window.
 .H3 "Resources"
 .pp
 A \fIresource\fR in X is a parameter 
