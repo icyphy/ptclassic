@@ -85,9 +85,9 @@ LINKSTRIPFLAGS=-Wl,-s
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
+LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
+LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR)
 
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
