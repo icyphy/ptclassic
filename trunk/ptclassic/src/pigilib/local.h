@@ -36,7 +36,7 @@ This is a local include file for useful macros and definitions.
 
 #include "sol2compat.h"		/* define boolean */
 #include "compat.h"		/* define architecture settings */
-#include "ansi.h"		/* define ARGS, EXTERN, and HAS_STDARG */
+#include "ansi.h"		/* define ARGS, OCT_EXTERN, and HAS_STDARG */
 
 #ifdef HAS_STDARG
 #include <stddef.h>
