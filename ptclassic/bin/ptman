@@ -1,0 +1,104 @@
+#!/bin/csh -f
+
+# Print a man page for a Ptolemy star.  Star can have its domain prepended to
+# it (e.g., SDFLMS) or not (e.g., LMS).  Looks through all the domains in
+# ~ptolemy/src/domains unless the PTMAN path is set to a subset.  If DISPLAY
+# is set, invokes xditview, otherwise uses nroff -- unless the -P option is
+# specified, which causes the page to be printed.
+
+set domaindir = ~ptolemy/src/domains
+set headers = "~ptolemy/doc/headers/domain ~ptolemy/doc/headers/shared"
+set all = 0
+set files = ""
+set exact = 0
+
+if ($#argv < 1) then
+usage:
+	echo "usage: $0 [-a] [-n] [-P|-Pprinter] star [...]"
+	exit 1
+endif
+
+# Parse command line arguments
+set done = 0
+while ($done == 0 && $#argv > 0)
+	switch ($1) 
+	case -a:	# Do all stars, not just the first one
+		set all = 1
+		shift
+		breaksw
+	case -P:	# Use default printer environment variable
+		set printer = -P${PRINTER}
+		shift
+		breaksw
+	case -P*:	# Use printer specified on command line
+		set printer = $1
+		shift
+		breaksw
+	case -n:	# Use nroff
+		unsetenv DISPLAY
+		shift
+		breaksw
+	case -x:	# Exact matches only, don't prepend domain name
+		set exact = 1
+		shift
+		breaksw
+	case -*:
+		echo "unknown option $1"
+		exit 1
+	default:
+		set done = 1
+		break
+	endsw
+end
+if ($#argv < 1) goto usage
+
+# Find the star
+cd $domaindir
+if ($?PTMANPATH) then
+	set domains = $PTMANPATH
+else
+	set domains = `ls`
+endif
+foreach star ( $argv )
+	set domfiles = ""
+	foreach domain ( $domains )
+		if (-e $domain/doc/stars/${star}.t) then
+			set domfiles = "$domfiles $domain/doc/stars/${star}.t"
+			if ($all) then
+				continue
+			else
+				break
+			endif
+		endif
+		# exact matches are expenses, don't do them if the used said so
+		if ($exact == 0) then
+			set capdomain = `echo $domain | tr a-z A-Z`
+			if (-e $domain/doc/stars/${capdomain}${star}.t) then
+				set domfiles = "$domfiles $domain/doc/stars/${capdomain}${star}.t"
+				if ($all) then
+					continue
+				else
+					break
+				endif
+			endif
+		endif
+	end
+	if ("$domfiles" == "") then
+		echo "No Ptolemy manual entry for $star"
+		continue
+	endif
+	set files = "$files $domfiles"
+end
+
+# Exit if we didn't find anything to print
+if ("$domfiles" == "") exit 1
+
+# Preview, nroff, or print it
+if ($?printer) then
+	soelim $headers $files | ditroff -me -eqn -tbl $printer
+else if ($?DISPLAY) then
+	soelim $headers $files | ditroff -me -eqn -tbl -t | \
+		xditview -resolution 100 -geometry 756x881 -
+else
+	soelim $headers $files | eqn | tbl | nroff -me | more
+endif
