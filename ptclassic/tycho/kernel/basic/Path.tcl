@@ -101,12 +101,18 @@ proc ::tycho::expandPath { path } {
     set path [string trim $path]
     if {[string first \$ $path] == 0} {
         global ::env
-        set slash [string first / $path]
-        if {$slash > 0} {
-            set envvar [string range $path 1 [expr {$slash-1}]]
-        } {
-            set envvar [string range $path 1 end]
-        }
+
+
+	set slash [string first / $path]
+	if {$slash > 0} {
+	    set envvar [string range $path 1 [expr {$slash-1}]]
+	} {
+	    set envvar [string range $path 1 end]
+	}		
+
+	set envvar [string range [lindex [file split $path] 0] 1 end]
+
+
         if [info exists env($envvar)] {
             set envval $env($envvar)
         } elseif {"$envvar" != "" && [uplevel #0 info exists $envvar]} {
@@ -116,6 +122,8 @@ proc ::tycho::expandPath { path } {
             # No such variable.
             error "No such variable: `$envvar' in the path `$path'."
         }
+
+
         if {$slash > 0} {
             set path [format "%s%s" $envval [string range $path $slash end]]
         } {
@@ -129,7 +137,7 @@ proc ::tycho::expandPath { path } {
                 error "Directory does not exist: $dir"
             }
             set tail [file tail $path]
-            set path "$dir/$tail"
+            set path [file join $dir $tail]
         }
     }
     # Get a consistent filename using "cd".  Note that this may not work
@@ -143,7 +151,7 @@ proc ::tycho::expandPath { path } {
             set path [pwd]
         } {
             cd [file dirname $path]
-            set path [format "%s/%s" [pwd] [file tail $path]]
+	    set path [file join [pwd] [file tail $path]]
         }
         cd $savedir
     }
@@ -433,14 +441,14 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
 #####################################################################
 #### tychoDir
 # Return the (abbreviated) path to the Tycho directory. In Unix,
-# this is ~/.tycho. If the directory does not exist, make it.
+# this is ~/.Tycho. If the directory does not exist, make it.
 # Note that the directory name will need to be passed to
 # <code>::tycho::expandPath</code> before being given to the
 # file system.
 #
 proc ::tycho::tychoDir {} {
     global tcl_platform
-    set dotTycho [file join [glob ~] .tycho]
+    set dotTycho [file join [glob ~] .Tycho]
 
     if {![file exists $dotTycho]} {
 	::tycho::mkdir $dotTycho
@@ -450,7 +458,7 @@ proc ::tycho::tychoDir {} {
                     exists by that name."
         }
     }
-    return [file join ~ .tycho]
+    return [file join ~ .Tycho]
 }
 
 #####################################################################
