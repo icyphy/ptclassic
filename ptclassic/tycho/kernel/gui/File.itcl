@@ -171,6 +171,9 @@ class ::tycho::File {
     # Save data to a crash recovery file.
     method saveCrash {}
 
+    # If the file is modified, then ask the user if they want to save it
+    method saveQuery { {areyousure {0}}}
+
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
 
@@ -867,6 +870,42 @@ body ::tycho::File::saveCrash {} {
 	set filename [file join [file dirname $file] $filename]
 	save $filename
     }    
+}
+
+#####################################################################
+#### saveQuery
+# If the file is marked as modified, then ask the user if they want to save it.
+# This method is especially useful if tycho is about to process a file
+# either by checking it in, or running a program on it etc.
+# If the optional argument `areyousure' is 1, and the user does not
+# save the file, then the user is asked if they are sure.  If they say 'no'
+# then a silent error is returned.
+# 
+# If the file was modified and was saved, return a 1.
+# If the file was modified, but not saved return a 0.
+# If the file was not modified, return a 1.
+# By checking the return value, we can skip processing if the user did
+# not save the file
+body ::tycho::File::saveQuery { {areyousure {0}}} {
+    if {[isModified] == 1} {
+        if {[::tycho::askuser \
+                "File `[filename]' has not been saved, Save it now?"]} {
+            save
+            return 1
+        } else {
+	    if {$areyousure == 0 } {
+		return 0
+	    } else {
+		if [::tycho::askuser \
+			"Are you sure you want to discard your changes (if any)?"] {
+		    return 1
+		} {
+		    ::tycho::silentError
+		}
+	    }
+        }
+    }
+    return 1
 }
 
 #####################################################################
