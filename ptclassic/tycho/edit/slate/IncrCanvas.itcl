@@ -180,8 +180,11 @@ class ::tycho::IncrCanvas {
     # Get the tags of an item
     method gettags {tag}
 
-    # Get the hierarchy tags of an item
-    method gethtags {id}
+    # Get the tags to give to children
+    method getchildtags {id}
+
+    # Get the tags to give to root children
+    method getrootchildtags {id}
 
     # Test if an item has a given tag
     method hastag {id tag}
@@ -593,17 +596,16 @@ body ::tycho::IncrCanvas::create* {tags type args} {
 # and options.
 #
 body ::tycho::IncrCanvas::createchild {parent type args} {
-    set t [lsearch -exact $args -tags]
-    if { $t != -1 } {
+    set indx [lsearch -exact $args -tags]
+    if { $indx != -1 } {
 	# Extract tags
 	set tags [lindex $args [expr $indx+1]]
 	set args [lreplace $args $indx [expr $indx+1]]
     } else {
 	set tags {}
     }
-    set ptags [$canvas gettags \
-	    [@scope ::tycho::$itemClass($parent) [list set primary($parent)]]]
-    eval [list createchild* $parent $ptags $tags $type] $args
+    eval [list createchild* $parent \
+            [getchildtags $parent] $tags $type] $args
 }
 
 #######################################################################
@@ -611,7 +613,7 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
 #
 # Create a child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# ComplexItem classes or as obtained by *gethtags*; the second
+# ComplexItem classes or as obtained by *getchildtags*; the second
 # is the additional tags of the new item.
 #
 body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
@@ -639,16 +641,15 @@ body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
 # and options.
 #
 body ::tycho::IncrCanvas::createrootchild {parent type args} {
-    set t [lsearch -exact $args -tags]
-    if { $t != -1 } {
+    set indx [lsearch -exact $args -tags]
+    if { $indx != -1 } {
 	set tags [lindex $args [expr $indx+1]]
 	set args [lreplace $args $indx [expr $indx+1]]
     } else {
 	set tags {}
     }
-    set ptags [$canvas gettags \
-	    [@scope ::tycho::$itemClass($parent) [list set primary($parent)]]]
-    eval [list createrootchild* $parent $ptags $tags $type] $args
+    eval [list createrootchild* $parent \
+    		[getrootchildtags $parent] $tags $type] $args
 }
 
 #######################################################################
@@ -656,7 +657,7 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
 #
 # Create a root child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# ComplexItem classes or as obtained by *gethtags*; the second
+# ComplexItem classes or as obtained by *getrootchildtags*; the second
 # is the additional tags of the new item.
 #
 body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
@@ -829,8 +830,8 @@ body ::tycho::IncrCanvas::focusin {} {
 #
 # Get the tags of an item. This method returns the tags explicitly given
 # to an item -- that is, tags used by IncrCanvas to manage complex
-# items and tags inherited from a parent item -- will not be included in
-# the result. To get those tags, use gethtags{}.
+# items and tags inherited from a parent item will not be included in
+# the result.
 #
 # Note that this routine works properly only if called with
 # a root simple item or a complex item as argument. If a simple
@@ -866,24 +867,35 @@ body ::tycho::IncrCanvas::gettags {tag} {
 }
 
 #######################################################################
-#### gethtags
+#### getchildtags
 #
-# Get the "hierarchy tags" of an item -- that is, the tags used internally
-# by the slate to manage the hierarchy of complex items. The
-# argument must be an item ID. If the item is a simple item, then
-# its tags are returned; if it is a complex item, then the tags
-# given to it by the slate are returned. These tags are those required
-# by the createchild*{} and createrootchild*{} methods.
+# Get the tags that need to be given to the child of the given
+# item. The argument must be the ID of a complex item. Use
+# this method if creating a series of child items with
+# the createchild*{} method.
 #
-body ::tycho::IncrCanvas::gethtags {id} {
-    # If a simple item, just return tags
-    if { [string match {[0-9]*} $id] } {
-	$canvas gettags $id
-    } else {
-	# If a complex item, get the tags from the primary
-	$canvas gettags \
-		[@scope ::tycho::ComplexItem [list set primary($id)]]
+body ::tycho::IncrCanvas::getchildtags {id} {
+    $canvas gettags \
+            [@scope ::tycho::ComplexItem [list set primary($id)]]
+}
+
+#######################################################################
+#### getrootchildtags
+#
+# Get the tags that need to be given to the child of the given
+# item that is also a "root" item. The argument must be the ID
+# of a complex item. Use this method if creating a series of
+# root child items with the createrootchild*{} method.
+#
+body ::tycho::IncrCanvas::getrootchildtags {id} {
+    set tags {}
+    foreach tag [$canvas gettags \
+            [@scope ::tycho::ComplexItem [list set primary($id)]]] {
+        if { [string match {[!_]*} $tag] } {
+            lappend tags $tag
+        }
     }
+    return $tags
 }
 
 #######################################################################
@@ -1005,12 +1017,12 @@ body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
 # can either be a tag or an id.
 #
 body ::tycho::IncrCanvas::move {tag x y} {
-    if { [string match {[_0-9]*} $tag } {
+    if { [string match {[_0-9]*} $tag] } {
 	# Move an item
 	$canvas move $tag $x $y
     } else {
 	# Find and move complex items
-	$canvas addtag temp all
+	$canvas addtag temp withtag $tag
 	foreach {_ id} [array get taggedItems $tag,*] {
 	    $canvas move $id $x $y
 	    $canvas dtag $id temp
@@ -1159,7 +1171,7 @@ body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
 # to search in.
 #
 # The method assumes that previously some (zero or more) items were
-# tagged with _tag_. It find items overlapping or enclosed by the
+# tagged with _tag_. It finds items overlapping or enclosed by the
 # given coordinates, and returns two lists: the first is the items
 # in the region that were not already tagged, and the second is the
 # items that were previously tagged and are no longer in the region.
@@ -1220,8 +1232,9 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 		if { ! [::info exists covered($root)] } {
 		    set covered($root) $tags
 		    # Add the tag to the complex item
-		    $canvas addtag $tag withtag $root
-		    set taggedItems($tag,$root) $root
+		    addtag $tag withtag $root
+                    # $canvas addtag $tag withtag $root
+		    # set taggedItems($tag,$root) $root
 		}
 	    }
 	}
@@ -1236,11 +1249,12 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 	    } else {
 		set root [string range [lindex $tags $t] 1 end]
 		if { ! [::info exists uncovered($root)] } {
-		    # Only add the item to the result if _all_ simple items
-		    # in the complex item are outside the region. Test for
-		    # this using the bounding box.
+		    # Only remove the item if _all_ simple items
+		    # in the complex item are outside the region.
+                    # Test for this using the bounding box of the
+                    # root tag.
 		    if { ! [eval ::tycho::Rectangle::overlap \
-			    $x0 $y0 $x1 $y1 [$canvas bbox $root]] } {
+			    $x0 $y0 $x1 $y1 [$canvas bbox !$root]] } {
 			set uncovered($root) $tags
 			$canvas dtag $root $tag
 			unset taggedItems($tag,$root)
@@ -1260,10 +1274,11 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 		set root [string range [lindex $tags $t] 1 end]
 		if { ! [::info exists covered($root)] } {
 		    if { [eval eval ::tycho::Rectangle::inside \
-			    [$canvas bbox $root] $x0 $y0 $x1 $y1] } {
+			    [$canvas bbox !$root] $x0 $y0 $x1 $y1] } {
 			set covered($root) $tags
-			$canvas addtag $tag withtag $root
-			set taggedItems($tag,$root) $root
+			addtag $tag withtag $root
+                        # $canvas addtag $tag withtag $root
+			# set taggedItems($tag,$root) $root
 		    }
 		}
 	    }
