@@ -533,6 +533,7 @@ void UniProcessor :: replaceWorms() {
 		}
 		subGal->removeBlock(*s);
 		subGal->addBlock(*worm, worm->name());
+		worm->setTarget(targetPtr);
 	}
 }
 
