@@ -426,6 +426,8 @@ char **typeNamePtr;
     } else if (strcmp(layerName, "anytypeColor") == 0 ||
 	       strncmp(layerName, ANYTYPE_COLOR, strlen(ANYTYPE_COLOR)) == 0) {
 	StrDup(typeNamePtr, "anytype");
+    } else if (strcmp(layerName, "packetColor") == 0) {
+	StrDup(typeNamePtr, "packet");
     } else { /* layer is nonstandard, i.e., not blueSolid, blueOutline, etc */
 	/* return as default type "float" */
 	StrDup(typeNamePtr, "float");
