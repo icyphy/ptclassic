@@ -128,6 +128,9 @@ if {![info exists ptolemy]} {
 
 ::tycho::_announce "TYCHO=$TYCHO"
 
+global ::tychofeature
+set tychofeature(java) 0
+
 global ::ptolemyfeature
 
 # ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
