@@ -86,8 +86,8 @@ public:
 	// destructor zaps all the member clusters (inherited)
 	~SDFClusterGal() {}
 
-	// partial destructor: use with caution. See notes in SDFCluster.cc.
-	void PartialDestructor();
+	// remove blocks from this galaxy without deallocating the blocks
+	void orphanBlocks();
 
 	// how many?
 	int numberClusts() const { return numberBlocks();}

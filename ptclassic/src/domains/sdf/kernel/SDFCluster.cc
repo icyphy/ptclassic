@@ -118,12 +118,9 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 	delete [] ptable;
 }
 
-// Partial destructor: deallocate sequental list and data members
-// Use this method with extreme care.  It assumes that the galaxy
-// cluster does not own its blocks, so only the SequentialList
-// holding the block pointers needs to be deallocated. -BLE
-void SDFClusterGal::PartialDestructor() {
-	// remove each block from galaxy list without deallocating it
+// remove blocks from this galaxy without deallocating the blocks.
+// It does deallocate the sequential list holding the block pointers. -BLE
+void SDFClusterGal::orphanBlocks() {
 	SDFClusterGalIter nextC(*this);
 	SDFCluster* c;
 	while ((c = nextC++) != 0) {
@@ -910,7 +907,7 @@ int SDFClusterBag::run() {
 SDFClusterBag::~SDFClusterBag() {
 	// empty b's galaxy's list of blocks if b doesn't own them
 	// to prevent them from being prematurely deleted -BLE
-	if (gal && !owner) gal->PartialDestructor();
+	if (gal && !owner) gal->orphanBlocks();
 	delete gal;
 	delete sched;
 }
