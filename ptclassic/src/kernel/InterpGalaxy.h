@@ -25,13 +25,20 @@ $Id$
 #include "StringList.h"
 
 // class for a list of Geodesics (or nodes)
-class NodeList : SequentialList {
+class NodeList : public SequentialList {
+	friend class NodeListIter;
 public:
 	void put(Geodesic& g) { SequentialList::put(&g);}
 	SequentialList::size;
-	SequentialList::reset;
-	Geodesic& operator ++ () { return *(Geodesic*) next();}
 	Geodesic* nodeWithName (const char* name);
+};
+
+class NodeListIter : private ListIter {
+public:
+	NodeListIter(const NodeList& n) : ListIter(n) {}
+	Geodesic* next() { return (Geodesic*) ListIter::next();}
+	Geodesic* operator++() { return next();}
+	ListIter::reset();
 };
 
 class InterpGalaxy: public Galaxy {
@@ -92,7 +99,7 @@ public:
 	setDomain(const char* newDomain);
 		
 // Make a new, identical galaxy
-	virtual Block *clone();
+	Block *clone() const;
 
 // "register" the galaxy (add it to the known list)
 	void addToKnownList(const char* domain);
