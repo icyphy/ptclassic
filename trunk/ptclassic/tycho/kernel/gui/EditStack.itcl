@@ -53,6 +53,9 @@ class ::tycho::EditStack {
     # Color the stack information in a region.
     method parseNow {start stop}
 
+    # Change the associated file to the specified file name and then save.
+    method saveAsFile {filename}
+
     ##########################################################################
     ####                       protected methods                          ####
    
@@ -193,6 +196,18 @@ body ::tycho::EditStack::parseNow {start stop} {
 
 
 #####################################################################
+#### saveAsFile
+# Save a complete record of the transcript in the console window,
+# including return values and prompts, to the specified file. 
+#
+body ::tycho::EditStack::saveAsFile {filename} {
+    set fd [open $filename w+]
+    puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
+    close $fd
+    return 1
+}
+
+#####################################################################
 #####################################################################
 ####                     protected methods                       ####
 
@@ -214,20 +229,24 @@ body ::tycho::EditStack::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     markUnmodified
 
     if {$menubar != {}} {
-        # Remove irrelevant capabilities from the menus.
-        $menubar delete  switchfile
-        $menubar delete  insert
-        $menubar delete  save
-        $menubar delete  reload
-        $menubar delete  revisioncontrol
-        
-        $menubar delete undoredo
-	$menubar delete editsep1
-        $menubar disable cut
-        $menubar disable paste
+        # Remove the unneeded menu items.
+        $menubar delete reload
+        $menubar delete insert
+        $menubar delete switchfile
+	$menubar delete save
+        $menubar delete togglereadonly
+        $menubar delete revisioncontrol
+        $menubar delete evaluate
+        $menubar delete compareto
+        $menubar delete gotoline
+        $menubar delete spelling
 
-        # Just delete the whole format menu
-        $menubar delete format
+	# Leave these these but disable them
+	$menubar disable cut
+	$menubar disable paste
+
+        # Remove the Format menu altogether
+	$menubar delete format
     }
 }
 
