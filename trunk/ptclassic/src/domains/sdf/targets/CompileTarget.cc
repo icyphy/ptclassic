@@ -1,3 +1,4 @@
+static const char file_id[] = "CompileTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -54,7 +55,7 @@ public:
 	void start();
 	int run();
 	void wrapup ();
-	Block* clone() const { return &(new CompileTarget)->copyStates(*this);}
+	Block* clone() const { LOG_NEW; return &(new CompileTarget)->copyStates(*this);}
 
 	// Routines for writing code: schedulers may call these
 	StringList beginIteration(int repetitions, int depth);
@@ -79,7 +80,7 @@ graphFileName(0), clusterFileName(0), schedFileName(0), id(0)
 
 void CompileTarget::start() {
 
-    delete dirFullName;
+    LOG_DEL; delete dirFullName;
     dirFullName = writeDirectoryName((char*)destDirectory);
 
     if(int(loopScheduler)) {
@@ -89,7 +90,7 @@ void CompileTarget::start() {
 	setSched(new
 		LoopScheduler(schedFileName,graphFileName,clusterFileName));
     } else {
-	setSched(new SDFScheduler);
+	LOG_NEW; setSched(new SDFScheduler);
     }
 }
 
@@ -544,7 +545,7 @@ StringList CompileTarget :: sanitizedName (NamedObj& obj) const {
 
 
 StringList CompileTarget :: sanitize(const char* s) const {
-        char *snm = new char [strlen(s) + 2];
+        LOG_NEW; char *snm = new char [strlen(s) + 2];
         char *n = snm;
 	if(isdigit(*s)) *(n++) = 'x';
         while (*s != 0) {
@@ -553,7 +554,7 @@ StringList CompileTarget :: sanitize(const char* s) const {
         }
         *n = 0;
         StringList out(snm);
-        delete snm;
+        LOG_DEL; delete snm;
         return out;
 }
 
