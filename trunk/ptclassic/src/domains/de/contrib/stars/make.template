@@ -41,9 +41,12 @@ include $(CONFIG)
 
 # DEDIR is the directory containing DE domain support
 DEDIR = 	$(ROOT)/src/domains/de/kernel
-INCL = 		-I$(DEDIR) \
-		-I$(KERNDIR) \
-		-I$(ROOT)/src/domains/de/contrib/stars
+TCLDIR = 	$(ROOT)/tcl/include
+PIGIDIR =	$(ROOT)/src/pigilib
+PTKLIB = 	$(ROOT)/src/ptklib
+INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
+			-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) \
+			-I$(ROOT)/src/domains/de/contrib/stars
 
 # Library name
 LIB =		libdecontribstars.$(LIBSUFFIX)
@@ -88,6 +91,13 @@ install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
+
+# Workaround bug in gcc-2.7.2 optimizer
+ifeq ($(USE_GPLUSPLUS),yes)
+DEpropag_uldl.o: DEpropag_uldl.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+endif
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
