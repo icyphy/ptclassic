@@ -131,6 +131,9 @@ class ::tycho::HTML {
     # Insert the specified data.
     method insertData {data}
 
+    # Insert the contents of the directory.
+    method insertDirectoryContents {dirname}
+
     # Return 1 if rendering is in progress, and 0 otherwise.
     method isRendering {} {return $isrendering}
 
@@ -521,8 +524,21 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         if [file isdirectory $filename] {
             set newfilename [format "%s/%s" $filename index.html]
             if ![file exists $newfilename] {
-                ::tycho::warn "Location is a directory:\n$filename"
-                return
+                # For backtracking
+                if $push {
+                    $stack push [list $file [currentPoint]]
+                }
+                toolbar clear location
+                toolbar insert location $filename
+                # Reset the insertion cursor to the origin, or else we will
+                # try to preserve the point in the file.
+                $itk_component(text) mark set insert 1.0
+
+                if {$point != {}} {
+                    after 200 [list $this seeFragment $point]
+                }
+		insertDirectoryContents $filename
+		return
             } else {
                 set filename $newfilename
                 unset newfilename
@@ -599,6 +615,57 @@ body ::tycho::HTML::insertData {data} {
     # The time delays seems to be necessary to ensure that the window
     # gets mapped immediately.
     after 100 [list ::tycho::HTML::render $this $data]
+}
+
+#####################################################################
+#### insertDirectoryContents
+# Insert the contents of the the directory 'dirname' into the html
+# widget.  We use this if the user visits a directory that does not
+# have a index.html file so that the user can see the contents of the
+# directory.  If the optional argument dirname is {}, then we generate
+# a table of contents of the current directory
+#
+body ::tycho::HTML::insertDirectoryContents {dirname} {
+    clear
+    set toc "<h1>Contents of [::tycho::simplifyPath $dirname]</h1>\n\
+            <pre><A HREF=\"..\">.. Up to higher level directory</A>"
+
+    # A string with 20 spaces, that we use to left justify the links
+    # We print the contents of the file inside a preformatted block
+    # so that we can align the text properly.
+    set spaceString "                   "
+
+    set files [lsort [glob -nocomplain $dirname/*]]
+    foreach file $files {
+        # If the filename is over 20 chars long, truncate it and add ...
+        set shortName [file tail $file]
+        if [file isdirectory $shortName] {
+            # FIXME Unixism?  We are adding a / here, what about mac and windows
+            set shortName "$shortName/"
+        }
+        if {[string length $shortName] > 20} {
+            set shortName "[string range $shortName 0 16]..."
+        }
+        if [catch {file stat $file stat} msg] {
+            set toc [format \
+                    "%s<br><A HREF=\"%s\">%s</A>%s  Couldn`t stat\n" \
+                    $toc $file \
+                    $shortName \
+                    [string range $spaceString \
+                    1 [expr {20 - [string length $shortName]}]] \
+                ]
+        } else {
+            set toc [format \
+                    "%s<br><A HREF=\"%s\">%s</A>%s %6s %s\n" \
+                    $toc $file \
+                    $shortName \
+                    [string range $spaceString \
+                    1 [expr {20 - [string length $shortName]}]] \
+                    $stat(size) \
+                    [clock format $stat(mtime)]]
+        }
+    }
+    insertData $toc
 }
 
 #####################################################################
