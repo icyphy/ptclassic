@@ -136,6 +136,13 @@ if {![info exists ptolemy]} {
 global ::tychokernel
 set tychokernel [file join $tycho kernel]
 
+# Text widgets should always use Motif style word parsing, rather than Windows
+# style.  If we use Windows style parsing then mousing on a word in a 
+# text widget will include the punctuation. 
+# For more info, see D:/Program Files/Tcl/lib/tcl8.0/word.tcl
+set tcl_wordchars {[a-zA-Z0-9_]}
+set tcl_nonwordchars {[^a-zA-Z0-9_]}
+
 global ::tycholib
 set tycholib [file join $tycho lib]
 
