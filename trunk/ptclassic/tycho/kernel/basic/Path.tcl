@@ -651,10 +651,12 @@ proc ::tycho::rm { args } {
 # by the user.  The solution is to break the link.
 #
 proc ::tycho::rmIfNotWritable { file } {
-    if {[file exists $file] && ![file writable $file]} {
+    # If a file is a link to a nonexistant file, then the link will
+    # exist, but not be readable.
+    if {[file exists $file] && \
+	    ![file writable $file] || ![file readable $file]} {
 	file delete -force $file
     }
-
 }
 
 #####################################################################
