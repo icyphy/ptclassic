@@ -93,6 +93,9 @@ namespace ::tycho {
     # ::tycho::File::registerExtensions {.fsm} \
     #       {::tycho::view EditFSM -file {%s}} \
     #       {Finite state machine editor}
+    ::tycho::File::registerExtensions {.graph} \
+            {::tycho::view EditGraph -file {%s}} \
+            {Graph editor} "graphics"
     if !$ptolemypresent {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
