@@ -57,8 +57,7 @@ const char* XXXScheduler::domain() const
 // Initialization.
 void XXXScheduler::setup()
 {
-    if (galaxy() == NULL)
-    {
+    if (!galaxy()) {
 	Error::abortRun(domain(), "Scheduler has no galaxy.");
 	return;
     }
@@ -71,9 +70,13 @@ void XXXScheduler::setup()
 // Run (or continue) the simulation.
 int XXXScheduler::run()
 {
-    if (SimControl::haltRequested())
-    {
-	Error::abortRun(*galaxy(), " cannot continue.");
+    if (!galaxy()) {
+	Error::abortRun("No galaxy to run");
+	return FALSE;
+    }
+
+    if (SimControl::haltRequested()) {
+	Error::abortRun(*galaxy(), "Cannot continue.");
 	return FALSE;
     }
 
