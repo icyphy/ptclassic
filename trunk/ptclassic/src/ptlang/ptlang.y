@@ -1738,9 +1738,9 @@ void genDef ()
 	if (nSeeAlso > 0) fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>.\n<br>\n", cvtToLower(domain), seeAlsoList[nSeeAlso-1], seeAlsoList[nSeeAlso-1]);
 
 /* Hyperlink to the source code.  Note that this assumes the source */
-/* is in a directory called "stars". */
+/* is in the same directory. */
         fprintf(fp,
-                "<br><b>See:</b> <a href=\"../../stars/%s%s.pl>source code</a>",
+                "<br><b>See:</b> <a href=\"%s%s.pl>source code</a>",
                 domain, objName);
 
 /* copyright */
