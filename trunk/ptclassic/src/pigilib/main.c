@@ -32,7 +32,7 @@ Initialization code for pigiRpc.
 #include "local.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "sol2compat.h"
+#include "compat.h"
 #include "rpc.h"
 #include "vemInterface.h"
 #include "compile.h"
