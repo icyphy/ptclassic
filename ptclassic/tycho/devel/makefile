@@ -60,10 +60,7 @@ ITCL_SRCS = \
 	VSM.itcl \
 	Strip.itcl \
 	SlateView.itcl \
-	Interchange.itcl \
-	testInterchange.itcl \
-	Model.itcl \
-	PersistentModel.itcl
+	testInterchange.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
