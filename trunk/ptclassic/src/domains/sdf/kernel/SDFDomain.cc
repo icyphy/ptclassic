@@ -66,7 +66,9 @@ public:
 	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
-	SDFDomain() : Domain("SDF") {}
+  	SDFDomain() : Domain("SDF") {
+          subDomains += "HOF";
+        }
 };
 
 // declare a prototype
