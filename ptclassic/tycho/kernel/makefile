@@ -74,6 +74,9 @@ EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES =		Ptolemy.xbm tclIndex
 
+# 'make realclean' should remove tclIndex
+REALCLEAN_STUFF =			tclIndex
+
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
