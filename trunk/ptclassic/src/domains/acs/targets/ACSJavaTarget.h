@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
- Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
+ Programmers:  Eric Pauer (Sanders)
  Date of creation: 1/15/98
  Version: $Id$
 
@@ -44,6 +44,8 @@ public:
             const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
     
+    ACSJavaTarget :: ~ACSJavaTarget();
+
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
