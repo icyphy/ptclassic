@@ -75,14 +75,14 @@ VHDLTarget(name,starclass,desc) {
   int pid = (int) getpid();
   // Because of the naming style we use and because the
   // address name (path name) is limited to 14 characters
-  // by socket.h, and because process ids are up to 5 digits,
+  // by struct sockaddr, and because process ids are up to 5 digits,
   // anything more than an additional character in length will
   // fail (e.g., multiplying by 100 instead of 10).
-// Maybe even mult. by 10 is too much.  :(
-//  pairNumber = pid * 10;
-// Note: removing *10 didn't seem to help on edison.
-// Still works on hubble.
-  pairNumber = pid;
+
+  // But now that we use struct sockaddr_un, we have 108 characters,
+  // so scaling up the id value is fine and will prevent applications
+  // from colliding with one another (even though this would be rare).
+  pairNumber = pid*1000;
 }
 
 // Clone the Target.

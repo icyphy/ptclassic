@@ -24,6 +24,12 @@ void close_socket();
 
 #define	PERRNO	{ (void) printf("file %s, line %d\n",__FILE__,__LINE__); }
 
+/* IMPORTANT:  The following #defines must match
+   the ones in $(ROOT)/src/domains/vhdl/targets/CGCVSynchComm.pl
+   in order for the sockets to communicate with one another
+   */
+#define	SOCK_BASE_NAME "/tmp/PTVHDLSIM"
+
 /***************************
    Data Structure Definition
 ***************************/
@@ -33,7 +39,8 @@ typedef struct {
   cliPID pidGo;		/* Pin ID for "go" */
   cliPID pidData;	/* Pin ID for "data" */
   cliPID pidDone;	/* Pin ID for "done" */
-  struct sockaddr nearaddr, faraddr;
+
+  struct sockaddr_un nearaddr, faraddr;
   int nearsock;
   char buffer[256];
   char *dummy;
@@ -41,9 +48,16 @@ typedef struct {
 Due to the limits on struct sockaddr, anything longer
 than 14 characters is too long.  We leave extra characters
 in the array to allow for null terminators, margin, etc.
+Hence, array size of 16.
+
+But with struct sockaddr_un, you can have a path up to 108 chars.
 */
+/*
   char nearstring[16];
   char farstring[16];
+*/
+  char nearstring[108];
+  char farstring[108];
   char format[16];
   int nearnamelen;
   int farnamelen;
