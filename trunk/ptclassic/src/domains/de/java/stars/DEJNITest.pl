@@ -26,7 +26,7 @@ the JDK1.1 JNI}
 	defstate {
             name { tcl_file }
             type { string }
-            default { "$PTOLEMY/src/domains/de/java/stars/jni.tcl" }
+            default { "$PTOLEMY/src/domains/de/java/stars/jnitest.tcl" }
             desc { The file from which to read the Tcl script }
 	}
 	header {
@@ -53,7 +53,7 @@ the JDK1.1 JNI}
                 return TCL_OK;
             }
             
-            static int setFactorial( ClientData tcl, Tcl_Interp*, int argc, char *argv[]) {
+            static int setFactorial( ClientData tcl, Tcl_Interp*, int /*argc*/, char *argv[]) {
                 int dummy;
                 //read the value
                 sscanf(argv[1], "%i", &dummy);
@@ -103,7 +103,6 @@ the JDK1.1 JNI}
             int myTclStarIfc::mySetup(Block *star, const char *tcl_file) {
                 myStar = star;
                 InfString buffer;
-                int dummy = 0;
                 synchronous = 1; 
 
                 buffer = "grabInputsNumber_";
