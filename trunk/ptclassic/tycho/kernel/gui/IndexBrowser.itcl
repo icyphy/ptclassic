@@ -110,6 +110,12 @@ class ::tycho::IndexBrowser {
 # a filename, and a point within the file.
 #
 configbody ::tycho::IndexBrowser::file {
+    set file $itk_option(-file)
+    if [ file readable $file.fst ] {
+        # Add a button that will bring up a forest browser.
+        $itk_component(buttons) add browse -text "    Browse    " \
+                -command "::tycho::File::openContext $file.fst"
+    }
     set fd [open $itk_option(-file) r]
     set contents [read $fd]
     close $fd
@@ -144,6 +150,8 @@ configbody ::tycho::IndexBrowser::file {
 ######################################################################
 #
 body ::tycho::IndexBrowser::constructor {args} {
+
+
     # Process any unevaluated arguments.
     eval itk_initialize $args
 }
