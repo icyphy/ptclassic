@@ -56,3 +56,7 @@ S56DIR =	$(ROOT)/vendors/s56dsp
 #    and MATLABLIBIDR is undefined
 MATLABDIR =	/usr/sww/matlab
 MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
+
+# Used by xv
+XV_CC =		gcc
+
