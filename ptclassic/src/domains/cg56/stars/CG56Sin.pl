@@ -2,9 +2,8 @@ defstar {
 	name { Sin }
 	domain { CG56 }
 	desc { 
-Sine function.
-Calculation by table lookup.  Input range of (-1,1) scaled by pi.
-Output is sin(pi*input).
+Sine function calculated by table lookup.  Input range of [-1,1) is scaled
+by pi.  Output is sin(pi*input).
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
@@ -18,11 +17,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 main library }
 	explanation {
 This star computes the sine of the input, which must be in the range
-(-1.0, 1.0).
-The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
-so the input range is effectively (-$~pi$, $pi~$).
-The output is in the range (-1.0, 1.0).
-The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
+[-1.0, 1.0).  The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
+so the input range is effectively (-$~pi$, $pi~$).  The output is in
+the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
+(e.g., cosine would use a phase of 90).
 	}
 	input {
 		name {input}
