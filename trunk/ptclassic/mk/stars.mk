@@ -638,7 +638,7 @@ else
 	LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
 endif
 
-PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
+PT_DEPEND += $(LIBPTCL) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS) $(TARGETS)
 
 # this would not be defined if we are making a small stand-alone 
