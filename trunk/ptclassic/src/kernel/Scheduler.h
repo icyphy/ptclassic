@@ -121,6 +121,16 @@ public:
 	// haltRequested, for backward compatibilty
 	static int haltRequested() { return SimControl::haltRequested();}
 
+	// For a target within a Wormhole, if this method returns TRUE
+	// and the outside domain is timed, then the target will be
+	// fired again at the time returned by the nextFiringTime method.
+	// In this base class, always return FALSE.
+	virtual int selfFiringRequested() { return FALSE; }
+	
+	// If selfFiringRequested returns TRUE, return the time at which
+	// this firing is requested.
+	virtual double nextFiringTime() { return 0.0; }
+
         // class identification
         virtual int isA(const char*) const;
 protected:
