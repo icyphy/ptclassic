@@ -1,6 +1,6 @@
 defstar {
-	name {DownSample}
-	domain {VHDL}
+	name { DownSample }
+	domain { VHDL }
 	desc { 
 A decimator by a given "factor" (default 2).
 The "phase" tells which sample to output.
@@ -18,7 +18,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { VHDL main library }
 	htmldoc {
 <a name="decimation"></a>
 	}
