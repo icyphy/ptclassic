@@ -57,7 +57,9 @@ PL_SRCS = \
  CGCVReceive.pl \
  VHDLCSynchComm.pl \
  VHDLCSend.pl \
- VHDLCReceive.pl
+ VHDLCReceive.pl \
+ VHDLLFCSend.pl \
+ VHDLLFCReceive.pl
 
 EXTRA_SRCS = $(PL_SRCS)
 
@@ -68,6 +70,7 @@ SRCS = \
  SynthArchTarget.cc \
  SimVSSTarget.cc \
  SimMTTarget.cc \
+ SimLFTarget.cc \
  $(PL_SRCS:.pl=.cc)
 
 HDRS = $(SRCS:.cc=.h)
