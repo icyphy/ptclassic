@@ -51,27 +51,24 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		type{ fix }
 	}
 	// Inherit setup method
+	codeblock(result) {
+; compute the power of the last Goertzel filter output z z*, where
+; z z* = state1*state1 - state1*state2*2*cos(theta) + state2*state2
+		clr	a		b,y1	; a = 0, y1 = b = d1*state2
+		mac	x0,x0,a			; a += state1*state1
+		mac	x1,x1,a			; a += state2*state2
+		mac	-x1,y1,b		; b = -d1*state2*state1
+		add	b,a			; a += b
+	}
+	codeblock(saveResult) {
+		move	a,$ref(output)
+	}
 	go {
 		// Run the Goertzel second-order IIR filter
 		CG56GoertzelBase::go();
 
-		// Compute the power of the kth DFT coefficient.
-		// The output of the Goertzel filter is
-		//   state1 - Wn*state2 =
-		//       state1 - [state2*cos(theta) - j*state2*sin(theta)]
-		// where Wn is the twiddle factor Wn = exp(-j theta), such
-		// that theta = 2 pi k / N.
-		// Power is complex number times its conjugate, z z*:
-		//   z = state1 - [state2*cos(theta) - j*state2*sin(theta)]
-		//   z = [state1 - state2*cos(theta)] - j [state2*sin(theta)]
-		//   z z* = state1*state1 - 2*state1*state2*cos(theta) +
-		//     state2*state2*cos^2(theta) + state2*state2*sin^2(theta)
-		//   z z* = state1*state1 - state1*state2*2*cos(theta) +
-		//          state2*state2
-		// where 2*cos(theta) = d1, by definition in CG56GoertzelBase.
-		Fix acc = Fix(state1)*Fix(state1) -
-			     Fix(state1)*Fix(state2)*Fix(d1) +
-		             Fix(state2)*Fix(state2);
-		// output%0 << acc;
+		// Compute the (real-valued) power of last (complex) sample
+		addCode(result);
+		addCode(saveResult);
 	}
 }
