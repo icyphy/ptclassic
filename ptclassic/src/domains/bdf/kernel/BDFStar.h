@@ -46,8 +46,9 @@ public:
 	int isSDFinContext() const;
 	int isA(const char*) const;
 protected:
-	short sdfCtx;
+	virtual int dataIndependent();
 private:
+	short sdfCtx;
 	short sdf;
 };
 
