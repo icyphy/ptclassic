@@ -23,6 +23,7 @@ $Id$
 #include "Galaxy.h"
 #include "GalIter.h"
 #include "Error.h"
+#include <stdio.h>
 
 // default commTime method: only one processor, no time
 
@@ -74,9 +75,9 @@ void Target::wrapup () {
 	return;
 }
 
-// by default, addCode is not supported
-void Target::addCode (const char*) {
-	Error::abortRun (*this, "addCode not supported for this Target");
+// by default, print to stdout
+void Target::addCode (const char* code) {
+	fputs (code, stdout);
 }
 		
 // by default, pass these on through
