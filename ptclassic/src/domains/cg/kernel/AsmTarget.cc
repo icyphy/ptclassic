@@ -31,6 +31,9 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 		CGTarget(nam,stype,desc), mem(m), interruptFlag(FALSE)
 { initStates();}
 
+// all AsmTargets permit AnyAsmStar.
+const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
+
 void AsmTarget :: initStates() {
 	uname = 0;
 	StringList hostPrompt,hostDes,runPrompt,runDes;
