@@ -117,7 +117,7 @@ uplevel #0 {
 # where this welcome window would be redundant.
 ::tycho::welcomeMessage
 
-if [file readable [glob ~/.tycho]] {
+if [file readable [glob -nocomplain ~/.tycho]] {
     source [glob ~/.tycho]
 }
 
