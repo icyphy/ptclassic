@@ -207,7 +207,7 @@ PortHole& WormMultiPort :: newPort() {
 
 	// build eventHorizon
         DataType type = realP.myType();
-        int numToken = realP.numberTokens;
+        int numToken = realP.numXfer();
 // separate rules for connecting inputs and outputs.
         if (galp->isItInput()) {
                 EventHorizon& to = outSideDomain->newTo();
