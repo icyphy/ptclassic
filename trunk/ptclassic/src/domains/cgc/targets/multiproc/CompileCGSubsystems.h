@@ -62,6 +62,7 @@ public:
     /*virtual*/ void generateCode();
 protected:
     /*virtual*/ void prepareChildren();
+    /*virtual*/ void flattenWorm();
 private:
     int replaceCommBlock(DataFlowStar& /*newStar*/,
 			 DataFlowStar& /*oldStar*/);
