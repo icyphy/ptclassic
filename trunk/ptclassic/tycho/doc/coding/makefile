@@ -45,7 +45,6 @@ EXTRA_SRCS =	buildtclexts.html \
 		fileheader.html \
 		index.html \
 		itclfilebody.html \
-		javastyle.html \
 		newfiles.html \
 		performance.html \
 		scope.html \
