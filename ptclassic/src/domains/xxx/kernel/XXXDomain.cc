@@ -71,18 +71,14 @@ static XXXDomain proto;
 class XXXTarget : public Target {
 public:
 	// Constructor
-	XXXTarget() : Target("default-XXX", "XXXStar", "default XXX target"){}
+	XXXTarget() : Target("default-XXX", "XXXStar",
+			     "default XXX target", XXXdomainName) {}
 
 	// Destructor
 	~XXXTarget() { delSched();}
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const { LOG_NEW; return new XXXTarget;}
-
-	// Return the domain of the galaxy if it exists and "XXX" otherwise
-	/*virtual*/ const char* domain() {
-		return galaxy() ? galaxy()->domain() : XXXdomainName;
-	}
 
 protected:
 	void setup() {
