@@ -56,6 +56,9 @@ class ::tycho::Layout {
     # Return all attributes of an item
     method attributes {item}
 
+    # Reset model coordinates according to current actual coordinates
+    method clean {}
+
     # Get or set the coordinates of an item
     method coords {item args}
 
@@ -89,8 +92,11 @@ class ::tycho::Layout {
     # Stop moving an item
     method moverelease {tag x y}
 
-    # Get the (full) names of items
+    # Get the names of items
     method names {{context {}}}
+
+    # Get the (full) names of items
+    method names* {context}
 
     # Reshape an item
     method reshape {name x y args}
@@ -123,10 +129,13 @@ class ::tycho::Layout {
     protected method evalInSpecificContext {args} {eval $args}
 
     #################################################################
-    ####                 protected variables                     ####
+    ####                   private variables                     ####
     
     # Storage used during interaction sequences
     protected variable _scratch
+    
+    # The dirty flag for each item -- to keep coordinates correct
+    protected variable _dirty
 }
 
 ########################################################################
@@ -169,6 +178,22 @@ body ::tycho::Layout::attributes {item} {
 }
 
 ########################################################################
+#### clean
+#
+# Reset the coordinates of each item marked "dirty" to the
+# current coordinates obtained from the primary view. This
+# must be called before calling any methods that access the
+# coordinates of this model, such as describe{}, save{}, and
+# so on. Note: this is all rather awkward, but is the price we
+# pay for being able to keep the Tcl code reasonable efficient.
+#
+body ::tycho::Layout::clean {} {
+    foreach item [array names _dirty] {
+        eval coords $item [$primaryview coords $item]
+    }
+}
+
+########################################################################
 #### coords
 #
 # With no arguments, get the coordinates of an item, with arguments,
@@ -187,8 +212,9 @@ body ::tycho::Layout::coords {item args} {
 	lreplace $_value($item) 0 0
     } else {
 	set inverse "coords $item [lreplace $_value($item) 0 0]"
-    	_assign item $cntxt $local \
-    		[linsert $args 0 [lindex $_value($item) 0]]
+        _assign item $cntxt $local \
+                [linsert $args 0 [lindex $_value($item) 0]]
+        set _dirty($item) 1
     	return $inverse
     }
 }
@@ -205,7 +231,7 @@ body ::tycho::Layout::delete {item} {
 
     _verify $type $cntxt $local
     set info [_delete $type $cntxt $local]
-    
+    catch {unset _dirty($item)}
     # Return inverse command.
     # FIXME: does not work with nested entities yet!
     concat item $item $info
@@ -228,8 +254,8 @@ body ::tycho::Layout::dtag {tag} {
 # See the <a href="Interchange.html"> Interchange</a> class.
 #
 body ::tycho::Layout::describe {{prefix {}}} {
-    # First call my primary view to update layout
-    $primaryview updateLayout
+    # First update coordinates
+    clean
 
     # Call the superclass
     chain $prefix
@@ -291,17 +317,25 @@ body ::tycho::Layout::move {tag x y} {
     # This is not for efficiency, but because the command may
     # need to generate its own redo command.
     if { $recording } {
+        # Construct the inverse command
 	if { [::info exists _value($tag)] } {
-	    # This is an item, so return simple inverse command
+            # Set dirty flag because coords on model are no longer valid
+            set _dirty($tag) 1
+
+ 	    # This is an item, so return simple inverse command
 	    return [list move $tag [expr -$x] [expr -$y]]
 	} else {
-	    # It's a tag, so explicitly construct commands to move all
+ 	    # It's a tag, so explicitly construct commands to move all
 	    # tagged items. Note that we don't use the tag since the
 	    # tags may change by the time the command is undone.
 	    set undo [list sequence]
 	    set redo [list sequence]
 	    foreach item [$primaryview withtag $tag] {
-		lappend undo [list move $item [expr -$x] [expr -$y]]
+                # Set dirty flag for this item
+                set _dirty($item) 1
+
+                # Construct undo and redo commands
+ 		lappend undo [list move $item [expr -$x] [expr -$y]]
 		lappend redo [list move $item $x $y]
 	    }
 	    # Add to history, and return null so nothing else is recorded.
@@ -356,11 +390,14 @@ body ::tycho::Layout::moverelease {tag x y} {
     # This should never happen, but we check just to make sure.
     if { $recording } {
 	if { [::info exists _value($tag)] } {
-	    # This is an item, so use simple command
+            # Set dirty flag of this item
+            set _dirty($tag) 1
+
+ 	    # This is an item, so use simple command
 	    set undo [list move $tag [expr -$deltax] [expr -$deltay]]
 	    set redo [list move $tag $deltax $deltay]
 	} else {
-	    # It's a tag, so construct commands to move all tagged items.
+ 	    # It's a tag, so construct commands to move all tagged items.
 	    # Note that we don't use the tag in the command since the
 	    # tags may change by the time the command is undone.
 	    set items [$primaryview withtag $tag]
@@ -368,14 +405,21 @@ body ::tycho::Layout::moverelease {tag x y} {
 		set undo {}
 		set redo {}
 	    } elseif { [llength $items] == 1 } {
-		set undo [list move [lindex $items 0] \
+                # Set dirty flag for this item
+                set _dirty([lindex $items 0]) 1
+
+ 		set undo [list move [lindex $items 0] \
 			[expr -$deltax] [expr -$deltay]]
 		set redo [list move [lindex $items 0] $deltax $deltay]
 	    } else {
 		set undo [list sequence]
 		set redo [list sequence]
 		foreach item [$primaryview withtag $tag] {
-		    lappend undo [list move $item \
+                    # Set dirty flag for this item
+                    set _dirty($item) 1
+
+                    # Construct undo and redo commands
+ 		    lappend undo [list move $item \
 			    [expr -$deltax] [expr -$deltay]]
 		    lappend redo [list move $item $deltax $deltay]
 		}
@@ -397,6 +441,18 @@ body ::tycho::Layout::names {{context {}}} {
     _children item $context
 }
 
+########################################################################
+#### names
+#
+# Get the full names of items.
+#
+body ::tycho::Layout::names* {context} {
+    set result {}
+    foreach c [_children item $context] {
+        lappend result $context.$c
+    }
+    return $result
+}
 ########################################################################
 #### reshape
 #
@@ -461,6 +517,9 @@ body ::tycho::Layout::reshaperelease {name x y} {
     # Only construct the inverse if the "recording" flag is set.
     # This should never happen, but we check just to make sure.
     if { $recording } {
+        # Set dirty flag of this item
+        set _dirty($name) 1
+
     	# This is an item, so use simple commands
     	set undo [concat reshape [list $name] \
 		[expr -$deltax] [expr -$deltay] $aspects]
