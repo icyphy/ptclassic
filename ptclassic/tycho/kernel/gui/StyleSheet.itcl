@@ -153,14 +153,14 @@ ensemble ::tycho::stylesheet {
 	}
 
 	# Get it
-	$model value [$model namebystyle $style $param] 1
+	$model value [concat $style [split $param .]] 1
     }
 
     # Register a stylesheet
     option register {stylesheet {masterfile {}} {userfile {}}} {
         if { $masterfile == "" } {
             if ![@scope ::tycho::StyleSheet ::info exists \
-                    _userfile($stylesheet)] {
+            		_userfile($stylesheet)] {
                 error "Style sheet \"$stylesheet\" has not been registered"
             }
             return [@scope ::tycho::StyleSheet set _userfile($stylesheet)]
@@ -185,8 +185,7 @@ ensemble ::tycho::stylesheet {
 	}
 
 	# Set it and publish
-	$model publish attrset \
-                [$model namebystyle $style $param] -value $value
+	$model publish attrset [concat $style [split $param .]] -value $value
     }
 
     # Get or set the preferred style
@@ -337,13 +336,10 @@ class ::tycho::StyleSheet {
     ####                     public methods                      ####
 
     # Notify on parameter update
-    method _notify {widget command name args}
+    method _updateoptions {widget command args}
 
     # Get an attribute by looking at the master style-sheet
     method dfltcget {name attribute}
-
-    # Convert a style and parameter name into an item name
-    method namebystyle {style param}
 
     # Convert a subscriber and parameter name into an item name
     method namebysubscriber {subscriber param}
@@ -435,7 +431,7 @@ body ::tycho::StyleSheet::constructor {args} {
     
     # Now a little trick: the model is subscribed to itself, so
     # it can update option subscriptions.
-    subscribe data $this all "$this _notify"
+    subscribe data $this "$this _updateoptions"
 }
 
 
@@ -444,27 +440,27 @@ body ::tycho::StyleSheet::constructor {args} {
 ####                          public methods                         ####
 
 ########################################################################
-#### _notify
+#### _updateoptions
 #
 # Callback for notification when a parameter is changed. We
 # reconfigure subscribed widgets only if _command_
 # is <b>attrset</b> and _args_ contains a <b>-value</b>
 # attribute.
 #
-body ::tycho::StyleSheet::_notify {command name args} {
+body ::tycho::StyleSheet::_updateoptions {command args} {
     # Make sure we have something to do
-    array set attrs $args
-    if { $command != "attrset" || ! [::info exists attrs(-value)] } {
+    if { $command != "attrset" } {
+        return
+    }
+    set name [lindex $args 0]
+    array set attrs [lreplace $args 0 0]
+    if { ! [::info exists attrs(-value)] } {
     	return
     }
-    
-    # Convert to style and parameter name
-    regexp {[^:]+$} [lindex $name 0] style
-    regsub {[^ ]+:} [lreplace $name 0 0] {} param
-    set param [join $param .]
 
-    # Get the item's value	
-    set value [value $name 1]
+    # Get style and parameter name
+    set style [lindex $name 0]
+    set param [join [lreplace $name 0 0] .]
 
     # Find subscribers and update. Note that we go directly to the
     # ::itk::Archetype method in order to bypass the overridden
@@ -503,30 +499,14 @@ body ::tycho::StyleSheet::dfltcget {name attribute} {
 	$master dfltcget $name $attribute
     } else {
 	# I am a master
-	regexp {[^:]+$} [lindex $name 0] style
-	if { $style == "default" } {
+	if { [lindex $name 0] == "default" } {
 	    # Can't go any further
 	    attrget $name $attribute
 	} else {
 	    # Try default style
-	    dfltcget [lreplace $name 0 0 style:default] $attribute
+	    dfltcget [lreplace $name 0 0 default] $attribute
 	}
     }
-}
-
-########################################################################
-#### namebystyle
-#
-# Convert a style and parameter name into a full item name.
-#
-body ::tycho::StyleSheet::namebystyle {style param} {
-    set name "style:$style"
-    set splat [split $param .]
-    foreach g [lreplace $splat end end] {
-	lappend name "group:$g"
-    }
-    lappend name "parameter:[lindex $splat end]"
-    return $name
 }
 
 ########################################################################
@@ -542,18 +522,11 @@ body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
     if { $s != "" } {
         set subscriber $s
     }
-
-    set name "style:$_widgetstyle($subscriber)"
-    set splat [split $param .]
-    foreach g [lreplace $splat end end] {
-	lappend name "group:$g"
-    }
-    lappend name "parameter:[lindex $splat end]"
-    return $name
+	concat $_widgetstyle($subscriber) [split $param .]
 }
 
 ########################################################################
-#### namebysubscriber
+#### style
 #
 # Select or get the style used to give value to a widget's options.
 # _subscriber_ is the widget, _stylesheet_ is the name of
@@ -598,8 +571,8 @@ body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
 	} else {
 	    # Change the style. First check that it's either here
 	    # or in the master.
-            if ![exists style:$style] {
-                if { $master == "" || ! [$master exists style:$style] } {
+            if ![exists $style] {
+                if { $master == "" || ! [$master exists $style] } {
                     error "Unknown style \"$style\" in style-sheet \"$modelname\""
                 }
 	    }
@@ -616,8 +589,8 @@ body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
             foreach {_ option param} [eval concat \
                     [array names _widgetoptions [list $subscriber * *]]] {
                 catch {
-                    $subscriber ::itk::Archetype::configure $option [value \
-                            [namebysubscriber $subscriber $param] 1]
+                    $subscriber ::itk::Archetype::configure $option \
+                    		[value [namebysubscriber $subscriber $param] 1]
                 }
             }
         }
@@ -864,17 +837,16 @@ body ::tycho::StyleSheet::load {stylesheet} {
 ########################################################################
 #### _addparameter
 #
-# Add a parameter. If no default is provided, the _value_ argument is
-# used as the default.
+# Add a parameter.
 #
 body ::tycho::StyleSheet::_addparameter {tail value args} {
     global _context_
  
     # Get the full name of the item
-    set name [concat $_context_ parameter:$tail]
+    set name [concat $_context_ $tail]
     
-    # Add it. (Any _default in $args will override the first one.)
-    eval [list add $name -value $value] $args
+    # Add it.
+    eval [list add parameter $name -value $value] $args
 }
 
 ########################################################################
@@ -883,10 +855,8 @@ body ::tycho::StyleSheet::_addparameter {tail value args} {
 # Return a string describing a parameter.
 #
 body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
-
     # Start string with type followed by local name
-    set string "${prefix}parameter $tail"
+    set string "${prefix}parameter [lindex $name end]"
 
     # Print value
     array set attrs [attrset $name]
@@ -912,24 +882,24 @@ body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
 # synchronize{} method.
 #
 body ::tycho::StyleSheet::_sync {master style context} {
-    set mgroups [$master match group [concat style:default $context]]
-    set groups [match group [concat style:$style $context]]
+    set mgroups [$master match group [concat default $context]]
+    set groups [match group [concat $style $context]]
 
     # Delete groups
     foreach g [::tycho::lsubtract $groups $mgroups] {
-		delete [concat style:$style $context group:$g]
+		delete [concat $style $context $g]
     }
     # Recursively synchronize groups
     foreach g [::tycho::lintersection $groups $mgroups] {
-		_sync $master $style [concat $context group:$g]
+		_sync $master $style [concat $context $g]
     }
 
     # Process parameters in this context
-    set mparams [$master match parameter [concat style:default $context]]
-    set params [match parameter [concat style:$style $context]]
+    set mparams [$master match parameter [concat default $context]]
+    set params [match parameter [concat $style $context]]
 
     # Delete parameters
     foreach p [::tycho::lsubtract $params $mparams] {
-		delete [concat style:$style $context parameter:$p]
+		delete [concat $style $context $p]
     }
 }

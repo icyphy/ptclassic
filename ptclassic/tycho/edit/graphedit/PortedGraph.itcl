@@ -47,7 +47,7 @@
 # <dd>
 # An edge between two ports. The name of an edge is formed from the
 # vertices and ports it connects:
-# <b>edge:</b>_v1_<b>.</b>_p1_<b>^</b>_v2_<b>.</b>_p2_, where _v1_ and _p1_
+# _v1_<b>.</b>_p1_<b>^</b>_v2_<b>.</b>_p2_, where _v1_ and _p1_
 # are the source vertex and port, and _v2_ and _p2_ are the target
 # vertex and port. The external (TIM) format is a little friendlier,
 # and represents an edge as <b>edge</b> _v1_ _p1_ _v2_ _p2_.
@@ -100,7 +100,7 @@
 #
 # Get the ports of a vertex:
 # <pre><tcl>
-#     $graph ports c
+#     $graph match port c
 # </tcl></pre>
 #
 # Get the edges coming _in_ to a given port:
@@ -115,13 +115,13 @@
 #
 # Delete an edge:
 # <pre><tcl>
-#     $graph delete edge:b.out^d.in
+#     $graph delete b.out^d.in
 #     $graph describe
 # </tcl></pre>
 #
 # Delete a vertex but not edges connected to it, and record the deletion:
 # <pre><tcl>
-#     $graph record delete vertex:c
+#     $graph record delete c
 #     $graph describe
 # </tcl></pre>
 #
@@ -154,9 +154,6 @@ class ::tycho::PortedDigraph {
 
     # Return edges matching a vertex and port patterns
     method edges {{v1 *} {p1 *} {v2 *} {p2 *}}
-
-    # Return ports of a vertex that match a pattern
-    method ports {vertex {port *}}
 
     # Remove a vertex _and_ adjacent edges from the graph
     method remove {vertex}
@@ -204,7 +201,7 @@ body ::tycho::PortedDigraph::constructor {args} {
 
     # Turn off the :leafonly option of vertices, so that
     # they can contain ports
-    # type configure vertex :leafonly 0
+    type configure vertex :leafonly 0
 
     # Evaluate options
     eval configure $args
@@ -217,28 +214,12 @@ body ::tycho::PortedDigraph::constructor {args} {
 # given patterns, where _v1_ and _p1_ are the source vertex and port,
 # and _v2_ and _p2_ are the target vertex and port. The returned list
 # alternates source and target vertex and port names (note: not item
-# names such as <code>edge:a.out^b.in</code>).
+# names such as <code>a.out^b.in</code>).
 #
 body ::tycho::PortedDigraph::edges {{v1 *} {p1 *} {v2 *} {p2 *}} {
     set result {}
-    foreach edge [names edge:$v1.$p1^$v2.$p2] {
-        eval lappend result [lrange [split $edge :^.] 1 4]
-    }
-    return $result
-}
-
-########################################################################
-#### ports
-#
-# Return a list of ports of the given vertex. If the second argument
-# is given, it is a glob-style pattern to be used to match against
-# port names. The result is a list of port names, relative to the
-# vertex name and without the "port:" qualification
-#
-body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
-    set result {}
-    foreach port [names [list vertex:$vertex port:$pattern]] {
-    	lappend result [lindex [split [lindex $port end] :] 1]
+    foreach edge [names $v1.$p1^$v2.$p2] {
+        eval lappend result [split $edge ^.]
     }
     return $result
 }
@@ -250,22 +231,22 @@ body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
 # commands if the recording flag is set.
 #
 body ::tycho::PortedDigraph::remove {vertex} {
-    if ![exists vertex:$vertex] {
+    if { ![exists $vertex] || [type get $vertex] != "vertex" } {
         error "Unknown vertex: \"$vertex\""
     }
     # Mark the history
     mark set temp
 
     # Delete outward edges
-    foreach edge [names edge:$vertex.*^*.*] {
+    foreach edge [names $vertex.*^*.*] {
         delete $edge
     }
     # Delete inward edges
-    foreach edge [names edge:*.*^$vertex.*] {
+    foreach edge [names *.*^$vertex.*] {
         delete $edge
     }
     # Delete the vertex
-    delete vertex:$vertex
+    delete $vertex
 
     # Compact the history
     if $recording {
@@ -281,12 +262,11 @@ body ::tycho::PortedDigraph::remove {vertex} {
 #
 body ::tycho::PortedDigraph::repair {} {
     mark set temp
-    foreach edge [names edge:*] {
-        foreach {_ v1 p1 v2 p2} [split $edge :.^] {}
-        if { ![exists "vertex:$v1 port:$p1"] \
-                || ![exists "vertex:$v2 port:$p2"] } {
+    foreach edge [match edge] {
+        foreach {v1 p1 v2 p2} [split $edge .^] {}
+        if { ![exists [list $v1 $p1]] || ![exists [list $v2 $p2]] } {
             # Delete a disconnected edge
-            delete edge:$v1.$p1^$v2.$p2
+            delete $v1.$p1^$v2.$p2
         }
     }
     if $recording {
@@ -298,16 +278,16 @@ body ::tycho::PortedDigraph::repair {} {
 #### subgraphEdges
 #
 # Return the edges within the sub-graph given by the arguments. Each
-# argument is the short name of a vertex.
+# argument is the name of a vertex.
 #
 body ::tycho::PortedDigraph::subgraphEdges {args} {
     set result {}
     foreach u $args {
         foreach v $args {
-            eval lappend result [names edge:$u.*^$v.*]
+            eval lappend result [names $u.*^$v.*]
         }
     }
-    return $result
+    return [::tycho::lnub $result]
 }
 
 ########################################################################
@@ -319,8 +299,8 @@ body ::tycho::PortedDigraph::subgraphEdges {args} {
 body ::tycho::PortedDigraph::subgraphInputs {args} {
     set result {}
     foreach v $args {
-        foreach edge [names edge:*.*^$v.*] {
-            if { [lsearch -exact $args [lindex [split $edge :.^] 1]] < 0 } {
+        foreach edge [names *.*^$v.*] {
+            if { [lsearch -exact $args [lindex [split $edge .^] 0]] < 0 } {
                 lappend result $edge
             }
         }
@@ -338,7 +318,7 @@ body ::tycho::PortedDigraph::subgraphOutputs {args} {
     set result {}
     foreach v $args {
         foreach edge [names edge:$v.*^*.*] {
-            if { [lsearch -exact $args [lindex [split $edge :.^] 3]] < 0 } {
+            if { [lsearch -exact $args [lindex [split $edge .^] 2]] < 0 } {
                 lappend result $edge
             }
         }
@@ -353,10 +333,9 @@ body ::tycho::PortedDigraph::subgraphOutputs {args} {
 # This method checks for improperly-connected edges.
 #
 body ::tycho::PortedDigraph::verify {} {
-    foreach edge [names edge:*] {
-        foreach {_ v1 p1 v2 p2} [split $edge :.^] {}
-        if { ![exists [list vertex:$v1 port:$p1]] \
-                || ![exists [list vertex:$v2 port:$p2]] } {
+    foreach edge [match edge] {
+        foreach {v1 p1 v2 p2} [split $edge .^] {}
+        if { ![exists [list $v1 $p1]] || ![exists [list $v2 $p2]] } {
             return 0
         }
     }
@@ -373,7 +352,7 @@ body ::tycho::PortedDigraph::verify {} {
 # Add an edge.
 #
 body ::tycho::PortedDigraph::_addedge {v1 p1 v2 p2 args} {
-    eval add edge:$v1.$p1^$v2.$p2 $args
+    eval add edge $v1.$p1^$v2.$p2 $args
 }
 
 ########################################################################
@@ -382,7 +361,7 @@ body ::tycho::PortedDigraph::_addedge {v1 p1 v2 p2 args} {
 # Return a string describing an edge.
 #
 body ::tycho::PortedDigraph::_describeedge {name {prefix {}}} {
-    return "${prefix}edge [lrange [split $name :^.] 1 4] [assign $name]\n"
+    return "${prefix}edge [split $name ^.] [attrset $name]\n"
 }
 
 ########################################################################
@@ -393,23 +372,22 @@ body ::tycho::PortedDigraph::_describeedge {name {prefix {}}} {
 #
 body ::tycho::PortedDigraph::_updatecache {} {
     # Do superclass first
-    chain
+    ::tycho::AbstractGraph::_updatecache
 
     # Regenerate parent-children. Use arrays to prevent duplicates.
-    foreach edge [names edge:*] {
-        set splat [split $edge :.^]
-        set src [lindex $splat 1]
-        set tgt [lindex $splat 3]
+    foreach edge [match edge] {
+        set splat [split .^]
+        set src [lindex $splat 0]
+        set tgt [lindex $splat 2]
 
         set parents$src($tgt) 0
         set children$tgt($src) 0
     }
     # Regenerate vertex list
-    foreach vertex [names vertex:*] {
-        set v [lindex [split $vertex :] 1]
-        lappend _vertices $v
-        set _parents($v) [array get parents$v]
-        set _children($v) [array get children$v]
+    foreach vertex [match vertex] {
+        lappend _vertices $vertex
+        set _parents($vertex) [array get parents$vertex]
+        set _children($vertex) [array get children$vertex]
     }
     # Validate cache
     cache validate

@@ -43,7 +43,7 @@
 # <dd>
 # An edge between two ports. The name of an edge is formed from the
 # vertices it connects:
-# <b>edge:</b>_v1_<b>^</b>_v2_, where _v1_ and _v2_
+# _v1_<b>^</b>_v2_, where _v1_ and _v2_
 # are the source and target vertices. The external (TIM) format is
 # a little friendlier,
 # and represents an edge as <b>edge</b> _v1_ _v2_.
@@ -183,12 +183,12 @@ body ::tycho::Digraph::constructor {args} {
 # Return a list containing the edges of the graph that match the
 # given patterns, where _vertex1_ and _vertex2 are the source and
 # target vertices. The returned list alternates source and target
-# vertex names (note: not item names such as <code>edge:a^b</code>).
+# vertex names (note: not item names such as <code>a^b</code>).
 #
 body ::tycho::Digraph::edges {{vertex1 *} {vertex2 *}} {
     set result {}
-    foreach edge [names edge:$vertex1^$vertex2] {
-        eval lappend result [lrange [split $edge :^] 1 2]
+    foreach edge [names $vertex1^$vertex2] {
+        eval lappend result [split $edge ^]
     }
     return $result
 }
@@ -201,14 +201,14 @@ body ::tycho::Digraph::edges {{vertex1 *} {vertex2 *}} {
 #
 body ::tycho::Digraph::repair {} {
     mark set temp
-    foreach edge [names edge:*] {
-        set splat [split $edge :^]
-        set src [lindex $splat 1]
-        set tgt [lindex $splat 2]
+    foreach edge [match edge] {
+        set splat [split $edge ^]
+        set src [lindex $splat 0]
+        set tgt [lindex $splat 1]
 
-        if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
+        if { ![exists $src] || ![exists $tgt] } {
             # Delete a disconnected edge
-            delete edge:$src^$tgt
+            delete $src^$tgt
         }
     }
     if $recording {
@@ -223,22 +223,22 @@ body ::tycho::Digraph::repair {} {
 # commands if the recording flag is set.
 #
 body ::tycho::Digraph::remove {vertex} {
-    if ![exists vertex:$vertex] {
+    if { ![exists $vertex] || [type get $vertex] != "vertex" } {
         error "Unknown vertex: \"$vertex\""
     }
     # Mark the history
 	mark set temp
 
     # Delete outward edges
-    foreach edge [names edge:$vertex^*] {
+    foreach edge [names $vertex^*] {
         delete $edge
     }
     # Delete inward edges
-    foreach edge [names edge:*^$vertex] {
+    foreach edge [names *^$vertex] {
         delete $edge
     }
     # Delete the vertex
-    delete vertex:$vertex
+    delete $vertex
 
     # Compact the history
     if $recording {
@@ -250,16 +250,16 @@ body ::tycho::Digraph::remove {vertex} {
 #### subgraphEdges
 #
 # Return the edges within the sub-graph given by the arguments. Each
-# argument is the short name of a vertex.
+# argument is the name of a vertex.
 #
 body ::tycho::Digraph::subgraphEdges {args} {
     set result {}
     foreach u $args {
         foreach v $args {
-            eval lappend result [names edge:$u^$v] 
+            eval lappend result [names $u^$v] 
         }
     }
-    return $result
+    return [::tycho::lnub $result]
 }
 
 ########################################################################
@@ -271,8 +271,8 @@ body ::tycho::Digraph::subgraphEdges {args} {
 body ::tycho::Digraph::subgraphInputs {args} {
     set result {}
     foreach v $args {
-        foreach edge [names edge:*^$v] {
-            if { [lsearch -exact $args [lindex [split $edge :^] 1]] < 0 } {
+        foreach edge [names *^$v] {
+            if { [lsearch -exact $args [lindex [split $edge ^] 0]] < 0 } {
                 lappend result $edge
             }
         }
@@ -290,8 +290,8 @@ body ::tycho::Digraph::subgraphOutputs {args} {
     _update
     set result {}
     foreach v $args {
-        foreach edge [names edge:$v^*] {
-            if { [lsearch -exact $args [lindex [split $edge :^] 2]] < 0 } {
+        foreach edge [names $v^*] {
+            if { [lsearch -exact $args [lindex [split $edge ^] 1]] < 0 } {
                 lappend result $edge
             }
         }
@@ -308,12 +308,12 @@ body ::tycho::Digraph::subgraphOutputs {args} {
 # it doesn't work with the subclass, or to perform additional tests.
 #
 body ::tycho::Digraph::verify {} {
-    foreach edge [names edge:*] {
-        set splat [split $edge :^]
-        set src [lindex $splat 1]
-        set tgt [lindex $splat 2]
+    foreach edge [match edge] {
+        set splat [split $edge ^]
+        set src [lindex $splat 0]
+        set tgt [lindex $splat 1]
         
-        if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
+        if { ![exists $src] || ![exists $tgt] } {
             return 0
         }
     }
@@ -330,7 +330,7 @@ body ::tycho::Digraph::verify {} {
 # Add an edge.
 #
 body ::tycho::Digraph::_addedge {vertex1 vertex2 args} {
-    eval add edge:$vertex1^$vertex2 $args
+    eval add edge $vertex1^$vertex2 $args
 }
 
 ########################################################################
@@ -339,7 +339,7 @@ body ::tycho::Digraph::_addedge {vertex1 vertex2 args} {
 # Return a string describing an edge.
 #
 body ::tycho::Digraph::_describeedge {name {prefix {}}} {
-    return "${prefix}edge [lrange [split $name :^] 1 2] [assign $name]\n"
+    return "${prefix}edge [split $name ^] [attrset $name]\n"
 }
 
 ########################################################################
@@ -353,17 +353,16 @@ body ::tycho::Digraph::_updatecache {} {
     chain
 
     # Regenerate vertex list
-    foreach vertex [names vertex:*] {
-        set vertex [lindex [split $vertex :] 1]
+    foreach vertex [match vertex] {
         lappend _vertices $vertex
         set _parents($vertex) {}
         set _children($vertex) {}
     }
     # Regenerate parent-children
-    foreach edge [names edge:*] {
-        set splat [split $edge :^]
-        set src [lindex $splat 1]
-        set tgt [lindex $splat 2]
+    foreach edge [match edge] {
+        set splat [split $edge ^]
+        set src [lindex $splat 0]
+        set tgt [lindex $splat 1]
 
         lappend _children($src) $tgt
         lappend _parents($tgt) $src
