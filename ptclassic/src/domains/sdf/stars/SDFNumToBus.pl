@@ -8,6 +8,7 @@ and then it will convert it to a bus with the required no. of lines.
 	}
 	author { Asawaree }
 	copyright { 1991 The Regents of the University of California }
+	version { %W %G}
 	input {
 		name {input}
 		type {int}
