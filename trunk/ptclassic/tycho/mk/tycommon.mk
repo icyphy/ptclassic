@@ -84,6 +84,8 @@
 # JAVADOC	The 'javadoc' program
 # JDOCFLAGS	Flags to pass to javadoc.
 # JZIP		Zip file of classes to be produced.
+# JARFILE	Jar file of classes to be produced.
+# JBEANCLASSES  Classes that are included in the jar file as Java Beans.
 # JDIST		The name and version of the tar.gz and zip files of the sources
 # JTESTHTML	Test html file for a java class.
 # JTCLSH	TclBlend Tcl/Java interface shell.
@@ -100,6 +102,34 @@
 # The reason is that we want to avoid duplicate 'all', 'install' 
 # and 'depend' rules without using the possibly unportable double-colon
 # makefile convention.
+
+# Run make all in the subdirs
+suball:
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making all in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) all ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
+
+# Run make install in the subdirs
+subinstall:
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making install in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources::	$(SRCS) $(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
@@ -131,7 +161,7 @@ sccsinfo:
 	fi
 	@sccs check || true
 
-# Remove everytying that can be retrieved from SCCS, except files that
+# Remove everything that can be retrieved from SCCS, except files that
 # are being edited.
 sccsclean:
 	@if [ "x$(DIRS)" != "x" ]; then \
@@ -282,6 +312,24 @@ jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
 	(cd $(CLASSPATH); zip -qn .class $@ $(JPACKAGE_DIR)/*.class)
 
+jars: $(JARFILE) 
+$(JARFILE): $(JSRCS) $(JCLASS)
+	@if [ "$(JBEANCLASSES)" != "" ]; then \
+		echo "Creating manifest.tmp"; \
+		rm -f manifest.tmp; \
+		echo ";$(JPACKAGE) $(JVERSION)" > manifest.tmp; \
+		for x in $(JBEANCLASSES); do \
+			echo "Name: $$x" >> manifest.tmp; \
+			echo "Java-Bean: True" >> manifest.tmp; \
+		done; \
+		(cd $(CLASSPATH); $(JAR) cfm $(JPACKAGE_DIR)/$@ \
+			$(JPACKAGE_DIR)/manifest.tmp \
+			$(JPACKAGE_DIR)/*.class); \
+	else \
+		echo "Creating $@"; \
+		(cd $(CLASSPATH); $(JAR) cf $(JPACKAGE_DIR)/$@ \
+			$(JPACKAGE_DIR)/*.class); \
+	fi
 
 # Rules to build Java package distributions
 # This rule builds both a tar file and zip file of the sources
@@ -291,7 +339,7 @@ jdist: $(JDISTS)
 # List of files to exclude
 JDIST_EX =	/tmp/$(JDIST).ex
 $(JDIST_EX): $(ROOT)/mk/tycommon.mk
-	/bin/echo "adm\nSCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip" > $@ 
+	/bin/echo "adm\nSCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip\n$(JARFILE)" > $@ 
 
 $(JDIST).tar.gz:  $(JDIST_EX)
 	(cd ..; gtar -zchf $(JPACKAGE)/$@ -X $(JDIST_EX) $(JPACKAGE))
@@ -503,7 +551,8 @@ checkjunk:
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
 	config.cache config.log config.status \
-	$(JCLASS) $(JPACKAGE).zip $(JDISTS) $(KRUFT)  
+	$(JCLASS) $(JPACKAGE).zip $(JPACKAGE).jar \
+	$(JDISTS) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
