@@ -50,7 +50,7 @@ EXTRA_SRCS = \
 	editors.html \
 	consoles.html
 
-MISC_FILES =
+MISC_FILES = codeDoc internals usersGuides
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
