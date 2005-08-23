@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+#	$Id$
+#
+
+/usr/tools/gnu/bin/gawk '$1 == "new" {
+	if ($3 == "Top") tag = $2 ":" $4;
+	else tag = $2 ":" $3 ":" $4;
+	where[$6] = tag;
+	blocksiz[$6] = $5;
+	idx[$6] = NR;
+}
+
+$1 == "del" {
+	if ($5 in where) {
+		delete where[$5];
+	}
+	else printf("No new for %s\n", $0);
+}
+END {
+	print "Undeleted blocks:";
+	for (loc in where) {
+		print idx[loc], where[loc], blocksiz[loc], loc;
+	}
+}' $MEMORYLOG | sort -n

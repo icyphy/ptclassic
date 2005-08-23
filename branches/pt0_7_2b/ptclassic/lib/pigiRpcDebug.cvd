@@ -1,0 +1,24 @@
+#! /bin/sh
+# usage: pigiRpcDebug <vem-args>
+# $Id$
+# Author: Dominique RAGOT, THOMSON-CSF Optronique,
+
+# This is typically invoked from wtih pigiRpcShell as the $COMMAND.
+# It brings up the debugger running PIGIRPC.
+
+# Use cvd as a debugger instead of gdb.
+# irix6 requires this
+
+dbginifile=$HOME/.cvdpigi
+dbgcmdfile=/tmp/rpc$$
+cp $dbginifile $dbgcmdfile
+cat >> $dbgcmdfile <<EOF
+run $*
+EOF
+
+CVDINIT=$dbgcmdfile
+export CVDINIT
+
+DEBUG='cvd'
+
+${PT_DEBUG-$DEBUG} $PIGIRPC &
