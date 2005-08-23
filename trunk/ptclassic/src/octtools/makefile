@@ -60,9 +60,9 @@ MAKEVARS = "PTARCH=$(PTARCH)"
 
 OCTTOOLS=$(PTOLEMY)/octtools
 
-.PHONY:	header liball libinstall vemall installvem otherinstall
-all vem: header liball libinstall otherall vemall
-install: header liball libinstall vemall installvem otherinstall
+.PHONY:	makefiles header liball libinstall vemall installvem otherinstall
+all vem: makefiles header liball libinstall otherall vemall
+install: makefiles header liball libinstall vemall installvem otherinstall
 
 otherall:
 	for x in $(OTHERDIRS); do \
