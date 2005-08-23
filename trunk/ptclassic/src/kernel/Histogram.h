@@ -43,10 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "logNew.h"
 
-//#ifndef PTSOL10
-inline int round(double x) { return x > 0 ? int(x+0.5) : -int(0.5-x); }
-//#endif
-
 // a simple integer vector class
 class intVec {
 private:

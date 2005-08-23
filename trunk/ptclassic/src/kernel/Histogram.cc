@@ -46,6 +46,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "StringList.h"
 
+//#ifndef PTSOL10
+inline int round(double x) { return x > 0 ? int(x+0.5) : -int(0.5-x); }
+//#endif
+
+
 // resize causes the intVec to grow or shrink.  The data are reallocated
 // and copied.
 
