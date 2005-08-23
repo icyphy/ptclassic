@@ -61,6 +61,8 @@ else
 	limit descriptors 128
 endif
 
+# Use the X11 version of pxgraph.  See src/pxgraph/README.txt
+setenv PT_USE_X11_PXGRAPH yes
 
 # Setup that is generic to all platforms at UCB is below here
 
