@@ -1,0 +1,163 @@
+<!-- @(#)tute-custom.html	1.9 04/06/98 -->
+<html>
+<head>
+<Title>Creating custom items</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Creating custom items</h1>
+
+<p>You can add new item types to the Slate by writing an Itcl class.
+You need to inherit from ComplexItem or a subclass. The ComplexItem class and 
+its subclasses are not proper classes, but a mechanism for manipulating
+items IDs and tags to give the Slate client the appearance of a single
+complex item, which is made of many primitive items.
+
+<p>As an example, we will create a simple class that is an oval
+with a text label in the center of it. This is a simple version of the 
+LabeledOval class. Firstly, we'll create the class body (the
+details will be filled in shortly):
+
+<tcl><pre>
+class ::tycho::Simple {
+    inherit ::tycho::ComplexItem
+
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    proc coords    {id canvas slate args}
+    proc _text     {id canvas slate tx}
+
+    protected common shape "oval"
+
+    private common methodtable
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    set methodtable(construct) ::tycho::Simple::construct
+    set methodtable(coords)    ::tycho::Simple::coords
+    set methodtable(_text)     ::tycho::Simple::_text
+
+    private common optiondefault
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+    set optiondefault(-text) ""
+}
+</pre></tcl>
+
+
+<p>Notice that the class contains procedures only -- not methods. The
+first three arguments to each procedure are always <i>id</i> (the item
+ID), <i>canvas</i> (the canvas widget inside the Slate we are drawing
+on) and <i>slate</i> (the Slate widget). Notice also that all data is
+``common'': each is an array indexed by the item ID. Every ComplexItem
+subclass must have the common variables <code>shape</code>,
+<code>methodtable</code>, and <code>optiondefault</code>.
+
+<p>To simulate inheritance, <code>methodtable</code> must first be set
+with the names of the procs in the parent class (the first <code>array
+set</code>), and then updated with procs defined in this class. The
+options are also inherited: the same procedure must be followed with
+the <code>optiondefault</code> array. This class has a single option,
+<code>-text</code>.
+
+<p> The <code>construct</code> procedure is called to create a new item.  
+It must start by setting the options: the first three lines of code are 
+common to every <code>construct</code> procedure.  In this case, the 
+<code>text</code> array will have an entry set to the supplied value of 
+the <code>-text</code> option, or the default value if none is supplied.
+
+<p>The next line creates the "primary" item -- every picture must create 
+one of these, which must be a primitive items.  It is used by the Slate 
+to get the coordinates of the complex item.  In this example, the 
+primary item is also displayed; in other cases, it may not be displayed 
+(by setting its <code>-outline</code> option to <code>{}</code>).  The 
+final line of code creates the text label, using the <code>-text</code>
+option, and remembers the text item ID in the <code>component</code> 
+array (define in the <code>ComplexItem</code> superclass).
+
+<tcl><pre>
+body ::tycho::Simple::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+        set option([string trimleft $opt -]$id) $val
+    }
+
+    # Create the primary component. This is the displayed oval.
+    set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 &#92
+	    -tags $tags]
+
+    # Create the text label
+    set component(label$id) [$canvas create text &#92
+	    [expr ($x0+$x1)/2] [expr ($y0+$y1)/2] &#92
+	    -text $option(text$id) -tags $tags]
+}
+</pre></tcl>
+
+<p>When the <code>-text</code> option is configured, the Slate calls a 
+procedure with the same name as the option (without the leading dash).
+Here is the <code>text</code> procedure -- it updates the text in the 
+text item:
+
+<tcl><pre>
+body ::tycho::Simple::_text {id canvas slate text} {
+    set option(text$id) $text
+    $canvas itemconfigure $component(label$id) -text $text
+}
+</pre></tcl>
+
+<p>Finally, we provide a special implementation of the 
+<code>coords</code> procedure to handle a change in the coordinates. 
+(In this example, it is not really necessary: the Slate provides a 
+default behavior based on item scaling that will be adequate for
+many complex items.)
+
+<tcl><pre>
+body ::tycho::Simple::coords {id canvas slate args} {
+    if { $args == "" } {
+        return [$canvas coords $primary($id)]
+    }
+    ::tycho::assign x0 y0 x1 y1 $args
+
+    # Move the oval
+    $canvas coords $primary($id) $x0 $y0 $x1 $y1
+
+    # Move the text item
+    $canvas coords $component(label$id) &#92
+        [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]
+}
+</pre></tcl>
+
+<p>To try out your new item type, just call the Slate as before:
+
+<tcl quiet><pre>
+  set slate [::tycho::Slate::demoslate]
+  set m [$slate create Simple 20 60 60 80 -text Foo]
+</pre></tcl>
+
+<p>Move it:
+
+<tcl><pre>
+  $slate move $m 10 10
+</pre></tcl>
+
+<p>Change its coordinates:
+
+<tcl><pre>
+  $slate coords $m 10 10 90 90
+</pre></tcl>
+
+<p>Change its label:
+
+<tcl><pre>
+  $slate itemconfigure $m -text Bar
+</pre></tcl>
+
+<p>
+<a href="tute-widgets.html">Next</a><br>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 04/06/98,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

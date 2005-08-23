@@ -1,0 +1,77 @@
+<!-- @(#)tute-constraints.html	1.5 05/19/98 -->
+<html>
+<head>
+<Title>Constraints</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Constraints</h1>
+
+<p>The Slate supports a simple constraint mechanism. The mechanism
+is really just a simple notification mechanism, and allows scripts
+to be executed when certain kinds of operations are performed on
+items.
+
+<p>First, we'll create a Slate with some items on it:
+
+<tcl quiet><pre>
+  source $tycho/editors/slate/doc/internals/newslate.itcl
+  set a [$slate create Frame 30 30 70 50 -color green -tags moveable]
+  set b [$slate create Frame 100 100 130 130 &#92
+		-color peachpuff -tags moveable]
+</pre></tcl>
+
+Now draw a line between them:
+<tcl quiet><pre>
+  set l [eval $slate create line &#92
+		[$slate aspect $a se] &#92
+		[$slate aspect $b nw] &#92
+		-tags moveable -arrow last]
+</pre></tcl>
+
+We want the line to remain connected to the boxes if we move either
+of the boxes. To do so, attach a constraint to each box, as follows:
+<tcl quiet><pre>
+  $slate constraint $a "move" {lambda id x y -&gt; &#92
+		$slate reshape $l $x $y "start"}
+  $slate constraint $b "move" {lambda id x y -&gt; &#92
+		$slate reshape $l $x $y "end"}
+</pre></tcl>
+
+(Try moving the boxes.)
+The first command here says that, when box <i>a</i> is moved, to move
+the <i>start</i> of the line by the same amount; the second line says
+that when box <i>b</i> is moved, to move the <i>end</i> of the line by
+the same amount.
+
+<p>Now, suppose we also want the boxes to move if we move the line. This
+is simple enough -- attach a constraint to the line, so that
+when it is moved, both boxes are moved:
+
+<tcl quiet><pre>
+  $slate constraint $l "move" {lambda id x y -> 
+	$slate move $a $x $y; &#92
+	$slate move $b $x $y }
+</pre></tcl>
+
+(Try moving the line. You have to position the mouse
+fairly carefully to "grab" it.)
+You will notice the constraints here are circular: moving the line
+moves the boxes, which in turn will try to reshape the line.
+The Slate checks for this kind of circularity and simply
+stops propagating constraints if a constraint attempts to
+move or reshape an item that has already been moved or reshaped.
+
+<p>
+<a href="tute-custom.html">Next</a><br>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/19/98,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

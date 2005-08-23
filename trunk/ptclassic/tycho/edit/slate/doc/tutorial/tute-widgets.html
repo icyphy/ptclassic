@@ -1,0 +1,167 @@
+<!-- @(#)tute-widgets.html	1.12 05/11/98 -->
+<html>
+<head>
+<Title>Creating custom widgets</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Creating custom widgets</h1>
+
+<p>One of the uses of the Slate is to rapidly create custom widgets.  
+We'll use the Slate and some interactors to simulate a custom widget 
+that mimics a "slider" as used on audio equipment.  This example is a 
+simple version of the complete <a 
+href="../usersGuides/SliderHelp.html">Slider</a> widget contained in the 
+Slate directory.
+
+<p>First, make a clean slate:
+<tcl quiet><pre>
+set slate [::tycho::Slate::demoslate]
+</pre></tcl>
+
+<p>Now, create some items that represent the slider components. The 
+first is a text item to display the current value:
+
+<tcl quiet><pre>
+set value [$slate create text 50 20 -text 0 -anchor s -fill blue]
+</pre></tcl>
+
+<p>The second is the vertical "trough" of the slider:
+
+<tcl quiet><pre>
+set trough [$slate create Frame 48 23 52 143 -color darkgrey &#92
+		-borderwidth 2 -relief sunken]
+</pre></tcl>
+
+<p>The third is the horizontal "bar" of the slider:
+
+<tcl quiet><pre>
+set bar [$slate create Frame 40 132 60 142  &#92
+		-color darkseagreen -borderwidth 3]
+</pre></tcl>
+
+<p>When the bar is moved, we want to update the display of the slider 
+value.  Assuming the slider ranges from 0 to 11, this procedure will 
+update it:
+
+<tcl><pre>
+proc updatevalue {args} {
+    global slate bar value
+    set position [expr [lindex [$slate coords $bar] 1] + 5]
+    set x [expr (137.0-$position)/108.0 * 11.0]
+    $slate itemconfigure $value -text [format %.1f $x]
+}
+</pre></tcl>
+
+<p>Now, we need some interactors to move the bar.  Firstly, create and 
+bind a <a href="../codeDoc/Bounder.html">Bounder</a> that moves the bar along the trough.  It is given a 
+value for its <code>-bounds</code> option to prevent it being moved past 
+the ends of the trough:
+
+<tcl quiet><pre>
+set bounder [$slate interactor Bounder &#92
+		-dragcommand updatevalue &#92
+		-constrain y -bounds {0 24 0 142}]	
+$bounder bind $bar -button 1
+</pre></tcl>
+
+(Try moving the bar.) Now, suppose instead we want the bar to move in 
+steps of 0.5 instead of continuously.  To do this, create a 
+<a href="../codeDoc/Stepper.html">Stepper</a> 
+interactor and cascade it with the
+ <a href="../codeDoc/Bounder.html">Bounder</a> interactor:
+
+<tcl quiet><pre>
+set stepper [$slate interactor Stepper -stepsize [expr 108.0/22] &#92
+		-dragcommand updatevalue]
+$bounder cascade $stepper
+</pre></tcl>
+
+(Now try moving the bar. Depending on where the bar was when you
+invoked the above code, the displayed values may not be multiples of
+0.5. For this simple example, we won't worry about fixing this.) To get
+back to the previous behavior, remove  the stepper from the chain:
+
+<tcl><pre>
+$bounder uncascade
+</pre></tcl>
+
+We have just used a couple of interactors that use the
+mouse to manipulate graphical object -- most interactors are
+in fact of this type. To illustrate that there is more
+to interactors than just dragging things about with the mouse, let's
+first create a label underneath the slider:
+
+<tcl quiet><pre>
+set label [$slate create text 50 150 -text "A slider" -anchor n &#92
+			-justify center]
+</pre></tcl>
+
+And then attach an <a href="../codeDoc/TextItemEdit.html">TextItemEdit</a>
+interactor to it:
+
+<tcl quiet><pre>
+set editor [$slate interactor TextItemEdit]
+$editor bind $label
+</pre></tcl>
+
+Now, clicking on the label underneath the slider will place the
+insertion cursor in the label and allow you to edit it. Use shift with
+the cursor keys to select a region; use Control with the cursor keys to
+move left and right a word at a time. To remove the cursor from the
+label:
+
+<tcl quiet><pre>
+$editor stop
+</pre></tcl>
+
+To disable editing completely:
+
+<tcl quiet><pre>
+$editor unbind $label
+</pre></tcl>
+
+This example has created a slider directly onto a Slate. The complete
+Slider widget is an [incr Tk] mega-widget, and so can be created just
+like any other widget:
+
+<tcl><pre>
+::tycho::Displayer .d
+::tycho::Slider .d.s -label Fred -resolution 0.5 -to 11 -command puts
+pack .d.s
+.d centerOnScreen
+</pre></tcl>
+
+(This Slider prints its current value to the Tcl console.
+There's actually a bug in it: it is performing too many
+prints...)
+The Slider widget has <a href="../usersGuides/SliderHelp.html">a more
+complex set of interaction mechanisms</a>, and uses two more
+interactors we have not used in this tutorial:
+
+<ul>
+<li>A <i>Repeater</i> interactor steps the bar at fixed time intervals
+towards the mouse while the left button is held down anywhere near the trough.
+<li>Another <i>Alonger</i> is used to "jump" the bar to the mouse 
+position when the middle button is clicked anywhere near the trough.
+</ul>
+
+ <P>See the <a href="../usersGuides/SliderHelp.html">Slider User's
+Guide</a> for a description of its operation,  the <a
+href="../codeDoc/Slider.html">Slider class documentation</a> for more
+information on its calling interface and options, and the 
+<a href="tute-interactors.html">Interactor overview</a> document for detailed
+information on the interactors.
+
+<p>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/11/98,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>
