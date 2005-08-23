@@ -1,0 +1,74 @@
+domain SDF
+defgalaxy fib {
+	domain DDF
+	star Const1 Const
+	setstate Const1 level "-1.0"
+	star Const2 Const
+	setstate Const2 level "-1.0"
+	star Const3 Const
+	setstate Const3 level 1.0
+	star Gain1 Gain
+	setstate Gain1 gain 1.0
+	star "Add.input=21" Add
+	numports "Add.input=21" input 2
+	star "Add.input=22" Add
+	numports "Add.input=22" input 2
+	star "Add.input=23" Add
+	numports "Add.input=23" input 2
+	star Thresh1 Thresh
+	setstate Thresh1 threshold 1.5
+	star BlackHole1 BlackHole
+	star Self1 Self
+	setstate Self1 recurGal fib
+	star Self2 Self
+	setstate Self2 recurGal fib
+	star "Case.output=21" Case
+	numports "Case.output=21" output 2
+	star "EndCase.input=21" EndCase
+	numports "EndCase.input=21" input 2
+	alias "input#1" Gain1 input
+	node node1
+	nodeconnect Gain1 output node1
+	nodeconnect Thresh1 input node1
+	nodeconnect Case.output=21 input node1
+	connect Const1 output "Add.input=21" "input#1"
+	node node2
+	nodeconnect Add.input=21 output node2
+	nodeconnect Add.input=22 input#2 node2
+	nodeconnect Self2 input node2
+	connect Const2 output "Add.input=22" "input#1"
+	connect Self2 output "Add.input=23" "input#2"
+	connect "Add.input=22" output Self1 input
+	connect Self1 output "Add.input=23" "input#1"
+	node node3
+	nodeconnect Thresh1 output node3
+	nodeconnect Case.output=21 control node3
+	nodeconnect EndCase.input=21 control node3
+	connect Const3 output "EndCase.input=21" "input#1"
+	connect "Add.input=23" output "EndCase.input=21" "input#2"
+	connect "Case.output=21" "output#1" BlackHole1 input
+	connect "Case.output=21" "output#2" "Add.input=21" "input#2"
+	alias "output#1" "EndCase.input=21" output
+}
+reset
+# Creating universe 'fibonnacci'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Fibonnacci numbers"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -0 'f(n)' =800x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star fib1 fib
+	connect Ramp1 output fib1 "input#1"
+	connect fib1 "output#1" Xgraph1 input
+run 7
+wrapup

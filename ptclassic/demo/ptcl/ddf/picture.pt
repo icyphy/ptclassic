@@ -1,0 +1,81 @@
+domain DDF
+defgalaxy displayline {
+	domain SDF
+	star Const1 Const
+	setstate Const1 level 0.0
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate 0
+	setstate Integrator1 state 0.0
+	star Integrator2 Integrator
+	setstate Integrator2 feedbackGain 1.0
+	setstate Integrator2 top 0.0
+	setstate Integrator2 bottom 0.0
+	setstate Integrator2 saturate 0
+	setstate Integrator2 state 0.0
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title "Path of a moth"
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "-P -0 '' =500x500+0+0"
+	setstate XYgraph1 ignore 0
+	alias xvec Integrator1 data
+	alias yvec Integrator2 data
+	node node1
+	nodeconnect Const1 output node1
+	nodeconnect Integrator1 reset node1
+	nodeconnect Integrator2 reset node1
+	connect Integrator1 output XYgraph1 xInput
+	connect Integrator2 output XYgraph1 input
+}
+domain SDF
+defgalaxy drawline {
+	domain DDF
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	star displayline1 displayline
+	star Repeater1 Repeater
+	star Repeater2 Repeater
+	alias length "Fork.output=21" input
+	alias yinc Repeater2 input
+	connect Repeater1 output displayline1 xvec
+	connect Repeater2 output displayline1 yvec
+	connect "Fork.output=21" "output#1" Repeater1 control
+	connect "Fork.output=21" "output#2" Repeater2 control
+	alias xinc Repeater1 input
+}
+reset
+# Creating universe 'picture'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Gain1 Gain
+	setstate Gain1 gain 1.0
+	star Gain2 Gain
+	setstate Gain2 gain 1.0
+	star RectToPolar1 RectToPolar
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower "-10.0"
+	setstate IIDUniform1 upper 10.0
+	star Cos1 Cos
+	star Sin1 Sin
+	star drawline1 drawline
+	star IIDUniform2 IIDUniform
+	setstate IIDUniform2 lower "-10.0"
+	setstate IIDUniform2 upper 10.0
+	node node2
+	nodeconnect RectToPolar1 phase node2
+	nodeconnect Cos1 input node2
+	nodeconnect Sin1 input node2
+	connect Cos1 output Gain1 input
+	connect Sin1 output Gain2 input
+	connect Gain1 output drawline1 xinc
+	connect Gain2 output drawline1 yinc
+	connect RectToPolar1 magnitude drawline1 length
+	connect IIDUniform1 output RectToPolar1 x
+	connect IIDUniform2 output RectToPolar1 y
+run 30
+wrapup

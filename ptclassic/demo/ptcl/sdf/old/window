@@ -1,0 +1,138 @@
+domain SDF
+defgalaxy dtft-mp {
+	domain SDF
+	newstate wStart float 0
+	newstate wStep float "2*PI/256"
+	newstate dtftNumIn int 256
+	newstate dtftNumOut int 256
+	newstate dtftTime float 1.0
+	star RealComplex1 RealComplex
+	star ComplexReal1 ComplexReal
+	star RectPolar1 RectPolar
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star BlackHole1 BlackHole
+	star DTFT1 DTFT
+	setstate DTFT1 length dtftNumIn
+	setstate DTFT1 numberOfSamples dtftNumOut
+	setstate DTFT1 timeBetweenSamples dtftTime
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step wStep
+	setstate FloatRamp1 value wStart
+	alias r RealComplex1 real
+	connect ComplexReal1 real RectPolar1 x
+	connect FloatDC1 output RealComplex1 imag
+	alias m RectPolar1 magnitude
+	connect DTFT1 dtft ComplexReal1 input
+	connect RealComplex1 output DTFT1 signal
+	connect RectPolar1 phase BlackHole1 input
+	connect ComplexReal1 imag RectPolar1 y
+	connect FloatRamp1 output DTFT1 omega
+}
+reset
+# Creating universe 'window'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate winLength int 128
+	newstate wStart float 0.0
+	newstate wStep float "PI/2/1024"
+	newstate dtftNumOut int 1024
+	newstate minDB float "-120"
+	newstate winNames string "-0 hanning -1 hamming -2 blackman -3 steep"
+	newstate sampleTime float 1.0
+	star DB1 DB
+	setstate DB1 min minDB
+	setstate DB1 inputIsPower FALSE
+	star DB2 DB
+	setstate DB2 min "-100"
+	setstate DB2 inputIsPower FALSE
+	star DB3 DB
+	setstate DB3 min "-100"
+	setstate DB3 inputIsPower FALSE
+	star XMgraph.input=41 XMgraph
+	numports XMgraph.input=41 input 4
+	setstate XMgraph.input=41 title "SDFWindow h(n)"
+	setstate XMgraph.input=41 saveFile ""
+	setstate XMgraph.input=41 options "=800x300+0+0 -0 hanning -1 hamming -2 blackman -3 steep"
+	setstate XMgraph.input=41 ignore 0
+	setstate XMgraph.input=41 xUnits sampleTime
+	setstate XMgraph.input=41 xInit 0.0
+	star XMgraph.input=42 XMgraph
+	numports XMgraph.input=42 input 4
+	setstate XMgraph.input=42 title "SDFWindow H(w) mag db"
+	setstate XMgraph.input=42 saveFile ""
+	setstate XMgraph.input=42 options "=800x500+0+350 -0 hanning -1 hamming -2 blackman -3 steep"
+	setstate XMgraph.input=42 ignore 0
+	setstate XMgraph.input=42 xUnits wStep
+	setstate XMgraph.input=42 xInit wStart
+	star DB4 DB
+	setstate DB4 min "-100"
+	setstate DB4 inputIsPower FALSE
+	star dtft-mp1 dtft-mp
+	setstate dtft-mp1 wStart wStart
+	setstate dtft-mp1 wStep wStep
+	setstate dtft-mp1 dtftNumIn winLength
+	setstate dtft-mp1 dtftNumOut dtftNumOut
+	setstate dtft-mp1 dtftTime sampleTime
+	star dtft-mp2 dtft-mp
+	setstate dtft-mp2 wStart wStart
+	setstate dtft-mp2 wStep wStep
+	setstate dtft-mp2 dtftNumIn winLength
+	setstate dtft-mp2 dtftNumOut dtftNumOut
+	setstate dtft-mp2 dtftTime sampleTime
+	star dtft-mp3 dtft-mp
+	setstate dtft-mp3 wStart wStart
+	setstate dtft-mp3 wStep wStep
+	setstate dtft-mp3 dtftNumIn winLength
+	setstate dtft-mp3 dtftNumOut dtftNumOut
+	setstate dtft-mp3 dtftTime sampleTime
+	star dtft-mp4 dtft-mp
+	setstate dtft-mp4 wStart wStart
+	setstate dtft-mp4 wStep wStep
+	setstate dtft-mp4 dtftNumIn winLength
+	setstate dtft-mp4 dtftNumOut dtftNumOut
+	setstate dtft-mp4 dtftTime sampleTime
+	star Window1 Window
+	setstate Window1 name Hanning
+	setstate Window1 length winLength
+	setstate Window1 period 0
+	star Window2 Window
+	setstate Window2 name Hamming
+	setstate Window2 length winLength
+	setstate Window2 period 0
+	star Window3 Window
+	setstate Window3 name Blackman
+	setstate Window3 length winLength
+	setstate Window3 period 0
+	star Window4 Window
+	setstate Window4 name SteepBlackman
+	setstate Window4 length winLength
+	setstate Window4 period 0
+	connect dtft-mp1 m DB1 input
+	connect dtft-mp4 m DB4 input
+	connect dtft-mp3 m DB3 input
+	connect dtft-mp2 m DB2 input
+	node node1
+	nodeconnect Window2 output node1
+	nodeconnect XMgraph.input=41 input#2 node1
+	nodeconnect dtft-mp2 r node1
+	node node2
+	nodeconnect Window3 output node2
+	nodeconnect XMgraph.input=41 input#3 node2
+	nodeconnect dtft-mp3 r node2
+	node node3
+	nodeconnect Window4 output node3
+	nodeconnect XMgraph.input=41 input#4 node3
+	nodeconnect dtft-mp4 r node3
+	node node4
+	nodeconnect Window1 output node4
+	nodeconnect XMgraph.input=41 input#1 node4
+	nodeconnect dtft-mp1 r node4
+	connect DB1 output XMgraph.input=42 input#1
+	connect DB2 output XMgraph.input=42 input#2
+	connect DB3 output XMgraph.input=42 input#3
+	connect DB4 output XMgraph.input=42 input#4
+run 1
+wrapup

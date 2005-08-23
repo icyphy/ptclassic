@@ -1,0 +1,84 @@
+domain SDF
+defgalaxy singen {
+	domain SDF
+	newstate sample_rate FLOAT "2*PI"
+	newstate frequency FLOAT "PI/50"
+	star Ramp1 Ramp
+	setstate Ramp1 step "2*PI*frequency/sample_rate"
+	setstate Ramp1 value 0.0
+	star Sin1 Sin
+	connect Ramp1 output Sin1 input
+	alias out Sin1 output
+}
+reset
+# Creating universe 'analytic'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star "MpyCx.input=21" MpyCx
+	numports "MpyCx.input=21" input 2
+	star "MpyCx.input=22" MpyCx
+	numports "MpyCx.input=22" input 2
+	star FFTCx1 FFTCx
+	setstate FFTCx1 order 8
+	setstate FFTCx1 size 240
+	setstate FFTCx1 direction 1
+	star FFTCx2 FFTCx
+	setstate FFTCx2 order 9
+	setstate FFTCx2 size 384
+	setstate FFTCx2 direction 1
+	star FIRCx1 FIRCx
+	setstate FIRCx1 taps "< ~ptolemy/src/domains/sdf/demo/analytic.cx"
+	setstate FIRCx1 decimation 8
+	setstate FIRCx1 decimationPhase 0
+	setstate FIRCx1 interpolation 5
+	star DB1 DB
+	setstate DB1 min "-100.0"
+	setstate DB1 inputIsPower FALSE
+	star DB2 DB
+	setstate DB2 min "-100.0"
+	setstate DB2 inputIsPower FALSE
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "spectrum before filter"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x300+0+0 -x K -0 w -y dB"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits "PI/256"
+	setstate Xgraph1 xInit "-PI"
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "spectrum after filter"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "=800x300+0+325 -x K -y dB -0 w"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits "PI/128"
+	setstate Xgraph2 xInit "-PI"
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "1 -1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	star singen1 singen
+	setstate singen1 sample_rate "2*PI"
+	setstate singen1 frequency "PI/5"
+	connect DB2 output Xgraph1 input
+	connect DB1 output Xgraph2 input
+	connect FFTCx1 output DB1 input
+	connect FFTCx2 output DB2 input
+	connect "MpyCx.input=21" output FFTCx2 input
+	connect FIRCx1 signalOut "MpyCx.input=22" "input#1"
+	connect "MpyCx.input=22" output FFTCx1 input
+	connect WaveForm1 output "MpyCx.input=21" "input#2"
+	connect WaveForm2 output "MpyCx.input=22" "input#2"
+	node node1
+	nodeconnect singen1 out node1
+	nodeconnect MpyCx.input=21 input#1 node1
+	nodeconnect FIRCx1 signalIn node1
+run 1
+wrapup

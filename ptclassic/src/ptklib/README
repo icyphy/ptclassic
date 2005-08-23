@@ -1,0 +1,17 @@
+This directory contains routines that are written in C, interface Tcl,
+and are used by both code generation and simulation domains in Ptolemy.
+They are meant to be kept very lean, so that they can be lightweight
+utilities in generated code.
+
+Policy:
+
+All routines callable from C or C++ should return an error status
+(0 for error, 1 for OK).  The caller will be responsible for reporting
+the error to the user.
+
+All routines callable from C++ should have declarations in corresponding .h
+file.  The .h file is to be used by C++ callers only.
+
+All routines callable from Tcl should return TCL_ERROR if an error occurs,
+after having placed the error message in the interp->result.
+They should not report the error directly.

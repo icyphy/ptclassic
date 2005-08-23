@@ -1,0 +1,101 @@
+#! /bin/sh
+# Build Corona and Core skeleton files
+
+# Version: %W% %G%
+# Copyright (c) 1997 The Regents of the University of California.
+# 	All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright
+
+# To create a Corona skeleton and the default Core skeletons, use:
+#	mkcorona domainname starname
+# To create a Corona skeleton and user named Core skeletons use:
+# 	mkcorona domainname starname corename [corename ... ] 
+
+usage="mkcorona [-h] domainname starname [corename ...]"
+defaultcores="CGC Java FPSim FPSimStat FPGA"
+
+if [ "$1" = "-h" ]; then 
+	echo "$usage"
+	echo "Default cores are: $defaultcores"
+	exit 8
+fi
+
+if [ $# -lt 2 ]; then
+	echo "$0: You must specify a domain name and a star name"
+	echo "$usage"
+	echo "Default cores are: $defaultcores"
+	exit 9
+fi
+
+
+
+domainname=$1
+starname=$2
+coronafile=$domainname$starname.pl
+
+# This probably won't work everywhere
+uid=`whoami`
+username=`finger $uid | awk '$0 ~ /In real life/ {for(i=7;i<=NF;i++) printf("%s ",$i); printf("\n");exit }' `
+
+# Check to see if the Corona already exists
+if [ -f $coronafile ]; then
+	echo "$0: Error: $coronafile already exists."
+	exit 10
+fi
+
+if [ $# -gt 2 ]; then
+	cores=${1+"$@"}
+else
+	cores="$defaultcores"
+fi
+
+
+# Make the Corona file
+cat  > $coronafile <<-EoF
+defstar {
+    name { $starname }
+    domain { $domainname }
+    desc { }
+    version { %W% %G% }
+    author { $username}
+    copyright {
+Copyright (c) 1998 The Regents of the University of California.
+All rights reserved.
+See the file \$PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
+    location { $domainname main library }
+    input {
+        name { input }
+        type { float }
+    }
+    output {
+        name { output }
+        type { float }
+    }
+}
+EoF
+
+# Make the Core files
+for core in $cores
+do
+	# Make the Corona file
+	cat > $domainname$starname$core.pl <<-EoF 
+defstar {
+    name { $starname$core }
+    domain { $domainname }
+    corona { $starname } 
+    desc { }
+    version { %W% %G% }
+    author { $username}
+    copyright {
+Copyright (c) 1998 The Regents of the University of California.
+All rights reserved.
+See the file \$PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
+    location { $domainname main library }
+}
+EoF
+
+done

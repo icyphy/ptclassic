@@ -1,0 +1,57 @@
+reset
+# Creating universe 'levinsonDurbin'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate order int 8
+	star LevDur1 LevDur
+	setstate LevDur1 order order
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Parameters of the AR process"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "-P =600x300+0+0 -0 lp -1 refl -x n"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg 512
+	setstate Autocor1 noLags order
+	setstate Autocor1 unbiased YES
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	star BiQuad1 BiQuad
+	setstate BiQuad1 d1 "-0.9"
+	setstate BiQuad1 d2 0.5
+	setstate BiQuad1 n0 1.0
+	setstate BiQuad1 n1 0.0
+	setstate BiQuad1 n2 0.0
+	setstate BiQuad1 state1 0.0
+	setstate BiQuad1 state2 0.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "prediction error power as a fn. of order"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P =680x200+0+330 -0 power -x order"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "autocorrelation estimate"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "-P =680x200+0+560 -0 autocor. -x lag"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits 1.0
+	setstate Xgraph2 xInit "1-order"
+	connect LevDur1 errPower Xgraph1 input
+	node node1
+	nodeconnect Autocor1 output node1
+	nodeconnect LevDur1 autocor node1
+	nodeconnect Xgraph2 input node1
+	connect LevDur1 lp XMgraph.input=21 input#1
+	connect LevDur1 refl XMgraph.input=21 input#2
+	connect BiQuad1 output Autocor1 input
+	connect IIDGaussian1 output BiQuad1 input
+run 1
+wrapup

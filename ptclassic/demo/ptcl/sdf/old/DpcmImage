@@ -1,0 +1,47 @@
+reset
+# Creating universe 'DpcmImage'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ReadImage1 ReadImage
+	setstate ReadImage1 fileName "~ptolemy/src/domains/sdf/demo/ptseq#"
+	setstate ReadImage1 frameId 0
+	star Dpcm1 Dpcm
+	setstate Dpcm1 alpha 0.9375
+	star RunLen1 RunLen
+	setstate RunLen1 Thresh 4
+	star RunLenInv1 RunLenInv
+	star DpcmInv1 DpcmInv
+	setstate DpcmInv1 alpha 0.9375
+	star DisplayImage1 DisplayImage
+	setstate DisplayImage1 command xv
+	setstate DisplayImage1 imageName result
+	setstate DisplayImage1 saveImage n
+	star DisplayImage2 DisplayImage
+	setstate DisplayImage2 command xv
+	setstate DisplayImage2 imageName dpcm_image
+	setstate DisplayImage2 saveImage n
+	star DiffImage1 DiffImage
+	setstate DiffImage1 Scale 2.0
+	star DisplayImage3 DisplayImage
+	setstate DisplayImage3 command xv
+	setstate DisplayImage3 imageName error
+	setstate DisplayImage3 saveImage n
+	connect RunLen1 outData RunLenInv1 input
+	connect RunLenInv1 outData DpcmInv1 input
+	node node1
+	nodeconnect Dpcm1 output node1
+	nodeconnect DisplayImage2 inData node1
+	nodeconnect RunLen1 input node1
+	connect DiffImage1 outData DisplayImage3 inData
+	node node2
+	nodeconnect DpcmInv1 output node2
+	nodeconnect DisplayImage1 inData node2
+	nodeconnect DiffImage1 input2 node2
+	node node3
+	nodeconnect ReadImage1 output node3
+	nodeconnect Dpcm1 input node3
+	nodeconnect DiffImage1 input1 node3
+run 2
+wrapup

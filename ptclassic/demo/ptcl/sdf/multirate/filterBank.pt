@@ -1,0 +1,246 @@
+domain SDF
+defgalaxy analysis {
+	domain SDF
+	newstate highpass floatArray "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	newstate lowpass floatArray "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star FIR1 FIR
+	setstate FIR1 taps highpass
+	setstate FIR1 decimation 2
+	setstate FIR1 decimationPhase 1
+	setstate FIR1 interpolation 1
+	star FIR2 FIR
+	setstate FIR2 taps {lowpass
+}
+	setstate FIR2 decimation 2
+	setstate FIR2 decimationPhase 1
+	setstate FIR2 interpolation 1
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	connect "Fork.output=21" "output#1" FIR1 signalIn
+	connect "Fork.output=21" "output#2" FIR2 signalIn
+	alias hp FIR1 signalOut
+	alias lp FIR2 signalOut
+	alias in "Fork.output=21" input
+}
+domain SDF
+defgalaxy synthesis {
+	domain SDF
+	newstate highpass floatArray "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	newstate lowpass floatArray "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star "Add.input=21" Add
+	numports "Add.input=21" input 2
+	star FIR3 FIR
+	setstate FIR3 taps highpass
+	setstate FIR3 decimation 1
+	setstate FIR3 decimationPhase 0
+	setstate FIR3 interpolation 2
+	star FIR4 FIR
+	setstate FIR4 taps lowpass
+	setstate FIR4 decimation 1
+	setstate FIR4 decimationPhase 0
+	setstate FIR4 interpolation 2
+	alias out "Add.input=21" output
+	alias hp FIR3 signalIn
+	alias lp FIR4 signalIn
+	connect FIR3 signalOut "Add.input=21" "input#1"
+	connect FIR4 signalOut "Add.input=21" "input#2"
+}
+domain SDF
+defgalaxy filterBankSource {
+	domain SDF
+	newstate lengthOfSineBurst int 50
+	newstate center int 50
+	newstate frequency float "PI/5"
+	star "Mpy.input=21" Mpy
+	numports "Mpy.input=21" input 2
+	star Rect1 Rect
+	setstate Rect1 height 1.0
+	setstate Rect1 width lengthOfSineBurst
+	setstate Rect1 period 0
+	star Ramp1 Ramp
+	setstate Ramp1 step frequency
+	setstate Ramp1 value "- center/frequency"
+	star Cos1 Cos
+	connect Rect1 output "Mpy.input=21" "input#2" "center/2"
+	alias out "Mpy.input=21" output
+	connect Cos1 output "Mpy.input=21" "input#1"
+	connect Ramp1 output Cos1 input
+}
+domain SDF
+defgalaxy prescaler {
+	domain SDF
+	newstate gain int 100
+	newstate offset int 128
+	star Limit1 Limit
+	setstate Limit1 bottom "-128"
+	setstate Limit1 top 127
+	star Const1 Const
+	setstate Const1 level offset
+	star Gain1 Gain
+	setstate Gain1 gain gain
+	star "Add.input=22" Add
+	numports "Add.input=22" input 2
+	connect Gain1 output Limit1 input
+	connect Limit1 output "Add.input=22" "input#1"
+	connect Const1 output "Add.input=22" "input#2"
+	alias out "Add.input=22" output
+	alias in Gain1 input
+}
+reset
+# Creating universe 'filterBank'
+domain SDF
+target loop-SDF
+	targetparam logFile ""
+	targetparam schedulePeriod 10000.0
+	newstate base int 17
+	newstate noIterations int 1600
+	star "Fork.output=22" Fork
+	numports "Fork.output=22" output 2
+	star analysis1 analysis
+	setstate analysis1 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis1 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=23" Fork
+	numports "Fork.output=23" output 2
+	star analysis2 analysis
+	setstate analysis2 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis2 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=24" Fork
+	numports "Fork.output=24" output 2
+	star analysis3 analysis
+	setstate analysis3 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis3 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=25" Fork
+	numports "Fork.output=25" output 2
+	star analysis4 analysis
+	setstate analysis4 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis4 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=26" Fork
+	numports "Fork.output=26" output 2
+	star analysis5 analysis
+	setstate analysis5 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis5 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=27" Fork
+	numports "Fork.output=27" output 2
+	star analysis6 analysis
+	setstate analysis6 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis6 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=28" Fork
+	numports "Fork.output=28" output 2
+	star analysis7 analysis
+	setstate analysis7 highpass "< ~ptolemy/src/domains/sdf/demo/qmf.highpass.filter"
+	setstate analysis7 lowpass "< ~ptolemy/src/domains/sdf/demo/qmf.lowpass.filter"
+	star "Fork.output=29" Fork
+	numports "Fork.output=29" output 2
+	star synthesis1 synthesis
+	setstate synthesis1 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis1 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis2 synthesis
+	setstate synthesis2 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis2 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis3 synthesis
+	setstate synthesis3 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis3 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis4 synthesis
+	setstate synthesis4 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis4 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis5 synthesis
+	setstate synthesis5 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis5 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis6 synthesis
+	setstate synthesis6 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis6 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star synthesis7 synthesis
+	setstate synthesis7 highpass "< ~ptolemy/src/domains/sdf/demo/recon.highpass.filter"
+	setstate synthesis7 lowpass "< ~ptolemy/src/domains/sdf/demo/recon.lowpass.filter"
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Delayed Original and Reconstructed Signal"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "=1100x200+0+0 -0 original -1 reconstructed"
+	setstate "XMgraph.input=21" ignore 0
+	setstate "XMgraph.input=21" xUnits 1.0
+	setstate "XMgraph.input=21" xInit 0.0
+	star Repeat1 Repeat
+	setstate Repeat1 numTimes 32
+	star Repeat2 Repeat
+	setstate Repeat2 numTimes 16
+	star Repeat3 Repeat
+	setstate Repeat3 numTimes 8
+	star Repeat4 Repeat
+	setstate Repeat4 numTimes 4
+	star Repeat5 Repeat
+	setstate Repeat5 numTimes 2
+	star "Commutator.input=81" Commutator
+	numports "Commutator.input=81" input 8
+	setstate "Commutator.input=81" blockSize noIterations
+	star Repeat6 Repeat
+	setstate Repeat6 numTimes 64
+	star Repeat7 Repeat
+	setstate Repeat7 numTimes 64
+	star filterBankSource1 filterBankSource
+	setstate filterBankSource1 lengthOfSineBurst 50
+	setstate filterBankSource1 center 50
+	setstate filterBankSource1 frequency "PI/5"
+	star prescaler1 prescaler
+	setstate prescaler1 gain 100
+	setstate prescaler1 offset 128
+	star PixToImage1 PixToImage
+	setstate PixToImage1 width noIterations
+	setstate PixToImage1 height 8
+	star DisplayImage1 DisplayImage
+	setstate DisplayImage1 command "xv -geometry 800x160+0+250"
+	setstate DisplayImage1 imageName "wavelet-transform"
+	setstate DisplayImage1 saveImage n
+	connect analysis1 hp "Fork.output=23" input "base*63/2"
+	connect analysis2 hp "Fork.output=24" input "base*31/2"
+	connect analysis3 hp "Fork.output=25" input "base*15/2"
+	connect analysis4 hp "Fork.output=26" input "base*7/2"
+	connect analysis5 hp "Fork.output=27" input "base*3/2"
+	connect analysis6 hp "Fork.output=28" input 8
+	connect analysis7 hp "Fork.output=29" input
+	connect "Fork.output=22" "output#2" analysis1 in
+	connect analysis1 lp analysis2 in
+	connect analysis2 lp analysis3 in
+	connect analysis3 lp analysis4 in
+	connect analysis4 lp analysis5 in
+	connect analysis5 lp analysis6 in
+	connect analysis6 lp analysis7 in
+	connect "Fork.output=29" "output#2" synthesis1 hp
+	connect "Fork.output=28" "output#2" synthesis2 hp 9
+	connect "Fork.output=27" "output#2" synthesis3 hp "base*3/2 + 1"
+	connect "Fork.output=26" "output#2" synthesis4 hp "base*7/2+1"
+	connect "Fork.output=25" "output#2" synthesis5 hp "base*15/2+1"
+	connect "Fork.output=24" "output#2" synthesis6 hp "base*31/2+1"
+	connect "Fork.output=23" "output#2" synthesis7 hp "base*63/2+1"
+	connect synthesis6 out synthesis7 lp
+	connect synthesis5 out synthesis6 lp
+	connect synthesis4 out synthesis5 lp
+	connect synthesis3 out synthesis4 lp
+	connect synthesis2 out synthesis3 lp
+	connect synthesis1 out synthesis2 lp
+	connect synthesis7 out "XMgraph.input=21" "input#2"
+	connect "Fork.output=22" "output#1" "XMgraph.input=21" "input#1" "base*63*2 + base"
+	connect "Fork.output=24" "output#1" Repeat5 input
+	connect "Fork.output=25" "output#1" Repeat4 input
+	connect "Fork.output=26" "output#1" Repeat3 input
+	connect "Fork.output=27" "output#1" Repeat2 input
+	connect "Fork.output=28" "output#1" Repeat1 input
+	connect "Fork.output=29" "output#1" Repeat6 input
+	node node1
+	nodeconnect analysis7 lp node1
+	nodeconnect Repeat7 input node1
+	nodeconnect synthesis1 lp node1
+	connect Repeat6 output "Commutator.input=81" "input#7"
+	connect Repeat7 output "Commutator.input=81" "input#8"
+	connect "Fork.output=23" "output#1" "Commutator.input=81" "input#1"
+	connect Repeat5 output "Commutator.input=81" "input#2"
+	connect Repeat4 output "Commutator.input=81" "input#3"
+	connect Repeat3 output "Commutator.input=81" "input#4"
+	connect Repeat2 output "Commutator.input=81" "input#5"
+	connect Repeat1 output "Commutator.input=81" "input#6"
+	connect filterBankSource1 out "Fork.output=22" input
+	connect "Commutator.input=81" output prescaler1 in
+	connect prescaler1 out PixToImage1 input
+	connect PixToImage1 output DisplayImage1 inData
+run 1
+wrapup

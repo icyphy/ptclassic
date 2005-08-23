@@ -1,0 +1,73 @@
+reset
+# Creating universe 'analytic'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 0.628319
+	setstate FloatRamp1 value 0.0
+	star Sin1 Sin
+	star ComplexFIR1 ComplexFIR
+	setstate ComplexFIR1 taps "< ~ptolemy/src/domains/sdf/demo/analytic.cx"
+	setstate ComplexFIR1 decimation 8
+	setstate ComplexFIR1 decimationPhase 0
+	setstate ComplexFIR1 interpolation 5
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order 8
+	setstate ComplexFFT1 size 240
+	setstate ComplexFFT1 direction 1
+	star DB1 DB
+	setstate DB1 min "-100.0"
+	setstate DB1 inputIsPower FALSE
+	star ComplexFFT2 ComplexFFT
+	setstate ComplexFFT2 order 9
+	setstate ComplexFFT2 size 384
+	setstate ComplexFFT2 direction 1
+	star DB2 DB
+	setstate DB2 min "-100.0"
+	setstate DB2 inputIsPower FALSE
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "spectrum before filter"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x300+0+0 -x K -0 w -y dB"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits "PI/256"
+	setstate Xgraph1 xInit "-PI"
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "spectrum after filter"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "=800x300+0+325 -x K -y dB -0 w"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits "PI/128"
+	setstate Xgraph2 xInit "-PI"
+	star ComplexProduct.input=21 ComplexProduct
+	numports ComplexProduct.input=21 input 2
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	star ComplexProduct.input=22 ComplexProduct
+	numports ComplexProduct.input=22 input 2
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "1 -1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	connect FloatRamp1 output Sin1 input
+	connect DB2 output Xgraph1 input
+	connect DB1 output Xgraph2 input
+	connect ComplexFFT1 output DB1 input
+	connect ComplexFFT2 output DB2 input
+	node node1
+	nodeconnect Sin1 output node1
+	nodeconnect ComplexFIR1 signalIn node1
+	nodeconnect ComplexProduct.input=21 input#1 node1
+	connect ComplexProduct.input=21 output ComplexFFT2 input
+	connect ComplexFIR1 signalOut ComplexProduct.input=22 input#1
+	connect ComplexProduct.input=22 output ComplexFFT1 input
+	connect WaveForm1 output ComplexProduct.input=21 input#2
+	connect WaveForm2 output ComplexProduct.input=22 input#2
+run 1
+wrapup

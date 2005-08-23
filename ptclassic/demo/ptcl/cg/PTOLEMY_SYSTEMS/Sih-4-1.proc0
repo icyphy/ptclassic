@@ -1,0 +1,21 @@
+#User:      jbuck
+#Date:      Wed Dec  2 13:36:22 1992
+#Target:    SharedBus.Sih-4-1.proc0
+#Universe:  Sih-4-1.proc0
+REPEAT 1 TIMES { /* depth 0*/
+// Line 1 from Source star
+// Line 2 from Source star
+// Multi Output star
+// CGSend Block
+// From processor 0   to processor 1
+// CGSend Block
+// From processor 0   to processor 2
+// Line 1 from CGThrough if control == FALSE
+// Line 2 from CGThrough if control == FALSE
+// Line 1 from CGThrough if control == FALSE
+// Line 2 from CGThrough if control == FALSE
+// Line 1 from CGThrough if control == FALSE
+// Line 2 from CGThrough if control == FALSE
+// Line 1 code from CGSink
+// Line 2 code from CGSink
+} /* end repeat, depth 0*/

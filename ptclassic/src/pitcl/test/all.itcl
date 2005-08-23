@@ -1,0 +1,13 @@
+# CAUTION: automatically generated file by a rule in tycommon.mk
+# This file will source all the .itcl files in the current
+# directory.  This file is different from alltest.itcl
+# in that alltest.itcl will source only the itcl files
+# that are listed in the makefile
+#
+# Set the following to avoid endless calls to exit
+set reallyExit 0
+foreach file [glob *.itcl] {
+    if {$file != "all.itcl" && $file != "alltests.itcl"} {
+         source $file
+    }
+}

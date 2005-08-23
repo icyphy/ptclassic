@@ -1,0 +1,61 @@
+#! /bin/sh
+# Command-line program for the tycho.kernel.gui utility \
+    exec itclsh "$0" "$@"
+
+# @(#)gui	1.1 02/24/98
+# Author: John Reekie
+
+# If the GUI_LIBRARY variable is set, add it to the auto_path
+if [info exists env(GUI_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(GUI_LIBRARY)] }  {
+	lappend auto_path $env(GUI_LIBRARY)
+    }
+}
+
+# Require the tycho.kernel.gui package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.kernel.gui}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.kernel.gui}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.kernel.gui}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.kernel.gui\". You can\n\
+	    1. Install tycho.kernel.gui in a subdirectory of your Tcl library\n\
+	    2. Install tycho.kernel.gui in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the GUI_LIBRARY variable to point to the \
+	    gui directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.kernel.gui, version 2.0"
+
+# Run the main procedure
+eval gui $argv
+
+# Done
+

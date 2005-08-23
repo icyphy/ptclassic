@@ -1,0 +1,313 @@
+domain SDF
+defgalaxy bits {
+	domain SDF
+	newstate probOfZero FLOAT 0.5
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper "1/probOfZero"
+	star FloatThresh1 FloatThresh
+	setstate FloatThresh1 threshold 1.0
+	connect IIDUniform1 output FloatThresh1 input
+	alias out FloatThresh1 output
+}
+domain SDF
+defgalaxy expjx {
+	domain SDF
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star Cos1 Cos
+	star Sin1 Sin
+	star RealComplex1 RealComplex
+	alias in Fork.output=21 input
+	connect Fork.output=21 output#1 Cos1 input
+	connect Fork.output=21 output#2 Sin1 input
+	connect Cos1 output RealComplex1 real
+	connect Sin1 output RealComplex1 imag
+	alias out RealComplex1 output
+}
+domain SDF
+defgalaxy conj {
+	domain SDF
+	star ComplexReal1 ComplexReal
+	star RealComplex2 RealComplex
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "-1.0"
+	connect ComplexReal1 imag FloatGain1 input
+	connect FloatGain1 output RealComplex2 imag
+	connect ComplexReal1 real RealComplex2 real
+	alias out RealComplex2 output
+	alias inc ComplexReal1 input
+}
+domain SDF
+defgalaxy hilbertSplit {
+	domain SDF
+	newstate delay int 32
+	star FIR1 FIR
+	setstate FIR1 taps {0 [delay] 1}
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	star RealComplex3 RealComplex
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain 0.70710678118654752441
+	star Hilbert1 Hilbert
+	setstate Hilbert1 taps "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
+	setstate Hilbert1 decimation 1
+	setstate Hilbert1 decimationPhase 0
+	setstate Hilbert1 interpolation 1
+	setstate Hilbert1 N "2*delay+1"
+	connect FIR1 signalOut RealComplex3 real
+	alias out RealComplex3 output
+	connect Hilbert1 signalOut RealComplex3 imag
+	alias in FloatGain2 input
+	node node1
+	nodeconnect FloatGain2 output node1
+	nodeconnect FIR1 signalIn node1
+	nodeconnect Hilbert1 signalIn node1
+}
+domain SDF
+defgalaxy channel {
+	domain SDF
+	newstate fwdTaps floatarray 1
+	newstate fdbkTaps floatarray 0
+	newstate noisePwr float 0
+	star FIR2 FIR
+	setstate FIR2 taps fwdTaps
+	setstate FIR2 decimation 1
+	setstate FIR2 decimationPhase 0
+	setstate FIR2 interpolation 1
+	star FloatDiff1 FloatDiff
+	star FIR3 FIR
+	setstate FIR3 taps fdbkTaps
+	setstate FIR3 decimation 1
+	setstate FIR3 decimationPhase 0
+	setstate FIR3 interpolation 1
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0
+	setstate IIDGaussian1 variance noisePwr
+	connect FIR2 signalOut FloatDiff1 pos
+	connect FIR3 signalOut FloatDiff1 neg 1
+	node node2
+	nodeconnect FloatDiff1 output node2
+	nodeconnect FloatSum.input=21 input#1 node2
+	nodeconnect FIR3 signalIn node2
+	connect IIDGaussian1 output FloatSum.input=21 input#2
+	alias in FIR2 signalIn
+	alias out FloatSum.input=21 output
+}
+domain SDF
+defgalaxy QAM4 {
+	domain SDF
+	star BitsToInt1 BitsToInt
+	setstate BitsToInt1 nBits 2
+	star CxTable1 CxTable
+	setstate CxTable1 values "(1,1) (-1,1) (1,-1) (-1,-1)"
+	connect BitsToInt1 output CxTable1 input
+	alias in BitsToInt1 input
+	alias out CxTable1 output
+}
+domain SDF
+defgalaxy qam4Slicer {
+	domain SDF
+	star RealComplex4 RealComplex
+	star ComplexReal2 ComplexReal
+	star Sgn1 Sgn
+	star Sgn2 Sgn
+	alias in ComplexReal2 input
+	alias out RealComplex4 output
+	connect Sgn2 output RealComplex4 real
+	connect Sgn1 output RealComplex4 imag
+	connect ComplexReal2 real Sgn2 input
+	connect ComplexReal2 imag Sgn1 input
+}
+domain SDF
+defgalaxy CxPower {
+	domain SDF
+	newstate alpha float 0.99
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain alpha
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate NO
+	setstate Integrator1 state 0.0
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain "1.0-alpha"
+	star ComplexReal3 ComplexReal
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star FloatSum.input=22 FloatSum
+	numports FloatSum.input=22 input 2
+	star DB1 DB
+	setstate DB1 min "-100"
+	setstate DB1 inputIsPower FALSE
+	star FloatGain4 FloatGain
+	setstate FloatGain4 gain 0.5
+	connect FloatDC1 output Integrator1 reset
+	alias out FloatGain4 output
+	alias in ComplexReal3 input
+	node node3
+	nodeconnect ComplexReal3 real node3
+	nodeconnect FloatProduct.input=22 input#2 node3
+	nodeconnect FloatProduct.input=22 input#1 node3
+	node node4
+	nodeconnect ComplexReal3 imag node4
+	nodeconnect FloatProduct.input=21 input#1 node4
+	nodeconnect FloatProduct.input=21 input#2 node4
+	connect FloatProduct.input=22 output FloatSum.input=22 input#1
+	connect FloatProduct.input=21 output FloatSum.input=22 input#2
+	connect FloatSum.input=22 output Integrator1 data
+	connect Integrator1 output FloatGain3 input
+	connect FloatGain3 output DB1 input
+	connect DB1 output FloatGain4 input
+}
+reset
+# Creating universe 'QAM4withDFE'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star bits1 bits
+	setstate bits1 probOfZero 0.5
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step "PI/4"
+	setstate FloatRamp1 value 0.0
+	star ComplexProduct.input=21 ComplexProduct
+	numports ComplexProduct.input=21 input 2
+	star ComplexProduct.input=22 ComplexProduct
+	numports ComplexProduct.input=22 input 2
+	star FIR4 FIR
+	setstate FIR4 taps "< ~ptolemy/src/domains/sdf/demo/bpf.taps"
+	setstate FIR4 decimation 1
+	setstate FIR4 decimationPhase 0
+	setstate FIR4 interpolation 1
+	star DownSample1 DownSample
+	setstate DownSample1 factor 8
+	setstate DownSample1 phase 7
+	star ComplexReal4 ComplexReal
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Baud rate samples at slicer"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "-P -nl -0 real -1 imag =550x275+550+0"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star Fork.output=22 Fork
+	numports Fork.output=22 output 2
+	star XMgraph.input=22 XMgraph
+	numports XMgraph.input=22 input 2
+	setstate XMgraph.input=22 title "Signal and noise powers at slicer, dB"
+	setstate XMgraph.input=22 saveFile ""
+	setstate XMgraph.input=22 options "-0 noise -1 signal =550x275+0+0"
+	setstate XMgraph.input=22 ignore 0
+	setstate XMgraph.input=22 xUnits 1.0
+	setstate XMgraph.input=22 xInit 0.0
+	star ComplexReal5 ComplexReal
+	star FloatGain5 FloatGain
+	setstate FloatGain5 gain 1.4142135623730950487
+	star BlackHole1 BlackHole
+	star CxRaisedCos1 CxRaisedCos
+	setstate CxRaisedCos1 taps "(-.040609,0.0) (-.001628,0.0) (.17853,0.0) (.37665,0.0)(.37665,0.0) (.17853,0.0) (-.001628,0.0) (-.040609,0.0)"
+	setstate CxRaisedCos1 decimation 1
+	setstate CxRaisedCos1 decimationPhase 0
+	setstate CxRaisedCos1 interpolation 16
+	setstate CxRaisedCos1 N 64
+	setstate CxRaisedCos1 P 16
+	setstate CxRaisedCos1 excessBW 1.0
+	star CxDiff1 CxDiff
+	star CxDiff2 CxDiff
+	star CxGain1 CxGain
+	setstate CxGain1 gain "(-1,0)"
+	star CxLMSPlot1 CxLMSPlot
+	setstate CxLMSPlot1 taps {(0,0) [2] (1,0)}
+	setstate CxLMSPlot1 decimation 2
+	setstate CxLMSPlot1 decimationPhase 0
+	setstate CxLMSPlot1 interpolation 1
+	setstate CxLMSPlot1 stepSize 0.2
+	setstate CxLMSPlot1 errorDelay 1
+	setstate CxLMSPlot1 saveTapsFile ""
+	setstate CxLMSPlot1 graphOptsMag "-0 c0 -1 c1 -2 c2 =550x275+0+300"
+	setstate CxLMSPlot1 graphOptsPhase "-0 c0 -1 c1 -2 c2 =550x275+550+300"
+	setstate CxLMSPlot1 graphTitleMag "forward LMS filter tap magnitudes"
+	setstate CxLMSPlot1 graphTitlePhase "forward LMS filter tap phases"
+	setstate CxLMSPlot1 trace YES
+	star CxLMSPlot2 CxLMSPlot
+	setstate CxLMSPlot2 taps {(0,0) [2]}
+	setstate CxLMSPlot2 decimation 1
+	setstate CxLMSPlot2 decimationPhase 0
+	setstate CxLMSPlot2 interpolation 1
+	setstate CxLMSPlot2 stepSize 0.03
+	setstate CxLMSPlot2 errorDelay 1
+	setstate CxLMSPlot2 saveTapsFile ""
+	setstate CxLMSPlot2 graphOptsMag "-0 d0 -1 d1 -2 d2 =550x275+0+600 "
+	setstate CxLMSPlot2 graphOptsPhase "-0 d0 -1 d1 -2 d2 =550x275+550+600"
+	setstate CxLMSPlot2 graphTitleMag "feedback LMS filter tap magnitudes"
+	setstate CxLMSPlot2 graphTitlePhase "feedback LMS filter tap phases"
+	setstate CxLMSPlot2 trace YES
+	star Trainer1 Trainer
+	setstate Trainer1 trainLength 50
+	star expjx1 expjx
+	star conj1 conj
+	star hilbertSplit1 hilbertSplit
+	setstate hilbertSplit1 delay 32
+	star channel1 channel
+	setstate channel1 fwdTaps "1 .5 .2"
+	setstate channel1 fdbkTaps .98
+	setstate channel1 noisePwr .01
+	star QAM41 QAM4
+	star qam4Slicer1 qam4Slicer
+	star CxPower1 CxPower
+	setstate CxPower1 alpha 0.99
+	star CxPower2 CxPower
+	setstate CxPower2 alpha 0.99
+	connect FloatRamp1 output expjx1 in
+	connect CxRaisedCos1 signalOut ComplexProduct.input=21 input#1
+	node node5
+	nodeconnect expjx1 out node5
+	nodeconnect ComplexProduct.input=21 input#2 node5
+	nodeconnect conj1 inc node5
+	connect hilbertSplit1 out ComplexProduct.input=22 input#1
+	connect conj1 out ComplexProduct.input=22 input#2
+	connect FIR4 signalOut hilbertSplit1 in
+	connect channel1 out FIR4 signalIn
+	connect ComplexProduct.input=22 output DownSample1 input
+	connect CxGain1 output CxLMSPlot1 error 1
+	connect DownSample1 output CxLMSPlot1 signalIn
+	connect CxLMSPlot1 signalOut CxDiff1 pos
+	connect CxLMSPlot2 signalOut CxDiff1 neg 1
+	connect bits1 out QAM41 in
+	connect ComplexReal4 real XMgraph.input=21 input#1
+	connect ComplexReal4 imag XMgraph.input=21 input#2
+	connect qam4Slicer1 out Trainer1 decision
+	node node6
+	nodeconnect CxDiff1 output node6
+	nodeconnect ComplexReal4 input node6
+	nodeconnect CxDiff2 pos node6
+	nodeconnect qam4Slicer1 in node6
+	connect QAM41 out Fork.output=22 input
+	connect Fork.output=22 output#2 CxRaisedCos1 signalIn
+	connect Fork.output=22 output#1 Trainer1 train 6
+	node node7
+	nodeconnect CxDiff2 output node7
+	nodeconnect CxGain1 input node7
+	nodeconnect CxLMSPlot2 error node7
+	nodeconnect CxPower1 in node7
+	node node8
+	nodeconnect Trainer1 output node8
+	nodeconnect CxDiff2 neg node8
+	nodeconnect CxLMSPlot2 signalIn node8
+	nodeconnect CxPower2 in node8
+	connect CxPower1 out XMgraph.input=22 input#1
+	connect CxPower2 out XMgraph.input=22 input#2
+	connect ComplexProduct.input=21 output ComplexReal5 input
+	connect ComplexReal5 real FloatGain5 input
+	connect FloatGain5 output channel1 in
+	connect ComplexReal5 imag BlackHole1 input
+run 500
+wrapup

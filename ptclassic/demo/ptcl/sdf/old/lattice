@@ -1,0 +1,138 @@
+domain SDF
+defgalaxy autocorrelation {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate order FLOAT 16
+	newstate resolution FLOAT 128
+	newstate log2resolution FLOAT 7
+	star LevDur1 LevDur
+	setstate LevDur1 order order
+	star BlackHole1 BlackHole
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "-1.0"
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order log2resolution
+	setstate ComplexFFT1 size "order + 1"
+	setstate ComplexFFT1 direction 1
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star Reciprocal1 Reciprocal
+	setstate Reciprocal1 magLimit 10000.0
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg numInputs
+	setstate Autocor1 noLags order
+	setstate Autocor1 unbiased 0
+	star Cut1 Cut
+	setstate Cut1 nread "order + 1"
+	setstate Cut1 nwrite 1
+	setstate Cut1 offset order
+	star Repeat1 Repeat
+	setstate Repeat1 numTimes resolution
+	star FloatPad1 FloatPad
+	setstate FloatPad1 nread order
+	setstate FloatPad1 nwrite "order + 1"
+	setstate FloatPad1 offset 1
+	setstate FloatPad1 fill 1.0
+	star FloatProduct.input=23 FloatProduct
+	numports FloatProduct.input=23 input 2
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	connect LevDur1 lp FloatGain1 input
+	connect LevDur1 refl BlackHole1 input
+	alias output FloatProduct.input=22 output
+	node node1
+	nodeconnect ComplexFFT1 output node1
+	nodeconnect FloatProduct.input=21 input#1 node1
+	nodeconnect FloatProduct.input=21 input#2 node1
+	connect Autocor1 output LevDur1 autocor
+	connect FloatProduct.input=21 output Reciprocal1 input
+	connect Reciprocal1 output FloatProduct.input=22 input#1
+	connect LevDur1 errPower Cut1 input
+	connect Cut1 output Repeat1 input
+	connect Repeat1 output FloatProduct.input=22 input#2
+	connect FloatGain1 output FloatPad1 input
+	connect FloatPad1 output ComplexFFT1 input
+	connect FloatProduct.input=23 output Autocor1 input
+	alias input FloatProduct.input=23 input#1
+	connect WaveForm1 output FloatProduct.input=23 input#2
+}
+reset
+# Creating universe 'lattice'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate order int 4
+	star FloatDiff1 FloatDiff
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FIR1 FIR
+	setstate FIR1 taps "-2.0 1.91 -0.91 0.205"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	star Lattice1 Lattice
+	setstate Lattice1 reflectionCoefs "0.804534 -0.820577 0.521934 -0.205"
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	star RLattice1 RLattice
+	setstate RLattice1 reflectionCoefs "0.804534 -0.820577 0.521934 -0.205"
+	star autocorrelation1 autocorrelation
+	setstate autocorrelation1 numInputs 512
+	setstate autocorrelation1 order 16
+	setstate autocorrelation1 resolution 128
+	setstate autocorrelation1 log2resolution 7
+	star autocorrelation2 autocorrelation
+	setstate autocorrelation2 numInputs 512
+	setstate autocorrelation2 order 16
+	setstate autocorrelation2 resolution 128
+	setstate autocorrelation2 log2resolution 7
+	star autocorrelation3 autocorrelation
+	setstate autocorrelation3 numInputs 512
+	setstate autocorrelation3 order 16
+	setstate autocorrelation3 resolution 128
+	setstate autocorrelation3 log2resolution 7
+	star XMgraph.input=31 XMgraph
+	numports XMgraph.input=31 input 3
+	setstate XMgraph.input=31 title "Lattice filter demo"
+	setstate XMgraph.input=31 saveFile ""
+	setstate XMgraph.input=31 options {=800x400+0+0 -0 direct-form -1 whitened -2 lattice-form -x "freq(Hz)" -y "(dB)"}
+	setstate XMgraph.input=31 ignore 0
+	setstate XMgraph.input=31 xUnits "1/64"
+	setstate XMgraph.input=31 xInit "-1"
+	star DB1 DB
+	setstate DB1 min "-100"
+	setstate DB1 inputIsPower FALSE
+	star DB2 DB
+	setstate DB2 min "-100"
+	setstate DB2 inputIsPower FALSE
+	star DB3 DB
+	setstate DB3 min "-100"
+	setstate DB3 inputIsPower FALSE
+	connect FIR1 signalOut FloatDiff1 neg
+	connect FloatDiff1 output Fork.output=21 input
+	connect Fork.output=21 output#2 FIR1 signalIn 1
+	connect Lattice1 signalOut autocorrelation1 input
+	connect RLattice1 signalOut autocorrelation2 input
+	node node2
+	nodeconnect Fork.output=21 output#1 node2
+	nodeconnect Lattice1 signalIn node2
+	nodeconnect autocorrelation3 input node2
+	node node3
+	nodeconnect IIDGaussian1 output node3
+	nodeconnect FloatDiff1 pos node3
+	nodeconnect RLattice1 signalIn node3
+	connect autocorrelation1 output DB1 input
+	connect DB1 output XMgraph.input=31 input#2
+	connect autocorrelation2 output DB3 input
+	connect autocorrelation3 output DB2 input
+	connect DB2 output XMgraph.input=31 input#1
+	connect DB3 output XMgraph.input=31 input#3
+run 1
+wrapup

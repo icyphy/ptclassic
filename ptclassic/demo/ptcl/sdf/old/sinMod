@@ -1,0 +1,44 @@
+domain SDF
+defgalaxy singen {
+	domain SDF
+	newstate freq FLOAT 0.062832
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step freq
+	setstate FloatRamp1 value 0.0
+	star Sin1 Sin
+	connect FloatRamp1 output Sin1 input
+	alias out Sin1 output
+}
+domain SDF
+defgalaxy modulator {
+	domain SDF
+	newstate freq FLOAT 0.062832
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star singen1 singen
+	setstate singen1 freq freq
+	alias in FloatProduct.input=21 input#1
+	alias out FloatProduct.input=21 output
+	connect singen1 out FloatProduct.input=21 input#2
+}
+reset
+# Creating universe 'sinMod'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "A modulator demo"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x400+0+0 -0 x"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star singen2 singen
+	setstate singen2 freq "0.01*PI"
+	star modulator1 modulator
+	setstate modulator1 freq "0.2*PI"
+	connect singen2 out modulator1 in
+	connect modulator1 out Xgraph1 input
+run 400
+wrapup

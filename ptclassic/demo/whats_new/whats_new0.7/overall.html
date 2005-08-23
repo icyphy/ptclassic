@@ -1,0 +1,257 @@
+<HTML>
+<HEAD>
+<TITLE>The SR Domain (17-Apr-1996)</TITLE>
+<!-- Created by: Stephen Anthony Edwards, 16-Apr-1996 -->
+<!-- Changed by: Stephen Anthony Edwards, 17-Apr-1996 -->
+
+</HEAD>
+<BODY>
+<H1>The SR Domain</H1>
+
+<H2>Introduction</H2>
+
+The Synchronous/Reactive domain implements a model of computation
+based on a the synchronous model of time like that in the Esterel
+language <A HREF="#SED:berry:92a">[1]</A>.  It is well-suited for
+specifying discrete reactive controllers--systems that maintain an
+ongoing dialog with their environment and must react to it at a speed
+dictated by the environment.
+
+<P>
+
+The model of time in the SR domain is based on the concept of an
+infinitely-fast machine.  When an input arrives from the outside
+world, the infinitely fast machine computes and produces its reaction
+<EM>at the same instant the input arrives</EM>.  Time is thus a series
+of discrete instants when the machine is performing a computation.
+Between these instants, nothing happens.
+
+<P>
+
+The stars in the SR domain communicate through unbuffered single
+driver, multiple receiver arcs.  These arcs carry valued events, which
+may be present with a value, absent, or unknown in each instant.  The
+value on an arc does not persist between instants.
+
+<P>
+
+The SR domain domain simulates the execution of an infinitely-fast
+machine an instant at a time.  The behavior of the system in each
+instant is simulated in two phases.  In the first phase, the stars in
+the system are fired repeatedly (their <TT>go()</TT> methods are
+called) to reach a fixed-point on the arcs' values.  The stars in the
+SR domain satisfy a monotonicity constraint that ensures this fixed
+point always exists and is unique, regardless of firing order.  In the
+second phase, all stars are instructed (their <TT>tick()</TT> method
+is called) to advance their state, if any, based on the values of
+their input arcs.  This prepares them for the next instant.
+
+<P>
+
+Broadly, there are two types of stars in the SR domain: strict and
+non-strict.  If any input to a strict star is unknown, then all of its
+outputs are unknown.  A two-input adder, for example, behaves like
+this--it cannot say anything about its output until the values of both
+inputs are known.  A non-strict star, by contrast, can produce some
+outputs before all of its inputs are known.  A two-input multiplexer
+is an example: when the selection input is known, it can ignore the
+unselected input.
+
+<P>
+
+Non-strict stars are the key to avoiding deadlocked situations when
+there are cyclic connections in the system.  If all the stars in a
+cycle are strict, they each need all of their inputs before producing
+an output--all will be left waiting.  The deadlock can be broken by
+introducing a non-strict star into the cycle that can produce an
+output without having all inputs from other stars in the cycle
+
+<HR>
+
+<H2>Writing SR Stars</H2>
+
+A porthole on an SR star can have an unknown value, an absent value,
+or be present with a particle.  These states can be tested with the
+following methods, which can be called on both input and output
+PortHoles:
+
+<P>
+
+<DL>
+<DT> <TT>int SRPortHole::known()</TT>
+<DD> Return <TT>TRUE</TT> when the value in the port is is known
+<DT> <TT>int SRPortHole::present()</TT>
+<DD> Return <TT>TRUE</TT> when the value in the port is present
+<DT> <TT>int SRPortHole::absent()</TT>
+<DD> Return <TT>TRUE</TT> when the value in the port is absent
+</DL>
+
+Once the presence of a particle on an input port is established, it
+can be accessed as follows:
+
+<P>
+
+<DL>
+<DT> <TT>Particle &amp; InSRPort::get()</TT>
+<DD> Return the particle in the port.  This should only be called
+	when <TT>present()</TT> returns <TT>TRUE</TT> 
+</DL>
+
+The value on an output port can be established by calling one of the
+following.  In an instant, a star may invoke one of these methods
+exactly once--more than this is an error.  (This ensures the
+fixed-point computation in an instant always terminates.)
+
+<P>
+
+<DL>
+<DT> <TT>Particle &amp; OutSRPort::emit()</TT>
+<DD> Force the value on the output port to be present and
+	return a reference to the output particle.
+<DT> <TT>void OutSRPort::makeAbsent()</TT>
+<DD> Force the value on the output port to be absent.
+</DL>
+
+A number of methods set attributes of SR stars.  These should be
+called in the <TT>setup</TT> method of a star as appropriate.  By
+default, none of these attributes is assumed to hold.
+
+<P>
+
+<DL>
+<DT> <TT>SRStar::reactive()</TT>
+<DD> Indicate the star is reactive--it needs at least one
+	present input to produce a present output.
+<DT> <TT>Star::noInternalState()</TT>
+<DD> Indicate the star has no internal state--its behavior in
+	an instant is a function only of the inputs in that instant,
+	and not on history.
+</DL>
+
+By default, a star in the SR domain is strict.  Here is (abbreviated)
+<TT>ptlang</TT> source for a two-input adder:
+
+<LISTING>
+defstar {
+    name { Add }
+    domain { SR }
+
+    input {
+        name { input1 }
+        type { int }
+    }
+
+    input {
+        name { input2 }
+        type { int }
+    }
+
+    output {
+        name { output }
+        type { int }
+    }
+
+    setup {
+        reactive();
+        noInternalState();
+    }
+
+    go {
+        if ( input1.present() && input2.present() ) {
+            output.emit() << int(input1.get()) + int(input2.get());
+        } else {
+          Error::abortRun(*this, "One input present, the other absent");
+        }
+    }
+
+}
+</LISTING>
+
+Non-strict stars inherit from the <TT>SRNonStrictStar</TT> class.
+Here is abbreviated source for a non-strict two-input multiplexer:
+
+<LISTING>
+defstar {
+    name { Mux }
+    domain { SR }
+    derivedFrom { SRNonStrictStar }
+
+    input {
+        name { trueInput }
+        type { int }
+    }
+
+    input {
+        name { falseInput }
+        type { int }
+    }
+
+    input {
+        name { select }
+        type { int }
+    }
+
+    output {
+        name { output }
+        type { int }
+    }
+
+    setup {
+        noInternalState();
+        reactive();
+    }
+
+    go {
+        if ( !output.known() && select.known() ) {
+            if ( select.present() ) {
+                if ( int(select.get()) ) {
+
+                    // Select is true--copy the true input if it's known
+
+                    if ( trueInput.known() ) {
+                        if ( trueInput.present() ) {
+                            output.emit() << int(trueInput.get());
+                        } else {
+                            // true input is absent: make the output absent
+                            output.makeAbsent();
+                        }
+                    }
+                } else {
+
+                    // Select is false--copy the false input if it's known
+
+                    if ( falseInput.known() ) {
+                        if ( falseInput.present() ) {
+                            output.emit() << int(trueInput.get());
+                        } else {
+                            // false input is absent: make the output absent
+                            output.makeAbsent();
+                        }
+                    }
+
+                }
+
+            } else {
+
+                // Select is absent: make the output absent
+
+                output.makeAbsent();
+            }
+        }
+    }
+}
+</LISTING>
+
+<HR>
+
+<dl><a name="SED:berry:92a"><dt>[1]
+<dd> Gerard Berry and Georges Gonthier.
+<dd> The Esterel synchronous programming language: Design, semantics,
+  implementation.
+<dd> <i>Science of Computer Programming</i>, 19(2):87-152, November 1992.
+<dd> <a href="ftp://cma.cma.fr/esterel/BerryGonthierSCP.ps.Z"> <code>
+  ftp://cma.cma.fr/esterel/BerryGonthierSCP.ps.Z </code></a>.
+</dl>
+
+</BODY>
+</HTML>

@@ -1,0 +1,96 @@
+# .twmrc  @(#).twmrc	1.2 3/1/96
+
+# MIT bug fixes for X11R4 Server
+NoBackingStore
+NoSaveUnders
+# End bug fixes
+
+DecorateTransients
+ShowIconManager
+SortIconManager
+IconManagerGeometry     "100x10-0+195"
+IconifyByUnmapping
+IconManagerDontShow {
+    "xclock"
+    "xbiff"
+}
+
+UsePPosition "on"
+RandomPlacement
+AutoRelativeResize
+MoveDelta 10
+
+NoTitle {
+    "xclock"
+    "xbiff"
+    "TWM Icon Manager"
+}
+NoTitleFocus
+
+Color {
+    IconManagerBackground	"black"
+    IconManagerForeground	"white"
+    TitleForeground      "white"
+    TitleBackground      "blue"
+    MenuForeground       "red"
+    MenuBackground       "cyan"
+    MenuTitleForeground  "red"
+    MenuTitleBackground  "turquoise"
+    MenuShadowColor  	 "yellow"
+}
+#    BorderColor		 "red"
+#    BorderTileForeground "blue"
+#    BorderTileBackground "yellow"
+#    IconForeground       "darkgreen"
+#    IconBackground       "cadetblue"
+#    IconBorderColor      "green"
+#    IconManagerBackground	"cyan"
+#    IconManagerForeground	"midnightblue"
+#}
+
+#Button = KEYS  :CONTEXT: FUNCTION
+#----------------------------------
+#Button1 = 	: t	: f.function "move-raise"
+Button1 = m	: w|i	: f.iconify
+Button1 = m|s	: r	: f.refresh
+Button1 = m	: r	: f.menu "Manager"
+Button2 = m	: w	: f.function "move-raiselower"
+Button2 = m	: r	: f.circleup
+Button3 = m	: w|i	: f.resize
+Button3 = m	: r	: f.menu "TwmWindows"
+
+"1"     = 	: r	: f.exec "xterm &"
+"2"     = 	: r	: f.exec "xterm -name xtermGreen &"
+
+
+Function "move-raiselower" { f.move f.raiselower }
+
+menu "Manager"
+{
+menu "WinOps"
+{
+	"ROOT OPERATIONS"	f.title
+	"Refresh"		f.refresh
+	"Focus on Root"		f.unfocus
+	"Cut File"		f.cutfile
+	"WINDOW OPERATIONS"     f.title
+	"Refresh Window"	f.winrefresh
+	"Move Window"		f.move
+	"ForceMove Window"	f.forcemove
+	"Resize Window"		f.resize
+	"Raise Window"		f.raise
+	"Lower Window"		f.lower
+	"Raise or Lower"	f.raiselower
+	"Focus on Window"	f.focus
+	"Raise-n-Focus"		f.function "raise-n-focus"
+	"Destroy Window"	f.destroy
+	"ICON OPERATIONS"	f.title
+	"Show Icon Mgr"		f.showiconmgr
+	"Hide Icon Mgr"		f.hideiconmgr
+	"DeIconify"		f.deiconify
+	"(De)Iconify"		f.iconify
+	"TWM OPERATIONS"	f.title
+	"Source .twmrc"		f.twmrc
+	"twm Version"		f.version
+	"Exit TWM (only)" 	f.quit
+}

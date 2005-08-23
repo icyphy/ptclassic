@@ -1,0 +1,57 @@
+reset
+# Creating universe 'adaptFilter'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	star FIR1 FIR
+	setstate FIR1 taps "< ~ptolemy/src/domains/sdf/demo/fir.taps"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	star FloatDiff1 FloatDiff
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star LMS1 LMS
+	setstate LMS1 taps "< ~ptolemy/src/domains/sdf/demo/lms.taps"
+	setstate LMS1 decimation 1
+	setstate LMS1 decimationPhase 0
+	setstate LMS1 interpolation 1
+	setstate LMS1 stepSize 0.1
+	setstate LMS1 errorDelay 1
+	setstate LMS1 saveTapsFile ""
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Error Signal"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x300+0+325 -0 error"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Filter outputs"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "=800x300+0+0 -0 'FIR output' -1 'LMS output'"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	node node1
+	nodeconnect IIDGaussian1 output node1
+	nodeconnect FIR1 signalIn node1
+	nodeconnect LMS1 signalIn node1
+	node node2
+	nodeconnect FIR1 signalOut node2
+	nodeconnect FloatDiff1 pos node2
+	nodeconnect XMgraph.input=21 input#1 node2
+	connect FloatDiff1 output Fork.output=21 input
+	connect Fork.output=21 output#2 LMS1 error 1
+	node node3
+	nodeconnect LMS1 signalOut node3
+	nodeconnect FloatDiff1 neg node3
+	nodeconnect XMgraph.input=21 input#2 node3
+	connect Fork.output=21 output#1 Xgraph1 input
+run 500
+wrapup

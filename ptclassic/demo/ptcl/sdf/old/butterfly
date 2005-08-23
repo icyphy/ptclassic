@@ -1,0 +1,62 @@
+reset
+# Creating universe 'butterfly'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step "PI/100"
+	setstate FloatRamp1 value 0.0
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain 4.0
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain "1/12"
+	star Sin1 Sin
+	star Cos1 Cos
+	star Cos2 Cos
+	star Exp1 Exp
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain "-2.0"
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star FloatProduct.input=23 FloatProduct
+	numports FloatProduct.input=23 input 2
+	star FloatSum1 FloatSum
+	star PolarRect1 PolarRect
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title Butterfly
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "=600x600+0+0 -0 xy"
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	connect FloatGain2 output Sin1 input
+	connect FloatGain1 output Cos1 input
+	connect Cos2 output Exp1 input
+	connect Cos1 output FloatGain3 input
+	node node1
+	nodeconnect FloatProduct.input=21 output node1
+	nodeconnect FloatProduct.input=22 input#1 node1
+	nodeconnect FloatProduct.input=22 input#2 node1
+	connect FloatProduct.input=22 output FloatProduct.input=23 input#1
+	node node2
+	nodeconnect Sin1 output node2
+	nodeconnect FloatProduct.input=21 input#1 node2
+	nodeconnect FloatProduct.input=21 input#2 node2
+	nodeconnect FloatProduct.input=23 input#2 node2
+	connect FloatGain3 output FloatSum1 input
+	connect FloatProduct.input=23 output FloatSum1 input
+	connect Exp1 output FloatSum1 input
+	connect FloatSum1 output PolarRect1 magnitude
+	node node3
+	nodeconnect FloatRamp1 output node3
+	nodeconnect FloatGain1 input node3
+	nodeconnect Cos2 input node3
+	nodeconnect FloatGain2 input node3
+	nodeconnect PolarRect1 phase node3
+	connect PolarRect1 x XYgraph1 xInput
+	connect PolarRect1 y XYgraph1 input
+run 10000
+wrapup

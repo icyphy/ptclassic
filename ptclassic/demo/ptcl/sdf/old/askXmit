@@ -1,0 +1,61 @@
+domain SDF
+defgalaxy bits {
+	domain SDF
+	newstate probOfZero FLOAT 0.5
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper "1/probOfZero"
+	star FloatThresh1 FloatThresh
+	setstate FloatThresh1 threshold 1.0
+	connect IIDUniform1 output FloatThresh1 input
+	alias out FloatThresh1 output
+}
+domain SDF
+defgalaxy ask {
+	domain SDF
+	newstate level FLOAT 1.0
+	star bits1 bits
+	setstate bits1 probOfZero 0.5
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "2.0*level"
+	star FloatDiff1 FloatDiff
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level level
+	star FIR1 FIR
+	setstate FIR1 taps "< ~ptolemy/src/domains/sdf/demo/rc100"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 8
+	connect bits1 out FloatGain1 input
+	connect FloatGain1 output FloatDiff1 pos
+	connect FloatDC1 output FloatDiff1 neg
+	connect FloatDiff1 output FIR1 signalIn
+	alias out FIR1 signalOut
+}
+reset
+# Creating universe 'askXmit'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ask1 ask
+	setstate ask1 level 1.0
+	star FIR2 FIR
+	setstate FIR2 taps "< ~ptolemy/src/domains/sdf/demo/lpf16"
+	setstate FIR2 decimation 16
+	setstate FIR2 decimationPhase 0
+	setstate FIR2 interpolation 17
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain 17.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "ASK signal"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 signal =800x300+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	connect ask1 out FIR2 signalIn
+	connect FIR2 signalOut FloatGain2 input
+	connect FloatGain2 output Xgraph1 input
+run 20
+wrapup

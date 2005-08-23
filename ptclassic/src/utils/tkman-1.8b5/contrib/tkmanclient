@@ -1,0 +1,102 @@
+#!/usr/local/bin/wish -f
+# command line client interface to tkman. handles directory-relative
+# arguments properly.
+# original author: Chris Siebenmann <cks@hawkwind.utcs.toronto.edu>
+# 
+# Changes by <anthony@aaii.oz.au>, 94-11-01 :
+# Can now give either just the manpage name, eg 'lpd', or section
+# and name, eg 'tkmanclient 8 lpd'. 
+# can give -k argument for apropos.
+# checks for tkman running, starts it if it doesnt exist (that code from
+# tkman_selection, by Scott Schwartz <schwartz@groucho.cse.psu.edu>)
+#
+# Note that you can use this nicely from a window manager button or
+# suchlike by executing the command "tkmanclient `xcb -p 0`"
+# or "tkmanclient `xselection PRIMARY`" (if you have either xcb or
+# xselection)
+
+wm withdraw .; update
+
+proc usage {} {
+    puts stderr {usage: tkmanclient [args] [section] name
+Arguments:  -new    instantiate man page in new window
+            -k      apropos on 'name' (dont give a section)
+            section manpage section (eg 1,2,n)
+            name    name of manpage. }
+}
+
+# check_for_tkman - looks for a running tkman, and returns the name of it,
+# if found. Otherwise, it starts tkman, waits for it to initialise, then
+# returns the name of the newly born tkman. Pretty much as it was in 
+# tkman_selection, except for the change to stop it finding itself in the
+# search for a tkman.
+proc check_for_tkman {} {
+   if {[set found [lsearch -regexp [winfo interps] {^tkman$|tkman[^c]}]]==-1} {
+      # if TkMan doesn't already exist, start one up
+      if {[catch {exec tkman &}]} {return 0}
+
+      # wait for it to be registered
+      for {set found -1} {$found==-1} {after 1} {
+         set found [lsearch -regexp [winfo interps] {^tkman$|tkman[^c]}]
+      }
+
+      # wait for it to initialize
+      for {set ready 0} {!$ready} {after 1} {
+         catch {if {[send tkman set manx(init)]=="1"} {set ready 1}}
+      }
+   }
+   set tkman [lindex [winfo interps] $found]
+
+   return $tkman
+}
+
+# Instantiate new view
+proc instNewView {tkman} {
+    set newwin [send $tkman incr manx(uid)]
+    send $tkman incr manx(outcnt)
+    send $tkman TkMan
+    send $tkman manOutput
+    return .man$newwin
+}
+
+set tkman [ check_for_tkman ]
+if { $tkman == 0 } { puts stderr "couldnt start tkman!"; exit 1; }
+
+set apropos 0
+set instNew 0
+set manWidg .man
+
+set remArgs {}
+
+if {$argc < 1} { usage ; exit 1 }
+for {set i 0} \$i<[llength $argv] {incr i} {
+    set arg [lindex $argv $i]
+    switch -glob -- $arg {
+	-k { set apropos 1 }
+	-new { set manWidg [ instNewView $tkman ] }
+	default {
+	    set remArgs [concat $remArgs  $arg  ]
+	}
+    }
+}
+
+if { $apropos } {
+    if { [llength $remArgs] != 1 } { usage ; exit 1 }
+    send $tkman wm deiconify $manWidg; send $tkman raise $manWidg
+    send $tkman manApropos $manWidg [lindex $remArgs 0]
+} else {
+    if {[llength $remArgs] == 2} {
+	    set msect [lindex $remArgs 0]
+	    set mpage [lindex $remArgs 1]
+    } else {
+	    set msect {all}
+	    set mpage [lindex $remArgs 0]
+    }
+    switch -glob -- $mpage {
+	    "./*" {set mpage [format "%s%s" [pwd] [string range $mpage 1 end]]}
+	    "../*" {set mpage [format "%s/%s" [pwd] $mpage]}
+    }
+    send $tkman wm deiconify $manWidg; send $tkman raise $manWidg
+    send $tkman manShowMan $mpage $msect $manWidg
+}
+exit 0

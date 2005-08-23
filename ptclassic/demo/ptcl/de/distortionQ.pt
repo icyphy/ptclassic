@@ -1,0 +1,140 @@
+domain SDF
+defgalaxy reorderQ {
+	domain DE
+	newstate timeScale FLOAT 1.0
+	newstate queueSize INT 3
+	star "Router.output=21" Router
+	numports "Router.output=21" output 2
+	star "Merge.input=21" Merge
+	numports "Merge.input=21" input 2
+	star Sampler1 Sampler
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	star RanGen1 RanGen
+	setstate RanGen1 distribution exponential
+	setstate RanGen1 meanORupper 40.0
+	setstate RanGen1 varianceORlower 0.0
+	star VarDelay1 VarDelay
+	setstate VarDelay1 delay 1.0
+	star FIFOQueue1 FIFOQueue
+	setstate FIFOQueue1 capacity queueSize
+	setstate FIFOQueue1 numDemandsPending 1
+	setstate FIFOQueue1 consolidateDemands TRUE
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Queue monitor"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-P -0 'queue size' -1 'sample is lost' =800x200+0+0"
+	star FloatDC1 FloatDC
+	setstate FloatDC1 value "-1"
+	alias output Sampler1 output
+	connect RanGen1 output VarDelay1 newDelay
+	connect VarDelay1 output "Merge.input=21" "input#2"
+	alias input "Fork.output=21" input
+	node node1
+	nodeconnect Router.output=21 output#2 node1
+	nodeconnect RanGen1 input node1
+	nodeconnect VarDelay1 input node1
+	connect "Router.output=21" "output#1" "Merge.input=21" "input#1"
+	connect "Fork.output=21" "output#1" "Router.output=21" input
+	connect "Merge.input=21" output FIFOQueue1 inData
+	node node2
+	nodeconnect Fork.output=21 output#2 node2
+	nodeconnect Sampler1 clock node2
+	nodeconnect FIFOQueue1 demand node2
+	connect FIFOQueue1 outData Sampler1 input
+	connect FloatDC1 output "XMgraph.input=21" "input#2"
+	connect FIFOQueue1 overflow FloatDC1 input
+	connect FIFOQueue1 size "XMgraph.input=21" "input#1"
+}
+domain SDF
+defgalaxy periodogram {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate log2order FLOAT 9
+	star Gain1 Gain
+	setstate Gain1 gain "1/numInputs"
+	star "Mpy.input=21" Mpy
+	numports "Mpy.input=21" input 2
+	star "Mpy.input=22" Mpy
+	numports "Mpy.input=22" input 2
+	star FFTCx1 FFTCx
+	setstate FFTCx1 order log2order
+	setstate FFTCx1 size numInputs
+	setstate FFTCx1 direction 1
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	node node3
+	nodeconnect FFTCx1 output node3
+	nodeconnect Mpy.input=21 input#1 node3
+	nodeconnect Mpy.input=21 input#2 node3
+	connect "Mpy.input=21" output Gain1 input
+	alias output Gain1 output
+	connect WaveForm1 output "Mpy.input=22" "input#2"
+	connect "Mpy.input=22" output FFTCx1 input
+	alias input "Mpy.input=22" "input#1"
+}
+reset
+# Creating universe 'distortionQ'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 20480
+	newstate log2order INT 8
+	newstate queueSize INT 3
+	star Ramp1 Ramp
+	setstate Ramp1 step 0.3
+	setstate Ramp1 value 0.0
+	star Sin1 Sin
+	star "XMgraph.input=22" XMgraph
+	numports "XMgraph.input=22" input 2
+	setstate "XMgraph.input=22" title "Before and after random reordering"
+	setstate "XMgraph.input=22" saveFile ""
+	setstate "XMgraph.input=22" options "-P -0 original -1 processed =800x200+0+250"
+	setstate "XMgraph.input=22" ignore 0
+	setstate "XMgraph.input=22" xUnits 1.0
+	setstate "XMgraph.input=22" xInit 0.0
+	star "Fork.output=22" Fork
+	numports "Fork.output=22" output 2
+	star "XMgraph.input=23" XMgraph
+	numports "XMgraph.input=23" input 2
+	setstate "XMgraph.input=23" title "Magnitude DFT"
+	setstate "XMgraph.input=23" saveFile ""
+	setstate "XMgraph.input=23" options "-0 original -1 processed =800x200+0+500"
+	setstate "XMgraph.input=23" ignore 0
+	setstate "XMgraph.input=23" xUnits "PI/(2^(log2order-1))"
+	setstate "XMgraph.input=23" xInit "-PI"
+	star DB1 DB
+	setstate DB1 min "-100.0"
+	setstate DB1 inputIsPower TRUE
+	star DB2 DB
+	setstate DB2 min "-100.0"
+	setstate DB2 inputIsPower TRUE
+	star reorderQ1 reorderQ
+	setstate reorderQ1 timeScale 1.0
+	setstate reorderQ1 queueSize queueSize
+	star periodogram1 periodogram
+	setstate periodogram1 numInputs "2^log2order"
+	setstate periodogram1 log2order log2order
+	star periodogram2 periodogram
+	setstate periodogram2 numInputs "2 ^ log2order"
+	setstate periodogram2 log2order log2order
+	connect Ramp1 output Sin1 input
+	connect "Fork.output=22" "output#1" "XMgraph.input=22" "input#2"
+	connect DB1 output "XMgraph.input=23" "input#1"
+	connect DB2 output "XMgraph.input=23" "input#2"
+	connect reorderQ1 output "Fork.output=22" input
+	node node4
+	nodeconnect Sin1 output node4
+	nodeconnect XMgraph.input=22 input#1 node4
+	nodeconnect reorderQ1 input node4
+	nodeconnect periodogram1 input node4
+	connect periodogram1 output DB1 input
+	connect "Fork.output=22" "output#2" periodogram2 input
+	connect periodogram2 output DB2 input
+run 1
+wrapup

@@ -1,0 +1,70 @@
+reset
+# Creating universe 'speech'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate stepSize float "1.0e-8"
+	newstate order int 16
+	newstate range float 800.0
+	star FloatDiff1 FloatDiff
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	star LMS1 LMS
+	setstate LMS1 taps {1.0 0.0 [order-1] }
+	setstate LMS1 decimation 1
+	setstate LMS1 decimationPhase 0
+	setstate LMS1 interpolation 1
+	setstate LMS1 stepSize stepSize
+	setstate LMS1 errorDelay 1
+	setstate LMS1 saveTapsFile ""
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FloatSum.input=22 FloatSum
+	numports FloatSum.input=22 input 2
+	star LMS2 LMS
+	setstate LMS2 taps {1.0 0.0 [order-1]}
+	setstate LMS2 decimation 1
+	setstate LMS2 decimationPhase 0
+	setstate LMS2 interpolation 1
+	setstate LMS2 stepSize stepSize
+	setstate LMS2 errorDelay 1
+	setstate LMS2 saveTapsFile ""
+	star Fork.output=22 Fork
+	numports Fork.output=22 output 2
+	star Play1 Play
+	setstate Play1 gain 1.0
+	setstate Play1 saveFile processed.au
+	star Quantizer1 Quantizer
+	setstate Quantizer1 thresholds "(-0.5*range) 0.0 (0.5*range)"
+	setstate Quantizer1 levels "(-0.75*range) (-0.25*range) (0.25*range) (0.75*range)"
+	star ReadFile1 ReadFile
+	setstate ReadFile1 fileName "~ptolemy/src/domains/sdf/demo/speech/sorrydave.ascii"
+	setstate ReadFile1 haltAtEnd YES
+	setstate ReadFile1 periodic NO
+	star Play2 Play
+	setstate Play2 gain 1.0
+	setstate Play2 saveFile original.au
+	connect FloatSum.input=21 output LMS1 signalIn 1
+	node node1
+	nodeconnect LMS1 signalOut node1
+	nodeconnect FloatDiff1 neg node1
+	nodeconnect FloatSum.input=21 input#2 node1
+	connect Fork.output=21 output#2 LMS1 error 1
+	connect LMS2 signalOut FloatSum.input=22 input#2
+	connect Fork.output=21 output#1 LMS2 error 1
+	connect FloatSum.input=22 output Fork.output=22 input
+	connect Fork.output=22 output#2 LMS2 signalIn 1
+	node node2
+	nodeconnect Quantizer1 output node2
+	nodeconnect FloatSum.input=22 input#1 node2
+	nodeconnect Fork.output=21 input node2
+	nodeconnect FloatSum.input=21 input#1 node2
+	connect FloatDiff1 output Quantizer1 input
+	connect Fork.output=22 output#1 Play1 input
+	node node3
+	nodeconnect ReadFile1 output node3
+	nodeconnect Play2 input node3
+	nodeconnect FloatDiff1 pos node3
+run 30000
+wrapup

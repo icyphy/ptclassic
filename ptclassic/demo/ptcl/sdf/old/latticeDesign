@@ -1,0 +1,80 @@
+reset
+# Creating universe 'latticeDesign'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate order int 4
+	newstate blockSize int 128
+	star FloatDiff1 FloatDiff
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FIR1 FIR
+	setstate FIR1 taps "-2.0 1.91 -0.91 0.205"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg blockSize
+	setstate Autocor1 noLags order
+	setstate Autocor1 unbiased NO
+	star LevDur1 LevDur
+	setstate LevDur1 order order
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Predictor Coefs"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "-P -0 FIR -1 lattice =800x200+0+0"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star FloatImpulse1 FloatImpulse
+	setstate FloatImpulse1 level 1.0
+	setstate FloatImpulse1 period 0
+	setstate FloatImpulse1 count 0
+	star BlockLattice1 BlockLattice
+	setstate BlockLattice1 blockSize blockSize
+	setstate BlockLattice1 order order
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Should be an Impulse"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x200+0+250 -0 impulse"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star BlackHole1 BlackHole
+	star BlockRLattice1 BlockRLattice
+	setstate BlockRLattice1 blockSize blockSize
+	setstate BlockRLattice1 order order
+	star XMgraph.input=22 XMgraph
+	numports XMgraph.input=22 input 2
+	setstate XMgraph.input=22 title "Impulse Response"
+	setstate XMgraph.input=22 saveFile ""
+	setstate XMgraph.input=22 options "=800x200+0+500 -0 RLattice -1 IIR-DF"
+	setstate XMgraph.input=22 ignore 0
+	setstate XMgraph.input=22 xUnits 1.0
+	setstate XMgraph.input=22 xInit 0.0
+	connect FIR1 signalOut FloatDiff1 neg
+	connect FloatDiff1 output Fork.output=21 input
+	connect LevDur1 lp XMgraph.input=21 input#1
+	connect Fork.output=21 output#2 FIR1 signalIn 1
+	connect Autocor1 output LevDur1 autocor
+	connect BlockLattice1 signalOut Xgraph1 input
+	connect LevDur1 errPower BlackHole1 input
+	node node1
+	nodeconnect FloatImpulse1 output node1
+	nodeconnect FloatDiff1 pos node1
+	nodeconnect BlockRLattice1 signalIn node1
+	node node2
+	nodeconnect LevDur1 refl node2
+	nodeconnect BlockLattice1 coefs node2
+	nodeconnect XMgraph.input=21 input#2 node2
+	nodeconnect BlockRLattice1 coefs node2
+	connect BlockRLattice1 signalOut XMgraph.input=22 input#1
+	node node3
+	nodeconnect Fork.output=21 output#1 node3
+	nodeconnect Autocor1 input node3
+	nodeconnect BlockLattice1 signalIn node3
+	nodeconnect XMgraph.input=22 input#2 node3
+run 1
+wrapup

@@ -1,0 +1,35 @@
+
+List of the new stars:
+---------------------
+CIIDGaussian    Complex IID Gaussian generator
+Cfft**          Compute the complex fft
+ErrCnt          Error Counter
+ExpGen          Complex Exponential Generator
+IntDiv          Integer Divide
+MagSqr          Magnitude Squared
+Modulus         Integer Modulus
+PipeOut         Pipe outputs to shell command
+PnGen           PN Generator
+PowerEst        Power Estimator
+PowerEstCx      Power Estimator
+QPSK            1input QPSK mapper. Inputs are int 0/1
+QPSK2           2input QPSK mapper. Inputs are int 0/1
+Rfft**          Compute the fft of a real input, using the '2-channel trick'
+SineGen         Sine Generator
+TWTA*           model of TWTA
+                TWTA amplifier is modelled by its transfer characteristic.  
+                Data points for output backoff (dB) vs. input backoff (dB) and 
+                phase (degree) vs. input backoff are supplied in three arrays.
+                Then for each complex input sample the input back off is 
+                computed, and linear interpolation/extrapolation is used to 
+                find the phase and output amplitude, which is converted back 
+                to a complex output sample.
+VDecoder***     Viterbi Decoder
+VEncoder***     Viterbi Encoder
+Variance        Compute Mean and Variance
+
+* Will not compile due to unusual math library calls for degree based sine
+  functions.  Should be straightforward to convert to standard calls.
+** Will not link due to use of non-standard complex class.
+*** Cannot be dynamically linked as it requires Encoder/Decoder functions
+    from Encoder.cc or Decoder.cc

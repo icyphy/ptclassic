@@ -1,0 +1,52 @@
+domain SDF
+defgalaxy wormhole {
+	domain DDF
+	star Gain1 Gain
+	setstate Gain1 gain 2.0
+	star Gain2 Gain
+	setstate Gain2 gain 1.0
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	star "Case.output=21" Case
+	numports "Case.output=21" output 2
+	star "EndCase.input=21" EndCase
+	numports "EndCase.input=21" input 2
+	connect "Case.output=21" "output#1" Gain1 input
+	connect Gain1 output "EndCase.input=21" "input#1"
+	alias in "Case.output=21" input
+	alias out "EndCase.input=21" output
+	alias control "Fork.output=21" input
+	connect "Fork.output=21" "output#2" "EndCase.input=21" control
+	connect "Fork.output=21" "output#1" "Case.output=21" control
+	connect "Case.output=21" "output#2" Gain2 input
+	connect Gain2 output "EndCase.input=21" "input#2"
+}
+reset
+# Creating universe 'ifThenElse'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Ramp2 Ramp
+	setstate Ramp2 step 0.1
+	setstate Ramp2 value 0.0
+	star Thresh1 Thresh
+	setstate Thresh1 threshold 0.5
+	star wormhole1 wormhole
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Ramp or Ramp*2"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -0 '' =800x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	connect Ramp1 output wormhole1 in
+	connect wormhole1 out Xgraph1 input
+	connect Thresh1 output wormhole1 control
+	connect Ramp2 output Thresh1 input
+run 20
+wrapup

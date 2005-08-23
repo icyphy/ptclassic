@@ -1,0 +1,53 @@
+reset
+# Creating universe 'chaos'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star Fork.output=31 Fork
+	numports Fork.output=31 output 3
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain 0.3
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain "-1.4"
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	star FloatSum.input=22 FloatSum
+	numports FloatSum.input=22 input 2
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Chaos in Time"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options {=800x200+0+0 -y "x(n)" -x n -0 ""}
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title "Phase Space Plot"
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options {-p -nl -x "x(n+1)" -y "x(n)" =500x500+0+250 -0 ""}
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	connect Fork.output=31 output#1 FloatProduct.input=21 input#1
+	connect Fork.output=31 output#2 FloatProduct.input=21 input#2
+	connect FloatProduct.input=21 output FloatGain2 input
+	connect FloatGain1 output FloatSum.input=21 input#2 1
+	connect FloatGain2 output FloatSum.input=21 input#1
+	connect FloatSum.input=21 output FloatSum.input=22 input#1
+	connect FloatDC1 output FloatSum.input=22 input#2
+	connect Fork.output=21 output#1 Fork.output=31 input 1
+	connect FloatSum.input=22 output Fork.output=21 input
+	connect Fork.output=21 output#2 XYgraph1 xInput
+	node node1
+	nodeconnect Fork.output=31 output#3 node1
+	nodeconnect Xgraph1 input node1
+	nodeconnect FloatGain1 input node1
+	nodeconnect XYgraph1 input node1
+run 2000
+wrapup

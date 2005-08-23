@@ -1,0 +1,23 @@
+#!/usr/sww/tcl-7.4b3/bin/wish
+
+if 0 {
+
+	re-tkman, suggested by Howard Moftich
+
+	kill if necessary, then restart TkMan
+	for use after a modules package changes the MANPATH
+
+}
+
+# kill old TkMen
+foreach interp [winfo interps] {
+	if [string match "tkman*" $interp] {
+		catch {send tkman "manSave; exit 0"}
+	}
+}
+
+# start a new one
+exec tkman &
+
+# exit this interpreter
+exit 0

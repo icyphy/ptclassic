@@ -1,0 +1,113 @@
+======================================================================
+
+TkMan is a graphical, hypertext manual page browser for UNIX.
+
+Compatible with Sun Solaris, SunOS, Hewlett-Packard HP-UX, OSF/1, DEC
+Ultrix, AT&T System V, SGI IRIX, Linux, SCO, IBM AIX, FreeBSD, BSDI
+
+	"I encourage you to use TkMan for reading man pages. ... 
+	Tkman provides an extremely pleasant GUI for browsing man
+	pages.  I cannot describe all the nice features of TkMan in
+	this small space.  Instead I will merely say that I now
+	actually look forward to reading man pages as long as I can do
+	it with TkMan."
+		-- Don Libes, _Exploring Expect_, page 21
+
+TkMan offers two major advantages over xman: hypertext links to other
+man pages (click on a word in the text which corresponds to a man
+page, and you jump there), and better navigation within long man pages
+with searches (both incremental and regular expression) and jumps to
+section headers.  TkMan also offers some convenience features, like a
+user-configurable list of commonly used man pages, a one-click
+printout, and integration of `whatis' and `apropos'.  Further, one may
+highlight, as if with a yellow marker, arbitrary passages of text in
+man pages and subsequently jump directly to these passages by
+selecting an identifying excerpt from a pulldown menu.  Finally, TkMan
+gives one control over the directory-to-menu volume mapping of man
+pages with a capability similar to but superior to xman's mandesc in
+that rather than forcing all who share a man directory to follow a
+single organization, TkMan gives control to the individual.  For example,
+one may decide he has no use for a large set of man pages--say for
+instance the programmer routines in volumes 2, 3, 4, 8--and eliminate
+them from his personal database.  Or a Tcl/Tk programmer may decide
+to group Tcl/Tk manual pages in their own volume listing.
+
+Other features include:
+* full text search of man pages (with Glimpse, optional)
+* when multiple pages match the search name, a pulldown list of all matches
+* regular expression searches for manual page names
+* a list of recently added or changed manual pages
+* a "history" list of recently visited pages
+* a user-configurable "shortcuts" or "hot" list
+* a preferences panel to control fonts, colors, and other system settings
+* compatibility with compressed pages (both source and formatted)
+* diagnostics on your manual page installation
+* elision of those unsightly page headers and footers,
+* and, when asking to print a page available only in formatted form,
+  reverse compilation into [tn]roff source, which can then be reformatted
+  as good-looking PostScript
+
+
+Among the NEW features in version 1.8 are:
+* Compatibility with Tcl 7.5/Tk 4.1
+* Highlight annotations automatically repositioned when man page changes
+  (robust across page reformats, once old highlights updated to new style.
+  When updating, use your current version of RosettaMan.)
+  It is now reasonable to invest effort in highlights with reasonable assurance
+  that they'll persist.
+* Option for unified Glimpse index (under Preferences/Misc);
+  can be used for local indexes.
+  (This is in addition to the index-per-MANPATH directory option.)
+* Searching backward for regular expressions in a man page
+* Command line options summarized as cascade menu under relevant section in 
+  Sections menu.  This is especially useful for pages like Tk's canvas, which 
+  describes several graphical object types, each with its own set of options.
+* Compensation for nonstandardness in GNU and UnixWare sed
+* SGI support completely solved (Scott Nelson)
+* fixed man.conf support (for BSDI, Linux),
+  which is important in the absence of a MANPATH (Hagen Finley)
+* on SCO, section names taken from /usr/default/man (Bela Lubkin)
+* man page names with colons (as in Perl 5) recognized
+* option for single mouse click to activate hyperlink (someone in CS160)
+* fixed bug related to find and the recent page list that caused inordinately
+  long database build times on some systems (Vinnie Shelton)
+
+Among the NEW features in version 1.7 are:
+* Compatibility with Tcl 7.4/Tk 4.0
+* Much faster searching within text buffer,
+  taking advantage of a new feature in Tk 4.0
+* Manual pages read in ~40% less time, once found in the database 
+  and filtered through nroff if necessary
+* Automated Glimpse indexing of compressed files
+  (i.e., .glimpse_filters file created automatically--existing .glimpse_filters
+  files are left unchanged)
+* Back door to use local man command.  Useful in situations when the MANPATH
+  changes frequently.  You do lose some functionality, however.
+* Volume listings set in columns for easier reading
+
+Among the NEW features since version 1.5 are:
+* database of man page names stored on disk, so once the database is built...
+     startup much quicker, searching faster, volume listings faster
+     also, the help page comes up much quicker
+     In sum, these changes make TkMan much more usable on slower machines.
+* full text search through man pages with Glimpse (optional)
+* Preferences panel to choose fonts, colors and other options
+* list of recently added or changed manual pages
+* likely man page references distinguished with typewriter font
+  (Michael Harrison)
+* hypertext list of all man pages with highlights (Steven S. Dick)
+* support for short UNIX file names (for old file systems)
+* support for saving formatted pages to H-P's cat.Z directories
+* support for LANG environment variable (Yasuro Kawata)
+* TKMAN environment variable searched for command line options
+* Help file maintained in HTML and automatically converted for use in TkMan.
+  This means that one can use a WWW browser to read the help and
+  generate a PostScript version to print out.
+* incremental searches highlight match
+* manual page filter slightly improved (handles OSF and GNU formatting)
+* error checking on MANPATH and existence of supporting executables
+* support for Linux Filesystem Structure (FSSTND) (Martin Wunderli)
+* support for IBM's AIX
+
+Long-time TkMan users can remove bin/bs2tk, lib/taputils.tcl, lib/utils.tcl,
+lib/searchbox.tcl.
