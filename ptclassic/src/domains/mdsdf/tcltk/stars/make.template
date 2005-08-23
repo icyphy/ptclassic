@@ -84,6 +84,11 @@ all:		makefile stars_all
 
 install:	stars_install
 
+tkMeter.tcl tkScript.tcl tkShowValues.tcl tkSlider.tcl tkText.tcl:
+	@if [ ! -f $@ ]; then \
+		echo "Linking to ../../../sdf/tcltk/stars/$@"; \
+		ln -s ../../../sdf/tcltk/stars/$@; \
+	fi
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
