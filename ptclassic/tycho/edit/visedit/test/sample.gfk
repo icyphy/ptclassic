@@ -1,8 +1,0 @@
-{configure -canvasheight 312}
-{configure -canvaswidth 412}
-{configure -scrolling auto}
-{centeredText Title title {} black {{times 24 bold i} {helvetica 24 bold i}}}
-{centeredText Subtitle subtitle title blue {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText Author author {title subtitle} red {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText {Version: $Id$} version {title subtitle author} black {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText {Copyright (c) %Q%} copyright {title subtitle author version} black {{times 16 bold r} {helvetica 16 bold r}}}
