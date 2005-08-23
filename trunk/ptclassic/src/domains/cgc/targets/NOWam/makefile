@@ -10,12 +10,14 @@
 # (through the symbolic link) -- that way a separate directory containing,
 # say, Sun-3 and Sun-4 objects can be maintained.
 
+ME = cgc/targets/NOWam
+
 # subdomain.mk reads MYVPATH
-MYVPATH = ../../../../../../src/domains/cgc/targets/NOWam
+MYVPATH = ../../../../../../src/domains/$(ME)
 
 include ../../../../../mk/subdomain.mk
 
 DIRS = NOWam libudpam
 
-ME = cgc/targets/NOWam
+
 
