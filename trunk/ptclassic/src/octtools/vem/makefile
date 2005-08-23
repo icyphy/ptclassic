@@ -1,6 +1,6 @@
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.44 05/25/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -177,10 +177,11 @@ INC_FILES = \
 	../windows/argsel.h ../windows/objsel.h ../windows/windows.h
 
 include:
-	-mkdir include
+	ln -s $(VPATH)/include .
+	-mkdir $(VPATH)/include
 	@echo -n Linking header files in ./include to actual header files...
 	@for file in $(INC_FILES); do\
-	    ( cd include;  ln -s $$file .; );\
+	    ( cd $(VPATH)/include;  ln -s $$file .; );\
 	done
 	@echo done
 
