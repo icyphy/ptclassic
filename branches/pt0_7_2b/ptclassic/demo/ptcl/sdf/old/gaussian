@@ -1,0 +1,54 @@
+reset
+# Creating universe 'gaussian'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate noLags int 64
+	newstate numValues int 1024
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	star Xhistogram1 Xhistogram
+	setstate Xhistogram1 title "Histogram of noise samples"
+	setstate Xhistogram1 saveFile ""
+	setstate Xhistogram1 binWidth 0.2
+	setstate Xhistogram1 options "-bar -nl =800x200+0+450 -0 counts"
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg numValues
+	setstate Autocor1 noLags noLags
+	setstate Autocor1 unbiased NO
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Autocorrelation estimate"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x200+0+225 -0 y -x lag"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit "1-noLags"
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "Gaussian white noise"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "=800x200+0+0 -0 noise -x n"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits 1.0
+	setstate Xgraph2 xInit 0.0
+	star Average1 Average
+	setstate Average1 numInputsToAverage "numValues/8"
+	setstate Average1 blockSize 1
+	star Xgraph3 Xgraph
+	setstate Xgraph3 title "128 sample averages"
+	setstate Xgraph3 saveFile ""
+	setstate Xgraph3 options "-P =800x200+0+675 -0 averages"
+	setstate Xgraph3 ignore 0
+	setstate Xgraph3 xUnits 1.0
+	setstate Xgraph3 xInit 0.0
+	connect Autocor1 output Xgraph1 input
+	node node1
+	nodeconnect IIDGaussian1 output node1
+	nodeconnect Xhistogram1 input node1
+	nodeconnect Autocor1 input node1
+	nodeconnect Xgraph2 input node1
+	nodeconnect Average1 input node1
+	connect Average1 output Xgraph3 input
+run 1
+wrapup

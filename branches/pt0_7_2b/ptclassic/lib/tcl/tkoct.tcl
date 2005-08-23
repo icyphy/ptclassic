@@ -1,27 +1,34 @@
-# Version: $Id$
+# Version: @(#)tkoct.tcl	1.10 08/26/97
 #
 #---------------------------------------------------------------------------
-# Copyright (c) 1994 The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
-#
+# 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
-#
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 # THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-#
+# 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+# This file is used by tkoct, which is an expermental Tk/Octtools
+# interface written by Kennard White.  See src/octtools/tkoct
+# in the other.src tar file.
 
 #
 # The technology root dir, if not specified, is handled by
@@ -100,15 +107,16 @@ source $ptolemy/lib/tcl/ptkOptions.tcl
 
 # Other Pigi procedures
 #source $ptolemy/lib/tcl/message.tcl
-#source $ptolemy/lib/tcl/utilities.tcl
-source $ptolemy/lib/tcl/dialog.tcl
-#source $ptolemy/lib/tcl/ptkBind.tcl
+source $ptolemy/lib/tcl/utilities.tcl
+source $ptolemy/lib/tcl/ptkBind.tcl
 #source $ptolemy/lib/tcl/ptkControl.tcl
 #source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
 source $ptolemy/lib/tcl/ptkParams.tcl
 #source $ptolemy/lib/tcl/ptkBarGraph.tcl
 #source $ptolemy/lib/tcl/ptkPrfacet.tcl
 
+# Math extensions for parameter parsing
+source $ptolemy/lib/tcl/mathexpr.tcl
 
 proc tkoct_bind_class {} {
     option add *XPGedWidget.background grey startupFile
@@ -127,7 +135,8 @@ proc tkoct_bind_class {} {
     bind XPGedWidget <Shift-B2-Motion> {%W scan stretchto %x %y}
 
     bind XPGedWidget f {tkoctViewFull %W}
-    bind XPGedWidget F {tkoctOpen %W}
+    # Strip off the .main.ged part
+    bind XPGedWidget F {tkoctOpen [file rootname [file rootname %W]] }
     bind XPGedWidget i {tkoctInside %W %x %y contents}
     bind XPGedWidget I {tkoctInside %W %x %y interface}
 
@@ -189,6 +198,9 @@ proc tkoctMotion { wd px py cycleB } {
     set wmi $wvars(w).main.info
     $wmi.type conf -text "[lindex $fmt 1]"
     $wmi.tw delete 1.0 end
+
+    #foreach item $fmt { $wmi.tw insert end "$item\n"}
+
     switch [lindex $fmt 1] {
       FACET {
         $wmi.tw insert end "Cell:\t[file tail [lindex $fmt 4]]\n"
@@ -230,11 +242,12 @@ proc tkoctInside {wd px py facetType} {
 
 
     if {"[set instId [_tkoctGetInst $wd $px $py]]"=="" } return
-    #puts "tkoctInside: $wd $px $py $facetType, $instId"
+#puts "tkoctInside: wd=$wd px=$px py=$py facetType=$facetType, instId=$instId"
     if [catch {toct_get "$instId > master ::$facetType"} masterId] {
       puts stdout "get master failed: $masterId"
 	return
     }
+#puts "tkoctInside: masterId=$masterId"
     if [ catch {tkoct_window .ged[gensym] -facet $masterId}] {
       tkoctInspectFile $masterId
     }
@@ -249,7 +262,9 @@ proc tkoctInspectFile {facet} {
   set facetFmt [toct_fmt "facet $facet"]
   set facetCell [lindex $facetFmt 4]
   set domainDir [file dirname [file dirname $facetCell]]
+  
   set fileName "$domainDir/stars/[string toupper [file tail $domainDir]][file tail $facetCell].pl"
+  puts "tkoctInspectFile $facet"
   set command [format $env(PT_DISPLAY) $fileName]
   eval exec $command &
 }
@@ -339,11 +354,11 @@ proc tkoctOpen { w } {
     tkwait variable openfacetName
     set ofn $openfacetName
 
-
+    puts stdout "tkoctOpen $w $ofn"
     if { "$ofn"=="" } { return }
     $w.main.ged conf -facet $ofn
     tkoctFacetChange $w
-#puts stdout "tkoctOpen $ofn"
+
 }
 # FIXME: pigilib/POct.cc defines ptkOpenFacet too!, but we can't use it
 # ptkOpenFacet <file_name_of_cell> [view] [facet]
@@ -453,6 +468,7 @@ proc tkoct_window { w args} {
     } else {
       # From tkAux, we need to fix this
       #focus_goTo $w.main.ged
+      bind $w.main.ged <Enter> {focus %W} 
       focus $w.main.ged
     }
     return $w

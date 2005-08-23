@@ -1,23 +1,23 @@
 defstar {
 	name { XMgraph }
 	domain { VHDL }
-	version { $Id$ }
+	version { @(#)VHDLXMgraph.pl	1.7 04/10/97 }
 	desc {
 Graph the input data.
 	}
 	author { Michael C. Williamson, J. T. Buck and E. A. Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDL main library }
-	explanation {
+	htmldoc {
 	}
 	inmulti {
 	  name{ input }
-	  type{ ANYTYPE }
+	  type{ float }
 	}
 	defstate {
 	  name { title }
@@ -46,7 +46,7 @@ variable $starSymbol(icount): integer := 0;
 $starSymbol(icount) := $starSymbol(icount) + 1;
 	}
 	codeblock (graph) {
-(pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
+! (pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
 	}
 	initCode {
 	  addCode(uses, "useLibs", "textio");
@@ -62,7 +62,7 @@ $starSymbol(icount) := $starSymbol(icount) + 1;
 	  addCode(filedecl, "mainDecls");
 	  addCode(init, "mainDecls");
 	  StringList cmd = "";
-	  cmd << "/bin/rm -f ";
+	  cmd << "! /bin/rm -f ";
 	  cmd << "$starSymbol(xgraph)";
 	  cmd << ".dat";
 	  cmd << "; ";
@@ -83,8 +83,8 @@ $starSymbol(icount) := $starSymbol(icount) + 1;
 	    cmd << j << ").dat";
 	    cmd << "; ";
 	  }
-	  addCode(cmd, "sysWrapup");
-	  addCode(graph, "sysWrapup");
+	  addCode(cmd, "simWrapup");
+	  addCode(graph, "simWrapup");
 	}
 	go {
 	  StringList dataout = "";

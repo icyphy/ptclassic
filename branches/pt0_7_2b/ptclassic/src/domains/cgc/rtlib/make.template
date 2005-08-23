@@ -1,6 +1,6 @@
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.3 1/23/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -38,11 +38,15 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cgc/rtlib
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-LIB=libCGCrtlib.$(LIBSUFFIX)
+# Hack to be sure we don't build a shared version of libCGCrtlib.a
+# If we do have a shared libCGCrtlib, then we need to be sure to include
+# -lg++ when building cgc binaries.
+#LIB=libCGCrtlib.$(LIBSUFFIX)
+LIBNONSHARED=libCGCrtlib.a
 
 # Header files
 HDRS=CGCrtlib.h
@@ -53,9 +57,9 @@ SRCS= $(HDRS:.h=.c)
 # Library objects
 OBJS= $(SRCS:.c=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(LIBNONSHARED)
 
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
 
 include $(ROOT)/mk/common.mk
 

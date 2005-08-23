@@ -1,26 +1,16 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 5/29/90
- Converted to use preprocessor, 9/26/90 
-
- Computes complex product of n inputs.
-
-**************************************************************************/
-}
-
 defstar {
-	name {ComplexProduct}
+	name {MpyCx}
 	domain {SDF}
-	desc {
-		"Output the product of the inputs, as a complex value"
+	desc { Output the product of the inputs, as a complex value.  }
+	version {@(#)SDFMpyCx.pl	2.12 09/01/97}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { SDF main library }
 	inmulti {
 		name {input}
 		type {complex}
@@ -29,11 +19,16 @@ defstar {
 		name {output}
 		type {complex}
 	}
-	start { input.reset();}
 	go {
-		Complex product = 1.0;
-		for(int i=input.numberPorts(); i>0; i--)
-			product *= Complex(input()%0);
+		MPHIter nexti(input);
+		PortHole *p;
+		Complex product(1.0, 0.0);
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmpproduct; 
+		while ((p = nexti++) != 0) {
+			tmpproduct = (*p)%0;
+			product *= tmpproduct;
+		}
 		output%0 << product;
 	}
 }

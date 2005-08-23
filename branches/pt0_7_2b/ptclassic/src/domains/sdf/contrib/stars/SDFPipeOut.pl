@@ -2,14 +2,15 @@ defstar {
   name { PipeOut }
   domain { SDF } 
   desc { Pipe outputs to shell command }
+  version { @(#)SDFPipeOut.pl	1.6	02/04/99 }
   author { N. Becker }
-        copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+  copyright {
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-        }
-  location { SDF main library }
+  }
+  location { SDF user contribution library }
   inmulti {
     name { in }
     type { float }
@@ -46,30 +47,43 @@ If no output y, return.}
     FILE *out;
   }
   setup {
-   out = popen( (char *)(command), "w" );
-   x = (float)Xinit;
-   if( !out )
-     Error::abortRun( *this, "Error opening pipe to command", (char *)(command) );
-  }
-  wrapup {
-    pclose( out );
+    const char *commandstr = command;
+#ifdef PT_NT4VC
+    out = _popen( commandstr, "w" );
+#else
+    out = popen( commandstr, "w" );
+#endif
+    x = Xinit;
+    if( !out ) {
+      Error::abortRun( *this, "Error opening pipe to command",
+		       commandstr );
+    }
   }
   go {
     int count = 0;		// count how many fields have been output
-    if( (int)XY ) {
+    if( int(XY) ) {
       fprintf( out, "%g", x );
-      x += (float)Xinc;
+      x += Xinc;
       count++;
     }
     MPHIter nextp( in );
     PortHole* p;
+    double value;
     while( (p = nextp++) ) {
-      if( count++ == 0 )
-	fprintf( out, "%g", (float)((*p)%0) );
+      value = ((*p)%0);
+      if( ! count )
+	fprintf( out, "%g", value );
       else
-	fprintf( out, "\t%g", (float)((*p)%0) );
+	fprintf( out, "\t%g", value );
+      count++;
     }
     fputs( "\n", out );
   }
+  wrapup {
+#ifdef PT_NT4VC
+    _pclose( out );
+#else
+    pclose( out );
+#endif
+  }
 }
-

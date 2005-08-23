@@ -1,5 +1,10 @@
+static const char file_id[] = "ganttChart.cc";
+
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+SCCS Version identification :
+@(#)ganttChart.cc	1.7	05/13/97
+
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -23,79 +28,54 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
-/* Routines for talking to the Gantt chart display */
-/* $Id$ */
 
-/* Do the right thing for sol2 boolean defs.  compat.h must be included
- * first so sys/types.h is included correctly.
- */
+ Programmer: Matt T. Tavis
+ Created: 8/4/95
+
+Routines for talking to the Gantt chart display
+*/
+
+// Do the right thing for sol2 boolean defs.  compat.h must be included
+// first so sys/types.h is included correctly.
+#include "compat.h"
 #include "sol2compat.h"
 
-#include "local.h"
-#include "err.h"
-#include "vemInterface.h"
-#include "xfunctions.h"
 #include "PTcl.h"
+#include "ganttChart.h"
 
-extern PTcl *ptcl;
+#define TCL_CATCH_ERR(tcl_call) \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(PTcl::activeInterp,"ptkDisplayErrorInfo"); \
+    }
 
-/* See libgantt/gantt_main.c */
-extern "C" int display_schedule( /* char *display_name, int PIGI_present,
-				char *input_file, char *output_file */);
+// functions added to handle PTcl and pigi compatability
+// needed to avoid interp calls in cg domain
 
-
-extern "C" {
-boolean
-displayGanttChart(char* fileName)
-{
-		return (TRUE);
-}
-}
-
-/* 8/12/89
-Save the error message for GGI and exit from display_schedule().
-*/
-extern "C" {
 void
-GanttErr(char* msg)
-{
-}
-}
+GanttChart::beginGantt(ostream& /*out*/, char *argstring) {
 
-extern "C" {
-int
-GanttMan(char* name)			/* ARGSUSED */
-{
-    return 0;
-}
-}
-
-/* functions added to handle ptcl and pigi compatability */
-/* needed to avoid interp calls in cg domain */
-
-extern void beginGantt(ostream& out, char *argstring) {
-
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 
 }
 
-extern void writeGanttLabel(ostream& out, char *argstring) {
+void
+GanttChart::writeGanttLabel(ostream& /*out*/, char *argstring) {
 
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
 
-extern void writeGanttBindings(ostream& out, char *argstring) {
+void
+GanttChart::writeGanttBindings(ostream& /*out*/, char *argstring) {
 
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
 
-extern void endGantt(ostream& out) {
+void
+GanttChart::endGantt(ostream& /*out*/) {
 }
 
-extern void writeGanttProc(ostream& out, char *argstring) {
-
-	Tcl_Eval(ptcl->activeInterp, argstring);
+void
+GanttChart::writeGanttProc(ostream& /*out*/, char *argstring) {
+  
+  	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
-
-

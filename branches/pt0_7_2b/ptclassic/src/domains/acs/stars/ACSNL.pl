@@ -2,7 +2,7 @@ defcorona {
 	name { NL }
 	domain { ACS }
 	desc { Non-linear operation including a low threshold, gain adjustment for linear region, and a upper limit. }
-	version { $Id$ }
+	version { @(#)ACSNL.pl	1.2 09/08/99 }
 	author { James Lundblad }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.

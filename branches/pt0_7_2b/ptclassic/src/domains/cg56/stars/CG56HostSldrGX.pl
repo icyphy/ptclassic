@@ -2,26 +2,26 @@ defstar {
 	name { HostSldrGX }
 	domain { CG56 }
 	desc { Host port Slider }
-	version { $Id$ }
+	version { @(#)CG56HostSldrGX.pl	1.7	03/29/97 }
 	acknowledge { Gabriel version by Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	ccinclude { "StringState.h" "CGTarget.h" "StringList.h"}
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 io library }
-	explanation {
-.Ir "slider bar"
-.Ir "gxslider program"
-Host port slider.  The parameters hostMin
-hostMax, and hostInitialValue control the values
-that the slider is labelled with under X windows.  They
-are mapped in a linear or decibel fashion into the range
-of the parameters dspMin and dspMax on the DSP,
-depending on whether scale is linear or log.
+	location { CG56 main library }
+	htmldoc {
+<a name="slider bar"></a>
+<a name="gxslider program"></a>
+Host port slider.
+The parameters <i>hostMin</i>, <i>hostMax</i>, and <i>hostInitialValue</i>
+control the values that the slider is labeled with under X windows.
+They are mapped in a linear or decibel fashion into the range
+of the parameters <i>dspMin</i> and <i>dspMax</i> on the DSP,
+depending on whether <i>scale</i> is linear or log.
 	}
 	output {
 		name {output}

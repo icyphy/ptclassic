@@ -1,17 +1,19 @@
 defstar {
 	name {BeamAbs}
 	domain {SDF}
-	version {@(#)SDFBeamAbs.pl	1.8 3/2/95}
+	version { @(#)SDFBeamAbs.pl	1.3	12/08/97 }
 	desc {
 Outputs the magnitude of the antenna array beam pattern with respect to the 
 antenna positions and the actual steering vector.
 	}
-	author { A. Richter, U. Trautwein }
+	author { A. Richter and U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	explanation {
 	}
 	ccinclude { "ComplexSubset.h" }
@@ -87,8 +89,12 @@ All rights reserved.
 	    for (int w = AngRes-1; w >=0 ; w--)
 	    {
 		G=0;
-		for (int element = 0; element < NumberElements; element++)
-		    G+=*(p++) * conj(Complex(steering%(NumberElements-element-1)));
+		for (int element = 0; element < NumberElements; element++) {
+		      // We use a temporary variable to 
+		      // avoid gcc2.7.2/2.8 problems
+		      Complex tmp = steering%(NumberElements-element-1);
+		      G+=*(p++) * conj(Complex(tmp));
+		}
 		output%w << abs(G);		    
 	    }
 	}

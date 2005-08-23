@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@
 #
 # Config file to build on i386 processor (PC) running NetBSD-1.x
 #
-# $Id$
+# @(#)config-nbsd.386.mk	1.9 12/15/97
 #                      
 # Programmer: Johnathan Reason 
 # --------------------------------------------------------------------
@@ -45,7 +45,21 @@ RANLIB =	ranlib
 CC =		gcc
 
 OCTTOOLS_MM_LIB=
-OCT_CC =	gcc -traditional $(OCTTOOLS_MM_LIB)
+OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
+
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 # Since NetBSD supports various architectures i386 needs to be specified
 # Other people might port Ptolemy to netbsd_sun, netbsd_amiga, netbsd_mac,
@@ -55,15 +69,17 @@ OCT_CC =	gcc -traditional $(OCTTOOLS_MM_LIB)
 # is upgraded from libg++.2.5.3 to libg++.2.5. ., or when some ports the Ptolemy
 # gnu-distribution. At any rate this new varibale should have no effect on any
 # of the other ports, since it is not defined in any of the other config files.
-SYSTEMDEF=	-Dnetbsd_i386
-OPTIMIZER=	-m486 -pipe
-EXTRA_OPTIMIZER=-O2
-#OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
+OPTIMIZER=	-m486 -pipe -O2 # -fomit-frame-pointer -pipe
+ARCHFLAGS=	-Dnetbsd_i386
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
-GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
-CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
-		-fwritable-strings
+LOCALCCFLAGS =
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-fwritable-strings
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 GNULIB =	/usr/lib
 
 #
@@ -75,10 +91,16 @@ GNULIB =	/usr/lib
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
-SYSLIBS=-lg++ -lm
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lm
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
-LINKFLAGS_D=-L$(LIBDIR) -g -static
+# system libraries (libraries from the environment)
+# -lstdc++ needed for iostream
+# -lcompat needed for cuserid
+SYSLIBS=	-lg++ -lstdc++ -lcompat $(CSYSLIBS)
+
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x
+LINKFLAGS_D=-L$(LIBDIR) -g 
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
@@ -90,9 +112,9 @@ COMPATLIB = -lcompat
 #
 # Directories to use
 #
-X11_INCSPEC = -I/usr/X11/include
-X11INCL     = -I/usr/X11/include
-X11_LIBSPEC = -L/usr/X11/lib -lX11
+X11_INCSPEC = -I/usr/X11R6/include
+X11INCL     = -I/usr/X11R6/include
+X11_LIBSPEC = -L/usr/X11R6/lib -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 X11EXT_LIBSPEC=-lXext -lSM -lICE
@@ -115,16 +137,7 @@ QUANTIFY =
 #S56DIR =	$(ROOT)/vendors/s56dsp
 S56DIR =
 
-# Variables for local Matlab installation
-# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
-#    and MATLABLIBDIR points to the directory containing the Matlab libraries
-# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
-#    and MATLABLIBIDR is undefined
-#MATLABDIR =	/usr/sww/matlab
-#MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
-MATLABDIR =	$(ROOT)/src/compat/matlab
-MATLABLIBDIR =
-
-
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional
+
+# Unknown Matlab architecture - No NetBSD port of Matlab as of 5/27/95

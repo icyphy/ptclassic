@@ -2,15 +2,15 @@ defstar {
 	name {TkSlider}
 	domain {CGC}
 	desc { Output a value determined by a Tk scale slider.  }
-	version { $Id$ }
-	author { E. A. Lee }
+	version { @(#)CGCTkSlider.pl	1.11	1/1/96 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	output {
 		name {output}
 		type {float}
@@ -32,6 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type{float}
 		default {"0.0"}
 		desc {The value to send to the output.}
+		attributes {A_GLOBAL}
 	}
 	defstate {
 		name {identifier}
@@ -55,9 +56,9 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    /* compute the initial position of the slider */
 	    position = 0.5 + 100*($val(value)
-			- $val(low))/($val(high)-$val(low));
+			- $val(low))/($val(high) - $val(low));
 
-	    makeScale("cp_low",			/* position in control panel */
+	    makeScale(".low",			/* position in control panel */
 	              "$starSymbol(scale)",	/* name of the scale pane */
 		      "$val(identifier)",	/* text identifying the pane */
 		      position,			/* initial position */
@@ -65,7 +66,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 
 	    /* set the initial value display */
-	    displaySliderValue("cp_low", "$starSymbol(scale)", "$val(value)");
+	    displaySliderValue(".low", "$starSymbol(scale)", "$val(value)");
 	}
 
 	// Note that the argument to this function will an integer
@@ -80,16 +81,15 @@ limitation of liability, and disclaimer of warranty provisions.
                 char **argv;                        /* Argument strings. */
             {
 		int position;
-		/* FIX ME: Is the following buffer big enough always? */
-		static char* buf[20];
+		static char buf[20];
                 if(sscanf(argv[1], "%d", &position) != 1) {
                     errorReport("Invalid value");
                     return TCL_ERROR;
                 }
-		$ref(value) = $val(low)+($val(high)-$val(low))*(position/100.0);
+		$ref(value) = $val(low) + ($val(high) - $val(low))*(position/100.0);
 		/* set the value display */
 		sprintf(buf, "%.4f", $ref(value));
-		displaySliderValue("cp_low", "$starSymbol(scale)", buf);
+		displaySliderValue(".low", "$starSymbol(scale)", buf);
                 return TCL_OK;
             }
 	}

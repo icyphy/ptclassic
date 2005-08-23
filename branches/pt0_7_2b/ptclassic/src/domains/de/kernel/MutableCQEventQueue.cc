@@ -1,6 +1,39 @@
 static const char file_id[] = "MutableCQEventQueue.cc";
 /**************************************************************************
-Yadi Yadi Yada
+Version identification:
+@(#)MutableCQEventQueue.cc	1.3 12/16/97
+
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer:  Soonhoi Ha
+ Date of creation: 10/11/91
+ Revisions:
+
+This file contains member functions for EventQueue..
+
 ******************************************************************/
 
 #ifdef __GNUG__
@@ -8,7 +41,7 @@ Yadi Yadi Yada
 #endif
 
 #include "MutableCQEventQueue.h"
-// #include "Particle.h"
+#include "Particle.h"
 
 Event* MutableCQEventQueue:: getEvent(Particle* p, PortHole* ph) {
 	Event* temp;
@@ -52,17 +85,6 @@ void MutableCQEventQueue:: putFreeLink(CqLevelLink* p) {
 		putEvent(temp);
 	}
 	MutableCalendarQueue:: putFreeLink(p);
-}
-
-CqLevelLink * MutableCQEventQueue::createRefInDestinedEventList( CqLevelLink * link )
-{
-	// Create reference in DestinedEventList and point CqLevelLink
-	// this reference. 
-	// FIXME: Will there be problems with the semantics of this
-	// statement; i.e., circular dependencies??
-	DEStar *destinationStar = (DEStar*) (link->dest);
-	link->destinedLink = destinationStar->addRefToDestinedEventList( link ); 
-	return link;
 }
 
 void MutableCQEventQueue :: initialize() {

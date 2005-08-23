@@ -2,16 +2,16 @@ defstar {
 	name {TkSlider}
 	domain {SDF}
 	derivedFrom { TclScript }
-	desc { Output a value determined by a Tk scale slider. }
-	version { $Id$ }
+	desc { Output a value determined by an interactive on-screen scale slider. }
+	version { @(#)SDFTkSlider.pl	1.9	10/23/95 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	hinclude { "ptk.h" }
 	defstate {
 		name {low}
@@ -52,35 +52,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Only a single output is supported");
 		return;
 	    }
+        }
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkSlider.tcl";
-	    synchronous = 0;
-	    // For now, we pass the relevant parameter values to tcl
-	    // by setting global variables.  We need a better way.
-	    sprintf(buf,"%d",100*(double(value)/(double(high)-double(low))));
-	    if((Tcl_SetVar(ptkInterp, "identifier", identifier,
-			TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "low", low.initValue(),
-		TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "high", high.initValue(),
-		TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "value", value.initValue(),
-		TCL_GLOBAL_ONLY) == NULL)) {
-                Error::abortRun(*this,"Failed to set parameter values for tcl");
-                return;
-            }
-	    if(int(put_in_control_panel)) {
-	       Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
-	    } else {
-	       Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
-	    }
-	    SDFTclScript::setup();
+
+	    SDFTclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.
 	    input.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
-	    synchronous.clearAttributes(A_SETTABLE);
 	}
 }

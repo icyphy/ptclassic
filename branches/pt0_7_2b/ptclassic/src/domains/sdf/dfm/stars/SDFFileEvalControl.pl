@@ -2,15 +2,15 @@ defstar {
     name { FileEvalControl }
     domain { SDF }
     derivedFrom { FileEval }
-    version { $Id$ }
+    version { @(#)SDFFileEvalControl.pl	1.3	03/29/97 }
     author { E. A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 This is just like FileEval, except that it supports any number of
 integer-valued inputs and outputs in addition to the anytype
@@ -32,7 +32,7 @@ the value of the outputs will be 0.
     }
     begin {
 	if (sourceIfNeeded("fileevalcontrol_editcommand",
-	    "$PTOLEMY/src/domains/sdf/dmm/stars/fileevalcontrolsupport.tcl")
+	    "$PTOLEMY/src/domains/sdf/dfm/stars/fileevalcontrolsupport.tcl")
 	    == 0) {
 	        return;
 	}
@@ -40,9 +40,9 @@ the value of the outputs will be 0.
         SDFFileEval::begin();
     }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     // Redefine the base class method to first replace all references
     // to the control inputs and outputs (intin and intout).

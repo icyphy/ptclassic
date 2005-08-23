@@ -1,5 +1,5 @@
 defstar {
-	name { RaisedCos }
+	name { RaisedCosine }
 	domain { CG56 }
 	derivedFrom { FIR }
 	desc {
@@ -7,35 +7,30 @@ An FIR filter with a magnitude frequency response shaped
 like the standard raised cosine used in digital communications.
 See the SDFRaisdCos star for more information.
 	}
-	version { $Id$ }
-	author { J. T. Buck, Kennard }
-	copyright { 1991 The Regents of the University of California }
+	version { @(#)CG56RaisedCosine.pl	1.15 10/16/97 }
+	author { J. T. Buck and Kennard White }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG56 dsp library }
-	explanation {
-See the SDFRaisedCos star.
+	htmldoc {
+See the
+<tt>SDFRaisedCos</tt>
+star.
 	}
 	seealso {FIR}
-	hinclude { <stream.h> }
-	code {
-		static double rcos (int t, int T, double excess) {
-			const double DELTA = 1.0e-7;
-			if (t == 0) return 1.0;
-			double x = (double)t/(double)T;
-			double s = sin (M_PI * x) / (M_PI * x);
-			x *= excess;
-			double den = 1.0 - 4 * x * x;
-			if (den > -DELTA && den < DELTA) return s * M_PI/4.0;
-			return s * cos (M_PI * x) / den;
-		}
-	}
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
-		name { N }
+		name { length }
 		type { int }
 		default { 64 }
 		desc { Number of taps }
 	}
 	defstate {
-		name { P }
+		name { symbol_interval }
 		type { int }
 		default { 16 }
 		desc { Distance from center to first zero crossing }
@@ -46,29 +41,38 @@ See the SDFRaisedCos star.
 		default { 1.0 }
 		desc { Excess bandwidth, between 0 and 1 }
 	}
+        defstate {
+		name { square_root }
+		type { int }
+		default { NO }
+		desc { If YES, use square-root raised cosine pulse }
+	}
 	constructor {
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 		// fix interpolation default
-		interpolation.setValue("16");
+		interpolation.setInitValue("16");
 		// make decimation parameters invisible
 		decimation.clearAttributes(A_SETTABLE);
 
 		// XXX: DONT do this...not implemented in CG56FIR
 		// XXX: decimationPhase.clearAttributes(A_SETTABLE);
 	}
-	start {
-		taps.resize (N);
-		int center = int(N)/2;
-		double maxval = double(ONE);
-		for (int i = 0; i < int(N); i++) {
-			double coef = rcos(i - center, P, excessBW);
-			if ( coef > maxval )	coef = maxval;
-			if ( coef < -1 )	coef = -1;
-			taps[i] = coef;
-			// cerr << "Tap %d" << coef << "\n";
+	setup {
+		if (double(excessBW) < 0.0)
+		    Error::abortRun(*this, "Invalid excess bandwidth");
+		if (int(symbol_interval) <= 0)
+		    Error::abortRun(*this, "Invalid symbol interval");
+		taps.resize (length);
+		int center = int(length)/2;
+		for (int i = 0; i < int(length); i++) {
+		    if (int(square_root))
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
+					int(symbol_interval), excessBW);
+		    else
+			taps[i] = Ptdsp_RaisedCosine(i - center,
+					int(symbol_interval), excessBW);
 		}
-		CG56FIR :: start();
+		CG56FIR :: setup();
 	}
 }
-

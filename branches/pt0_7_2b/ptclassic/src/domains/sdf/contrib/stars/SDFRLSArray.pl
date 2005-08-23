@@ -6,13 +6,15 @@ An adaptive antenna array processor using the RLS algorithm.
 The output signals of the antenna elements are taken
 from a bus connected to the input.
         }
-	version {@(#)SDFRLSArray.pl	1.0 9/24/96}
-	author { U. Trautwein , A. Richter}
+	version { @(#)SDFRLSArray.pl	1.4	05/28/98 }
+	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1998 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	inmulti {
 		name {input}
 		type {complex}
@@ -58,6 +60,7 @@ All rights reserved.
 		name {output}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 		int NumberElements;
 		Complex *p_matrix;
@@ -110,8 +113,12 @@ All rights reserved.
 		PortHole *p;
 		int i = 0;
 		while ((p = nexti++) != 0)  {
-			x_vector[i] = Complex((*p)%index);
-			x_vector_new[i++] = Complex((*p)%0);
+			//x_vector[i] = Complex((*p)%index);
+			//x_vector_new[i++] = Complex((*p)%0);
+			Complex tmp1 = (*p)%index;
+			x_vector[i] = tmp1;
+			Complex tmp2 = (*p)%0;
+			x_vector_new[i++] = tmp2;
 		}
 		int i1, j;
 
@@ -130,9 +137,11 @@ All rights reserved.
 		   k_vector[i]=t1_vector[i]*t2;
 
 		// w=w+k*conj(e)
-		for (i=0; i<NumberElements; i++)
-		   steering[i]+=k_vector[i]*conj(Complex(error%0));
-
+		for (i=0; i<NumberElements; i++) {
+	           //We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		   Complex tmp = error%0;
+		   steering[i]+=k_vector[i]*conj(tmp);
+		}
 		// y=w'*x (calculate the output signal, use the actual input)
 		Complex y = Complex(0.0,0.0);
 		for (i=0; i<NumberElements; i++)

@@ -1,9 +1,32 @@
+static const char file_id[] = "AutoForkNode.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)AutoForkNode.cc	2.12	3/2/95
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: J. Buck
  Date of creation: 11/7/90
@@ -12,96 +35,27 @@ $Id$
  when attempts are made to connect multiple outputs to it.  It forbids
  the specification of multiple inputs.
 *************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "AutoForkNode.h"
-#include "KnownBlock.h"
-#include "miscFuncs.h"
 
-// variable used for generating names
-int AutoForkNode::nF = 0;
-
-// generate a new name for autofork stars
-const char* AutoForkNode::autoForkName() {
-	char buf[16];
-	sprintf (buf, "!af%d", ++nF);
-	return savestring (buf);
-}
-	
 // this type is persistent
-int AutoForkNode::isItPersistent () {
+int AutoForkNode::isItPersistent () const {
 	return TRUE;
 }
 
 // make a new source connection
-PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
-	if (originatingPort) {
-		Error::abortRun (*this, " already has a source port");
-		return 0;
-	}
-// MultiPortHole: in this case the Geodesic is really not used, we
-// just set up to make connections to the given multiporthole by setting
-// forkOutput to be equal to it.
-	if (sp.isItMulti()) {
-		if (forkOutput) {
-			Error::abortRun(*this,"Multiport input must be first");
-			return 0;
-		}
-		forkOutput = (MultiPortHole *)&sp;
-		if (destinationPort) {
-			forkOutput->connect(*destinationPort,0);
-			destinationPort = 0;
-			return destinationPort->far();
-		}
-		else return &sp.newConnection();
-	}
-// normal case, simple enough.
-	originatingPort = &sp.newConnection();
-	portHoleConnect();
-	return originatingPort;
+PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int numDelays,
+				       const char* initDelayValues) {
+	return af.setSource(sp, numDelays, initDelayValues);
 }
 
 // make a new destination connection, possibly autoforking
-// this REQUIRES that there be a star in the current domain named Fork
-// with a porthole named input and a multiporthole named output.
 PortHole* AutoForkNode::setDestPort (GenericPort &gp) {
-	PortHole& dp = gp.newConnection();
-	// already autoforked -- connect new port to Fork output multiport
-	if (forkOutput) {
-		forkOutput->connect(dp, 0);
-		return &dp;
-	}
-	// no output -- use this one
-	else if (!destinationPort) {
-		destinationPort = &dp;
-	}
-	// second connection: must make a Fork
-	else {
-		PortHole * forkInput;
-
-		// create the Fork star
-		if ((forkStar = KnownBlock::clone("Fork")) == 0 ||
-		    (forkOutput = forkStar->multiPortWithName("output")) == 0
-		    || (forkInput = forkStar->portWithName("input")) == 0) {
-			Error::abortRun (*this, "can't create Fork star");
-			if (forkStar) { delete forkStar; forkStar = 0;}
-			return 0;
-		}
-
-		// install fork in parent galaxy
-		parent()->asGalaxy().addBlock(*forkStar, autoForkName());
-
-		// connect old output connection to Fork instead.
-		// also connect new output, and connect to the Fork.
-		forkOutput->connect(*destinationPort, 0);
-		destinationPort = forkInput;
-		forkOutput->connect(dp, 0);
-	}
-	portHoleConnect();
-	return &dp;
+	return af.setDest(gp);
 }
 
-// destructor
-AutoForkNode::~AutoForkNode () {
-// for now rely on parent galaxy's destructor to wipe out forkStar
-//	delete forkStar;
-	// remaining stuff handled by baseclass destructor
-}
+// class id
+ISA_FUNC(AutoForkNode,Geodesic);

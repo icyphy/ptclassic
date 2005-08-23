@@ -2,13 +2,19 @@ defstar {
 	name { Limit }
 	domain { CG56 }
 	desc { Hard Limiter }
-	version { $Id$ }
+	version { @(#)CG56Limit.pl	1.13 06 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="hard limiter"></a>
 The star hard limits input samples to keep the range of 
-(\fIbottom, top\fR).
+(<i>bottom, top</i>).
 	}
 	input {
 		name {input}
@@ -19,17 +25,21 @@ The star hard limits input samples to keep the range of
 		type {FIX}
 	}
 	state {
-		name {top}
-		type {FIX}
-		default {0.1}
-		desc {sets top limit.}
-	}
-	state {
 		name {bottom}
 		type {FIX}
-		default {"-0.1"}
-		desc {sets bottom limit}
+		default {0}
+		desc {Lower limit of the output.}
 	}
+	state {
+		name {top}
+		type {FIX}
+		default {ONE}
+		desc {Upper limit of the output.}
+	}
+	constructor {
+		noInternalState();
+	}
+
 
 	codeblock(limitblock) {
 	move	#$val(top),x0
@@ -45,7 +55,7 @@ $label(end)
         }
 
  	go {
- 		gencode(limitblock);
+ 		addCode(limitblock);
  	}
 
 	exectime {

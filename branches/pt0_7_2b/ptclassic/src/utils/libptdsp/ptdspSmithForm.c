@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspSmithForm.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for decompostion of matrices to their Smith Forms ]
-
-  Author      [ Brian Evans ]
-
-  Copyright   [ 
+/*******************************************************************
+Version identification:
+@(#)ptdspSmithForm.c	1.6 04 Oct 1996
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -34,163 +26,154 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
-]
 
-   Version [ $Id$ ]
+ Programmer: Brian L. Evans
 
-******************************************************************************/
+       Functions for decomposition of integer matrices into their
+       Smith forms. 
+
+********************************************************************/
 
 #include "ptdspSmithForm.h"
 #include "ptdspExtendedGCD.h"
 #include <malloc.h>
 
-/*---------------------------------------------------------------------------*/
-/* Macro declarations                                                        */
-/*---------------------------------------------------------------------------*/
-
-#define intmin(m,n)             ( ( (m) < (n) ) ? (m) : (n) )
-#define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
+#define INT_MIN_VALUE(m,n)      ( ( (m) < (n) ) ? (m) : (n) )
+#define INT_ABS_VALUE(m)        ( ( (m) > 0 ) ? (m) : (-(m)) )
 #define INT_IS_ZERO(x)          ( ! (x) )
 #define INT_IS_NOT_ZERO(x)      (x)
 #define INT_SWAP3(a,b,t)        { t = a; a = b; b = t; }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of internal functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/* Swap two rows in a matrix the slow but safe way */
-void intSwapRows( int *mat, int row1, int row2, int numRows, int
-		  numCols ) {
-  int temp, col;
-
-  if ( row1 != row2 ) {
+/* Swap two rows in matrix mat the slow but safe way. */
+static void 
+intSwapRows(int *mat, int row1, int row2, int numRows, int numCols ) {
+  if (row1 != row2) {
+    int col, temp;
     for ( col = 0; col < numCols; col++ )
       INT_SWAP3(mat[row1*numCols + col], mat[row2*numCols + col], temp);
   }
-  
   return;
 }
 
-/* Swap two columns in a matrix the slow but safe way */
-void intSwapCols( int *mat, int col1, int col2, int numRows, int
-		  numCols ) {
-  int temp, row;
-
+/* Swap two columns in matrix mat the slow but safe way. */
+static void 
+intSwapCols(int *mat, int col1, int col2, int numRows, int numCols) {
   if ( col1 != col2 ) {
+    int temp, row;
     for ( row = 0; row < numRows; row++ )
       INT_SWAP3(mat[row*numCols + col1], mat[row*numCols + col2], temp);
   }
-
   return;
 }
 
+
 /* FIXME
-   The two functions below, identity and mul, may prove useful in the
-   future for other functions or more functions may be added for
-   manipulating a matrix. In that case, these two functions, together
-   with those new functions, should be placed in a file of their own. */
+   The two functions below, identity and mul, should be in a file of
+   their own, a file that provides functions for manipulating matrices
+   in the form of double arrays, when more functions are added. 
+*/
 
-/* sets mat to be an identity matrix */
-void identity (int * mat, int numRows, int numCols) {
-
-  int row, col;
-
-  for ( row = 0; row < numRows; row++)
-    for ( col = 0; col < numCols; col++)
-      if (row == col) {
-	mat[row*numCols + col] = 1;
-      } else {
-	mat[row*numCols + col] = 0;
-      }
+/* Sets matrix mat to be an identity matrix. */
+static void 
+identity(int* mat, int numRows, int numCols) {
+  int row;
+  for ( row = 0; row < numRows; row++) {
+    int col;
+    for ( col = 0; col < numCols; col++) {
+      *mat++ = (row == col) ? 1 : 0;
+    }
+  }
 }
 
-
-/* Multiply two matrices, true matrix multiply, this is a fairly fast
+/* Matrix multiplication.
+        outMatrix = src1 * src2
+   Multiply two matrices, true matrix multiply, this is a fairly fast
    algorithm, especially when optimized by the compiler.
          outMatrix = src1 * src2
    Returns 1 if error, ie nCols1 != nRows2 
    This function writes the contents to a separate vector before
    copying to the outMatrix if the outMatrix is equal to the
    source. Thus this allows
-             X = X * Y   */
-int mul (int * outMatrix, const int * src1, const int nRows1, const
-	 int nCols1, const int * src2, const int nRows2, const int nCols2) {
+             X = X * Y
 
-  int temp, i, j, k;
-  int dup = 0;
-  int tempMat[nRows1*nCols2];
+   The return result is stored in integer array outMatrix .
+*/
+static int 
+mul(int* outMatrix, const int* src1, const int nRows1, const int nCols1, 
+    const int * src2, const int nRows2, const int nCols2) {
+  int i = 0;
+  int duplicateMatrix = 0;
+  int* tempMat = 0;
+  int* destMat = 0;
+  int maxi = nRows1 * nCols2;
 
-  if(nCols1 != nRows2) {
-    return 1;
-  }
-  
-  if (outMatrix == src1 || outMatrix == src2)
-    dup = 1;
+  if (nCols1 != nRows2) return 0;
 
-  for( i = 0; i < nRows1; i++)
+  duplicateMatrix = ((outMatrix == src1 || outMatrix == src2));
+  if (duplicateMatrix) tempMat = (int *) malloc(maxi * sizeof(int));
+  destMat = (duplicateMatrix) ? tempMat : outMatrix;
+
+  for( i = 0; i < nRows1; i++) {
+    int j;
     for( j = 0; j < nCols2; j++) {
-      temp = src1[i*nCols1] * src2[j];
-      for(k = 1; k < nCols1; k++)
+      int k;
+      int temp = src1[i*nCols1] * src2[j];
+      for (k = 1; k < nCols1; k++) {
         temp += src1[i*nCols1 + k] * src2[k*nCols2 + j];
-      if (dup) 
-	tempMat[i*nCols2 + j] = temp;
-      else
-	outMatrix[i*nCols2 + j] = temp;
+      }
+      destMat[i*nCols2 + j] = temp;
     }
-  if (dup)
-    for ( i = 0; i < nRows1*nCols2; i++) 
+  }
+  if (duplicateMatrix) {
+    for ( i = 0; i < maxi; i++) 
       outMatrix[i] = tempMat[i];
-  return 0;
+  }
+  free(tempMat);
+  return 1;
 }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
+/* Decompose integer matrix inputMat into one of its Smith forms S = U D V,
+   where U, D, and V are simpler integer matrices. Here, D is
+   diagonal, and U and V have determinant of +1 or -1 (and are called
+   regular unimodular). The Smith form decomposition for integer
+   matrices is analogous to singular value decomposition for
+   floating-point matrices. 
 
-/**Function*******************************************************************
-  Synopsis    [ Decompose an integer matrix into one of its Smith forms ]
-  Description [ Decompose an integer matrix S into one of its Smith
-                forms S = U D V, where U, D, and V are simpler integer
-		matrices. Here, D is diagonal, and U and V have
-		determinant of +1 or -1 (and are called regular
-		unimodular). The Smith form decomposition for integer
-		matrices is analogous to singular value decomposition
-		for floating-point matrices. ]
-  SideEffects [ The d, u and v integer arrays are modified. ]
-  SeeAlso     [ Ptdsp_SmithCanonForm ]
-******************************************************************************/
+   U, D and V are stored in the integer arrays d, u and v,
+   respectively. 
+*/
 void 
-Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
+Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
 		const int m, const int n) {
 
-  int entry, mincol, minrow, minabsvalue, minvalue, quotient, sum;
-  int endflag, dim, row, col, i;
-
   /* perform the basic Smith form decomposition */
-  int *mVector = (int *) malloc(m * sizeof(int));
-  int *nVector = (int *) malloc(n * sizeof(int));
-  int r = intmin(m, n);
-  
+  int* mVector = (int *) malloc(m * sizeof(int));
+  int* nVector = (int *) malloc(n * sizeof(int));
+  int r = INT_MIN_VALUE(m, n);
+  int dim, i;
+
   /* copy contents of inputMat into d */
-  for ( i = 0; i < m * n; i++)
+  for (i = 0; i < m * n; i++)
     d[i] = inputMat[i];
 
   /* set u and v to be identity matrixes */
   identity(u, m, m);
   identity(v, n, n);
 
-  for (  dim = 0; dim < r - 1; dim++ ) {
-    endflag = 0;
-    while ( ! endflag ) {
-      
+  for (dim = 0; dim < r - 1; dim++) {
+    int endflag = 0;
+    while (! endflag) {
+      int col, row;
+
       /* find indices of the pivot: non-zero entry with min value in d */
-      mincol = minrow = dim;
-      minvalue = d[minrow * n + mincol]; /* ie
-						   inputMat[minrow][mincol] */
-      minabsvalue = intabs(minvalue);
-      for ( row = dim; row < m; row++ ) {
-	for ( col = dim; col < n; col++ ) {
-	  entry = d[row*n + col];
+      int minrow = dim;
+      int mincol = dim;
+      int minvalue = d[minrow * n + mincol]; /* ie inputMat[minrow][mincol] */
+      int minabsvalue = INT_ABS_VALUE(minvalue);
+      for (row = dim; row < m; row++) {
+	int col;
+	for (col = dim; col < n; col++) {
+	  int entry = d[row*n + col];
 	  if ( entry < 0 ) entry = -entry;
 	  if ( INT_IS_NOT_ZERO(entry) && ( entry < minabsvalue ) ) {
 	    minabsvalue = entry;
@@ -216,34 +199,34 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
 	 Therefore, full matrix multiplication is not required
 	 We must be careful because we are performing updates in place */
       minvalue = d[dim*n + dim];
-      for ( row = dim + 1; row < m; row++ )
+      for (row = dim + 1; row < m; row++ )
 	mVector[row] = -d[row*n + dim] / minvalue;
-      for ( col = dim + 1; col < n; col++ )
+      for (col = dim + 1; col < n; col++ )
 	nVector[col] = -d[dim*n + col] / minvalue;
       
-      for ( row = dim + 1; row < m; row++ ) {
-	quotient = mVector[row];
+      for (row = dim + 1; row < m; row++) {
+	int quotient = mVector[row];
 	for ( col = dim + 1; col < n; col++ ) {
 	  d[row*n + col] += quotient * d[dim*n + col];
 	}
 	d[row*n + dim] += quotient * minvalue;
       }						/* E^-1 D */
-      for ( col = dim + 1; col < n; col++ ) {
-	quotient = nVector[col];
+      for (col = dim + 1; col < n; col++) {
+	int quotient = nVector[col];
 	for ( row = dim + 1; row < m; row++ ) {
 	  d[row*n + col] += d[row*n + dim] * quotient;
 	}
 	d[dim*n + col] += quotient * minvalue;
       }						/* (E^-1 D) F^-1 */
-      
-      for ( row = 0; row < m; row++ ) {
-	sum = u[row*m + dim];
+
+      for (row = 0; row < m; row++) {
+	int sum = u[row*m + dim];
 	for ( col = dim + 1; col < m; col++ )
 	  sum -= u[row*m + col] * mVector[col];
 	u[row*m + dim] = sum;
       }						/* U E */
       for ( col = 0; col < n; col++ ) {
-	sum = v[dim*n + col];
+	int sum = v[dim*n + col];
 	for ( row = dim + 1; row < n; row++ )
 	  sum -= nVector[row] * v[row*n + col];
 	v[dim*n + col] = sum;
@@ -251,13 +234,13 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
       
       /* check for the ending condition for this iteration */
       endflag = 1;
-      for ( col = dim + 1; col < n; col++ )
+      for (col = dim + 1; col < n; col++)
 	if ( INT_IS_NOT_ZERO(d[dim*n + col]) ) {
 	  endflag = 0;
 	  break;
 	}
-      if ( endflag ) {
-	for ( row = dim + 1; row < m; row++ )
+      if (endflag) {
+	for (row = dim + 1; row < m; row++)
 	  if ( INT_IS_NOT_ZERO(d[row*n + dim]) ) {
 	    endflag = 0;
 	    break;
@@ -269,30 +252,29 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
   free(nVector);
 }
   
-/**Function*******************************************************************
-  Synopsis    [ Put the Smith form into canonical form ]
-  Description [ This function takes the result of D, U, and V of a
-                SmithForm decomposition, whereby D is not unique, and
-		puts them into the canonical form, whereby D is
-		unique. Note, however, that U and V are still not
-		unique. This is done by : <BR>
-		(1) pulling out negative signs <BR>
-		(2) sorting diagonal entries <BR>
-		(3) shuffling factors along diagonal by iteratively finding
-		regular unimodular G and H such that
-		U D V = U (G^-1 G) D (H H^-1) V = (U G^-1) (G D H) (H^-1 V)
-		so that G and H move D closer to canonical form ]
-  SideEffects [ The d, u and v integer arrays are modified. ]
-  SeeAlso     [ Ptdsp_SmithForm ]
-******************************************************************************/
+/* Put the Smith form into canonical form.
+   This function takes the result of D, U, and V of a SmithForm
+   decomposition, and puts them into the canonical form. The result is
+   that D is now unique. Note, however, that U and V are still not
+   unique. 
+   The processes carried out are :
+   (1) pulling out negative signs 
+   (2) sorting diagonal entries 
+   (3) shuffling factors along diagonal by iteratively finding regular
+       unimodular G and H such that
+   U D V = U (G^-1 G) D (H H^-1) V = (U G^-1) (G D H) (H^-1 V)
+       so that G and H move D closer to canonical form.
+
+   Integer arrays d, u and v are modified into canonical form.
+*/
 void 
 Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   
-  int ginv[m*m];
-  int hinv[n*n];
+  int* ginv = (int *) malloc(m * m * sizeof(int));
+  int* hinv = (int *) malloc(n * n * sizeof(int));
   int i, j, di, jend, temp, lastd, lasti;
   int lcmvalue, lambda, mu, gcdvalue;
-  int r = intmin(m, n);
+  int r = INT_MIN_VALUE(m, n);
 
   /* (1) pull out negative signs */
   identity(ginv, m, m);
@@ -320,8 +302,8 @@ Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   /* (3) shuffle factors along the diagonal */
   lastd = d[0];
   lasti = 0; 
-  /*  process second to last diagonal elements, i = 1
-      ... r-1 */
+
+  /*  process second to last diagonal elements, i = 1 ... r-1 */
   for ( i = 1; i < r; i++ ) {
     di = d[i*n + i];
     gcdvalue = Ptdsp_ExtendedGCD(lastd, di, &lambda, &mu);
@@ -357,5 +339,7 @@ Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
     lastd = lcmvalue;
     lasti = i;
   }
-}  
 
+  free(hinv);
+  free(ginv);
+}  

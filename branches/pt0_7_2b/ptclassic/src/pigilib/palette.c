@@ -1,18 +1,45 @@
 /* palette.c  edg
 Version identification:
-$Id$
+@(#)palette.c	1.16	02/08/99
 Make palette of icons.
 These routines should be in octIfc.c maybe, since it enforces policy.
 */
 
 /*
-Copyright (c) 1989 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 */
 
 /* Includes */
-#include <stdio.h>
+
 #include "local.h"
+#include <stdio.h>
+
+#include "palette.h"
+
+#include "oct.h"
 #include "rpc.h"
 #include "oh.h"
 #include "octMacros.h"
@@ -26,7 +53,7 @@ GOCPaletteFacet(palName, facetPtr)
 char *palName;
 octObject *facetPtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT, 0};
     octStatus status;
 
     facetPtr->type = OCT_FACET;
@@ -40,8 +67,11 @@ octObject *facetPtr;
 	return(FALSE);
     } else if (status == OCT_NEW_FACET) {
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "VIEWTYPE", "SCHEMATIC"));
+	FreeOctMembers(&prop);
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "EDITSTYLE", "SCHEMATIC"));
+	FreeOctMembers(&prop);
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "TECHNOLOGY", UTechProp));
+	FreeOctMembers(&prop);
     }
     return (TRUE);
 }
@@ -67,7 +97,7 @@ octCoord *leftMar, *width, *dx, *dy;
 #define dxDef 200
 #define dyDef 150
 
-    octObject obj, bb;
+    octObject obj = {OCT_UNDEFINED_OBJECT, 0};
 
     if (ohGetByPropName(cursorPtr, &obj, "leftMargin") == OCT_NOT_FOUND) {
 	obj.contents.prop.type = OCT_INTEGER;
@@ -95,32 +125,38 @@ static struct octPoint defaultCursorPt = {500, -500};
 
     octGenerator genInst;
     struct octPoint cursorPt;
-    octObject bb;
-    char *techDir, buf[FILENAME_MAX], *cell;
+    octBox bb;
+    char *techDir, buf[MAXPATHLEN], *cell;
 
-    octInitGenContents(palFacetPtr, OCT_INSTANCE_MASK, &genInst);
+    octInitGenContentsSpecial(palFacetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, cursorPtr) == OCT_OK) {
 	if (IsCursor(cursorPtr)) {
-	    ERR_IF1(!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width,
-		dx, dy));
+	    if (!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width,
+	      dx, dy)) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
+	    octFreeGenerator(&genInst);
 	    return (TRUE);
 	}
     }
+    octFreeGenerator(&genInst);
     /* No cursor found, create one... */
     if (octBB(palFacetPtr, &bb) == OCT_OK) {
 	/* It looks like RPC octBB() doesn't give the right BB for some reason,
-	    at least some times (edg 1/5/90)
+	    at least some times (edg 1/5/90)'
 	*/
 	/* Locates cursor at an even (100 octUnits) point below the
 	    lowerLeft corner of current bounding box.
 	*/
-	cursorPt.x = AlignFunction(bb.contents.box.lowerLeft.x + 50);
-	cursorPt.y = -AlignFunction(-bb.contents.box.lowerLeft.y + 75);
+	cursorPt.x = AlignFunction(bb.lowerLeft.x + 50);
+	cursorPt.y = -AlignFunction(-bb.lowerLeft.y + 75);
     } else {
 	cursorPt = defaultCursorPt;
     }
     ERR_IF1(!UGetFullTechDir(&techDir));
-    ERR_IF1(!StrDup(&cell, sprintf(buf, "%s/%s", techDir, "%cCursor")));
+    sprintf(buf, "%s/%s", techDir, PT_PERCENT "cCursor");
+    ERR_IF1(!StrDup(&cell, buf));
     CK_OCT(CreateInstance2(palFacetPtr, cursorPtr, "", cell, "schematic",
 	"interface", cursorPt.x, cursorPt.y, OCT_NO_TRANSFORM));
     ERR_IF1(!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width, dx, dy));
@@ -135,7 +171,8 @@ octObject *iconFacetPtr, *palFacetPtr;
 {
     octCoord leftMar, width, dx, dy;
     struct octPoint cursorPt;
-    octObject cursorInst, iconInst;
+    octObject cursorInst = {OCT_UNDEFINED_OBJECT, 0},
+	      iconInst = {OCT_UNDEFINED_OBJECT, 0};
 
     ERR_IF1(!GOCCursor(palFacetPtr, &cursorInst, &leftMar, &width, &dx, &dy));
     cursorPt = cursorInst.contents.instance.transform.translation;
@@ -191,7 +228,9 @@ MkPalIconInPal(facetPtr, dir, palName)
 octObject *facetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      palFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     ERR_IF1(!MkPalIcon(facetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
@@ -212,7 +251,9 @@ MkUnivIconInPal(facetPtr, dir, palName)
 octObject *facetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      palFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     ERR_IF1(!MkUnivIcon(facetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
@@ -233,7 +274,9 @@ MkGalIconInPal(galFacetPtr, dir, palName)
 octObject *galFacetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      palFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     ERR_IF1(!MkGalIcon(galFacetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
@@ -251,12 +294,13 @@ will be placed in current VEM directory.  Else, use dir and absolute
 pathname.
 */
 boolean
-MkStarIconInPal(starName, dir, palName)
-char *starName, *dir, *palName;
+MkStarIconInPal(starName, dir, domain, palName)
+char *starName, *dir, *domain, *palName;
 {
-    octObject iconFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      palFacet = {OCT_UNDEFINED_OBJECT, 0};
 
-    ERR_IF1(!MkStarIcon(starName, dir, &iconFacet));
+    ERR_IF1(!MkStarIcon(starName, dir, domain, &iconFacet));
     ERR_IF1(!GOCPaletteFacet(palName, &palFacet));
     ERR_IF1(!AddIconToPal(&iconFacet, &palFacet));
     CK_OCT(octCloseFacet(&palFacet));

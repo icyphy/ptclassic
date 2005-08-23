@@ -1,77 +1,107 @@
 defstar {
 	name { Distributor }
 	domain { C50 }
-	desc { 
-One input, two output distributor. 
- }
-	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	desc {
+Takes one input stream and synchronously splits it into N output streams,
+where N is the number of outputs.  It consumes N*B input particles,
+where B = blockSize, and sends the first B particles to the first output,
+the next B particles to the next output, etc.
+	}
+	version { @(#)C50Distributor.pl	1.8	05/26/98 }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 control library }
-	explanation {
-.Ir "alternating data streams"
+	location { C50 main library }
+	htmldoc {
+<a name="alternating data streams"></a>
 Distributes an input signal among two outputs, alternating samples.
 	}
-	input {
-		name {input}
-		type {ANYTYPE}
-	}
+
 	outmulti {
 		name {output}
-		type {=input}
+		type {anytype}
 	}
+
+	input  {
+		name {input}
+		type {=output}
+	}
+
         state {
                 name {blockSize}
                 type {int}
                 default {1}
                 desc {Number of particles in a block.}
 	}
-        state  {
-                name { outputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+	constructor {
+		noInternalState();
+	}
+	
+	protected {
+		// holds the effective blocksize(to allow for
+		// complex inputs)
+		int effBlockSize;
+		// number of input ports
+		int numPorts;
 
-	setup {
-                int n = output.numberPorts();
+		}
+
+        setup {
+		
+                numPorts = output.numberPorts();
 		int bs = int(blockSize);
-                input.setSDFParams(n*bs,n*bs-1);
+		if (input.resolvedType() == COMPLEX) effBlockSize = 2*bs;
+		else	effBlockSize = bs;
 		output.setSDFParams(bs,bs-1);
+		input.setSDFParams(numPorts*bs,numPorts*bs-1);
         }
 
         codeblock (one) {
-        splk    #$addr(input),BMAR        	;just move data from in to out
-        bldd    BMAR,#$addr(output#1)		;
+	lmmr	ar1,#$addr(input)
+	nop
+	nop
+	smmr	ar1,#$addr(output#1)
         }
 
- 	codeblock(main) {
-        lar    	AR0,#$addr(input)		;Address input		=> AR0
-        mar	*,AR0				;
-        }
-        codeblock(loop) {
-        bldd    *,#$addr(output#outputNum)	;output port(n) = input(i)
+	codeblock(oneCx){
+	lmmr	ar1,#$addr(input,0)
+	lmmr	ar2,#$addr(input,1)
+	smmr	ar1,#$addr(output#1)
+	smmr	ar2,#$addr(output#1)+1)
+	}
+	
+	codeblock(moveBlockInit){
+	mar	*,ar1
 	}
 
-        go {
-                if (output.numberPorts() == 1) {
-                        addCode(one);
-                        return;
-                }
-                addCode(main);
-                for (int i = 1; i <= output.numberPorts(); i++) {
-                        outputNum=i;
-                        addCode(loop);
-                }
-        }
-       exectime {
-                return (2*(int(output.numberPorts()))+2);
-        }
-}
+	codeblock(moveBlock,"int Inum"){
+	lar	ar1,#$addr(output#@Inum)
+	rpt	#@(effBlockSize - 1)
+	bldd	#($addr(input)+@(effBlockSize*(Inum-1))),*+
+	}
 
+	go {
+
+		if ((numPorts == 1) && (effBlockSize == 2)) addCode(oneCx);
+		else if ((numPorts == 1) && (effBlockSize == 1)) addCode(one);
+		else {
+			addCode(moveBlockInit);
+                	for (int i = 1; i <= numPorts; i++) {
+				addCode(moveBlock(i));
+                	}
+		}
+	}
+
+	exectime {
+		if ((numPorts == 1) && (effBlockSize == 2))  return 4;
+		else if ((numPorts == 1) && (effBlockSize == 2)) return 2;
+		else {
+			int onePortCost = effBlockSize + 2;
+			return (onePortCost*numPorts + 1) ;
+		}
+	}
+}

@@ -2,21 +2,21 @@
 #define _VHDLFiring_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLFiring.h	1.13 05/02/97
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,11 +25,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
- Methods defining VHDL Firings.
+ Methods defining VHDL firings.
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -37,27 +39,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLObjList.h"
 #include "VHDLGeneric.h"
 #include "VHDLPort.h"
 #include "VHDLVariable.h"
-#include "VHDLPortVar.h"
-#include "VHDLGenericMap.h"
-#include "VHDLPortMap.h"
 #include "VHDLSignal.h"
+
+class VHDLPort;
+class VHDLPortList;
+class VHDLSignalList;
 
 class VHDLFiring : public VHDLObj
 {
  public:
   // Constructors.
   VHDLFiring();
-  VHDLFiring(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLFiring();
 
-  // Name.
-//  StringList name;
   // Star class name.
   StringList starClassName;
   // Generic list.
@@ -66,18 +65,28 @@ class VHDLFiring : public VHDLObj
   VHDLPortList* portList;
   // Variable list.
   VHDLVariableList* variableList;
-  // PortVar list.
-  VHDLPortVarList* portVarList;
   // Action.
   StringList action;
-  // VarPort list.
-  VHDLPortVarList* varPortList;
   // Generic map list.
-  VHDLGenericMapList* genericMapList;
+  VHDLGenericList* genericMapList;
   // Port map list.
-  VHDLPortMapList* portMapList;
+  VHDLPortList* portMapList;
   // Signal list.
   VHDLSignalList* signalList;
+  // Extra variable declarations.
+  StringList decls;
+  // Suppress sensitivity lists.
+  int noSensitivities;
+  // Suppress output clocking.
+  int noOutclocking;
+  // Firegroup serial number
+  int groupNum;
+  // Starting time.
+  int startTime;
+  // Ending time.
+  int endTime;
+  // Latency (note: should be endTime - startTime).
+  int latency;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;

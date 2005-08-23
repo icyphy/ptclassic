@@ -2,21 +2,21 @@
 #define _VHDLPort_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLPort.h	1.11 03/10/97
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,7 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
@@ -36,25 +38,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
+#include "VHDLSignal.h"
+#include "VHDLVariable.h"
+#include "VHDLFiring.h"
 
-class VHDLPort : public VHDLObj
+class VHDLSignal;
+class VHDLFiring;
+class VHDLToken;
+
+class VHDLPort : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLPort();
-  VHDLPort(const char*, Block*, const char*);
+  VHDLPort(const char* n, const char* t, const char* d, const char* m, VHDLSignal* s, VHDLVariable* v = NULL,
+	   VHDLFiring* f = NULL, VHDLToken* tok = NULL) : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v), firing(f), token(tok) {}
 
   // Destructor.
   ~VHDLPort();
 
-  // Name.
-//  StringList name;
-  // Data type.
-  StringList type;
   // Data direction.
   StringList direction;
+  // Map binding.
+  StringList mapping;
+  // Signal connection.
+  VHDLSignal* signal;
+  // Internal variable.
+  VHDLVariable* variable;
+  // Parent firing.
+  VHDLFiring* firing;
+  // Associated data token.
+  VHDLToken* token;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -63,48 +78,65 @@ class VHDLPort : public VHDLObj
   // Return a pointer to a new copy of the VHDLPort.
   VHDLPort* newCopy();
 
+  void setDirec(const char* newDirec) { direction = newDirec; }
+  StringList getDirec() { return direction; }
+  void setVar(VHDLVariable* newVar) { variable = newVar; }
+  VHDLVariable* getVar() { return variable; }
+  void setFire(VHDLFiring* newFire) { firing = newFire; }
+  VHDLFiring* getFire() { return firing; }
+  void setToken(VHDLToken* newToken) { token = newToken; }
+  VHDLToken* getToken() { return token; }
+  int isItInput() { return !strcmp(direction,"IN"); }
+  int isItOutput() { return !strcmp(direction,"OUT"); }
+
+  void connect(VHDLSignal*);
+
  protected:
  private:
 };
 
-class VHDLPortList : public VHDLObjList
+class VHDLPortList : public VHDLTypedObjList
 {
   friend class VHDLPortListIter;
 
  public:
   // Add VHDLPort to list.
-  void put(VHDLPort& v) { VHDLObjList::put(v); }
+  void put(VHDLPort& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLPort on list (const, non-const forms).
-  VHDLPort* head() { return (VHDLPort*) VHDLObjList::head(); }
+  VHDLPort* head() { return (VHDLPort*) VHDLTypedObjList::head(); }
   const VHDLPort* head() const {
-    return (const VHDLPort*) VHDLObjList::head();
+    return (const VHDLPort*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLPort from the list.
   // Note:  the VHDLPort is not deleted.
-  int remove (VHDLPort* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLPort* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLPort with given name (const, non-const forms).
   VHDLPort* vhdlPortWithName(const char* name) {
-    return (VHDLPort*) vhdlObjWithName(name);
+    return (VHDLPort*) vhdlTypedObjWithName(name);
   }
 
   const VHDLPort* vhdlPortWithName(const char* name) const {
-    return (const VHDLPort*) vhdlObjWithName(name);
+    return (const VHDLPort*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
   VHDLPortList* newCopy();
 
+  // Allocate memory for a new VHDLPort and put it in the list.
+  void put(StringList, StringList, StringList, StringList="",
+	   VHDLSignal* =NULL, VHDLVariable* =NULL, VHDLFiring* =NULL,
+	   VHDLToken* =NULL);
 };
 
-class VHDLPortListIter : public VHDLObjListIter {
+class VHDLPortListIter : public VHDLTypedObjListIter {
  public:
-  VHDLPortListIter(VHDLPortList& l) : VHDLObjListIter(l) {}
-  VHDLPort* next() { return (VHDLPort*) VHDLObjListIter::next(); }
+  VHDLPortListIter(VHDLPortList& l) : VHDLTypedObjListIter(l) {}
+  VHDLPort* next() { return (VHDLPort*) VHDLTypedObjListIter::next(); }
   VHDLPort* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

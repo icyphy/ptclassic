@@ -8,10 +8,11 @@ zero 0, then only a single impulse is generated; otherwise, it
 specifies the period of the impulse train.  The impulse or impulse
 train is delayed by the amount specified by "delay".
 }
-    version { @(#)ACSImpulse.pl	1.1 05/07/98 }
+    version { @(#)ACSImpulse.pl	1.6 09/08/99}
     author { Eric Pauer }
     copyright {
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-1999 The Regents of the University of California
+and Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -20,6 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
         name { output }
         type { float }
+    }
+    defstate {
+	name { level }
+	type{ float }
+	default { 1.0 }
+	desc { The height of the impulse(s). }
     }
     defstate {
 	name { period }

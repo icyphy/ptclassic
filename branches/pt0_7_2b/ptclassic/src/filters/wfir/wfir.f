@@ -1,4 +1,4 @@
-c $Id$
+c @(#)wfir.f	1.2	1/11/91
 c main program: window design of linear phase, lowpass, highpass
 c               bandpass, and bandstop fir digital filters
 c author:       lawrence r. rabiner and carol a. mcgonegal
@@ -41,6 +41,7 @@ c
       dimension w(512), g(512)
       integer otcd1, otcd2
       character fname*100
+      character answer*1
 c
       pi = 4.0*atan(1.0)
       twopi = 2.0*pi

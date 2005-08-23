@@ -1,79 +1,66 @@
-#ifndef _DDFScheduler_h
-#define _DDFScheduler_h 1
-
-#include "Scheduler.h"
-#include "Galaxy.h"
-#include "SDFStar.h"
-#include "DDFStar.h"
-#include "SDFConnect.h"
-#include "DataStruct.h"
-#include "IntState.h"
-
-/**************************************************************************
+/**********************************************************************
 Version identification:
-$Id$
+@(#)DDFScheduler.h	2.25 1/16/96
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
- Programmer:  Soonhoi Ha
- Date of creation: 8/9/90
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+
+ Programmers: Soonhoi Ha, Joe Buck
+ The authors gratefully acknowledge the contributions of Richard Stevens.
+
+ Richard Stevens is an employee of the U.S. Government whose contributions
+ to this computer program fall within the scope of 17 U.S.C. A7 105
+
+ Date of creation: 7/20/94
 
  Methods for the DDF Scheduler
 
-**************************************************************************/
+***********************************************************************/
+#ifndef _DDFScheduler_h
+#define _DDFScheduler_h 1
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "DynDFScheduler.h"
 
 	////////////////////////////
 	// DDFScheduler
 	////////////////////////////
 
-class DDFScheduler : public Scheduler {
-
-	// explicit stopping condition
-	int stopTime;
-
-	// check whether a star is runnable. Also enable lazy evaluation.
-	int isRunnable(Star&);
-
-	// lazy evaluation
-	int lazyEval(Star*);
-	int checkLazyEval(Star *);
-
-	// list of source blocks.
-	SequentialList sourceBlocks;
-
-	// the number of firing all sources so far
-	int numFiring;
-
-	// number of overlapped execution allowed.
-	int numOverlapped;
+class DDFScheduler : public DynDFScheduler {
 public:
 	// my domain
 	const char* domain() const ;
 
-	// The setup function computes an DDF schedule
-	// and initializes all the blocks.
-	int setup(Block& galaxy);
-
-	// The run function resumes the run where it was left off.
-	int run(Block& galaxy);
-
-	StringList displaySchedule() ;
-
-	// Constructor sets default options
-	DDFScheduler () { stopTime = 1;
-			 numOverlapped = 1; 
-			 schedulePeriod = 10000.0; }
-
-	// setStopTime, for compatibility with DE scheduler.
-	// for now, we assume each schedule interation takes 1.0
-	// time units.  (Argh).  Deal with roundoff problems.
-	void setStopTime (float limit) { stopTime = int(limit) ;}
-	void resetStopTime () { stopTime = 1; numFiring = 0; }
-
-	// scheduler Period : interface with timed domain.
-	float schedulePeriod;
+	// reset "restructured" flag for DDFSelf star
+	void resetFlag() {
+		DynDFScheduler::resetFlags();
+	}
 };
 
 #endif

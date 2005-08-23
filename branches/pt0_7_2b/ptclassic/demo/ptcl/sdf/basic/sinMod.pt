@@ -1,0 +1,48 @@
+domain SDF
+defgalaxy singen {
+	domain SDF
+	newstate sample_rate FLOAT "2*PI"
+	newstate frequency FLOAT "PI/50"
+	star Ramp1 Ramp
+	setstate Ramp1 step "2*PI*frequency/sample_rate"
+	setstate Ramp1 value 0.0
+	star Sin1 Sin
+	connect Ramp1 output Sin1 input
+	alias out Sin1 output
+}
+domain SDF
+defgalaxy modulator {
+	domain SDF
+	newstate freq FLOAT 0.062832
+	star "Mpy.input=21" Mpy
+	numports "Mpy.input=21" input 2
+	star singen1 singen
+	setstate singen1 sample_rate "2*PI"
+	setstate singen1 frequency "PI/5"
+	alias in "Mpy.input=21" "input#1"
+	alias out "Mpy.input=21" output
+	connect singen1 out "Mpy.input=21" "input#2"
+}
+reset
+# Creating universe 'sinMod'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "A modulator demo"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x400+0+0 -0 x"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star singen2 singen
+	setstate singen2 sample_rate "2*PI"
+	setstate singen2 frequency "PI/100"
+	star modulator1 modulator
+	setstate modulator1 freq "0.2*PI"
+	connect singen2 out modulator1 in
+	connect modulator1 out Xgraph1 input
+run 400
+wrapup

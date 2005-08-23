@@ -2,10 +2,10 @@ defstar {
 	name { IntToFloat }
 	domain { CGC }
 	desc { type conversion from int to float }
-	version { $Id$ }
+	version { @(#)CGCIntToFloat.pl	1.3	1/27/96 }
 	author { Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -38,8 +38,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		numSample = output.numXfer();
 	}
 	codeblock (body) {
-	int i;
-	for (i = 0; i < $val(numSample); i++) {
+	int i = 0;
+	for (; i < $val(numSample); i++) {
 		$ref(output, i) = $ref(input, i);
 	}
 	}

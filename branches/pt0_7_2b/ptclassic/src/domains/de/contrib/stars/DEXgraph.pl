@@ -4,7 +4,7 @@ defstar {
 	desc {
 Generate a plot of a single signal with the xgraph program.
 	}
-	version {@(#FXgraph.pl	1.17 3/2/95}
+	version { @(#)DEXgraph.pl	1.2 06/24/97 }
 	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.

@@ -5,7 +5,7 @@ defcorona {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {@(#)ACSNonBiMem.pl	1.0	7 November 1998}
+	version {@(#)ACSNonBiMem.pl	1.3 09/08/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

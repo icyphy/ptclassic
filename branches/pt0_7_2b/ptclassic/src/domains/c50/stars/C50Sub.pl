@@ -1,19 +1,19 @@
 defstar {
 	name { Sub }
 	domain { C50 }
-	desc { any input subtractor }
-	version { $Id$ }
+	desc { Subtract the neg inputs from the pos input. }
+	version { @(#)C50Sub.pl	1.5	06 Oct 1996 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
-	explanation {
-.PP
-Output the \fIpos\fR minus all \fIneg\fR inputs.
+	location { C50 main library }
+	htmldoc {
+<p>
+Output the <i>pos</i> minus all <i>neg</i> inputs.
         }    
 	input {
 		name { pos }
@@ -27,20 +27,13 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
 		name { output }
 		type { fix }
 	}
-        state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
         codeblock(main) {
 	mar	*,AR0
 	lar	AR0,#$addr(pos)			;Address pos		=>AR0
         lacc    *,15,AR1			;Accu	= pos
         }
-        codeblock(loop) {
-	lar	AR1,#$addr(neg#inputNum)	;Address neg#i		=>AR1
+        codeblock(loop, "int i") {
+	lar	AR1,#$addr(neg#@i)		;Address neg#i		=>AR1
         sub	*,15				;Accu pos-neg#i
         }
         codeblock(done) {
@@ -49,15 +42,17 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
         sach    *,1				;output = Accu
         }
 
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(main);
 		for (int i = 1; i <= neg.numberPorts(); i++) {
-			inputNum = i;
-			addCode(loop);
+			addCode(loop(i));
 		}
 		addCode(done);
 	}
 	execTime {
-		return 2 * int  (neg.numberPorts()) + 6;
+		return 2 * int(neg.numberPorts()) + 6;
 	}
 }

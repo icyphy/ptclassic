@@ -1,20 +1,21 @@
 defstar {
 	name { QuantRange }
 	domain { C50 }
-	desc { The star quantizes the input to one of N+1 possible output levels
+	desc {
+The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
-	version { $Id$ }
-	author { A. Baesnch }
+	version { @(#)C50QuantRange.pl	1.4	01 Oct 1996 }
+	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
-	explanation {
-.PP
+	location { C50 main library }
+	htmldoc {
+<p>
 The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 For an input less than or equal to the Nth threshold,
@@ -106,18 +107,20 @@ $label(term)
 	pac
 	sach	*,1
         }
+	constructor {
+		noInternalState();
+	}
         setup {
-             if(levels.size() != thresholds.size()+1)
-                 Error::abortRun (*this,
-		 ": Must have 1 more level than threshold to quantize.");
+		if (levels.size() != thresholds.size()+1) {
+		    Error::abortRun(*this,
+			"Must have one more level than number of thresholds");
+		}
         }
 	go {
-                 X=thresholds.size();
+                 X = thresholds.size();
 
-                 if(thresholds.size()>1) 
-                     addCode(main);
-		 else
-	             addCode(other);
+                 if (thresholds.size()>1) addCode(main);
+		 else addCode(other);
 	}
 	exectime {
 	        return 15+7*int(thresholds.size());

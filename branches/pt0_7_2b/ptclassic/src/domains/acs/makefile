@@ -1,5 +1,5 @@
 # Makefile for ACS domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1998-2000 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,8 +24,8 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  E. A. Lee and D. Niehaus
-# $Id$
+# Programmer:  Eric Pauer (Sanders), Edward A. Lee, Christopher Hylands
+# @(#)makefile	1.9 08/14/00
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/acs.
 # Instead run in from $PTOLEMY/obj.$PTARCH/domains/acs (through the symbolic
@@ -45,7 +45,7 @@ include $(ROOT)/mk/topdomain.mk
 # Subdirectories with star directories in them
 SUBDOMAINDIRS =
 
-DIRS = kernel stars $(SUBDOMAINDIRS)
+DIRS = kernel stars targets $(SUBDOMAINDIRS) #test
 
 include $(ROOT)/mk/domain.mk
 

@@ -1,10 +1,10 @@
 defstar {
 	name { Logic }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCLogic.pl	1.5	01 Oct 1996 }
 	author { Brian L. Evans and Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -16,21 +16,11 @@ The inputs are integers interpreted as Boolean values,
 where zero means FALSE and a nonzero value means TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
-	explanation {
+	htmldoc {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
 of TRUE values among the inputs.
 The other operations are self-explanatory.
-.ir "logic"
-.ir "Boolean logic"
-.ir "not (logical operation)"
-.ir "and (logical operation)"
-.ir "exclusive or"
-.ir "xor (logical operation)"
-.ir "xnor (logical operation)"
-.ir "nand (logical operation)"
-.ir "or (logical operation)"
-.ir "nor (logical operation)"
 	}
 	inmulti {
 		name { input }
@@ -63,6 +53,9 @@ non-zero integer (not necessarily 1).
 	private {
 		int test;
 	}
+        constructor {
+		noInternalState();
+	}
 	setup {
 		const char* cn = logic;
 		if ( strcasecmp(cn, "NOT") == 0) {
@@ -79,48 +72,63 @@ non-zero integer (not necessarily 1).
 		else if ( strcasecmp(cn, "XNOR") == 0 ) test = XNORID;
 		else Error::abortRun(*this, "Unrecognized test.");
 	}
+
+	codeblock(logicAndOp,"int i") {
+	result = result && $ref(input#@i);
+	}
+
+	codeblock(logicOrOp,"int i") {
+	result = result || $ref(input#@i);
+	}
+
+	codeblock(logicXorOp,"int i") {
+	if ( $ref(input#@i) ) result = ! result;
+	}
+
 	go {
 		// The inverter (not) star is the simplest case
 		if ( test == NOTID ) {
-			addCode("$ref(output) = ! $ref(input,#1);\n");
+			addCode("\t$ref(output) = ! $ref(input#1);\n");
 			return;
 		}
 
 		// Declare and initialize local variables i and result
-		StringList iterator = "int i = 0;\n";
 		if ( test == ANDID || test == NANDID ) {
-			iterator << "int result = 1;\n";
+			addCode("\tint result = 1;\n");
 		}
 		else {
-			iterator << "int result = 0;\n";
+			addCode("\tint result = 0;\n");
 		}
 
 		// Generate the code that walks through the input values
-		iterator << "for (; i < "
-			 << input.numberPorts()
-			 << "; i++ ) {\n";
+		int i = 1;
 		switch( test ) {
 		  case ANDID:
 		  case NANDID:
-		    iterator << "\tresult = result && $ref(input,#@i);\n";
-		    break;
+			for (i = 1; i <= input.numberPorts(); i++ ) {
+			    addCode(logicAndOp(i));
+			}
+			break;
 		  case ORID:
 		  case NORID:
-		    iterator << "\tresult = result || $ref(input,#@i);\n";
-		    break;
+			for (i = 1; i <= input.numberPorts(); i++ ) {
+			    addCode(logicOrOp(i));
+			}
+			break;
 		  case XORID:
 		  case XNORID:
-		    iterator << "\tif ( $ref(input,#@i) ) {\n"
-			     << "\t\tresult = ! result;\n"
-			     << "\t}\n";
-		    break;
+			for (i = 1; i <= input.numberPorts(); i++ ) {
+			    addCode(logicXorOp(i));
+			    break;
+			}
 		}
 
-		iterator << "}\n";
+		// Compute final result 
+		StringList finalCode;
 		if (test == NANDID || test == NORID || test == XNORID ) {
-			iterator << "\tresult = ! result;\n";
+			finalCode << "\tresult = ! result;\n";
 		}
-		iterator << "$ref(output) = result;\n";
-		addCode(iterator);
+		finalCode << "\t$ref(output) = result;\n";
+		addCode(finalCode);
 	}
 }

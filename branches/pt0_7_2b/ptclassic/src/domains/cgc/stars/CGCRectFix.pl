@@ -1,21 +1,21 @@
 defstar {
 	name { RectFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc {
 Generate a fixed-point rectangular pulse of height "height" 
 (default 1.0) and width "width" (default 8).
 If "period" is greater than zero, then the pulse is repeated with the
 given period.
 	}
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCRectFix.pl	1.6	7/10/96 }
 	location { CGC main library }
 
 	output {
@@ -59,6 +59,7 @@ If the value cannot be represented by this precision,
 the output is set to its maximum value (or minimum for negative magnitudes).
                 }
         }
+
         setup {
 		CGCFix::setup();
 		// if the user specified an invalid precision string, the error
@@ -66,10 +67,14 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		// class PrecisionState
 		output.setPrecision(OutputPrecision);
         }
+
+        // an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	go {
 @	FIX_SetToZero($ref(output));
 
-@	if ($ref(count) < $ref(width) {
+@	if ($ref(count) < $ref(width)) {
 		CGCFix::clearOverflow();
 @		FIX_Assign($ref(output),$ref(height));
 		CGCFix::checkOverflow();
@@ -79,6 +84,6 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 @		$ref(count) = 0;
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

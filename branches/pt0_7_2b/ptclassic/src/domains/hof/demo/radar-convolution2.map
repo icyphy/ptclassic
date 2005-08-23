@@ -1,0 +1,16 @@
+# -------------------------------
+#  Name : convolution2.map
+#  Description:
+#  This contains the parameters to define the targets for a convolution; 
+#  Attention: Be sure that the number of antenna is equal to the number included in the filename.
+##  ---------
+#  A target is define by :
+#        PNs  number of samples used to represente the range bin.
+#        PDu  the emission duration.
+# ------------------------------- 
+PNs(1) Ns
+PNs(2) Ns
+# Emission duartion
+PDu(1) 30
+PDu(2) 30
+

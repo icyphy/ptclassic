@@ -2,12 +2,17 @@ defstar {
 	name { Beep }
 	domain { DE }
 	desc { Cause a beep on the terminal when fired. }
-	version { $Id$ }
+	version { @(#)DEBeep.pl	1.8	3/2/95 }
 	author { T. M. Parks }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 
-	hinclude { "pt_fstream.h" }
+	ccinclude { <iostream.h> }
 
 	input
 	{
@@ -15,24 +20,8 @@ defstar {
 	    type { anyType }
 	}
 
-	protected
-	{
-	    pt_ofstream output;
-	}
-
-	start
-	{
-	    // abortRun is called on open failure
-	    output.open("<cerr>");
-	}
-
 	go
 	{
-	    output << '\007';	// ASCII BEL character.
-	}
-
-	wrapup
-	{
-		output.flush();
+	    cerr << '\007';	// ASCII BEL character.
 	}
 }

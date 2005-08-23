@@ -1,16 +1,16 @@
 defstar {
 	name { FloatToCx }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFFloatToCx.pl	1.7 09/01/97 }
 	author { Mike J. Chen }
 	copyright {
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF conversion palette }
-	desc { Converts a float input to a complex type output. }
+	location { SDF main library }
+	desc { Convert a floating-point input to a complex output. }
 	input {
 		name { input }
 		type { float }
@@ -22,6 +22,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output complex type }
 	}
 	go {
-	    output%0 << (Complex)(input%0);
+	    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	    Complex t = input%0;
+	    output%0 << t;
 	}
 }

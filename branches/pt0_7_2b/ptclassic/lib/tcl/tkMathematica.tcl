@@ -1,27 +1,30 @@
-# Author: Steve X. Gu and Brian L. Evans
-# Version: $Id$
+# Author: Brian L. Evans, Steve X. Gu, and John Novak
+# Version: @(#)tkMathematica.tcl	1.4	3/7/96
 #
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
-#
+# 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that the
 # above copyright notice and the following two paragraphs appear in all
 # copies of this software.
-#
+# 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 # THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-#
+# 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 #
 # Creates a Tk window that evaluates Mathematica commands and displays
 # results.  Graphics and sound are displayed in separate windows.
@@ -64,7 +67,10 @@ proc tkMathematicaWindow {name} {
 		-text Quit \
 		-command "destroy $w
 			  incr tkMathematica(Count) -1
-			  unset tkMathematica_$name"
+			  unset tkMathematica_$name
+			  if { $tkMathematica(Count) == 0 } {
+				mathematica end tkMathematica
+			  }"
 
 	  button $w.buttons.clearEntry -text "Clear Entry" \
 	  	-command "$w.entry delete @0 end"
@@ -106,7 +112,7 @@ proc tkMathematicaWindow {name} {
 proc tkMathematicaSend {count input window} {
 	# Check the connection to Mathematica
 	if { [mathematica status] } {
-		mathematica start
+		mathematica start tkMathematica
 		if { [mathematica status] } {
 			error "Error: Cannot start Mathematica"
 			return -code error

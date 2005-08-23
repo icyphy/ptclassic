@@ -1,17 +1,26 @@
 defstar {
-	name { ZeroSubstitution }
+	name { SeqATMZero }
 	domain { DE }
 	author { GSWalter }
-	version { $Id$ }
-	copyright { 1992 (c) U. C. Regents }
-	location { DE main palette }
+	version { @(#)DESeqATMZero.pl	1.9 10/23/95 }
+        copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
+	location { DE main library }
 	desc {
-This star reads in a sequence of BitArray types. If
-it finds a BitArray missing by checking sequence
-numbers, it will substitute all 0-bits for the missing
-bits. All bits are unloaded from their BitArray
-before exiting the output port.
+This star reads in a sequence of SeqATMCell objects.
+For each object input correctly in sequence, 'headerLength'
+bits are skipped over and the next 'numInfoBits' bits in the
+cell are output.
+
+If this star finds that a SeqATMCell is missing by checking sequence
+numbers, it will substitute 'numInfoBits' 0-bits for the missing
+bits.
 	}
+
 
 	input { name { input } type { message } }
 	output { name { output } type { int } }
@@ -21,25 +30,26 @@ before exiting the output port.
 		default { 384 }
 		desc { number of information bits per cell }
 	}
+	defstate {
+		name { headerLength }
+		type { int }
+		default { 40 }
+		desc { Number of bits per cell header. }
+	}
 
-	hinclude { "BitArray.h" }
+	hinclude { "SeqATMCell.h" }
 
 	protected { int count; }
 
-	start {
-		if ( numInfoBits > 384 )
-			Error::abortRun( *this,
-				"numInfoBits must be <= 384" );
-		count = 0;
-	}
+	setup { count = 0; }
 
 	go {
 		if ( input.dataNew ) {
 			Envelope inPkt;
 			input.get().getMessage( inPkt );
-			TYPE_CHECK( inPkt, "BitArray" );
+			TYPE_CHECK( inPkt, "SeqATMCell" );
 			count %= 8;
-			const BitArray* voiceCell = ( const BitArray* )
+			const SeqATMCell* voiceCell = ( const SeqATMCell* )
 					inPkt.myData();
 
 			// if packet missing, fill in with all 0s
@@ -51,7 +61,8 @@ before exiting the output port.
 			}
 
 			// output the arrived packet's bits
-			for ( int j = 40; j < int( 40 + numInfoBits ); ++j ) {
+			for ( int j = headerLength;
+					j < int( headerLength + numInfoBits ); ++j ) {
 				if ( voiceCell->isON( j ) )
 					output.put( arrivalTime ) << 1;
 				else

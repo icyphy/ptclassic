@@ -1,3 +1,32 @@
+/*******************************************************************
+SCCS version identification
+@(#)ps.c	1.5 3/2/95
+
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
 /*
  * Postscript output for xgraph
  *
@@ -5,7 +34,6 @@
  * David Harrison
  */
 
-#include "copyright.h"
 #include <stdio.h>
 #include "xgout.h"
 
@@ -27,7 +55,7 @@
 #define PS_BDR_PAD		0.075
 #define PS_AXIS_PAD		0.1
 #define PS_LEG_PAD		0.025
-#define PS_TICK_LEN		0.125
+#define PS_TICK_LEN		0.08
 #define BASE_DASH		(1.0/48.0)
 
 #define BASE_WIDTH		(1.0/8.0)
@@ -222,7 +250,7 @@ int flags;			/* Output options */
     double pnt_width, pnt_height;
 
     if (flags & D_DOCU) {
-	OUT(psFile, "%%%%BoundingBox: %ld %ld %ld %ld\n",
+	OUT(psFile, "%%%%BoundingBox: %d %d %d %d\n",
 	    0, 0,
 	    (int) (((double) width) /
 		   (MICRONS_PER_INCH * INCHES_PER_POINT)+0.5),
@@ -256,30 +284,30 @@ int flags;			/* Output options */
 	pnt_width = ((double) width) / MICRONS_PER_INCH * POINTS_PER_INCH;
 	pnt_height = ((double) height) / MICRONS_PER_INCH * POINTS_PER_INCH;
 	PS("%% Determine whether rotation is required\n");
-	OUT(psFile, "%lg page-width gt\n", pnt_width);
+	OUT(psFile, "%G page-width gt\n", pnt_width);
 	PS("{ %% Rotation required\n");
 	PS("   90 rotate\n");
 	PS("   0 page-width neg translate\n");
 	PS("   %% Handle centering\n");
 	PS("   Y-CENTER-PLOT 1 eq { %% Center in y\n");
-	OUT(psFile, "      page-height %lg sub 2 div\n", pnt_width);
+	OUT(psFile, "      page-height %G sub 2 div\n", pnt_width);
 	PS("   } { %% Don't center in y\n");
 	PS("      0\n");
 	PS("   } ifelse\n");
 	PS("   X-CENTER-PLOT 1 eq { %% Center in x\n");
-	OUT(psFile, "      page-width %lg sub 2 div\n", pnt_height);
+	OUT(psFile, "      page-width %G sub 2 div\n", pnt_height);
 	PS("   } { %% Don't center in x\n");
 	PS("      0\n");
 	PS("   } ifelse\n");
 	PS("   translate\n");
 	PS("} { %% No rotation - just handle centering\n");
 	PS("   X-CENTER-PLOT 1 eq { %% Center in x\n");
-	OUT(psFile, "      page-width %lg sub 2 div\n", pnt_width);
+	OUT(psFile, "      page-width %G sub 2 div\n", pnt_width);
 	PS("   } { %% Don't center in x\n");
 	PS("      0\n");
 	PS("   } ifelse\n");
 	PS("   Y-CENTER-PLOT 1 eq { %% Center in y\n");
-	OUT(psFile, "      page-height %lg sub 2 div\n", pnt_height);
+	OUT(psFile, "      page-height %G sub 2 div\n", pnt_height);
 	PS("   } { %% Don't center in y\n");
 	PS("      0\n");
 	PS("   } ifelse\n");
@@ -292,7 +320,7 @@ int flags;			/* Output options */
      */
     factor = POINTS_PER_INCH / VDPI;
     PS("%% Set the scale\n");
-    OUT(psFile, "%lg %lg scale\n", factor, factor);
+    OUT(psFile, "%G %G scale\n", factor, factor);
 }
 
 
@@ -435,11 +463,11 @@ int style;			/* Style                      */
     if (style != ui->currentTextStyle) {
 	switch (style) {
 	case T_AXIS:
-	    OUT(ui->psFile, "%lg /%s choose-font\n",
+	    OUT(ui->psFile, "%G /%s choose-font\n",
 		ui->axis_size * INCHES_PER_POINT * VDPI, ui->axis_family);
 	    break;
 	case T_TITLE:
-	    OUT(ui->psFile, "%lg /%s choose-font\n",
+	    OUT(ui->psFile, "%G /%s choose-font\n",
 		ui->title_size * INCHES_PER_POINT * VDPI, ui->title_family);
 	    break;
 	}
@@ -466,7 +494,7 @@ int color;			/* Zero to seven              */
  */
 {
     struct userInfo *ui = (struct userInfo *) state;
-    int newwidth, i;
+    int newwidth = 0, i;
 
     if ((style != ui->currentLStyle) || (width != ui->currentWidth)) {
 	switch (style) {
@@ -490,7 +518,7 @@ int color;			/* Zero to seven              */
 	if (lappr == 0) {
 	    PSU("[] 0 setdash\n");
 	} else {
-	    OUT(ui->psFile, "[%lg] 0 setdash\n",
+	    OUT(ui->psFile, "[%G] 0 setdash\n",
 		((double) lappr) * BASE_DASH * VDPI);
 	}
 	ui->currentDashStyle = lappr;

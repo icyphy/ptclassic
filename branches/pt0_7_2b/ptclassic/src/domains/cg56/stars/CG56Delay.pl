@@ -1,14 +1,19 @@
 defstar {
 	name { Delay }
 	domain { CG56 }
-	desc { A delay star of parameter total_delay unit delays. }
-	version { $Id$ }
+	desc { A delay star of an integer number of time units. }
+	version { @(#)CG56Delay.pl	1.15 03/29/97 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-A delay star of parameter total_delay unit delays.
-}
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+A delay star of <i>totalDelay</i> unit time delays.
+	}
 
         input  {
                 name { input }
@@ -62,20 +67,25 @@ A delay star of parameter total_delay unit delays.
         move    y0,$ref(output)
         move    #-1,m0
         }
-        start {
-                delayBuf.resize(totalDelay);
+	codeblock(zero) {
+	move	$ref(input),a
+	move	a,$ref(output)
+	}
+        setup {
+                delayBuf.resize(int(totalDelay));
         }		
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
-                if(totalDelay==1)
-	             gencode(one);
-		else     
-                     gencode(std);
+		if (int(totalDelay) == 0) addCode(zero);
+                else if (int(totalDelay) == 1) addCode(one);
+		else addCode(std);
         }		
 
 	execTime { 
-                 return 8;
+		if (int(totalDelay) == 0) return 2;
+		else if (int(totalDelay) == 1) return 5;
+		else return 8;
 	}
 }

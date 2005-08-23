@@ -2,7 +2,7 @@ defstar {
     name { CxToFix }
     domain { C50 }
     desc { Outputs the magnitude squared of the complex number. }
-    version { $Id$ }
+    version { @(#)C50CxToFix.pl	1.3   7/22/96 }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -30,10 +30,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	zap	
 	sqra	*+
 	sqra	*,ar1
+	apac
 	sach	*,1
+	clrc	ovm
     }
     go {
 	addCode(magnitude);
     }
-    exectime { return 7; }
+    exectime { return 8; }
 }

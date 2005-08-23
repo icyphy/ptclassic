@@ -1,7 +1,7 @@
 #ifndef _ImplementationCost_h
 #define _ImplementationCost_h 1
 /******************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  Brian L. Evans
 Created: July 2, 1996
-Version: $Id$
+Version: @(#)ImplementationCost.h	1.4	07/02/96
 
 This file defines an ImplementationCost class to track software and
 hardware implementation costs.
@@ -47,10 +47,19 @@ class ImplementationCost {
 	// destructor
 	~ImplementationCost();
 
-	inline int executionTime() { return exectime; }
-	inline const int* programMemory() { return progMemoryVector; }
-	inline const int* dataMemory() { return dataMemoryVector; }
+	// initialize data members
+	void initialize();
 
+	// return values of data members
+	inline int executionTime() { return exectime; }
+	inline int progMemoryCost(int i) {
+		return progMemoryVector[i];
+	}
+	inline int dataMemoryCost(int i) {
+		return dataMemoryVector[i];
+	}
+
+	// set values of data members
 	inline void setExecutionTime(int etime) {
 		exectime = etime;
 	}
@@ -61,7 +70,7 @@ class ImplementationCost {
 		dataMemoryVector[i] = cost;
 	}
 
-	// number of instruction cycles
+	// number of clock cycles
 	inline int time() { return exectime; }
 
 	// number program and data memory locations

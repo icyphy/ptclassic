@@ -1,45 +1,49 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 8/17/90
- Converted to use preprocessor, 10/3/90
-
- Distributor takes one input stream and splits it up into n output
- streams (n may be any number).  It consumes n particles and produces
- 1 particle on each of the n outputs.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Distributor }
 	domain { SDF }
-	desc {}
+	version {@(#)SDFDistributor.pl	2.10	3/2/95}
+	desc {
+Takes one input stream and synchronously splits it into N output streams,
+where N is the number of outputs.  It consumes N*B input particles,
+where B = blockSize, and sends the first B particles to the first output,
+the next B particles to the next output, etc.
+	}
+	author { J. T. Buck and E. A. Lee}
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
 	input {
 		name { input }
 		type { ANYTYPE }
 	}
 	outmulti {
 		name { output }
-		type { ANYTYPE }
+		type { =input }
 	}
-	constructor {
-		output.inheritTypeFrom(input);
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
 	}
-	start {
+	setup {
 		int n = output.numberPorts();
-		input.setSDFParams(n,n-1);
+		input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
+		output.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 // note: delay 0 is the newest sample, so we must read backwards
 	go {
-		for (int i = output.numberPorts() - 1; i >= 0; i--)
-			output()%0 = input%i;
+		MPHIter nexto(output);
+		PortHole* p;
+		for (int i = output.numberPorts() - 1; i >= 0; i--) {
+		   p = nexto++;
+		   for (int j = int(blockSize)-1; j >= 0; j--)
+			(*p)%j = input%(j+i*int(blockSize));
+		   }
 	}
 }
 

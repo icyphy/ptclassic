@@ -2,7 +2,7 @@ defcorona {
     name { Compare }
     domain { ACS }
     desc { Output 1 (True) if left input is less than right input }
-    version { @(#)ACSCompare.pl	1.1 8/5/99 }
+    version { @(#)ACSCompare.pl	1.4 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California

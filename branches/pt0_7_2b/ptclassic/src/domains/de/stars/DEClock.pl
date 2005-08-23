@@ -1,26 +1,18 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
-MISSING:  THIS SHOULD BE DERIVED FROM DERepeatStar, not DEStar.
-I DON'T KNOW HOW TO DO THIS IN THE INTERPRETER
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/30/90
-
- This star generates events at regular intervals, starting at time zero.
-
-**************************************************************************/
-}
 defstar {
 	name {Clock}
+	derivedFrom { RepeatStar }
 	domain {DE}
+	version { @(#)DEClock.pl	1.10	3/2/95}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { DE main library }
 	desc {
-	   "Generates events at regular intervals, starting at time zero."
+Generate events at regular intervals, starting at time zero.
 	}
 	output {
 		name {output}
@@ -30,19 +22,18 @@ defstar {
 		name {interval}
 		type {float}
 		default {"1.0"}
-		desc { "The interval of events" }
+		desc { The interval of events. }
 	}
 	defstate {
 		name {magnitude}
 		type {float}
 		default {"1.0"}
-		desc { "The magnitude of samples generated" }
+		desc { The value of the output particles generated. }
 	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
-	   // (The double cast is because of a gnu compiler bug)
-	   output.put(completionTime) << float(double(magnitude));
+	   output.put(completionTime) << double(magnitude);
 
 	   // and schedule the next firing
 	   refireAtTime(completionTime);

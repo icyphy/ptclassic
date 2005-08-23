@@ -1,8 +1,8 @@
 # Makefile for Ptolemy cgc library (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.6 8/7/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,7 +34,10 @@ VPATH = $(ROOT)/lib/cgc
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-MISC_FILES = CGCrtlib.c CGCrtlib.h makefile_C.mk
+MISC_FILES = makefile_C.mk TclTk_Target.mk makefile_VIS.mk \
+		makefile_TclTk_VIS.mk
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
+

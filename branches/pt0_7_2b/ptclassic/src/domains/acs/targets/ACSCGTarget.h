@@ -3,7 +3,7 @@
 #define _ACSCGTarget_h
 
 /**********************************************************************
-Copyright (c) 1998- The Regents of the University of California.
+Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders)
  Date of creation: 1/15/98
- Version: @(#)ACSCGTarget.h	1.10 08/15/00
+ Version: @(#)ACSCGTarget.h	1.6 05/15/98
 
 ***********************************************************************/
 

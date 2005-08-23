@@ -1,14 +1,21 @@
 defstar {
 	name { Log }
 	domain { CG56 }
-	desc { Logorithm }
-	version { $Id$ }
+	desc { Base two logarithm }
+	version { @(#)CG56Log.pl	1.14 06 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992s The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
+The coefficients of the polynomial are given by <i>d</i>.
+<a name="logarithm"></a>
         }
         input {
                 name { input }
@@ -19,27 +26,19 @@ using polynomial approximation with eight bits of accuracy.
 		type { fix }
 	}
         state {
-                name { d1 }
-                type { fix }
-                default { 0.9981958 }
-                attributes { A_ROM|A_YMEM|A_CONSEC }
+                name { d }
+                type { FIXARRAY }
+                default { "0.9981958 -0.3372223 -0.6626105" }
+                attributes { A_ROM|A_YMEM|A_NONSETTABLE }
         }
-        state {
-                name { d2 }
-                type { fix }
-                default { "-0.3372223" }
-                attributes { A_ROM|A_YMEM|A_CONSEC }
-        }
-        state {
-                name { d3 }
-                type { fix }
-                default { "-0.6626105" }
-                attributes { A_ROM|A_YMEM }
-        }
+	constructor {
+		noInternalState();
+	}
+
 	codeblock(std) {
         move            m7,r7
         move            $ref(input),a
-        move            #$addr(d1),r1
+        move            #>$addr(d),r1
         rep   #23
         norm  r7,a
         move            a,x0
@@ -58,7 +57,7 @@ using polynomial approximation with eight bits of accuracy.
 	} 
 
         go {
-        gencode(std);
+        addCode(std);
 	}
 	execTime { 
 		return 49;

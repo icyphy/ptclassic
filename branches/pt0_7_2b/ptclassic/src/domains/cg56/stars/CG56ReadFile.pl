@@ -1,16 +1,23 @@
 defstar {
 	name { ReadFile }
 	domain { CG56 }
-	desc { Reads data from file for use by simulator.}
-	version { $Id$ }
+	desc { Reads data from file for use with simulator.}
+	version { @(#)CG56ReadFile.pl	1.15 03/29/97 }
 	author { Chih-Tsung Huang }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-Reads data from file for use by simulator.
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	execTime {
-		return (output.bufSize() >= 1) ? 2 : 0;
+	location { CG56 main library }
+	htmldoc {
+<a name="Motorola DSP56000 simulator"></a>
+<a name="simulator, Motorola DSP56000"></a>
+<a name="file input"></a>
+Reads one data value from the <i>fileName</i> for use with the
+Motorola DSP56000 simulator.
+The <i>inVal</i> is used as the storage location of the read data value.
 	}
 	output {
 		name {output}
@@ -20,39 +27,37 @@ Reads data from file for use by simulator.
 		name { fileName }
 		type { STRING }
 		default { "infile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		desc {
+'Root' of filename that gets the data. '.sim' is appended.
+		}
 	}
 	state {
 		name { inVal}
 		type { fix }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
 	}
-	start {
-		if (output.bufSize() >= 1) {
-			// these attributes allocate memory
-			inVal.setAttributes(A_YMEM|A_NOINIT);
-		}
-	}
-	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is >= 1.
 
+	// this codeblock causes the simulator to read from a file into
+	// a memory location each time it is referenced.
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RF
-}
-	initCode {
-                genMiscCmd(logIn);
 	}
 
-	// this codeblock produces code
+	initCode {
+                addCode(logIn, "simulatorCmds");
+	}
+
 	codeblock (copy) {
 	move	$ref(inVal),a
 	move	a,$ref(output)
 	}
+
 	go {
-		if (output.bufSize() >= 1) gencode(copy);
+		addCode(copy);
+	}
+
+	execTime {
+		return 2;
 	}
 }
-
-
-

@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy CGC stars
-# @(#)make.template	1.2 08/08/96
+# @(#)make.template	1.4 02/17/99
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -52,7 +52,8 @@ INCL = -I$(CGCVISDIR) -I$(CGCDSPDIR) -I$(CGCSTARDIR) -I$(CGCDIR) -I$(CGDIR) \
 
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= CGCVISTkStereoIn.pl \
-	CGCVISTkStereoOut.pl
+	CGCVISTkStereoOut.pl \
+	CGCVISTkParametricEq.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
@@ -66,7 +67,7 @@ HDRS= $(SRCS:.cc=.h)
 DOMAIN=CGC
 STAR_MK=cgcvistcltkstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libcgcvistcltk.$(LIBSUFFIX)
+PTLIB=libcgcvistcltk.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

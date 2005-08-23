@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 2/25/98
- Version: $Id$
+ Version: @(#)ACSFPSimCore.cc	1.7 09/08/99
 
 ***********************************************************************/
 
@@ -40,7 +40,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Global category string
 extern const char ACSFPSimCategory[] = "FPSim";
 
-// add string to KnownCategory list
-static ACSKnownCategory	entry(ACSFPSimCategory);
+// add base class core to KnownCategory list
+static ACSFPSimCore proto;
+static ACSKnownCategory	entry(proto);
 
+// isA
+ISA_FUNC(ACSFPSimCore, ACSCore);
 

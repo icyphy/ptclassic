@@ -45,9 +45,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Debug switches
 static const int DEBUG_PIN=0;
+static const int DEBUG_PIN_ADD=0;
 static const int DEBUG_PIN_OPERATOR=0;
 static const int DEBUG_PIN_CONNECT=0;
 static const int DEBUG_PIN_PRECISION=0;
+static const int DEBUG_PIN_MATCH=0;
 
 // Pin constants
 static const int LOCKED=1;
@@ -68,8 +70,8 @@ static const int NO_PRIORITY=-1;
 // FIX:This should be broken down into classes, with attributes that could help
 //     arbitrate amongst multiple INPUT_PIN_CLK types (etc.)
 static const int INPUT_PIN=1;
-static const int INPUT_PIN_AH=2;
-static const int INPUT_PIN_AL=3;
+static const int INPUT_PIN_CARRY=2;
+static const int INPUT_PIN_MODE=3;
 static const int INPUT_PIN_CLK=4;
 static const int INPUT_PIN_RESET=5;
 static const int INPUT_PIN_CTRL=6;
@@ -102,6 +104,17 @@ static const int INPUT_PIN_DELAY_CE=32;
 static const int INPUT_PIN_DELAY_MUX=33;
 static const int INPUT_PIN_DELAY_WC=34;
 static const int INPUT_PIN_START=35;
+static const int INPUT_PIN_PHASE_START=36;
+static const int INPUT_PIN_STOP=37;
+static const int INPUT_PIN_MEMREQ=38;
+static const int INPUT_PIN_DONE=39;
+static const int INPUT_PIN_RAMW=40;
+static const int INPUT_PIN_RAME=41;
+static const int INPUT_PIN_RAMG=42;
+static const int INPUT_PIN_SET=43;
+static const int INPUT_PIN_PREPHASE=44;
+static const int INPUT_PIN_SEQRESET=45;
+static const int INPUT_PIN_LUTINDEX=46;
 static const int OUTPUT_PIN=100;
 static const int OUTPUT_PIN_NOEXT=101;
 static const int OUTPUT_PIN_AND=102;
@@ -142,6 +155,14 @@ static const int OUTPUT_PIN_DELAY_WC=136;
 static const int OUTPUT_PIN_DELAY_CE=137;
 static const int OUTPUT_PIN_DELAY_MUX=138;
 static const int OUTPUT_PIN_START=139;
+static const int OUTPUT_PIN_PHASE_START=140;
+static const int OUTPUT_PIN_STOP=141;
+static const int OUTPUT_PIN_MEMOK=142;
+static const int OUTPUT_PIN_EXTCTRL=143;
+static const int OUTPUT_PIN_PREPHASE=144;
+static const int OUTPUT_PIN_SEQRESET=145;
+static const int OUTPUT_PIN_CTRL=146;
+static const int OUTPUT_PIN_LUTINDEX=147;
 static const int BIDIR_PIN=200;
 static const int BIDIR_PIN_MEMORY=201;
 static const int BIDIR_PIN_MUX_RESULT=202;
@@ -152,29 +173,37 @@ static const int INTERNAL_PIN=999;
 
 // IMPORTANT:Adjust to reflect span of pin groups defined above
 static const int IPIN_MIN=1;
-static const int IPIN_MAX=35;
+static const int IPIN_MAX=46;
 static const int OPIN_MIN=100;
-static const int OPIN_MAX=139;
+static const int OPIN_MAX=147;
 static const int BIDIR_MIN=200;
 static const int BIDIR_MAX=205;
+
+// Assertion constants
+static const char AL=0;
+static const char AH=1;
 
 
 class Pin {
  private:
   int pin_count;
   ACSIntArray* major_bit;
-  ACSIntArray* vector_length;
+  ACSIntArray* vector_length;  // Really means bitlength *groan*
+  ACSIntArray* word_count;
   ACSIntArray* min_vlength;
   ACSIntArray* max_vlength;
   ACSIntArray* word_lock;      // Used by Word Length analysis tool
   ACSIntArray* prec_lock;      // Used by FPGA-target for mechanical growth
   ACSIntArray* netlist_ids;    // Netlist identifiers for algorithmic connections
 
+  ACSIntArray* skip_pin;       // For multiple implementations, block out pins that arent utilized
   ACSIntArray* data_type;
   ACSIntArray* pin_type;
+  ACSIntArray* pin_assertion;
   ACSIntArray* pin_assigned;
   ACSIntArray* pin_limit;
   ACSIntArray* pin_priority;
+  ACSIntArray* phase_dependency;
   ACSIntArray** pin_directions;  // Breaks a pin down into pin_types for each bit
 
   StringArray* pin_name;
@@ -186,31 +215,46 @@ class Pin {
 
   ACSIntArray* inode_pins;
   ACSIntArray* onode_pins;
-  ACSIntArray* cnode_pins;
+  ACSIntArray* icnode_pins;
+  ACSIntArray* ocnode_pins;
 
   public:
   Pin::Pin();
   Pin::~Pin();
   Pin& operator=(Pin&);
   void Pin::update_pins();
-  ACSIntArray* Pin::classify_datapins(int);
-  ACSIntArray* Pin::classify_controlpins(void);
+  void Pin::copy_pin(Pin*,const int);
+  void Pin::copy_pins(Pin*);
+  void Pin::copy_pins(Pin*,ACSIntArray*);
+  ACSIntArray* Pin::classify_datapins(const int);
+  ACSIntArray* Pin::classify_controlpins(const int);
   int Pin::add_pin(const char*,const int);
+  int Pin::add_pin(const char*,const int,const char);
   int Pin::add_pin(const char*,const char*,const int);
   int Pin::add_pin(const char*,const int,const int,const int);
+  int Pin::add_pin(const char*,const int,const int,const int,const char);
   int Pin::add_pin(const char*,const int,const int,const int,const int);
-  int Pin::add_pin(const char*,const char*,
-		   const int,const int,const int,const int);
+  int Pin::add_pin(const char*,const int,const int,const int,const int,const char);
+  int Pin::add_pin(const char*,const char*,const int,const int,const int,const int);
   int Pin::new_pin(void);
+  int Pin::change_pinname(const int, const char*);
   int Pin::set_pinpriority(const int,
 			   const int);
+  int Pin::set_phasedependency(const int,
+			       const int);
   int Pin::set_pinlim(const int,
 		      const int);
   int Pin::set_pintype(const int,
 		       const int);
+  int Pin::set_pinassertion(const int,
+		       const int);
   int Pin::set_directionality(const int,
 			      const int,
 			      const int);
+  int Pin::set_wordcount(const int,
+                         const int);
+  int Pin::set_skip(const int,
+                    const int);
   int Pin::set_datatype(const int,
 			const int);
   int Pin::set_min_vlength(const int,
@@ -221,6 +265,8 @@ class Pin {
 			 const int,
 			 const int,
 			 const int);
+  int Pin::set_preclock(const int,
+                        const int);
   int Pin::match_precision(const int,
                            const int);
   int Pin::match_precision(Pin*,const int,const int);
@@ -238,16 +284,20 @@ class Pin {
   int Pin::query_pincount(void);
   int Pin::query_majorbit(const int);
   int Pin::query_bitlen(const int);
+  int Pin::query_wordcount(const int);
   int Pin::query_minbitlen(const int);
   int Pin::query_maxbitlen(const int);
   int Pin::query_wordlock(const int);
   int Pin::query_preclock(const int);
   int Pin::query_netlistid(const int);
+  int Pin::query_skip(const int);
   int Pin::query_datatype(const int);
   int Pin::query_pintype(const int);
+  int Pin::query_pinassertion(const int);
   int Pin::query_pinassigned(const int);
   int Pin::query_pinlimit(const int);
   int Pin::query_pinpriority(const int);
+  int Pin::query_phasedependency(const int);
   char* Pin::query_pinname(const int);
   char* Pin::query_altpinname(const int);
   int Pin::query_altpinflag(const int);
@@ -256,7 +306,8 @@ class Pin {
   Delay* Pin::query_delay(const int);
   ACSIntArray* Pin::query_inodes(void);
   ACSIntArray* Pin::query_onodes(void);
-  ACSIntArray* Pin::query_cnodes(void);
+  ACSIntArray* Pin::query_icnodes(void);
+  ACSIntArray* Pin::query_ocnodes(void);
 
 
   int Pin::pin_classtype(const int);
@@ -267,6 +318,7 @@ class Pin {
   void Pin::print_pins(const char*);
   void Pin::print_pinclasses(void);
   int Pin::free_pintype(const int);
+  int Pin::free_pintype(const int,const int);
   int Pin::connect_pin(const int,
 		       const int,
 		       const int,
@@ -286,11 +338,19 @@ class Pin {
 			 const int);
   int Pin::disconnect_pin(const int,
 			  const int);
+  int Pin::disconnect_pin_to(const int, const int);
+  int Pin::disconnect_pin_from(const int, const int);
+  int Pin::disconnect_all_pinsto(const int);
+  int Pin::disconnect_all_ipins(void);
+  int Pin::disconnect_all_opins(void);
   int Pin::disconnect_allpin_nodes(const int);
   int Pin::disconnect_allpins(void);
   int Pin::bw_exclude(void);
   int Pin::pin_withname(const char*);
   int Pin::pin_withnetlist(const int);
+  int Pin::pin_withnetlist(const int,
+                           const int);
+  int Pin::pins_withnetlist(const int);
   int Pin::reclassify_pin(const int,
 			  const int);
   int Pin::max(const int,const int);

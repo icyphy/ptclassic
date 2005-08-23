@@ -2,15 +2,15 @@ defstar {
 	name { DummySrcCx }
 	domain { CG }
 	desc { Source star that generates no code.  }
-	version { $Id$ }
+	version { @(#)CGDummySrcCx.pl	1.3 10/01/96 }
 	author { Raza Ahmed and Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
+	htmldoc {
 The star is used to create connected galaxies (universes) without
 requiring any resources.  For example, it is used by the CGCostTarget  
 to create dummy universes to measure implementation costs of individual
@@ -31,5 +31,8 @@ stars.
 		output.setSDFParams(n,int(n)-1);
 	}
 	go {
+	}
+	exectime {
+		return 0;
 	}
 }

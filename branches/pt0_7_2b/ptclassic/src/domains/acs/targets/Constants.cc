@@ -1,7 +1,7 @@
 static const char file_id[] = "Constants.cc";
 
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Constants.cc      1.0     06/16/99
+ Version: @(#)Constants.cc	1.5 08/02/01
 ***********************************************************************/
 #include "Constants.h"
 
@@ -36,9 +36,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 Constants::Constants(void)
+: count(0), sign_convention(UNSIGNED), storage(NULL)
 {
-  count=0;
-  storage=NULL;
+  types=new ACSIntArray;
+}
+Constants::Constants(const int sign_type) 
+: count(0), sign_convention(sign_type), storage(NULL)
+{
   types=new ACSIntArray;
 }
 Constants::~Constants(void)
@@ -98,7 +102,10 @@ void Constants::add(void* value,const int type)
   types->add(type);
 
   if (DEBUG_CONST)
-    printf("Constants: count=%d\n",count);
+    {
+      printf("Constants: count=%d\n",count);
+      printf("query_bitstr %s converted\n",query_bitstr(count-1,0,16));
+    }
 }
 
 void Constants::add_storage(void* add_ptr)
@@ -190,37 +197,38 @@ char* Constants::query_bitstr(int index,
     }
 
   // Convert to 2's complement if negative value
-  if (value<0)
-    {
-      if (DEBUG_CONST)
-	printf("Constants::query_str:Converting negative value\n");
-
-      // Invert bits
-      for (int loop=0;loop<bitlen;loop++)
-	if (bit_array[loop]==1)
-	  bit_array[loop]=0;
-	else
-	  bit_array[loop]=1;
-      
-      // Add 1
-      int carry=1;
-      int bit=0;
-      while (carry)
-	if (bit_array[bit]==1)
-	  {
-	    bit_array[bit]=0;
-	    bit++;
-	    
-	    //FIX: This should set an error for insufficient bits
-	    if (bit==bitlen)
+  if (sign_convention==SIGNED)
+    if (value<0)
+      {
+	if (DEBUG_CONST)
+	  printf("Constants::query_str:Converting negative value\n");
+	
+	// Invert bits
+	for (int loop=0;loop<bitlen;loop++)
+	  if (bit_array[loop]==1)
+	    bit_array[loop]=0;
+	  else
+	    bit_array[loop]=1;
+	
+	// Add 1
+	int carry=1;
+	int bit=0;
+	while (carry)
+	  if (bit_array[bit]==1)
+	    {
+	      bit_array[bit]=0;
+	      bit++;
+	      
+	      //FIX: This should set an error for insufficient bits
+	      if (bit==bitlen)
+		carry=0;
+	    }
+	  else
+	    {
+	      bit_array[bit]=1;
 	      carry=0;
-	  }
-	else
-	  {
-	    bit_array[bit]=1;
-	    carry=0;
-	  }
-    }
+	    }
+      }
 
   // Generate character version
   ostrstream tmp_str;
@@ -261,7 +269,7 @@ char* Constants::query_str(int index,
       int delta_bits=majorbits+1-bitlen;
       if (delta_bits<-2)
 	lsd=-1*delta_bits;
-      
+
       // FIX:There is probably a more clever way of doing this:
       ostrstream format;
       format << "%" << msd << "." << lsd << "f" << ends;
@@ -280,11 +288,13 @@ char* Constants::query_str(int index,
       break;
     case CFLOAT:
       queried_float=get_float(index);
-      sprintf(tmp_valstr,format_str,queried_float);
+      sprintf(tmp_valstr,"%g",queried_float);
+//      sprintf(tmp_valstr,format_str,queried_float);
       break;
     case CDOUBLE:
       queried_double=get_double(index);
-      sprintf(tmp_valstr,format_str,queried_double);
+      sprintf(tmp_valstr,"%g",queried_double);
+//      sprintf(tmp_valstr,format_str,queried_double);
       break;
     }
 
@@ -295,7 +305,8 @@ char* Constants::query_str(int index,
 }
 
 
-int Constants::query_bitsize(int index)
+int Constants::query_bitsize(const int index,
+			     const int limit)
 {
   int indexed_type=types->query(index);
   long value=0;
@@ -308,8 +319,7 @@ int Constants::query_bitsize(int index)
       value=get_long(index);
       break;
     case CFLOAT:
-      value=0;
-      break;
+      return(query_bitsize_float(index,limit));
     case CDOUBLE:
       value=0;
       break;
@@ -326,13 +336,34 @@ int Constants::query_bitsize(int index)
   if (value<0)
     bit_count++;
 
-  // FIX: For now assume that these constants are signed
-  bit_count++;
+  if (sign_convention==SIGNED)
+    bit_count++;
 
   if (DEBUG_CONST)
     printf("Converted value %ld to bit count %d\n",
 	   value,
 	   bit_count);
   return(bit_count);
+}
+
+int Constants::query_bitsize_float(const int index,
+				   const int limit)
+{
+  float value=get_float(index);
+  int power_test=1;
+  while (power_test < limit)
+    {
+      float curr_value=value*pow(2.0,power_test);
+      float trunc_value=curr_value-(int) curr_value;
+      if (trunc_value < 0)
+	trunc_value*=-1.0;
+      if ((curr_value-trunc_value) <= 0)
+	return(power_test);
+      else
+	power_test++;
+    }
+  if (DEBUG_CONST)
+    printf("limit hit of %d\n",limit);
+  return(limit);
 }
 

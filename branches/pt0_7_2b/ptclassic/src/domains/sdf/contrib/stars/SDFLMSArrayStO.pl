@@ -11,13 +11,15 @@ on each invocation of the star you get one steering weight and after
 length(steering) invocations you have one complete set of weights
 which can be used e.g. for beam pattern calculation.
         }
-	version {@(#)SDFLMSArrayStO.pl	1.0 9/24/96}
+	version { @(#)SDFLMSArrayStO.pl	1.4	05/28/98 }
 	author { U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1998 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	inmulti {
 		name {input}
 		type {complex}
@@ -61,6 +63,7 @@ All rights reserved.
 	        name {StO}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 		int cyclecounter;
 		int NumberElements;
@@ -95,7 +98,10 @@ All rights reserved.
 		       outputset[i] = steering[i];
 		   }
 
-		Complex e = Complex(error%0) * double(stepSize);
+		//Complex e = Complex(error%0) * double(stepSize);
+		Complex tmperror = error%0;
+		Complex e = tmperror * double(stepSize);
+
 		int index = int(errorDelay);
 
 		MPHIter nexti(input);
@@ -106,11 +112,16 @@ All rights reserved.
 		    // First update the steering vector
 		    // adjustment is the conjugate of e times the input
 		    // this is consistent with the RLSArray Star
-			steering[i] = steering[i] + conj(e) * Complex((*p)%index);
+
+		    // We use a temporary variable to 
+		    // avoid gcc2.7.2/2.8 problems
+		    Complex tmp1 = (*p)%index;
+		    steering[i] = steering[i] + conj(e) * tmp1;
 
 		    // with the updated steering we can calculate the
 		    // output simultaneously
-			sum += (Complex)((*p)%0) * conj(steering[i++]);
+		    Complex tmp2 = (*p)%0;	
+		    sum += tmp2 * conj(steering[i++]);
 		}
 		output%0 << sum;
 	}

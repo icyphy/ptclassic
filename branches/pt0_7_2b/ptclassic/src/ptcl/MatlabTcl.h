@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MatlabTcl.h	1.10	08/17/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,9 +43,11 @@ a Tcl interpreter.
 #endif
 
 
-#include "tcl.h"
+#include <tcl.h>
 #include "MatlabIfc.h"
+#include "DataStruct.h"
 #include "StringList.h"
+#include "InstanceManager.h"
 
 
 class MatlabTcl {
@@ -64,8 +66,11 @@ public:
 	int end(int argc, char** argv);
 	int eval(int argc, char** argv);
 	int get(int argc, char** argv);
+	int getpairs(int argc, char** argv);
+	int send(int argc, char** argv);
 	int set(int argc, char** argv);
 	int start(int argc, char** argv);
+	int status(int argc, char** argv);
 	int unset(int argc, char** argv);
 
 	// set data members
@@ -81,12 +86,23 @@ protected:
 	// display an error message in the Tcl interpreter
 	int error(const char* msg);
 
+	// set Matlab figure handle
+	void sethandle();
+
+	// start a Matlab process if one is not running
+	int init(char* command = 0);
+
+	// evaluate a Matlab command
+	int evaluate(char* command, int outputBufferFlag);
+
 	// the current Tcl interpeter
 	Tcl_Interp* tclinterp;
 
 	// the interface to the Matlab engine
-	MatlabIfc matlabInterface;
+	MatlabIfc* matlabInterface;
 
+	// object to control the Tcl/Matlab interface
+	InstanceManager manager;
 };
 
 #endif

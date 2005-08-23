@@ -1,5 +1,5 @@
-#ifndef _StateScope_h
-#define _StateScope_h 1
+#ifndef _Scope_h
+#define _Scope_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -7,9 +7,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Scope.h	1.3	6/21/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,21 +43,45 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynamicGalaxy.h"
 #include "StringList.h"
 
-class StateScope:private Galaxy {
+class Scope:private Galaxy {
 public:
-    StateScope(Galaxy&,StateScope* = NULL);
-    ~StateScope();
+    // the main routine - to set up state and name scoping on a galaxy
+    // hierarchy, call the childScope method.  This method will create
+    // a scoping hierarchy if one does not exist.  This new hierarchy
+    // will be automatically deleted after the corresponding galaxy is
+    // deleted
+    static Scope* createScope(Galaxy&);
     
-    // remove a block that is using this scoping hierarchy
+    // remove a block that is using this scoping hierarchy, this
+    // should only be called in Block::~Block
     void remove(Block& b);
 
-    Galaxy::fullName;
-    Galaxy::stateWithName;
-    Galaxy::parent;
+    // return the name of just this galaxy
     Galaxy::name;
+
+    // lookup a state using the scoping hierarchy
+    State* lookup(const char*);
+
+    // return the fullName using the scoping hierarchy
+    /*virtual*/ StringList fullName() const;
+        
+protected:
+    Scope(Galaxy&);
+    ~Scope();
+    
+    // return the parent of this scope
+    Scope* parentScope() const { return prntScope; }
+
+    // set the parentScope
+    void setParentScope(Scope* scope) { prntScope = scope; }
+
 private:
+    // Parent scope
+    Scope* prntScope;
+
+    void removeChild(Scope&);
+    void optionalDestructor();
     BlockList childScopes;
-    StateScope* prntScope;
 };
 
 #endif

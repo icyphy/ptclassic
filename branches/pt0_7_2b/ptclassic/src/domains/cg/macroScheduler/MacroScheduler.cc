@@ -1,10 +1,33 @@
 static const char file_id[] = "MacroScheduler.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)MacroScheduler.cc	1.5	2/5/96
 
 Copyright (c) 1995 Seoul National University
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
  Date of creation: 
@@ -182,11 +205,12 @@ int MacroParSched :: generateSchedule(CGMacroClusterGal* mgal) {
 // setUpProcs
 /////////////////////////////
 
-void MacroParSched :: setUpProcs(int num) {
+ParProcessors* MacroParSched :: setUpProcs(int num) {
 	ParScheduler :: setUpProcs(num);
 	LOG_DEL; if (parSched) delete parSched;
 	LOG_NEW; parSched = new MacroParProcs(numProcs, mtarget);
 	parProcs = parSched;
+	return parProcs;
 }
 
 MacroParSched :: ~MacroParSched() {
@@ -280,8 +304,8 @@ int MacroParSched :: scheduleIt()
 // Processor id of Fork star is  determined by the ancestor.
 
 int MacroParSched :: procIdOfFork(CGMacroCluster* s) {
-	CGClustPortIter piter(*s);
-	CGClustPort* p;
+	CGMacroClustPortIter piter(*s);
+	CGMacroClustPort* p;
 	p = piter++;
 	while (p->isItOutput()) p = piter++;
 	CGMacroCluster* farS = p->far()->parentClust();
@@ -409,19 +433,23 @@ StringList MacroParSched :: displaySchedule() {
 	CGMacroClusterGal* clustGal = (CGMacroClusterGal*) myGraph->myGalaxy();
 
 	StringList out;
-	out += parSched->display(clustGal->realGal());
+	out << "{\n  { scheduler \"Ha's Macro Parallel Scheduler\" }\n"
+	    << "  { cluster {\n"
+	    << parSched->display(clustGal->realGal())
+	    << "  } }\n";
 
-	// display macro schedule
-	out += "*********** macro Schedules ************\n";
+	// display macro schedules
 	CGMacroClusterGalIter next(*clustGal);
 	CGMacroCluster* s;
 	while ((s = next++) != 0) {
-		CGMacroClusterBag* cbag = s->asSpecialBag();
-		if (cbag) {
-			out += "-------- \n\n";
-			out += cbag->displaySchedule();
+	    CGMacroClusterBag* cbag = s->asSpecialBag();
+	    if (cbag) {
+		out << "  { cluster {\n"
+		    << cbag->displaySchedule()
+		    << " } }\n";
 		}
 	}
+	out << "}\n";
 
 	return out;
 }

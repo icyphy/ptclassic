@@ -3,7 +3,7 @@
 #define _ACSFPGATarget_h
 
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSFPGATarget.h	1.6 08/02/01
 
 ***********************************************************************/
 
@@ -37,6 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSFPGATarget : public ACSCGTarget {
 public:
-}
+};
 
 #endif //_ACSFPGATarget_h

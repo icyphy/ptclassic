@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Swallows an input sample
 	}
-	version {1.9	12 August 1998}
+	version {@(#)ACSSink.pl	1.2 09/08/99}
 	author { E. A. Lee }
 	copyright {
 	    Copyright (c) 1990-1996 The Regents of the University of California.

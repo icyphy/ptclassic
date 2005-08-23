@@ -1,31 +1,60 @@
-#include "WormConnect.h"
+static const char file_id[] = "EventHorizon.cc";
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "EventHorizon.h"
 #include "Star.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "Wormhole.h"
+#include "Particle.h"
+#include "Plasma.h"
+#include "CircularBuffer.h"
+#include "Domain.h"
+#include "Scheduler.h"
+#include "Geodesic.h"
  
 /**************************************************************************
 Version identification:
-$Id$
+@(#)EventHorizon.cc	2.28	01/27/97
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/31/90
- Date of Revision: 6/13/90
+ Date of Revision: 9/16/92
  Revisions:
 	make EventHorizon Universal.
         each doamin needs to define In??EventHorizon and Out??EventHorizon
-        derived from Universal EventHorizon with domain-specific
-  	translation.
+        derived from Universal EventHorizon and domain-specific PortHoles.
 
-Code for functions declared in WormConnect.h
+Code for functions declared in EventHorizon.h
 
 **************************************************************************/
-
-extern Error errorHandler;
-extern PlasmaList plasmaList;
 
 /**************************************************************************
 
@@ -41,43 +70,90 @@ EventHorizon :: ghostConnect(EventHorizon& to)
         ghostPort = &to;
 }
  
-PortHole& EventHorizon :: setPort (
-			     inOutType inOut,
-			     const char* s,
-                             Wormhole* parentWormhole,
-                             Star* parentStar,
-                             dataType t = FLOAT,
-			     float timeStamp = 0.0,
-			     unsigned numTokens = 1,
-			     unsigned delay = 0)
-{
-	// Initialize PortHole
-        PortHole::setPort(s, parentStar,t);
+// destructor
+EventHorizon :: ~EventHorizon() {
+	if (ghostPort) { 
+		ghostPort->ghostPort = 0;
+		LOG_DEL; delete ghostPort;
+		ghostPort = 0;
+	}
+}
 
+// predicate saying whether the eventhorizon is retricted to one token
+// at a time.  This is the default implementation.
+int EventHorizon :: onlyOne() const { return FALSE; }
+
+void EventHorizon::setEventHorizon (inOutType inOut, Wormhole* parentWormhole,
+			     	unsigned numTokens) {
 	// Initialize the EventHorizon members
-	timeStamp = 0.0;
-	dataNew = FALSE;
-	numberTokens = 1;
-	bufferSize = numberTokens + delay;
-
+	timeMark = 0.0;
+	tokenNew = FALSE;
+	if (numTokens > 1 && onlyOne())
+		Error::abortRun(*asPort(),"cannot support numTokens > 1");
+	else {
+		asPort()->numberTokens = numTokens;
+		asPort()->bufferSize = numTokens;
+	}
 	// set which wormhole it is in
 	wormhole = parentWormhole;
 
-	// in or out?
-	inOrOut = inOut;
-
-        return *this;
+        // in or out?
+        inOrOut = inOut;
 }
 
-int EventHorizon :: isItInput() {
-	if (inOrOut < 2) return TRUE;
-	else		 return FALSE;
+// This method should be called from the inside EH of the wormhole.
+void EventHorizon :: setParams(int numTok) {
+	// no effect if either end can transfer only one token and we
+	// ask for more.
+	if (numTok > 1) {
+		if (onlyOne()) return;
+		if (ghostPort && ghostPort->onlyOne()) return;
+	}
+	asPort()->numberTokens = numTok;
+	asPort()->bufferSize = numTok;
+	ghostAsPort()->numberTokens = numTok;
+	ghostAsPort()->bufferSize = numTok;
+
+	// note that ghost port is the visible EH of the wormhole.
+	ghostAsPort()->initialize();
+}
+	
+int EventHorizon :: isItInput() const { return (inOrOut < 2); }
+int EventHorizon :: isItOutput() const { return (inOrOut > 1); }
+
+void EventHorizon :: initialize() {}
+
+// This method moves num particles from the EventHorizon "from"
+// to me.
+
+void EventHorizon::moveFromGhost(EventHorizon& from, int num) {
+	CircularBuffer* toBuffer = buffer();
+	CircularBuffer* fromBuffer = from.buffer();
+	toBuffer->backup(num);
+	for (int i = num; i > 0; i--) {
+		Particle** p = toBuffer->next();
+		Particle** q = fromBuffer->next();
+
+		// In the following code, particles aren't copied, only
+		// pointers to Particles.
+		// get a reference to the old particle from the fromBuffer.
+		Particle* tmp = *q;
+		// Transfer the particle from one buffer to the other
+		*q = *p;
+
+		// zero the old particle and put it in the source buffer.
+		tmp->initialize();
+		*p = tmp;
+	}
 }
 
-int EventHorizon :: isItOutput() {
-	if (inOrOut > 1) return TRUE;
-	else		 return FALSE;
-}
+// return the scheduler of the inner domain.
+Scheduler* EventHorizon :: innerSched() 
+	{ return selfPort->parent()->scheduler(); }
+// return the scheduler of the outer domain.
+Scheduler* EventHorizon :: outerSched()
+	{ return selfPort->parent()->parent()->scheduler(); }
+
 
 /**************************************************************************
 
@@ -88,11 +164,11 @@ int EventHorizon :: isItOutput() {
 void ToEventHorizon :: getData()
 {
 	// check whether data exists or not
-	if (myGeodesic->size() >= numberTokens) {
-		getParticle();
-		dataNew = TRUE;
+	if (asPort()->numTokens() >= asPort()->numXfer()) {
+		asPort()->getParticle();
+		tokenNew = TRUE;
 	} else {
-		dataNew = FALSE;
+		tokenNew = FALSE;
 	}
 }
 
@@ -100,55 +176,44 @@ void ToEventHorizon :: transferData ()
 {
 // It moves a Particle from the Universal EventHorizon to the ghostPort.
 
-	Pointer* p;
-
 	// check if data in.
-	if (dataNew == FALSE) return;
+	if (tokenNew == FALSE) return;
 
-	// Back up in the buffer by numberTokens
-	for(int i = numberTokens; i>0; i--)
-		p = myBuffer->last();
-
-	// now, transfer the data.
-	for(i = numberTokens; i>0; i--) {
-	
-		// get the buffer pointer
-		p = myBuffer->next();
-
-		// Get Particle from Plasma
-		Particle* pp = myPlasma->get();
-
-		// Copy from the buffer to this Particle
-		// since we need previous values sometimes.
-		*pp = *(Particle *)*p;
-	
-		// ghostPort :: current pointer
-		Pointer* q = ghostPort->myBuffer->next();
-
-		// put the current particle to Plasma
-		ghostPort->myPlasma->put((Particle*)*q);
-
-		// Get a new Particle (event) from the Geodesic
-		*q = pp;
-	}
+	// move data.
+	moveFromGhost(*ghostPort, asPort()->numberTokens);
 
 	// set DataNew Value to ghostPort
-	ghostPort->dataNew = TRUE;
-	dataNew = FALSE;
+	ghostPort->tokenNew = TRUE;
+	tokenNew = FALSE;
 
 	// call ghostPort->sendData() for further conversion if it is input.
 	if (isItInput())
-		ghostPort->sendData();
+		ghostAsPort()->sendData();
 }
 
 void ToEventHorizon :: initialize()
 {
-	// call initialization routine for itselt
-	PortHole :: initialize();
+	// Initialize members
+	timeMark = 0.0;
+	tokenNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItInput())
-		ghostPort->initialize();
+		ghostAsPort()->initialize();
+}
+
+// Allocate a geodesic appropriate for the inner or outer domain.
+Geodesic* ToEventHorizon::allocateGeodesic()
+{
+    StringList nm;
+    nm << "Node_" << asPort()->name();
+    const char* dName = isItOutput() ? wormhole->insideDomain()
+	: asPort()->parent()->parent()->domain();
+    Domain* d = Domain::named(dName);
+    Geodesic* g = NULL;
+    if (d != NULL) g = &d->newGeo();
+    if (g != NULL) g->setNameParent(hashstring(nm),asPort()->parent());
+    return g;
 }
 
 /**************************************************************************
@@ -161,16 +226,101 @@ void FromEventHorizon :: transferData ()
 {
 	// call ghostPort->grabData for initial conversion if it is output.
 	if (isItOutput())
-		ghostPort->grabData();
+		ghostAsPort()->receiveData();
 }
 
 void FromEventHorizon :: initialize()
 {
-	// call initialization routine for itselt
-	PortHole :: initialize();
+	// Initialize members
+	setTimeMark(0.0);
+	tokenNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItOutput())
-		ghostPort->initialize();
+		ghostAsPort()->initialize();
 }
 
+int FromEventHorizon :: ready() { return TRUE ;}
+
+// Allocate a geodesic appropriate for the inner or outer domain.
+Geodesic* FromEventHorizon::allocateGeodesic()
+{
+    StringList nm;
+    nm << "Node_" << asPort()->name();
+    const char* dName = isItInput() ? wormhole->insideDomain()
+	: asPort()->parent()->domain();
+    Domain* d = Domain::named(dName);
+    Geodesic* g = NULL;
+    if (d != NULL) g = &d->newGeo();
+    if (g != NULL) g->setNameParent(hashstring(nm),asPort()->parent());
+    return g;
+}
+
+/**************************************************************************
+
+	methods for WormMultiPort
+
+**************************************************************************/
+
+int WormMultiPort :: isItInput() const { return myGMPH->isItInput(); }
+int WormMultiPort :: isItOutput() const { return myGMPH->isItOutput(); }
+
+extern const char* ghostName(const GenericPort&);
+
+PortHole& WormMultiPort::newPort() {
+
+	// identify domain
+	Domain* inSideDomain = Domain::named(worm->insideDomain());
+	Domain* outSideDomain = Domain::named(parent()->domain());
+
+	// make real porthole
+	GalMultiPort* galp = myGMPH;
+	PortHole& realP = galp->newConnection();
+
+	// build eventHorizon
+        DataType type = realP.type();
+        int numToken = realP.numXfer();
+	
+// separate rules for connecting inputs and outputs.
+        if (galp->isItInput()) {
+                EventHorizon& to = outSideDomain->newTo();
+		PortHole& toPort = *to.asPort();
+
+                to.setEventHorizon(in, worm, numToken);
+		installPort(toPort);
+
+                EventHorizon& from = inSideDomain->newFrom();
+		PortHole& fromPort = *from.asPort();
+
+                from.setEventHorizon(in, worm, numToken);
+		fromPort.setPort(ghostName(toPort), parent(), type);
+		
+                to.ghostConnect(from);
+
+                fromPort.connect(realP,0);
+		return toPort;
+        }
+	else {
+                EventHorizon& from = outSideDomain->newFrom();
+		PortHole& fromPort = *from.asPort();
+		
+                from.setEventHorizon(out, worm, numToken);
+		installPort(fromPort);
+		
+                EventHorizon& to = inSideDomain->newTo();
+		PortHole& toPort = *to.asPort();
+		
+                to.setEventHorizon(out, worm, numToken);
+		toPort.setPort(ghostName(fromPort), parent(), type);
+		
+                to.ghostConnect(from);
+		
+                realP.connect(toPort,0);
+		return fromPort;
+        }
+}
+
+PortHole& WormMultiPort :: newConnection() {
+	// always make a new connection.
+	return newPort();
+}

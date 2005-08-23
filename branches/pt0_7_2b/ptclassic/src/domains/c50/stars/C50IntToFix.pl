@@ -2,7 +2,7 @@ defstar {
     name { IntToFix }
     domain { C50 }
     desc { Convert an integer input to a fixed-point output. }
-    version { $Id$  }
+    version { @(#)C50IntToFix.pl	1.3  07/26/96  }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -18,16 +18,14 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {FIX}
+	attributes { P_NOINIT }
     }
     constructor {
 	noInternalState();
     }
-    codeblock(convert) {
-	lmmr	ar0,#$addr(input)
-	smmr	ar0,#$addr(output)
+    setup {
+	forkInit(input,output);
     }
-    go {
-	addCode(convert);
-    }
-    exectime { return 2; }
+
+    exectime { return 0; }
 }

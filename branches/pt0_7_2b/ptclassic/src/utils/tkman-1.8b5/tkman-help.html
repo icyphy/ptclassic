@@ -1,0 +1,835 @@
+<HTML><HEAD><TITLE>TkMan Help Page</TITLE></HEAD>
+<BODY>
+<H1>A bird?  A plane?  TkMan!  (TkPerson?)</H1>
+by Tom Phelps
+
+<P>implemented in John Ousterhout's Tcl 7.5/Tk 4.1, icon drawn by Rei Shinozuka<BR>
+Compatible with Sun Solaris, SunOS, Hewlett-Packard HP-UX, OSF/1, DEC
+Ultrix, AT&amp;T System V, SGI IRIX, Linux, SCO, IBM AIX, FreeBSD, BSDI
+-- each of which, believe you me, is in some way different from all the others
+
+<P>Copyright © 1993-1996  Thomas A. Phelps<BR>
+All Rights Reserved.<BR>
+University of California, Berkeley<BR>
+Department of Electrical Engineering and Computer Science<BR>
+Computer Science Division
+
+
+<P>The latest version of TkMan is always available by anonymous <sc>FTP</sc> at
+<tt>ftp.cs.Berkeley.EDU</tt> in the <tt>/ucb/people/phelps/tcltk</tt> directory.
+
+
+<P><sc>PERMISSION IS GRANTED TO DISTRIBUTE THIS SOFTWARE FREELY, WITH THE EXCEPTION THAT ONE MAY NOT
+CHARGE FOR IT OR INCLUDE IT WITH SOFTWARE WHICH IS SOLD.</sc>
+Walnut Creek, O'Reilly -- this means you too!
+
+<P><EM>If you send me bug reports and/or suggestions for new features, include your MANPATH, the
+versions of TkMan, Tcl, Tk, X, and UNIX, your machine and X window
+manager names, the edited Makefile, a copy of your <tt>~/.tkman</tt> file, 
+and the first few lines of the <tt>tkman</tt> executable.  Otherwise don't waste my time.</EM>
+
+
+<H1><A NAME="introduction1">Introduction</A></H1>
+
+<P>A graphical manual page browser, TkMan offers two major advantages over <manref>man(1)</manref>
+and <manref>xman</manref>:
+hypertext links to other man pages (click on a word in the text which
+corresponds to a man page, and you jump there), and better navigation
+within long man pages with searches (both incremental and regular
+expression) and jumps to section headers.  TkMan also offers some
+convenience features, like a user-configurable list of commonly used man
+pages, a one-click printout, and integration of <manref>whatis</manref> and <manref>apropos</manref>.
+Further, one may highlight, as if with a yellow marker, arbitrary passages
+of text in man pages and subsequently jump directly to these passages by
+selecting an identifying excerpt from a pulldown menu.  Finally, TkMan
+gives one control over the directory-to-menu volume mapping of man pages
+with a capability similar to but superior to <tt>xman</tt>'s mandesc in that rather
+than forcing all who share a man directory to follow a single organization,
+TkMan gives control to the individual.  For instance, one may decide he has no
+use for a large set of man pages--say for instance the programmer routines
+in volumes 2, 3, 4, 8--and eliminate them from his personal database,
+or a Tcl/Tk programmer may decide
+to group Tcl/Tk manual pages in their own volume listing.
+
+<P>Other features include:<BR>
+* full text search of manual pages (with Glimpse; optional)<BR>
+* when multiple pages match the search name, a pulldown list of all matches<BR>
+* regular expression searches for manual page names<BR>
+* a list of recently added or changed manual pages<BR>
+* a "history" list of the most recently visited pages<BR>
+* a preferences panel to control fonts, colors, and other system settings<BR>
+* compatibility with compressed pages (both as source and formatted)<BR>
+* diagnostics on your manual page installation<BR>
+* elision of those unsightly page headers and footers<BR>
+* and, when attempting to print a page available only in formatted form,
+reverse compilation into [tn]roff source,
+which can then be reformatted as good-looking PostScript.
+
+<P>This help page is shipped with the distribution in HTML form for
+easy printing.
+
+<H1><A NAME="using1">Using TkMan</A></H1>
+
+<H2><A NAME="locating2">Locating a man page</A></H2>
+
+<P>There are several ways to specify the manual page you desire.  You
+can type its name into the entry box at the top of the screen and
+press <tt>Return</tt> or click the <tt>man</tt> button.  The name may be just the name of
+the command or may end with <tt>.</tt><i>n</i> or <tt>(</tt><i>n</i><tt>)</tt>,
+where <i>n</i> specifies in which section to look.  Man pages are
+matched using regular expressions, so you can use <tt>.</tt> to match
+any single character, <tt>*</tt> to match any (zero or more) of the
+previous regular expression, <tt>[</tt> .. <tt>]</tt> to match any
+single character in the enclosed class; see <manref>egrep</manref> for more
+information.  For instance, <manref>.*mail.*.1</manref> searches section 1
+(user commands) for commands with "mail" anywhere in their names.
+Likewise, one can collect all the various manual pages relating to Perl 5
+with <manref>perl.*</manref>, or see a list of all X window managers with
+<manref>.*wm</manref>.
+If you're running TkMan from a shell and giving it an initial man page
+name to load up as an argument, use this syntax (adequately quoted for
+protection from the shell), as opposed to the syntax of the standard
+<tt>man</tt> command (which is <tt>man</tt> <i>section</i>
+<i>name</i>--that is, the section number comes first, whereas in TkMan
+it is part of the name.
+
+<P>Usually TkMan searches the directories in your <sc>MANPATH</sc>
+environment variable for the man page, but you may instead provide a
+path name for the man page by beginning it with 
+<tt>`~'</tt>, <tt>`/'</tt>, <tt>`.'</tt> or <tt>`..'</tt>;
+this is the way to access a man page which isn't installed in a
+<sc>MANPATH</sc> man directory.  Further, other <manref>Tcl</manref> interpreters may display a
+man page in TkMan by <tt>send</tt>ing a message to the function <tt>manShowMan</tt>
+with the name of the desired man page, e.g. <tt>send tkman
+manShowMan tcl.n</tt>.  If multiple man page names match the
+specification, the first match (as searched for in <sc>MANPATH</sc> order) is
+shown and a pulldown menu appears which contains a list of the other
+matches.  Return from reading help or a volume listing to the last man
+page seen with <tt>C-m</tt> when the focus is in the main text display
+area.
+
+<P><tt>apropos</tt> information is available by typing the name and
+clicking <tt>apropos</tt> or hitting Shift-Return.  The output of <tt>apropos</tt> is piped
+through <tt>sort</tt> and <tt>uniq</tt> to remove duplicates.  To pass
+the matches through additional filters, simply give the pipe as in a
+shell, e.g., `<tt>search | grep ^g</tt>' (each space character is
+significant) returns all the search-related commands which begin with
+the letter <tt>g</tt>.
+The results of the last apropos query are available under the <tt>Volumes</tt> menu.
+
+<P>You may also
+see a button for <tt>glimpse</tt>, a full text search program that
+requires only small index files ("typically 2-5% the size of the
+original text" but larger percentages for smaller amounts of text), 
+written by Udi Manber, Sun Wu, and Burra Gopal of
+the University of Arizona's Department of Computer Science.  In their
+performance measurements, "a search for Schwarzkopf allowing two
+misspelling errors in 5600 files occupying 77MB took 7 seconds on a
+SUN IPC".  For example, one may search for the string `WWW' anywhere in any manual page
+by typing in `WWW' in the entry line at the top of the
+screen and clicking on the <tt>glimpse</tt> button
+or typing <tt>Meta-Return</tt> (for meta-information, of course).
+<tt>Escape</tt> and <tt>C-g</tt> can interrupt a search after the
+current directory is done.
+To employ <tt>glimpse</tt>'s command line options, simply
+place them before the search pattern in the entry box, or add them to
+the default options by editing the <tt>man(glimpse)</tt> variable in
+your <tt>~/.tkman</tt> startup file (see Customizing TkMan, below).
+For instance, to search for "perl" as a word and not part of another
+word (as in "properly"), glimpse for <tt>-w perl</tt>.
+Glimpse supports an <tt>AND</tt> operation denoted by the symbol
+<tt>`;'</tt> and an <tt>OR</tt> operation denoted by the symbol
+<tt>`,'</tt>.
+Refer to the <manref>glimpse</manref> manual page for more information.
+The regular expression used by <tt>glimpse</tt> automatically sets the intrapage search 
+expression.  For this reason, the case sensitivity of the glimpsing is set to the same
+intrapage.
+A complete set of matches from the last full text search is available
+under the <tt>Volumes</tt> menu.
+
+<P>The <tt>Paths</tt> pulldown gives you complete control over which directory hierarchies of
+your <sc>MANPATH</sc> are searched for man pages and apropos information.  You can
+call up a listing of all man pages in a volume through the <tt>Volumes</tt>
+pulldown menu and then select one to view by double-clicking on its name.
+New `pseudo-volumes' can be added, and arbitrary directories may be added to
+or deleted from a volume listing using tkmandesc commands, described below.
+In a volume listing, typing a letter jumps to the line in the listing starting with that letter
+(capital and lower case letters are distinct).  Return to the last volume
+seen with <tt>C-d</tt> when the focus is in the main text display area.
+
+<P>Whenever you have a man page name in the text display box, whether from
+apropos, a volume listing or a reference within another man page, you can
+double-click on it to hypertext-jump to it.  Pressing shift while double-clicking
+opens up a new viewer box to display the page.
+
+<P>The last few man pages you looked at can be accessed directly through the
+<tt>History</tt> pulldown menu.  The list is sorted top to bottom in order of increasing
+time since that page was last visited.
+<tt>Shortcuts</tt> lists your personal favorites and is
+used just like <tt>History</tt>, with the additional options of adding the current man page (by
+clicking <tt>+</tt>) or removing it (<tt>-</tt>) from the list.  A shift-click on <tt>-</tt>
+removes all shortcuts.
+
+<P>(Man pages specified as above are processed through an <tt>nroff</tt> filter.
+TkMan can also read raw text from a file or from a command pipeline, which
+can then be read, searched and highlighted same as a man page.  To read
+from a file, make the first character in the name a <tt>&lt;</tt>, as in
+<tt>&lt;~/foo.txt</tt>.  To open a pipe, make the first character a <tt>|</tt> (vertical
+bar), as in `<tt>|gzcat foo.txt.gz</tt>' or `<tt>|cat ../foo.txt | grep bar</tt>' (that's no
+space after the first <tt>|</tt>, a space before and after any subsequent ones).
+After reading a file in this way, the current directory is set to its directory.
+Commands are not processed by a shell, but the metacharacters <tt>.</tt>, <tt>..</tt>,
+<tt>~</tt> and <tt>$</tt> (for environment variables), are expanded nonetheless.  Typing
+is eased further by file name completion, bound to <tt>Escape</tt>.  Lone
+files (i.e., not part of a pipe) are automatically uncompressed--no need to
+read compressed files through a <tt>zcat</tt> pipe.  It is not expected that
+reading raw text will be done much; it is included so the occasional
+non-man page documentation, say, a FAQ or RFC, may be read from the same environment.)
+
+
+<H2><A NAME="working2">Working within a man page</A></H2>
+
+<P>The full pathname of the current manual page is shown at the top of
+the screen.  Via the Preferences dialog, this can be changed to the
+<manref>whatis</manref> information for the page.
+(whatis information is build by <manref>catman</manref>.)
+
+<P>To the extent it follows conventional formatting, a manual page is parsed to yield its
+section and subsection titles (which are directly available from the
+<tt>Sections</tt> pulldown) and references to other man pages from throughout the page
+including its <sc>SEE ALSO</sc> section (<tt>Links</tt> pulldown).  
+One may jump directly to a section within a man page or a referenced man page, respectively, by
+selecting the corresponding entry from one of these pulldowns.
+
+<P>Within a man page or raw text file or pipe, you may add ad hoc
+highlighting, as though with a yellow marker (underlining on monochrome
+monitors).  Highlighted regions may then be scrolled to directly through
+the <tt>Highlights</tt> pulldown menu.  To highlight a region, select the desired
+text by clicking button 1, dragging to the far extent of the desired
+region and releasing the button, then click on the <tt>+</tt> next to
+<tt>Highlights</tt>.  To remove any highlights or portions thereof in a region,
+select it as before but then click on <tt>-</tt>.  A shift-click on the menu title
+tours through all the highlights on the page.  A shift-click on <tt>-</tt>
+removes all highlights on the page.  A complete set of pages with highlighting
+is available under the <tt>Volumes</tt> menu.
+
+<P>Highlighting information is
+robust against changes to and reformatting of the page.  Here's how highlight reattachment works.
+When you highlight a region, the starting and ending positions
+are saved along with some the content of the highlighted region and context.  
+When that page is viewed again, if those positions
+still match the context, the highlight is attached there (this is an exact match).  If not,
+the context is searched forward and backward for a match, with the closer match
+chosen if there are matches in both directions (a repositioned match).  
+If no match is found with the full context, gradually less and less of it is tried, 
+reasoning that perhaps the content of the context has been changed (repositioned, but
+with less confidence, triggering a warning dialog).
+If still no match is found (an orphan), the highlight is reported at the bottom
+of the page, where it must be reattached manually before leaving the page or it will
+be forgotten.  (Before TkMan v1.8b4, highlights were attached by positions only,
+and when the page modification date changed, the user had the choice of applying 
+highlights at those same positions regardless of the text there now or throwing
+out the highlights wholesale.  Old style highlights are automatically updated to the new
+style that can be automatically and robustly repositioned.  The next time an old style page
+is viewed, the old style highlights are applied as before, and from those postions new style
+highlights are composed.)  The annotation reattachment mechanism is inspried by
+Stanford's ComMentor system.
+
+<P>You can move about the man page by using the scrollbar or typing a number
+of key combinations familiar to Emacs aficionados.  Space and <tt>C-v</tt> page down,
+and delete and <tt>M-v</tt> page up.  <tt>C-n</tt> and <tt>C-p</tt> scroll up and down,
+respectively, by a single line (<tt>vi</tt> fans will be happy to hear that
+<tt>C-f</tt> and <tt>C-b</tt> also page down and page up, respectively).
+<tt>M-&lt;</tt> goes to the head and <tt>M-&gt;</tt> to the tail
+of the text.  One may "scan" the page, which is to say scroll it up and down with the mouse but
+without the use of the scrollbar, by dragging on the text display with the
+middle mouse button pressed.  Like Emacs, <tt>C-space</tt> will mark one's current
+location, which can be returned to later with <tt>C-x</tt>, which exchanges the
+then-current position with the saved mark; a second <tt>C-x</tt> swaps back.
+
+<P><tt>C-s</tt> initiates an incremental search.  Subsequently typing a few letters attempts to find
+a line with that string, starting its search at the current match, if any,
+or otherwise the topmost visible line.  
+A second <tt>C-s</tt> finds the next match of the string typed
+so far.  (If the current search string is empty, a second <tt>C-s</tt> retrieves the
+previous search pattern.) <tt>C-r</tt> is similar to <tt>C-s</tt> but searches backwards.
+<tt>Escape</tt> or <tt>C-g</tt> cancels searching.
+Incremental search can be used to
+quickly locate a particular command-line option or a particular command in
+a group (as in <tt>csh</tt>'s long list of internal commands).
+At the bottom of the screen, type in a regular
+expression to search for (see Tcl's <manref>regexp</manref> command),
+and hit return or click <tt>Search</tt> to begin a
+search.  Hit <tt>C-s</tt>, click the down arrow or keep hitting return to search for the next
+occurance; likewise <tt>C-r</tt> or the up arrow for previous occurances.
+
+<!--  If there is an X selection (in any application), clicking on 
+ Search will replace the current search text with the X selection and 
+ initiate a search for it.  If there is no selection or if the search is 
+ initiated from the keyboard in the entry window, the current search text is 
+ observed. -->
+
+<P>The <tt>Tab</tt> key moves the focus from the man page type-in line to the text view
+of the man page to the search line and back around.  <tt>Shift-Tab</tt> jumps
+about in the opposite direction.
+
+
+<H2><A NAME="other2">Other commands</A></H2>
+
+<P>The <tt>Occasionals</tt> menu holds commands and options which you probably won't
+frequently.  <tt>Help</tt> returns to this
+information screen.  Although virtually made obsolete by TkMan, <tt>Kill Trees</tt>
+makes a printout of the current man page on dead, cut, bleached trees, helping to starve the
+planet of life-giving oxygen.  A list of printers appears in the cascade menu; this
+list may be edited in Preferences/Misc.  (Even if only one printer is available,
+it placed in the cascade menu, rather than being directly available.  This is a feature.)
+(If the <tt>[tn]roff</tt> source is not available, TkMan
+asks if it should try to reverse compile the man page.  If successful, this
+produces much more appealing output than an <sc>ASCII</sc> dump.)  By
+default, incremental searching is not case sensitive, but regular
+expression searching is; these settings can be toggled with the next two
+menus.  <tt>iff upper</tt> means that searching is case sensitive
+if and only if their is at least one uppercase letter in the search expression--that is,
+all lowercase searches are not case sensitive; this idea is taken from Emacs.
+With proportional fonts giving a ragged right margin, any change
+bars in the right margin will form an uneven line; by opting for
+<tt>Changebars on left</tt>, they will form a straight line at the left margin.
+
+<P>As with <tt>xman</tt> one may instantiate multiple viewers.  When there is more than
+one viewer you may choose man pages in one viewer and have their contents
+shown in another.  Use the <tt>Output</tt> pulldown (which appears and disappears
+as relevant) to direct one viewer's output destination to another.  With
+this feature one may easily compare two similar man pages for differences,
+keep one man page always visible, or examine several man pages from a
+particular volume listing or a <sc>SEE ALSO</sc> section.  <tt>Output</tt> only affects the
+display destination of man pages.
+
+TkMan uses a database of all manual page names in searching for a
+match for a particular name.  This database is constructed
+automatically if it doesn't exist (this includes the first time TkMan
+is run for a particular user) and whenever it is out of date due to
+pages being added or changed, or changes in one's <sc>MANPATH</sc> or
+tkmandesc commands.  (If you want to add paths to your
+<sc>MANPATH</sc>, or edit <tt>~/.tkman</tt>, you will have to restart
+to see any changes take effect, however.)  If you install new manual
+pages, invoking <tt>Rebuild Database</tt> will permit them to show up
+in the next search or volume listing without the bother of quitting
+and re-executing TkMan.  <tt>Rebuild Glimpse Database</tt> creates and
+then maintains the index that is used for full text searches.  The
+Glimpse database is not maintained automatically.
+
+When exited via the <tt>Quit</tt> button TkMan saves its state.  One
+may guard against losing highlighting, shortcuts and other
+what-should-be persistent information without quitting by by invoking
+<tt>Checkpoint state to .tkman</tt>; <tt>Quit, don't update</tt> performs the
+opposite operation.
+
+<P>At the bottom right corner of the screen, <tt>Mono</tt> toggles between the
+proportionally-spaced font and a monospaced one, for use in those man pages
+that rely on a fixed-width font to align columns.  <tt>Quit</tt> exits TkMan, of course,
+after saving some state information (see below).  To exit without saving
+status information, select the <tt>Quit</tt> option from the <tt>Occasionals</tt>
+pulldown.
+
+
+<H2><A NAME="preferences2">Preferences</A></H2>
+
+<P>The <tt>Preferences...</tt> choice in the <tt>Occasionals</tt> pulldown menu
+brings up a graphical user interface to setting various attributes of TkMan,
+including fonts, colors, and icons.  Click on a checkbutton at the top of the
+window to bring up the corresponding group of choices.  After making a set
+of choices, the <tt>Apply</tt> button reconfigures the running application to show these changes,
+<tt>OK</tt> sets the changes for use now and in the future, <tt>Cancel</tt> quits the dialog
+and sets all choices to their settings as of the time Preferences was called up, and
+<tt>Defaults</tt> resets the settings in the current group to those
+set by TkMan out of the box.
+
+<P>The first line in the Fonts group specifies the font to use for the general user interface,
+which amounts to the labels on buttons and the text in menus.  The first menu
+in the line labeled <tt>Interface</tt> sets the font family, the next menu sets the font
+size, and the last the font styling (normal, bold, italics, bold-italics).
+<tt>Text display</tt> makes these settings for the text box in which the manual pages
+contents are displayed.  For listings of all man pages in a particiular volume
+(as chosen with the <tt>Volumes</tt> menu), you may wish to use a smaller font so
+that more names fit on the screen at once.
+<tt>Screen DPI</tt> specifies the right set of fonts to use
+for your monitor.
+
+<P>Colors sets the foreground and background colors to use for the
+manual page text display box, the general user interface, and the
+buttons of the user interface.  In addition it sets the color (or
+font) in which to show various classes of text in the text box,
+including manual page references, incremental search hits, regular
+expression search hits, and highlighted regions.
+
+<P>The See group specifies what information to display.
+Usually manual page headers and footers are uninteresting and
+therefore are stripped out, but a canonical header and footer (along
+the date the page was installed in the <tt>man/man</tt><i>n</i> directory or formatted
+to the <tt>man/cat</tt><i>n</i> directory) to be shown at the bottom of every page can
+be requested.  Solaris and IRIX systems come with many "subvolumes"--that is volumes
+with names like "3x" and "4dm" that form subgroupings under the main volumes
+"3" and "4", respectively--and you make use tkmandesc commands to add your own
+subvolumes.  You can reduce the length of the main <tt>Volumes</tt> menu by
+placing all volumes in such groups as cascaded menus.
+When a highlighted passage is jumped to via the <tt>Highlights</tt> menu,
+some number of lines of back context are included; the exact number of
+lines is configurable.  
+The information bar at the top of the window can display either the short,
+one-line description from a manual page's NAME section or the pathname
+of the page.  
+Around the man page display area runs a buffer region, the exact width of 
+which is configurable.
+Tk deviates from Motif behavior slightly, as
+for instance in highlighting buttons when they're under the cursor,
+but you can observe strict Motif behavior.
+
+<P>The Icon group sets all the options relating to iconification.
+The pathnames of the icon bitmap and icon mask should be the full pathnames
+(beginning with a `/').
+
+<p>If a man page has not been formatted by <tt>nroff</tt>, TkMan must
+first pipe the source text through <tt>nroff</tt>.  By turing on
+<tt>Cache formatted (nroff'ed) pages</tt> in the Misc(ellaneous)
+group, the <tt>nroff</tt>-formatted text is saved to disk (if
+possible), thereby eliminating this time-consuming step the next time
+the man page is read.  The <tt>on &amp; compress</tt> setting will
+compress the page, which saves on disk space (often substantially as
+much of a formatted page is whitespace), but will make it unavailable
+to other manual pagers that don't handle compression.  
+By default man page links are activated by double clicking.  The first click
+puts the name in the entry box so that it can be used as the apropos or glimpse
+pattern as well.  This click once to select, twice to launch follows the
+Macintosh convention.  Since TkMan was written, some hypertext browsers have
+popularized a click-once-to-launch practice.  The <tt>Mouse click to activate hyperlink</tt>
+switch chooses between the two.
+TkMan can extract section headers from all manual
+pages, but only some manual page macros format <i>sub</i>section headers in
+a way that can be distinguished from ordinary text; if your macros do,
+turn this option on to add subsections to the <tt>Sections</tt> menu.
+The <tt>History</tt> pulldown must balance depth of the
+list against ease of finding an entry; set your own inflection point
+with this menu.  <tt>Volumes'</tt> <tt>(recent)</tt>
+choice will show all manual pages that have been added or changed
+<i>n</i> days, where <i>n</i> is set with this next menu.  Glimpse
+works best when searching for relatively uncommon words; guard against
+getting too many hits by setting the maximum number reported.
+By default Glimpse indexes are placed at the root of the corresponding
+man hierarchy, where they can be shared.  For the case when an individual
+may not have write permission there, a single, unified index can be created and
+stored locally (though you lose control of it from the Paths settings).
+Unified indexes are much faster that distributed.
+In this latter case and also for "stray cats"
+(i.e., directories not part of a set of man hierarchy directories), you should
+specify an auxiliary directory to hold the index.
+
+
+Proportional spacing wrecks the spacing used to set tables in columns,
+hence the <tt>Mono</tt>(space) button on the bottom line of the main screen.
+<!-- ;
+setting the <tt>Aggressive table parsing</tt> option on will
+try to identify tables and format them in a fixed-width font while
+keeping the rest of the text proportionally spaced.  It is quite
+difficult to identify tables with the single-pass filter that TkMan
+uses, however, so you'll probably want to leave it off.  -->
+
+<H1><A NAME="customizing1">Customizing TkMan</A></H1>
+
+<P>There are four levels of configuration to TkMan.
+
+<P>(1) Transparent.  Simply use TkMan and it will remember your window
+size and placement, short cuts, and highlights (if you quit out of
+TkMan via the <tt>Quit</tt> button).
+
+<P>(2) Preferences editor (see Preferences above).
+
+<P>(3) Configuration file.  Most interesting settings, like the
+command(s) used to print the man page and some key bindings, can be
+changed by editing one's own <tt>~/.tkman</tt>.  Thus, a single copy
+of TkMan (i.e., the executable <tt>tkman</tt>) can be shared, but each
+user can have his own customized setup.  (The file <tt>~/.tkman</tt>
+is created/rewritten every time one quits TkMan via the <tt>Quit</tt>
+button in the lower right corner.  Therefore, to get a
+<tt>~/.tkman</tt> to edit, first run and quit TkMan.  Do not create
+one from scratch as it will not have the proper format used for saving
+other persistent information, and your work will be overwritten, which
+is to say lost.)  Be careful not to edit a ~/.tkman file only to have
+it overwritten when a currently-running TkMan quits.
+
+<P>Options that match the defaults are commented
+out (i.e., preceded by a <tt>#</tt>).  This is so that any changes in the defaults
+will propagate nicely, while the file still lists all interesting variables.
+To override the default settings for these options, first
+comment in the line.
+
+<P>The ~/.tkman save file is the place to add or delete colors to the
+default set, which will subsequently become menu choices in
+Preferences, by <b>editing in place</b> the variable
+<tt>man(colors)</tt>.  One may also edit the order of Shortcuts
+in the <tt>man(shortcuts)</tt> variable.
+Other interesting variables include
+<tt>man(highlight)</tt>, which can be edited to change the background
+in place of the foreground, or both the foreground <i>and</i>
+background, or a color <i>and</i> the font as with the following
+setting:<br>
+<tt>set man(highlight) {bold-italics -background #ffd8ffffb332}</tt>
+
+<P>Arbitrary Tcl commands, including tkmandesc commands (described below),
+can be appended to <tt>~/.tkman</tt> (after the <tt>### your additions go below</tt> line).
+<!-- For instance, to force the color model to be
+monochrome even though you have a color screen, add this line:<BR>
+<tt>tk colormodel . monochrome</tt> -->
+
+<P>To set absolutely the volume names for which all directories should be
+searched, <b>edit</b> the parallel arrays on these <b>existing</b> lines:<BR>
+<tt>set man(manList) ...</tt><BR>
+<tt>set man(manTitleList) ...</tt><BR>
+Changing the order volumes in these lists (make sure to keep the two lists
+in parallel correspondence) changes the precedence of matches when two or
+more pages have the same name: the page found in the earlier volume in this list
+is show first.
+
+
+<P>Additional useful commands include <manref>wm(n)</manref>, which deals with the window
+manager; <manref>bind(n)</manref>, which changes keyboard and mouse bindings not related
+to the text display window; <manref>options</manref>, which sets the X defaults;
+and <manref>text(n)</manref>, which describes the text widget.
+
+<P>(4) Source code.  Of course, but if you make generally useful changes or
+have suggestions for some, please report them back to me so I may share the
+wealth with the next release.
+
+
+<H2><A NAME="command2">Command line options</A></H2>
+
+The environment variable named <sc>TKMAN</sc>, if it exists, is used
+to set command line options.  Any options specified explicitly (as
+from a shell or in a script) override the settings in <sc>TKMAN</sc>.
+Any settings made with command-line options apply for the current execution only.
+Many of these options can be set persistently via the Preferences dialog
+(under the <tt>Occasionals</tt> menu).
+
+<DL>
+<DT><tt>-title <i>title</i></tt></DT>
+<DD>Place <tt><i>title</i></tt> in the window's title bar.</DD>
+
+<DT><tt>-geometry <i>geometry</i></tt></DT>
+<DD>Specify the geometry for this invocation only.  To assign a persistent
+geometry, start up TkMan, size and place the window as desired, then (this
+is important) quit via the <tt>Quit</tt> button in the lower right corner.</DD>
+
+<DT><tt>-iconify</tt> and <tt>-!iconify</tt></DT>
+<DD>Start up iconified or uniconified (the default), respectively.</DD>
+
+<DT><tt>-iconname <i>name</i></tt></DT>
+<DD>Use <tt><i>name</i></tt> in place of the uniconified window's title for the icon name.</DD>
+
+<DT><tt>-iconbitmap <i>bitmap-path</i></tt> and <tt>-iconmask <i>bitmap-path</i></tt></DT>
+<DD>Specify the icon bitmap and its mask.</DD>
+
+<DT><tt>-iconposition (+|-)x(+|-)y</tt></DT>
+<DD>Place the icon at the given position; <tt>-iconposition "" ""</tt>
+cancels any such hints to the window manager.</DD>
+
+<DT><tt>-debug</tt> or <tt>-!debug</tt></DT>
+<DD>Generate (or not) debugging information.</DD>
+
+<DT><tt>-startup <i>filename</i></tt></DT>
+<DD>Use <tt><i>filename</i></tt> in place of <tt>~/.tkman</tt> as the startup file; "" indictates
+no startup file.</DD>
+
+<DT><tt>-database <i>filename</i></tt></DT>
+<DD>Use <tt><i>filename</i></tt> in place of <tt>~/.tkmandatabase</tt> as
+the name of the file in which to create the database of man page
+names.  This can point to a shared file to save disk space or share a custom design, or to an OS-specific
+file for systems with multiple machine architectures that share home directories.
+</DD>
+
+<DT><tt>-rebuildandquit</tt></DT>
+<DD>Simply rebuild the database and quit.  This option may be useful in a cron script.
+</DD>
+
+<DT><tt>-quit save</tt> and <tt>-quit nosave</tt></DT>
+<DD>Specify that the startup file (usually <tt>~/.tkman</tt>) should be updated (<tt>save</tt>)
+or not (<tt>nosave</tt>) when quitting by the <tt>Quit</tt> button.</DD>
+
+<DT><tt>-v</tt></DT>
+<DD>Show the current version of TkMan and exit immediately thereafter.</DD>
+
+<DT><tt>-M <i>path-list</i></tt><BR>
+or <tt>-M+ <i>path-list</i></tt><BR>
+or <tt>-+M <i>path-list</i></tt></DT>
+<DD>As with <tt>man</tt>, change the search path for manual pages to the given
+colon-separated list of directory subtrees.  <tt>-M+</tt> appends and <tt>-+M</tt>
+prepends these directories to the current list.</DD>
+
+<DT><tt>-now</tt></DT>
+<DD>Start up TkMan without checking to see if the database is out of date.</DD>
+
+<DT><tt>--help</tt></DT>
+Display a list of options.
+<DD></DD>
+</DL>
+
+
+<H2><A NAME="key2">Key bindings</A></H2>
+
+<P>Key bindings related to the text display box are kept in the <tt>sb</tt>
+array in <tt>~/.tkman</tt> (for more information on Tcl's arrays, refer to
+the <manref>array(n)</manref> man page.  In editing the <tt>sb(key,...)</tt> keyboard bindings,
+modifiers MUST be listed in the following order: <tt>M</tt> (for meta), <tt>C</tt>
+(control), <tt>A</tt> (alt).  DO NOT USE SHIFT.  It is not a general
+modifier: Some keyboards require shift for different characters,
+resulting in incompatibilities in bindings.  For this reason, the
+status of the shift key is supressed in matching for bindings.  For
+instance, <tt>set sb(key,M-less) pagestart</tt> is a valid binding on keyboards worldwide, whereas
+<tt>set sb(key,MS-less)</tt> is not.  To make a binding without a modifier
+key, precede the character by `-', as in <tt>set sb(key,-space) pagedown</tt>.
+
+
+<H2><A NAME="tkmandesc2">tkmandesc</A></H2>
+
+<P>Like <tt>xman</tt>, TkMan gives you directory-by-directory control over named
+volume contents.  Unlike and superior to <tt>xman</tt>, however, each individual user
+controls directory-to-volume placement, rather than facing a single
+specification for each directory tree that must be observed by all.
+
+<P>By default a matrix is created by taking the product of directories in the
+<sc>MANPATH</sc> crossed with volume names, with the yield of each volume containing
+all the corresponding subdirectories in the <sc>MANPATH</sc>.  By adding Tcl
+commands to your <tt>~/.tkman</tt> (see above), you may add new volume names and
+add, move, copy and delete directories to/from/among directories.
+
+<P>The interface to this functionality takes the form of Tcl commands, so you
+may need to learn Tcl--particularly the commands that deal with Tcl lists 
+(including <manref>lappend(n)</manref>, <manref>linsert(n)</manref>,
+<manref>lrange(n)</manref>, <manref>lreplace(n)</manref>) and string
+matching (<manref>string(n)</manref>, <tt>match</tt> subcommand)--to
+use this facility to its fullest.  tkmandesc commands are used
+to handle the nonstandard format of SGI's manual page directories, and
+the <tt>sgi_bindings.tcl</tt> in the <tt>contrib</tt> directory is a good
+source of examples in the use of tkmandesc commands.
+
+<P>Directory titles and abbrevations are kept in lists.  Abbreviations
+MUST be unique (capital letters are distinct from lower case), but need not
+correspond to actual directories.  In fact, volume letters specified here
+supercede the defaults in identifying a volume in man page searches.
+
+<H3>COMMANDS</H3>
+
+<P>The following commands are <b>appended</b> to the file <tt>~/.tkman</tt>
+(see Customizing TkMan, above).
+
+<P>To recreate a cross product of current section lists:<BR>
+<tt>manDescDefaults</tt><BR>
+This cross product is made implicitly before other tkmandesc commands.
+Almost always this is what one expects.  If it is not, one may supress the
+cross product by setting the variable <tt>manx(defaults)</tt> to a non-null, non-zero
+value before other tkmandesc commands are invoked.
+
+<P>To add "pseudo" sections to the current volume name list, at various positions including
+at end of the list, in alphabetical order, or before or after a specific volume:<BR>
+<tt>manDescAddSects <i>list of (letter, title pairs)</i></tt><BR>
+or <tt>manDescAddSects <i>list of (letter, title) pairs</i> sort</tt><BR>
+or <tt>manDescAddSects <i>list of (letter, title) pairs</i> before <i>sect-letter</i></tt><BR>
+or <tt>manDescAddSects <i>list of (letter, title) pairs</i> after <i>sect-letter</i></tt><BR>
+In manual page searches that produce multiple matches, the page found
+in the earlier volume is the one shown by default.
+
+<P>To move/copy/delete/add directories:<BR>
+<tt>manDescMove <i>from-list</i> <i>to-list</i> <i>dir-patterns-list</i></tt><BR>
+<tt>manDescCopy <i>from-list</i> <i>to-list</i> <i>dir-patterns-list</i></tt><BR>
+<tt>manDescDelete <i>from-list</i> <i>dir-patterns-list</i></tt><BR>
+<tt>manDescAdd <i>to-list</i> <i>dir-list</i></tt>
+
+<P>The <i>dir-patterns-list</i> uses the same meta characters as man
+page searching (see above).  It is matched against <sc>MANPATH</sc>
+directories with volume subdirectory appended, as in
+<tt>/usr/man/man3</tt>, where <tt>/usr/man</tt> is a component of the
+<sc>MANPATH</sc> and <tt>man3</tt> is a volume subdirectory.
+<i>from-list</i> and <i>to-list</i> are Tcl lists of the unique volume
+abbreviations (like <tt>1</tt> or <tt>3X</tt>); <tt>*</tt> is an
+abbreviation for all volumes.
+
+<P>Adding directories with <tt>manDescAdd</tt> also makes them available
+to Glimpse for its indexing.
+
+<P>Warning: Moving directories from their natural home slightly impairs
+searching speed when following a reference within a man page.  For
+instance, say you've moved man pages for X Windows subroutines from their
+natural home in volume 3 to their own volume called `X'.  Following a
+reference in <tt>XButtonEvent</tt> to <tt>XAnyEvent(3X11)</tt> first searches volume 3;
+not finding it, TkMan searches all volumes and finally finds it in volume
+X.  With no hint to look in volume 3 (as given by the <tt>3X11</tt> suffix), the
+full volume search would have begun straight away.  (Had you double-clicked
+in the volume listing for volume X or specified the man page as
+<tt>XButtonEvent.X</tt>, volume X would have been searched first, successfully.)
+
+<P>To help debug tkmandesc scripts, invoke <tt>manDescShow</tt> to dump to
+stdout the current correspondence of directories to volumes names.
+
+
+<H3>EXAMPLES</H3>
+
+<P>(1) To collect together all man pages in default volumes 2 and 3 in all
+directories into a volume called "Programmer Subroutines", add these lines
+to the tail of <tt>~/.tkman</tt>:<BR>
+<tt>manDescAddSects {{p "Programmer Subroutines"}}</tt><BR>
+<tt>manDescMove {2 3} p *</tt>
+
+<P>To place the new section at the same position in the volume pulldown list
+as volumes 2 and 3:<BR>
+<tt>manDescAddSects {{p "Programmer Subroutines"}} after 2</tt><BR>
+<tt>manDescMove {2 3} p *</tt>
+
+<P>To move only a selected set of directories:<BR>
+<tt>manDescAddSects {{p "Programmer Subroutines"}}</tt><BR>
+<tt>manDescMove * p {/usr/man/man2 /usr/local/man/man3}</tt>
+
+
+<P>(2) To have a separate volume with all of your and a friend's personal man
+pages, keeping a duplicate in their default locations:<BR>
+<tt>manDescAddSects {{t "Man Pages de Tom"} {b "Betty Page(s)"}}</tt><BR>
+<tt>manDescCopy *phelps* t *</tt><BR>
+<tt>manDescCopy *page* t *</tt>
+
+
+<P>(3) To collect the X windows man pages into two sections of their own, one
+for programmer subroutines and another for the others:<BR>
+<tt>manDescAddSects {{x "X Windows"}} after 1</tt><BR>
+<tt>manDescAddSects {{X "X Subroutines"}} after 3</tt><BR>
+<tt>manDescMove * x *X11*</tt><BR>
+<tt>manDescMove x X *3</tt>
+
+
+<P>(4) If you never use the programmer subroutines, why not
+save time and memory by not reading them into the database?<BR>
+<tt>manDescDelete * {*[2348]}</tt> (braces prevent Tcl from trying to execute [2348] as a command)
+
+<P>Alternatively but not equivalently:<BR>
+<tt>manDescDelete {2 3 4 8} *</tt>
+
+
+<H3>tkmandesc vs. xman and SGI</H3>
+
+<P>TkMan's tkmandesc capability is patterned after <tt>xman</tt>'s mandesc files.  By
+placing a mandesc file at the root of a man page directory tree, one may
+create pseudo volumes and move and copy subdirectories into them.  Silicon
+Graphics has modified <tt>xman</tt> so that simply by creating a subdirectory in a
+regular man subdirectory one creates a new volume.  This is evil.  It
+violates the individual user's rights to arrange the directory-volume
+mapping as he pleases, as the mandesc file or subdirectory that
+spontaneously creates a volume is set a single place and must be observed
+by all who read that directory.  By contrast, TkMan places the
+directory-to-volume mapping control in an individual's own <tt>~/.tkman</tt> file.
+This gives the individual complete control and inflicts no pogrom on
+others who share man page directories.  Therefore, mandesc files are not
+supported in any way by TkMan.
+
+<P>One may still share custom setups, however, by sharing the relevant lines
+of <tt>~/.tkman</tt>.  In fact, a tkmandesc version of the standard SGI man page
+directory setup is included in the <tt>contrib</tt> directory of the TkMan
+distribution.  For assistance with SGI-specific directory manipulation,
+contact Paul Raines (<tt>raines@bohr.physics.upenn.edu</tt>).
+
+<!--
+<H1><A NAME="platspec1">Platform-specific Support</A></H1>
+<P>
+Here's what's most common....
+(All the variations in man pages per se is handled by RosettaMan.)
+
+<H2>SGI Irix</H2>
+Subdirectories, pre-formatted pages in /usr/catman.  However, other pages in standard way.
+Page files named without section but with .z
+<H2>Linux</H2>
+FSSTND specification
+<H2>Solaris</H2>
+Renaming of `whatis' to `windex'<BR>
+Subvolume directories (e.g., `man1s'), as separate volumes or merge together
+<H2>HP/UX</H2>
+Compressed page files listed without .Z, which is on its enclosing directory
+<H2>BSDI</H2>
+Concatenation of all `whatis' files into a single /usr/share/man/whatis.db
+<H2>IBM AIX</H2>
+Prevent man pages from being parsed, since they are just simple ASCII files, 
+only vaguely resembling man pages
+
+-->
+
+<H1><A NAME="rosettaman1">RosettaMan</A></H1>
+
+<P>TkMan uses <i>RosettaMan</i> to translate and reformat man pages (see <manref>man(5)</manref>).
+<I>RosettaMan</I> (called <manref>rman</manref> in its executable form) 
+takes formatted man pages from most of the
+popular flavors of UNIX and transforms them into any of a number of
+text source formats.  <I>RosettaMan</I> accepts formatted man pages
+from Hewlett-Packard HP-UX, AT&amp;T System V, SunOS, Sun Solaris, OSF/1,
+DEC Ultrix, SGI IRIX, Linux, FreeBSD, SCO.  It can produce ASCII-only, section headers-only,
+TkMan, [tn]roff (source), Ensemble, SGML, HTML, MIME, LaTeX, LaTeX2e, RTF, Perl 5 POD.  
+A modular architecture permits easy addition of additional output
+formats.  The latest version of RosettaMan is available from 
+<tt>ftp://ftp.cs.berkeley.edu/ucb/people/phelps/tcltk/rman.tar.Z</tt>.
+
+
+
+<H1><A NAME="author1">Author</A></H1>
+
+<P>Tom Phelps<BR>
+University of California, Berkeley<BR>
+Computer Science Division<BR>
+387 Soda Hall #1776<BR>
+Berkeley, CA  94720-1776<BR>
+USA
+
+<P><tt>phelps@cs.Berkeley.EDU</tt>
+
+<H1><A NAME="more1">More Information</A></H1>
+
+My article "TkMan: A Man Born Again" appears in <I>The X Resource</I>,
+issue 10, pages 33--46.  Here are the section titles:
+
+Introduction,
+Availability,
+The User Interface,
+Navigating among Man Pages,
+Inspecting Individual Man Pages,
+Customization,
+Logical Volumes with tkmandesc,
+Persistency,
+The RosettaMan Filter,
+Extensions,
+Problems,
+Future Work,
+Acknowledgements,
+Bibliography.
+
+<P>A World Wide Web page that lists other Tcl/Tk software and a
+related Berkeley Computer Science Division technical report,
+CSD-94-802, can be found at
+<tt>http://http.cs.berkeley.edu/~phelps/</tt>.
+
+
+<H1><A NAME="disclaimer1">Disclaimer</A></H1>
+
+<P>Permission to use, copy, modify, and distribute this software and its
+documentation for educational, research and non-profit purposes, 
+without fee, and without a written agreement is hereby granted, 
+provided that the above copyright notice, this and the following two
+paragraphs appear in all copies.  
+
+<P><sc>IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.</sc>
+
+<P><sc>THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.</sc>
+
+<P>Help page last revised on $Date$
+</BODY>
+</HTML>

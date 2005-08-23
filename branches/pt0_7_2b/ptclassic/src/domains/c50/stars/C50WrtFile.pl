@@ -4,23 +4,20 @@ defstar {
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
-	version { $Id$ }
+	version { @(#)C50WrtFile.pl	1.5	02/03/99 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 io library }
-	explanation {
-.Ir "simulator, TI DSK320C5x"
-.Ir "TI DSK320C5x simulator"
-.Id "file output"
+	location { C50 main library }
+	htmldoc {
+<a name="simulator, TI DSK320C5x"></a>
+<a name="TI DSK320C5x simulator"></a>
+<a name="file output"></a>
 Writes data to a file, for use with the TI DSK320C5x simulator.
-	}
-	execTime {
-		return 2;
 	}
 	input {
 		name {input}
@@ -33,12 +30,11 @@ Writes data to a file, for use with the TI DSK320C5x simulator.
 		desc { 'Root' of filename that gets the data.}
 	}
 	state {
-		name { outVal}
+		name { outVal }
 		type { FIX }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
-		default { "0"}
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+		default { "0" }
 	}
-	// this codeblock produces code
 	codeblock (copy) {
 	mar	*,AR6
 	lar	AR6,#$addr(input)
@@ -56,7 +52,7 @@ Writes data to a file, for use with the TI DSK320C5x simulator.
 	go {
 		addCode(copy);
 	}
+	execTime {
+		return 2;
+	}
 }
-
-
-

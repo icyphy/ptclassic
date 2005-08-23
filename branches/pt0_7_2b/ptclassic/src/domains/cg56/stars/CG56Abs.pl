@@ -2,30 +2,39 @@ defstar {
 	name { Abs }
 	domain { CG56 }
 	desc { Absolute value }
-	version { $Id$ }
+	version { @(#)CG56Abs.pl	1.13	01 Oct 1996 }
 	author { E. A. Lee }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-The input is moved into accumlator "a", where the "abs" instruction is applied.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="absolute value"></a>
+The input is moved into accumulator "a", where the "abs" instruction is applied.
 	}
 	execTime {
 		return 3;
 	}
 	input {
-		name {in}
-		type {FLOAT}
+		name {input}
+		type {FIX}
 	}
 	output {
-		name {out}
-		type {FLOAT}
+		name {output}
+		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (absblock) {
-	move	$loc(in),a
+	move	$ref(input),a
 	abs	a
-	move	a,$loc(out)
+	move	a,$ref(output)
 	}
 	go {
-		gencode(absblock);
+		addCode(absblock);
 	}
 }

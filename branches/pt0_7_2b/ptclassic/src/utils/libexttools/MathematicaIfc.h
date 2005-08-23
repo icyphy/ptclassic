@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -21,10 +21,14 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-Programmer: Steve X. Gu and Brian L. Evans
-Date of creation: 01/13/96
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
-Base class for the Ptolemy interface to Mathematica via MathLink.
+Author:  Steve X. Gu and Brian L. Evans
+Created: 01/13/96
+Version: @(#)MathematicaIfc.h	1.11	03/18/96
+
+General base class to define an interface to Mathematica via MathLink.
 
  */
 
@@ -37,7 +41,7 @@ Base class for the Ptolemy interface to Mathematica via MathLink.
 
 #include "StringList.h"
 #include "InfString.h"
-#include "mathlink.h"
+#include "MathematicaIfcFuns.h"
 
 #define MATHEMATICA_IFC_DEBUG 0
 
@@ -45,7 +49,11 @@ class MathematicaIfc {
 
 public:
     // Constructor
-    MathematicaIfc();
+    MathematicaIfc(const char* initstring = 0,
+		   const char* name = 0,
+		   int privateContextFlag = 0,
+		   int echoInputFlag = 0,
+		   int echoOutputNumFlag = 0);
 
     // Destructor
     ~MathematicaIfc();
@@ -62,40 +70,100 @@ public:
     int GetOutputBufferLength();
     const char* GetErrorString();
     const char* GetWarningString();
+    const char* GetPrivateOutputBuffer();
+    int GetPrivateOutputBufferLength();
 
     // get static members
     MLINK GetCurrentLink();
     int GetMathematicaIfcInstanceCount();
+    const char* GetHandle();
 
     // Methods to interface to the Mathematica process via MathLink
 
     // A. low-level interfaces
-    int OpenMathLink(int argc, char **argv);
-    int SendToMathLink(char* command);
+    int OpenMathLink(int argc, char** argv);
+    int SendToMathLink(MLINK link, char* command);
     int CloseMathLink();
 
+    int ExpectPacket(MLINK link, int discardFlag, int& returnType);
+    int LoopUntilPacket(MLINK link, int packetType, int& returnType);
+    int EvaluatePrivateCommand(MLINK link, char* command,
+			       int storeResult = FALSE);
+    int InitXWindows(MLINK link);
+
     // B. higher-level interfaces to the Mathematica process
-    int EvaluateOneCommand(char* command);
+    inline int EvaluateOneCommand(char* command) {
+	return SendToMathLink(mathlink, command);
+    }
+
+    inline int EvaluateUnrecordedCommand(char* command, int storeResult) {
+	return EvaluatePrivateCommand(mathlink, command, storeResult);
+    }
 
     // C. highest-level interface to the Mathematica process
     int StartMathematica();
+    int StartMathematica(int oargc, char** oargv);
     int MathematicaIsRunning();
-    int EvaluateUserCommand(char* command);
+    inline int EvaluateUserCommand(char* command) {
+	return mathematicaCommand(command, TRUE);
+    }
+    inline int EvaluateUnrecordedUserCommand(char* command) {
+	return mathematicaCommand(command, FALSE);
+    }
+    int CloseMathematicaFigures();
     int KillMathematica();
 
 protected:
-    // place to store output from Mathematica
+    // place to store Mathematica output returned by EvaluateUserCommand
     InfString outputBuffer;
+
+    // place to store Mathematica output returned by EvaluateUnrecordedCommand
+    InfString privateOutputBuffer;
 
     // Mathematica error string
     InfString errorString;
 
+    // add an error message
+    void AddErrorMessage(const char *msg);
+
+    // initialize error messages
+    void InitErrorMessages();
+
     // Mathematica warning string
     InfString warningString;
 
-private:
-    // type of the output packet
-    int returnType;
+    // instance number
+    int instanceNumber;
+
+    // package name attached to Mathematica interface instance
+    InfString context;
+    InfString prolog;
+    InfString epilog;
+    InfString initCode;
+    InfString customInitCommand;
+
+    // method to set the string states context, prolog, epilog, and initCode
+    void setContext(const char* name, int flag);
+
+    // current link to Mathematica
+    MLINK mathlink;
+    MLEnvironment environment;
+
+    // read the contents of a packet
+    StringList ReadPacketContents(MLINK linkp);
+
+    // methods to manage the static connection
+    int OpenStaticMathLink(int argc, char** argv);
+    int CloseStaticMathLink();
+    const char* SetInputName(const char* name);
+    const char* GetInputName();
+
+    // whether to display the input prompt and expression
+    int displayInputFlag;
+    int displayOutputNumFlag;
+
+    // abstraction of highest-level evaluate methods
+    int mathematicaCommand(char* command, int preprocessedFlag);
 };
 
 #endif

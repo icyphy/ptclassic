@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Itcl interface (PITcl): test directory
 #
-# $Id$
+# @(#)makefile	1.15 04/06/97
 # Authors: Edward A. Lee, Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.
@@ -41,19 +41,37 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-SIMPLE_TESTS =
+SIMPLE_TESTS = \
+	testAddBlock.itcl \
+	testBlocks.itcl \
+	testConnect.itcl \
+	testConnected.itcl \
+	testDescriptor.itcl \
+	testGalaxyPort.itcl \
+	testKnown.itcl \
+	testName.itcl \
+	testOnFiring.itcl \
+	testPorts.itcl \
+	testPredicates.itcl \
+	testRemove.itcl \
+	testRun.itcl \
+	testTarget.itcl
 
-GRAPHICAL_TESTS =
+# We need at least one GRAPHICAL_TEST so that we can generate alltests.itcl
+GRAPHICAL_TESTS = \
+	testDummy.itcl
 
-ITCL_SRCS =
+ITCL_SRCS =	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES =
 
-# Sources that may or may not be present, but if they are present, we don't
-# want make checkjunk to barf on them.
-OPTIONAL_FILES =
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	alltests.itcl all.itcl	
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -61,18 +79,36 @@ REALCLEAN_STUFF =
 tests:: test_graphics
 
 # These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+test_simple: $(EXTRA_SRCS)
 	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: alltests.itcl
-	tycho -e alltests.itcl
+test_graphics: $(EXTRA_SRCS)
+	tycho -ptiny -noconsole -nowelcome -e alltests.itcl
+
+
+# Pure Inc tools to use for testing
+PURECOV_BINARY = $(PTOLEMY)/obj.$(PTARCH)/pitcl/pitcl.ptiny.debug.purecov
+PURIFY_BINARY = $(PTOLEMY)/obj.$(PTARCH)/pitcl/pitcl.ptiny.debug.purify
+
+
+$(PURECOV_BINARY):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/pitcl; make pitcl.ptiny.debug.purecov)
+$(PURIFY_BINARY):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/pitcl; make pitcl.ptiny.debug.purify)
+
+# Run the tests under purecov
+test_purecov: $(PURECOV_BINARY)
+	@echo "It could take a few minutes to save the coverage data"
+	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
+
+# Run the tests under purify
+test_purify: $(PURIFY_BINARY)
+	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
+
 
 FORCE:
-
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

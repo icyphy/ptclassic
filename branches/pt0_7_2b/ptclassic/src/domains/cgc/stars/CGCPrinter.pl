@@ -6,59 +6,81 @@ Prints out one sample from each input port per line
 If "fileName" is not equal to "cout" (the default) or "stdout", it
 specifies the filename to write to.
 	}
-	version { $Id$ }
-	author { E. A. Lee }
-	copyright { 1992 The Regents of the University of California }
+	version { @(#)CGCPrinter.pl	1.18	01/27/97 }
+	author { E. A. Lee, Kennard }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
-	explanation {
-This star prints its input, which may be any supported type.
+	htmldoc {
+This star prints its input, which may be int or float type.
 There may be multiple inputs: all inputs are printed together on
 the same line, separated by tabs.
 	}
 	inmulti {
 		name { input }
-		type { ANYTYPE }
+		type { float }
 	}
-	defstate {
+	state {
 		name { fileName }
 		type { string }
 		default { "cout" }
 		desc { Filename for output. }
 	}
+	state {
+		name { index }
+		type { int }
+		default { "1" }
+		desc { index for multi input trace. }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
 	private {
 		int fileOutput;
 	}
 	initCode {
-	    fileOutput = strcmp((char*)fileName, "cout") &&
-			 strcmp((char*)fileName, "stdout");
+	    const char *fn = fileName;
+	    fileOutput = ! ( fn==NULL
+	      || strcmp(fn, "cout")==0 || strcmp(fn, "stdout")==0
+	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0);
 	    if(fileOutput) {
-		StringList s =
-			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
+		StringList s;
+		s << "    FILE* $starSymbol(fp);";
 		addDeclaration(s);
-		addInclude("#include <stdio.h>\n");
-		gencode(openfile);
+		addInclude("<stdio.h>");
+		addCode(openfile);
 	    }
 	}
 codeblock (openfile) {
-    if(!($starSymbol(fp)=fopen("$val(fileName)","w")))
+    if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) {
 	fprintf(stderr,"ERROR: cannot open output file for Printer star.\n");
-/* second if temporarily necessary: can't use brackets */
-    if(!$starSymbol(fp)) exit(1);
+    	exit(1);
+    }
 }
 	go {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
-		char buf[80];
+		index = i;
 		if(fileOutput) {
-		    sprintf(buf,
-"\tfprintf($starSymbol(fp),\"%%f\\n\", $ref(input#%d));\n", i);
+			addCode(
+"\tfprintf($starSymbol(fp),\"%f\\t\", (double) ($ref(input#index)));\n");
 		} else {
-		    sprintf(buf, "\tprintf(\"%%f\\n\", $ref(input#%d));\n", i);
+			addCode( 
+"\tprintf(\"%f\\t\", (double) ($ref(input#index)));\n");
 		}
-		gencode(CodeBlock(buf));
 	    }
+	    if (fileOutput) {
+		addCode("\tfprintf($starSymbol(fp),\"\\n\");\n");
+	    } else {
+		addCode("\tprintf(\"\\n\");\n");
+	   }
 	}
 	wrapup {
 	    if(fileOutput)
-		gencode(CodeBlock("    fclose($starSymbol(fp));\n"));
+		addCode("\tfclose($starSymbol(fp));\n");
+	}
+	exectime {
+		return 6;	/* unreliable data */
 	}
 }

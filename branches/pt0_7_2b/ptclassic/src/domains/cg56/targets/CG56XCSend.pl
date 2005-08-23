@@ -1,65 +1,63 @@
-defstar {
-	name { S56XCGCSend }
-	domain { CG56 }
-	desc { S56X to CGC send star }
-	version { $Id$ }
-	author { Jose Pino }
-	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+defstar	{
+
+name { XCSend }
+domain { CG56 }
+desc { S56X to CGC sunchronous send star }
+version	{ @(#)CG56XCSend.pl	1.16	01 Oct 1996 }
+author { Jose Luis Pino }
+derivedFrom { XCSynchComm }
+
+copyright {
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 Target Directory }
-	explanation {
-	}
+See the file $PTOLEMY/copyright	for copyright notice,
+limitation of liability, and disclaimer	of warranty provisions.
+}
 
-	input {
-		name {input}
-		type {ANYTYPE}
-	}
+ccinclude { "CGTarget.h" }
+	
+location { CG56	Target Directory }
 
-	codeblock(wordCnt) {
-$label(initial_wait)
-	move	y:WordCnt,a	; get word count
-	tst 	a
-	jeq	$label(initial_wait)
-	jclr	#m_dma,x:m_hsr,$label(initial_wait)
-	}
+explanation {}
 
-	codeblock(sendOne) {
-$label(wait)
-	jclr	#m_htde,x:m_hsr,$label(wait) ;wait for host port available
-	movep	$ref(input),x:m_htx
-	}
+protected {
+	friend class S56XTargetWH;
+}
 
-	codeblock(sendMany) {
-	move #$addr(input),r0	;read starting location address
-	do	a,$label(WHL)
-$label(wait)
-	jclr	#m_htde,x:m_hsr,$label(wait) ;wait for host port available
-	movep	$mem(input):(r0)+,x:m_htx
-$label(WHL)
-	nop
-	}
+input {
+	name {input}
+	type {ANYTYPE}
+}
 
-	codeblock(resetWordCnt) {
-	move	#0,a
-	move	a,y:WordCnt
-	nop
-	}
+codeblock(sendData,"int pairNumber,int numXfer") {
+$label(bufferFull)
+	btst	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
+	jcs	$label(bufferFull)
+	move	#$addr(input),r0	;read starting input geodesic address
+	move	#$addr(buffer),r1	;read starting buffer address
+	do	#@numXfer,$label(XFR)
+		move	$mem(input):(r0)+,a
+		move	a,$mem(buffer):(r1)+
+$label(XFR)
+}
 
-	go {
-		addCode(wordCnt);
-		if (input.numXfer()==1)
-			addCode(sendOne);
-		else
-			addCode(sendMany);
-		addCode(resetWordCnt);
-	}
+setup {
+    resolvedType = input.setResolvedType();
+    numXfer = input.numXfer();
+    CG56XCSynchComm::setup();
+}
+	
+go {
+	addCode(sendData(pairNumber,numXfer));
+	addCode(processPendingInterrupts(pairNumber));
+@	bset	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
+@
+	addCode(triggerInterrupt);
+}
 
-	execTime {
-		if (input.numXfer()==1) return 9;
-		return (9 + 2*input.numXfer());
-	}
+execTime {
+	if (input.numXfer()==1)	return 9;
+	return (9 + 2*input.numXfer());
+}
+
 }

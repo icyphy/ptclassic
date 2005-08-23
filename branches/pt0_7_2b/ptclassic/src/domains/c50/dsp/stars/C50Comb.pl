@@ -2,18 +2,18 @@ defstar {
 	name { Comb }
 	domain { C50 }
 	desc { Comb Filter }
-	version { $Id$ }
+	version {@(#)C50Comb.pl	1.5	05/26/98}
 	acknowledge { Gabriel version by A.Baensch }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
-.pp
+	htmldoc {
+<p>
 A comb filter with a one-pole lowpass filter
 in the delay loop.  The pole location is given
 by the pole parameter.  The reverberation time
@@ -40,21 +40,21 @@ Journal, Vol.  3, No. 2.
 		type { fix }
 		desc { internal }
 		default { 0.0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
         state  {
                 name { delayBuf }
 		type { fixarray }
 		desc { buffer }
 		default { "0" }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
         state  {
                 name { delayBufStart }
                 type { int }
                 default { 0 }
                 desc { pointer to the buffer }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
         state  {
                 name { delay }
@@ -77,10 +77,9 @@ Journal, Vol.  3, No. 2.
          }
 
 	codeblock(block) {
-* initialize comb     pointer to internal buffer
-	.ds	$val(delayBufStart)
-  	.word	$val(delayBuf)
-   	.text
+        mar *,ar0
+        lar ar0,#$addr(delayBuf)
+        sar ar0,$addr(delayBufStart)
 	}        		      
         codeblock(std) {
 	zap
@@ -92,14 +91,14 @@ Journal, Vol.  3, No. 2.
 	lacc	*,AR7
 	sacl	*,AR1
 	lt	*
-	mpya	#>$val(pole)
+	mpya	#$valfix(pole) 
 	apac
 	sacl	*
 	lt	*,AR1
 	mpy	*,AR6
 	spl	TREG0
 	lacc	*,AR0
-	mpy	#$val(X)
+	mpy	#$valfix(X)
 	apac
 	sacl	*+
 	sar	*,INDX

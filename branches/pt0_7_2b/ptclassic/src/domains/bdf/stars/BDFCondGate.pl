@@ -1,13 +1,20 @@
 defstar {
-	name { True }
+	name { CondGate }
 	domain { BDF }
-	version { $Id$ }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	version { @(#)BDFCondGate.pl	1.11	7/1/96 }
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-If the value on the 'control' line is nonzero, input is copied to output;
-otherwise, the control token is just eaten.  This is effectively one half
-of a Select gate.
+If the value on the "control" input is nonzero, the input particle
+is copied to output. Otherwise, no input is consumed (except the control
+particle) and no output is produced.  This is effectively one half
+of a Select.
 	}
 	input {
 		name { input }
@@ -22,15 +29,12 @@ of a Select gate.
 		type { =input }
 	}
 	constructor {
-		input.setBDFParams(1,control,TRUE);
-		output.setBDFParams(1,control,TRUE, 0);
+		input.setBDFParams(1,control,BDF_TRUE);
+		output.setBDFParams(1,control,BDF_TRUE, 0);
 	}
 	go {
-		control.grabData();
 		if (int(control%0)) {
-			input.grabData();
 			output%0 = input%0;
-			output.sendData();
 		}
 	}
 }

@@ -1,13 +1,34 @@
 static const char file_id[] = "DCGraph.cc";
 /****************************************************************
 Version identification:
-$Id$
+@(#)DCGraph.cc	1.13	09/10/99
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's work.
-Date of last revision: 5/92 
 
 *****************************************************************/
 #ifdef __GNUG__
@@ -17,10 +38,13 @@ Date of last revision: 5/92
 #include "GalIter.h"
 #include "DCGraph.h"
 #include "type.h"
-#include "streamCompat.h"
+#include <stdio.h>              // sprintf()
+#include <fstream.h>
 #include "Error.h"
 
-EGNode *DCGraph::newNode(SDFStar *s, int i)
+int isMember(DCNodeList&, EGNode*);
+
+EGNode *DCGraph::newNode(DataFlowStar *s, int i)
 	{ LOG_NEW; return new DCNode(s,i); }
 
                         /////////////////////////
@@ -31,7 +55,7 @@ EGNode *DCGraph::newNode(SDFStar *s, int i)
 // 2) DCNodeList : The list of DCNodes sorted largest static level first 
 // 3) BranchNodes : A list of DCNodes with more than one descendant
 // 4) MergeNodes : A list of DCNodes with more than one ancestor
-// 5) InitNodes : A list of the initially runnable DCNodes
+// 5) runnableNodes : A list of the initially runnable DCNodes
 //
 // and the following properties for each node in the graph:
 // 1) StaticLevel : The longest path in execution time from the node
@@ -43,25 +67,13 @@ EGNode *DCGraph::newNode(SDFStar *s, int i)
 
 int DCGraph::initializeGraph() {
 
+	if (ParGraph::initializeGraph() == 0) return FALSE;
+
 	// initialize members
 	clustNumber = 0;
-	nodeCount = 0;
-	ExecTotal = 0;
 
 	cutArcs.initialize();
-	InitNodes.initialize();
-
-	// Remove the arcs with delay from the ancestors and descendants
-	removeArcsWithDelay();
-
-        EGSourceIter nxtSrc(*this);
-        DCNode *src;
-
-        // Set the levels for each node
-        while ((src = (DCNode*)nxtSrc++) != 0) {
-		sortedInsert(InitNodes, src, 1);  // Sort highest SL first
-                if(SetNodeSL(src) < 0) return FALSE;
-        }
+	findRunnableNodes();
 
 	if (logstrm)
            *logstrm << "Finished assigning levels, starting sortDCNodes\n";
@@ -136,10 +148,10 @@ void DCGraph::SingleNodeTC(DCNode *node, int direction) {
         while ((pnode = diter++) != 0) {
 
 		if (direction == 1) {
-			if (pnode->RTClosure.mySize())
+			if (pnode->RTClosure.size())
 			    mergeClosure(node->RTClosure, pnode->RTClosure);
 		} else {
-			if (pnode->TClosure.mySize())
+			if (pnode->TClosure.size())
 			    mergeClosure(node->TClosure, pnode->TClosure);
 		}
 
@@ -161,20 +173,9 @@ void DCGraph :: mergeClosure(DCNodeList& first, DCNodeList& second) {
 	DCNodeListIter niter(second);
 	DCNode* pnode;
 
-	while ((pnode = niter++) != 0) 
-		sortedInsert(first, pnode, 1);
-}
-
-			///////////////////
-			///  replenish  ///
-			///////////////////
-// Replenishes the tempAncs and tempDescs for each node in the DCGraph.
-
-void DCGraph::replenish(int flag) {
-	DCIter Noditer(*this);	// Attach iterator to the DCGraph
-	DCNode *nodep;
-	while ((nodep = Noditer++) != 0) {
-		nodep->copyAncDesc(this, flag);
+	while ((pnode = niter++) != 0) {
+		if (isMember(first, pnode) == FALSE) 
+			sortedInsert(first, pnode, 1);
 	}
 }
 
@@ -207,11 +208,11 @@ void DCGraph::sortDCNodes() {
 		sortedInsert(sortedNodes, pg, 1);
 
 		// Branchnodes are sorted smallest StaticLevel first
-		if (((pg->descendants).mySize()) > 1)
+		if (((pg->descendants).size()) > 1)
 			sortedInsert(BranchNodes, pg, 0); // Branch node
 
 		// MergeNodes are sorted largest StaticLevel first
-		if (((pg->ancestors).mySize()) > 1) 
+		if (((pg->ancestors).size()) > 1) 
 			sortedInsert(MergeNodes, pg, 1); // Merge node
 		 
 	}
@@ -228,10 +229,10 @@ StringList DCGraph::display() {
 	out += ExpandedGraph :: display();
 
 	out += "\nThe DCGraph has initNodes\n";
-	DCNodeListIter nextSource(this->InitNodes);
+	EGNodeListIter nextSource(this->runnableNodes);
 	DCNode *source;
 
-	while ((source = nextSource++) != 0) {
+	while ((source = (DCNode*) nextSource++) != 0) {
     		out += source->print();
   	}
 
@@ -276,8 +277,6 @@ DCNode* DCGraph :: intersectNode(DCNode* D1, DCNode* D2, int direction) {
 	return last;
 }
 		
-int isMember(DCNodeList&, EGNode*);
-
 			//////////////////////
 			///  traceArcPath  ///
 			//////////////////////
@@ -422,24 +421,24 @@ int isMember(DCNodeList& nlist, EGNode* n) {
 }
 
 			//////////////////////
-			///  genClustName  ///
+			///  genDCClustName  ///
 			//////////////////////
-const char* DCGraph :: genClustName(int type) {
+const char* DCGraph :: genDCClustName(int type) {
 	char buf[20];
 	if (type == 0) {
-		sprintf (buf, "ElemClust%d", clustNumber++);
+		sprintf (buf, "ElemDCClust%d", clustNumber++);
 	} else { 
-		sprintf (buf, "MacroClust%d", clustNumber++);
+		sprintf (buf, "MacroDCClust%d", clustNumber++);
 	}
 	return hashstring(buf);
 }
 
 			//////////////////////////
-			///  formElemClusters  ///
+			///  formElemDCClusters  ///
 			//////////////////////////
 
 // from the cutArc information, form elementary clusters
-void DCGraph :: formElemClusters(ClusterList& EClusts) {
+void DCGraph :: formElemDCClusters(DCClusterList& EClusts) {
 
 	// removeCutArcs will fill this list with initially runnable nodes.
 	DCNodeList starters;
@@ -455,11 +454,11 @@ void DCGraph :: formElemClusters(ClusterList& EClusts) {
 	while ((startNode = startList++) != 0) {
 		if (startNode->alreadyVisited() == 0) {
 			LOG_NEW; cnodes = new DCNodeList;
-			addToCluster(startNode, cnodes);
+			addToDCCluster(startNode, cnodes);
 		
 			// make clusters
-			LOG_NEW; Cluster* newC = new Cluster(cnodes);
-			newC->setName(genClustName(0));
+			LOG_NEW; DCCluster* newC = new DCCluster(cnodes);
+			newC->setName(genDCClustName(0));
 			EClusts.insertSorted(newC);
 		}
 	}
@@ -469,9 +468,9 @@ void DCGraph :: formElemClusters(ClusterList& EClusts) {
 }
 
                         //////////////////////
-                        ///  addToCluster  ///
+                        ///  addToDCCluster  ///
                         //////////////////////
-void DCGraph :: addToCluster(DCNode* n, DCNodeList* nlist) {
+void DCGraph :: addToDCCluster(DCNode* n, DCNodeList* nlist) {
 	if (n->alreadyVisited()) return;
 
 	// mark visit flag.
@@ -484,11 +483,11 @@ void DCGraph :: addToCluster(DCNode* n, DCNodeList* nlist) {
 	DCDescendantIter diter(n);
 	DCNode* en;
 	while ((en = diter++) != 0)
-		addToCluster(en, nlist);
+		addToDCCluster(en, nlist);
 
 	DCAncestorIter aiter(n);
 	while ((en = aiter++) != 0)
-		addToCluster(en, nlist);
+		addToDCCluster(en, nlist);
 }
 
                         ///////////////////////
@@ -514,7 +513,7 @@ void DCGraph::removeCutArcs(DCNodeList& elist) {
 	DCNode *node;
 	while ((node = niter++) != 0) {
 		node->resetVisit();		// clear the visit flag.
-		if (node->tempAncs.mySize() == 0)
+		if (node->tempAncs.size() == 0)
 			elist.append(node);
 	}
 }
@@ -529,9 +528,9 @@ void DCGraph::setInterclusterArcs() {
 
 	while ((arc = iter++) != 0) {
 		DCNode* src = arc->getSrc();
-		Cluster* srcC = src->elemCluster;
+		DCCluster* srcC = src->elemDCCluster;
 		DCNode* sink = arc->getSink();
-		Cluster* sinkC = sink->elemCluster;
+		DCCluster* sinkC = sink->elemDCCluster;
 		if (srcC != sinkC) {    // Intercluster arcs
 			int num = src->getSamples(sink);
 			sinkC->addArc(srcC,num);
@@ -547,7 +546,7 @@ void DCGraph::setInterclusterArcs() {
 //      cluster is for switching onto another processor.
 // Returns integer (#samples passed offproc) - (#samples passed onproc)
 // The cluster property of each node was set to the proper level in the
-//      hierarchy by routine setClusters, which was called in scheduleAnalysis.
+//      hierarchy by routine setDCClusters, which was called in scheduleAnalysis.
 
 void DCGraph::computeScore() {
 	// set the score.
@@ -557,8 +556,8 @@ void DCGraph::computeScore() {
         while ((arc = iter++) != 0) {
                 DCNode* n1 = arc->getSrc();
                 DCNode* n2 = arc->getSink();
-                Cluster* sclust = n1->cluster;
-                Cluster* dclust = n2->cluster;
+                DCCluster* sclust = n1->cluster;
+                DCCluster* dclust = n2->cluster;
 		if (sclust == dclust) continue;	// in the same cluster? ignore.
 
 		int num = n1->getSamples(n2);
@@ -577,7 +576,7 @@ void DCGraph::computeScore() {
 			///////////////////
 // find the procs that clust communicates with
 
-void DCGraph::commProcs(Cluster *clust, int* procs) {
+void DCGraph::commProcs(DCCluster *clust, int* procs) {
 
 	DCArcIter iter(cutArcs);
 	DCArc *arc;
@@ -586,8 +585,8 @@ void DCGraph::commProcs(Cluster *clust, int* procs) {
 	while ((arc = iter++) != 0) {
 		DCNode* n1 = arc->getSrc();
 		DCNode* n2 = arc->getSink();
-		Cluster* sclust = n1->cluster;
-		Cluster* dclust = n2->cluster;
+		DCCluster* sclust = n1->cluster;
+		DCCluster* dclust = n2->cluster;
 		if (sclust == dclust) continue;
 
 		if (sclust == clust) procs[dclust->getProc()] = 1;

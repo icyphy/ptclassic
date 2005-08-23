@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)utilities.h	1.2 06/24/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,6 +41,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma interface
 #endif
+
+extern int port2interp(PortHole* port,Tcl_Interp* myInterp,
+		       const char* ghostDomain);
+extern int interp2port(Tcl_Interp* myInterp,PortHole* port,
+		       const char* ghostDomain);
 
 extern char** strParser(const char* strings,int& numStr,const char* type);
 

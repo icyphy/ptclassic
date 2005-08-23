@@ -1,0 +1,5 @@
+#!/bin/sh
+DIRNAME=`dirname $0`
+$DIRNAME/sdf1.fixref $*
+$DIRNAME/sdf2.fixref $*
+$DIRNAME/sdf3.fixref $*

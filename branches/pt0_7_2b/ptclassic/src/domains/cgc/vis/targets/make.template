@@ -1,5 +1,5 @@
 # Makefile for Ptolemy C Code Generation main targets
-# $Id$
+# @(#)make.template	1.3 08/03/96
 # Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -42,24 +42,21 @@ CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 
 INCL= -I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR)
 
-SRCS =	CGCVISTarget.cc
+SRCS =	CGCVISSimTarget.cc
 
 HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 
 all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all
 		@echo Installation complete.
 
-endif
-
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-

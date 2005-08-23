@@ -1,13 +1,13 @@
 defstar {
 	name { Multiple }
 	domain { SDF } 
-	desc { Outputs a 1 if top input is a multiple of bottom input }
-	version {$Id$}
+	desc { Output a 1 if top input is a multiple of bottom input }
+	version {@(#)SDFMultiple.pl	1.4	3/2/95}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }

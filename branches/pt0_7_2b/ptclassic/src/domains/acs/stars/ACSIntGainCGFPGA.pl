@@ -6,10 +6,10 @@ defcore {
 	desc {
 Produces constant coefficient multiply
 	}
-	version {@(#)ACSGainCGFPGA.pl	1.0    08/26/99 }
+	version{ @(#)ACSIntGainCGFPGA.pl	1.11 08/02/01 }
 	author { P. Fiore }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -19,7 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}
-        ccinclude { <sys/ddi.h> }
         ccinclude { <sys/wait.h> }
 	ccinclude { "acs_vhdl_lang.h" }
 	ccinclude { "acs_starconsts.h" }
@@ -58,22 +57,23 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -95,57 +95,82 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
 	    }
 	}
 	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 
 		// BEGIN-USER CODE
 
-	             // pfiore Thu Aug 26 14:49:05 EDT 1999
-		     // trying to figure out coefficient wordlength (signed coeff)
- 		     int cwidth=2; //coefficient wordlength init
- 		     int gain_amt = (int) (corona.gain);   // the gain amount
-                     if ( gain_amt < -1 |  gain_amt > 0 )
-		     { 
-                        if (gain_amt>0)
-               		  cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
-                        else
-               		  cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
-		     }
+		// pfiore Thu Aug 26 14:49:05 EDT 1999
+		// trying to figure out coefficient wordlength (signed coeff)
+		int cwidth=2; //coefficient wordlength init
+		int gain_amt = (int) (corona.gain);   // the gain amount
+		if ( gain_amt < -1 |  gain_amt > 0 )
+		{ 
+		    if (gain_amt>0)
+			cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
+		    else
+			cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
+		}
 
-                     //output width will be cwidth+input_bit_length
-    cost_file << "cost= ceil((insizes/2-1)*(" << cwidth << "/2+2)+insizes*0.7805);"  << endl;
-    cost_file << "cost= max([zeros(1,size(insizes,2)) ; cost]);" << endl;
-		numsim_file << "y= x*" << gain_amt << ";" << endl;
+		//output width will be cwidth+input_bit_length
+		cost_file << "cost= ceil((insizes/2-1)*(" << cwidth 
+		          << "/2+2)+insizes*0.7805);"  << endl;
+		cost_file << "cost= max([zeros(1,size(insizes,2)) ; cost]);" << endl;
+                cost_file << " if sum(numforms)>0 " << endl;
+                cost_file << "  disp('ERROR - use parallel numeric form only' )  " 
+		          << endl;
+                cost_file << " end " << endl;
+
+		// numsim_file << "y= x*" << gain_amt << ";" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=x{k}* " << gain_amt << ";" << endl;
+                numsim_file <<  " end " << endl;
+                numsim_file <<  " " << endl;
+
  	        rangecalc_file <<"orr=inputrange*" << gain_amt << ";"  << endl;
-                natcon_file 
+ 
+               natcon_file 
 		    << "yesno=(insizes>=4 & insizes<=32  & outsizes<=58 & outsizes<=insizes+ " <<  cwidth  << " );"
 		    << endl;
+
+                schedule_file << "outdel= ones(1,length(insizes)); " << endl;
+                schedule_file << "t=find(insizes>5); " << endl;
+                schedule_file << "outdel(t)=outdel(t)+1; " << endl;
+                schedule_file << "t=find(insizes>10); " << endl;
+                schedule_file << "outdel(t)=outdel(t)+1; " << endl;
+                schedule_file << "t=find(insizes>17); " << endl;
+                schedule_file << "outdel(t)=outdel(t)+1; " << endl;
+                schedule_file << "vl1=veclengs(1); " << endl;
+                schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+                schedule_file << "for k=1:size(insizes,2)" << endl;
+                schedule_file << "  racts1=[0 1 vl1-1; outdel(k) 1 vl1-1+outdel(k)];" << endl;
+                schedule_file << "  racts{k}=racts1;" << endl;
+                schedule_file << "end"  << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+                schedule_file << "if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << "end " << endl;
+
+
+
+
 		// END-USER CODE
 
 		// Return happy condition
@@ -153,34 +178,49 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
 	
-	             // pfiore Thu Aug 26 14:49:05 EDT 1999
-		     // trying to figure out coefficient wordlength (signed coeff)
- 		     int cwidth=2; //coefficient wordlength init
- 		     int gain_amt = (int) (corona.gain);   // the gain amount
-                     if ( gain_amt < -1 |  gain_amt > 0 )
-		     { 
-                        if (gain_amt>0)
-               		  cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
-                        else
-               		  cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
-		     }
+		// pfiore Thu Aug 26 14:49:05 EDT 1999
+		// trying to figure out coefficient wordlength (signed coeff)
+		int cwidth=2; //coefficient wordlength init
+		int gain_amt = (int) (corona.gain);   // the gain amount
+		if ( gain_amt < -1 |  gain_amt > 0 )
+		{ 
+		    if (gain_amt>0)
+			cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
+		    else
+			cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
+		}
 
-			       int input_majorbit = pins->query_majorbit(0);
-			       int input_bitlen = pins->query_bitlen(0);
+		int input_majorbit = pins->query_majorbit(0);
+		int input_bitlen = pins->query_bitlen(0);
 
 		pins->set_precision(1, cwidth-2+input_majorbit,  input_bitlen+cwidth, LOCKED);
 
-
-
-		// Calculate CLB sizes
-		    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		int in_bitlen=pins->query_bitlen(0);
 		if ((in_bitlen >=4) && (in_bitlen <= 5))
@@ -196,7 +236,7 @@ It outputs lines of comments, instead of code.
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -253,7 +293,6 @@ It outputs lines of comments, instead of code.
    		    // Control port definitions
 		    pins->set_datatype(2,STD_LOGIC);  // c pin
 		    pins->set_precision(2,0,1,LOCKED);
-		    pins->set_precision(3,0,1,LOCKED);
 		    // END-USER CODE
 		}
 		else

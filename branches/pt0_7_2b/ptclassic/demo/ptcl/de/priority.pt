@@ -1,0 +1,46 @@
+reset
+# Creating universe 'priority'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Server1 Server
+	setstate Server1 serviceTime 1.0
+	star "XMgraph.input=31" XMgraph
+	numports "XMgraph.input=31" input 3
+	setstate "XMgraph.input=31" title "Inputs to queue and outputs of server"
+	setstate "XMgraph.input=31" saveFile ""
+	setstate "XMgraph.input=31" options {-P -0 "high priority" -1 "low priority" -2 output =800x200+0+350}
+	star Clock1 Clock
+	setstate Clock1 interval 5.0
+	setstate Clock1 magnitude 1.0
+	star Clock2 Clock
+	setstate Clock2 interval 1.0
+	setstate Clock2 magnitude 2.0
+	star "PriorityQueue.inData=21" PriorityQueue
+	numports "PriorityQueue.inData=21" inData 2
+	setstate "PriorityQueue.inData=21" capacity 6
+	setstate "PriorityQueue.inData=21" numDemandsPending 1
+	setstate "PriorityQueue.inData=21" consolidateDemands TRUE
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Queue size"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-P -0 size -1 'lost data' =800x300+0+0"
+	node node1
+	nodeconnect Clock2 output node1
+	nodeconnect XMgraph.input=31 input#2 node1
+	nodeconnect PriorityQueue.inData=21 inData#2 node1
+	node node2
+	nodeconnect Clock1 output node2
+	nodeconnect XMgraph.input=31 input#1 node2
+	nodeconnect PriorityQueue.inData=21 inData#1 node2
+	connect "PriorityQueue.inData=21" outData Server1 input
+	node node3
+	nodeconnect Server1 output node3
+	nodeconnect XMgraph.input=31 input#3 node3
+	nodeconnect PriorityQueue.inData=21 demand node3
+	connect "PriorityQueue.inData=21" overflow "XMgraph.input=21" "input#2"
+	connect "PriorityQueue.inData=21" size "XMgraph.input=21" "input#1"
+run 50
+wrapup

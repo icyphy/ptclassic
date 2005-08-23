@@ -4,7 +4,7 @@ defstar{
     domain  { DE }   
     derivedfrom { DEcell_list } 
     author { A. Wernicke, J. Voigt }
-    version { 1.1 6/22/1997 }
+    version { @(#)DErrmanager_uldl.pl	1.5 06/11/98 }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
     Mobile Communications Systems 
     }
@@ -80,70 +80,84 @@ defstar{
         DEcell_list::begin();
         DEcell_list::time_offset();
         ejected_user= usersum= 0;
+        list_h = NULL;
+        list_t = NULL;
+        active = NULL;
+        handy = NULL;
     }
     constructor { 
-        list_h= list_t= handy= active= NULL;
+        list_h= NULL;
+        list_t= NULL;
+        handy= NULL;
+        active= NULL;
         Rx_Pos.before(C_dBm);
     }
     destructor  { 
         while (list_h) {
             handy=list_h;
-            active=list_h;
             list_h=list_h -> next;
             delete handy;
-            delete active;
+            handy = 0;
         }
+        list_h = NULL;
     }
     method {
         name { delete_handy }
 	access { private }
 	type { void }
-	code {
-            hop=0;   
-            if (list_t!=NULL)    
-            if ((list_h->next==NULL) && ((list_h->startnum)==stopvar)) {   
-                Handy *del_handy;
-                del_handy=list_h;
-                zellen[list_h->cellnumber].user--;
-                del_cellno=list_h->cellnumber;
-                list_h=NULL;
-                list_t=NULL;
-                delete del_handy;
-                hop=1;
-            }
-            if ((list_t!=NULL) && (list_h->next!=NULL)) {
-                for (handy=list_h; handy->next!=NULL; handy=handy->next) {
-                    if ((handy==list_h) && ((handy->startnum)==stopvar)) {  
-                        Handy *del_handy;
-                        list_h=handy->next;
-                        del_handy=handy;
-                        zellen[handy->cellnumber].user--;
-                        del_cellno=handy->cellnumber;
-                        delete del_handy;
-                        hop=1;
-                    }
-                    if (hop==1) break;
-                    if ((handy->next->startnum)==stopvar) {  
-                        Handy *del_handy;
-                        del_handy=handy->next;
-                        if (handy->next->next==NULL) {
-                            list_t=handy;
-                            zellen[handy->next->cellnumber].user--;
-                            del_cellno=handy->next->cellnumber;
-                            handy->next=NULL;
-                            delete del_handy;
-                        }
-                        else {       
-                            zellen[handy->next->cellnumber].user--;
-                            del_cellno=handy->next->cellnumber;
-                            handy->next=handy->next->next;
-                            delete del_handy;
-                        }
-                        hop=1;
-                    }
-                    if (hop==1) break;  
+	code {  
+            if (list_t!=NULL && list_h != NULL) {    
+                if ((list_h->next==NULL) && ((list_h->startnum)==stopvar)) {
+                    // delete the only member
+                    Handy *del_handy;
+                    del_handy=list_h;
+                    zellen[list_h->cellnumber].user--;
+                    del_cellno=list_h->cellnumber;
+                    list_h=NULL;
+                    list_t=NULL;
+                    delete del_handy;
+                    del_handy = 0;
                 }
-            }              
+                if ((list_t!=NULL) && (list_h->next!=NULL)) {
+                    // list has at least two members
+                    for (handy=list_h; handy->next!=NULL; handy=handy->next) {
+                        if ((handy==list_h) && ((handy->startnum)==stopvar)) {  
+                            // delete first member
+                            Handy *del_handy;
+                            list_h=handy->next;
+                            del_handy=handy;
+                            zellen[handy->cellnumber].user--;
+                            del_cellno=handy->cellnumber;
+                            delete del_handy;
+                            del_handy = 0;
+                            break;
+                        }
+                        if ((handy->next->startnum)==stopvar) {  
+                            Handy *del_handy;
+                            del_handy=handy->next;
+                            if (handy->next->next==NULL) {
+                                // delete last member
+                                list_t=handy;
+                                zellen[handy->next->cellnumber].user--;
+                                del_cellno=handy->next->cellnumber;
+                                handy->next=NULL;
+                                delete del_handy;
+                                del_handy  = 0;
+                                break;
+                            }
+                            else {
+                                // delete member in the middle
+                                zellen[handy->next->cellnumber].user--;
+                                del_cellno=handy->next->cellnumber;
+                                handy->next=handy->next->next;
+                                delete del_handy;
+                                del_handy = 0;
+                                break;
+                            }
+                        }
+                    }
+                }              
+            }
         }
     }
     method {
@@ -179,7 +193,6 @@ defstar{
             handy=list_h;
             while (handy) {
                 if (handy->cellnumber==del_cellno) {
-                    int usr= handy->startnum;
                     cellno=del_cellno;
                     shifter+=band;
                     band=  handy->B;
@@ -257,17 +270,19 @@ defstar{
             active->C_dBm=C_dBm.get();
             if (active->C_dBm < -120) active->C_dBm = -70;
         }
-        if (active !=NULL)
-        if ((list_h!=list_t) && (active->C_dBm!=0))
-        check.put(arrivalTime) << 1;   
+        if (active !=NULL && list_h != NULL && list_t != NULL) {
+            if ((list_h != list_t) && active->C_dBm!=0) {
+                check.put(arrivalTime) << 1;   
+            }
+        }
     }
     wrapup  { 
         while (list_h) {
             handy=list_h;
-            active=list_h;
             list_h=list_h -> next;
             delete handy;
-            delete active;
+            handy = 0;
         }
+        list_h = NULL;
     }
 }

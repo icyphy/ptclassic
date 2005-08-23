@@ -2,34 +2,35 @@ defstar
 {
     name { Splice }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNSplice.pl	1.11 3/29/96 }
     desc { Base class for stars that splice in other stars. }
     author { T. M. Parks }
-    copyright
-    {
-Copyright (c) 1990-1994 The Regents of the University of California.
+    copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { PN library }
 
-    hinclude { "InterpGalaxy.h" }
-    ccinclude { "Geodesic.h", "PNThread.h", "PNMonitor.h" }
+    hinclude { "PNThread.h", "InterpGalaxy.h" }
+    ccinclude { "Geodesic.h" }
 
     protected
     {
 	InterpGalaxy* gal;	// Container for dynamically created stars.
 	int spliceCount;	// Number of spliced stars.
+	ThreadList* threads;	// Container for dynamically created threads.
     }
 
     conscalls
     {
-	gal(0), spliceCount(0)
+	gal(0), spliceCount(0), threads(0)
     }
 
     destructor
     {
+	LOG_DEL; delete threads;
 	LOG_DEL; delete gal;
     }
 
@@ -37,8 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	type { "DataFlowStar*" }
 	name { splice }
-	arglist { "(const char* starClass, const char* aliasPort,
-                    const char* connectPort, PortHole* port)" } 
+	arglist { "(const char* starClass, const char* aliasPort, const char* connectPort, PortHole* port)" } 
 	code
 	{
 	    StringList starName;
@@ -52,6 +52,11 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    gal->addStar(starName, starClass);
 	    DataFlowStar* star = (DataFlowStar*)gal->blockWithName(starName);
+	    if (star == NULL)
+	    {
+		Error::abortRun(*this, "could not splice in ", starClass);
+		return star;
+	    }
 
 	    // The galaxy's port list is used to keep track of the
 	    // original conection.
@@ -72,7 +77,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // the plasma will exist.
 	    PNMonitor proto;
 	    star->initialize();
-	    port->enableLocking(proto);
+	    alias->enableLocking(proto);
+	    con->enableLocking(proto);
 
 	    return star;
 	}
@@ -83,6 +89,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { unsplice }
 	code
 	{
+	    // Delete any processes that were created.
+	    LOG_DEL; delete threads; threads = NULL;
+
 	    // Step through the ports to reestablish the
 	    // original connections.
 	    BlockPortIter nextPort(*this);
@@ -98,7 +107,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		port->disconnect();
 		pFar->disconnect(FALSE);
 		alias->disconnect(FALSE);
-		aFar->disconnect(FALSE);
 
 		if (port->isItInput())
 		{
@@ -122,7 +130,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	arglist { "(DataFlowStar* star)" }
 	code
 	{
-	    LOG_NEW; new DataFlowProcess(*star);
+	    if (!threads)
+	    {
+		LOG_NEW; threads = new ThreadList;
+	    }
+	    LOG_NEW; DataFlowProcess* p = new DataFlowProcess(*star);
+	    threads->add(p);
+	    p->initialize();
 	}
     }
 

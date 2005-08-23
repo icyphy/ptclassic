@@ -1,8 +1,8 @@
 /**********************************************************************
 Version identification:
-$Id$
+@(#)FSMTarget.cc	1.8 01/08/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,25 +34,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 static const char file_id[] = "FSMTarget.cc";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
+#include "InfString.h"
+#include "Galaxy.h"
 #include "FSMTarget.h"
 #include "FSMScheduler.h"
 
 FSMTarget::FSMTarget() :
-Target("default-FSM","FSMStar","default FSM target")
+Target("default-FSM", "FSMStar", "default FSM target")
 {
-  addState(inputNameMap.setState("inputNameMap",this,"",
-	   "Assign the name for each PortHole in the input MultiPortHole.
-            Each name should be embraced in a pair of double quotes."));
-  addState(outputNameMap.setState("outputNameMap",this,"",
-	   "Assign the name for each PortHole in the output MultiPortHole.
-            Each name should be embraced in a pair of double quotes."));
-  addState(machineType.setState("machineType",this,"Moore",
-	   "Moore or Mealy machine."));
-  addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
+  addState(intlEventNames.setState("intlEventNames", this, "",
+	   "Assign the name for each internal event. Each name should be sparated by at least one space."));
+  addState(intlEventTypes.setState("intlEventTypes", this, "",
+	   "Assign the type for each internal event. Each type should be sparated by at least one space."));
+
+  addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
 	   "schedulePeriod for interface with a timed domain."));
 }
 
@@ -63,20 +63,40 @@ Block* FSMTarget::makeNew() const {
 FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
-  FSMScheduler *fsmSched;
-  fsmSched = new FSMScheduler;
+  int i;
+  FSMScheduler* fsmSched = new FSMScheduler;
 
   // setSched deletes the old scheduler.
   setSched(fsmSched);
-  delete [] fsmSched->inputNameMap;
-  fsmSched->inputNameMap = savestring((const char*)inputNameMap);
-  delete [] fsmSched->outputNameMap;
-  fsmSched->outputNameMap = savestring((const char*)outputNameMap);
-  delete [] fsmSched->machineType;
-  fsmSched->machineType = savestring((const char*)machineType);
+
+  if (intlEventNames.size() != intlEventTypes.size() ) {
+      Error::abortRun("FSMTarget: ",
+		      "The number of names is not matched",
+		      "the number of types for internal events");
+  }
+  
+  fsmSched->intlEventNames.initialize();
+  for (i=0; i<intlEventNames.size(); i++)
+      fsmSched->intlEventNames << intlEventNames[i];
+
+  fsmSched->intlEventTypes.initialize();
+  for (i=0; i<intlEventTypes.size(); i++)
+      fsmSched->intlEventTypes << intlEventTypes[i];
+
 //	fsmSched->schedulePeriod = schedulePeriod;
+
   if (galaxy()) fsmSched->setGalaxy(*galaxy());
 
   Target::setup();
   if (Scheduler::haltRequested()) return;
+}
+
+void FSMTarget::begin() {
+  Target::begin();
+
+  ((FSMScheduler *)scheduler())->resetInitState();
+}
+
+const char* FSMTarget::domain() {
+  return galaxy() ? galaxy()->domain() : "FSM";
 }

@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspRGBYUVConversion.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Routines for conversion from RGB format images to YUV and back ]
-
-  Author      [ Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis ]
-
-  Copyright   [ 
+/*******************************************************************
+Version identification:
+@(#)ptdspRGBYUVConversion.c	1.7 04 Oct 1996
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -34,16 +26,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
- ]
 
-  Version     [ $Id$ ]
+ Programmer: Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis
 
-******************************************************************************/
+       Routines for conversion from RGB format images to YUV and back.
+
+********************************************************************/
 
 #include "ptdspRGBYUVConversion.h"
  
-/* perform rounding in range [0, 255] */
-unsigned char quant (double inval) {
+/* Map a double into an integer in the range [0,255] by rounding. */
+static unsigned char
+quant(double inval) {
   if (inval < 0.5) 
     return ((unsigned char) 0);
   else if (inval > 254.5) 
@@ -52,45 +46,39 @@ unsigned char quant (double inval) {
     return ((unsigned char) (int)(inval + 0.5));
 }
 
-/*---------------------------------------------------------------------------*/	
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Converts a RGB format image to YUV format ]
-  Description [ Read three double arrays that describe a color image
-                in Red-Green-Blue (RGB) format stores the output in
-		three double arrats that describe that image in YUV
-		format. No downsampling is performed on the U and V
-		signals.]
-  SideEffects []
-  SeeAlso     [ Ptdsp_YUVToRGB ]
-******************************************************************************/
+/* Converts a RGB format image to YUV format.
+   Read three double arrays that describe a color image in
+   Red-Green-Blue (RGB) format stores the output in three double
+   arrays that describe that image in YUV format. No downsampling is
+   performed on the U and V signals.
+   
+   The contents of the double arrays YImg, UImg and VImg are modified
+   to store the return Y, U and V images, respectively.
+*/
 void 
 Ptdsp_RGBToYUV ( const double* redImg, const double* greenImg, 
 		 const double* blueImg, double* YImg, double* UImg,
 		 double* VImg, int width, int height, int CCIR_601 ) {
   
-  int i, j, temp1, temp2;
-  double rvalue, gvalue, bvalue;
-  double yvalue, uvalue, vvalue;
+  int i;
   for ( i = 0; i < height; i++ ) {
-    temp1 = i*width;
+    int temp1 = i*width;
+    int j;
     for ( j = 0; j < width; j++ ) {
-      temp2 = j + temp1;
-      rvalue = redImg[temp2];
-      gvalue = greenImg[temp2];
-      bvalue = blueImg[temp2];
-      yvalue =  0.299  * rvalue +
-	        0.587  * gvalue +
-	        0.114  * bvalue;
-      uvalue = -0.1687 * rvalue +
-	       -0.3313 * gvalue +
-	        0.5    * bvalue;
-      vvalue =  0.5    * rvalue +
-	       -0.4187 * gvalue +
-	       -0.0813 * bvalue;
-      if ( (int)CCIR_601 ) {
+      int temp2 = j + temp1;
+      double rvalue = redImg[temp2];
+      double gvalue = greenImg[temp2];
+      double bvalue = blueImg[temp2];
+      double yvalue =	 0.299  * rvalue +
+			 0.587  * gvalue +
+			 0.114  * bvalue;
+      double uvalue =	-0.1687 * rvalue +
+			-0.3313 * gvalue +
+			 0.5    * bvalue;
+      double vvalue =	 0.5    * rvalue +
+			-0.4187 * gvalue +
+			-0.0813 * bvalue;
+      if ( CCIR_601 ) {
 	yvalue = (219.0*yvalue)/255.0 +  16;
 	uvalue = (224.0*uvalue)/255.0 + 128;
 	vvalue = (224.0*vvalue)/255.0 + 128;
@@ -106,29 +94,30 @@ Ptdsp_RGBToYUV ( const double* redImg, const double* greenImg,
   }
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Converts a YUV format image to RGB format ]
-  Description [ Read three double arrays that describe a color image
-                in YUV format and stores the result in  three double
-		arrays that describe an image in RGB format. ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_RGBToYUV ]
-******************************************************************************/
+/* Converts a YUV format image to RGB format.
+   Read three double arrays that describe a color image in YUV format
+   and stores the result in  three double arrays that describe an
+   image in RGB format. 
+   
+   The contents of double arrays redImg, greenImg and blueImg are
+   modified to store the return red, green and blue image
+   respectively. 
+*/
 void 
 Ptdsp_YUVToRGB ( const double* YImg, const double* UImg, 
 		 const double* VImg, double* redImg, double* greenImg,
 		 double* blueImg, int width, int height, int CCIR_601 ) {
-  int i, j, temp1, temp2;
-  double rvalue, gvalue, bvalue;
-  double yvalue, uvalue, vvalue;
+  int i;
   for (i = 0; i < height; i++) {
-    temp1 = i * width;
+    int temp1 = i * width;
+    int j;
     for (j = 0; j < width; j++){
-      temp2 = j + temp1;
-      yvalue = YImg[temp2];
-      uvalue = UImg[temp2];
-      vvalue = VImg[temp2];
-      if ( (int)CCIR_601 ) {
+      double rvalue, gvalue, bvalue;
+      int temp2 = j + temp1;
+      double yvalue = YImg[temp2];
+      double uvalue = UImg[temp2];
+      double vvalue = VImg[temp2];
+      if ( CCIR_601 ) {
 	yvalue = 255.0*(yvalue -  16)/219.0;
 	uvalue = 255.0*(uvalue - 128)/224.0;
 	vvalue = 255.0*(vvalue - 128)/224.0;

@@ -2,7 +2,7 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)testConnect.itcl	1.4   04/04/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -44,13 +44,13 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y and populate with blocks.
 
-test connect.0 {create a test universe} {
+test connect-0 {create a test universe} {
     namespace ::pitcl {
-        defgalaxy y {
+        defGalaxy y SDF {
             addBlock z Ramp
             galaxyPort out z.output
         }
-        addUniverse x
+        addUniverse x SDF
         addBlock a y
         addBlock b Ramp
         addBlock c Add
@@ -61,8 +61,8 @@ test connect.0 {create a test universe} {
 ######################################################################
 #### connect
 
-test connect.1 {connection of galaxy port to multiport, relative naming} {
-    ::pitcl::curgalaxy .x
+test connect-1 {connection of galaxy port to multiport, relative naming} {
+    ::pitcl::currentGalaxy .x
     ::pitcl::connect a.out c.input
     list \
             [::pitcl::connected c.input#1] \
@@ -70,8 +70,8 @@ test connect.1 {connection of galaxy port to multiport, relative naming} {
             [::pitcl::connected -deep c.input#1]
 } {.x.a.out .x.c.input#1 .x.a.z.output}
 
-test connect.2 {connection of star port to multiport, absolute naming} {
-    ::pitcl::curgalaxy .main
+test connect-2 {connection of star port to multiport, absolute naming} {
+    ::pitcl::addUniverse .confuse SDF
     ::pitcl::connect .x.b.output .x.c.input
     list \
             [::pitcl::connected .x.c.input#2] \
@@ -79,11 +79,11 @@ test connect.2 {connection of star port to multiport, absolute naming} {
             [::pitcl::connected -deep .x.b.output]
 } {.x.b.output .x.c.input#2 .x.c.input#2}
 
-test connect.3 {are the ports connected to a multiport are listed correctly} {
+test connect-3 {are the ports connected to a multiport are listed correctly} {
     ::pitcl::connected .x.c.input
 } {.x.a.out .x.b.output}
 
-test connect.4 {are the ports connected to a multiport are listed correctly} {
+test connect-4 {are the ports connected to a multiport are listed correctly} {
     ::pitcl::connected -deep .x.c.input
 } {.x.a.z.output .x.b.output}
 

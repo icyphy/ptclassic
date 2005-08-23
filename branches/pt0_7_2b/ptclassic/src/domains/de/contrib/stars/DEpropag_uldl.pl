@@ -3,7 +3,7 @@ defstar {
        	domain { DE }
       	derivedfrom { DEcell_list }
 	author { A. Wernicke }
-	version { 1.0 1/31/1997 }
+	version { @(#)DEpropag_uldl.pl	1.6 06/11/98}
 	copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                     Mobile Communications Systems 
         }
@@ -20,7 +20,8 @@ defstar {
         This is not a generic path-loss-model for any AutoCad-enviroment !!!
         }
        	hinclude { <stdio.h>, <string.h>, <fstream.h>,
-		  <complex.h>, <math.h>, <stdlib.h>, <iomanip.h>}
+		  <complex.h>, <math.h>, <stdlib.h>, <iomanip.h>, 
+		  "pt_fstream.h" }
         input 	{
             name { MS_Position }
             type { Complex }
@@ -33,6 +34,13 @@ defstar {
             name { C_dBm }  
             type { float }
         }
+	defstate {
+		name { fileName }
+		type { string }
+		default { "$PTOLEMY/src/domains/de/contrib/stars/topo.dxf" }
+		descriptor { File describing topology }
+	}
+
  	private {
 	enum Umgebung { Fenster, Fenster1, Fenster2, Tuer, Tuer2, Metall_Tuer, Metall_Tuer1,
  			Glas_Tuer, Glas_Doppel_Tuer, Doppel_Tuer, Doppel_Tuer2, Fahrstuhltuer,
@@ -80,17 +88,22 @@ defstar {
        
   
 	    }	
-
+            constructor {
+                Gelesen = 0;
+                for (int i = 1; i < 50; i++) {
+                    Art[i] = 0;
+                }
+            }
 begin { 
     tunnel_flag=0;
-    DEcell_list::begin();    
+    DEcell_list::begin();
 }
 
 
 method {
     name { BS_Stoerer }		
     access { public }  
-    arglist { "(int I_number, int C_number)" } 
+    arglist { "(int I_number, int C_number, const char* topoFileName)" } 
     type { float }
     code {
 
@@ -98,7 +111,7 @@ method {
 	 LI_number=I_number;			// interf. BS-cellnumber
 	 LC_number=C_number;		        // desired BS-Pos
 
-	 Abzweig();
+	 Abzweig(topoFileName);
 	 return (Berechnung());
          }
 }
@@ -106,7 +119,7 @@ method {
 method {
     name { MS_Stoerer }			
     access { public }  
-    arglist { "(int number, Complex Tposition)" } 
+    arglist { "(int number, Complex Tposition, const char* topoFileName)" } 
     type { float }
     code {
 
@@ -114,7 +127,7 @@ method {
 	 LC_number=number;			// interf. BS-cellnumber
 	 position=Tposition;		        // desired BS-Pos
 
-	 Abzweig();
+	 Abzweig(topoFileName);
 	 return (Berechnung());
          }
 }
@@ -123,11 +136,12 @@ method {
 method {
     name { Abzweig }
     access { private } 
+    arglist { "(const char* topoFileName)" } 
     type { void }
     code {
 
 	int 	j, m, n;
-	double 	F1, F2, Schritt_m, Kath_x, Kath_y;
+	double 	F1, F2, Kath_x, Kath_y;
 	
 	Mass=100;
 
@@ -155,7 +169,7 @@ method {
 	if (Gelesen==1)  Objekte_abtast();    
 	else
 	{
-		File_lesen();
+		File_lesen(topoFileName);
 		Sortierung();
 		Objekte_abtast();
 	}
@@ -229,6 +243,7 @@ method {
 method {
     name { File_lesen }
     access { private }
+    arglist { "(const char *name)" }
     type { void }
     code {
 
@@ -240,9 +255,11 @@ method {
    double 	Tuerbog[5];
    
   
-   ifstream in("/users/voigtje/demo/stars/topo.dxf");
+   pt_ifstream in;
+   in.close();
+   in.open(name);
    if (!in) {
-	Error::abortRun(*this, "can't open dxf-file");
+	Error::abortRun(*this, "can't open dxf-file  ", fileName);
 	}
    else
    {
@@ -1597,7 +1614,7 @@ method {
     code {
 
 	int    i,n,z, Paar;
-	double lambda_m, Loss_dB, Attenuat_dB;
+	double lambda_m, Loss_dB, Attenuat_dB = 0.0;
 
 	lambda_m  = 0.3/(zellen[LC_number].dl_freq);
 
@@ -1680,7 +1697,7 @@ method {
         		LC_number = cellnumb.get();
 			position = MS_Position.get();		// MS: Transceiver-pos
 
-			Abzweig();
+			Abzweig(fileName);
 			C_dBm.put(arrivalTime) << Berechnung();			
        		}
           

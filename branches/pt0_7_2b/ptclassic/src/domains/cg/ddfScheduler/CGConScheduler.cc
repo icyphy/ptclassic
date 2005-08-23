@@ -14,21 +14,21 @@ static const char file_id[] = "CGConScheduler.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGConScheduler.cc	1.4	1/25/96
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -37,7 +37,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
 
@@ -215,6 +217,8 @@ void CGConScheduler :: fixProfile(int nP, int resWork, IntArray* pAvail) {
 
 static int _compareType (CGStar& s, const char* t) {
 	const char* nm = s.className();
+	// Pointer arithmetic that means &nm[ strlen(s.domain()) ]
+	// For example, if nm = "SDFRamp" than p = "Ramp"
 	const char* p = nm + strlen(s.domain());
 	int flag = strcmp(p,t);
 	if (!flag) return TRUE;
@@ -231,10 +235,10 @@ static int _compareType (CGStar& s, const char* t) {
 //     star
 
 Geodesic* CGConScheduler :: findGeo(CGStar* macroS, const char* nm) {
-	CGClustPortIter nextp(*owner);
-	CGClustPort* p = 0;
+	CGMacroClustPortIter nextp(*owner);
+	CGMacroClustPort* p = 0;
 	while ((p = nextp++) != 0) {
-		CGClustPort* inp = p->inPtr();
+		CGMacroClustPort* inp = p->inPtr();
 		CGMacroCluster* ins = inp->parentClust();
 		CGAtomCluster* as = 0;
 		if (!nm) {
@@ -266,8 +270,8 @@ Geodesic* CGConScheduler :: findGeo(CGStar* macroS, const char* nm) {
 // if flag = 1, output and connected to "Case" or "EndCase" or others
 // if flag = 2, output and connected to "Fork" and eventually to "control".
 CGPortHole* CGConScheduler :: boundaryPort(CGMacroCluster* s, int flag) {
-	CGClustPortIter nextp(*s);
-	CGClustPort* p;
+	CGMacroClustPortIter nextp(*s);
+	CGMacroClustPort* p;
 	while ((p = nextp++) != 0) {
 		if ((!flag && p->isItInput()) || (flag && p->isItOutput())) {
 			if (flag) {
@@ -292,8 +296,8 @@ CGPortHole* CGConScheduler :: boundaryPort(CGMacroCluster* s, int flag) {
 	return copyPortHole(p);
 }
 	
-CGPortHole* CGConScheduler :: copyPortHole(CGClustPort* p) {
-	CGClustPort* temp = p->inPtr();
+CGPortHole* CGConScheduler :: copyPortHole(CGMacroClustPort* p) {
+	CGMacroClustPort* temp = p->inPtr();
 	const char* pname = temp->real().name();
 	ParNode* smallest = (ParNode*) temp->parentClust()->myMaster();
 	DataFlowStar* copyS = smallest->getCopyStar();

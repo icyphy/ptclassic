@@ -1,21 +1,29 @@
 #!/bin/csh -f
-# Version $Id$
+# Version @(#)ptmake	1.6 2/6/96
 # Author:	T. M. Parks
 # Created:	20 October 1994
 # 
-# Change to the obj.$ARCH directory before invoking make.
+# Change to the obj.$PTARCH directory before invoking make.
 
-# Make sure the $ARCH variable is set.
-if (! $?ARCH) then
-	setenv ARCH `ptarch`
-	echo ARCH=$ARCH
+# Make sure the $PTARCH variable is set.
+# First check if it is one of the arguments to ptmake
+foreach arg ($argv)
+	if ($arg =~ PTARCH=*)  then
+		setenv PTARCH `echo $arg|sed -e 's/PTARCH=//'`
+		break
+	endif
+end
+
+if (! $?PTARCH) then
+	setenv PTARCH `ptarch`
+	echo PTARCH=$PTARCH
 endif
 
-# Make sure we are not in the wrong obj.$ARCH directory.
-set obj="s:/obj.[^/]*:/obj.${ARCH}:"
+# Make sure we are not in the wrong obj.$PTARCH directory.
+set obj="s:/obj.[^/]*:/obj.${PTARCH}:"
 
 # Make sure we are not in the src directory.
-set src="s:/src:/obj.${ARCH}:"
+set src="s:/src:/obj.${PTARCH}:"
 
 set objdir=`echo $cwd | sed -e $obj:q -e $src:q`
 

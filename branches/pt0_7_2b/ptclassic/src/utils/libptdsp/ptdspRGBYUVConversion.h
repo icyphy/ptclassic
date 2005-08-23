@@ -28,21 +28,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis
-Version: $Id$
+Version: @(#)ptdspRGBYUVConversion.h	1.2 7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Ptdsp_RGBToYUV ( const double* redImg, const double* greenImg, 
-			     const double* blueImg, double* YImg, double* UImg,
-			     double* VImg, int width, int height, int
-			     CCIR_601 );
-extern void Ptdsp_YUVToRGB ( const double* YImg, const double* UImg, 
-			     const double* VImg, double* redImg, double* greenImg,
-			     double* blueImg, int width, int height, int CCIR_601 );
-
+extern void Ptdsp_RGBToYUV (const double* redImg, const double* greenImg,
+		const double* blueImg, double* YImg, double* UImg,
+		double* VImg, int width, int height, int CCIR_601 );
+extern void Ptdsp_YUVToRGB (const double* YImg, const double* UImg, 
+		const double* VImg, double* redImg, double* greenImg,
+		double* blueImg, int width, int height, int CCIR_601 );
 
 #ifdef __cplusplus
 }

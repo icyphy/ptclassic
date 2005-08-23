@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testCGCStars.tcl	1.1 12/09/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.

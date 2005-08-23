@@ -1,30 +1,32 @@
 defstar {
-	name { CxWaveForm }
+	name { WaveFormCx }
 	domain { SDF }
 	desc {
 Output a complex waveform as specified by the array state "value"
 (default "(1,0) (-1,0)").
-To halt the simulation after exhausing the data, set "haltAtEnd" to YES.
-Otherwise, to get a periodic waveform, set "periodic" to YES.
-Then the value list will be cyclically repeated.
-If "periodic" is not YES, and "haltAtEnd" is NO, then the value list is
-output only once, and (0,0) values are output subsequently.
+The parameters work the same way as in the WaveForm star.
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+something of the form "&lt; filename".
 	}
-	explanation {
+	htmldoc {
 Since this star can be used to read a complex waveform from a file,
 there is no other star dedicated to this purpose.
-.IE "file read"
-.IE "complex waveform"
-.IE "reading from a file"
-.IE "halting a simulation"
+<a name="file read"></a>
+<a name="complex waveform"></a>
+<a name="reading from a file"></a>
+<a name="halting a simulation"></a>
 	}
-	version {$Id$}
+	version {@(#)SDFWaveFormCx.pl	1.12	10/07/96 }
 	author { J. T. Buck and E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF main library }
-	ccinclude { "Scheduler.h" }
+	seealso { Waveform }
+	ccinclude { "SimControl.h" }
 	output {
 		name { output }
 		type { complex }
@@ -50,12 +52,12 @@ there is no other star dedicated to this purpose.
 	protected {
 		int pos;
 	}
-	start {
+	setup {
 		pos = 0;
 	}
 	go {
-		if (int(haltAtEnd) && (pos >= value.size() - 1))
-			Scheduler::requestHalt();
+		if (int(haltAtEnd) && (pos >= value.size()))
+			SimControl::requestHalt();
 		if (pos >= value.size())
 			output%0 << Complex(0.0,0.0);
 		else

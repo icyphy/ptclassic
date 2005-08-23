@@ -2,16 +2,16 @@ defstar {
     name { SubCx }
     domain { CG56 }
     desc { Output the "pos" input minus all "neg" inputs. }
-    version { $Id$ }
+    version { @(#)CG56SubCx.pl	1.2	01 Oct 1996 }
     author { Brian L. Evans and Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 main library }
-    explanation {
+	htmldoc {
 The inputs are added and the result is written on the output.
     }
     input {

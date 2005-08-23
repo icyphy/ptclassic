@@ -1,8 +1,9 @@
-/* transport.h:  Macros for transport.c
+/* transport.h:  Macros for transport.c */
 /******************************************************************
 Version identification:
+@(#)transport.h	1.4 07/23/96
 
-Copyright (c) 1995-1996  The Regents of the University of California.
+Copyright (c) 1995-1997  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -32,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #ifndef _TRANSPORT_H
-#define _TRANSPORT_H "$Id$"
+#define _TRANSPORT_H 
 
 
 #define AM_GetXferAsynch4(request_endpoint, reply_endpoint, source_offset, \

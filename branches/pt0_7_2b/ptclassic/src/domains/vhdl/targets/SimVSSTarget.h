@@ -2,21 +2,21 @@
 #define _SimVSSTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)SimVSSTarget.h	1.31 08/16/96
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,7 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
@@ -39,13 +41,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLTarget.h"
 #include "VHDLCompDecl.h"
-#include "VHDLCompMap.h"
 #include "VHDLSignal.h"
-//#include "VHDLState.h"
-//#include "VHDLPortVar.h"
-//#include "VHDLCluster.h"
-//#include "VHDLFiring.h"
-//#include "Attribute.h"
+#include "VHDLCSend.h"
+#include "VHDLCReceive.h"
+#include "CGCVSend.h"
+#include "CGCVReceive.h"
 
 class SimVSSTarget : public VHDLTarget {
 public:
@@ -77,57 +77,55 @@ public:
 	/*virtual*/ int runCode();
 
 protected:
+	// CodeStreams.
+	CodeStream cli_configs;
+
 	// States.
+	StringState synopsys;
+	StringState arch;
+	StringState simarch;
 	IntState analyze;
 	IntState startup;
 	IntState simulate;
 	IntState report;
 	IntState interactive;
 	
+	/*virtual*/ void begin();
+
 	/*virtual*/ void setup();
 
+	// Method to write out com file for VSS if needed.
+	void setWriteCom();
+
+	// virtual function to add additional codeStreams.
+	/*virtual*/ void addCodeStreams();
+
+	// Initialize codeStreams.
+	/*virtual*/ void initCodeStreams();
+
+	// Initialize VHDLObjLists.
+	/*virtual*/ void initVHDLObjLists();
+
+	// Method called by comm stars to place important code into structure.
+	virtual void registerComm(int, int, int, const char*);
+
 private:
-	CodeStream preSynch;
-	CodeStream postSynch;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;
 	CodeStream top_configuration;
-	CodeStream entity_declaration;
-	CodeStream architecture_body_opener;
 
 	VHDLGenericList mainGenList;
 	VHDLPortList mainPortList;
-	VHDLGenericMapList mainGenMapList;
-	VHDLPortMapList mainPortMapList;
 	VHDLSignalList topSignalList;
-	VHDLCompMapList topCompMapList;
-
-	// Add in generic refs here from genList.
-	StringList addGenericRefs(VHDLGenericList* genList);
-
-	// Add in port refs here from portList.
-	StringList addPortRefs(VHDLPortList* portList);
-
-	// Add in signal declarations here from signalList.
-	StringList addSignalDeclarations(VHDLSignalList* signalList);
-
-	// Add in component mappings here from compMapList.
-	StringList addComponentMaps(VHDLCompMapList* compMapList);
-
-	// Register component mapping.
-	void registerCompMap(StringList label, StringList name,
-				     VHDLPortMapList* portMapList,
-				     VHDLGenericMapList* genMapList);
-
-	// Method called by C2V star to place important code into structure.
-	void registerC2V(int pairid, int numxfer);
-
-	// Method called by V2C star to place important code into structure.
-	void registerV2C(int pairid, int numxfer);
+	VHDLCompDeclList topCompDeclList;
 
 	int pairNumber;
+	int writeCom;
 	void configureCommPair(CommPair&);
+
+	// Method to write out com file for VSS if needed.
+	virtual void writeComFile();
 };
 
 #endif

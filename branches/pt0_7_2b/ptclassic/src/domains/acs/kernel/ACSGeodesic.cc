@@ -1,7 +1,7 @@
 static const char file_id[] = "ACSGeodesic.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)ACSGeodesic.cc	1.4 09/08/99
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
@@ -54,3 +54,11 @@ char* ACSGeodesic::getBufName() const {
 // allocation control heuristic
 double ACSGeodesic :: wasteFactor() const { return myWaste; }
 
+
+/*	ACSPortHole* ACSGeodesic::src() {
+		return ((ACSPortHole*)originatingPort)->getForkSrc();
+	}
+	const ACSPortHole* ACSGeodesic::src() const {
+		return ((const ACSPortHole*)originatingPort)->getForkSrc();
+	}
+*/

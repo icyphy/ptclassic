@@ -1,7 +1,7 @@
 defstar {
 	name { WiNeS_Tcl_Animation }
 	domain { DE }
-	version { 1.0   6/22/97 }
+	version { @(#)DEWiNeS_Tcl_Animation.pl	1.3 06/24/97 }
 	author { J. Voigt }
 	copyright {
             Copyright (c) 1997 Dresden University of Technology,
@@ -63,7 +63,7 @@ defstar {
 	defstate {
             name { tcl_file }
             type { string }
-            default { "/users/voigtje/demo/stars/test.tcl" }
+            default { "$PTOLEMY/src/domains/de/contrib/stars/test.tcl" }
             desc { The file from which to read the Tcl script }
 	}
 	defstate {
@@ -240,7 +240,6 @@ defstar {
             int TclStarIfcWiNeS::mySetup(Block *star, const char *tcl_file) {
                 myStar = star;
                 InfString buffer;
-                int dummy = 0;
                 synchronous = 1; 
 
                 buffer = "grabInputsNew_";
@@ -380,7 +379,7 @@ defstar {
             }
 	    if (Interferenz.dataNew) {
 		dummy = Interferenz%0;
-		int r, i, flag, r1, i1, r2, i2;
+		int r, i, flag;
 		r = int(real(dummy));
 		i = int(imag(dummy));
 		tcl.s = strength.get();

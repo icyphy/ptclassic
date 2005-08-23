@@ -4,26 +4,26 @@ defstar {
 	desc {
 Generate a plot of a single signal with the xgraph program.
 	}
-	version { $Id$ }
+	version { @(#)C50Xgraph.pl	1.5	06 Oct 1996 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 TI Sim I/O library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+	location { C50 main library }
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i> program.
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
+The <i>options</i> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
-.Ir "xgraph program, C50"
-.Id "graph, X window, C50"
+<a name="xgraph program, C50"></a>
+<a name="graph, X window, C50"></a>
 	}
 	derivedFrom { WrtFile }
 	defstate {
@@ -64,14 +64,13 @@ for a complete explanation of the options.
 	}
 
 	codeblock(xgraph,"const char* outfile") {
+/bin/rm -f @outfile
 
-	/bin/rm -f @outfile
+tail +$val(ignore) $starSymbol(/tmp/cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
 
-	tail +$val(ignore) $starSymbol(/tmp/cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
-	
-	/usr/bin/rm -f $starSymbol(/tmp/cgwritefile).io
+/bin/rm -f $starSymbol(/tmp/cgwritefile).io
 
-	(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f  $starSymbol(/tmp/cgxgraph)")) &
+(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f $starSymbol(/tmp/cgxgraph)")) &
 	}
 
 	constructor {

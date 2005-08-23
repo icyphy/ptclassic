@@ -1,5 +1,5 @@
 /******************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  Brian L. Evans
 Created: July 2, 1996
-Version: $Id$
+Version: @(#)ImplementationCost.cc	1.3	07/08/96
 
 This file defines an ImplementationCost class to track software
 and hardware implementation costs.
@@ -34,30 +34,33 @@ and hardware implementation costs.
 ******************************************************************/
 
 #ifdef __GNUG__
-#pragma interface
+#pragma implementation
 #endif
 
 #include "ImplementationCost.h"
 
 static const char file_id[] = "ImplementationCost.cc";
 
+// constructor
 ImplementationCost::ImplementationCost(int numProcessors, int numDataBanks) :
 		exectime(0), progNodes(numProcessors), progMemoryVector(0),
 		dataBanks(numDataBanks), dataMemoryVector(0) {
-	int i;
-	if (progNodes) {
-	    progMemoryVector = new int[progNodes];
-	    for (i = 0; i < numProcessors; i++) progMemoryVector[i] = 0;
-	}
-	if (dataBanks) {
-	    dataMemoryVector = new int[dataBanks];
-	    for (i = 0; i < dataBanks; i++) dataMemoryVector[i] = 0;
-	}
+	if (progNodes) progMemoryVector = new int[progNodes];
+	if (dataBanks) dataMemoryVector = new int[dataBanks];
+	initialize();
 }
 
+// destructor
 ImplementationCost::~ImplementationCost() {
 	delete [] progMemoryVector;
 	delete [] dataMemoryVector;
+}
+
+// initialize data members
+void ImplementationCost::initialize() {
+	int i;
+	for (i = 0; i < progNodes; i++) progMemoryVector[i] = 0;
+	for (i = 0; i < dataBanks; i++) dataMemoryVector[i] = 0;
 }
 
 int ImplementationCost::totalMemory() {

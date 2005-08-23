@@ -8,7 +8,7 @@ That is, at any time step, the neuron either fires, or does not fires.
         author {Biao Lu}
         acknowledge { Brian L. Evans }
         location { CGC contrib library }
-	version { $Id$ }
+	version { @(#)CGCNeuronBase.pl	1.2	03/24/98 }
         copyright {
 Copyright (c) 1997-1998 The University of Texas.
 All rights reserved.
@@ -56,7 +56,7 @@ The number of the weights must be equal to the number of the inputs.
 
 	codeblock(initial) {
 	  double kthweight, out = 0.0;
-	  int k, index = 0;
+	  int index = 0;
 	}
 
 	codeblock(iteration, "int k") {

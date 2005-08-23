@@ -1,7 +1,7 @@
 # Makefile for ACS utilities
 
 # Version Identification:
-# $Id$
+# @(#)makefile	1.1 01/15/98
 # Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -35,7 +35,14 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 MISC_FILES = \
-	mkcorona
+	mkallcorona \
+	mkcorona \
+	vhdl_done.tk \
+	wf_sequencer_declaratives.vhd \
+	wf_sequencer_mainbody.vhd \
+	wildforce.arch \
+	wordlength \
+	wordgui_pause.tk
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

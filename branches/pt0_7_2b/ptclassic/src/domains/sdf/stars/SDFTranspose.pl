@@ -2,13 +2,19 @@ defstar {
 	name { Transpose }
 	domain { SDF }
 	desc {
-Transposes a rasterized matrix.
-Number of samples produced and consumed equals the product
+Transpose a rasterized matrix (one that is read as a sequence
+of particles, row by row, and written in the same form).
+The number of particles produced and consumed equals the product
 of "samplesInaRow" and "numberOfRows".
 	}
-	version {$Id$}
+	version {@(#)SDFTranspose.pl	1.9	3/7/96}
 	author { E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+}
 	location { SDF main library }
 	input {
 		name { input }
@@ -33,7 +39,7 @@ of "samplesInaRow" and "numberOfRows".
 	protected {
 		int size;
 	}
-	start {
+	setup {
 		size = int(samplesInaRow)*int(numberOfRows);
 		input.setSDFParams(size, size-1);
 		output.setSDFParams(size, size-1);

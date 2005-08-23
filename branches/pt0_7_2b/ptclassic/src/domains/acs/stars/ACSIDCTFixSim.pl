@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FixSim }
 	corona { IDCT }
 	desc { computes the inverse discrete cosine transform of a block of 8 samples }
-	version { $Id$ }
+	version { @(#)ACSIDCTFixSim.pl	1.2 09/08/99 }
 	author { James Lundblad }
     	copyright {
 Copyright (c) 1998 The Regents of the University of California.

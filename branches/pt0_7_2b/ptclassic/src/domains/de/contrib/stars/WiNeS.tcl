@@ -1,6 +1,6 @@
 # WiNeS.tcl
 #
-# 1.1 6/22/1997
+# @(#)WiNeS.tcl	1.2 06/24/97
 # author: J.Voigt
 #
 # copyright (c) Dresden University of Technology
@@ -622,7 +622,9 @@ $s.f.pad create polygon \
 
 
 # base stations
-image create bitmap base -file "/users/voigtje/demo/stars/bs.xbm" -foreground blue
+image create bitmap base \
+	-file "$env(PTOLEMY)/src/domains/de/contrib/stars/bs.xbm" \
+	-foreground blue
 
 set inputvals [grabSetup_$starID]
     set test [lindex $inputvals 0]
@@ -825,7 +827,10 @@ proc new_$starID {starID} {
 	}
     }
     
-    image create bitmap handy -file "/users/voigtje/demo/stars/ms.xbm" -foreground black
+    global env
+    image create bitmap handy \
+	    -file "$env(PTOLEMY)/src/domains/de/contrib/stars/ms.xbm" \
+	    -foreground black
     incr counter
     $s.f.pad create image $xin $yin -image handy -tag telefon_$counter 
     $s.f.pad create line $xbs $ybs $xin $yin -arrow both -fill yellow -tag pfeil_$counter

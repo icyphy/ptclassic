@@ -2,7 +2,7 @@
 #define _PendingEventList_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PendingEventList.h	1.8 01/29/98
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.
@@ -45,36 +45,88 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "type.h"
 #include "LinkedList.h"
 
+class MutableCQEventQueue;
 class CqLevelLink;
+class DEStar;
 
 
 class PendingEventList : public LinkedList {
 	friend class DEStar;
+	friend class PendingEventListIter;
 
 public:
 	// Constructor 
-	PendingEventList(); 
+	PendingEventList(MutableCQEventQueue *eventQueue); 
 
 	// Destructor
-	// FIXME: Fill this in!
-	// ~PendingEventList();
+	~PendingEventList();
 
 	// Append to tail and return pointer to element
-	Link * appendGet( CqLevelLink * obj ); 
+	Link * appendGet(CqLevelLink * obj); 
+
+	// return and remove head of list
+	void removeHeadAndFree(); 
+
+	// Free a CqLevelLink. Note that this function requires
+	// the destinationRef to be set to 0 before being called.
+	// Otherwise an error will occur.
+	void freeEvent(CqLevelLink * obj);
 
 	// Clear list
-	void clearList() { LinkedList::initialize(); }
+	LinkedList::initialize;
 
 	// Return the size of the list
 	LinkedList::size;
 
 private:
+        // Return and remove head of list
+        CqLevelLink * getHeadAndRemove() {
+	    return (CqLevelLink *)LinkedList::getHeadAndRemove();
+	}
+
 	// Remove an element from the list
-	// Note that this method can lead 
-	// to memory leaks.
-	void remove( Link * obj ); 
+	CqLevelLink * remove( Link * obj ); 
+
+	// The Event Queue owned by this PendingEventList
+	MutableCQEventQueue *myQueue;
 
 };
+
+
+
+        ///////////////////////////////////
+        // class PendingEventListIter
+        ///////////////////////////////////
+
+// PendingEventListIter steps sequentially through a PendingEventList.  
+// Warning: if the list is modified "out from under" the 
+// PendingEventListIter, bad things may happen if next() is called, 
+// though reset() will be safe.
+
+class PendingEventListIter : public LinkedListIter {
+public:
+        // constructor: attach to a PendingEventList
+        inline PendingEventListIter(PendingEventList& l) 
+		: LinkedListIter(&l) { }
+
+        // next and operator++ are synonyms.  Return the next element,
+        // return 0 if there are no more.
+        // This routine has been re-implemented and optimized for speed
+        // because of its heavy usage.  The if-structure is organized
+        // so that necessary ifs are executed, but for cases where only
+        // a few ifs are needed, the minimum number of ifs is done for
+        // the most common cases, with rarer cases taking decreasing
+        // priority in the if-structure.
+	inline CqLevelLink* next() { 
+	    // FIXME: myQueue->decrementEventCount();
+	    return (CqLevelLink*)LinkedListIter::next();
+	}
+        inline CqLevelLink* operator++ (POSTFIX_OP) { return next();}
+
+        LinkedListIter::reset;
+	LinkedListIter::remove;
+};
+
 
 #endif
 

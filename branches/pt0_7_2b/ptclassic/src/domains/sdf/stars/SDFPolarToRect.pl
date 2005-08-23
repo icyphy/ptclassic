@@ -1,25 +1,24 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/16/90
- Converted to use preprocessor, 10/3/90, JTB
-
-Convert magnitude and phase to rectangular form
-
-**************************************************************************/
-}
 defstar {
-	name { PolarRect }
+	name { PolarToRect }
 	domain { SDF }
-	desc {
-		"Convert magnitude and phase to rectangular form"
+	desc { Convert magnitude and phase to rectangular form. }
+	version { @(#)SDFPolarToRect.pl	1.12	10/01/96 }
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	htmldoc {
+Two floating-point inputs are converted into two floating-point outputs.
+<a name="polar to rectangular conversion"></a>
+<a name="format conversion, polar to rectangular"></a>
+<a name="magnitude"></a>
+<a name="phase"></a>
+<a name="Cartesian coordinates"></a>
+	}
+	location { SDF main library }
 	input {
 		name { magnitude }
 		type { float }
@@ -38,8 +37,8 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		float m = magnitude%0;
-		float p = phase%0;
+		double m = magnitude%0;
+		double p = phase%0;
 		x%0 << m * cos(p);
 		y%0 << m * sin(p);
 	}

@@ -2,47 +2,87 @@ defstar {
 	name { IIDUniform }
 	domain {CGC}
 	desc {
-Generate pseudo-IID-uniform random variables.  The values range from
--range to range where range is a parameter.
+Generate random variables that are approximately independent identically
+distributed uniform random variables.  The values range from "lower"
+to "upper".
 	}
-	version { $Id$ }
+	version { @(#)CGCIIDUniform.pl	1.10	7/12/96 }
 	author { Soonhoi Ha }
-	copyright { 1992 The Regents of the University of California }
-	location { CGC main library }
-	explanation {
-Use two library functions drand48() and srand48(long) in Sun machines.
-For other machines, we may want to change this random number generation 
-part. The code should be modified for portability.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { CGC main library }
 	output {
 		name { output }
 		type { float }
 	}
 	defstate {
-		name { range }
+		name { lower }
+		type { float }
+		default { 0.0 }
+		desc { lower limit of uniform random number generator }
+	}
+	defstate {
+		name { upper }
 		type { float }
 		default { 1.0 }
-		desc { range of random number generator is [-range,+range] }
+		desc { upper limit of uniform random number generator }
 	}
 	defstate {
 		name { seed }
 		type { int }
 		default { 1 }
 	}
+
+	setup {
+		if ( double(lower) > double(upper) ) {
+		    Error::abortRun(*this, "The upper limit must be greater ",
+				    "than the lower limit");
+		    return;
+		}
+	}
+
 	initCode {
-		addGlobal("double drand48();\n");
-		gencode(initSeed);
+		// Pull in prototypes for srand and rand
+		addInclude("<stdlib.h>");
+		// Initialize the random number generator
+		addCode(initSeed);
 	}
+
 	go {
-		gencode(random);
+		addCode(randomGen);
 	}
-	// "code" to initialize the seed
+
+	// initialize the seed of the random number generator
 	codeblock(initSeed) {
-    srand48($val(seed));
+/* Initialize the random number generator */
+srand($val(seed));
 	}
-	// "common" part of random number generation
-	codeblock(random) {
-		float scale = $val(range) * 2.0;
-		$ref(output) = scale * (drand48() - 0.5);
+
+	// generate a random number
+	codeblock(randomGen) {
+		/* Generate a random number on the interval [0,1] and */
+		/* map it into the interval [$val(lower),$val(upper)] */
+		double randomValue = 0.0;
+		int randomInt = rand();
+		double scale = $val(upper) - ($val(lower));
+		double center = ($val(upper) + ($val(lower)))/2.0;
+
+		/* RAND_MAX is an ANSI C standard constant */
+		/* If not defined, then just use the lower 15 bits */
+#ifdef RAND_MAX
+		randomValue = ((double) randomInt) / ((double) RAND_MAX);
+#else
+		randomInt &= 0x7FFF;
+		randomValue = ((double) randomInt) / 32767.0;
+#endif
+		$ref(output) = scale * (randomValue - 0.5) + center;
+	}
+
+	exectime {
+		return 10 + 5;	/* based on CG96IIDUniform */
 	}
 }

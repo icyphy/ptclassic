@@ -1,4 +1,8 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Microsoft VC++ nmake file, based on stars.mk, but modified by hand.
+#
+# Version: @(#)stars.mk.vc	1.5 01/05/99
+#
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +29,6 @@
 #
 #
 # stars.mk :: Common definitions of star and target subsets.
-# Version: @(#)stars.mk	$Id$
 #
 # Eventually this file will be automatically generated.
 # But for now, we do it by hand.
@@ -51,7 +54,7 @@
 # CGC tcl stars are included because they don't pull in tk.
 # SDF tcl stars are omitted because they do.
 #
-# Note that you must explicitly include any target .o files in TARGETS
+# Note that you must explicitly include any target .obj files in TARGETS
 # for architectures that don't use shared libraries.  If you don't, then
 # you won't see these targets in non-shared library architectures.  For
 # an example, see the CG56 target section below.
@@ -112,11 +115,11 @@ FSMDIR = $(CROOT)\src\domains\fsm
 
 !if "$(INCLUDE_IPUS_DOMAIN)" != "yes" #ifneq
 	# Non G++ compilers fail to compile IPUS' templates
-IPUS =
+!undef IPUS
 !endif
 
 !if "$(INCLUDE_PN_DOMAIN)" != "yes" #ifneq
-PN =
+!undef PN
 !endif
 
 # Tcl\Tk stars can be used in pigiRpc but not ptcl, for this we define TK
@@ -125,15 +128,15 @@ PN =
 	# We can't include the ipus domain since the non-tk ipus stars need 
 	# Blackboard* symbols, which are defined in the tk ipus stars.
 	# Set up definitions for stars.mk
-IPUS =
+!undef IPUS
 
-CGCTK =
-CGCVISTK =
-CODESIGN =
-FSM =
-SDFTK =
-SDFDFM =
-VHDLTK =
+!undef CGCTK
+!undef CGCVISTK
+!undef CODESIGN
+!undef FSM
+!undef SDFTK
+!undef SDFDFM
+!undef VHDLTK
 !endif
 
 # Synchronous\Reactive domain
@@ -368,7 +371,7 @@ SDFLIB = 1
 # 				$(CROOT)\thread\include.$(PTARCH) \
 # 				$(CROOT)\thread\lib.$(PTARCH)
 # 			# POSIX thread library from Florida State University.
-# LIBFILES = $(LIBFILES) $(ROOT)\thread\lib.$(PTARCH)\libgthreads.a
+# LIBFILES = $(LIBFILES) $(ROOT)\thread\lib.$(PTARCH)\libgthreads.$(LIBNONSHAREDSUFFIX)
 # LIBS = $(LIBS) -lposixthread \
 # 				-L$(ROOT)\thread\lib.$(PTARCH) -lgthreads
 # !else
@@ -442,7 +445,7 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libdeatmstars.$(LIBSUFFIX)
 !ifdef  TK
 			# The contrib stars use Tk
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\contrib\stars
-STARS = $(STARS) $(LIBDIR)\decontribstars.o
+STARS = $(STARS) $(LIBDIR)\decontribstars.obj
 LIBS = $(LIBS) -ldecontribstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libdecontribstars.$(LIBSUFFIX)
 !endif
@@ -467,8 +470,12 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libdetclstars.$(LIBSUFFIX)
 !endif
 	# kernel and stars
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\stars $(DEDIR)\kernel 
-STARS = $(STARS) $(LIBDIR)\destars.o
-LIBS = $(LIBS) -ldestars -lde
+
+##### NOTE: we comment out destars.obj here for building with nt4.vc
+
+STARS = $(STARS) $(LIBDIR)\destars.obj
+LIBS = $(LIBS) $(PTOLEMY)\lib.$(PTARCH)\libdestars.lib \
+		$(PTOLEMY)\lib.$(PTARCH)\libde.lib
 LIBFILES = $(LIBFILES) $(LIBDIR)\libdestars.$(LIBSUFFIX) \
 		$(LIBDIR)\libde.$(LIBSUFFIX)
 	# dependencies
@@ -679,14 +686,14 @@ PALETTES = $(PALETTES) PTOLEMY\src\domains\sdf\icons\sdf.pal
 	# Asynchronous Transfer Mode stars
 !ifdef  ATM
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\atm\stars
-STARS = $(STARS) $(LIBDIR)\sdfatmstars.o
+STARS = $(STARS) $(LIBDIR)\sdfatmstars.obj
 LIBS = $(LIBS) -lsdfatmstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfatmstars.$(LIBSUFFIX)
 !endif
 	# Design Flow Management stars
 !ifdef  SDFDFM
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\dfm\stars
-STARS = $(STARS) $(LIBDIR)\sdfdfmstars.o
+STARS = $(STARS) $(LIBDIR)\sdfdfmstars.obj
 LIBS = $(LIBS) -lsdfdfmstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfdfmstars.$(LIBSUFFIX)
 		# dependencies
@@ -695,7 +702,7 @@ SDFTK = 1
 	# Tcl\Tk stars
 !ifdef  SDFTK
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\tcltk\stars
-STARS = $(STARS) $(LIBDIR)\sdftclstars.o
+STARS = $(STARS) $(LIBDIR)\sdftclstars.obj
 LIBS = $(LIBS) -lsdftclstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdftclstars.$(LIBSUFFIX)
 		# dependencies
@@ -704,28 +711,29 @@ SDFDSP = 1
 	# DSP stars
 !ifdef  SDFDSP 
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\dsp\stars
-STARS = $(STARS) $(LIBDIR)\sdfdspstars.o
-LIBS = $(LIBS) -lsdfdspstars
+STARS = $(STARS) $(LIBDIR)\sdfdspstars.obj
+#LIBS = $(LIBS) -lsdfdspstars
+LIBS = $(LIBS) $(LIBDIR)\libsdfdspstars.$(LIBSUFFIX)
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfdspstars.$(LIBSUFFIX)
 !endif
 	# Image processing stars
 !ifdef  SDFIMAGE
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\image\stars
-STARS = $(STARS) $(LIBDIR)\sdfimagestars.o
+STARS = $(STARS) $(LIBDIR)\sdfimagestars.obj
 LIBS = $(LIBS) -lsdfimagestars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfimagestars.$(LIBSUFFIX) 
 !endif
 	# Matrix stars
 !ifdef  SDFMATRIX 
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\matrix\stars
-STARS = $(STARS) $(LIBDIR)\sdfmatrixstars.o
+STARS = $(STARS) $(LIBDIR)\sdfmatrixstars.obj
 LIBS = $(LIBS) -lsdfmatrixstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfmatrixstars.$(LIBSUFFIX)
 !endif
 	# Matlab interface stars
 !ifdef  SDFMATLAB
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\matlab\stars
-STARS = $(STARS) $(LIBDIR)\sdfmatlabstars.o
+STARS = $(STARS) $(LIBDIR)\sdfmatlabstars.obj
 LIBS = $(LIBS) -lsdfmatlabstars
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfmatlabstars.$(LIBSUFFIX)
 		# dependencies
@@ -735,7 +743,7 @@ MATLABENGINE = 1
 	# Contributed stars by third-party users
 !ifdef  SDFCONTRIB
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\contrib\kernel $(SDFDIR)\contrib\stars
-STARS = $(STARS) $(LIBDIR)\sdfcontribstars.o
+STARS = $(STARS) $(LIBDIR)\sdfcontribstars.obj
 LIBS = $(LIBS) -lsdfcontribstars -lsdfcontrib 
 LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfcontribstars.$(LIBSUFFIX) \
 			$(LIBDIR)\libsdfcontrib.$(LIBSUFFIX)
@@ -743,7 +751,7 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfcontribstars.$(LIBSUFFIX) \
 	# Ultrasparc Visual Instruction Set (VIS) stars
 !ifdef  SDFVIS
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\vis\stars
-STARS = $(STARS) $(LIBDIR)\sdfvisstars.o
+STARS = $(STARS) $(LIBDIR)\sdfvisstars.obj
 LIBS = $(LIBS) -lsdfvisstars
 LIBS = $(LIBS) $(VSDKHOME)\util\vis.il
 !endif
@@ -751,13 +759,14 @@ LIBS = $(LIBS) $(VSDKHOME)\util\vis.il
 		# FIXME: The only thing in sdf\targets also depends on 
 		# cg... should this be in the cg directory?
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\targets
-TARGETS = $(TARGETS) $(SDFT)\CompileTarget.o
+TARGETS = $(TARGETS) $(SDFT)\CompileTarget.obj
 !endif
 	# kernel and stars
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\stars
-STARS = $(STARS) $(LIBDIR)\sdfstars.o 
-LIBS = $(LIBS) -lsdfstars
-LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfstars.$(LIBSUFFIX)	
+STARS = $(STARS) $(LIBDIR)\sdfstars.obj
+#LIBS = $(LIBS) -lsdfstars
+LIBS = $(LIBS) $(LIBDIR)\libsdfstars.$(LIBSUFFIX)	
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfstars.$(LIBSUFFIX)
 	# dependencies
 SDFLIB = 1
 	# ptdsp library is used by the Play star as well as the SDF\DSP stars
@@ -780,11 +789,13 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libbdf.$(LIBSUFFIX)
 
 !ifdef  SDFLIB
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\kernel $(SDFDIR)\loopScheduler
-LIBS = $(LIBS) -lLS -lsdf
+#LIBS = $(LIBS) -lLS -lsdf
+LIBS = $(LIBS) $(LIBDIR)\libLS.$(LIBSUFFIX) \
+		    $(LIBDIR)\libsdf.$(LIBSUFFIX)
 LIBFILES = $(LIBFILES) $(LIBDIR)\libLS.$(LIBSUFFIX) \
 		    $(LIBDIR)\libsdf.$(LIBSUFFIX)
 !if "$(USE_SHARED_LIBS)" != "yes" #ifneq 
-TARGETS = $(TARGETS) $(OBJDIR)\domains\sdf\loopScheduler\LoopTarget.o
+TARGETS = $(TARGETS) $(OBJDIR)\domains\sdf\loopScheduler\LoopTarget.obj
 !endif
 !endif
 
@@ -808,7 +819,7 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libhof.$(LIBSUFFIX)
 !endif
 
 !if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
-STARS =
+#STARS =
 !endif
 
 !ifdef  OCT
@@ -829,7 +840,7 @@ LIBVOV = -lvov
 		-lutility -lst -lerrtrap -luprintf #-lport
 
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPIGI = $(LIBDIR)\libpigi.a
+LIBPIGI = $(LIBDIR)\libpigi.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPIGI = $(LIBDIR)\libpigi.$(LIBSUFFIX)
 !endif
@@ -846,7 +857,7 @@ LIBPIGI = $(LIBDIR)\libpigi.$(LIBSUFFIX)
 !ifdef  TK
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\ptklib 
 LIBS = $(LIBS) -lptk $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
-PT_DEPEND = $(PT_DEPEND) $(LIBDIR)\libptk.a
+PT_DEPEND = $(PT_DEPEND) $(LIBDIR)\libptk.$(LIBNONSHAREDSUFFIX)
 !endif
 
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\kernel $(CROOT)\src\pigiRpc $(CROOT)\src\ptcl \
@@ -857,20 +868,20 @@ CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\kernel $(CROOT)\src\pigiRpc $(CROOT)\s
 	# Under some architectures, we need to use static libraries or we get
 	# GateKeeper errors.
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPTCL = $(LIBDIR)\libpitcl.a
+LIBPTCL = $(LIBDIR)\libpitcl.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPTCL = $(LIBDIR)\libpitcl.$(LIBSUFFIX)
 !endif
 !else
 	# Use libptcl, not libpitcl
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPTCL = $(LIBDIR)\libptcl.a
+LIBPTCL = $(LIBDIR)\libptcl.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPTCL = $(LIBDIR)\libptcl.$(LIBSUFFIX)
 !endif
 !endif
 
-PT_DEPEND = $(PT_DEPEND) $(LIBPTCL) $(LIBDIR)\libptolemy.a \
+PT_DEPEND = $(PT_DEPEND) $(LIBPTCL) $(LIBDIR)\libptolemy.$(LIBNONSHAREDSUFFIX) \
 	$(LIBFILES) $(STARS) $(TARGETS)
 
 # unfortunately, if we are building a stand-alone program and
@@ -885,28 +896,32 @@ PIGI =1
 # Program to test the ptolemy libraries, see standalone.mk
 !ifdef  PIGI
 !ifdef  PITCL
-LIBS = $(LIBS) version.o -lpitcl
+LIBS = $(LIBS) version.obj libpitcl.lib
 !else
-LIBS = $(LIBS) version.o -lptcl
+LIBS = $(LIBS) version.obj libptcl.lib
 !endif
 !endif
 
 # External C library of Ptolemy DSP C routines
 !ifdef  PTDSPLIB
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\utils\libptdsp
-LIBS = $(LIBS) -lptdsp
+#LIBS = $(LIBS) -lptdsp
+LIBS = $(LIBS) $(LIBDIR)\libptdsp.$(LIBSUFFIX)
 LIBFILES = $(LIBFILES) $(LIBDIR)\libptdsp.$(LIBSUFFIX)
 !endif
 
 # External interface support - we need to expand libexttools, because it
 # depends upon the Ptolemy kernel.  Matlab and mathematica are always pulled in
-#CUSTOM_DIRS += $(CROOT)\src\utils\libexttools \
-#	$(CROOT)\src\utils\libptmatlab \
-#	$(CROOT)\src\utils\libptmathematica
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\utils\libexttools \
+	$(CROOT)\src\utils\libptmatlab \
+	$(CROOT)\src\utils\libptmathematica
 #LIBS += -lexttools $(MATLABEXT_LIB) $(MATHEMATICAEXT_LIB)
+LIBS = $(LIBS) $(LIBDIR)\libexttools.$(LIBSUFFIX) \
+	$(LIBDIR)\libptmathematica.$(LIBSUFFIX) \
+	$(LIBDIR)\libptmatlab.$(LIBSUFFIX) \
 #LIBFILES += $(LIBDIR)\libexttools.$(LIBSUFFIX)
 
 # Now, pull in the Ptolemy kernel support, system libraries and tcl
-LIBS = $(LIBS) -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+LIBS = $(LIBS) $(PTOLEMY)\src\kernel\libptolemy.lib $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
 	$(SYSLIBS) $(LIB_FLUSH_CACHE)
 

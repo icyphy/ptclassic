@@ -8,7 +8,7 @@ This package provides routines to compute the Fourier series as formulas.
 
 (* :Context:	FourierSeriesFormula` *)
 
-(* :PackageVersion:  $Id$  *)
+(* :PackageVersion:  @(#)FourierSeriesFormula.m	1.1	3/12/96  *)
 
 (* :Copyright:
 Copyright (c) 1990-1995 The Regents of the University of California.

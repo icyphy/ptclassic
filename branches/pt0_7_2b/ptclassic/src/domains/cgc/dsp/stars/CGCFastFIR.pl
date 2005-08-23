@@ -6,18 +6,18 @@ A Finite Impulse Response (FIR) filter.
 Coefficients are in the "taps" state variable.
 Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
-coefficients with "<fileName".
+coefficients with "fileName".
 	}
-	version {$Id$}
+	version {@(#)CGCFastFIR.pl	1.6 04/08/97}
 	author { Soonhoi Ha, Bill Chen, and John Reekie }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This FIR filter produces fast code by eliminating the need for a 
 Circular buffer.
 	}
@@ -50,13 +50,14 @@ Circular buffer.
 	}
 	codeblock(mainDecl){
 	  int currentValue,i;
-	  double src[tapSize], fir[tapSize];;
+	  double src[$val(tapSize)], fir[$val(tapSize)];
 	}
 
 	codeblock(initialize){
 	  currentValue = 0;
-	  for(i=0;i<tapSize;i++){
-	    fir[tapSize]=$ref2(taps,i);
+	  for(i=0;i<$val(tapSize);i++){
+	    fir[i]=$ref2(taps,i);
+	    src[i] = 0.0;
 	  }
 	}
 	initCode{
@@ -69,8 +70,8 @@ Circular buffer.
 	}
 	codeblock(body) {
 
-	  if(currentValue > 7){
-	    currentValue -= tapSize;
+	  if(currentValue > $val(tapSize)-1){
+	    currentValue -= $val(tapSize);
 	  }
 	  
 	  accum = 0.0;
@@ -81,8 +82,8 @@ Circular buffer.
 	    nminusk--;
 	  }
 
-	  nminusk = tapSize-1;
-	  for (k = currentValue+1; k < tapSize; k++){
+	  nminusk = $val(tapSize)-1;
+	  for (k = currentValue+1; k < $val(tapSize); k++){
 	    accum += fir[k] * src[nminusk];
 	    nminusk--;
 	  }

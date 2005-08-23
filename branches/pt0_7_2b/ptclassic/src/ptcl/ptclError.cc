@@ -1,10 +1,32 @@
 static const char file_id[] = "ptclError.cc";
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)ptclError.cc	1.15	3/28/96
 
- Copyright (c) 1992 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: J. Buck
  Date of creation: 3/5/92
@@ -15,12 +37,12 @@ functions use Tcl to report errors, unless there is no active
 Tcl interpreter.
 
 *******************************************************************/
+#include "PTcl.h"
 #include "Error.h"
-#include "Scheduler.h"
+#include "SimControl.h"
 #include "NamedObj.h"
 #include <stream.h>
 #include <stdio.h>
-#include "PTcl.h"
 #include "miscFuncs.h"
 
 typedef const char cc;
@@ -31,25 +53,26 @@ static void p3(cc* m1, cc* m2, cc* m3) {
 	cerr << m1 << " " << m2 << " " << m3 << "\n";
 }
 
-// procedure for Tcl to use to free allocated strings.  Used as
-// the "freeProc" argument for Tcl_SetResult.
-static void deleteString(char* s) {
-	LOG_DEL; delete s;
-}
-
 void
 Error :: error(cc* m1, cc* m2, cc* m3) {
+// If there is no active PTcl interpreter, use the standard error
+// stream cerr to report error.
 	if (PTcl::activeInterp == 0) {
 		cerr << "ERROR: ";
 		p3(m1,m2,m3);
 		return;
 	}
-	if (!m2) m2 = "";
-	if (!m3) m3 = "";
-	int l = strlen(m1)+strlen(m2)+strlen(m3)+8;
-	LOG_NEW; char* msg = new char[l];
-	sprintf (msg, "ERROR: %s%s%s", m1, m2, m3);
-	Tcl_SetResult(PTcl::activeInterp, msg, deleteString);
+// if there is already a result, append to it.
+	char* res = PTcl::activeInterp->result;
+	StringList msg;
+	if (res && *res)
+		msg << res << "\n";
+	else
+		msg << "ERROR: ";
+	msg << m1 << (m2 ? m2 : "") << (m3 ? m3 : "");
+	char* msgc = msg.newCopy();
+	Tcl_SetResult(PTcl::activeInterp, msgc, TCL_VOLATILE);
+	LOG_DEL; delete [] msgc;
 }
 
 void
@@ -60,22 +83,14 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	if (PTcl::activeInterp == 0) {
-		cerr << "ERROR: ";
-		Error::message(o,m1,m2,m3);
-		return;
-	}
-	StringList s = o.readFullName();
-	const char* name = s;
-	int l = strlen(name) + strlen(m1) + strlen(m2) + strlen(m3) + 10;
-	LOG_NEW; char* msg = new char[l];
-	sprintf (msg, "ERROR: %s: %s%s%s", name, m1, m2, m3);
-	Tcl_SetResult(PTcl::activeInterp, msg, deleteString);
+	StringList n_m1 = o.fullName();
+	n_m1 << ": " << m1;
+	error(n_m1,m2,m3);
 }
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << "Warning: " << n << ": ";
 	p3(m1,m2,m3);
 }
@@ -87,7 +102,7 @@ Error :: message(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << n << ": ";
 	p3(m1,m2,m3);
 }
@@ -95,13 +110,13 @@ Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 void
 Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 	error (m1, m2, m3);
-	Scheduler::requestHalt();
+	SimControl::declareErrorHalt();
 }
 
 void
 Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
-	Scheduler::requestHalt();
+	SimControl::declareErrorHalt();
 }
 
 // marking is not supported in this implementation

@@ -1,136 +1,78 @@
 defstar {
-	name		{ ZigZag }
-	domain		{ SDF }
-	version		{ $Id$ }
-	author		{ Paul Haskell }
-	copyright	{ 1992 The Regents of the University of California }
-	location	{ SDF image palette }
-	desc {
-This star zig-zag scans a DCTImage and outputs the result.
-This is useful before quantization.
-	}
+  name { ZigZagImg }
+  domain { SDF }
+  version { @(#)SDFZigZagImg.pl	1.19 7/12/96 }
+  author { Paul Haskell }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
+  location { SDF image library }
+  desc {
+This star zig-zag scans a FloatMatrix and outputs the result.
+This is useful before quantizing a DCT transformed image.
+  }
 
-	input	{ name { inport }	type { packet } }
-	output	{ name { outport }	type { packet } }
+  input	{ name { inport } type { FLOAT_MATRIX_ENV } }
+  output { name { outport } type { FLOAT_MATRIX_ENV } }
 
-	hinclude { "DCTImage.h", "Error.h" }
+  defstate {
+    name { BlockSize }
+    type { int }
+    default { 8 }
+    desc { Block size of each zig-zag scan. }
+  }
 
+  hinclude { "Matrix.h", "Error.h" }
+  ccinclude { "ptdspZigZag.h" }
 
-	method {
-		name { checkSize }
-		type { int }
-		access { protected }
-		arglist { "(const DCTImage& img)" }
-		code {
-			int retval = (img.retFullSize() ==
-					(img.fullWidth() * img.fullHeight()));
-			retval &= (img.retFullSize() == img.retSize());
-			return retval;
-	}	}
+  method {
+    name { doZigZag }
+    type { "void" }
+    access { protected }
+    arglist { "(const FloatMatrix& inImg, FloatMatrix& outImg)" }
+    code {
+      // initialize
+      int width = inImg.numCols();
+      int height = inImg.numRows();
+      double * outArr = new double[inImg.numCols() * inImg.numRows()];
 
+      // FIXME
+      // Sets inImagePtr to the vector representing the FloatMatrix.
+      // This only works because in the underlying implementation of FloatMatrix,
+      // inImage[0], which returns the 1st row, also returns the entire vector
+      // representing the matrix. 
+      // A method should be added to the FloatMatrix class to do this instead
+      // of relying on this current operation
+      const double* inImagePtr = inImg[0];
 
-	method { // zig-zag scan one block. "fData" holds output.
-		name { zigzag }
-		type { "void" }
-		access { protected }
-		arglist { "(float* fData, const float* imData, const int i, \
-				const int j, const int width, const int blockSize)" }
-		code {
-			int k, l, indx;
+      Ptdsp_ZigZagScan ( inImagePtr, outArr, width, height, int(BlockSize));
 
-// Do zig-zag scan.
-			indx = 0;
-// K is length of current (semi)diagonal; L is iteration along diag.
-			for(k = 1; k < blockSize; k++) { // Top triangle
-				for(l = 0; l < k; l++) { // down
-					fData[indx++] = imData[j + (i+l)*width + (k-l-1)];
-				}
-				k++; // NOTE THIS!
-				for(l = 0; l < k; l++) { // back up
-					fData[indx++] = imData[j + (i+k-l-1)*width + l];
-			}	}
+      // Copy the data to the outImg.
+      for(int i = 0; i < width * height; i++) {
+	outImg.entry(i) = outArr[i];
+      }
+      LOG_DEL; delete [] outArr;
+    }
+  } // end { doZigZag }
 
-// If blockSize an odd number, start with diagonal, else one down.
-			if (blockSize % 2) { k = blockSize; }
-			else { k = blockSize-1; }
+  go {
+    Envelope inEnvp;
+    (inport%0).getMessage(inEnvp);
+    const FloatMatrix& inImg = *(const FloatMatrix*)inEnvp.myData();
 
-			for(; k > 1; k--) { // Bottom triangle
-				for(l = 0; l < k; l++) { // down
-					fData[indx++] = imData[j + (i+blockSize-k+l)*width +
-							(blockSize-l-1)];
-				}
-				k--; // NOTE THIS!
-				for(l = 0; l < k; l++) { // back up
-					fData[indx++] = imData[j + (i+blockSize-l-1)*width +
-							blockSize-k+l];
-			}	}
+    if (inEnvp.empty()) {
+      Error::abortRun(*this, "Input is a dummyMessage.");
+      return;
+    }
 
-// Have to do last element.
-			fData[indx] = imData[j + (i + blockSize - 1) * width +
-					blockSize - 1];
-		} // end code {}
-	} // end zigzag {}
+    // Allocate output image.
+    FloatMatrix& outImg = *(new FloatMatrix(inImg));
 
-
-	method { // Do the run-length coding.
-		name { doZigZag }
-		type { "void" }
-		access { protected }
-		arglist { "(DCTImage& img)" }
-		code {
-// Initialize.
-			const int bSize = img.retBS();
-			const int width = img.fullWidth();
-			const int height = img.fullHeight();
-
-			LOG_NEW; float* outArr = new float[img.retFullSize()];
-
-// For each row and col...
-			int row, col;
-			for(row = 0; row < height; row += bSize) {
-				for(col = 0; col < width; col += bSize) {
-					zigzag(outArr, img.retData(), row, col, width,
-							bSize);
-					outArr += bSize*bSize;
-			}	} // end for(each row and column)
-
-// Copy the data to the DCTImage.
-			copy(img.retFullSize(), img.retData(), outArr);
-			LOG_DEL; delete outArr;
-		}
-	} // end { doZigZag }
-
-
-	method {
-		name { copy }
-		type { void }
-		arglist { "(const int c, float* to, const float* from)" }
-		access { private }
-		code {
-			for(int i = 0; i < c % 5; i++) { *to++ = *from++; }
-
-			for(i = c % 5; i < c; i += 5) {
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-			}
-	}	}
-
-
-	go {
-		Packet inPkt;
-		(inport%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt, "DCTImage");
-
-		DCTImage* image = (DCTImage*) inPkt.writableCopy();
-		if (!checkSize(*image)) {
-			Error::abortRun(*this, "Processed or fragmented.");
-			return;
-		}
-		doZigZag(*image);
-
-		Packet outPkt(*image); outport%0 << outPkt;
-	}
-} // end defstar { ZigZag }
+    // Do processing and send out.
+    doZigZag(inImg,outImg);
+    outport%0 << outImg;
+  }
+} // end defstar { ZigZagImg }

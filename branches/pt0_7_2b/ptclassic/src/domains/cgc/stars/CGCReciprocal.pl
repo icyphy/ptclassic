@@ -2,14 +2,19 @@ defstar {
 	name {Reciprocal}
 	domain { CGC }
 	desc {  1/x, with an optional magnitude limit. }
-	version { $Id$ }
+	version { @(#)CGCReciprocal.pl	1.10	10/07/96 }
 	author { E. A. Lee }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC nonlinear library }
-	explanation {
-This star computes $1/x$, where $x$ is the input.
-If the \fImagLimit\fR parameter is not 0.0, then the output is
-$+- ~ max ( magLimit, ~ 1/x )$.  In this case, $x$ can be zero
+	htmldoc {
+This star computes 1<i>/x</i>, where <i>x</i> is the input.
+If the <i>magLimit</i> parameter is not 0.0, then the output is
+&#177;max(<i>magLimit, </i>1<i>/x </i>).  In this case, <i>x</i> can be zero
 without causing an floating exception.
 The sign of the output is determined by the sign of the input.
 	}
@@ -55,4 +60,9 @@ The sign of the output is determined by the sign of the input.
 		$ref(output) = t;
 	}
    }
+	exectime {
+		/* based on CG96Reciprocal */
+		if (double(magLimit) == 0.0) return 8;
+		else return 12;
+	}
 }

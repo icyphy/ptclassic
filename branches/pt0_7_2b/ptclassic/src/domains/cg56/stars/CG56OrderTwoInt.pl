@@ -4,10 +4,10 @@ defstar {
 	desc {
 Takes two inputs and outputs the greater and lesser of the two integers.
 	}
-	version { $Id$ }
+	version { @(#)CG56OrderTwoInt.pl	1.5	3/27/96 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -31,11 +31,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(order) {
-	move	$ref(lower),y0			; y0 = lower input
-	move	$ref(upper),x0	y0,a		; x0 = upper input
-	cmp	x0,a	x0,b			; compare upper to lower
-	tlt	x0,a			; a holds lesser value
-	tlt	y0,b			; b holds greater value
+	move	$ref(lower),a		; a = lower input
+	move	$ref(upper),b		; b = upper input
+	cmp	a,b	a,x0		; compare upper to lower, x0 = lower
+	tlt	b,a			; if upper(b) < lower(a) swap b and a
+	tlt	x0,b
 	move	b,$ref(greater)
 	move	a,$ref(lesser)
 	}

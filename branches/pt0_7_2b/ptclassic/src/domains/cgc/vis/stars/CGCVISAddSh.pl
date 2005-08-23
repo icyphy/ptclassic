@@ -1,22 +1,23 @@
 defstar {
-	name { QuadAdd16 }
-	domain { SDF }
-	version { @(#)SDFQuadAdd16.pl	1.6 3/14/96 }
+	name { VISAddSh }
+	domain { CGC }
+	version { @(#)CGCVISAddSh.pl	1.10	04/07/97 }
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC vis library }
 	desc { 
-	  Add the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  There is no saturation
-	  arithmetic so that overflow results in wraparound.
-	    }
+Add the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are added to those
+of another 64-bit float particle.  The result is returned as a 
+single 64-bit float particle.  There is no saturation arithmetic 
+so that overflow results in wrap around.
+        }
 	input {
 	  name { inA }
 	  type { float }
@@ -32,14 +33,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
+	constructor {
+	  noInternalState();
+	}
+	initCode{
+	  addInclude("<vis_types.h>");
+	  addInclude("<vis_proto.h>");
+	}
+	codeblock(addfour){
+	  vis_d64 sum = vis_fpadd16((double)$ref(inA),(double)$ref(inB));
+	  $ref(out) = sum;
+	}
 	go {
-	  
-	  double sum=0.0;
-	  
-	  /*calculate the sum*/
-	  sum = vis_fpadd16(double(inA%0),double(inB%0));
-	  
-          out%0 << (double) sum;
+	  addCode(addfour);
       	}
 }

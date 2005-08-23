@@ -2,10 +2,10 @@
 #define _pthreadsCompat_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)pthreadsCompat.h	1.6 04/07/97
 Author: Christopher Hylands
 
-Copyright (c) %Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

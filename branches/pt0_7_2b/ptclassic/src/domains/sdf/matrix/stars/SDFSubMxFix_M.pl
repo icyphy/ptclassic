@@ -2,9 +2,14 @@ defstar {
   name { SubMxFix_M }
   domain { SDF }
   desc { Find a submatrix of the input matrix }
-  version { $Id$ }
+  version { @(#)SDFSubMxFix_M.pl	1.3 10/6/95 }
   author { Bilung Lee, modified from SDFGainFix.pl by Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
     name { input }

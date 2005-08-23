@@ -1,6 +1,6 @@
 # Ptolemy makefile skeleton used by makefile_C CGC target
 # Version:
-# $Id$
+# @(#)makefile_C.mk	1.3 07/15/96
 # Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -28,7 +28,7 @@
 
 ROOT =	$(PTOLEMY)
 include $(ROOT)/mk/config-$(PTARCH).mk
-C_INCL =	-I$(ROOT)/src/domains/cgc/rtlib
+C_INCL =
 
 # $(CYSYSLIBS) is defined in config-$(PTARCH).mk or config-default.mk
 LDFLAGS = 	$(CSYSLIBS)
@@ -36,4 +36,9 @@ LDFLAGS = 	$(CSYSLIBS)
 # We are not assuming GNU make, so we can't include common.mk,
 # so we have to set up our own .c.o rule
 .c.o:
-	$(CC) -c $(CFLAGS) $(C_INCL) $<
+	$(CC) -c $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) $<
+
+# The GNU make info page says:
+#  "`N' is made automatically from `N.o' by running the linker 
+#  (usually called `ld') via the C compiler. The precise command
+#  used is `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."

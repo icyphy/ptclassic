@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a 2,3, and 4-input MUX 
 	}
-	version {@(#)ACSMuxCGFPGA.pl 1.1 18 June 1999}
+	version{ @(#)ACSMuxCGFPGA.pl	1.11 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -59,11 +59,18 @@ This star exists only for demoing the generic CG domain.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -82,34 +89,79 @@ This star exists only for demoing the generic CG domain.
 	    ostrstream output_filename;
 	    int bidir_flag;
 	}
-	method {
-	    name {macro_query}
+        method {
+	    name {sg_cost}
 	    access {public}
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
-		// BEGIN-USER CODE
-		return(WHITE_STAR);
-		// END-USER CODE
+		cost_file << "cost=ceil(0.5*outsizes);" << endl;
+		// Just for scheduling
+		numsim_file << "y=cell(1,size(x,2));" << endl;
+		numsim_file << "for k=1:size(x,2)" << endl;
+		// Cheating...
+		numsim_file << "  y{k}=max(";
+		for (int i = 0; i < input_count; i++)
+		{
+		    numsim_file << "x{" << i+1 << ",k}";
+		    if (i==(input_count-1))
+			numsim_file << ");" << endl;
+		    else
+			numsim_file << ",";
+		}
+		numsim_file << "end" << endl;
+
+		rangecalc_file << "orr=[min(inputrange(:,1)) max(inputrange(:,2))];" << endl;
+		natcon_file << "yesno=ones(1,size(insizes,2));" << endl;
+		schedule_file << "vl1=veclengs(1); " << endl;
+		schedule_file << "racts1=[";
+		for (int i = 0; i < input_count; i++)
+		    schedule_file << "0 1 vl1-1;";
+		for (int i = 0; i < control_count; i++)
+		    schedule_file << "0 1 vl1-1;";
+		schedule_file << "0 1 vl1-1];" << endl;
+                schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+                schedule_file << "racts(:)=deal({racts1});" << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+		
+		// Return happy condition
+		return(1);
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
+
+		// Determine maximum input size
+		// FIX: mbit determination is gross
+		int max_bitlen=0;
+		int max_mbit=0;
+		for (int loop=1;loop<=total_count;loop++)
+		{
+		    if (pins->query_bitlen(loop) > max_bitlen)
+			max_bitlen=pins->query_bitlen(loop);
+		    if (pins->query_majorbit(loop) > max_mbit)
+			max_mbit=pins->query_majorbit(loop);
+		}
+		
+
 		if (pins->query_preclock(0)==UNLOCKED)
 		    pins->set_precision(0,
-					pins->query_bitlen(1)-1,
-					pins->query_bitlen(1),
+//					max_bitlen-1,
+					max_mbit,
+					max_bitlen,
 					UNLOCKED);
 
 		// If output is locked then fix all the input sizes accordingly
 		if (pins->query_preclock(0)==LOCKED)
 		    for (int loop=1;loop<=total_count;loop++)
 			pins->set_precision(loop,
-					    pins->query_bitlen(0)-1,
+//					    pins->query_bitlen(0)-1,
+					    max_mbit,
 					    pins->query_bitlen(0),
 					    lock_mode);
 		
@@ -122,19 +174,36 @@ This star exists only for demoing the generic CG domain.
 		// FIX: Should work with the input balancing routine
 		if (lock_type==LOCKED)
 		    pins->set_precision(0,
-					pins->query_bitlen(1)-1,
-					pins->query_bitlen(1),
+//					max_bitlen-1,
+					max_mbit,
+					max_bitlen,
 					LOCKED);
 
-		// Calculate CLB sizes
-		resources->set_occupancy(1,pins->query_bitlen(0)/2);
-		
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -165,13 +234,13 @@ This star exists only for demoing the generic CG domain.
 
 		// FIX: Corona names for the output pins described here
 		char* switch_name=new char[80];
-		int line=0;
-		for (int loop=input_count+1;loop<=total_count;loop++)
+		int line=0, loop;
+		for (loop=input_count+1;loop<=total_count;loop++)
 		{
 		    sprintf(switch_name,"d%d",line++);
 		    pins->add_pin(switch_name,"output",OUTPUT_PIN_MUX_SWITCHABLE);
 		}
-		for (int loop=0;loop<input_count;loop++)
+		for (loop=0;loop<input_count;loop++)
 		{
 		    sprintf(switch_name,"d%d",line++);
 		    pins->add_pin(switch_name,"output",INPUT_PIN_MUX_SWITCHABLE);
@@ -182,7 +251,7 @@ This star exists only for demoing the generic CG domain.
 		// Control port definitions
 		control_count=(int) ceil(log((double) total_count)/log(2.0));
 		char* control_name=new char[80];
-		for (int loop=0;loop<control_count;loop++)
+		for (loop=0;loop<control_count;loop++)
 		{
 		    sprintf(control_name,"s%d",loop);
 		    int muxpin=pins->add_pin(control_name,INPUT_PIN_CTRL);
@@ -214,7 +283,8 @@ This star exists only for demoing the generic CG domain.
 		
 		    // Bidir port definitions
 		    pins->set_datatype(0,STD_LOGIC);  // o port
-		    for (int loop=1;loop<=total_count;loop++)
+                    int loop;
+		    for (loop=1;loop<=total_count;loop++)
 		    {
 			if (DEBUG_STARS)
 			    printf("Setting pin %d\n",loop);
@@ -223,7 +293,7 @@ This star exists only for demoing the generic CG domain.
 		    }
 
    		    // Control port definitions
-		    for (int loop=total_count+1;
+		    for (loop=total_count+1;
 			 loop<total_count+control_count+1;
 			 loop++)
 		    {
@@ -251,6 +321,7 @@ This star exists only for demoing the generic CG domain.
 		// BEGIN-USER CODE
 		{
 		    int outsens_flag=0;
+		    int output_len=pins->query_bitlen(0);
 		    ofstream out_fstr(output_filename.str());
 
 		    ctrl_signals->add_pin("sel",
@@ -282,16 +353,16 @@ This star exists only for demoing the generic CG domain.
 			    int ind=loop+total_count+1;
 			    sprintf(sel_slice,"sel(%d)",loop);
 			    merge_expr << lang->equals(sel_slice,
-						       pins->retrieve_pinname(ind))
+						       pins->query_pinname(ind))
 				<< lang->end_statement << endl;
 			}
 		    else
 		    {
 			int ind=total_count+1;
 			merge_expr << lang->equals("sel",
-						   pins->retrieve_pinname(ind))
+						   pins->query_pinname(ind))
 			           << lang->end_statement << endl;
-			switch_sensies->add(pins->retrieve_pinname(ind));
+			switch_sensies->add(pins->query_pinname(ind));
 		    }
 			
 		    delete []sel_slice;
@@ -324,9 +395,9 @@ This star exists only for demoing the generic CG domain.
 				   << lang->then_statement << endl
 				   << "\t";
 			    select << lang->equals("o",pins->
-						   retrieve_pinname(line))
+						   query_pinname(line))
 				   << lang->end_statement << endl;
-			    switch_sensies->add(pins->retrieve_pinname(line));
+			    switch_sensies->add(pins->query_pinname(line));
 			    if ((bidir_flag) && (!outsens_flag))
 			    {
 				switch_sensies->add("o");
@@ -339,11 +410,23 @@ This star exists only for demoing the generic CG domain.
 				select << lang->else_statement << endl
 				       << "\t";
 				if (bidir_flag)
-				    select << lang->equals("o","(others=>'Z')")
-					<< lang->end_statement << endl;
+				{
+				    if (output_len > 1)
+					select << lang->equals("o","(others=>'Z')")
+					       << lang->end_statement << endl;
+				    else
+					select << lang->equals("o","'Z'")
+					       << lang->end_statement << endl;
+				}
 				else
-				    select << lang->equals("o","(others=>'0')")
-					<< lang->end_statement << endl;
+				{
+				    if (output_len > 1)
+					select << lang->equals("o","(others=>'0')")
+					       << lang->end_statement << endl;
+				    else
+					select << lang->equals("o","'0'")
+					       << lang->end_statement << endl;
+				}
 				select << lang->endif_statement 
 				       << lang->end_statement << endl;
 			    }
@@ -360,15 +443,15 @@ This star exists only for demoing the generic CG domain.
 			    select << lang->test("sel",sel_char)
 				   << lang->then_statement << endl
 				   << "\t";
-			    select << lang->equals(pins->retrieve_pinname(line),"o")
+			    select << lang->equals(pins->query_pinname(line),"o")
 				   << lang->end_statement << endl;
 			    select << lang->else_statement << endl
 				   << "\t";
 			    if (bidir_flag)
-				select << lang->equals(pins->retrieve_pinname(line),"(others=>'Z')")
+				select << lang->equals(pins->query_pinname(line),"(others=>'Z')")
 				   << lang->end_statement << endl;
 			    else
-				select << lang->equals(pins->retrieve_pinname(line),"(others=>'0')")
+				select << lang->equals(pins->query_pinname(line),"(others=>'0')")
 				    << lang->end_statement << endl;
 				
 			    select << lang->endif_statement 
@@ -389,6 +472,7 @@ This star exists only for demoing the generic CG domain.
 		    // END-USER CODE
 		    out_fstr << lang->end_scope << lang->end_statement << endl;
 		    out_fstr.close();
+		    printf("Core %s has been built\n",name());
 		}
 		else
 		    return(0);

@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)WriteASCIIFiles.h	1.3	03/17/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,8 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *************************************************************************/
 
-#ifndef _WriteFiles_h
-#define _WriteFiles_h 1
+#ifndef _WriteASCIIFiles_h
+#define _WriteASCIIFiles_h 1
 
 #ifdef __GNUG__
 #pragma interface

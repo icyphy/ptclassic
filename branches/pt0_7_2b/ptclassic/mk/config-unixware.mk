@@ -1,9 +1,9 @@
 #
 # Config file for Unixware1.1
 
-# $Id$
+# @(#)config-unixware.mk	1.8 02/04/99
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,30 @@
 #
 # Config file to build on Unixware 1.1
 #
-# %Z% Your SCCS code here!
+# @(#) Your SCCS code here!
 
 # Author: Steven Kimball, skimball@sanders.com
+
+# You may find in helpful to have the text below in your .profile, or
+# the equivalent in your .cshrc if you use csh.
+#---start---
+#ARCH=unixware
+#export ARCH
+#
+#PTOLEMY=/home/ptolemy
+#export PTOLEMY
+#
+#PATH=/usr/X/bin:$PTOLEMY/bin.$ARCH:$PTOLEMY/bin:/tools/gccs/bin:/tools/gnu/bin:$PATH
+#export PATH
+#
+#LD_LIBRARY_PATH=$PTOLEMY/lib.$ARCH:/usr/X/lib
+#export LD_LIBRARY_PATH
+#---end---
+
+# Note that if you are using gcc-2.7.0, you will need a patch, see the
+# ptolemy-hackers archives, or 
+# ftp://ptolemy.eecs.berkeley.edu/pub/ptolemy/ptolemy0.5.2/patches/README
+
 
 #
 #
@@ -91,21 +112,41 @@ USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 LIBSUFFIX =		so
 endif
 
-# debug version
-UWDEF =	-DPTSVR4
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
+
 #	Don't use -pipe, it makes life worse on small-memory systems.
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
-OPTIMIZER =	-g
+OPTIMIZER =	-O2
 
 #
 # 'production' version with optimization
 #OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 
-# -Wsynth is new in g++-2.6.x
+# -Wsynth is a g++ flag first introduced in g++-2.6.x.
 WARNINGS =	-Wall -Wcast-align -Wsynth
-GPPFLAGS =	$(UWDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG) -fno-for-scope
-CFLAGS =	$(UWDEF) $(OPTIMIZER) -fwritable-strings
+ARCHFLAGS =	-DPTSVR4
+
+LOCALCCFLAGS =	-g
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+# If you are not using gcc, then you might have problems with the WARNINGS flag
+LOCALCFLAGS =	-g -fwritable-strings
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 #
 # Variables for the linker
@@ -118,6 +159,8 @@ SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 else
 SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 endif
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lsocket -lnsl -ldl -lm
 
 PTLANGLIB= -L/tools/gccs/lib -liberty
 

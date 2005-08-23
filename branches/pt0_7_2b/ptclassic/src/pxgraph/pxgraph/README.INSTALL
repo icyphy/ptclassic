@@ -1,3 +1,7 @@
+@(#)README.INSTALL	1.2 12/04/97
+**************************************
+This file is obsolete, see README.html
+**************************************
 
 This file contains instructions for building the X11 version of xgraph.
 When unpacked,  the source is distributed in three directories:

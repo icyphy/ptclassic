@@ -6,17 +6,17 @@ Implements an real-valued lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
-	version { $Id$ }
+	version { @(#)CG56Table.pl	1.6	01 Oct 1996 }
 	author { Joseph T. Buck and Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
 	}
 	input {
 		name { input }
@@ -28,31 +28,34 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name { values }
-		type { intarray }
+		type { fixarray }
 		default { "-1 1" }
-		desc { "table of values to output" }
-		attributes { A_NONCONSTANT|A_YMEM|A_NOINIT }
+		desc { table of values to output }
+		attributes { A_YMEM|A_CONSEC }
 	}
 	defstate {
 		name { runTimeCheck }
 		type { int }
 		default { YES }
-		desc { "If YES, check range of index at runtime, else omit"}
+		desc {
+If YES, check range of index at runtime, else omit.
+This is currently not supported in the CG56 domain.
+		}
 	}
 	constructor {
 		noInternalState();
 	}
 	codeblock(readIdx) {
-		move	#<$addr(input),a	; a = index into table
+	move	#>$addr(values),r0			; table address in y memory
+	move	$ref(input),n0			; table index
+	nop				; account for pipelining delay
 	}
 	codeblock(check) {
 ; There is no check to make sure that the index is in bounds
 	}
 	codeblock(lookup) {
-		move	$ref(values),x0
-		add	x0,a
-		move	a,r0
-		move	y:(r0),$ref(output)
+	move	y:(r0+n0),x0		; read table value (2 instructions)
+	move	x0,$ref(output)			; write table value to output
 	}
 	go {
 		addCode(readIdx);
@@ -60,6 +63,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode(lookup);
 	}
 	exectime {
-		return 5;
+		return 6;
 	}
 }

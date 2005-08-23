@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /**************************************************************************
 Version identification:
-@(#)SetSigHandle.cc	
+@(#)SetSigHandle.cc	1.19	2/25/96
 
 Author: Joel R. King
 
@@ -35,108 +35,51 @@ Sets up the signal handlers for Tycho.
 
 **************************************************************************/
 
+// SigHandle.h defines SIG_PT
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "compat.h"
+#include "SigHandle.h"
 #include "SetSigHandle.h"
 
-/****************************************************************************/
+// setSignalHandlers
+//
+// This function sets up the signal handlers.
 
-/***** This function sets up the signal handlers and, makes sure that *******/
-/***** RLIMIT is not 0 (if in development mode) which would prevent a *******/
-/***** core file from being generated. The environmental variable     *******/
-/***** PT_DEVELOP when set to a non-zero value, or not set at all,    *******/
-/***** will cause the core to be dumped, and the debugger to be run.  *******/
-
-int 
-setSignalHandlers(void) 
+int setSignalHandlers(void) 
 {
 
-    char *isDevelop; 
+#if !defined(PTHPPA) && !defined(PTSOL2) && !defined(PTSUN4) \
+&& !defined(PTIRIX5)
+
+    // We only handle the above four cases. For the others do nothing.
+    // FIX-ME: handle other UNIX platforms and minimum ANSI C signal set
+    // for PC and MAC platforms.
+    return 0; 
+
+#endif
+
     int returnValue = 0;
-
-    if (setCoreLimit() != 0) 
-        returnValue = 1; /* Try to go ahead and set the signalhandlers      */
-                         /* despite the initial setback.                    */
-
-    isDevelop = getenv("PT_DEVELOP"); /* getenv(char *) gets the value of an*/
-                                      /* environmental variable or returns  */
-                                      /* NULL if it does not exist.         */
-
-    if (isDevelop == 0 || isDevelop[0] == 0) 
-    {
-        if (setReleaseHandlers() != 0)
-	    returnValue = 2;
-    }
-    else
-    {
-        if (setDebugHandlers() != 0)
-	    returnValue = 3;
-    }
+    // FIXME: ptSignal returns the value of the previous function
+    // function pointer that handled the signal we are setting our
+    // function to handle. What we really want is a return value that
+    // lets us know if the handler was set successfully, and then 
+    // base our return value (nonzero if failed to set) on this.
+    // Unforunately this requires a change to the current implementation
+    // of ptSignal, or a another function.
+    setHandlers((SIG_PT) signalHandler);	
+    setStrings();
 
     return returnValue;
 
 }
-
-/****************************************************************************/
-
-/****** This function sets the value of the maximum size of core file *******/
-/****** allowed.                                                      *******/
-
-int
-setCoreLimitDebug(void) 
-{
-
-    struct rlimit coreLimit;
-
-    if (getrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* getrlimit gets information about RLIMIT (max size      */
-        return 1; /* of core) and places it in a rlimit struct. Returns 0   */
-    }             /* on a failure.                                          */
-
-    coreLimit.rlim_cur = coreLimit.rlim_max; /* Set RLIMIT to max allowable */
-                                             /* value, to insure that core  */
-                                             /* file is generated. If this  */
-                                             /* was set to zero it would    */
-                                             /* prevent a core file from    */
-                                             /* being made.                 */
- 
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* setrlimit sets system values to the information in     */
-        return 1; /* rlimit struct.                                         */
-    }
-
-    return 0;  
-  
-}
-
-/****************************************************************************/
-
-
-/****** This function sets the value of the maximum size of core file *******/
-/****** allowed.                                                      *******/
-
-int
-setCoreLimitRelease(void) 
-{
-
-    struct rlimit coreLimit;
-
-    coreLimit.rlim_cur = 0; /* Set RLIMIT 0. This prevents core file from   */
-                            /* being generated. This is included just in    */
-                            /* case an error occurs in the setting of the   */
-                            /* signal handlers, and the user continues.     */
-                            /* In normal operation however any signals that */
-                            /* could cause a core dump are intercepted so   */
-                            /* that a core file would never be generated.   */
-
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* setrlimit sets system values to the information in     */
-        return 1; /* rlimit struct.                                         */
-    }
-
-    return 0;  
-  
-}
-
-/****************************************************************************/
 
 
 

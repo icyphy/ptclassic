@@ -1,6 +1,6 @@
 # Config file to build on SPARC processor running Solaris 10
 # with gcc-2.95.1
-# $Id$
+# @(#)config-sol10.mk	1.1 05/31/05
 
 # Copyright (c) 2005 The Regents of the University of California.
 # All rights reserved.
@@ -28,10 +28,8 @@
 # 						COPYRIGHTENDKEY
 #		       
 
-# Author:	Christopher Hylands
+# Author:	Christopher Brooks
 
-# If you don't have a compiler, see
-# http://sunfreeware.com
 # 
 # To build with the Sun CC binary, I used:
 # setenv PTOLEMY /home/users/cxh/ptolemy
@@ -39,3 +37,5 @@
 # set path = ($PTOLEMY/bin $PTOLEMY/bin.sol10 /opt/SUNWspro/bin /usr/sfw/bin /usr/ccs/bin /bin /usr/bin /usr/ucb .)
 
 include $(ROOT)/mk/config-sol8.mk
+# PTSOL8 is read in src/compat/ptolemy/compat.h
+ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -DPTSOL7 -DPTSOL8 -DPTSOL10 -D_PTHREAD_1003_1c

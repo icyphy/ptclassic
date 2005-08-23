@@ -2,13 +2,18 @@ defstar {
 	name { CellLoad }
 	domain { DE }
 	author { GSWalter }
-	version { $Id$ }
-	copyright { 1992 (c) U. C. Regents }
-	location { DE main palette }
+	version { @(#)DECellLoad.pl	1.8 10/23/95 }
+        copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
+	location { DE main library }
 
 	desc {
-Reads in an Envelope, extracts its Message, and
-outputs that Message in a NetworkCell.
+Read in an Envelope, extract its Message, and
+output that Message in a NetworkCell.
 	}
 
 	input {
@@ -41,17 +46,17 @@ outputs that Message in a NetworkCell.
 	hinclude { "NetworkCell.h" }
 
 	go {
-		if ( input.dataNew ) {
-			Envelope inEnvlp;
-			input.get().getMessage( inEnvlp );
-			const Message* toLoad = ( const Message* ) inEnvlp.myData();
+		if (input.dataNew) {
 			completionTime = arrivalTime;
+			Envelope inEnvlp;
+			input.get().getMessage(inEnvlp);
+			Message* toLoad = inEnvlp.writableCopy();
 			LOG_NEW; NetworkCell* shipItOut = new NetworkCell(
-					*toLoad, int( priority ), int(
-					destination ), int( mssgSize ), 0,
+					*toLoad, int( priority ), int( destination ),
+					int( mssgSize ), 0,
 					float( completionTime), 0 );
 			Envelope outEnvlp( *shipItOut );
 			output.put( completionTime ) << outEnvlp;
-		} // endif
+		} // end if
 	} // end go
 } // end defstar

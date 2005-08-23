@@ -3,8 +3,8 @@ defstar {
 	domain { C50 }
 	desc {
 The output is set to the input multiplied by a gain term.
-}
-	version { @(#)C50GainInt.pl	1.3	3/28/96 }
+	}
+	version { @(#)C50GainInt.pl	1.8	06 Oct 1996  }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -13,10 +13,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-We handle the special cases for values of \fIgain\fR equal to
+	htmldoc {
+We handle the special cases for values of <i>gain</i> equal to
 -1, 0, 1, 2, 3, 4, and 5.
-In the case that the \fIgain\fR is one, we eliminate ourselves from
+In the case that the <i>gain</i> is one, we eliminate ourselves from
 the circuit.
 	}
 	protected {
@@ -35,7 +35,7 @@ the circuit.
 		type {int}
 		default {2}
 		desc {Gain value}
-		attributes { A_UMEM|A_CONSTANT }
+		attributes { A_CONSTANT }
 	}
  
 	constructor {
@@ -43,7 +43,10 @@ the circuit.
 	}
 	setup {
 		identity = (int(gain) == 1);
-		if (identity) forkInit(input,output);
+		if (identity){
+			 output.setAttributes(P_NOINIT);
+			 forkInit(input,output);
+		}
 	}
 	codeblock(cbNeg) {
 	lar	ar0,#$addr(input)
@@ -53,17 +56,18 @@ the circuit.
 	setc	ovm
 	neg
 	sach	*,0
+	clrc	ovm
 	}
 
 	codeblock(cbOne) {
-; A gain of one has been removed from the system
+* a gain of one has been removed from system
 	}
 
 	codeblock(cbPowTwo,"int shift"){
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
 	mar	*,ar0
-	lacc	*,@val,ar1
+	lacc	*,@shift,ar1
 	sacl	*
 	}
 
@@ -78,19 +82,19 @@ the circuit.
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
 	mar	*,ar0
-	lacc	*,@val
-	add	*,ar1
+	lacc	*,@shift
+	add	*,0,ar1
 	sacl	*
 	}
 	
 	codeblock(cbStd){
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
-	lar	ar2,#$addr(gain)
+	lacc	#$val(gain),0
+	samm	treg0
 	mar	*,ar0
-	lt	*,ar2
 	mpy	*,ar1
-	sacl	*
+	spl	*
 	}
 
 	go {
@@ -105,16 +109,16 @@ the circuit.
 		    addCode(cbOne);
 		    break;
 		  case 2:
-		    addCode(cbPowTwo(1);
+		    addCode(cbPowTwo(1));
 		    break;
 		  case 3:
-		    addCode(cbPowTwoPlusOne(1);
+		    addCode(cbPowTwoPlusOne(1));
 		    break;
 		  case 4:
-		    addCode(cbPowTwo(2);
+		    addCode(cbPowTwo(2));
 		    break;
 		  case 5:
-		    addCode(cbPowTwoPlusOne(2);
+		    addCode(cbPowTwoPlusOne(2));
 		    break;
 		  default:
 		    addCode(cbStd);
@@ -136,7 +140,7 @@ the circuit.
 		    pairOfIntervals = 6;
 		    break;
 		  case 2:
-		  case 4;
+		  case 4:
 		    pairOfIntervals = 5;
 		    break;
 		  default:

@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy CGC stars contributed by users
-# $Id$
+# @(#)make.template	1.4 03/26/98
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -40,18 +40,22 @@ CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
-SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
 CGCDIR = 	$(ROOT)/src/domains/cgc/kernel
-INCL = 		-I$(SDFDIR) \
+CGDIR =		$(ROOT)/src/domains/cg/kernel
+INCL = 		-I$(CGDIR) \
 		-I$(CGCDIR) \
 		-I$(KERNDIR) \
 		-I$(ROOT)/src/domains/cgc/contrib/stars
 
 # Library name
-LIB =		libcgccontribstars.$(LIBSUFFIX)
+PTLIB =		libcgccontribstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+CGCNeuronBase.pl \
+CGCMPNeuron.pl \
+CGCNeuron.pl \
+CGCSigmoid.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -67,14 +71,11 @@ DOMAIN =	CGC_CONTRIB
 DOMAIN_2 =	CGC
 MISC_FILES =	#README README.notes
 
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES) override.mk
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
 
 all:		$(SRCS) stars_all
 
 install:	stars_install
-
-# allow CC_SHAREDFLAGS to be overridden (neal@ctd.comsat.com (Neal Becker))
--include $(VPATH)/override.mk
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

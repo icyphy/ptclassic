@@ -1,25 +1,15 @@
 defstar {
   name { GainFix_M }
   domain { SDF }
-  desc {
-    Takes an input FixMatrix and multiplies it by a scalar gain value.
-    The value of the "gain" parameter and its precision in bits can currently 
-    be specified using two different notations.
-    Specifying only a value by itself in the dialog box would create a
-    fixed-point number with the default precision which has a total length
-    of 24 bits with the number of range bits as required by the value.
-    For example, the default value 1.0 creates a fixed-point object with
-    precision 2.22, and a value like 0.5 would create one with precision
-    1.23.  An alternative way of specifying the value and the
-    precision of this parameter is to use the parenthesis notation
-    of (value, precision).  For example, filling the dialog
-    box for the gain parameter with (2.546, 3.5) would create a fixed-point
-    object formed by casting the double-precision floating-point number
-    2.546 to a fixed-point number with a precision of 3.5.
-  }
-  version { $Id$ }
+  desc { Multiply a fixed-point matrix by a fixed-point scalar gain value. }
+  version { @(#)SDFGainFix_M.pl	1.7 10/6/95 }
   author { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
     name { input }
@@ -94,24 +84,33 @@ parameter.  The keywords for overflow handling methods are :
     // get input
     Envelope inpkt;
     (input%0).getMessage(inpkt);
-    const FixMatrix *matrix = (const FixMatrix *)inpkt.myData();
+    const FixMatrix& matrix = *(const FixMatrix *)inpkt.myData();
 
-    FixMatrix *result = new FixMatrix(matrix->numRows(),matrix->numCols(),
-                                      out_len, out_IntBits);
-
-    Fix fixIn;
-
-    // do scalar * matrix
-    for(int i = 0; i < matrix->numRows() * matrix->numCols(); i++) {
-      if(int(UseArrivingPrecision))
-        fixIn = matrix->entry(i);
-      else
-        fixIn = Fix(in_len, in_IntBits, matrix->entry(i));
-      result->entry(i).set_ovflow(OV);
-      result->entry(i) = fixIn * Fix(gain);
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
     }
+    else {
+      // valid input matrix
 
-    output%0 << *result;
+      FixMatrix& result = *(new FixMatrix(matrix.numRows(),matrix.numCols(),
+                                          out_len, out_IntBits));
+
+      Fix fixIn;
+
+      // do scalar * matrix
+      for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
+        if(int(UseArrivingPrecision))
+          fixIn = matrix.entry(i);
+        else
+          fixIn = Fix(in_len, in_IntBits, matrix.entry(i));
+        result.entry(i).set_ovflow(OV);
+        result.entry(i) = fixIn * Fix(gain);
+      }
+
+      output%0 << result;
+    }
   }
 }
 

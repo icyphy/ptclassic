@@ -1,18 +1,48 @@
+/*******************************************************************
+Version identification:
+@(#)ptdspchbevl.c	1.8 8/6/96
+
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+					PT_COPYRIGHT_VERSION_2
+					COPYRIGHTENDKEY
+
+ Programmer: Stephen L. Moshier
+
+       Function definition for Ptdsp_chbevl.
+
+********************************************************************/
+
+#include "ptdspcephes.h"
+
 /*
- * $Id$
- *
- *	Evaluate Chebyshev series
- *
- *
- *
  * SYNOPSIS:
+ *		Evaluate the Chebyshev series
  *
  * int N;
- * double x, y, coef[N], chebevl();
+ * double x, y, coef[N], Ptdsp_chebevl();
  *
- * y = chbevl( x, coef, N );
- *
- *
+ * y = Ptdsp_chbevl( x, coef, N );
  *
  * DESCRIPTION:
  *
@@ -80,26 +110,19 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "cephes.h"
+double 
+Ptdsp_chbevl( double x, double * array, int n ) {
+  double b0, b1 = 0.0, b2;
+  double *p = array;
+  int i = n - 1;
 
-double chbevl( double x, double array[], int n )
-{
-double b0, b1, b2, *p;
-int i;
+  b0 = *p++;
 
-p = array;
-b0 = *p++;
-b1 = 0.0;
-i = n - 1;
+  do {
+    b2 = b1;
+    b1 = b0;
+    b0 = x * b1  -  b2  + *p++;
+  } while( --i );
 
-do {
-	b2 = b1;
-	b1 = b0;
-	b0 = x * b1  -  b2  + *p++;
-} while( --i );
-
-return( 0.5*(b0-b2) );
+  return( 0.5*(b0-b2) );
 }
-
-
-

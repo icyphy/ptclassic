@@ -1,10 +1,32 @@
 static const char file_id[] = "DCNode.cc";
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DCNode.cc	1.8	3/2/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 Date of last revision: 5/92 
@@ -16,14 +38,14 @@ Date of last revision: 5/92
 
 #include "DCNode.h"
 #include "DCGraph.h"
-#include "Cluster.h"
+#include "DCCluster.h"
 #include "Error.h"
 
                         ///////////////////////
                         ///  *Constructor*  ///
                         ///////////////////////
 
-DCNode::DCNode(SDFStar* s, int invoc_no) : ParNode(s, invoc_no)
+DCNode::DCNode(DataFlowStar* s, int invoc_no) : ParNode(s, invoc_no)
 {
 	scheduledTime = -1;	// Initialize to something invalid
 	finishTime = -1;	// Initialize to something invalid
@@ -38,43 +60,6 @@ DCNode::DCNode(int type) : ParNode(type) {
 	StaticLevel = 0;	// Initialize to something invalid
 	scheduledTime = -1;	// Initialize to something invalid
 	finishTime = -1;	// Initialize to something invalid
-}
-
-                        /////////////////////
-                        ///  copyAncDesc  ///
-                        /////////////////////
-// This function copies the ancestors and descendants of the node
-//	into temporary variables tempAncs and tempDescs.
-// If flag = 0, copy normally
-// If flag = 1, copy ancestors into tempDescs and descendants into tempAncs
-
-void DCNode::copyAncDesc(DCGraph* g, int flag) {
-
-	resetWaitNum();
-
-	EGGateLinkIter dfiter1(ancestors);
-	EGGateLinkIter dfiter2(descendants);
-	EGGate *dfl;
-
-	// Clear tempAncs and tempDescs completely
-	tempAncs.initialize();
-	tempDescs.initialize();
-
-	// Restore tempAncs (sorted smallest SL first)
-	while ((dfl = dfiter1++) != 0) {
-	   if (flag == 0)
-		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 0);
-	   else
-		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 0);
-	}
-
-	// Restore tempDescs (sorted largest SL first)
-	while ((dfl = dfiter2++) != 0) {
-	   if (flag == 0)
-		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 1);
-	   else
-		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 1);
-	}
 }
 
                         ////////////////////
@@ -121,7 +106,6 @@ DCNode* DCNode :: adjacentNode(DCNodeList& nlist, int direction) {
 StringList DCNode::print() {
 
 	StringList out;
-	DCNode *node;
 
 	if (getType() < 0) { // Communication node
 		if (getType() == -1) {

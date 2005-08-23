@@ -4,12 +4,12 @@ defstar {
 	desc {
 Output the logical and of the two inputs with the given delay.
 	}
-        version { $Id$ }
+        version { @(#)VHDLBAnd.pl	1.4 3/2/95 }
 	author { M. C. Williamson }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDLB main library }
@@ -30,6 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	        type { int }
 	        default { 1 }
 	        desc { The propagation delay, in nsec }
+	}
 	go {
 	}
 }

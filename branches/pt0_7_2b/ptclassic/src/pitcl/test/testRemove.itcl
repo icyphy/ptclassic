@@ -2,7 +2,7 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)testRemove.itcl	1.5   04/04/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -44,13 +44,13 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y
 
-test remove.0 {create a test universe} {
+test remove-0 {create a test universe} {
     namespace pitcl {
-        defgalaxy y {
+        defGalaxy y SDF {
             addBlock z Ramp
             galaxyPort out z.output
         }
-        addUniverse x
+        addUniverse x SDF
         addBlock a y
         addBlock b Ramp
         addBlock c Add
@@ -65,38 +65,31 @@ test remove.0 {create a test universe} {
 ######################################################################
 #### remove
 
-test remove.1 {remove a simple star} {
-    ::pitcl::curgalaxy .x
+test remove-1 {remove a simple star} {
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove b
     ::pitcl::blocks
 } {a c d e}
 
-test remove.2 {remove a galaxy by relative name} {
-    ::pitcl::curgalaxy .x
+test remove-2 {remove a galaxy by relative name} {
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove a
     ::pitcl::blocks .x
 } {c d e}
 
-test remove.3 {remove a galaxy by absolute name} {
-    ::pitcl::curgalaxy .main
+test remove-3 {remove a galaxy by absolute name} {
+    ::pitcl::addUniverse .confusion SDF
     ::pitcl::remove .x.e
     ::pitcl::blocks .x
 } {c d}
 
-set univlist [::pitcl::univlist]
+set univlist [::pitcl::knownUniverses]
 set loc [lsearch -exact $univlist .x]
 set newunivlist [lreplace $univlist $loc $loc]
-test remove.4 {remove a universe} {
-    ::pitcl::curgalaxy .x
+test remove-4 {remove a universe} {
+    ::pitcl::currentGalaxy .x
     ::pitcl::remove .x
-    list [::pitcl::univlist] [::pitcl::curgalaxy]
-} [list $newunivlist .main]
-
-test remove.5 {attempt to remove main} {
-    ::pitcl::addUniverse .main
-    ::pitcl::addBlock a Ramp
-    ::pitcl::remove .main
-    ::pitcl::blocks .main
-} {}
+    list [::pitcl::knownUniverses] [::pitcl::currentGalaxy]
+} [list $newunivlist {}]
 
 doneTests

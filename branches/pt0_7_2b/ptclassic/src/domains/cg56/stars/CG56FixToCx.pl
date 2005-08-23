@@ -1,46 +1,34 @@
 defstar {
-	name { Const }
-	domain { CG56 }
-	desc { Constant source }
-	version { @(#)CG56Const.pl	1.12  01/01/96 }
-	author { E. A. Lee,  J. Pino, J. Buck }
-	copyright {
+    name { FixToCx }
+    domain { CG56 }
+    desc { Convert a fixed-point input to a complex output. }
+    version { @(#)CG56FixToCx.pl	1.3 2/7/96 }
+    author { Jose Luis Pino }
+    copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
-	explanation {
-There are no runtime instructions associated with this star.
-The output buffer is initialized with the specified DC value.
-	}
-	output {
-		name {output}
-		type {FIX}
-		attributes{P_NOINIT}
-	}
-	state {
-		name {level}
-		type {FIX}
-		default {0.001}
-		descriptor { Constant value to go to the output. }
-	}
-	codeblock (org) {
-	org	$ref(output)
-	}
-	codeblock (dc) {
-	dc	$val(level)
-	}
-	codeblock (orgp) {
-	org	p:
-	}
-	initCode {
-		addCode(org);
-		for (int i=0 ; i<output.bufSize() ; i++) addCode(dc);
-		addCode(orgp);
-	}
-	execTime {
-		return 0;
-	}
+    }
+    location { CG56 main library }
+    input {
+	name {input}
+	type {FIX}
+    }
+    output {
+	name {output}
+	type {COMPLEX}
+    }
+    constructor {
+	noInternalState();
+    }
+    codeblock(convert) {
+	move	$ref(input),x1
+	move	#0.0,x0
+	move	x,$ref(output)
+    }
+    go {
+	addCode(convert);
+    }
+    exectime { return 3; }
 }

@@ -1,9 +1,9 @@
-/* Misc. stuff to manage locks, FIFOS, lists for NOW */
+/* misc.h:  Header for misc UDPAM stuff  */
 /******************************************************************
 Version identification:
-$Id$
+@(#)misc.h	1.6 7/23/96
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,18 +24,21 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 
- Programmer: The NOW Project, UC Berkeley
-*******************************************************************/
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Brent Chun 
+ Creation Date: Sat Nov  4 17:25:01 PST 1995
+*/
 
 #ifndef _MISC_H
 #define _MISC_H   "$Id$"
 
 #include <stdlib.h>
+#include <thread.h>
 #include <udpam.h>
 
-#ifdef SOLARIS
 #define LockEP(endpoint)  \
       if (mutex_lock(&endpoint->lock) != 0) { \
           perror("mutex_lock error\n"); \
@@ -56,7 +59,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
           perror("mutex_lock error\n"); \
           exit(-1); \
       }    
-#endif /* SOLARIS */
 
 /*
  * TxFree FIFO management functions:
@@ -78,13 +80,27 @@ extern void RemoveTimeout(ea_t endpoint, UDPAM_Buf *buf);
 extern void MoveToTailTimeout(ea_t endpoint, 
 			      struct timeout_elem *timeout_elem);
 
-/* Routine to handle timeouts and events */
+/*
+ * Miscellaneous Functions:
+ *   GlobalToIndex(endpoint,global): Global to index in translation table
+ *   BuildToken(token,....):  Builds a token 
+ *   BuildArgBlock(argblock,...): Constructs an argblock to pass to err handler
+ */
+extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
+extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id, 
+		       int seq_num, tag_t tag, ea_t dest_ep);
+extern void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint, 
+			  int reply_endpoint, Token *token, handler_t handler, 
+			  void *source_addr, void *dest_addr, int nbytes, 
+			  int dest_offset, int source_offset, int arg0, 
+			  int arg1, int arg2, int arg3, int arg4, int arg5, 
+			  int arg6, int arg7, int buf_id,int seq_num);
+
+/* Function to handle timeouts and events */
 void *TimeoutThread(void *bundle);
 
-#define QUANTA                2    /* Initial Tout in secs */
+#define QUANTA                2    /* Initial Timeout Value in Seconds */
 #define UDPAM_MAX_RETRIES     3    /* Max Number of Retries */
-#define MESSAGES_PER_ENDPOINT 5
-/* #define DEBUG2  */
 
 typedef enum {FALSE, TRUE} Bool;
 

@@ -1,0 +1,68 @@
+reset
+# Creating universe 'Sih-4-1'
+domain CG
+target SharedBus
+	targetparam destDirectory PTOLEMY_SYSTEMS
+	targetparam nprocs 3
+	targetparam inheritProcessors NO
+	targetparam sendTime 1
+	targetparam childType "default-CG"
+	targetparam filePrefix "Sih-4-1.proc"
+	targetparam ganttChart YES
+	targetparam logFile "<stdout>"
+	targetparam ignoreIPC NO
+	targetparam overlapComm NO
+	targetparam useCluster YES
+	star MultiOut.output=31 MultiOut
+	numports MultiOut.output=31 output 3
+	setstate MultiOut.output=31 runTime 1
+	star Through1 Through
+	setstate Through1 runTime 3
+	setstate Through1 control FALSE
+	star Through2 Through
+	setstate Through2 runTime 5
+	setstate Through2 control FALSE
+	star Through3 Through
+	setstate Through3 runTime 5
+	setstate Through3 control FALSE
+	star Through4 Through
+	setstate Through4 runTime 3
+	setstate Through4 control FALSE
+	star Through5 Through
+	setstate Through5 runTime 2
+	setstate Through5 control FALSE
+	star Through6 Through
+	setstate Through6 runTime 4
+	setstate Through6 control FALSE
+	star Through7 Through
+	setstate Through7 runTime 2
+	setstate Through7 control FALSE
+	star Through8 Through
+	setstate Through8 runTime 3
+	setstate Through8 control FALSE
+	star Through9 Through
+	setstate Through9 runTime 4
+	setstate Through9 control FALSE
+	star Source1 Source
+	setstate Source1 runTime 1
+	star Sink1 Sink
+	setstate Sink1 runTime 3
+	star Sink2 Sink
+	setstate Sink2 runTime 3
+	star Sink3 Sink
+	setstate Sink3 runTime 3
+	connect Through1 output Through2 input
+	connect Through2 output Through7 input
+	connect Through3 output Through4 input
+	connect Through4 output Through8 input
+	connect Through5 output Through6 input
+	connect Through6 output Through9 input
+	connect MultiOut.output=31 output#2 Through3 input
+	connect MultiOut.output=31 output#1 Through1 input
+	connect MultiOut.output=31 output#3 Through5 input
+	connect Source1 output MultiOut.output=31 input
+	connect Through7 output Sink1 input
+	connect Through8 output Sink2 input
+	connect Through9 output Sink3 input
+run 1
+wrapup

@@ -6,25 +6,24 @@ Plot Y input(s) vs. X input(s) with dynamic updating.
 Time stamps are ignored.  If there is an event on only
 one of a matching pair of X and Y inputs, then the previously
 received value (or zero if none) is used for the other.
-Two styles are currently supported: style = 0 causes
-points to be plotted, whereas style = 1 causes connected
+Two styles are currently supported: "dot" causes
+points to be plotted, whereas "connect" causes connected
 lines to be plotted. Drawing a box in the plot will
 reset the plot area to that outlined by the box.
 There are also buttons for zooming in and out, and for
 resizing the box to just fit the data in view.
 	}
-	version { $Id$ }
-	author { E. A. Lee }
+	version { @(#)DETkXYPlot.pl	1.8    10/23/95 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	hinclude { "ptk.h" }
 	hinclude { "XYPlot.h" }
-
 	defstate {
                 name {label}
                 type{string}
@@ -69,15 +68,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 	        name {style}
-		type {int}
-		default {"0"}
-		desc {Plot style (0 for points, 1 for lines)}
+		type {string}
+		default {"dot"}
+		desc {Plot styles are dot or connect}
 	}
 	defstate {
 	        name {updateSize}
 		type{int}
 		default {10}
-		desc { The number of points drawn simulataneously. Higher numbers make the response faster.  }
+		desc { The number of points drawn simultaneously. Higher numbers make the response faster.  }
 	}
 	
 	inmulti {
@@ -95,7 +94,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	  InfString labCopy, geoCopy, xtCopy, ytCopy;
 	  double xMin, xMax, yMin, yMax;
 	}
-
+	setup {
+	  // parse the x and y ranges which are
+	  // specified as strings for user convenience
+	  if ((sscanf((const char *)xRange, "%lf %lf", &xMin, &xMax) != 2) ||
+	      (xMax <= xMin)) {
+	    Error::abortRun(*this, "xRange parameter values are invalid");
+	  }
+	  if ((sscanf((const char *)yRange, "%lf %lf", &yMin, &yMax) != 2) ||
+	      (yMax <= yMin)) {
+	    Error::abortRun(*this, "yRange parameter values are invalid");
+	  }
+	}
 	begin {
 	  // Need to make non-const copies of  strings to
 	  // avoid compilation warnings
@@ -104,23 +114,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  xtCopy = (const char*)xTitle;
 	  ytCopy = (const char*)yTitle;
 
-	  // parse the x and y ranges which are
-	  // specified as strings for user convenience
-	  if ((sscanf((const char *)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
-	      (xMax <= xMin )) {
-	    Error::abortRun(*this, "xRange parameter values are invalid");
-	  }
-	  if ((sscanf((const char *)yRange,"%lf %lf", &yMin, &yMax) != 2) ||
-	      (yMax <= yMin )) {
-	    Error::abortRun(*this, "yRange parameter values are invalid");
-	  }
+	  int plotstyle = 0;
+	  if (strcmp(style,"connect") == 0) plotstyle = 1;
 
 	  // create the XYplot window labeling, scaling,
 	  // and ranging as specified by the parameters
 	  xyplot.setup(this,	   
 		       (char*)  labCopy,     // Label for the XY plot
-		       (int)    persistence, // The number of data points to retain
-		       (int)    updateSize,  // The number of data points between refreshes
+		       (int)    persistence, // no. data points to retain
+		       (int)    updateSize,  // no. data points between refreshes
 		       (char*)  geoCopy,     // Geometry for the window
 		       (char*)  xtCopy,      // Title for X-axis
 		                xMin,        // minimum X range value
@@ -129,12 +131,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		                yMin,	     // minimum Y range value
 		                yMax,        // maximum Y range value
 		                Y.numberPorts(),   // The number of data sets
-		       (int)    style);      // the plot style to use
+		       (int)    plotstyle);  // the plot style to use
 
 	}
 	go {
 	  InDEMPHIter nextx(X), nexty(Y);
-	  InDEPort *px, *py;
+	  InDEPort *px, *py = (InDEPort*)NULL;
 	  int set = 1;
 	  while ((px = nextx++) != 0 && (py = nexty++) != 0) {
 	    if (px->dataNew || py->dataNew) {

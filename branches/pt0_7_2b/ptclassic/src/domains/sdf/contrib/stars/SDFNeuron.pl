@@ -7,7 +7,7 @@ This neuron will output the sum of the weighted inputs, as a floating value.
 	author {Biao Lu}
 	acknowledge { Brian L. Evans }
        	location { SDF contrib library }
-	version{ $Id$ }
+	version{ @(#)SDFNeuron.pl	1.1	03/24/98 }
 	copyright {
 Copyright (c) 1997-1998 The University of Texas.
 All rights reserved.

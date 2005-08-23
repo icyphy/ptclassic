@@ -2,7 +2,7 @@ defstar {
 	name { IntToFix }
 	domain { CGC }
 	derivedFrom { Fix }
-	version { $Id$ }
+	version { @(#)CGCIntToFix.pl	1.4 01 Oct 1996 }
 	author { J.Weiss }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	desc { Convert a floating-point input to an fixed-point output. }
-	explanation {
+	htmldoc {
 This star converts a int value to a fix value with the specified precision.
 If the output precision is not specified, the precision is determined at
 runtime according to the incoming int value.
@@ -44,6 +44,9 @@ value (or minimum for negative magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	begin {
 		// if the precision for the output port is not defined
 		// - neither by this nor the successor star -, the actual
@@ -54,7 +57,7 @@ value (or minimum for negative magnitudes).
 	}
 
 	codeblock(setprec) {
-	        FIX_SetPrecisionFromDouble($precision(output),$ref(input));
+	        FIX_SetPrecisionFromDouble($precision(output),(double)((int)$ref(input)));
 	}
 	codeblock(assign) {
 	        FIX_DoubleAssign($ref(output),(double)((int)$ref(input)));
@@ -72,6 +75,6 @@ value (or minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-	// a wrap-up method is inherited from CGCFix
-	// if you defined your own, you should call CGCFix::wrapup()
+	// a wrapup method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

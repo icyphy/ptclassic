@@ -1,154 +1,102 @@
-#include "Fraction.h"
+static const char file_id[] = "Fraction.cc";
+/**************************************************************************
+Version identification:
+@(#)Fraction.cc	1.17	3/2/95
 
-/*
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
 
- Copyright (c) 1989 The Regents of the University of California.
-                       All Rights Reserved.
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Edward A. Lee
  Date: 12/7/89
 
- This class represents fractions using integers for the numerator
- and denominator.
+ This class represents fractions using integers for the myNum
+ and myDen.
+
+ Rewritten by Joe Buck to implement assignment operators and to be
+ more efficient.
 
  This file contains the member function definitions.
 
-*/
+**************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
-# include <stream.h>	// needed only for the print function
+#include "Fraction.h"
+#include <stream.h>
 
-Fraction operator + (Fraction i, Fraction j)
-{
-    Fraction temp;
-
-    temp.numerator = i.numerator * j.denominator + j.numerator * i.denominator;
-    temp.denominator = i.denominator * j.denominator;
-
-    return (temp);
-}
-
-Fraction operator - (Fraction i, Fraction j)
-{
-    Fraction temp;
-
-    temp.numerator = i.numerator * j.denominator - j.numerator * i.denominator;
-    temp.denominator = i.denominator * j.denominator;
-
-    return (temp);
-}
-
-Fraction operator * (Fraction i, Fraction j)
-{
-    Fraction temp;
-
-    temp.numerator = i.numerator * j.numerator;
-    temp.denominator = i.denominator * j.denominator;
-
-    return (temp);
-}
-
-Fraction operator / (Fraction i, Fraction j)
-{
-    Fraction temp;
-
-    temp.numerator = i.numerator * j.denominator;
-    temp.denominator = i.denominator * j.numerator;
-
-    return (temp);
-}
-
-int operator == (Fraction i, Fraction j)
-{
-    return ((i.numerator == j.numerator) && (i.denominator == j.denominator));
-}
-
-void Fraction :: print()
-{
-	cout << numerator << "/" << denominator << "\n";
-}
-
-// This routine simplifies a Fraction so that its numerator and denominator
-// are relatively prime.
-
-void Fraction::simplify ()
-{
-	GcdLcm d;
-
-	// by convention, if the numerator is 0, the denominator is set to 1
-	if (numerator == 0) denominator = 1;
-	else {
-	  // find the greatest common divisor of the numerator and denominator
-	  d = this->computeGcdLcm();
-
-	  numerator = numerator / d.gcd;
-	  denominator = denominator / d.gcd;
+// greatest common divisor function.  If 2nd arg is negative, result is
+// negative.  Magnitude of result equals gcd(abs(a),abs(b)).
+// these are so simplify is easy to write.
+int gcd(int a, int b) {
+	int sign = 1;
+	// record signs
+	if (a < 0) {
+		a = -a;
+	}
+	if (b < 0) {
+		sign = -1;
+		b = -b;
+	}
+	// swap to make a > b if needed
+	if (a < b) { int t = a; a = b; b = t;}
+	if (b == 0) return a;
+	while (1) {
+		if (b <= 1) return b*sign;
+		int rem = a%b;
+		if (rem == 0) return b*sign;
+		a = b;
+		b = rem;
 	}
 }
 
+Fraction&
+Fraction :: simplify() {
+	int g = gcd(myNum,myDen);
+	myNum /= g;
+	myDen /= g;
+	return *this;
+}
 
-/********************************************************************
-			computeGcdLcm
-
-This routine computes and returns the greatest common divisor of two
-integers numerator and denominator in the class Fraction.
-It uses Euclid's algorithm, as described in Richard Blahut,
-"Fast Algorithms for Digital Signal Processing", Addison-Wesley, 1985.
-
-The technique used is to update the matrix A(r), where
-           | 0      1 |
-    A(r) = |          | A(r-1)
-           | 1  -q(r) |
-Where
-    q(r) = floor ( s(r-1) / t(r-1))
-And
-    | s(r) |        |  numerator  |
-    |      | = A(r) |             |
-    | t(r) |        | denominator |
-
-Begin with r=1, s(0)=abs(numerator), t(0)=abs(denominator), A(0)=I.
-Terminate when t(r)=0, and return (s(r), A21(r), A22(r)).
-
-*/
-
-GcdLcm Fraction::computeGcdLcm ()
+Fraction&
+Fraction:: operator += (const Fraction& a)
 {
-	// initialize the matrix to the identity
-	int a12 = 0;
-	int a21 = 0;
-	int a11 = 1;
-	int a22 = 1;
+	myNum = myNum * a.myDen + a.myNum * myDen;
+	myDen *= a.myDen;
+	return *this;
+}
 
-	int s0 = abs(numerator);
-	int t0 = abs(denominator);
+Fraction&
+Fraction::operator -= (const Fraction& a)
+{
+	myNum = myNum * a.myDen - a.myNum * myDen;
+	myDen *= a.myDen;
+	return *this;
+}
 
-	// initialize the iteration vector
-	int sr = s0;
-	int tr = t0;
-
-	int qr,tmp1;
-
-	while (tr != 0) {
-
-		// update the quotient
-		qr = sr/tr;
-
-		// update the matrix
-		tmp1 = a22;
-		a22 = a12 - qr*tmp1;
-		a12 = tmp1;
-		tmp1 = a21;
-		a21 = a11 - qr*tmp1;
-		a11 = tmp1;
-
-		// update the vector
-		sr = a11*s0 + a12*t0;
-		tr = a21*s0 + a22*t0;
-	}
-
-	GcdLcm toReturn;
-	toReturn.gcd = sr;
-	toReturn.lcm = abs(a21)*s0;
-	// abs(a21)*s0 should also equal abs(a22)*t0
-
-	return toReturn;
+// print
+ostream& operator<<(ostream& o,const Fraction& f) {
+	return o << f.num() << '/' << f.den();
 }

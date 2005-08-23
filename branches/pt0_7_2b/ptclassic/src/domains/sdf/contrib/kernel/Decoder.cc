@@ -1,8 +1,36 @@
+/*
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
 static const char file_id[] = "Decoder.cc";
 
 /*
+Viterbi Decoder
+
 Version identification:
-$Id$
+@(#)Decoder.cc	1.5	3/7/96
 
 Programmer:	Neal Becker
  */
@@ -54,19 +82,20 @@ void Decoder::Reset() {
   StateMetricIndex = 0;
 }
 
-float Decoder::BM( int xsym, int I, int Q ) {
-  float NormI = float( I ) / float( Gain );
-  float NormQ = float( Q ) / float( Gain );
-  float XmitI = XmitMap (xsym & 1);
-  float XmitQ = XmitMap ((xsym >> 1) & 1);
-  float Dist = sqdist( XmitI, NormI ) + sqdist( XmitQ, NormQ );
+double Decoder::BM( int xsym, int I, int Q ) {
+  double NormI = double( I ) / double( Gain );
+  double NormQ = double( Q ) / double( Gain );
+  double XmitI = XmitMap (xsym & 1);
+  double XmitQ = XmitMap ((xsym >> 1) & 1);
+  double Dist = sqdist( XmitI, NormI ) + sqdist( XmitQ, NormQ );
   return Dist;
 }
-				/* Do ACS */
+
+/* Do ACS */
 void Decoder::DoACS( int I, int Q ) {
   int state;
-  float* NewState;
-  float* OldState;
+  double* NewState;
+  double* OldState;
   int* PathPt;
 
   PathPt = Path[ PathIndex ];
@@ -82,9 +111,9 @@ void Decoder::DoACS( int I, int Q ) {
 
 
   for( state = 0; state < 64; state++ ) {
-    float d0 = BM (Xsymbol [0][state], I, Q) + 
+    double d0 = BM (Xsymbol [0][state], I, Q) + 
       OldState [PrevState [0][state]];
-    float d1 = BM (Xsymbol [1][state], I, Q) +
+    double d1 = BM (Xsymbol [1][state], I, Q) +
       OldState [PrevState [1][state]];
     if( d0 < d1 ) {
       NewState[ state ] = d0;
@@ -97,7 +126,7 @@ void Decoder::DoACS( int I, int Q ) {
   }
 }
 
-				/* Do traceback.  Also update PathIndex */
+/* Do traceback.  Also update PathIndex */
 int Decoder::TraceBack() {
   int pi = PathIndex;
   int step;
@@ -108,20 +137,17 @@ int Decoder::TraceBack() {
   for( step = 0; step < 64; step++ ) {
     pi &= 0x3f;			/* ring buffer size 64 */
     state = Path[ pi-- ][ state ]; 
- }
-
-				/* LSB of state is info bit */
-  return state & 1;
+  }
+  return state & 1;		/* LSB of state is info bit */
 }
 
-				/* Find the minimum state metric.  Subtract this from all */
-				/* the metrics.  This is *not* the most efficient way to */
-				/* normalize, it's the most basic. */
-				/* StateMetricIndex is flipped here also. */
+/* Find the minimum state metric.  Subtract this from all */
+/* the metrics.  This is *not* the most efficient way to */
+/* normalize, it's the most basic. */
+/* StateMetricIndex is flipped here also. */
 void Decoder::Normalize() {
+  double* NewState;
   int state;
-  float* NewState;
-  float MinMetric;
 
   if( StateMetricIndex == 0 ) {
     NewState = StateMetric[ 0 ];
@@ -132,19 +158,15 @@ void Decoder::Normalize() {
     StateMetricIndex = 0;
   }
 
-  for( state = 0; state < 64; state++ ) {
-    if( state == 0 )
-      MinMetric = NewState[ state ];
-    else {
-      MinMetric = ( NewState[ state ] < MinMetric ) ? 
-	NewState[ state ] : MinMetric;
-    }
+  double MinMetric = NewState[0];
+  for( state = 1; state < 64; state++ ) {
+    MinMetric = ( NewState[ state ] < MinMetric ) ?
+		NewState[ state ] : MinMetric;
   }
 
   for( state = 0; state < 64; state++ )
     NewState[ state ] -= MinMetric;
 }
-
 
 int Decoder::operator() ( int I, int Q ) {
   DoACS( I, Q );
@@ -152,4 +174,3 @@ int Decoder::operator() ( int I, int Q ) {
   Normalize();
   return out;
 }
-

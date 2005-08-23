@@ -3,8 +3,15 @@ defstar
     name { SGIAudio }
     domain { CGC }
     desc { Base class for reading and writing SGI audio ports. }
-    version { $Id$ }
+    version { @(#)CGCSGIAudio.pl	1.4 01/01/96 }
     author { T. M. Parks }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CGC main library }
 
     codeblock (declare)
     {

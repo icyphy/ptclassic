@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspExtendedGCD.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_ExtendedGCD ]
-
-  Author      [ Brian Evans ]
-
-  Copyright   [ 
+/*******************************************************************
+Version identification:
+@(#)ptdspExtendedGCD.c	1.7 8/6/96
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -34,23 +26,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
-]
 
-   Version [ $Id$ ]
+ Programmer: Brian L. Evans
 
-******************************************************************************/
+      Greatest common divisor and least common multiple routines
+
+********************************************************************/
 
 #include "ptdspExtendedGCD.h"
 
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
-// Greatest common divisor function.  If 2nd arg is negative, result is
-// negative.  Magnitude of result equals gcd(abs(a),abs(b)).
-// these are so simplify is easy to write.
-int gcd(int a, int b) {
-  
-  int rem, t;
+/* Greatest common divisor function
+   If the second arg is negative, result is negative.
+   Magnitude of result equals gcd(abs(a),abs(b)).
+*/
+int
+Ptdsp_GCD(int a, int b) {
   int sign = 1;
+
   /* record signs */
   if (a < 0) {
     a = -a;
@@ -59,39 +53,50 @@ int gcd(int a, int b) {
     sign = -1;
     b = -b;
   }
+
   /* swap to make a > b if needed */
-  if (a < b) { t = a; a = b; b = t;}
+  if (a < b) { int t; t = a; a = b; b = t;}
   if (b == 0) return a;
-  while (1) {
-    if (b <= 1) return b*sign;
-    rem = a%b;
-    if (rem == 0) return b*sign;
+  while (b > 1) {
+    int rem = a%b;
+    if (rem == 0) break;
     a = b;
     b = rem;
   }
+  return b*sign;
 }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-/**Function*******************************************************************
-  Synopsis    [ ]
-  SideEffects []
-******************************************************************************/
+/* Least common multiple function.
+   Order of the multiplication and division is chosen to avoid
+   overflow in cases where a*b > MAXINT but lcm(a,b) < MAXINT.  The
+   division always goes evenly.
+   This routines returns 0 for the lcm of 0 and 1.
+*/
+int 
+Ptdsp_LCM(int a, int b) { 
+  return a == b ? a : a * (b / Ptdsp_GCD(a,b));
+}
 
-int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
+/* Extended greatest common divisor function.
+   Solves the Bezout identity
+       alpha a + beta b == 1
+  over the integers given the values for a and b.
 
-  int mumax, mu, lambdap, lambda, lambdamax, mup;
-
+  The values at addresses alpha and beta are set to store the return
+  values.
+*/ 
+int
+Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
+  int mu, lambda;
   int lambdavalue = 0, muvalue = 0;
-  int gcdvalue = gcd(a, b);
+  int gcdvalue = Ptdsp_GCD(a, b);
   int anorm = a / gcdvalue;
   int bnorm = b / gcdvalue;
 
   if ( intabs(a) <= intabs(b) ) {
-    mumax = intabs(anorm);
+    int mumax = intabs(anorm);
     for ( mu = 0; mu < mumax; mu++ ) {
-      lambdap = ( 1 - mu * bnorm );
+      int lambdap = ( 1 - mu * bnorm );
       lambda = lambdap / anorm;
       if ( lambdap == (lambda * anorm) ) {
 	lambdavalue = lambda;
@@ -101,9 +106,9 @@ int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
     }
   }
   else {
-    lambdamax = intabs(bnorm);
+    int lambdamax = intabs(bnorm);
     for ( lambda = 0; lambda < lambdamax; lambda++ ) {
-      mup = ( 1 - lambda * anorm );
+      int mup = ( 1 - lambda * anorm );
       mu = mup / bnorm;
       if ( mup == ( mu * bnorm ) ) {
 	muvalue = mu;
@@ -112,9 +117,9 @@ int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
       }
     }
   }
-  
-  *alpha = lambdavalue;
-  *beta = muvalue;
+
+  *alphap = lambdavalue;
+  *betap = muvalue;
   
   return(gcdvalue);
 }

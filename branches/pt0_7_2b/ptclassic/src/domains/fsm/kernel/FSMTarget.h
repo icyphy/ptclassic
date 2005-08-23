@@ -1,8 +1,8 @@
 /**********************************************************************
 Version identification:
-$Id$
+@(#)FSMTarget.h	1.7 10/08/98
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,27 +40,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Target.h"
+#include "StringArrayState.h"
 #include "StringState.h"
 #include "FloatState.h"
+#include "Block.h"
+#include "Target.h"
 
 class FSMTarget : public Target {
-protected:
-	// Input/Output name maps.
-        StringState inputNameMap;         
-	StringState outputNameMap;   
 
-        // type of this machine.
-	StringState machineType;
+public:
+	// constructor
+	FSMTarget();
+
+	// destructor
+	~FSMTarget();
+
+	void setup();
+	void begin();
+
+	// return a copy of itself
+	Block* makeNew() const;
+
+	// return the domain of the galaxy and "FSM" otherwise
+	/*virtual*/ const char* domain();
+
+protected:
+	// Internal event names and types. 
+	StringArrayState intlEventNames;
+	StringArrayState intlEventTypes;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
-public:
-	FSMTarget();
-	void setup();
-	Block* makeNew() const;
-	~FSMTarget();
-private:
 };
 #endif

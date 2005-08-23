@@ -1,9 +1,31 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)DecomGal.h	1.8	3/2/95
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha 
  Date of creation: 4/92
@@ -29,6 +51,21 @@ class ostream;
 
 class DecomGal : public SDFClusterGal
 {
+public:
+	DecomGal(Galaxy& g, ostream* l) : SDFClusterGal(g,l) {}
+	DecomGal(ostream* l) : SDFClusterGal(l) {}
+
+	// remove Arcs with delays if these delays are enough to
+	// fire the destination nodes as many as repetitions numbers.
+	int simplify();
+
+	// Detect all strongly connected components and cluster them
+	// to decompose the galaxy.
+	void decompose();
+
+	// loop all clusters for the final clustering phase.
+	void loopAll();
+
 private:
 	// Make clusters of strongly connected graph
 	void makeCluster(SequentialList*);
@@ -44,25 +81,41 @@ private:
 
 	// setup the decomposed clusters.
 	void setUpClusters();
-
-public:
-	// constructor.
-	DecomGal(Galaxy& g, ostream* l) : SDFClusterGal(g,l) {}
-	DecomGal(ostream* l) : SDFClusterGal(l) {}
-
-	// remove Arcs with delays if these delays are enough to
-	// fire the destination nodes as many as repetitions numbers.
-	int simplify();
-
-	// Detect all strongly connected components and cluster them
-	// to decompose the galaxy.
-	void decompose();
-
-	// loop all clusters for the final clustering phase.
-	void loopAll();
 };
 
 class DecomClusterBag : public SDFClusterBag {
+
+public:
+	// create the SDFClusterGal
+	void createGalaxy(ostream* log) { 
+		INC_LOG_NEW; cgal = new DecomGal(log);
+		INC_LOG_NEW; loopSched = new DecomScheduler(log);
+	}
+
+	// setup Galaxy
+	void setUpGalaxy();
+
+	DecomClusterBag() : loopSched(0), cgal(0), idFlag(1) {}
+	~DecomClusterBag();
+
+	SDFClusterGal* clusterGal() { return cgal; }
+
+	// regard it as an atomic cluster for Joe's clustering
+	SDFClusterBag* asBag() { return idFlag? this: 0; }
+	void resetId()	{ idFlag = 0; }
+
+	// return me as a special bag
+	SDFClusterBag* asSpecialBag() { return this; }
+
+	// run the cluster
+	void go();
+
+protected:
+	// redefine, generate my Schedule
+	int genSched() { 
+		sched = loopSched;
+		return loopSched->genSched(cgal); 
+	} 
 
 private:
 	// private scheduler
@@ -73,33 +126,6 @@ private:
 
 	// id: Bag in the decomposition, Atomic in the Joe's clustering.
 	int idFlag;
-
-public:
-	// create the SDFClusterGal
-	void createGalaxy(ostream* log) { 
-		INC_LOG_NEW; cgal = new DecomGal(log);
-		INC_LOG_NEW; loopSched = new DecomScheduler(log);
-		sched = loopSched;
-	}
-
-	// setup Galaxy
-	void setUpGalaxy();
-
-	// constructor
-	DecomClusterBag() : cgal(0), loopSched(0), idFlag(1) {}
-	~DecomClusterBag();
-
-	SDFClusterGal* clusterGal() { return cgal; }
-
-	// regard it as an atomic cluster for Joe's clustering
-	SDFClusterBag* asBag() { return idFlag? this: 0; }
-	void resetId()	{ idFlag = 0; }
-
-	// run the cluster
-	void go();
-
-	// generate my Schedule
-	int genSched() { return loopSched->genSched(cgal); } 
 };
 
 #endif

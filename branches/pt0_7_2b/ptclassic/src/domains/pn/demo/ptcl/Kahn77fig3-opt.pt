@@ -1,0 +1,18 @@
+# Version %W% %G%
+# Author: T. M. Parks
+# Compute all prime numbers up to 100.
+reset
+newuniverse Kahn77fig3-opt
+domain PN
+
+     star RampInt1 RampInt
+	 setstate RampInt1 step 1
+	 setstate RampInt1 value 2
+     star Sift1 Sift
+     star Print1 Printer
+     connect RampInt1 output Sift1 input
+     connect Sift1 output Print1 input
+
+run 100
+wrapup
+

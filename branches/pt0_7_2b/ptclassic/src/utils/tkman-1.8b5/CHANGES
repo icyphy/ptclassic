@@ -1,0 +1,203 @@
+1993
+24 Mar	hard stuff working
+25	easy stuff finished up, including documentation
+29	wrote Makefile and otherwise prepared for distribution
+31	changed incremental searching
+1 Apr	posted to comp.lang.tcl (698 lines, including instructions)
+2	more portable version posted
+	browsers `send' to `manShowManFound', sink manual section
+4	SEE ALSO links filter, unpacks compressed pages (both inspired by Paul Raines)
+5	manX.[zZ] directories, whatis found in text
+6	workaround for bind bug, sunken text (both Dan Schenck)
+	"Searching for ..." message
+7	print: now meta-click, works with compressed ones
+	fixed bind problems
+	can type in, e.g., print.3v and print.3s; distinction saved in history
+	.so links work (thanks Dave Lemke)--but don't do this with compressed pages (which HPs don't)
+	various portability/system admin (suggested by model bug reporter Lars Huttar)
+8	memory pipe replaces tmp file
+10	Emacs-like point and mark
+	sections loaded on demand (suggested by Lars Huttar)
+	user additions preserved in ~/.tkman 
+	quick view of first n lines
+11	>1000 lines
+	wait cursor, tkinfo shares window with TkMan
+12	option to preload or not, instant show update moved to bs2tk
+13	restricted search of paths in MANPATH (anthony baxter)
+14	case sensitivity switches to searches (anthony baxter)
+15	tbl, eqn handled (Mark McIntosh)
+17	incremental searching made more like Emacs, flush volume cache (both suggested by Robert Wilensky)
+19	fixed handling of compressed pages, section re-viewing much faster
+20	solution to multiple, identically-named man pages in different directories, at the expense of volume load on demand
+25	different way to deal with multiples
+27	hack around Tk text's wordend limitation
+29	compressed database hack around
+	v1.3.3 released
+30	dups menu hangs around, different hack around for compressed database
+2 May	faster startup with database (big thanks to Frank Delahoyde)
+	SuperMan, of dubious value since it's so slow (suggested by Larry Virden)
+5	demo to UCB Tcl/Tk users
+7	(none) and (n/a) shown when pulldowns empty (Steve Smoot)
+14	manTextOpen, manTextClose, manSectButt
+	documented: scan, pipe capability of apropos
+	apropos responsive to selected directory switches (Robert Wilensky)
+15	more generous focus hits (Steve Smoot), tab moves focus
+18	v1.3.4 released
+19	v1.3.5 released (fixed bug which affected first-time users)
+	default fonts changed from pixel specification to point size (Donn Cave)
+29	man page name searching case insensitive--search time 3->4 seconds (Wayne A. Christopher)
+1 Jun	multiple instantiations
+2	output menu for multiple instantiations
+	changed default font to New Century Schoolbook so underscores show up
+4	switch all man paths on or off (David Taubman)
+7	. and .. to ~ and / (John Hagerman)
+25	support for people with only cat directories (6 characters from Mike Beasley)
+	v1.4 released
+28	deleted "focus $w.show" at very end of proc TkMan.  otherwise if start up iconified, then deiconify before done with init, text window doesn't show up. It's the focus problem again.  (David Svoboda)
+29	"update, don't quit" (Gordon Lack & Lord Wodehouse)
+1 Jul	lengthier criteria for picking which to show from list of matches (Michael Moore and Kwo-Long Lai)
+14	option not to move change bars, apropos filter in variable (both Warren Jessop)
+18	manKeyNav's key bindings to variables (David Sibley; thanks Wayne Christopher)
+	moved Paths, added `All' to Volumes (Neal McBurnett, friend of Scott Schwartz)
+	option to save nroff-formatted version (Warren Jessop)
+24	margins around text box (colleague of Gordon Lack)
+26	character to indicate popup menu (too bulky and unaesthetic, though)
+27	keep list of man pages with dots--startup takes a couple more seconds (Warren Jessop)
+4 Aug	check to see if man page source is older than nroff (Warren Jessop)
+	C-s C-s retrieves last search pattern, as in Emacs
+5	multiple instantiations share menu windows--sabotaged by new requirement in Tk 3.3
+6	each instance gets own set of variables
+	`|command' syntax for arbitrary text-generating command, `<file' syntax for reading raw file
+	uses SearchBox mega widget
+8	file name completion (if had fast database could do man page name completion and spelling correction)
+11	user annotations (first cool new idea since March!) (could have set of different annotations but would that be useful?) (automatically jump to first highlight?)
+17	mandesc-like directory dance hall (clamored for by Oyvind Yrke)
+	>2000 lines, 70K characters, despite kicking generally useful code into taputils.tcl
+	decision: don't integrate tkinfo (it could use the searchbox megawidget, though)
+20	changes to tkmandesc (Oyvind Yrke)
+21	SGI support worked out (Paul Raines)
+13 Sep	greater control of ordering of added (pseudo) volumes (Paul Raines)
+15	submitted to comp.sources.testers
+	>80K characters
+20	fixed printing of .so pages (Larry Virden)
+21	various parts of ui disabled for different text box content types
+28	1.5 review version available via comp.sources.testers
+7 Oct	iconposition, -nosave, tkmangeometry (Chris Siebenmann)
+12	reviews received from comp.sources.testers
+	C-d/C-m hot keys (Kwo-Long Lai)
+	variety of small changes suggested by the anonymous reviewers
+	removed gzip requirement for H-P
+	if main window owns X selection, zap it before showing another page
+13	taking advantage of bs2tk's new reverse compile, do this for cat page printouts
+	show hot spot on a single click (many, Robert Wilensky first)
+	more small changes suggested by reviewers
+	killing TkMan with window manager's kill removes process
+21	>90K characters
+24	highlights for symbolic links resolved to physical file
+2 Nov	1.5 released for Tcl 7.0/Tk 3.3
+24 Dec	TKMAN environment variable sets usual options
+
+
+
+1994
+1 Jan	support for LANG environment variable (Yasuro Kawata)
+21	support for saving to H-P's cat.Z (w/o .Z/.gz/.z suffix)
+28	fixed deep weirdness, write protected home directory bugs (Dave Glowacki)
+1 Apr	first anniversary
+12 May	list of all man pages with highlights (Steven S. Dick)
+23	help page maintained in HTML, compiled to Tk text and [tn]roff (can zap linebreaks so get good linebreaking on all screen sizes!)
+5 Jun	would like to use idiom like: menubutton -menu [set m [menu $w.x.m]], but have to do this: set m $w.x.m; menubutton -menu $m; menu $m
+6 Aug	experiment in moving database to Glimpse
+10	compressed list of all man page names works great: < 40K in size (with gzip), quick to search (preserves pattern matching), since kept on disk reduces startup time and memory image runs off tkmandesc orderings so can still do wild additions, section dumps efficient
+24	search within virtual sections too
+	finds names with dots (again)
+26	incremental search highlights match
+	try to find needed binaries beforehand, abort if can't (Keith Vetter among others)
+1 Sep	support for weird /etc/man.conf (Shannon Jaeger)
+	dynamically change font dpi
+4	handle .so links to compressed pages (grr)
+6	validity checks on components of MANPATH
+9	hookup with Glimpse for fulltext search only (& optionally)
+12	1.6beta testing
+16	glimpse AND apropos, both now dumping results into a pseudo volume
+	Perl's out, only Tcl for formatting volumes... sigh
+17	automatically rebuild database every month
+22	if current mandir != mandir used to build database, automatically rebuild it
+26	automatically rebuild database if change in MANPATH or tkmandesc commands
+27	-rebuildandquit option (Dietmar Theobald)
+	instead of monthly rebuilds, simply check dates of mandirs--it takes a noticable amount of time, but not excessively long (Dietmar Theobald)
+29	Volume lists dynamically created, once again controlled by Paths (push from Kevin L. Short)
+	database validity check information moved into .tkmandatabase
+30 Sep	1.6gamma testing
+7 Oct	use simple priority number to choose better the right manual page (why didn't I think of this before?)
+31 Oct	list of new/changed manual pages, if any, as pseudovolume
+	when looking at header&footer, show date of file also
+7 Nov	support for keeping Solaris 1, 1b, 1c, ... volumes separate (Will C Lauer)
+10&11	preferences panels (code now >100K characters, >3000 lines)
+21	Support for proposed Linux FSSTND /var/catman
+23	deep-six the problematic mandir variable and suck up all unique names in manN*/* and catN*/* assuming they're in manN*/* => takes to long to build database
+25	abolished mandir variable (which so many didn't set correctly)
+	if no manN, check for catN automatically.  lose on stray cats, though
+29	manDescAdd also makes that directory available to Glimpse
+	Tcl code indention: spaces => tabs, saving 9K
+7 Dec	1.6delta testing
+8	IBM AIX support: first need to convert InfoExplorer files to /usr/man/cat*. can't parse pages (so don't), so lose on Sections, Links.  but everything else OK
+9	restored SGI support (oops!)
+15	bad variable values in old save file automatically updated (Martin Forssen & Greg McFarlane)
+17	"(none)"'s changed to -state disabled's (don't have someone try it and fail)
+20	pulldown menus shrink as necessary to fit on screen, if possible (Marty Leisner)
+22	Winter Solstice: 1.6 released for use with RosettaMan + new database
+	(100th RCS revision, 3628 lines)
+24	updated for Tcl 7.4/Tk 4.0
+29	new idiom for menubuttons + menus
+
+
+
+1995
+1 Jan	time to display page once found cut by more than a third by (1) changing while {[gets $fid line]!=1} {eval $line} to while {![eof $fid]} {eval [gets $fid]} and (2) hacking tkText.c to accept multiple (text,tags+mark) pairs
+20	right pseudosection set for Shortcuts
+24 Mar	tweaks to Glimpse, site-wide installation (John Talintyre)
+25	changes for Tk 4.0b3: tk colormodel, -nocase (grr, no easy marks for text widget)
+1.7b1	released for Tcl 7.4b3/Tk 4.0b3
+26 Apr	chmod a+r for Glimpse indexes (except those in one's home directory) (Jim Ingham)
+29 Jun	1.7b2 released for Tcl 7.4b4/Tk 4.0b4
+30	1.7b3 released to fix some egregious bug or something
+21 Jul	1.7 released for Tcl 7.4/Tk 4.0
+	Preferences' Defaults button applies to current panel only (Don Libes)
+26	1.7.1 released, advertised widely
+1 Aug	miscellaneous small fixes, columns for apropos
+	>4000 lines (happened sometime earlier)
+	1.7.2 released to fix problem in passing command line options
+9	added manDescSGI to place catman directories into user-added volumes according to user-specified patterns (Scott Nelson).  Is this a final solution to the SGI issue?
+11	only reset gui if something changed in Preferences
+	1.7.3b2 advertised to SGI users
+18	option to present subvolumes as submenus under Volumes (original version by Nigel Wade)
+	1.7.3 released
+24	special case for `whatis' file check on dumb BSDI (John Carroll)
+10 Oct	1.7.4 released
+2 Nov	1.7.5 released
+2 Dec	compensate for varying behavior of sed from flavor to flaver (Vin Shelton)
+20	place man page name in window title (Simon Blanchard)
+
+
+
+1996
+16 Jan	option for unified Glimpse index
+31	fix up picking right file when have both with and without extensions (Carl Mascott)
+6 Feb	small changes to take advantage of new features in Tcl 7.5/Tk 4.1 (foreach, tag prevrange)
+11	use clock command instead of exec date
+12	final comb through of code to clean up any lingering cruft
+	take links from manref tags, fixed manBinCheck on fully-specified paths
+20	fixed man.conf support (Hagen Finley)
+1 Apr	statistics and information screen
+26	fix check for out of date Glimpse indexes (Vinnie Shelton)
+13 May	option for single-click hyperlinks (someone in CS160--identify yourself for an acknowledgement)
+26	try to reattach highlights to right positions when man page changes
+27	5000 lines
+ 3 Jun  searches give warning before wraparound (Rick Macdonald)
+20	choose print destination from a list of printers (Peter Maguire)
+23	menu of command line options in each section (maybe not such a good idea after all)
+10 Jul  automatically set special case bindings files for virgins on Solaris, SGI, SCO
+16	fixed bug related to find and the recent page list that caused inordinately long database build times on some systems (Vinnie Shelton)
+19	cumulative statistics recording without afffecting other persistent settings
+XXX	1.8 released

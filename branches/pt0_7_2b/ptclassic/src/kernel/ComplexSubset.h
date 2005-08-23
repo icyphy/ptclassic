@@ -1,249 +1,174 @@
-// IMPORTANT: the following file is a SUBSET of Complex.h
-// as distributed with libg++, version 1.37.
-// It does not define the stream functions.
-// The error handlers are also removed.
-//
-// $Id$
-///////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////
-// This may look like C code, but it is really -*- C++ -*-
 /* 
-Copyright (C) 1988 Free Software Foundation
-    written by Doug Lea (dl@rocky.oswego.edu)
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
 
-This file is part of GNU CC.
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-GNU CC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY.  No author or distributor
-accepts responsibility to anyone for the consequences of using it
-or for whether it serves any particular purpose or works at all,
-unless he says so in writing.  Refer to the GNU CC General Public
-License for full details.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
 
-Everyone is granted permission to copy, modify and redistribute
-GNU CC, but only under the conditions described in the
-GNU CC General Public License.   A copy of this license is
-supposed to have been given to you along with GNU CC so you
-can know your rights and responsibilities.  It should be in a
-file named COPYING.  Among other things, the copyright notice
-and this notice must be preserved on all copies.  
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 */
+// A small complex class -- a subset of the cfront and libg++ versions,
+// but written from scratch.
+// @(#)ComplexSubset.h	1.9 03/26/98
 
+// checking _Complex_h is a hack allowing to use Complex.h from libg++
+// when included before ComplexSubset.h and vice versa
 #ifndef _Complex_h
-#pragma once
-#define _Complex_h 1
-
+#ifndef _ComplexSubset_h
+#define _ComplexSubset_h 1
+#define _Complex_h
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include <math.h>
 
-class Complex
-{
-protected:
-  double           re;
-  double           im;
-
+class Complex {
+private:
+	double r;
+	double i;
 public:
+	// retrieve members
+	double real() const { return r;}
+	double imag() const { return i;}
 
-  inline double /* const */ real() const;
-  inline double /* const */ imag() const;
+	// constructor, copy constructor
+	Complex() : r(0.0), i(0.0) {}
+	Complex(double rp, double ip = 0.0) : r(rp), i(ip) {}
+	Complex(const Complex& arg) : r(arg.r), i(arg.i) {}
 
-  inline           Complex();
-  inline           Complex(const Complex& y);
-  inline           Complex(double r, double i=0);
+	// assignment operator
+	Complex& operator = (const Complex& arg) {
+		r = arg.r;
+		i = arg.i;
+		return *this;
+	}
 
-  inline          ~Complex();
+	// op-assign operators
+	Complex& operator += (const Complex& arg) {
+		r += arg.r;
+		i += arg.i;
+		return *this;
+	}
 
-  inline Complex&  operator =  (const Complex& y);
+	Complex& operator -= (const Complex& arg) {
+		r -= arg.r;
+		i -= arg.i;
+		return *this;
+	}
 
-  inline Complex&  operator += (const Complex& y);
-  inline Complex&  operator += (double y);
-  inline Complex&  operator -= (const Complex& y);
-  inline Complex&  operator -= (double y);
-  inline Complex&  operator *= (const Complex& y);
-  inline Complex&  operator *= (double y);
+	Complex& operator *= (const Complex& arg) {
+		double nr = r * arg.r - i * arg.i;
+		i = r * arg.i + i * arg.r;
+		r = nr;
+		return *this;
+	}
 
-  Complex&         operator /= (const Complex& y); 
-  Complex&         operator /= (double y); 
+	// this one is not inline: too big
+	Complex& operator /= (const Complex& arg);
 
-  void             error(const char* msg) const;
+	// special ones for double args
+	Complex& operator *= (double arg) {
+		r *= arg;
+		i *= arg;
+		return *this;
+	}
+
+	Complex& operator /= (double arg) {
+		r /= arg;
+		i /= arg;
+		return *this;
+	}
 };
 
-// inline members
-
-inline double /* const */ Complex::real() const { return re; }
-inline double /* const */ Complex::imag() const { return im; }
-
-inline Complex::Complex() {}
-inline Complex::Complex(const Complex& y) :re(y.real()), im(y.imag()) {}
-inline Complex::Complex(double r, double i) :re(r), im(i) {}
-
-inline Complex::~Complex() {}
-
-inline Complex&  Complex::operator =  (const Complex& y) 
-{ 
-  re = y.real(); im = y.imag(); return *this; 
-} 
-
-inline Complex&  Complex::operator += (const Complex& y)
-{ 
-  re += y.real();  im += y.imag(); return *this; 
+// comparisons
+inline int operator != (const Complex& x, const Complex& y) {
+	return x.real() != y.real() || x.imag() != y.imag();
 }
 
-inline Complex&  Complex::operator += (double y)
-{ 
-  re += y; return *this; 
+inline int operator == (const Complex& x, const Complex& y) {
+	return x.real() == y.real() && x.imag() == y.imag();
 }
 
-inline Complex&  Complex::operator -= (const Complex& y)
-{ 
-  re -= y.real();  im -= y.imag(); return *this; 
+// basic operations
+inline Complex operator + (const Complex& x, const Complex& y) {
+	return Complex(x.real()+y.real(),x.imag()+y.imag());
 }
 
-inline Complex&  Complex::operator -= (double y)
-{ 
-  re -= y; return *this; 
+inline Complex operator - (const Complex& x, const Complex& y) {
+	return Complex(x.real()-y.real(),x.imag()-y.imag());
 }
 
-inline Complex&  Complex::operator *= (const Complex& y)
-{  
-  double r = re * y.real() - im * y.imag();
-  im = re * y.imag() + im * y.real(); 
-  re = r; 
-  return *this; 
+inline Complex operator - (const Complex& y) {
+	return Complex(-y.real(),-y.imag());
 }
 
-inline Complex&  Complex::operator *= (double y)
-{  
-  re *=  y; im *=  y; return *this; 
+inline Complex conj (const Complex& x) {
+	return Complex(x.real(),-x.imag());
 }
 
+inline double real (const Complex& x) { return x.real();}
+inline double imag (const Complex& x) { return x.imag();}
 
-// non-inline functions
-
-Complex  /* const */ operator /  (const Complex& x, const Complex& y);
-Complex  /* const */ operator /  (const Complex& x, double y);
-Complex  /* const */ operator /  (double   x, const Complex& y);
-
-Complex  /* const */ cos(const Complex& x);
-Complex  /* const */ sin(const Complex& x);
-
-Complex  /* const */ cosh(const Complex& x);
-Complex  /* const */ sinh(const Complex& x);
-
-Complex  /* const */ exp(const Complex& x);
-Complex  /* const */ log(const Complex& x);
-
-Complex  /* const */ pow(const Complex& x, long p);
-Complex  /* const */ pow(const Complex& x, const Complex& p);
-Complex  /* const */ sqrt(const Complex& x);
-   
-// inline functions
-
-inline int /* const */ operator == (const Complex& x, const Complex& y)
-{
-  return x.real() == y.real() && x.imag() == y.imag();
+inline Complex operator * (const Complex& x, const Complex& y) {
+	return Complex(x.real()*y.real() - x.imag()*y.imag(), 
+		       x.real()*y.imag() + x.imag()*y.real());
 }
 
-inline int /* const */ operator == (const Complex& x, double y)
-{
-  return x.imag() == 0.0 && x.real() == y;
+inline Complex operator * (double x, const Complex& y) {
+	return Complex(x*y.real(),x*y.imag());
 }
 
-inline int /* const */ operator != (const Complex& x, const Complex& y)
-{
-  return x.real() != y.real() || x.imag() != y.imag();
+inline Complex operator * (const Complex& x, double y) {
+	return y*x;
 }
 
-inline int /* const */ operator != (const Complex& x, double y)
-{
-  return x.imag() != 0.0 || x.real() != y;
+inline Complex operator / (const Complex& x, double y) {
+	return Complex(x.real()/y, x.imag()/y);
 }
 
-inline Complex /* const */ operator - (const Complex& x)
-{
-  return Complex(-x.real(), -x.imag());
+inline double abs(const Complex& arg) {
+	return hypot(arg.real(), arg.imag());
 }
 
-inline Complex /* const */ conj(const Complex& x)
-{
-  return Complex(x.real(), -x.imag());
+inline double arg(const Complex& x) {
+	return atan2(x.imag(), x.real());
 }
 
-inline Complex /* const */ operator + (const Complex& x, const Complex& y)
-{
-  return Complex(x.real() + y.real(), x.imag() + y.imag());
+inline double norm(const Complex& arg) {
+	return arg.real() * arg.real() + arg.imag() * arg.imag();
 }
 
-inline Complex /* const */ operator + (const Complex& x, double y)
-{
-  return Complex(x.real() + y, x.imag());
-}
+// math functions.
+Complex operator / (const Complex&, const Complex&);
+Complex sin(const Complex&);
+Complex cos(const Complex&);
+Complex exp(const Complex&);
+Complex log(const Complex&);
+Complex sqrt(const Complex&);
+Complex pow(double base,const Complex& expon);
+Complex pow(const Complex& base, const Complex& expon);
+Complex pow(double base, const Complex& expon);
 
-inline Complex /* const */ operator + (double x, const Complex& y)
-{
-  return Complex(x + y.real(), y.imag());
-}
+class ostream;
 
-inline Complex /* const */ operator - (const Complex& x, const Complex& y)
-{
-  return Complex(x.real() - y.real(), x.imag() - y.imag());
-}
-
-inline Complex /* const */ operator - (const Complex& x, double y)
-{
-  return Complex(x.real() - y, x.imag());
-}
-
-inline Complex /* const */ operator - (double x, const Complex& y)
-{
-  return Complex(x - y.real(), -y.imag());
-}
-
-inline Complex /* const */ operator * (const Complex& x, const Complex& y)
-{
-  return Complex(x.real() * y.real() - x.imag() * y.imag(), 
-                 x.real() * y.imag() + x.imag() * y.real());
-}
-
-inline Complex /* const */ operator * (const Complex& x, double y)
-{
-  return Complex(x.real() * y, x.imag() * y);
-}
-
-inline Complex /* const */ operator * (double x, const Complex& y)
-{
-  return Complex(x * y.real(), x * y.imag());
-}
-
-inline double /* const */ real(const Complex& x)
-{
-  return x.real();
-}
-
-inline double /* const */ imag(const Complex& x)
-{
-  return x.imag();
-}
-
-inline double /* const */ abs(const Complex& x)
-{
-  return hypot(x.real(), x.imag());
-}
-
-inline double /* const */ norm(const Complex& x)
-{
-  return (x.real() * x.real() + x.imag() * x.imag());
-}
-
-inline double /* const */ arg(const Complex& x)
-{
-  return atan2(x.imag(), x.real());
-}
-
-inline Complex /* const */ polar(double r, double t = 0.0)
-{
-  return Complex(r * cos(t), r * sin(t));
-}
-
-#endif
+ostream& operator<<(ostream&, const Complex&);
+#endif //_ComplexSubset_h
+#endif //_Complex_h

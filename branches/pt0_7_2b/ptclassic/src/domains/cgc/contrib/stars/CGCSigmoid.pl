@@ -9,7 +9,7 @@ neural networks.
         author { Biao Lu }
         acknowledge { Brian L. Evans }
         location { CGC contrib library }
-        version { $Id$ }
+        version { @(#)CGCSigmoid.pl	1.2	03/24/98 }
         copyright {
 Copyright (c) 1997 The University of Texas.
 All rights reserved.
@@ -65,8 +65,7 @@ of the intermediate computations remain in the range [-1,1).
                 addCode(exp);
         }
    codeblock(exp) {
-        double rate;
-	rate = $val(learning_rate);
+        double rate = $val(learning_rate);
         $ref(output) = 1.0/(1.0 + exp(- rate * $ref(input)));
    }
         exectime {

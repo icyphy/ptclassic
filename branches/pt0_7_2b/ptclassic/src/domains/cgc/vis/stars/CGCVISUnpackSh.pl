@@ -1,20 +1,24 @@
 defstar {
-	name { Vis64ToFloat }
-	domain { SDF }
-	version { @(#)SDFVis64ToFloat.pl	1.1 3/14/96 }
+	name { VISUnpackSh }
+	domain { CGC }
+	version { @(#)CGCVISUnpackSh.pl	1.13 04/07/97 }
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  UnPack a single floating point number into four floating 
-	  point numbers.  The input floating point number is first
-	  separated into four shorts and then each short is up cast 
-	  to a floating point number.}
+Takes a single 64-bit float particle, unpacks them into four
+16-bit fixed point numbers, and casts them into four float particles.
+The input float particle is first separated into four 16-bit
+fixed point numbers.  Once again, the order of the fixed point numbers
+can be reversed.  The fixed point numbers are then up cast to float
+particles.  The exponent value of each float particle can
+be adjusted by the scaledown parameter.
+        }
 	input {
 		name { in }
 		type { float }
@@ -25,46 +29,73 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
        		desc { Output float type }
 	}
-	ccinclude {<vis_proto.h>}
 	defstate {
-	        name { scale }
+	        name { scaledown }
 		type { float }
 		default { "1.0/32767.0" }
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	code {
-                #define NumOut (4)
+	defstate {
+	        name { reverse }
+		type { int }
+		default { FALSE }
+		desc { 
+TRUE unpacks with most current sample at initial position; 
+FALSE unpacks with most current sample at trailing position}
+		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	protected{
-	  double *packedin;
+	code{
+#define PACKOUT (4)
 	}
-	constructor{
-	  packedin = 0;
-	}
-	destructor{
-	  free(packedin);
-       	}
 	setup {
-	  out.setSDFParams(NumOut,NumOut-1);
+	  out.setSDFParams(PACKOUT,PACKOUT-1);
 	}
-	begin {
-	  free(packedin);
-	  packedin = (double *) memalign(sizeof(double),sizeof(double));
+	codeblock(globalDecl){
+	  union $sharedSymbol(CGCVISUnpackSh,inoverlay){
+	    vis_d64 invaluedbl;
+	    vis_s16 invaluesh[4];
+	  };
+	}
+	codeblock(mainDecl){
+	  union $sharedSymbol(CGCVISUnpackSh,inoverlay) $starSymbol(packedin);
+	}
+	initCode{
+	  addGlobal(globalDecl);
+	  addDeclaration(mainDecl);
+          addInclude("<vis_types.h>");
+	}
+	codeblock(unpackit){
+	  $starSymbol(packedin).invaluedbl = (double) $ref(in);
+	}
+	codeblock(unpackbackwards){
+	  /*scale down and unpack input*/
+          $ref2(out,0)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[0]);
+          $ref2(out,1)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[1]);
+          $ref2(out,2)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[2]);
+          $ref2(out,3)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[3]);
+	}
+	codeblock(unpackforwards){
+	  /*scale down and unpack input*/
+          $ref2(out,0)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[3]);
+          $ref2(out,1)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[2]);
+          $ref2(out,2)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[1]);
+          $ref2(out,3)=(double) ($val(scaledown) * (double)
+				 $starSymbol(packedin).invaluesh[0]);
+
 	}
 	go {
-	  
-	  int index;
-	  double outvalue;
-	  short *invalue;
-	  
-	  *packedin = double(in%0);
-	  invalue = (short *) packedin;
-	  
-	  //scale input and unpack output
-	      for (index=0;index<NumOut;index++){
-		outvalue = (double) scale* (double) invalue[index];
-		out%(index) << outvalue;
-	      }
-      	}
+	  addCode(unpackit);
+	  if (!reverse)
+	    addCode(unpackbackwards);
+	  else
+	    addCode(unpackforwards);
+	}
 }

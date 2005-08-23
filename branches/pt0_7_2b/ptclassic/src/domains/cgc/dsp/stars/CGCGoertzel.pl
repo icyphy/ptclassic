@@ -2,45 +2,44 @@ defstar {
 	name { Goertzel }
 	domain { CGC }
 	derived { GoertzelBase }
-	version { $Id$ }
+	version { @(#)CGCGoertzel.pl	1.5	10/07/96 }
 	desc {
 Second-order recursive computation of the kth coefficient of an
 N-point DFT using Goertzel's algorithm.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
-	explanation {
-.lp
+	location { CGC dsp library }
+	htmldoc {
+<p>
 This two-pole, one-zero IIR filter has a transfer function of
-.EQ
-{1 ~-~ {W sub N} sup k z sup -1} over
-{1 ~-~ 2 cos ( {2 pi} over {N} k ) z sup -1 ~+~ sup -2} ~.
-.EN
-.ID "Goertzel's algorithm"
+<pre>
+           1 - (W<sub>N</sub>)<sup>k</sup> z<sup>-1</sup>
+    ---------------------------
+    1 - 2cos(2*pi*k/N)z<sup>-1</sup> + z<sup>-2</sup>
+
+</pre>
 This filter is a biquad filter with
-.sp 0.5
-.(l
-n0 = 1
-n1 = -Wn = exp(j 2 pi k / N)
-n2 = 0
-d1 = -2 cos(2 pi k / N)
-d2 = 1
-.)l
-.sp 0.5
-The Goertzel's implementation takes the simpler forms of n0, n2, and d2
-into account, and computes n1 and d1 from the parameters k and N.
+<p>
+<ul>
+<li> n<sub>0</sub> = 1
+<li> n<sub>1</sub> = -W<sub>n</sub> = exp(j 2 pi k / N)
+<li> n<sub>2</sub> = 0
+<li> d<sub>1</sub> = -2 cos(2 pi k / N)
+<li> d<sub>2</sub> = 1
+</ul>
+<p>
+The Goertzel's implementation takes the simpler forms of n<sub>0</sub>, n<sub>2</sub>, and d<sub>2</sub>
+into account, and computes n<sub>1</sub> and d<sub>1</sub> from the parameters k and N.
 It is implemented in direct form II.
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	output {

@@ -37,16 +37,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSIntArray.h"
 #include "acs_starconsts.h"
 
-static const int DEBUG_TIMING=0;
 
 class Port_Timing
 {
-public:
+  static const int DEBUG_TIMING=0;
+
+ public:
   int count;
   int free_muxline;
   ACSIntArray* address_start;
   ACSIntArray* address_step;
   ACSIntArray* address_activation;
+  ACSIntArray* address_rate;
+  ACSIntArray* vector_length;
   ACSIntArray* major_bit;
   ACSIntArray* bitlen;
   ACSIntArray* data_activation;
@@ -54,7 +57,6 @@ public:
   ACSIntArray* mem_type;
   ACSIntArray* mem_id;
   ACSIntArray* mux_line;
-  int vector_length;
 
   // Local copy of memport timings
   int read_skew;
@@ -64,22 +66,30 @@ public:
  Port_Timing::Port_Timing();
  Port_Timing::Port_Timing(const int,const int);
  Port_Timing::~Port_Timing();
- int Port_Timing::add_read(const int,const int,const int,const int,
-const int,const int,const int);
- int Port_Timing::add_write(const int,const int,const int,const int,
-const int,const int,const int);
+ int Port_Timing::add_read(const int,const int,const int,const int,const int,const int,const int,const int,const int);
+ int Port_Timing::add_lutread(const int,const int,const int,const int,const int,const int,const int,const int,const int);
+ int Port_Timing::add_write(const int,const int,const int,const int,const int,const int,const int,const int,const int);
  int Port_Timing::adjust_times(const int,const int,int&,int&,int);
- int Port_Timing::add_entry(const int,const int,const int,const int, const int,
-const int,const int,const int);
+ int Port_Timing::add_entry(const int,const int,const int,const int, const int,const int,const int,const int,const int,const int);
  int Port_Timing::sort_times(void);
  int Port_Timing::calc_updseq(void);
  int Port_Timing::add_wordcount(const int);
  int Port_Timing::get_sa(const int);
+ int Port_Timing::get_addrate(const int);
+ int Port_Timing::get_vectorlength(const int);
  int Port_Timing::get_memtype(const int);
  int Port_Timing::get_majorbit(const int);
  int Port_Timing::get_bitlen(const int);
  int Port_Timing::get_memid(const int);
+ int Port_Timing::get_addresstime(const int);
+ ACSIntArray* Port_Timing::get_startingaddress(void);
+ ACSIntArray* Port_Timing::get_stepaddress(void);
+ ACSIntArray* Port_Timing::get_addressrate(void);
+ ACSIntArray* Port_Timing::get_veclen(void);
+
  int Port_Timing::max_address(const int);
+ ACSIntArray* Port_Timing::access_times(const int);
+ ACSIntArray* Port_Timing::address_times(void);
  void Port_Timing::dump(void);
 };
 

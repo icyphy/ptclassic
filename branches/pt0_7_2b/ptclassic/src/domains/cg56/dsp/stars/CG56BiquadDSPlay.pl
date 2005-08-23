@@ -1,21 +1,38 @@
 defstar {
-	name { DSPlayBQ }
+	name { BiquadDSPlay }
 	domain { CG56 }
 	desc { Second order IIR filter (Biquad) }
-	version { $Id$ }
+	version { @(#)CG56BiquadDSPlay.pl	1.15 06 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-DSP56000 - Second order IIR filter (Biquad).  This biquad is taylored to use the coefs from the DSPlay filter design tool.  If DSPlay gives the coefs:  A B C D E  then define the parameters thus:
-                         a = A
-                         b = B
-                         c = C
-                         d = -(D+1)
-                         e = -E
-Of course this only works if abcde are (-1,+1)
-Xfer function: (a+bz1+cz2)/(1-(d+1)z1-ez2)
-Default coefs:  Low Pass Filter
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 dsp library }
+	htmldoc {
+This second-order biquad IIR filter is tailored to use the coefficients
+from the DSPlay filter design tool.
+If DSPlay gives the coefficients A B C D E, then define the parameters
+as follows:
+<p>
+<ul>
+<li> a = A
+<li> b = B
+<li> c = C
+<li> d = -(D+1)
+<li> e = -E
+</ul>
+<p>
+This only works if a, b, c, d, and e are in the range (<i>-</i>1<i>, +</i>1).
+The transfer function realized by the filter is:
+<pre>
+H(z) = a + bz<sup>-1</sup> + cz<sup>-2</sup>
+       ---------------------
+       1 - (d + 1)z<sup>-1</sup> - ez<sup>-2</sup>
+</pre>
+The default coefficients implement a low pass filter.
         }
         input {
                 name { input }
@@ -101,10 +118,10 @@ Default coefs:  Low Pass Filter
         move    a1,$ref(output)
 	} 
         initCode {
-                gencode(coefinit);
+                addCode(coefinit);
   	}
         go {
-                gencode(std);
+                addCode(std);
 	}
 	execTime { 
 		return 15;

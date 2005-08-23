@@ -1,7 +1,29 @@
 # Version identification:
-# $Id$
-# Copyright (c) 1992-1994 The Regents of the University of California.
-#                       All Rights Reserved.
+# @(#)userstars.mk	1.10	02/21/99
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # Date of creation: 10/21/94
 # Written by: E. A. Lee
 #
@@ -13,29 +35,29 @@
 # create a makefile in the same directory where the stars are
 # defined.  This should be called "make.template".  I minimal
 # version of this is as shown below (the stars are assumed to
-# be in the DE domain):
+# be in the DE domain, of course, you would need to remove the 
+# leading comment symbols '#' first):
 #
-#	make.template:
-#	---------------------------------------------------------
-#	| ROOT = $(PTOLEMY)					|
-#	| VPATH = .						|
-#	| include $(ROOT)/mk/config-$(ARCH).mk			|
-#	| INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)	|
-#	| PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl		|
-#	| DOMAIN = DE						|
-#	| include $(ROOT)/mk/userstars.mk			|
-#	---------------------------------------------------------
+#--start--
+# ROOT = $(PTOLEMY)
+# VPATH = .
+# include $(ROOT)/mk/config-$(PTARCH).mk
+# INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)
+# PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl
+# DOMAIN = DE
+# include $(ROOT)/mk/userstars.mk
+#--end--
 #	
 # The above file assumes the PTOLEMY environment variable is set to point
 # to the home directory of the Ptolemy installation (e.g. /users/ptolemy).
 #
-# It also assumes the ARCH environment variable is set to specify the target
+# It also assumes the PTARCH environment variable is set to specify the target
 # architecture (such as "sun4").
 #
 # The VPATH variable specifies where the sources are.  If the directory name
 # in which your stars are stored includes the string "/src/", then the
 # object files will be put in a corresponding directory with "src" replaced
-# by $(ARCH).  This allows your stars to have several object files for
+# by $(PTARCH).  This allows your stars to have several object files for
 # different architectures simultaneously.
 #
 # The include statement includes a standard Ptolemy makefile for the
@@ -48,6 +70,11 @@
 # Also, very few Ptolemy stars will get by without the ptolemy kernel
 # directory, specified by -I$(KERNDIR).
 #
+# PL_SRCS is the list of .pl files that you want to generate .o files for
+# If you are using GNU make, then you could use the following line 
+# to include all the .pl files in a directory:
+# PL_SRCS = $(wildcard *.pl)
+# 
 # The DOMAIN variable gives the domain name.
 #
 # To automatically generate all dependencies, the above makefile should
@@ -67,7 +94,7 @@
 SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.cc=.o)
+OBJS= $(PL_SRCS:.pl=.o)
 
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
@@ -80,28 +107,15 @@ all:	makefile $(OBJS)
 
 # Rule for compiling C++ files
 .cc.o:
-	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
+	$(CPLUSPLUS) $(USER_CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
 .c.o:
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
-
-# Note that forcing the installation of ptlang might not be the best
-# thing to do, it would be best if 'make sources' did not touch the
-# bin.$(ARCH) directory, so we check to see if there is a ptlang in the
-# obj.$(ARCH)/ptlang directory and use it.  This is awkward, but the
-# GNU tools do something similar
-
-# ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
-
-# Use either the ptlang binary in the obj directory or just use ptlang
-PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
-	then echo $(PTLANG_IN_OBJ) ; \
-	else echo ptlang; fi`
+	$(CC) $(USER_C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
+PTLANG=	$(PTOLEMY)/bin.$(PTARCH)/ptlang
 .pl.cc:
 	cd $(VPATH); $(PTLANG) $< 
 
@@ -117,10 +131,11 @@ clean:
 # Make things "even cleaner".  Removes libraries, generated .cc and .h
 # files from preprocessor, etc.
 realclean:
-	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(PL_SRCS:.pl=.t) \
+	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) \
+	$(PL_SRCS:.pl=.htm) $(PL_SRCS:.pl=.t) \
 	$(REALCLEAN_STUFF)
 
-DEPEND_INCL=$(INCL) $(C_INCL)
+DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
 		cd $(VPATH); \
@@ -143,7 +158,7 @@ TAGS:		$(SRCS)
 # Rule for detecting junk files
 
 checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(LIB) \
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(PTLIB) \
 		$(STAR_MK).o $(EXTRA_DESTS) makefile make.template SCCS
 
 # "check" does not print anything if nothing is being edited.

@@ -1,6 +1,6 @@
 # Makefile for testing Ptolemy DE stars 
 #
-# $Id$
+# @(#)makefile	1.3 12/09/97
 # Author: Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.
@@ -43,12 +43,12 @@ TCL_SRCS = testDEDefs.tcl
 
 # Demos that use stars that are not present in pitcl
 SIMPLE_PTCL_TESTS = \
-	testSDFContrib.tcl
+	testDEContrib.tcl
 
 
-# testSDFStars.tcl should be first, since it instantiates one of every star.
+# testDEStars.tcl should be first, since it instantiates one of every star.
 SIMPLE_TESTS = \
-	testSDFStars.tcl \
+	testDEStars.tcl \
 
 GRAPHICAL_TESTS = \
 	dummy
@@ -62,7 +62,7 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES = README
+MISC_FILES = #README
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES

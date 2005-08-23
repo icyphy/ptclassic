@@ -2,7 +2,7 @@ defcorona {
     name { PolarToRect }
     domain { ACS }
     desc { Convert magnitude and phase to rectangular form. }
-    version { $Id$ }
+    version { @(#)ACSPolarToRect.pl	1.4 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

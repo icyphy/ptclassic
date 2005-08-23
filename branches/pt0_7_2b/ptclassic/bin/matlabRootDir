@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/sh
 #
 # Script to find the root (installation) Matlab directory.  Used by
 # makefiles to determine the location of the external interface library.
@@ -6,9 +6,9 @@
 # empty string.
 #
 # Author:  Brian L. Evans
-# Version: $Id$
+# Version: @(#)matlabRootDir	1.6	3/7/96
 #
-# Copyright (c) 1990-1994 The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
@@ -22,33 +22,38 @@
 # along the path name that contains the sub-directories extern/lib
 # and extern/include.
 #
-#
-#  Look for the matlab startup script
-#
-set searchfile = "matlab"
-#
-#  Search the path
-#
-foreach i ( $path )
-  if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
-    set matpath = $i/$searchfile
+
+# Look for the matlab startup script
+searchfile=matlab
+matpath=""
+
+# Search the path
+for i in `echo $PATH | sed -e 's/:/ /g'`
+do
+  if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+  then
+    matpath=$i/$searchfile
     break
-  endif
-end
+  fi
+done
 #
 #  Search an alternate path:  all bin sub-directories of /usr
 #
-if ( ! $?matpath ) then
-  if ( -x /usr/bin && -r /usr/bin && -d /usr/bin ) then
-    set altpath = /usr/{bin,*/bin}
-    foreach i ( $altpath )
-      if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
-        set matpath = $i/$searchfile
+if [ "$matpath" = "" ]
+then
+  if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
+  then
+    altpath=/usr/{bin,*/bin}
+    for i in $altpath
+    do
+      if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+      then
+        matpath=$i/$searchfile
         break
-      endif
-    end
-  endif
-endif
+      fi
+    done
+  fi
+fi
 #
 #  If the Matlab script is found, then
 #  1. the first while statement will determine the full path name of the
@@ -58,45 +63,67 @@ endif
 #     directory which contains the external interface sub-directories
 #     extern/include and extern/lib
 #
-if ( ! $?matpath ) then
+if [ "$matpath" = "" ]
+then
   echo ""
 else
-  set numlinks = 1
-  set maxsymlinks = 8
-  set oldpath = ""
-  set newpath = $matpath
-  while ( $oldpath != $newpath && $numlinks < $maxsymlinks )
-    set lsinfo = `ls -l $newpath`
-    if ( "$lsinfo[1]" != "lrwxrwxrwx" ) then
+  numlinks=1
+  maxsymlinks=8
+  oldpath=""
+  newpath=$matpath
+  while [ "$oldpath" != "$newpath" -a $numlinks -lt $maxsymlinks ]
+  do
+    # Exit if the newpath is not a symbolic link
+    if [ ! -h $newpath ]
+    then
       break
-    endif
-    set oldpath = $newpath
-    set newpath = ""
-    foreach lsword ( $lsinfo )
-      if ( $?getlsrest ) then
-        set newpath = "$newpath $lsword"
-      endif
-      if ( "$lsword" == "->" ) then
-        set getlsrest = ""
-      endif
-    end
-    @ numlinks ++
-  end
-  set oldpath = $newpath
-  set newpath = $oldpath:h
-  while ( $oldpath != $newpath )
-    set matextern = $newpath/extern
-    if ( -x $matextern && -r $matextern && -d $matextern ) then
-      set matexterninc = $matextern/include
-      if ( -x $matexterninc && -r $matexterninc && -d $matexterninc ) then
-        set matexternlib = $matextern/lib
-        if ( -x $matexternlib && -r $matexternlib && -d $matexternlib ) then
-          break
-        endif
-      endif
-    endif
-    set oldpath = $newpath
-    set newpath = $oldpath:h
-  end
+    fi
+    # Get information about the symbolic link
+    lsinfo=`ls -l $newpath`
+    oldpath=$newpath
+    newpath=""
+    getnextword=0
+    for lsword in $lsinfo
+    do
+      if [ $getnextword -eq 1 ]
+      then
+        newpath="$lsword"
+        getnextword=0
+	break
+      fi
+      if [ "$lsword" = "->" ]
+      then
+        getnextword=1
+      fi
+    done
+    # If the newpath is not an absolute path name, then append
+    # newpath to the oldpath (oldpath is always guaranteed to be correct)
+    if [ ! -x $newpath ]
+    then
+      newdir=`dirname $oldpath`
+      newpath=$newdir/$newpath
+    fi
+    numlinks=`expr $numlinks + 1`
+  done
+  oldpath=$newpath
+  newpath=`dirname $oldpath`
+  while [ "$oldpath" != "$newpath" ]
+  do
+    matextern=$newpath/extern
+    if [ -x $matextern -a -r $matextern -a -d $matextern ]
+    then
+      matexterninc=$matextern/include
+      if [ -x $matexterninc -a -r $matexterninc -a -d $matexterninc ]
+      then
+        matexternlib=$matextern/lib
+        if [ -x $matexternlib -a -r $matexternlib -a -d $matexternlib ]
+	then
+	  break
+	fi
+      fi
+    fi
+    oldpath=$newpath
+    newpath=`dirname $oldpath`
+  done
   echo $newpath
-endif
+fi

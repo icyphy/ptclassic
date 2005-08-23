@@ -7,9 +7,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)InvokeInterp.h	1.2	09/27/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,6 +45,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class InvokeInterp {
 public:
+	// constructor
+	InvokeInterp();
+
+	// destructor
+	~InvokeInterp();
+
 	// send a string to an external interpreter for evaluation
 	const char* interpreter(const char* expression);
 };

@@ -3,24 +3,21 @@ defstar {
 	domain { C50 }
 	desc {
 Output parameters are reciprocal of the inputs.
-The time to execute the division algorith will be
+The time to execute the division algorithm will be
 Nf + 2 cycles if Nf < 8 and Nf if Nf >= 8.  Also,
 15 >= Nf >= 1.
-}
-	version { $Id$  }
+	}
+	version { @(#)C50Reciprocal.pl	1.4	04/08/97  }
 	author { Luis Gutierrez  }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 Find the reciprocal of a fraction in terms of a fraction and some left shifts.
-	}
-	execTime {
-		return 3;
 	}
 	input {
 		name {input}
@@ -87,11 +84,3 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 		return (21 + int(Nf) );
 	}
 }
-
-
-
-
-
-
-
-

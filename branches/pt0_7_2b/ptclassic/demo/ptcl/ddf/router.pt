@@ -1,0 +1,35 @@
+reset
+# Creating universe 'router'
+domain DDF
+target default-DDF
+	targetparam restructure YES
+	targetparam maxBufferSize 1024
+	targetparam numOverlapped 1
+	targetparam schedulePeriod 10000.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Ramp2 Ramp
+	setstate Ramp2 step 3.0
+	setstate Ramp2 value 0.0
+	star Thresh1 Thresh
+	setstate Thresh1 threshold 0.5
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Randomly Merged Ramps"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P =600x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star "EndCase.input=21" EndCase
+	numports "EndCase.input=21" input 2
+	connect Ramp1 output "EndCase.input=21" "input#1"
+	connect Ramp2 output "EndCase.input=21" "input#2"
+	connect IIDUniform1 output Thresh1 input
+	connect Thresh1 output "EndCase.input=21" control
+	connect "EndCase.input=21" output Xgraph1 input
+run 20
+wrapup

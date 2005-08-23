@@ -1,18 +1,22 @@
 defstar {
     name {SubInt}
     domain {CGC}
-    desc { Output the complex product of the inputs. }
-    version { $Id$ }
+    desc { Output the "pos" input minus all "neg" inputs. }
+    version { @(#)CGCSubInt.pl	1.2	2/20/96 }
     author { Brian L. Evans and Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC main library }
+    input {
+	name {pos}
+	type {int}
+    }
     inmulti {
-	name {input}
+	name {neg}
 	type {int}
     }
     output {
@@ -23,19 +27,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	noInternalState();
     }
     codeblock(startOp) {
-	int diff = $ref(input#1);
+	int diff = $ref(pos);
     }
     codeblock(doOp,"int i") {
-	diff -= $ref(input#@i);
+	diff -= $ref(neg#@i);
     }
     codeblock(saveResult) {
 	$ref(output) = diff;
     }
     go { 
 	addCode(startOp);
-	for (int i = 2; i <= input.numberPorts(); i++) 
+	for (int i = 1; i <= neg.numberPorts(); i++) 
 	    addCode(doOp(i)); 
 	addCode(saveResult);
     }
-    exectime {return input.numberPorts() + 1;}
+    exectime {return neg.numberPorts() + 1;}
 }

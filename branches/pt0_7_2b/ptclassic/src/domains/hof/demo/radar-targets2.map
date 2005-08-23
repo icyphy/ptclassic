@@ -1,0 +1,17 @@
+# -------------------------------
+#  Name : targets2.map
+#  Description:
+#  This contains the parameters to define the targets; 
+#  their number should be >1 in HOF star parameter.
+#  A target is define by :
+#        ANs  number of samples used to represente the range bin.
+#        ASnr signal to noise ratio in dB.
+#        Adn  the distance of the target in meters.
+# ------------------------------- 
+ANs(1) RNs ANs(2) RNs
+ASnr(1) 40.0 ASnr(2) 55.0
+Adn(1) 6400 Adn(2) 7400
+# The antenna positions AR_ variables are define
+# a hierachical level above via RTR_ variables.
+ARx(1) RTRx ARy(1) RTRy ARz(1) RTRz
+ARx(2) RTRx ARy(2) RTRy ARz(2) RTRz

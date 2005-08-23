@@ -1,17 +1,26 @@
 defstar {
-	name { IntWriteFile }
+	name { WrtFileInt }
 	domain { CG56 }
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
-	version { $Id$ }
+	version { @(#)CG56WrtFileInt.pl	1.13 03/29/97 }
 	author { Chih-Tsung Huang and Jose Pino }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="simulator, Motorola DSP56000"></a>
+<a name="Motorola DSP56000 simulator"></a>
+<a name="file output"></a>
+Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
 	execTime {
-		return (input.bufSize() >= 1) ? 2 : 0;
+		return 2;
 	}
 	input {
 		name {input}
@@ -26,18 +35,12 @@ When run on the simulator, arranges for its input to be logged to a file.
 	state {
 		name { outVal}
 		type { int }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
-	}
-	start {
-		if (input.bufSize() >= 1) {
-			// these attributes allocate memory
-			outVal.setAttributes(A_YMEM|A_NOINIT);
-		}
 	}
 
 	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is >= 1.
+	// outVal state.
 	codeblock (logOut) {
 output $ref(outVal) $val(fileName).sim -RD
 }
@@ -47,9 +50,9 @@ output $ref(outVal) $val(fileName).sim -RD
 	move	a,$ref(outVal)
 	}
         initCode {
-		genMiscCmd(logOut);
+		addCode(logOut,"simulatorCmds");
 	}
 	go {
-		if (input.bufSize() >= 1) gencode(copy);
+		addCode(copy);
 	}
 }

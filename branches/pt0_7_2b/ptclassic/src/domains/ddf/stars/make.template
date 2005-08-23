@@ -1,8 +1,29 @@
-
 # Makefile for Ptolemy DDF stars
-# $Id$
-# Copyright (c) 1990 The Regents of the University of California.
-#				All Rights Reserved.
+# @(#)make.template	1.25	8/4/95
+# Copyright (c) 1990-1995 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -10,47 +31,46 @@
 #
 # This will add the dependencies to the makefile.
 
-# SRCDIR is the directory containing the Ptolemy kernel source.
-SRCDIR = ../..
-DDFDIR = ..
-GPPFLAGS = -g -I$(SRCDIR) -I$(DDFDIR)
-GNU = g++
-GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include -I$(DDFDIR)
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/ddf/stars
 
-# Where to install
-DESTDIR = .
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
 
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) -c  $<
+# DDFDIR is the directory containing DDF domain support
+DDFDIR = $(ROOT)/src/domains/ddf/kernel
+# SDFDIR is the directory containing SDF domain support (also needed)
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-SRCS=LastOfN.cc Repeater.cc Select.cc Switch.cc DownCounter.cc 
+INCL = -I$(DDFDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-OBJS=LastOfN.o Repeater.o Select.o Switch.o DownCounter.o 
+PL_SRCS=\
+DDFCase.pl \
+DDFDownCounter.pl \
+DDFEndCase.pl \
+DDFLastOfN.pl \
+DDFRepeater.pl \
+DDFSelf.pl \
+DDFThresh.pl
 
-HDRS=LastOfN.h Repeater.h Select.h Switch.h DownCounter.h 
+PTLIB =libddfstars.$(LIBSUFFIX)
 
-all:		makefile $(OBJS)
+SRCS=$(PL_SRCS:.pl=.cc)
+OBJS=$(SRCS:.cc=.o)
+HDRS=$(SRCS:.cc=.h)
 
-install:	makefile $(OBJS)
-		mv -f $(OBJS) $(DESTDIR)
+DOMAIN=DDF
+STAR_MK=ddfstars
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
-sources:	$(SRCS) $(HDRS) make.template
+all:		makefile stars_all
 
-clean:
-		rm -f *.o core *~ *#
-depend:
-		makedepend $(GNUINCLUDE) $(SRCS)
+install:	stars_install
 
-makefile:	make.template
-		rm -f makefile
-		cp make.template makefile
-		make -f make.template sources depend  # note: use new SRCS list
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-
 

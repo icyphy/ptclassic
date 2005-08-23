@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,14 +25,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Capability.h      1.0     06/16/99
+ Version: @(#)Capability.h	1.6 08/02/01
 ***********************************************************************/
 #ifndef CAPABILITY_H
 #define CAPABILITY_H
 
 #include <stdio.h>
 #include <assert.h>
-#include "StringList.h"
+#include "StringArray.h"
+#include "CoreList.h"
 #include "acs_starconsts.h"
 
 static const int DEBUG_CAPABILITY=0;
@@ -40,19 +41,18 @@ static const int DEBUG_CAPABILITY=0;
 class Capability {
 
  public:
-  StringList* domains;
-  StringList* architectures;
-  SequentialList* languages;
-
+  StringArray* domains;
+  StringArray* architectures;
+  ACSIntArray* languages;
+  
  public:
   Capability::Capability();
   Capability::~Capability();
   Capability& Capability::operator=(const Capability&);
-  char* Capability::retrieve_string(StringList*,int);
-  int Capability::add_domain(char*);
-  int Capability::add_architecture(char*);
-  int Capability::add_language(int);
-  int Capability::get_language(int);
+  int Capability::add_domain(const char*);
+  int Capability::add_architecture(const char*);
+  int Capability::add_language(const int);
+  int Capability::get_language(const int);
 };
 
 #endif

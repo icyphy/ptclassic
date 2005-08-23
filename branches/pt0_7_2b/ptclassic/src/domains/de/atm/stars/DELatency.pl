@@ -6,13 +6,13 @@ ident {
 defstar{
        name {Latency}
        domain {DE}
-       version {$Id$}
-       location {ATM demo library}
+       version {@(#)DELatency.pl	1.7	06 Oct 1996}
+       location { DE ATM library }
        author { Allen Lao }
        copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
@@ -21,13 +21,14 @@ Measures packet traversal-time statistics for a set of traffic-
 loaded trunk lines.
        }
 
-       explanation {
+	htmldoc {
 Produces several statistics: on a per-packet basis, it passes through
-VoiceData type packets received on "input" to "output" and also
-each packet's individual traversal time on the "latency" port.
-When a "demand" is detected, it produces average latency statistics
-for each individual trunk line on "avgLatencyIndiv" port and over all
-trunk lines on "avgLatencyAll" port.
+<tt>VoiceData</tt>
+type packets received on <i>input</i> to <i>output</i> and also
+each packet's individual traversal time on the <i>latency</i> port.
+When a <i>demand</i> is detected, it produces average latency statistics
+for each individual trunk line on <i>avgLatencyIndiv</i> port and over all
+trunk lines on <i>avgLatencyAll</i> port.
        }
 
        hinclude {"VoiceData.h"}
@@ -122,7 +123,7 @@ trunk lines on "avgLatencyAll" port.
 	     OutDEPort *avgport;
 
 	     Envelope  inEnv;
-	     VoiceData*  v;
+	     const VoiceData*  v;
       
 	     float  del, delayTotal;
 	     int  count, countTotal;
@@ -140,7 +141,7 @@ trunk lines on "avgLatencyAll" port.
 		    // get input packet
 	            iport->get().getMessage(inEnv);
 		    if (!voiceCheck(inEnv,*this)) return;
-		    v = (VoiceData*) inEnv.myData();
+		    v = (const VoiceData*) inEnv.myData();
 
 		    // calculate latency for this packet
 		    del = arrivalTime - (v->retStamp());

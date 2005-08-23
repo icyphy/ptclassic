@@ -2,25 +2,26 @@ defstar {
 	name { UpSample }
 	domain { CG56 }
 	desc { 
-Upsample by a factor (default 2), filling with fill (default 0.0).  The
+Upsample by a factor (default 2), filling with "fill" (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
-is to output it first (phase = 0). The maximum phase is "factor" - 1.
+is to output it first (phase of 0). The maximum phase is "factor" - 1.
 	}
-	version { $Id$ }
-	author { J. Pino, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-
+	version { @(#)CG56UpSample.pl	1.20   03/29/97 }
+	author { Jose Luis Pino, ported from Gabriel }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { CG56 main library }
 	input {
 		name {input}
-		type {FIX}
+		type {anytype}
 	}
 	output {
 		name {output}
-		type {FIX}
-		attributes { P_CIRC }
+		type {=input}
 	}
 	state {
 		name {factor}
@@ -30,7 +31,6 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 		attributes { A_SETTABLE }
 	}
 	state {
-	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
@@ -40,30 +40,38 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	state {
 		name {fill}
 		type {FIX}
-		default {0}
+		default {0.0}
 		desc { Value to fill the output block. }
 		attributes { A_SETTABLE }
 	}
-	codeblock (sendsample) {
-	move	$ref(output),r1
-	move	$size(output),m1
-	move	$ref(input),x0
-	move	$val(fill),a		x0,x:(r1)+
+	setup {
+		output.setSDFParams(int(factor),int(factor)-1);
+		if (int(phase) >= int(factor))
+			Error::abortRun(*this, ": phase must be < factor");
+	}
+	codeblock (initfill) {
+	move	#$addr(output),r1
+	move	#$val(fill),a
 	}
 	codeblock (repeatcode) {
-	rep	#($val(factor)-1)
+	rep	#$size(output)
 	}
 	codeblock (fillcode) {
-	move	a,x:(r1)+
+	move	a,$mem(output):(r1)+
+	}
+	initCode {
+		addCode (initfill);
+		if (int(factor) > 1) addCode(repeatcode);
+		addCode(fillcode);
+	}
+	codeblock (sendsample) {
+	move	$ref(input),a
+	move	a,$ref2(output,phase)
 	}
 	go {
-		gencode(sendsample);
-		if (factor > 1) {
-			if (factor > 2) gencode(repeatcode);
-			gencode(fillcode);
-		}
+		addCode(sendsample);
 	}
 	execTime {
-		return factor + 2;
+		return 2;
 	}
 }

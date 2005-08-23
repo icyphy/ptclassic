@@ -7,13 +7,13 @@ from a bus.
 	}
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow a bus (a multi-port) to be routed to several
 different destination stars, this star is written to allow the user to
 create two copies of the same bus.  The user can then route the two identical

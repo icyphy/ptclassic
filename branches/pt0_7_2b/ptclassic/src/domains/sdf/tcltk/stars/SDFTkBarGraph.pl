@@ -2,18 +2,19 @@ defstar {
 	name {TkBarGraph}
 	domain {SDF}
 	desc {
-Takes any number of inputs and dynamically
-displays their value in bar-chart form.
+Dynamically display the value of any number of input signals in bar-chart form.
+The first 12 input signals will be assigned distinct colors. After that,
+the colors are repeated. The colors can be controlled using X resources.
 	}
-	version { $Id$ }
-	author { E. A. Lee }
+	version { @(#)SDFTkBarGraph.pl	1.12	10/25/95 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	hinclude { "ptk.h" }
 	hinclude { "BarGraph.h" }
 	inmulti {
@@ -63,36 +64,68 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { "+0+0" }
 		desc { Width of the bar graph in centimeters }
 	}
+	defstate {
+	        name {updateSize}
+	        type {int}
+	        default {1}
+	        desc {
+To speed up the display, this many bars are updated at once
+		}
+	}
 	protected {
 		BarGraph bar;
-		int count;
+		int count, batchCount;
+		char *labCopy;
+		char *posCopy;
+	}
+	constructor {
+	    labCopy = posCopy = 0;
+	}
+	destructor {
+	    delete [] labCopy;
+	    delete [] posCopy;
 	}
 	setup {
-	    if(float(top) <= float(bottom)) {
+	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
+	    input.setSDFParams(1, int(updateSize) - 1);
+	}
+	begin {
+	    // Need to make non-const copies of "position" and "label"
+	    delete [] posCopy;
+	    posCopy = savestring((const char*)position);
+	    delete [] labCopy;
+	    labCopy = savestring((const char*)label);
 	    bar.setup(this,
-		(char*)label,
+		labCopy,
 		input.numberPorts(),
-		(int)number_of_bars,
-		(float)top,
-		(float)bottom,
-		(char*)position,
-		(float)bar_graph_width,
-		(float)bar_graph_height);
-	    count = 0;
+		(int) number_of_bars,
+		(double) top,
+		(double) bottom,
+		posCopy,
+		(double) bar_graph_width,
+		(double) bar_graph_height);
+	    count = batchCount = 0;
 	}
 	go {
+	  if (++batchCount == (int)updateSize) {
+	    batchCount = 0;
 	    MPHIter nexti(input);
 	    PortHole *p;
-	    int i=0;
-	    while ((p = nexti++) != 0) {
-		if(bar.update(i++,count,(*p)%0) == FALSE) {
-		    Error::abortRun(*this, "failed to update bar chart");
-		    return;
+	    // Iterate over the number of points to be plotted at once.
+	    for (int j = (int)updateSize-1; j >= 0; j--) {
+	      int i=0;
+	      while ((p = nexti++) != 0) {
+		if(bar.update(i++,count,(*p)%j) == FALSE) {
+		  Error::abortRun(*this, "failed to update bar chart");
+		  return;
 		}
+	      }
+	      nexti.reset();
+	      count++;
+	      if(count >= int(number_of_bars)) count=0;
 	    }
-	    count++;
-	    if(count >= int(number_of_bars)) count=0;
+	  }
 	}
 }

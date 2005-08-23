@@ -6,9 +6,9 @@
 
 /*******************************************************************
  SCCS Version identification :
-$Id$
+@(#)DDFWormhole.h	1.2 01/06/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1998-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,8 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer : Soonhoi Ha
- Date of Creation : 6/15/90
+ Programmer : Bilung Lee
+ Date of Creation : 10/28/98
 	
 ********************************************************************/
 #include "StringList.h"

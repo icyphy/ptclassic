@@ -1,5 +1,5 @@
-#ifndef _QSParProcs_h
-#define _QSParProcs_h
+#ifndef _HuParProcs_h
+#define _HuParProcs_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -7,10 +7,32 @@
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)HuParProcs.h	1.10	7/19/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
 Date of last revision: 
@@ -18,79 +40,32 @@ Date of last revision:
 *****************************************************************/
 
 #include "NamedObj.h"
-#include "QSUniProc.h"
-#include "QSGraph.h"
-#include "ParProcessors.h"
+#include "HuGraph.h"
+#include "DLParProcs.h"
 
 /////////////////////////
-// class QSParProcs //
+// class HuParProcs //
 /////////////////////////
 
 // A class for managing the parallel processor schedules.
 
-class QSParProcs : public ParProcessors {
+class HuParProcs : public DLParProcs {
+
+public:
+	HuParProcs(int pNum, MultiTarget* t);
+
+	/* virtual */ void scheduleSmall(DLNode*);
+
+protected:
+	// Fire a node. Check the runnability of descendants.
+	/* virtual */ void fireNode(DLNode*);
 
 private:
-	// global clock
-	int clock;
+	// redefine virtual methods
+	/* virtual */ void prepareComm(DLNode*);	//  do nothing
+	/* virtual */ void scheduleIPC(int);	//  do nothing
 
-	// schedule a node into a designated processor
-	void assignNode(QSNode* pd, int leng, int pNum);
-
-	// The program graph to be scheduled
-	QSGraph* myGraph;
-
-	// processors
-	QSUniProc* schedules;
-
-	// advance the global clock, and identify the nodes which become
-	// runnable at that time.
-	void advanceClock(int ix);
-
-	// set the processor index for big blocks.
-	void setIndex(int v);
-public:
-	// constructor
-	QSParProcs(int pNum, BaseMultiTarget* t);
-
-	~QSParProcs();
-
-	// initialize
-	void initialize(QSGraph*);
-
-	// get the i-th processor. Processors are indexed from 0 to
-	// numProcs-1.
-	QSUniProc* getSchedule(int num) { return &(schedules[pId[num]]); }
-
-	UniProcessor* getProc(int num); 
-
-  	// determine the pattern of processor availability before scheduling
-  	// a dynamic construct (or non-atomic node).
-  	void determinePPA(IntArray& avail);
-
-	// renew PPA since the processor of "spot" index got
-	// assigned a new node.
-	void renewPatternIndex(int spot);
-
-	// Before schedule an atomic block, check whether the preferred
-	// processor is available or not.  If available, assign the node
-	// to the processor.  If not available, but exchangeable, exchange
-	// the scheduled node.
-	void checkPreferredProc(int pNum);
-
-	// schedule blocks.  Depending on the blocks, there are four
-	// different methods. Return the current scheduler clock.
-	// scheduleSmall: schedule a normal atomic block on a first
-	//		  available processor.
-	// scheduleBig: schedule a non-atomic block (such as dynamic 
-	//		construct) using more than one processors.
-	// scheduleIdle: When there is no runnable block at current time,
-	//		 increase the scheduler clock to make the first
-	//		 available processor finish the current execution
-	//		 and provide some runnable nodes.
-	void scheduleSmall(QSNode* pd);
-	void scheduleBig(QSNode* node, int opt, IntArray& avail);
-	int scheduleIdle();
+	int isCandidate(int);	// determine if specified proc is in the "candidate" array
 };
 
 #endif

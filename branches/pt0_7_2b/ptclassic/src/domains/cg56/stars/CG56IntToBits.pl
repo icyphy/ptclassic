@@ -6,17 +6,15 @@ Read the least significant nBits bits from an integer input,
 and output the bits as integers serially on the output,
 most significant bit first.
     }
-    version { $Id$ }
+    version { @(#)CG56IntToBits.pl	1.7 03/29/97 }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1994 The Regents of the University of California.
-	All rights reserved.
-	See the file $PTOLEMY/copyright for copyright notice,
-	limitation of liability, and disclaimer of warranty provisions.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 demo library }
-    explanation {
-    }
+    location { CG56 main library }
     input {
 	name {input}
 	type {int}
@@ -42,17 +40,14 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	move    #$addr(output)+$val(nBits)-1,r0
+	move    #>($addr(output)+$val(nBits)-1),r0
 	move    $ref(input),a1
+	move	#>1,x0
         do      #$val(nBits),$label(decompress)
-        ror     a
-	jcc     $label(clear)
-        bset    #0,x:(r0)-
-        jmp     $label(continue)      
-$label(clear)
-	bclr    #0,x:(r0)-
-$label(continue)
-	nop
+	clr	b
+        lsr     a
+	tcs     x0,b
+	move	b,x:(r0)-
 $label(decompress)
     }
     go {

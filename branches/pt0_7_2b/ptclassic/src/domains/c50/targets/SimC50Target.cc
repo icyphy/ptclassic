@@ -1,7 +1,7 @@
 static const char file_id[] = "SimC50Target.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SimC50Target.cc	1.4	05/28/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "SimC50Target.h"
 #include "KnownTarget.h"
 #include "TITarget.h"
@@ -266,8 +267,8 @@ int SimC50Target :: runCode() {
 	      dataMem = dataMem + atoi(tokenPtr);
 	    else{
  
-	      Error::message(*this, "A memory allocation directive except than 
-                                    .text .data .sect and .bss is not allowed");
+	      Error::message(*this, "A memory allocation directive other than"
+                      ".text .data .sect and .bss is not allowed");
 	      return(FALSE); 
 	    }
 	  }
@@ -316,7 +317,7 @@ void SimC50Target::writeFloat(double val) {
 
 }
 
-void TITarget::writeFix(double val) {
+void SimC50Target::writeFix(double val) {
 	*defaultStream << "\t.word\t" << int(limitFix(val)*(pow(2,15)-1)) << "\n";
 }
 

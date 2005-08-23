@@ -7,11 +7,11 @@ defstar
 Just like StereoOut, except that a Tk slider is put in the master
 control panel to control the volume and balance.
     }
-    version { @(#)CGCVISTkStereoOut.pl	1.2 08/08/96 }
+    version { @(#)CGCVISTkStereoOut.pl	1.4 04/08/97 }
     author { Sunil Bhave }
     location { CGC Tcl/Tk library }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -52,14 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".low", "$starSymbol(scale2)", "  $val(balance)");
       }
       
-      /* Test code for the new custom control panels */
-      connectControl("$val(starName)",
-		     "gain",
-		     $starSymbol(setVolume));
-
-      connectControl("$val(starName)",
-		     "balance",
-		     $starSymbol(setBalance));
     }
     codeblock (setVolumeDef) {
         static int $starSymbol(setVolume)(dummy, interp, argc, argv)

@@ -28,17 +28,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Paul Haskell
-Version: $Id$
+Version: @(#)ptdspZigZag.h	1.4 7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
+extern void Ptdsp_ZigZagScan (const double* inImg, double* outImg, int width,
 			      int height, int bSize);
-extern void Ptdsp_ZigZagInverse (double * inImg, double * outImg,
-				 int width, int height,  int bSize);
+extern void Ptdsp_ZigZagInverse (const double* inImg, double* outImg,
+				 int width, int height, int bSize);
 
 #ifdef __cplusplus
 }

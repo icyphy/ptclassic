@@ -1,12 +1,12 @@
-static const char file_id[] = "PolisScheduler.cc";
+static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:
-@(#)PolisScheduler.cc	@(#)PolisScheduler.cc	1.2 02/18/98
+Version identification:  @(#)DERCScheduler.cc	1.18 09/21/99
  
 Author: Mudit Goel
         Neil Smyth
+        Claudio Passerone
 
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1997-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "type.h"
-#include "PolisScheduler.h"
+#include "DERCScheduler.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
@@ -46,7 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <assert.h>
 #include "checkConnect.h"
 #include "DataStruct.h"
-#include "DEPolis.h"
+#include "DERCStar.h"
 
 extern const char DEdomainName[];
 
@@ -58,20 +58,20 @@ extern const char DEdomainName[];
 ////////////////////////////
 // displaySchedule
 ////////////////////////////
-StringList PolisScheduler :: displaySchedule () {
-    return "{ { scheduler \"Calendar queue for Polis run-time scheduler\" } }";
+StringList DERCScheduler :: displaySchedule () {
+    return "{ { scheduler \"Calendar queue for Resource Contention(RC) run-time scheduler\" } }";
 }
 
 
 ////////////////////////////
 // setup
 ////////////////////////////
-void PolisScheduler :: setup () {
+void DERCScheduler :: setup () {
     clearHalt();
     currentTime = 0;
 
     if (! galaxy()) {
-        Error::abortRun("Polis scheduler has no galaxy defined");
+        Error::abortRun("DERC scheduler has no galaxy defined");
         return;
     }
 
@@ -92,62 +92,67 @@ void PolisScheduler :: setup () {
         Error::abortRun(*galaxy(),
         "zero timeScale is not allowed in DE.");
     }
+
+    // Added by Claudio Passerone 09/24/1998
+    // Set indexValue of stars
+    setStarIndices(*galaxy());
+    resourceList = getResources();
 }
 
 
 
 	///////////////////////////////////////////////////
-	// The following are the Polis specific methods.
+	// The following are the DERC specific methods.
 	///////////////////////////////////////////////////
 
 // Gets the list of all distinct resources and sets the resourcePointer in all
 // stars to the appropriate new Resource object. Currently each Star is 
 // restricted to accessing one resource
-SequentialList* PolisScheduler :: getResources() {
+SequentialList* DERCScheduler :: getResources() {
 
     GalStarIter nextStar(*galaxy());
     DEStar* star;
-    DEPolis *pStar;
+    DERCStar *rcStar;
     char* newResourceName;
     int found = 0;
     Resource* reslink;
 	
     SequentialList* resList = new SequentialList();
     while ((star = (DEStar*) nextStar++) != 0) {
-	if (star->isRCStar) {
-	    pStar = (DEPolis*)s;
-	    newResourceName = pStar->resource;; 	
-	    pStar->interruptQ = (PolisEventQ*)interruptQueue();
-	    if (strcmp(newResourceName, "HW")) {	 //Not a HW star
-		found = 0;
-		ListIter nextResource(*resList);
-		while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
-		    if (strcmp (newResourceName, reslink->name) == 0){
-			found = 1;   // Resource already exists
-			pStar->resourcePointer = reslink;
+	    if (star->isRCStar && ((DERCStar*)star)->needsSharedResource < 2) {
+	        rcStar = (DERCStar*)star;
+	        newResourceName = rcStar->resource;
+            if (rcStar->needsSharedResource) {	 //Not a HW star
+		        found = 0;
+		        ListIter nextResource(*resList);
+		        while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
+		            if (strcmp (newResourceName, reslink->name) == 0) {
+    			        found = 1;   // Resource already exists
+	    		        rcStar->resourcePointer = reslink;
 
                         // Now check that this Star has the same scheduling
                         // policy as all the other Stars using this resource
-                        if (pStar->schedPolicy != reslink->schedPolicy) {
-                            Error::abortRun("Stars with different scheduling \
-policies executing on same resource");
-                            return FALSE;
-                        }
-		    }
-		}
-		if (found == 0) {
-                    int schedPolicy = (pStar->schedPolicy);
+//                        Deleted by Claudio Passerone
+//                        if (rcStar->schedPolicy != reslink->schedPolicy) {
+//                            Error::abortRun("Stars with different scheduling policies executing on same resource");
+//                            return FALSE;
+//                        }
+                    }
+		        }
+		        if (found == 0) {
+//                    Deleted by Claudio Passerone
+//                    int schedPolicy = (rcStar->schedPolicy);
+                    int schedPolicy = -1;
                     Resource* newResource = new Resource(newResourceName, schedPolicy, this); 
-		    resList->append(newResource);
-		    pStar->resourcePointer = newResource;
+                    resList->append(newResource);
+    		        rcStar->resourcePointer = newResource;
                 }
+	        } else {
+                // This is a HW star
+		        Resource* newResource = new Resource("HW", -1, this);
+                rcStar->resourcePointer = newResource;	
+	        }
 	    }
-	    else { // This is a HW star
-		// 1 indicates that the resource doesn't allow preemption
-		Resource* newResource = new Resource("HW", NonPreemptive, this);
-		pStar->resourcePointer = newResource;	
-	    }
-	}
     }
     return resList;
 }
@@ -161,60 +166,33 @@ policies executing on same resource");
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 
-int PolisScheduler :: run () {
-    resourceList = getResources();
+int DERCScheduler :: run () {
+//    Deleted by Claudio Passerone  9/24/1998
+//    Added in the setup() method
+//    resourceList = getResources();
 
     if (SimControl::haltRequested() || !galaxy()) {
         Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
     }
-
+    
     double level = 0;
-    int dummyFlag = -1;
     
     while (TRUE) {      
-        int qFlag = -1;
 	int bFlag = FALSE;  // flag = TRUE when the terminal is on the
         // boundary of a wormhole of DE domain.
-
+        
 	// fetch the earliest event.
-	CqLevelLink* f  = NULL;
-	CqLevelLink* ev  = eventQ.get();
-	CqLevelLink* interr  = interruptQ.get();
+	CqLevelLink* f  = eventQ.get();
         
 	// Choosing the one with the lowest level
-	if ((ev == NULL) && (interr == NULL)) break;
-	else if ((ev != NULL) && (interr != NULL)) {
- 	    if (( ev->level) < (it->level)) {
-                f = ev;
-		ev = NULL;
-                interruptQ.pushBack(interr);
-                qFlag = 0;
-            }
-            else {
-                f = interr;
-		interr = NULL;
-                eventQ.pushBack(ev);
-                qFlag = 1;
-            }
-	}
-	else if (ev != NULL) { 
-	    f = ev; 
-	    ev = NULL;
-	    qFlag = 0; 
-	}
-	else { 
-	    f = interr; 
-	    interr = NULL;
- 	    qFlag = 1; 
-	}
-        
-	level    = f->level;
+	if (f == NULL) break;
+        level    = f->level;
+        //printf("\thave event in scheduler for star %s at time %f\n\n", ((Event*)f->e)->dest->parent()->asStar().name(), f->level);fflush(0);
      
 	// if level > stopTime, RETURN...
 	if (level > stopTime)	{
-            if (qFlag == 0) eventQ.pushBack(f);		// push back
-            else interruptQ.pushBack(f);
+            eventQ.pushBack(f);		// push back
             // set currentTime = next event time.
             // FIXME : need to resolve time issue (real time vs instants)
             currentTime = stopTime/relTimeScale;
@@ -228,28 +206,22 @@ int PolisScheduler :: run () {
 	    // Try to give a good error message.
             Event* ent = (Event*) f->e;
             PortHole* src = ent->dest->far();
+            //printf("now is %f, event at time %f\n", currentTime, level);fflush(0);
             Error::abortRun(*src, ": event from this porthole is in the past!");
             return FALSE;  
 	}        
 	// set currentTime
 	currentTime = level;
        
-        // event from the interruptQ
-	if (qFlag == 1) {
-	    PolisEvent* pEvent = (PolisEvent*)(f->e);
-	    DEPolis* pStar = (DEPolis*)(pEvent->src);
-            pStar->arrivalTime = level;
-           // interruptQ.putFreeLink(f);
-            pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
-	}
         //A new event, never seen before
-	else if (f->dest->isA("DEPolis")) {
-	    PolisEvent* pEvent = (PolisEvent*)(f->e);
-	    DEPolis* pStar = (DEPolis*)(f->dest);
-            pStar->arrivalTime = level;
- 	 //   eventQ.putFreeLink(f);
-             pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime);
-         }
+	if (((DEStar*)f->dest)->isRCStar && ((DERCStar*)f->dest)->needsSharedResource < 2) {
+            DERCStar* pStar = (DERCStar*)(f->dest);
+            //pStar->arrivalTime = level;
+            //printf("updating arrivalTime of Star  %s, to time %f\n", ((Event*)f->e)->dest->parent()->asStar().name(), level);fflush(0);
+ 	    // eventQ.putFreeLink(f);
+            // this method will only return false if star fails to run(error)
+            if (!(pStar->resourcePointer->newEventFromEventQ(f, currentTime))) return FALSE;
+        }
         else {
             // check if the normal event is fetched
 	    //
@@ -290,7 +262,8 @@ int PolisScheduler :: run () {
 		ds->startNewPhase();
 	    }
 	    // put the LinkList into the free pool for memory management.
-	//    eventQ.putFreeLink(f);
+   	    // LL: uncommented 9/16/99
+	    eventQ.putFreeLink(f);
             
 	    // Check if there is another event launching onto the
 	    // same star with the same time stamp (not the same port)...
@@ -322,14 +295,16 @@ int PolisScheduler :: run () {
 		    if (tl) {
 		        int success = ((InDEPort*) tl)->getFromQueue(ee->p);
 		        if (success) {
-		//	    eventQ.putFreeLink(h);
+			   // LL: uncommented 9/16/99
+		           eventQ.putFreeLink(h);
 			}
 		        else {
 			    h->next = store;
 			    store = h;
 		        }
 		    } else if (!tl) {
-		   //     eventQ.putFreeLink(h);
+			 // LL: uncommented 9/16/99
+		         eventQ.putFreeLink(h);
 		    } 
 	        } else {
 		    // need to put back since we did a get
@@ -367,7 +342,7 @@ int PolisScheduler :: run () {
 ////////////////////////////
 
 // fetch an event on request.
-int PolisScheduler :: fetchEvent(InDEPort* p, double timeVal) 
+int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal) 
 {
     CqLevelLink *store = NULL;
     eventQ.DisableResize();
@@ -385,7 +360,8 @@ int PolisScheduler :: fetchEvent(InDEPort* p, double timeVal)
             // if same destination star with same time stamp..
             if (tl == p) {
                 if (tl->getFromQueue(ent->p)){
-             //       eventQ.putFreeLink(h);
+		      // LL: uncommented 9/16/99
+                    eventQ.putFreeLink(h);
                 }
                 else
                     eventQ.pushBack(h);
@@ -406,4 +382,4 @@ int PolisScheduler :: fetchEvent(InDEPort* p, double timeVal)
 }
 
 // isA
-ISA_FUNC(PolisScheduler,DEBaseSched);
+ISA_FUNC(DERCScheduler,DEBaseSched);

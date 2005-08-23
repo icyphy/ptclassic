@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Connectivity.cc      1.0     06/16/99
+ Version: @(#)Connectivity.cc	1.5 08/02/01
 ***********************************************************************/
 #include "Connectivity.h"
 
@@ -218,6 +218,7 @@ int Connectivity::remove_node(const int node_no)
 }
 
 
+// Could be neater, but want to make sure;)
 int Connectivity::remove_allnodes()
 {
   node_count=0;
@@ -225,6 +226,10 @@ int Connectivity::remove_allnodes()
   delete pin_id;
   delete pin_type;
   delete pin_signal;
+  acs_id=new ACSIntArray;
+  pin_id=new ACSIntArray;
+  pin_type=new ACSIntArray;
+  pin_signal=new ACSIntArray;
 
   // Return happy condition
   return(1);
@@ -263,6 +268,13 @@ int Connectivity::query_pinid(const int index)
 {
   return(pin_id->query(index));
 }
+
+// Essentially return the number of node_counts
+int Connectivity::connected(void)
+{
+  return(node_count);
+}
+
 
 
 int Connectivity::dump(void)

@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)HWSchedule.cc      1.0     06/16/99
+ Version: @(#)HWSchedule.cc	1.7 08/02/01
 ***********************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -139,7 +139,7 @@ int MEMPort::init_pt(int seqlen)
       return(-1);
     }
   else
-    mem_timing=new IntArray(seqlen,UNKNOWN);
+    mem_timing=new ACSIntArray(seqlen,UNKNOWN);
 
   // Return happy condition
   return(1);
@@ -230,19 +230,19 @@ int MEMPort::assign_snkcore(ACSCGFPGACore* fpga_core,int act)
 Pin::Pin()
 {
   pin_count=0;
-  major_bit=new IntArray;
-  vector_length=new IntArray;
-  min_vlength=new IntArray;
-  max_vlength=new IntArray;
-  word_lock=new IntArray;
-  prec_lock=new IntArray;
-  netlist_ids=new IntArray;
+  major_bit=new ACSIntArray;
+  vector_length=new ACSIntArray;
+  min_vlength=new ACSIntArray;
+  max_vlength=new ACSIntArray;
+  word_lock=new ACSIntArray;
+  prec_lock=new ACSIntArray;
+  netlist_ids=new ACSIntArray;
 
-  data_type=new IntArray;
-  pin_type=new IntArray;
-  pin_assigned=new IntArray;
-  pin_limit=new IntArray;
-  pin_priority=new IntArray;
+  data_type=new ACSIntArray;
+  pin_type=new ACSIntArray;
+  pin_assigned=new ACSIntArray;
+  pin_limit=new ACSIntArray;
+  pin_priority=new ACSIntArray;
 
   connect=NULL;
   delays=NULL;
@@ -1283,7 +1283,7 @@ Constants::Constants(void)
 {
   count=0;
   storage=NULL;
-  types=new IntArray;
+  types=new ACSIntArray;
 }
 Constants::~Constants(void)
 {
@@ -1558,7 +1558,12 @@ int Constants::query_bitsize(int index)
     }
   
   // log2(x)=log(x)/log(2)
+
+#ifdef PTHPPA_CFRONT
+  long abs_value=(long) abs((double)value);
+#else
   long abs_value=(long) abs(value);
+#endif
   int bit_count=0;
   if (abs_value==0)
     bit_count=1;

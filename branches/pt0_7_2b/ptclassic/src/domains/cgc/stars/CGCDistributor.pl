@@ -1,7 +1,7 @@
 defstar {
 	name { Distributor }
 	domain { CGC }
-	version {$Id$ }
+	version {@(#)CGCDistributor.pl	1.7	7/11/96 }
 	desc {
 Takes one input stream and synchronously splits it into N output streams,
 where N is the number of outputs.  It consumes N*B input particles,
@@ -10,9 +10,9 @@ the next B particles to the next output, etc.
 	}
 	author { E. A. Lee}
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
@@ -30,14 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {1}
 		desc {Number of particles in a block.}
 	}
-	state {
-		name {ix}
-		type { int }
-		default { 1 }
-		desc { index for multiple output trace }
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
-	start {
+	setup {
 		int n = output.numberPorts();
 		input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
@@ -47,21 +40,21 @@ limitation of liability, and disclaimer of warranty provisions.
 		StringList out;
 		if(int(blockSize) > 1) out << "\tint j;\n";
 		for (int i = output.numberPorts() - 1; i >= 0; i--) {
-		   ix = output.numberPorts() - i;
+		   int port = output.numberPorts() - i;
 		   if(int(blockSize) > 1) {
-			out << "\tfor (j = ";
-			out << int(blockSize)-1;
-			out << "; j >= 0; j--)\n";
-			out << "\t\t$ref2(output#ix,j) = $ref2(input,j+";
-			out << i*int(blockSize);
+			out << "\tfor (j = " << int(blockSize)-1
+			    << "; j >= 0; j--)\n" << "\t\t$ref2(output#"
+			    << port << ",j) = $ref2(input,j+"
+			    << i*int(blockSize) << ");\n";
 		   } else {
-			out << "\t$ref2(output#ix,0) = $ref2(input,";
-			out << i;
+			out << "\t$ref2(output#" << port
+			    << ",0) = $ref2(input," << i << ");\n";
 		   }
-		   out << ");\n";
-		   addCode(out);
-		   out.initialize();
 		}
+		addCode(out);
+	}
+	exectime {
+		return int(blockSize)*2*output.numberPorts();
 	}
 }
 

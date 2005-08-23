@@ -1,5 +1,5 @@
-#ifndef _PTDSPMuLaw_h
-#define _PTDSPMuLaw_h 1
+#ifndef _ptdspMuLaw_h
+#define _ptdspMuLaw_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -28,14 +28,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: J. T. Buck
-Version: $Id$
+Version: @(#)ptdspMuLaw.h	1.7 04/27/97
 */
+
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-unsigned char PTDSPMuLaw( int sample );
+unsigned char Ptdsp_LinearToPCMMuLaw(int sample);
+
+int Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte);
+
+int Ptdsp_WriteSunMuLawHeader(FILE *fp);
 
 #ifdef __cplusplus
 }

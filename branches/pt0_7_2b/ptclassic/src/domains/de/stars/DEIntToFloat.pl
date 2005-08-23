@@ -1,7 +1,7 @@
 defstar {
 	name { IntToFloat }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DEIntToFloat.pl	1.1 02/27/97 }
 	author { Mike J. Chen, John S. Davis, II }
 	copyright {
 Copyright (c) 1997 The Regents of the University of California.

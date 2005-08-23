@@ -1,10 +1,32 @@
 static const char file_id[] = "DCParProcs.cc";
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DCParProcs.cc	1.10	12/08/97
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 Date of last revision: 5/92 
@@ -16,55 +38,10 @@ Date of last revision: 5/92
 
 #include "DCParProcs.h"
 #include "DCGraph.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 
-			/////////////////////
-			///  Constructor  ///
-			/////////////////////
-DCParProcs::DCParProcs(int n, BaseMultiTarget* t) : ParProcessors(n,t) {
-	LOG_NEW; schedules = new DCUniProc[n];
-	SCommNodes.initialize();
-	commCount = 0;
-}
-
-UniProcessor* DCParProcs :: getProc(int num) { return getSchedule(num); }
-
-			////////////////////
-			///  Destructor  ///
-			////////////////////
-
-DCParProcs::~DCParProcs() {
-	LOG_DEL; delete [] schedules;
-	SCommNodes.removeNodes();
-}
-
-			////////////////////
-			///  initialize  ///
-			////////////////////
-void DCParProcs::initialize() {
-	commCount = 0;
-	ParProcessors :: initialize();
-}
-
-// copy node lists
-static void copyNodes(DCNodeList& from, DCNodeList& to) {
-	to.initialize();
-	DCNodeListIter niter(from);
-	DCNode* node;
-	while ((node = niter++) != 0)
-		to.append(node);
-}
-
-// find the earliest time when all ancestors are scheduled.
-static int ancestorsFinish(DCNode* node) {
-	int finish = 0;
-	DCAncestorIter iter(node);
-	DCNode *pg;
-	while ((pg = iter++) != 0) {
-		if (pg->getFinishTime() > finish)
-			finish = pg->getFinishTime();
-	}
-	return finish;
+ParNode* DCParProcs :: createCommNode(int i) {
+	LOG_NEW; return new DCNode(i);
 }
 
 			//////////////////
@@ -76,117 +53,17 @@ void DCParProcs::saveBestResult(DCGraph* graph) {
 	graph->copyInfo();
 
 	// for communication nodes
-	DCNodeListIter Noditer(SCommNodes);
+	EGNodeListIter Noditer(SCommNodes);
 	DCNode *nodep;
-	while ((nodep = Noditer++) != 0) {
+	while ((nodep = (DCNode*) Noditer++) != 0) {
 		nodep->saveInfo();
 	}
 }
 
-			/////////////////////
-			///  listSchedule ///
-			/////////////////////
-// The list scheduler which obtains the makespan.  It finds all the
-//      instances of interprocessor communication, constructs
-//      new DCNodes to represent them, and schedules them along
-//      with the other DCNodes.
-int DCParProcs :: listSchedule(DCGraph* graph) {
-
-	// runnable nodes
-	DCNodeList readyNodes;
-	copyNodes(graph->InitNodes, readyNodes);
-
-	// reset the graph
-	graph->replenish(0);
-
-	// find communication nodes and insert them into the graph.
-	findCommNodes(graph);
-
-	while (readyNodes.mySize() > 0) {
-		DCNode* node = readyNodes.takeFromFront();
-		DCUniProc* p = getSchedule(node->whichProc());
-
-		// compute the earliest schedule time
-		int start = ancestorsFinish(node);
-		
-		// If node is a comm node, call topology dependent section
-		// to see if there are any constraints
-		if (node->getType() < 0) {
-			int t = mtarget->scheduleComm(node, start);
-			if (start < t) start = t;
-		}
-		
-		// schedule node
-		p->addNode(node, start);
-
-		// check whether any descendant is runnable after this node.
-		DCDescendantIter iter(node);
-		DCNode* n;
-		while ((n = iter++) != 0) {
-			if (n->fireable())
-				graph->sortedInsert(readyNodes, n, 1);
-		}
-	}
-	return getMakespan();
-}
-
-			///////////////////////
-			///  findCommNodes  ///
-			///////////////////////
-// Makes send and receive DCNodes for each interprocessor communication.
-// Want to splice these into tempAncs and tempDescs for list scheduling.
-
-void DCParProcs::findCommNodes(DCGraph* graph) {
-
-	// Make sure the list of communication nodes is clear
-	SCommNodes.removeNodes();
-
-	DCIter iter(*graph);
-	DCNode *pg, *desc;
-	while ((pg = iter++) != 0) {
-		EGGateLinkIter giter(pg->descendants);
-		EGGate* g;
-		while ((g = giter++) != 0) {
-			DCNode* desc = (DCNode*)(g->farEndNode());
-			int from = pg->whichProc();
-			int to = desc->whichProc();
-			if (from != to) {
-				int num = g->samples();
-
-				// make comm nodes.
-				// 1. compute communication times.
-				int sTime = mtarget->commTime(from,to,num,0);
-				int rTime = mtarget->commTime(from,to,num,1);
-
-				// 2. make send and receive nodes
-				LOG_NEW; DCNode* snode = new DCNode(-1);
-				snode->assignProc(from);
-				snode->assignSL(pg->getSL() + 1);
-				snode->setExTime(sTime);
-				
-				LOG_NEW; DCNode* rnode = new DCNode(-2);
-				rnode->assignProc(to);
-				rnode->assignSL(desc->getSL());
-				rnode->setExTime(rTime);
-
-				// 3. insert them into the graph.
-				pg->connectedTo(snode);
-				snode->connectedTo(rnode);
-				rnode->connectedTo(desc);
-
-				SCommNodes.insert(snode);
-				SCommNodes.insert(rnode);
-			}
-		}
-	}
-	// Set the communcation node count for the schedule
-	commCount = (int)(SCommNodes.mySize() / 2);
-}
-
 // reset the visit flag of nodes in the list
-static void resetVisitFlag(DCNodeList& nlist) {
-	DCNodeListIter iter(nlist);
-	DCNode *eg;
+static void resetVisitFlag(EGNodeList& nlist) {
+	EGNodeListIter iter(nlist);
+	EGNode *eg;
 	while ((eg = iter++) != 0) {
 		eg->resetVisit();
 	}
@@ -212,15 +89,16 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 	// the time we trace the path to, going backwards from the makespan
 	//	down to zero.
 	int time = getMakespan();
+        int curProc;
 
 	// Find the lowest index proc which finishes exactly at the makespan
-	for (int curProc = 0; curProc < numProcs; curProc++) {
-		if ((getSchedule(curProc)->getAvailTime() == time))
+	for (curProc = 0; curProc < numProcs; curProc++) {
+		if ((getProc(curProc)->getAvailTime() == time))
 			break;
 	}
 
 	// Keep tracing the path.
-	NodeSchedule* ns = getSchedule(curProc)->getCurSchedule();
+	NodeSchedule* ns = getProc(curProc)->getCurSchedule();
 	while (time != 0) {
 		DCNode* curNode = (DCNode*) ns->getNode();
 		if (curNode->getType() <= 0) {
@@ -232,9 +110,9 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 
 		// < switch processors >
 		// backtrack slp until to meet a comm node
-		DCNode* node, *commNode;
+		DCNode* node, *commNode = 0;
 		while ((node = slp->headNode()) != 0) {
-			if (node->getType() >= 0) { // non-comm node
+			if (node->getType() >= 0) { // non-receive node
 				slp->takeFromFront(); // cut off node
 				continue;
 			}
@@ -260,7 +138,7 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 			Error::abortRun("Backtracking error in SLP");
 			return FALSE;
 		} else {
-			ns = getSchedule(curProc)->getNodeSchedule(commNode);
+			ns = getProc(curProc)->getNodeSchedule(commNode);
 			if (!ns) {
 				Error::abortRun("can't find node schedule");
 				return FALSE;
@@ -271,7 +149,6 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 	return TRUE;
 }
 
-			
 			/////////////////////////
 			///  categorizeLoads  ///
 			/////////////////////////
@@ -285,10 +162,10 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 
 void DCParProcs::categorizeLoads(int* procs) {
 
-        int maxload = 0;
+        int i, maxload = 0;
 
-        for (int i = 0; i < numProcs; i++) {
-                DCUniProc* sch = getSchedule(i);
+        for (i = 0; i < numProcs; i++) {
+                UniProcessor* sch = getProc(i);
                 int load = sch->computeLoad();
                 if (load > maxload) maxload = load;
         }
@@ -300,7 +177,7 @@ void DCParProcs::categorizeLoads(int* procs) {
 	do {
 		int seenIdle = 0;
 		for (i = 0; i < numProcs; i++) {
-			int temp = getSchedule(i)->getLoad();
+			int temp = getProc(i)->getLoad();
 			if (temp > threshold) {
 				procs[i] = 1;
 			} else {
@@ -321,4 +198,35 @@ void DCParProcs::categorizeLoads(int* procs) {
         } while (flag == 2);
 }
 			
-		
+			////////////////////////
+			///  finalizeGalaxy  ///
+			////////////////////////
+
+// After the final schedule is made, we make a final version of the
+// expanded graph including all comm. nodes.
+
+void DCParProcs :: finalizeGalaxy(DCGraph* graph) {
+
+	// reset the graph
+	graph->replenish(0);
+
+	// for communication nodes,
+	EGNodeListIter niter(SCommNodes);
+	ParNode* n;
+	while ((n = (ParNode*) niter++) != 0) {
+		if (n->getType() == -1) {	// send node
+			ParAncestorIter ancs(n);
+			ParNode* srcN = ancs++;
+			n->removeAncs(srcN);
+			srcN->connectedTo(n);
+		} else {
+			ParDescendantIter descs(n);
+			ParNode* destN = descs++;
+			if (destN) {
+				n->removeDescs(destN);
+				n->connectedTo(destN);
+			}
+		}
+	}
+}
+

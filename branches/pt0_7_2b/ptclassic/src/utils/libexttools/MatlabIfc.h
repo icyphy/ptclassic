@@ -3,9 +3,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MatlabIfc.h	1.19	07/25/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,7 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 11/6/95
  Revisions:
 
- Base class for the Ptolemy interface to Matlab.
+ Base class for an external interface to Matlab.
+ Only one Matlab process is run and is shared.
 
 **************************************************************************/
 
@@ -41,20 +42,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include <string.h>
 #include "StringList.h"
+#include "InfString.h"
+#include "MatlabIfcFuns.h"
 
-#define MATLAB_BUFFER_LEN        1023
 #define MATLAB_ERR_STR           "\x07???"
-
-#define MXCOMPLEX 1
-#define MXREAL 0
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
-#define PTOLEMY_MATLAB_DIRECTORY "$PTOLEMY/lib/matlab"
-#define MATLAB_SET_FIGURES       "PtSetStarFigures"
-#define MATLAB_CLOSE_FIGURES     "PtCloseStarFigures"
-#define MATLAB_UNIX_COMMAND      "matlab"
+#define MATLAB_SCRIPT_DIR     "$PTOLEMY/lib/matlab"
+#define MATLAB_SET_FIGURES    "PtSetStarFigures"
+#define MATLAB_CLOSE_FIGURES  "PtCloseStarFigures"
 
 class MatlabIfc {
 public:
@@ -64,39 +63,46 @@ public:
 	// destructor
 	~MatlabIfc();
 
-	// set data members
+	// Methods to Access Data Members
+
+	// set protected data members
 	int SetDeleteFigures(int flag);
 	const char* SetScriptDirectory(const char* dir);
 	const char* SetFigureHandle(const char* handle);
 	const char* SetMatlabCommand(const char* command);
+	char* SetOutputBuffer(char *buffer, int bufferlen);
+	const char* SetErrorString(const char* string);
+	const char* SetWarningString(const char* string);
 
-	// get data members
+	// get protected data members
 	int GetDeleteFigures();
-	const char *GetScriptDirectory();
-	const char *GetFigureHandle();
-	const char *GetMatlabCommand();
+	const char* GetScriptDirectory();
+	const char* GetFigureHandle();
+	const char* GetMatlabCommand();
+	char* GetOutputBuffer();
+	int GetOutputBufferLength();
+	char* GetErrorString();
+	char* GetWarningString();
 
-	// setup functions
-	void NameMatlabMatrices(char *matNames[], int numMatrices,
-				const char *baseName);
-	const char *BuildMatlabCommand(const char *matlabFunction,
-				char *matlabInputNames[], int numInputs,
-				char *matlabOutputNames[], int numOutputs);
+	// get static members
+	Engine* GetCurrentEngine();
+	int GetMatlabIfcInstanceCount();
 
-	// manage Matlab process (low-level methods)
-	// derived class must override these methods
-	char* MatlabEngineOpen(char* unixCommand);
+	// Methods to interface to the Matlab process via the Matlab engine
+
+	// A. low-level interfaces
+	Engine* MatlabEngineOpen(char* unixCommand);
 	int MatlabEngineSend(char* command);
-	int MatlabEngineOutputBuffer();
-	char* MatlabEngineGetMatrix(char* name);
-	char* MatlabEnginePutMatrix(char* matrix);
+	int MatlabEngineOutputBuffer(char* buffer, int buferLength);
+	mxArray* MatlabEngineGetMatrix(char* name);
+	int MatlabEnginePutMatrix(mxArray* matrixPtr);
 	int MatlabEngineClose();
 
-        // higher-level interfaces to the Matlab process
+        // B. higher-level interfaces to the Matlab process
 	int EvaluateOneCommand(char* command);
 
-	// highest-level interface to the Matlab process
-	int StartMatlab();
+	// C. highest-level interface to the Matlab process
+	int StartMatlab(char* command = 0);
 	int MatlabIsRunning();
 	int EvaluateUserCommand();
 	int EvaluateUserCommand(char* command);
@@ -105,27 +111,72 @@ public:
 	int CloseMatlabFigures();
 	int KillMatlab();
 
+	// Methods not using any data members but serve at C++ wrappers
+
+	//    1. generate a list of names for Matlab matrices
+	//       use FreeStringArray to deallocate matNames
+	void NameMatlabMatrices(char *matNames[],
+				int numMatrices,
+				const char* baseName);
+
+	//    2. build up a complete Matlab command
+	const char* BuildMatlabCommand(
+				char* matlabInputNames[], int numInputs,
+				const char* matlabFunction,
+				char* matlabOutputNames[], int numOutputs);
+
+	//    3. free an array of Matlab matrices
+	void FreeMatlabMatrices(mxArray *matlabMatrices[], int numMatrices);
+
+	//    4. name a Matlab matrix in memory
+	void NameMatlabMatrix(mxArray* matrixPtr, const char *name);
+
+	// Methods for interface to/from another scripting language (e.g. Tcl)
+	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
+	int SetMatlabVariable(const char* name,
+			      int numrows, int numcols,
+			      char** realPartStrings,
+			      char** imagPartStrings);
+	int GetMatlabVariable(char* name,
+			    int* numrows, int* numcols,
+			    char*** realPartStrings,
+			    char*** imagPartStrings);
+	int UnsetMatlabVariable(char* name);
+	int UnsetMatlabVariable(char* name[], int numMatrices);
+	void FreeStringArray(char** strarray, int numstrings);
+
 protected:
-	// counts how many instances of this class have been created
-	static int matlabStarsCount;
-
-	// keeps track of the lone Ptolemy-controlled Matlab process running
-	static char* matlabEnginePtr;
-
 	// indicate whether or not to delete created figures upon destruction
 	int deleteFigures;
 
 	// script directory containing user scripts
-	char *scriptDirectory;
+	char* scriptDirectory;
 
 	// place to put the first N output characters from Matlab
-	char matlabOutputBuffer[MATLAB_BUFFER_LEN + 1];
+	char* outputBuffer;
+	int outputBufferLen;
 
 	// name attached to Matlab figures
-	StringList matlabFigureHandle;
+	StringList figureHandle;
+
+	// Matlab command to execute to tag Matlab figures
+	InfString figureHandleCommand;
+
+	// set figureHandleCommand to Matlab command to attach tags to figures
+	const char* MakeFigureHandleCommand();
 
 	// Matlab command to execute
-	StringList commandString;
-}
+	InfString commandString;
+
+	// Matlab error string
+	InfString errorString;
+
+	// Matlab warning string
+	InfString warningString;
+
+	static void MatlabEngineError();
+public:
+#include "MatlabIfc.h.Auto"
+};
 
 #endif

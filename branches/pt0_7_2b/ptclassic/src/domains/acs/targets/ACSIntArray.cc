@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)ACSIntArray.cc      1.0     06/16/99
+ Version: @(#)ACSIntArray.cc	1.4 08/15/00
 ***********************************************************************/
 #include <sys/types.h>
 #include <unistd.h>
@@ -89,24 +89,26 @@ void ACSIntArray::fill(int default_val)
     ints[loop]=default_val;
 }
 
-inline static int intcompare(int *i, int *j)
+static int intcompare(const void *i, const void *j)
 {
-  if (*i > *j)
+
+  if (*((int *)i) > *((int *)j))
     return(1);
-  if (*i <= *j)
+  if (*((int *)i) <= *((int *)j))
     return(-1);
   return(0);
     
 }
-inline static int intcompare2(int *i, int *j)
+static int intcompare2(const void *i, const void *j)
 {
-  if (*i < *j)
+  if (*((int *)i) < *((int *)j))
     return(1);
-  if (*i >= *j)
+  if (*((int *)i) >= *((int *)j))
     return(-1);
   return(0);
     
 }
+
 ACSIntArray* ACSIntArray::sort_lh(void)
 {
   ACSIntArray* results=new ACSIntArray(total);
@@ -172,15 +174,7 @@ void ACSIntArray::reorder(ACSIntArray* new_order)
 
 void ACSIntArray::add(void)
 {
-  int* new_ints=new int[total+1];
-  for (int loop=0;loop<total;loop++)
-    new_ints[loop]=ints[loop];
-  new_ints[total]=-1;
-  
-  delete []ints;
-  ints=new_ints;
-
-  total++;
+  add(-1);
 }
 
 void ACSIntArray::add(int new_int)
@@ -196,17 +190,40 @@ void ACSIntArray::add(int new_int)
   total++;
 }
 
+// Only add the new_int value iff the value has not already been stored in the array
+int ACSIntArray::add_unique(int new_int)
+{
+  for (int loop=0;loop<total;loop++)
+    if (ints[loop]==new_int)
+      return(0);
+
+  add(new_int);
+  return(1);
+}
+
 void ACSIntArray::remove(int index)
 {
   int* new_ints=new int[total-1];
   for (int low_loop=0;low_loop<index;low_loop++)
-    new_ints[low_loop]=ints[low_loop];
+    {
+//      printf("preserving lower entry %d\n",low_loop);
+      new_ints[low_loop]=ints[low_loop];
+    }
   for (int high_loop=index+1;high_loop<total;high_loop++)
-    new_ints[high_loop-1]=ints[high_loop];
+    {
+//      printf("preserving higher entry %d\n",high_loop);
+      new_ints[high_loop-1]=ints[high_loop];
+    }
   delete []ints;
   ints=new_ints;
 
   total--;
+}
+
+void ACSIntArray::remove_all(void)
+{
+  total=0;
+  delete []ints;
 }
 
 inline int ACSIntArray::population(void)
@@ -293,5 +310,11 @@ int ACSIntArray::pop(void)
 {
   int val=get(total-1);
   remove(total-1);
+  return(val);
+}
+
+int ACSIntArray::tail(void)
+{
+  int val=get(total-1);
   return(val);
 }

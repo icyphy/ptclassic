@@ -1,4 +1,4 @@
-# Makefile for sdf/contrib, which contains user contributed stars
+# Makefile for de/contrib, which contains user contributed stars
 # Top-level Ptolemy makefile.
 # Copyright (c) 1994-1997 The Regents of the University of California.
 # All rights reserved.
@@ -25,17 +25,16 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# @(#)makefile	1.5 04/07/97
+# @(#)makefile	1.2 06/24/97
 #
 # Important!  Do not run this makefile while in 
-# ~ptolemy/src/domains/sdf/contrib.  Instead run in from
-# ~ptolemy/obj.$PTARCH/domains/sdf/contrib (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# ~ptolemy/src/domains/de/contrib.  Instead run in from
+# ~ptolemy/obj.$PTARCH/domains/de/contrib (through the symbolic
+# link) -- that way a separate directory containing, say, sol2 and hppa
 # objects can be maintained.
 
 include ../../../../mk/subdomain.mk
 
-DIRS = kernel stars
+DIRS = stars
 
-ME = sdf/contrib
-
+ME = de/contrib

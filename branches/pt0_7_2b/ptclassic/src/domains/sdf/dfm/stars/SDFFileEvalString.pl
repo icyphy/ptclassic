@@ -2,15 +2,15 @@ defstar {
     name { FileEvalString }
     domain { SDF }
     derivedFrom { FileEval }
-    version { $Id$ }
+    version { @(#)SDFFileEvalString.pl	1.5	03/29/97 }
     author { E. A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 This command is just like the FileEval command, but with the addition
 of another set of outputs "strout".  This set of outputs is treated
@@ -21,7 +21,7 @@ For example, if "command" is "set strout#1 foo", then the output
 filename is "foo".  If the "command" script does not set "strout#i"
 for a connected output "i", then a temporary filename is generated.
     }
-    explanation {
+	htmldoc {
 The idea of this star is to give the user more control over the
 produced filenames.  In particular, the filenames can be constructed
 on the fly by the "command" script.  But there are also trickier uses
@@ -40,9 +40,9 @@ executed.
     }
     ccinclude { "FileMessage.h" }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     go {
 	SDFFileEval::go();
@@ -59,6 +59,11 @@ executed.
 	    } else {
 		fm = new FileMessage();
 	    }
+	    Envelope pkt(*fm);
+		
+	    // Now send the filename to the output
+	    PortHole* p = nextp++;
+	    (*p)%0 << pkt;
 	}
     }
 }

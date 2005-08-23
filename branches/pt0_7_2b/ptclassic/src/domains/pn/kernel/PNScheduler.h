@@ -1,89 +1,105 @@
-/*  Version $Id$
+#ifndef _PNScheduler_h
+#define _PNScheduler_h
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
+/* 
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
-    Programmer:		T.M. Parks
-    Date of creation:	7 February 1992
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 */
-
-#ifndef _MTDFScheduler_h
-#define _MTDFScheduler_h
+/*  Version @(#)PNScheduler.h	2.7 3/7/96
+    Author:	T. M. Parks
+    Created:	7 February 1992
+*/
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
+#include "PNThread.h"
 #include "Scheduler.h"
-#include "MTDFThread.h"
-#include "MTDFThreadList.h"
-#include "Monitor.h"
-#include "Condition.h"
 
-class Galaxy;
-class MTDFStar;
-
-class MTDFScheduler : public Scheduler
+class PNScheduler : public Scheduler
 {
 public:
     // Constructor.
-    MTDFScheduler();
+    PNScheduler();
 
     // Destructor.
-    ~MTDFScheduler();
+    ~PNScheduler();
 
     // Domain identification.
-    virtual const char* domain() const;
+    /*virtual*/ const char* domain() const;
 
-    // Set up the schedule and initialize all Blocks.
-    // Return TRUE on success.
-    virtual int setup(Galaxy& galaxy);
+    // Initialization.
+    /*virtual*/ void setup();
 
     // Run the simulation.
-    virtual int run(Galaxy& galaxy);
-
-    // Set the stopping time.
-    virtual void setStopTime(float limit);
+    /*virtual*/ int run();
 
     // Get the stopping time.
-    virtual float getStopTime();
+    /*virtual*/ double getStopTime();
 
-    // Prepare stars for scheduling.
-    void prepareForScheduling(Galaxy& galaxy);
+    // Set the stopping time.
+    /*virtual*/ void setStopTime(double);
 
-    // Create threads and build ThreadList.
-    void createThreads(Galaxy& galaxy);
-
-    // Delete Threads and clear the ThreadList.
-    void deleteThreads();
-
-protected:
-    // Number of iterations completed.
-    unsigned int numIterations;
-
-    // Stopping time.
-    unsigned int stopTime;
+    // Set the stopping time when inside a Wormhole.
+    /*virtual*/ void resetStopTime(double);
 
     // Duration of one schedule period or iteration.
-    float schedulePeriod;
+    double schedulePeriod;
 
-    // Thread for normal Stars.
-    static void starThread(MTDFStar* star);
+    // Delay used for sleeping Threads.
+    virtual double delay(double);
 
-    // Thread for source Stars.
-    static void sourceThread(MTDFScheduler* sched, MTDFStar* star);
+protected:
+    // Increase buffer capacities.
+    int increaseBuffers();
 
-    // Thread for main().
-    static MTDFThread& main;
+    // Create threads.
+    void createThreads();
 
-    // List of Star Threads.
-    MTDFThreadList starThreads;
+    // Delete threads.
+    void deleteThreads();
+
+    // Enable locking.
+    void enableLocking();
+
+    // Disable locking.
+    void disableLocking();
+
+    // Stopping time.
+    double stopTime;
 
     // Monitor for guarding the Conditions used by the Scheduler.
-    Monitor monitor;
+    PNMonitor* monitor;
 
     // Condition variable for synchronizing the start of an iteration.
-    Condition start;
+    PNCondition* start;
+    int iteration;
+
+    // List for keeping track of threads.
+    ThreadList* threads;
 };
 
 #endif

@@ -2,41 +2,39 @@ defstar {
     name { FileEval }
     domain { SDF }
     derivedFrom { TclScript }
-    version { $Id$ }
+    version { @(#)SDFFileEval.pl	1.6	03/29/97 }
     author { E. A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 Evaluate the "command" parameter in Tcl. Inputs are referenced in
 the comand as "input#1", "input#2", etc.  Outputs are file names,
 and are referenced in the command as "output#1", "output#2", etc.
-For example, if "command" is "exec sed -e /foo/s//bar/ input#1 > output#1",
+For example, if "command" is "exec sed -e /foo/s//bar/ input#1 &gt output#1",
 then the program "sed" will be used to replace all instances of "foo"
 in the input file given by the first input to yield the output file
 on the first output.  
     }
-    explanation {
+	htmldoc {
 The command may or may not be executed.  It will be executed
 if any of the following conditions holds:
-.ip
-  (1) There are files in the inputs and these are newer than the outputs.
-.ip
-  (2) The "conditional" parameter is "NO" (this is the default).
-.ip
-  (3) The "command" is different from the previous invocation.
-.pp
+<OL>
+<LI> There are files in the inputs and these are newer than the outputs.
+<LI> The "conditional" parameter is "NO" (this is the default).
+<LI> The "command" is different from the previous invocation.
+</OL>
 For the purposes of testing condition (3), the command is compared
 to the previous invocation after replacing all input and output references
 with the values of the inputs and the names of the input files.
 The latest command executed is stored in the top-level facet,
 although you must save the facet for this information to persist
 to the next time you run Ptolemy.
-.pp
+<p>
 The files produced by this star may or may not be persistent.
 If the parameter "output_filenames" is given, then it must be a
 list of file names to use for the output.  In this case, the
@@ -45,14 +43,14 @@ then unique temporary file names are generated. In this latter case,
 normally the temporary files will be deleted after they have been read
 at their destination.  Deletion of these files can be prevented
 by setting "save_output_files" to "YES" (the default is "NO").
-.pp
+<p>
 Although it is expected that most uses of this star will have
 inputs of type File, any type of input is acceptable. The string
 returned by the "print" method of the input particles replaces
 the strings "input#1", etc., before the command is evaluated.
 Regrettably, because of the current overly restrictive type-resolution
 mechanism in Ptolemy, all inputs must be of the same type.
-.pp
+<p>
 The "command" parameter can be any Tcl command.  A common application
 will use the Tcl "exec" command to invoke some other program on the
 input files, producing output files. Note that when using exec in this way,
@@ -60,7 +58,7 @@ the program should not be put in the background.  It is up to you
 to ensure that the output files are written to before "command" returns.
 Otherwise, downstream actors may complain about not receiving the
 files they expect.
-.pp
+<p>
 If "show_evaluation" is "YES", then the icon associated with the
 star will be highlighted in green whenever the command is actually
 executed.  Since this star is meant to be used to invoke large,
@@ -69,7 +67,7 @@ A useful visualization tool is to turn on graphical animation
 as well.  In this case, the star will be highlighted in red
 when it fires, and the color will change to green if (and only if)
 the command is evaluated.
-.pp
+<p>
 If there is a delay on the arc feeding one of the inputs, then
 there will be no file name for that input on the first firing.
 In this case, the star replaces references to the input in the
@@ -77,11 +75,11 @@ command with the special string "/dev/null".
 Although it is probably rare to have an application that needs this,
 if you have such an application, your command should be able to
 accept this string.
-.pp
+<p>
 Note that in the current implementation, is not advisable to use
 the same file name for an output as an input.  The results will
 be unpredictable, and there is no error checking.
-.pp
+<p>
 This star is designed to make it easy to derive more specialized
 stars from it.  Thus, if you have some external program that you use
 frequently, you should consider deriving a star from this one.
@@ -93,7 +91,7 @@ you may only need to redefine the tcl_file parameter.  This parameter
 gives the name of a Tcl file that defines the "goTcl_$starID" procedure
 that is invoked when it has been determined that "command" should
 be evaluated.
-.pp
+<p>
 For convenience, another method is provided for conditionally sourcing
 a Tcl file containing support code.  This method is called
 "sourceIfNeeded" and it takes two arguments.  The first argument is
@@ -102,7 +100,7 @@ already exists in the interpreter, then it is assumed that the file
 need not be sourced again.  If the procedure does not exist, then
 the name of the file to source is given by the second argument.
     }
-    ccinclude { "FileMessage.h" }
+    ccinclude { "FileMessage.h" <iostream.h> }
     outmulti {
 	name {out}
 	type {filemsg}
@@ -154,10 +152,10 @@ the name of the file to source is given by the second argument.
 	}
     }
     begin {
-        tcl_file = "$PTOLEMY/src/domains/sdf/dmm/stars/fileeval.tcl";
+        tcl_file = "$PTOLEMY/src/domains/sdf/dfm/stars/fileeval.tcl";
 
 	if (sourceIfNeeded("fileeval_evalneeded",
-	        "$PTOLEMY/src/domains/sdf/dmm/stars/fileevalsupport.tcl")
+	        "$PTOLEMY/src/domains/sdf/dfm/stars/fileevalsupport.tcl")
 		== 0) {
 	    return;
 	}
@@ -169,9 +167,9 @@ the name of the file to source is given by the second argument.
 	output.setAttributes(P_HIDDEN);
     }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     // Return TRUE if evaluation is needed.
     // This occurs if:

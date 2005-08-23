@@ -2,19 +2,49 @@ defstar {
 	name { LMS }
 	domain { CG56 }
 	desc { Least mean square (LMS) adaptive filter. }
-	version { $Id$ }
+	version { @(#)CG56LMS.pl	1.17 03 Oct 1996 }
+	acknowledge { Gabriel version by E. A. Lee, Maureen O'Reilly }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-DSP56000 - Least Mean Square Adaptive Filter Star
-           The order is determined from the number of initial coefficients.
-           Initial coefficients default to a lowpass filter of order 8.
-           Default stepSize 0.01
-           The errorDelay must specify the total delay between
-           the filter output and the error input.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 dsp library }
+	htmldoc {
+<p>
+This star implements an adaptive filter using the LMS algorithm.
+The initial coefficients determine the order of the filter.
+The default coefficients specify
+an eighth order, equiripple, linear-phase, lowpass filter,
+the same as the default coefficients of the <i>FIR</i> star.
+<p>
+The <i>stepSize</i> parameter specifies the rate of adaptation.
+<p>
+The <i>errorDelay</i> parameter specifies the relative delay between the output
+samples and the input error samples.  There must be at least
+a delay of one (you must add the delay in your system) because
+the path from the output to the error forms a closed feedback loop.
+You can insert more delays if you wish (you may have to decrease
+<i>stepSize</i> to keep the algorithm stable), but be sure to
+adjust the <i>errorDelay</i> parameter accordingly.
+<p>
+The <i>decimation</i> parameter specifies how many input samples should be
+consumed before firing the star.  For example, to downsample
+by a factor of two, the user could simply follow the LMS filter by
+a downsample star, which would be set to discard every second input.
+But it is inefficient for the LMS filter to compute these samples,
+only to have them discarded.  Setting the <i>decimation</i> parameter to 2
+in the LMS filter is exactly equivalent,
+except that the discarded samples are not computed.
+Interpolation is not supported.
 	}
         
+        output {
+		name { output }
+		type { fix }
+	}
         input  {
                 name { input }
 	        type { fix }
@@ -22,10 +52,6 @@ DSP56000 - Least Mean Square Adaptive Filter Star
         input  {
                 name { error }
 	        type { fix }
-	}
-        output {
-		name { output }
-		type { fix }
 	}
         state  {
                 name { stepSize }
@@ -53,27 +79,22 @@ error samples.
                 type { fixarray }
                 desc { internal }
                 default { "-4.0609e-2 -1.6280e-3 1.7853e-1 3.7665e-1 3.7665e-1 1.7853e-1 -1.6280e-3 -4.0609e-2" }
-                attributes { A_ROM|A_NONCONSTANT|A_XMEM }
+                attributes { A_NONCONSTANT|A_XMEM }
         }
         state {
                 name { coefLen }
                 type { int }
                 desc { number of coef. }
                 default { 8 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }        
 
-        state {
-                name { X }
-                type { int }
-                desc { internal }
-                default { 0 }
-        }        
-    
         state {
                 name { Y }
                 type { int }
                 desc { internal }
                 default { 0 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }        
 
         state {
@@ -81,15 +102,23 @@ error samples.
                 type { int }
                 desc { internal }
                 default { 0 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }            
 
         state {
                 name { delayLine }
-                type { int }
+                type { intarray }
                 desc { internal }
-                default { 1 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
+                default { 0 }
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT}
         }
+        state {
+                name { delayLineStart }
+	        type { int }
+                desc { internal }
+                default { 0 }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+	}
         state {
                 name { delayLineSize }
                 type { int }
@@ -98,17 +127,11 @@ error samples.
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 
-        state  {
-                name { runtimeVal }
-                type { int }
-                default { 0 }
-                desc { runtime value }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
         codeblock(std) {
 	; initialize address registers for coef and delayLine
-        move    #$val(X),r3     	      ; coef
-        move    $ref(delayLine),r5            ; delayLine
+         move    #$addr(coef)+$val(coefLen)-1,r3
+; insert here
+        move    $ref(delayLineStart),r5            ; delayLine
         move    #$val(Y),m5
                                   ; first adapt coefficients.
                                   ; multiply the error by the stepSize --> x0
@@ -137,7 +160,7 @@ $label(endloop)
         move    b,x:(r3)
 ; move current inputs into delayLine.
         move    #$addr(input),r0
-        move    $ref(delayLine),r5
+        move    $ref(delayLineStart),r5
         }
 
         codeblock(decimationGreaterthanOne) {
@@ -153,8 +176,8 @@ $label(decimationloop)
         }
 
         codeblock(cont1) {
-                                            ; update delayLine pointer.
-        move    r5,$ref(delayLine)          ;oldest sample pointer
+; update delayLine pointer.
+        move    r5,$ref(delayLineStart)          ;oldest sample pointer
                                             ; now compute output.
         lua     (r5)-,r5
         nop
@@ -178,48 +201,75 @@ $label(loop1)
         }
        
         codeblock(makeblock) {
+; delayLine memory
         org     $ref(delayLine)
-        bsc     $val(coefLen),0
+        bsc     $val(delayLineSize),0
         org     p:
         }
-
-        start {
-                input.setSDFParams(int(decimation),int(decimation)-1);
-
-	        if (decimation <=0)
-        	      Error::abortRun(*this, "Decimation must be greater than 0.");
-        // initial tap values.
-//                delayLineSize=decimation*(errorDelay-1)+coefLen;
+      
+        codeblock(delaystart) {
+; pointer to delay line into memory
+        org     $ref(delayLineStart)
+        dc      $addr(delayLine)
+        org     p:
         }
-    
+        setup {
+		// FIXME: Parameters are not always resolved properly
+		// before setup but should be.  For now, check parameters
+		// in initCode method.
+		// CheckParameterValues();
+
+		coefLen = coef.size();
+		delayLineSize = int(errorDelay) - 1;
+		delayLineSize = int(coefLen) +
+				int(decimation)*int(delayLineSize);
+		delayLine.resize(int(delayLineSize));
+		input.setSDFParams(int(decimation),int(decimation)-1);
+        }
+        method {
+	    name {CheckParameterValues}
+	    arglist { "()" }
+	    type { void }
+	    code {
+	        if (int(decimation) <= 0) {
+        	    Error::abortRun(*this,
+				    "Decimation must be greater than 0.");
+		    return;
+		}
+	    }
+	}
         initCode  {
-	        gencode(makeblock);
-//        	delayLine=&delayLine;
+		CheckParameterValues();
+	        addCode(makeblock);
+                addCode(delaystart);
         }
         go { 
-	        gencode(std);
-	
-        	if(coefLen>2) {
-	            loopVal=coefLen-1;    
-	            gencode(loop);
+                Y = int(errorDelay)-1;
+                Y = int(coefLen) - 1 + int(decimation)*int(Y);
+
+	        addCode(std);
+
+        	if (int(coefLen) > 2) {
+	            loopVal = int(coefLen) - 1;    
+	            addCode(loop);
 		}
-		else gencode(noloop);
+		else addCode(noloop);
 
-	        gencode(cont);
+	        addCode(cont);
       	
-		if(decimation>1)
-	            gencode(decimationGreaterthanOne);
+		if ( int(decimation) > 1)
+	            addCode(decimationGreaterthanOne);
 		else
-	            gencode(decimationOne);
+	            addCode(decimationOne);
 	    
-	        gencode(cont1);
+	        addCode(cont1);
 
-		if(coefLen>2)
-        	     gencode(loop1);
+		if ( int(coefLen) > 2)
+        	     addCode(loop1);
 		else
-        	     gencode(noloop1);
+        	     addCode(noloop1);
 	     
-	        gencode(end);
+	        addCode(end);
         }             
 	execTime { 
               if (int(coefLen)<=2) {

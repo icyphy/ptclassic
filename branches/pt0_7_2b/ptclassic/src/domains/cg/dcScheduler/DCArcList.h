@@ -6,10 +6,32 @@
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DCArcList.h	1.8	3/2/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: G.C. Sih
 Modifier: Soonhoi Ha
@@ -44,6 +66,10 @@ public:
 	int operator==(DCArc &a) 
 	 	{return ((srcnode == a.srcnode) && (sinknode == a.sinknode));}
 
+	// check whether this arc is between invocs of the same star.
+	int betweenSameStarInvocs() {
+		return (srcnode->myMaster() == sinknode->myMaster()); }
+
 	void reverse();
 	StringList print();
 
@@ -67,10 +93,9 @@ class DCArcList : public SequentialList
 {
 
 public:
-
 	DCArcList() {initialize();}
-
 	DCArcList(DCArcList &arclist);
+	~DCArcList();
 
 	// Return the DCArc at the front of the list
 	DCArc *head() {return (DCArc*)SequentialList::head();}
@@ -78,7 +103,7 @@ public:
 	// Insert a DCArc into the front of the list
 	void insert(DCArc *arc) {
 		arc->parent = this;
-		SequentialList::tup(arc);
+		SequentialList::prepend(arc);
 	}
 
 	// Append a DCArc into the back of the list
@@ -101,27 +126,22 @@ public:
 
 	// The number of DCArcs in the list
 	int mySize() {return size(); } 
-
-	// Destructor
-	~DCArcList();
 };
 
 class DCArcIter : private ListIter
 {
 public:
-	// Constructor
 	DCArcIter(const DCArcList& list) : ListIter(list) {}
 
 	// Get the next DCArc in the list
 	DCArc *next() {return (DCArc*)ListIter::next();}
-	DCArc *operator++ () {return next();}
+	DCArc *operator++ (POSTFIX_OP) {return next();}
 
 	// reset to the beginning of the list
 	void reset() {ListIter::reset();}
 
 	// connect this iterator to another nodelist
 	void reconnect(DCArcList& list) {ListIter::reconnect(list);}
-
 };
 
 #endif

@@ -2,20 +2,20 @@ defstar {
 	name { Log }
 	domain { C50 }
 	desc { Base two logarithm }
-	version { $Id$ }
+	version { @(#)C50Log.pl	1.3   06 Oct 1996 }
 	author { Luis Gutierrez, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-        explanation {
+	htmldoc {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
-The coefficients of the polynomial are given by \fId\fR.
-.Id "logarithm"
+The coefficients of the polynomial are given by <i>d</i>.
+<a name="logarithm"></a>
         }
         input {
                 name { input }

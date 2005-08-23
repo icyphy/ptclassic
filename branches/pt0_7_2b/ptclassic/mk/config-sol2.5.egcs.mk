@@ -2,7 +2,7 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5.1
 # with the Experimental Gnu Compiler
 
-# $Id$
+# @(#)config-sol2.5.egcs.mk	1.7 12/15/97
 
 # Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
@@ -31,8 +31,16 @@
 #		       
 # Programmer:  Christopher Hylands
 
-include $(ROOT)/mk/config-sol2.5.mk
+include $(ROOT)/mk/config-sol2.mk
 
-CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
-CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
+ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
 
+CC =		$(PTOLEMY)/gnu/sol2.5.egcs/bin/gcc
+
+CPLUSPLUS =	$(PTOLEMY)/gnu/sol2.5.egcs/bin/g++ -I$(ROOT)/src/compat/cfront
+
+# system libraries (libraries from the environment)
+SYSLIBS=-lstdc++ $(CSYSLIBS)
+
+# where the Gnu library is
+GNULIB=$(PTOLEMY)/gnu/sol2.5.egcs/lib

@@ -1,4 +1,4 @@
-;$Id$
+;@(#)intequ.asm	1.1	8/28/92
 ;************************************************************************
 ;       EQUATES for DSP56000 Interrupt Vectors
 ;       Reference: DSP56000 User's Manual, Table 8.2, Interrupt Sources

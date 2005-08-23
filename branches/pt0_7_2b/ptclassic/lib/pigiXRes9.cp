@@ -1,29 +1,31 @@
-! $Id$
+! @(#)pigiXRes9.cp	1.10	02/23/97
 ! VEM options for Pigi:
-vem.bindings:	~ptolemy/lib/vem.bindings.8-1
-vem*deftechname:	ptolemy
-vem*grid*major*units:	100
-vem*grid*minor*units:	10
-vem*lambda:	1
+vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1
+vem.deftechname:	ptolemy
+vem.grid.major.units:	100
+vem.grid.minor.units:	10
+vem.lambda:	1
 vem*logfile:	/dev/null
 vem*snap:	25
-vem*technology:	~ptolemy/lib/colors
+vem*technology:	$PTOLEMY/lib/colors
 
 ! The following are optional.  They can be overriden by the user.
-vem*font: 9x15
+Vem*Font: *-times-medium-r-normal--*-180-*
 vem*wrap: word
 vem*grid*zero*size: 0
 vem*label*boundbox: 10
-#ifdef COLOR
-vem*background: white
-vem*background*color: grey
-vem*grid*zero*color: grey
-vem*menu*item*background: LightGray
 vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
+#ifdef COLOR
+vem*cursor*color: red
+Vem*Background: grey93
+vem*menu*background: white
+vem*foreground: black
+vem.background.color: azure3
+vem.grid.zero.color: azure3
+vem*menu*item*background: LightGray
 vem*button*foreground: IndianRed
 vem*title*foreground: black
-vem*cursor*color: red
 #else
 *Background:    white
 *Foreground:    black
@@ -38,11 +40,7 @@ ptolemy_sim*Foreground: 	green
 ptolemy_man*Background:		black
 ptolemy_man*Foreground: 	orange
 
-xgraph.Background: white
-xgraph.ZeroColor: navy
-xgraph.Markers: off
-xgraph.Foreground: black
-binxgraph.Background: white
-binxgraph.ZeroColor: navy
-binxgraph.Markers: off
-binxgraph.Foreground: black
+pxgraph.Background: white
+pxgraph.ZeroColor: navy
+pxgraph.Markers: off
+pxgraph.Foreground: black

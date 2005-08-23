@@ -1,0 +1,55 @@
+#!/bin/sh
+# Stand-alone Tycho start-up script \
+	exec itkwish "$0" "$@"
+
+# @Authors: John Reekie
+# @Version: @(#)tywish	1.3 02/26/98
+
+# This script is intended for a default stand-alone
+# start-up of Tycho in itkwish with the graphical user
+# interface. Arguments to the command line are passed
+# to the ::tycho::start procedure (see the file tycho)
+# and can be used to control startup options such
+# as whether to start the GUI or not, whether to keep
+# a simple command console, and so on. Note that
+# this script should NOT be executed if you are
+# using Ptolemy with Tycho -- use the tycho script
+# supplied with the Ptolemy distribution.
+
+
+# Find the Tycho directory. The search looks in
+# for the environment variables TYCHO and TYCHO_LIBRARY.
+# If neither of those is found, it sees if the current
+# directory has a pkgIndex.tcl file, in which case it uses
+# that. If it finds a candidate directory, it checks to
+# see if the directory is in auto_path, and if not, appends
+# it. If it doesn't find a candidate directory, it complains.
+if [info exists tycho] {
+    set tycho $tycho
+} elseif [info exists TYCHO] {
+    set tycho TYCHO
+} elseif [info exists env(TYCHO)] {
+    set tycho $env(TYCHO)
+} elseif [info exists env(TYCHO_LIBRARY)] {
+    set tycho env(TYCHO_LIBRARY)
+} elseif [file exists [file join [pwd] pkgIndex.tcl]] {
+    set tycho [file dirname [pwd]]
+} else {
+    error "Tycho failed to start up: set the TYCHO environment variables"
+}
+set TYCHO $tycho
+
+# Make sure the tycho path is in the auto search path
+if { [lsearch -exact $auto_path $tycho] == -1 } {
+    lappend auto_path $tycho
+}
+
+# Load the "basic" package
+package require tycho.kernel.basic
+
+# Convert command-line arguments into tycho features
+eval ::tycho::processCommandLine $argv
+
+# Execute the startup procedure
+::tycho::start
+

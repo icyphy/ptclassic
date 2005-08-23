@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSJavaTarget.cc";
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,9 +26,29 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSJavaTarget.cc	1.6 08/02/01
 
 ***********************************************************************/
-
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "ACSJavaTarget.h"
+#include "KnownTarget.h"
+
+ACSJavaTarget::ACSJavaTarget(const char* name,const char* starclass,
+        const char* desc, const char* assocDomain)
+    : ACSCGTarget(name,starclass,desc,assocDomain) {}
+
+ACSJavaTarget :: ~ACSJavaTarget() {}
+
+Block* ACSJavaTarget::makeNew() const {
+    LOG_NEW; return new ACSJavaTarget(name(),starType(),descriptor());
+}
+
+ISA_FUNC(ACSJavaTarget,ACSCGTarget);
+
+static ACSJavaTarget targ("ACS-Java","ACSStar",
+	"A target for Java code generation using Adaptive Computing System Coronas and Cores");
+
+static KnownTarget entry(targ,"ACS-Java");

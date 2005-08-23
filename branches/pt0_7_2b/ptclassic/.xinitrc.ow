@@ -1,0 +1,21 @@
+# .xinitrc - OpenWindows startup script.
+if [ -f $HOME/.Xdefaults ]; then
+    xrdb $HOME/.Xdefaults &		# Load Users X11 resource database
+else
+    xrdb $OPENWINHOME/lib/Xdefaults &	# Load Default X11 resource database
+fi
+$OPENWINHOME/lib/openwin-sys &		# OpenWindows system initialization
+
+# Install function key "F1" as an Open Look "Help" key
+# This precludes its use by applications
+# If your applications use F1 for anything else, comment out the following line
+xmodmap -e 'keysym F1 = Help'
+
+eval `svenv -env`			# SunView binary compatibility
+olwm -3 -follow &			# OpenLook Window Manager
+if [ -x $HOME/.openwin-init ]; then
+    $HOME/.openwin-init			# Custom OpenWindows tools
+else
+    $OPENWINHOME/lib/openwin-init   	# Default OpenWindows tools
+fi
+wait

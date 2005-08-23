@@ -2,9 +2,14 @@ defstar {
 	name {CxToRect}
 	domain {CGC}
 	desc { Convert complex data to real and imaginary parts. }
-	version { $Id$ }
+	version { @(#)CGCCxToRect.pl	1.6	1/1/96 }
 	author { S. Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	input {
 		name {input}
@@ -27,5 +32,8 @@ defstar {
 	}
 	go {
 		addCode(body);
+	}
+	exectime {
+		return 2;
 	}
 }

@@ -3,32 +3,35 @@ defstar {
 	domain {DE}
 	derivedfrom { RepeatStar }
 	desc {
-Generates a voice process for a single caller and recognizes "VoiceData"
+Generates a voice process for a single caller and recognizes
+.c VoiceData
 prompts to begin and cease packet transmission.
         }
 
-	version {$Id$}
+	version {@(#)DEVoiceSrc.pl	1.10	06 Oct 1996}
 	author { Allen Y. Lao }
 	copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-	location { ATM demo library }
+	location { DE ATM library }
 
-	explanation {
+	htmldoc {
 This star produces dummy voice packet outputs modeling a voice process
 where silence periods are exponentially distributed in length
-with mean "silenceExpMean."  The talkspurts are geometrically
+with mean <i>silenceExpMean</i>.  The talkspurts are geometrically
 distributed with the mean number of packets per talkspurt set by the
-state "meanPacketsSpurt."  Then there is a state for the packetization
-period called "packPeriod." Naturally, one can figure the mean duration
-of a talkspurt from the "meanPacketsSpurt" and "packPeriod" states.
+state <i>meanPacketsSpurt</i>.  Then there is a state for the packetization
+period called <i>packPeriod</i>. Naturally, one can figure the mean duration
+of a talkspurt from the <i>meanPacketsSpurt</i> and <i>packPeriod</i> states.
 Also, the packet is time-stamped and identified by connection.
 
-It recognizes "VoiceData" type input prompts: Transmit Packets
-and StopTransmitPackets. "Transmit" packets send as info. incoming VPI,
+It recognizes
+<tt>VoiceData </tt>
+type input prompts: Transmit Packets
+and StopTransmitPackets. Transmit packets send as info. incoming VPI,
 source VCI number, and destination VCI number.  Preceding a transmission
 is a Start-of-Transmission packet (SOT), and after a transmission has
 been completed, an End-of-Transmission (EOT) packet is sent.
@@ -110,14 +113,14 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                   
                     if (!input.dataNew)  {
                         //  leftover feedback event is possible
-                        Particle& p = feedbackIn.get();
+                        feedbackIn->get();
                         return;
                     }
 
                     //  expect a TRANSMIT packet to begin voice transmission
                     input.get().getMessage(inEnv);
                     if (!voiceCheck (inEnv, *this)) return;
-                    VoiceData*  v = (VoiceData*) inEnv.myData();
+                    const VoiceData*  v = (const VoiceData*) inEnv.myData();
 
                     if (!v->isitTRMessage()) {
                         Error :: abortRun (*this,
@@ -151,7 +154,7 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                         //  transmission interrupted
                         input.get().getMessage(inEnv);
                         if (!voiceCheck (inEnv, *this)) return;
-                        VoiceData*  v1 = (VoiceData*) inEnv.myData();
+                        const VoiceData*  v1 = (const VoiceData*) inEnv.myData();
 
                         if (!v1->isitSTRMessage()) {
                             Error :: abortRun (*this,
@@ -171,8 +174,8 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                     else {
                   
 			//  received a token on the "feedback"port caused by a
-			//  call to refire this star, transmit a packet with appropiate
-			//  header information
+			//  call to refire this star, transmit a packet with
+			//  appropriate header information
                         LOG_NEW; VoiceData*  w2 = new VoiceData();
                         unsigned char*  ptz = w2->asVoice();
                         ptz[0] = vpi;  ptz[2] = vciSrc;  ptz[3] = vciDst;
@@ -184,7 +187,7 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                         double d1, d2;
                         d2 = (*randomUnif)();
     
-                        if (d2 < 1.0/double(meanPacketsSpurt))  {
+                        if (d2 < 1.0/double(int(meanPacketsSpurt)))  {
                             d1 = (*randomExp)();
                             completionTime += d1;
                         }

@@ -1,14 +1,35 @@
 defstar {
 	name { HostOut }
 	domain { CG56 }
-	desc { Data output. }
-	version { $Id$ }
-	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-Output data from DSP to host via host port.
-        }
+	desc { Synchronous host port output. }
+	version { @(#)CG56HostOut.pl	1.27 03/29/97 }
+	acknowledge { Gabriel version by Phil Lapsley }
+	author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+Output data from DSP to host via host port synchronously.
+<h3>IMPLEMENTATION:</h3>
+<p>
+We distinguish between single word transfers and multiword transfers.
+The single word case is simpler in that we can use the <i>ref</i> macro to
+access the value.
+The multiple word case requires a loop.
+Currently, we distinguish the two cases by <i>samplesConsumed</i>, but
+I think it should be <i>samplesOuput</i>.
+<p>
+In blocking mode we wait until the host is ready to read our samples.
+In non-blocking mode, we completely skip the transfer if the host
+is not ready.
+<p>
+This implementation currently uses the "unsafe" START/STOP host port DMA
+flow control.
+	}
 	input	{
 		name { input }
 		type { fix }
@@ -16,20 +37,20 @@ Output data from DSP to host via host port.
 	state {
 		name { samplesConsumed }
 		type { int }
-		desc { number of samples consumed. }
+		desc { Number of samples consumed. }
 		default { 1 }
 	}
 	state {
 		name { samplesOutput }
 		type { int }
-		desc { number of samples outputed.  }
+		desc { Number of samples transferred to host.  }
 		default { 1 }
 	}
  	state  {
 		name { blockOnHost }
-		type { string }
-		desc {  }
-		default { "yes" }
+		type { int }
+		desc { Boolean: wait until host ready? }
+		default { "YES" }
 	}
  	state  {
 		name { command }
@@ -37,61 +58,67 @@ Output data from DSP to host via host port.
 		desc {  }
 		default { "" }
 	}
-        start {
-               !$val(command);
-               input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
-        }
-
-        codeblock(yeshostBlock) {
-$label(l)
-        jclr    #m_htde,x:m_hsr,$label(l)
-        jclr    #0,x:m_pbddr,$label(l)
-        movep   $ref(input),x:m_htx
+	setup {
+	input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
 	}
-        codeblock(elsehostBlock) {
-        jclr    #m_htde,x:m_hsr,$label(l)
-        jclr    #0,x:m_pbddr,$label(l)
-        movep   $ref(input),x:m_htx
-$label(l)
-        }
-        codeblock(nohostBlock) {
-        jclr    #m_htde,x:m_hsr,$label(l3)		      
-        jclr    #0,x:m_pbddr,$label(l3)
-        move    #$addr(input),r0
-        do      #$val(samplesOutput),$label(l)
-$label(l2)
-        jclr    #m_htde,x:m_hsr,$label(l2)
-        jclr    #0,x:m_pbddr,$label(l2)
-        movep   x:(r0)+,x:m_htx
-$label(l)
-$label(l3)
-        }
-        codeblock(done) {
-        move    #$addr(input),r0
-        do      #$val(samplesOutput),$label(l)
-$label(l2)
-        jclr    #m_htde,x:m_hsr,$label(l2)
-        jclr    #0,x:m_pbddr,$label(l2)
-        movep   x:(r0)+,x:m_htx
-$label(l1)
-$label(l3)
-        }        
-        go { 
-        const char* p=blockOnHost;		
-        if (samplesConsumed==1) {
-                if(p[0]=='y` || p[0]=='Y') 
-	              gencode(yeshostBlock);
-		else
-	              gencode(elsehostBlock);
+	initCode {
+		const char* p=command;
+		StringList cmd;
+		cmd << command << "\n";
+		if (p[0] != 0) addCode(command,"shellCmds");
+	}
+	codeblock(cbSingleBlocking) {
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
+	movep	$ref(input),x:m_htx
+	}
+	codeblock(cbSingleNonBlocking) {
+	jclr	#m_htde,x:m_hsr,$label(skip)
+	jclr	#0,x:m_pbddr,$label(slip)
+	movep	$ref(input),x:m_htx
+$label(skip)
+	}
+	codeblock(cbMultiNonBlocking) {
+	jclr	#m_htde,x:m_hsr,$label(skip)
+	jclr	#0,x:m_pbddr,$label(skip)
+	move	#$addr(input),r0
+	.LOOP	#$val(samplesOutput)
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
+	movep	x:(r0)+,x:m_htx
+	.ENDL
+	nop
+$label(skip)
+	}
+	codeblock(cbMultiBlocking) {
+	move	#$addr(input),r0
+	.LOOP	#$val(samplesOutput)
+$label(wait)
+	jclr	#m_htde,x:m_hsr,$label(wait)
+	jclr	#0,x:m_pbddr,$label(wait)
+	movep	x:(r0)+,x:m_htx
+	.ENDL
+	nop
+	}
+	go {
+		if (int(samplesConsumed)==1) {
+			if ( int(blockOnHost) ) {
+				addCode(cbSingleBlocking);
+			} else {
+				addCode(cbSingleNonBlocking);
+			}
+		} else {
+			if ( int(blockOnHost) ) {
+				addCode(cbMultiBlocking);
+			} else {
+				addCode(cbMultiNonBlocking);
+			}
 		}
-        else {
-               if (p[0]=='n' || p[0]== 'N')
-	              gencode(nohostBlock);
-	       else
-	              gencodeblock(done);
- 	}
+	}
 
 	execTime { 
 		return 2;
 	}
- }
+}

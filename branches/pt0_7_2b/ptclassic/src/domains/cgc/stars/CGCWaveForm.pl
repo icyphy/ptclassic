@@ -7,32 +7,37 @@ You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
 capabilities:
 
-haltAtEnd   periodic   period    operation
------------------------------------------------------------------------
-NO          YES        0         The period is the length of the waveform
-NO          YES        N>0       The period is N
-NO          NO         anything  Output the waveform once, then zeros
-YES         anything   anything  Stop after outputting the waveform once
+ haltAtEnd   periodic   period    operation
+ ------------------------------------------------------------------------
+ NO          YES        0         The period is the length of the waveform
+ NO          YES        N>0       The period is N
+ NO          NO         anything  Output the waveform once, then zeros
+ YES         anything   anything  Stop after outputting the waveform once
 
 The first line of the table gives the default settings.
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
+something of the form "&lt; filename".  The file will be read completely
 and its contents stored in an array.  The size of the array is currently
 limited to 20,000 samples.  To read longer files, use the 
-.c ReadFile
+<tt>ReadFile</tt>
 star.  This latter star reads one sample at a time, and hence also
 uses less storage.
-.Id "file read"
-.Id "waveform from file"
-.Id "reading from a file"
-.Ir "halting a simulation"
-.Ir "simulation, halting"
+<a name="file read"></a>
+<a name="waveform from file"></a>
+<a name="reading from a file"></a>
+<a name="halting a simulation"></a>
+<a name="simulation, halting"></a>
 	}
-	version { $Id$ }
+	version { @(#)CGCWaveForm.pl	1.10	01 Oct 1996 }
 	author { S. Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	output {
 		name { output }
@@ -74,7 +79,7 @@ uses less storage.
 		default { 0 }
 		attributes { A_NONSETTABLE }
 	}
-	start {
+	setup {
 		pos = 0;
 		size = value.size();
 	}
@@ -95,5 +100,8 @@ uses less storage.
 	}
 	go {
 		addCode(body);
+	}
+	exectime {
+		return 11;  /* worst case number */
 	}
 }

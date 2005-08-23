@@ -1,0 +1,54 @@
+<!-- documentation file generated from DEDynMapGr.pl by ptlang -->
+<html>
+<head>
+<title>DE DynMapGr star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="DynMapGr star, DE domain">DynMapGr star in DE domain</a></h1>
+<p>
+A graphical Version of the <tt>DEDynMap</tt>-star.  We now use a 
+masterblock which we clone instead of granny's states.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/domain.idx#DynMap ">DEDynMap</a><br>
+<b>Location:</b> $PTOLEMY/src/domains/de/contrib/stars<br>
+<b>Version:</b> 1.5 "01/15/98"<br>
+<b>Author:</b> J. Voigt<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>exin</font></b></i> (multiple)</td><td>anytype</td>
+<td>dummy input, we just need a connection to the masterblock</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>exout</font></b></i> (multiple)</td><td>ANYTYPE</td>
+<td>dummy output, we just need a connection to the masterblock</td>
+</tr>
+</table>
+<h2>Details</h2><p>
+Now we have to put a masterinstance of a block, which we want to multiply dynamically, at our <i>exin</i> and <i>exout</i> portholes instead of declaring it in the states. Otherwise, the same functionality like in <tt>DEDynMap</tt> is implemented. See its description for further explanations.
+<p>
+We can clone a block which has inputs and outputs or a block 
+which has just one type of portholes. If we have a block without inputs to 
+clone, we can put a <tt>DEBlackHole</tt> on our exout. If we have a block 
+without outputs to clone, we can put a <tt>DENull</tt> on our exin. 
+Or we create us icons with the right number of portholes.
+<p>
+See the descriptions of <tt>DEDynMapBase</tt> and <tt>DEDynMap</tt>, where this star is derived from, for further details. 
+<p>
+<h3>The current limitations are:</h3>
+<p>
+The masterblock must not have MultiPortHoles.
+We can't have more then one block to clone on our portholes.
+<p>
+<br><b>See:</b> <a href="DEDynMapGr.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#DynMapGr facet, DE user">DynMapGr users</a>
+<p><hr><p>
+copyright (c) 1997 Dresden University of Technology 
+All rights reserved.
+See the file <a href="$PTOLEMY/copyright">$PTOLEMY/copyright</a> for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+</body>
+</html>

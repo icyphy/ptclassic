@@ -4,8 +4,15 @@ defstar
     derivedFrom { SGIAudio }
     domain { CGC }
     desc { Get samples from audio input port. }
-    version { $Id$ }
+    version { @(#)CGCSGIAudioIn.pl	1.4 1/1/96 }
     author { T. M. Parks }
+    copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
+    location { CGC main library }
 
     output
     {

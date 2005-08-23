@@ -1,8 +1,8 @@
 # Makefile for Ptolemy X11R5 compat. stuff (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.4 12/08/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,12 +31,15 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/X11R5
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
+
+# Dummy variable to avoid make warnings about duplicate commands
+LIBR = dummylib
 
 HDRS = 	X.h Xfuncproto.h Xlib.h Xos.h Xosdefs.h Xutil.h cursorfont.h
 
-MISC_FILES = README
+MISC_FILES =
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

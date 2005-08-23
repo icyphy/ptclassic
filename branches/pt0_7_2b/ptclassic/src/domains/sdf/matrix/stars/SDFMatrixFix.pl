@@ -2,14 +2,23 @@ defstar {
   name      { MatrixFix }
   domain    { SDF }
   desc      { 
-Produces a matrix with fixed-point entries. The entries are
-read from the array state FixMatrixContents in rasterized order:
-i.e. for a MxN matrix, the first row is filled from left to right
-using the first N values from the array. All entries have the
-same precision, as specifid by the state Precision. }
-  version   { $Id$ }
+Generate a matrix with fixed-point entries.
+  }
+	htmldoc {
+The entries of the generated matrix are read from the array parameter
+<i>FixMatrixContents</i> in rasterized order: i.e. for an <i>M</i> &#215; <i>N</i> matrix,
+the first row is filled from left to right using the first <i>N</i> values
+from the array.  All entries have the same precision, as specified by
+the parameter <i>FixPrecision</i>.
+  }
+  version   { @(#)SDFMatrixFix.pl	1.11 02 Oct 1996 }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   output {
 	name { output }
@@ -45,6 +54,7 @@ Precision of all entries in the matrix.
   protected {
         const char* precision;
         int length, intbits;
+  }
   go {
     // parse precision value
     precision = FixPrecision;
@@ -53,9 +63,8 @@ Precision of all entries in the matrix.
 
     // collect inputs and put into the matrix
 
-    FixMatrix *matrix = new FixMatrix(int(numRows), int(numCols),
-                                      length, intBits, FixMatrixContents);
-    output%0 << *matrix;
+    FixMatrix& matrix = *(new FixMatrix(int(numRows), int(numCols),
+                                        length, intbits, FixMatrixContents));
+    output%0 << matrix;
   }
 }
-

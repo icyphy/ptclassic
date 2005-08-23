@@ -4,9 +4,14 @@ defstar
     derivedFrom { GAL }
     domain { CGC } 
     desc { Ganged Gradient Adaptive Lattice filters. }
-    version { $Id$ }
+    version { @(#)CGCGGAL.pl	1.5 3/7/96 }
     author { T. M. Parks }
-    copyright { 1992 The Regents of the University of California }
+    copyright {
+Copyright (c) 1992-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { CGC local library }
 
     input

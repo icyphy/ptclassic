@@ -1,7 +1,7 @@
 # MS VC++ Makefile to build ptcl, tycho and pigiRpc binaries
-# $Id$
+# @(#)ptbin.mk.vc	1.4 02/21/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -51,7 +51,7 @@
 # SDFFULL =	1
 
 !ifndef  VERSION
-VERSION =	0.7.1devel.$(BASENAME)
+VERSION =	0.7.2devel.$(BASENAME)
 !endif
 
 !ifdef  ALLBINARIES
@@ -63,7 +63,7 @@ FULL =		1
 !endif
 
 !ifdef  PTCL
-TK =
+!undef TK
 !endif
 
 # Note that some of these settings will be filtered out by stars.mk
@@ -94,10 +94,10 @@ PIGI =		$(BASENAME).ptiny
 VERSION_DESC =	'With SDF (no image stars) and DE domains only'
 DE =		1
 	#HOF =		1
-	#SDF =		1
+SDF =		1
 	#SDFTK =		1
 	#SDFDFM =	1
-	#SDFDSP =	1
+SDFDSP =	1
 	#SDFMATRIX =	1
 	#SDFMATLAB =	1
 !endif
@@ -123,6 +123,7 @@ NEED_MATHEMATICADIR = 	1
 
 
 PIGI_OBJS = $(PIGI_OBJS) $(STARS) $(TARGETS) $(MISC_OBJS)
+#PIGI_OBJS = $(PIGI_OBJS) $(TARGETS) $(MISC_OBJS)
 
 PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
@@ -156,23 +157,16 @@ INSTALL = $(INSTALL) makefile $(BINDIR)\$(PIGI)
 # 
 # This is the default target
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		$(VERSION_DESC) \
-		'%created' `date` '";' | sed 's\%\\\n\g' > version.c
-	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
-		>> version.c
-	$(CC) -c version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
-	$(STRIP_DEBUG) $@
-
+	echo char *gVersion = "Version?"; > version.cc
+	echo char DEFAULT_DOMAIN[] = "$(DEFAULT_DOMAIN)"; >> version.cc
+	$(CPLUSPLUS) -c /Tpversion.cc
+	set LIB=$(TOOLS32)\lib
+#	$(link32) $(linkdebug) $(conlflags) -out:$@.exe $(guilibs)  MSVCRT.LIB MSVCIRT.LIB $(PIGI_OBJS) $(LIBS)
+	$(link32) $(linkdebug) $(conlflags) -out:$@.exe $(guilibs)  $(PIGI_OBJS) $(LIBS)
 # Same, with debugging symbols.
 $(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		$(VERSION_DESC) \
-		'and debugging symbols.' \
-		'%created' `date` '";' | sed 's\%\\\n\g' > version.c
-	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
-		>> version.c
+	echo char *gVersion = "Version?"; > version.c
+	echo char DEFAULT_DOMAIN[] = "$(DEFAULT_DOMAIN)"; >> version.c
 	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
@@ -298,7 +292,7 @@ PTDEPEND:
 install: $(INSTALL)
 
 # Build three binaries
-all: makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
+all: makefile $(PTLIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
 # Print the names of all the binaries that can be produced
 echo_every_binary:

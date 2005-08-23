@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)octObjectClass.h	1.4	11/27/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,6 +39,7 @@ of oct objects.
 #define _octObjectClass_h 1
 
 extern "C" {
+#include "oct.h"
 #include "octIfc.h"
 }
 
@@ -46,7 +47,10 @@ class octObjectClass {
 
 public:
 	// constructor
-        octObjectClass() { facet.objectId = OCT_UNDEFINED_OBJECT; }
+        octObjectClass() {
+		facet.type = OCT_UNDEFINED_OBJECT;
+		facet.objectId = 0;
+	}
 
 	// destructor
         ~octObjectClass() { FreeOctMembers(&facet); }

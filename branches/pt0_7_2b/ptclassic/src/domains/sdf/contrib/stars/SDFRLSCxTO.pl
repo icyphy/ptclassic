@@ -11,13 +11,15 @@ The actual (time-dependent) tap weight vector is cyclically output, i.e.
 on each invocation of the star you get one tap weight and after
 length(taps) invocations you have one complete set of weights.
         }
-	version {@(#)SDFRLSCxTO.pl	1.0 9/24/96}
-	author { U. Trautwein , A. Richter}
+	version { @(#)SDFRLSCxTO.pl	1.4	05/28/98 }
+	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	input {
 		name {input}
 		type {complex}
@@ -67,6 +69,7 @@ All rights reserved.
 	        name {TO}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 	        int cyclecounter;
 		int NumberElements;
@@ -144,8 +147,12 @@ All rights reserved.
 		int i1, j;
 
 		for (i=0; i<NumberElements; i++) {
-			x_vector[i] = Complex(input%(index+i));
-			x_vector_new[i] = Complex(input%i);
+			// We use a temporary variable to 
+		        // avoid gcc2.7.2/2.8 problems
+			Complex tmp1 = input%(index+i);
+			x_vector[i] = tmp1;
+			Complex tmp2 = input%i;
+			x_vector_new[i] = tmp2;
 		}
 
 		// k=P*x/(lambda+x'*P*x)
@@ -163,8 +170,12 @@ All rights reserved.
 		   k_vector[i]=t1_vector[i]*t2;
 
 		// w=w+k*conj(e)
-		for (i=0; i<NumberElements; i++)
-		   taps[i]+=k_vector[i]*conj(Complex(error%0));
+		for (i=0; i<NumberElements; i++) {
+		   // We use a temporary variable to 
+		   // avoid gcc2.7.2/2.8 problems
+		   Complex tmp = error%0;
+		   taps[i]+=k_vector[i]*conj(tmp);
+		}
 
 		// y=w'*x (calculate the output signal, use the actual input)
 		Complex y = Complex(0.0,0.0);

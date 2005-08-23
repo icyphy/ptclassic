@@ -8,10 +8,10 @@ of the codebook, so the star will be significantly slower than
 either Quant or LinQuantIdx.  The absolute value of the difference
 is used as a distance measure.
   }
-  version { $Id$ }
+  version { @(#)CGCQuantizer.pl	1.2 04/08/97 }
   author { Bilung Lee, Yu Kee Lim }
   copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

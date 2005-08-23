@@ -1,14 +1,19 @@
 defstar {
-	name { QuantBitsLin }
+	name { QntBtsLin }
 	domain { CG56 }
 	desc { Linear quantizer with adjustable offset. }
-	version { $Id$ }
+	version { @(#)CG56QntBtsLin.pl	1.10 01 Oct 1996 }
 	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-.Id "quantizer"
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="quantizer"></a>
 Normally, the output is just the two's complement number
 given by the top noBits of the input, but
 an optional offset can be added to shift the output levels up or down.
@@ -40,6 +45,9 @@ an optional offset can be added to shift the output levels up or down.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
+	constructor {
+		noInternalState();
+	}
         codeblock(std) {
 	move	$ref(input),x0
 	move	#-$val(X),a
@@ -51,8 +59,8 @@ an optional offset can be added to shift the output levels up or down.
   	ccinclude {<math.h>}
 
         go { 
-		
-                double a = pow(2,1-double(noBits));
+		// There is no IntState to double cast, so cast to int first.
+                double a = pow(2,1-double(int(noBits)));
    		X=a;
  		addCode(std);
  	}

@@ -1,10 +1,31 @@
-/*  Version $Id$
+static const char file_id[] = "XXXStar.cc";
 
-    Copyright 1991 The Regents of the University of California.
-			All Rights Reserved.
+/*  Version @(#)XXXStar.cc	1.5 3/7/96
 
-    Programmer:		T.M. Parks
-    Date of creation:	5 January 1991
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+    Author:	T.M. Parks
+    Created:	5 January 1992
 
 */
 
@@ -13,10 +34,7 @@
 #endif
 
 #include "XXXStar.h"
-#include "XXXConnect.h"
 
-// The following is defined in XXXDomain.cc -- this forces that module
-// to be included if any XXX stars are linked in.
 extern const char XXXdomainName[];
 
 // Class identification.
@@ -26,26 +44,4 @@ ISA_FUNC(XXXStar,Star);
 const char* XXXStar::domain() const
 {
     return XXXdomainName;
-}
-
-// Domain-specific initialization.
-void XXXStar::prepareForScheduling()
-{}
-
-// Firing definition.
-void XXXStar::fire()
-{
-    BlockPortIter port(*this);
-
-    // Get data for all PortHoles.
-    for(int i = numberPorts(); i > 0; i--)
-	(port++)->grabData();
-
-    // Fire the Star.
-    Star::fire();
-
-    // Send data for all PortHoles.
-    port.reset();
-    for(i = numberPorts(); i > 0; i--)
-	(port++)->sendData();
 }

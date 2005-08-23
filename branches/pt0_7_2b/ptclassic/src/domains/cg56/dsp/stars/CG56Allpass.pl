@@ -2,15 +2,24 @@ defstar {
 	name { Allpass }
 	domain { CG56 }
 	desc { Allpass filter }
-	version { $Id$ }
+	version { @(#)CG56Allpass.pl	1.14 06 Oct 1996 }
+	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-DSP56000 - An allpass filter with one pole and one zero.
-           The location of these is given by the polezero input.
-           This is from fig. 1a of J.A. Moore, `About this 
-           reverberation business', Computer Music. Journal, Vol 3, No.2 
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 dsp library }
+	htmldoc {
+An all-pass filter with one pole and one zero.
+The location of these is given by the pole-zero input [1, fig. 1a].
+<h3>References</h3>
+<p>[1]  
+J.A. Moore, "About this reverberation business",
+<i>Computer Music Journal</i>,
+vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 
         input  {
@@ -65,14 +74,14 @@ DSP56000 - An allpass filter with one pole and one zero.
         move    a,$ref(output)
         move    r0,$ref(delayBufStart)
         }
-        start {
+        setup {
                 delayBuf.resize(delay);
         }
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
-                gencode(std);
+                addCode(std);
         }		
 	execTime { 
                  return 16;

@@ -1,9 +1,9 @@
 static const char file_id[] = "CGCTychoTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCTychoTarget.cc	1.16 01/20/99
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -38,43 +38,42 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <string.h>
+#include <ctype.h>
+#include <stream.h>
 #include "CGCTychoTarget.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
+#include "miscFuncs.h"
+
+// These files included for use within compileCode() and runCode().
+#include "ptk.h"
+#include "PTcl.h"
+#include "CGUtilities.h"
 
 // constructor
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
-                   const char* desc) : CGCMakefileTarget(name,starclass,desc) {
-	funcName.setInitValue("go");
-	//StringList compOpts = "$(TCLTK_CFLAGS)";
+                   const char* desc) : CGCTarget(name,starclass,desc) {
 
-	// There is no point in including X11 directories here,
-	// since they will be different for each platform.
-	//compileOptions.setInitValue(hashstring(compOpts));
-
-	//StringList linkOpts = "$(TCLTK_LOADLIBES)";
-	//linkOptions.setInitValue(hashstring(linkOpts));
-
-	// Set the default skeleton makefile
-	StringList skelMakefile = "$PTOLEMY/lib/cgc/TclTk_Target.mk";
-	skeletonMakefile.setInitValue(hashstring(skelMakefile));
+        // These target parameters are not used, so make them
+        // invisible and not settable.
+        compileCommand.clearAttributes(A_SETTABLE);
+        compileOptions.clearAttributes(A_SETTABLE);
+        linkOptions.clearAttributes(A_SETTABLE);
 
 	loopingLevel.setInitValue("1");
-	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
-	addStream("tkSetup", &tkSetup);
-
-	// Add the string state for the Tcl start command
-	addState(startCommand.setState("startCommand",this,"makeRunWindow",
-        "set the Tcl comment to execute to start the interactive interface")
-		 );
+        addStream("tychoSetup",&tychoSetup);
+        addStream("tkSetup",&tkSetup);
+        addState(scriptFile.setState("scriptFile",this,"Enter the Custom Script path here"));
 }
 
 void CGCTychoTarget :: initCodeStrings() {
 	CGCTarget::initCodeStrings();
-	mainLoopInit.initialize();
 	mainLoopTerm.initialize();
-	tkSetup.initialize();
+        tychoSetup.initialize();
+        tkSetup.initialize();
+
 }
 
 // clone
@@ -82,60 +81,236 @@ Block* CGCTychoTarget :: makeNew () const {
 	LOG_NEW; return new CGCTychoTarget(name(),starType(),descriptor());
 }
 
+int CGCTychoTarget :: compileCode() {
+  // Create a string and call Tycho to evaluate it
+  StringList cmd, error;
+  cmd << "puts " << filePrefix << "\n";
+  cmd << "::tycho::compileC "
+      << expandPathName(destDirectory) << "/" << filePrefix << ".c"
+      << " -autostart 1 -autodestroy 1 -modal 1";
+  
+  if (Tcl_Eval(PTcl::activeInterp, cmd.chars()) != TCL_OK) {
+      StringList message;
+      message << "CGCTychoTarget::compileCode(): Tcl command:\n" <<
+          cmd.chars() << " failed:\n " <<
+          Tcl_GetVar(PTcl::activeInterp,"errorInfo",TCL_GLOBAL_ONLY) << "\n";
+      cerr << message;
+      Error::abortRun(*this,message);
+      return 0;
+  }
+  return 1;
+}
+
+// Run the code. Start another Tycho process and give it the
+// "loader" file as argument.
+int CGCTychoTarget :: runCode() {
+  StringList ldr, fname;
+  fname << filePrefix << "_ld.tcl";
+  ldr << "::tycho::File::openContext " 
+      << expandPathName(destDirectory) << "/" << filePrefix << ".so";
+  rcpWriteFile(targetHost, destDirectory, fname, ldr);
+
+  // Exec another Tycho -- note "&" in the command so
+  // pigi doesn't go dead...
+  StringList cmd, error;
+  cmd << "tycho -e " << filePrefix << "_ld.tcl &";
+  error << "Could not run " << filePrefix;
+  return (systemCall(cmd, error, targetHost) == 0);
+}
+
 /////////////////////////////////////////
 // codeGenInit
 /////////////////////////////////////////
 
 int CGCTychoTarget :: codeGenInit() {
-    // Define variables needed by the tcl init file.
-    globalDecls << "char *name = \"" << galaxy()->name() << "\";\n"
-		<< "int numIterations = "
-		<< int(scheduler()->getStopTime()) << ";\n"
-		<< "static char startCmd[] = \"" << startCommand << "\";\n"
-      //dont include tkMain.c "#include \"tkMain.c\"\n\n";
 
-    // If the system is paused, wait until Go is hit again
-    mainLoopInit << "if ( getPollFlag() ) processFlags();\n"
-		 << "while (runFlag == -1) Tk_DoOneEvent(0);\n"
-		 << "if (runFlag == 0) break;\n";
-
-    mainLoopTerm << "runFlag = 0;\n";
+    mainLoopTerm << comment("If timer has expired, return")
+      << "if ( Ty_TimerElapsed() ) {\n"
+      << " return 1;\n}\n";
 
     return CGCTarget::codeGenInit();
-}
-
-void CGCTychoTarget :: beginIteration(int repetitions, int depth) {
-    CGCTarget::beginIteration(repetitions, depth);
-    // Note, unlike SimControl, the following does not support
-    // threaded computation
-    *defaultStream <<  "if ( getPollFlag() ) processFlags();\n";
 }
 
 CodeStream CGCTychoTarget::mainLoopBody() {
     CodeStream body;
     defaultStream = &body;
 
-    // Need specialized code instead of the beginIterations method
-    // so that the value can be changed each time the function is run.
-    // and infinite iterations can be supported
-    StringList iterator = symbol("sdfIterationCounter");
-    body << "{\n\tint " << iterator<< ";\n"
-	 << iterator << " = 0;\n"
-	 << "while (" << iterator << "++ != numIterations) {\n"
-	 << mainLoopInit << mainLoop << "}} /* MAIN LOOP END */\n"
-	 << mainLoopTerm;
-
+    body << "while (iterationCounter != numIterations) {\n"
+      << mainLoop << "/* Main Loop End */\n"
+      << mainLoopTerm
+      << "iterationCounter++;\n}\n";
     defaultStream = &myCode;
     return body;
 }
 
+void CGCTychoTarget :: addStaticDecls 
+                 ( StringList &result, const char *string ) {
+    int length;
+    char *start;
+    char *current = (char *)string;
+    
+    // If the string is NULL, don't parse through it
+    if (!(string == NULL)) {
+        while ( *current != '\0' ) {
+            // skip white space
+            while ( *current != '\0' 
+            && ( *current == ' ' || *current == '\n' || *current == '\t' )) {
+                current++;
+            }
+            if ( *current == '\0' ) {
+                result << "\n";
+                break;
+            }
+            length = 0;
+            start = current;
+            if ( *current == '/' && *(current+1) == '*' ) {
+                // If this is a comment, go to the end of it
+                current += 2;
+                while ( *current != '\0'
+                && *current != '*' && *(current+1) != '/') {
+                    current++;
+                    length++;
+                }
+            } else if ( ! strncmp(start, "typedef", 7) ) {
+                // In a typedef. This is fragile and should match braces
+                while ( *current != '\0' && *current != '}' ) {
+                    length++;
+                    current++;
+                }
+                while ( *current != '\0' && *current != ';' ) {
+                    length++;
+                    current++;
+                }
+            } else if ( ! strncmp(start, "#", 1) ) {
+                // In a preprocessor line. Scan to end of line
+                while ( *current != '\0' && *current != '\n' ) {
+                    length++;
+                    current++;
+                }
+            } else {
+                /// Otherwise scan to the end of the statement
+                while ( *current != '\0' && *current != ';' ) {
+                    length++;
+                    current++;
+                }
+            }
+            length++;
+	    if ( *current == '*' && *(current+1) == '/' ) {
+	      /* skip the 2 symbols */
+	      length+=3;
+	      current+=3;
+	      result << "\n";
+	    } else if ( ! strncmp(start, "typedef", 7)) {
+	      result << "\n";
+	    } else if ( ! strncmp(start, "#", 1)) {
+	      result << "\n";
+	    } else if ( *current == '\0' ) {
+	      result << start;
+	      break;
+	    } else {
+	      result << "\n" << "static ";
+	    }
+	    char *temp = new char[length+1];
+	    temp[length] = '\0';
+	    strncpy(temp,start,length);
+	    result << temp;
+	    delete [] temp; 
+	    current++;
+        }
+    }
+}
+
 void CGCTychoTarget :: frameCode() {
-    procedures << "void tkSetup() {\n" << tkSetup << "}\n";
-    CGCTarget::frameCode();
+  char* tycgcpath = expandPathName("$PTOLEMY/tycho/src/tycgc/tycgc.h");
+
+  // Add the comment, and include files
+  myCode << headerComment() << "\n\n"
+  << include
+  << "#include \""
+  << tycgcpath
+  << "\"\n\n";
+
+    // Add static variables used by all modules
+  myCode << comment("Name of this CGC module")
+    << "static char *moduleName = \"" 
+    << galaxy()->name() << "\";\n"
+    << comment("The name of the script file that creates the user interface")
+    << "static char *scriptFile = \""
+    << (const char *)scriptFile << "\";\n\n"
+    << comment("Loop counters")
+      << "static int numIterations = "
+      << int(scheduler()->getStopTime()) << ";\n"
+      << "static int iterationCounter;\n"
+      << "static int sdfLoopCounter;\n\n"
+      << comment("Tcl interface data")
+	<< "static char tclcountername[40];\n"
+	<< "static char updatetclcounter;\n\n";
+
+  // Add static variable decls from stars, with
+  // a "static" in front of each
+  addStaticDecls(myCode, (const char *)globalDecls);
+  addStaticDecls(myCode, (const char *)mainDecls);
+
+  // Add tychoSetup to the procedures string
+  procedures << "static void tychoSetup() {\n" << tychoSetup << "}\n";
+  // Add the procedures
+  myCode << procedures;
+
+  StringList setupDecl = "\nstatic void setup() {\n";
+  StringList wrapupDecl = "\nstatic void wrapup() {\n";
+  StringList executeDecl = "\nstatic int execute() {\n";
+
+  setupDecl << "sdfLoopCounter = 0;\n"
+	    << "iterationCounter = 0;\n"
+	    << commInit << mainInit 
+	    << "}\n";
+  wrapupDecl << mainClose << "\n}\n";
+
+  executeDecl << mainLoopBody()
+    << comment("If we go to here, the iteration counter was reached")
+      << comment("so call wrapup and return 0")
+	<< "wrapup();\n"
+	<< "return 0;\n}\n";
+   
+  // Mess about to get the right name for the initialization function
+  char buffer[120];
+  char *b = buffer;
+  strcpy(buffer,galaxy()->name());
+  *b++ = toupper(*b);
+  while ( *b != '\0' ) {
+    *b++ = tolower(*b);
+  }
+
+  StringList initProcedure = "int ";
+  initProcedure << buffer << "_Init"
+    <<"(Tcl_Interp *interp) {\n"
+        << "/* Adds a single interface command */\n"
+        <<"Tcl_CreateCommand(interp, "
+	<<"\"::tycho::"
+	<< galaxy()->name()
+	<<"\", tclinterface, (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);\n"
+	<<"return TCL_OK;\n}\n";
+
+  char* tclifpath = expandPathName("$PTOLEMY/tycho/src/tycgc/tclif.c");
+
+  myCode << setupDecl << wrapupDecl << executeDecl 
+  << "#include \""
+  << tclifpath
+  << "\"\n"
+  << initProcedure;
+
+  // after generating code, initialize code strings again.
+  initCodeStrings();
 }
 
 static CGCTychoTarget targ("Tycho_Target", "CGCStar",
-			   "Target for Tcl/Tk C code generation");
+			   "Target for Tcl/Tk C code generation with Custom Control Panels");
 
 static KnownTarget entry(targ, "Tycho_Target");
+
+
+
+
+
+
 

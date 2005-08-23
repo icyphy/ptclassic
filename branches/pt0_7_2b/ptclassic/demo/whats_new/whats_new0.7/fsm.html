@@ -1,0 +1,135 @@
+<HTML>
+<HEAD>
+<TITLE>FSM Domain</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF">
+
+<CENTER><H1>FSM Domain</H1></CENTER>
+<HR>
+<I>Author: Bilung Lee</I><BR>
+<HR>
+<CENTER><H2>1 Introduction</H2></CENTER>
+The finite state machine (FSM) has been one of the most popular models for
+describing control-oriented systems, like real-time process controllers.
+A directed node-and-arc graph, called a state transition diagram (STD), 
+can be used to describe an FSM. It represents a system in the form of states 
+(nodes) and transitions (arcs) between states.
+
+
+<CENTER><H2>2 Graphical User Interface</H2></CENTER>
+The old and outdated visual interface to Ptolemy, called VEM, is not suitable
+for drawing the STD for an FSM. A new visual editor* (<A HREF="GUI.gif">see 
+Figure</A>) is under development based on Tycho, a hierarchical syntax manager,
+which is part of the Ptolemy project.
+
+<H3>2.1 Edit a new STD file</H3>
+To edit a new STD for an FSM, the Tycho has to be started first. Then either 
+open a file with the file extension "std", or drag down the "Window" menu and 
+choose "State transition diagram editor". A message window will pop up to ask 
+for machine type. Currently there is one type of FSM supported, called mixed 
+Mealy/Moore machine.<BR><BR>
+
+<H3>2.2 Edit the Input/Output and Internal Events Names</H3>
+If there are any input/output and internal events for the FSM, their names
+must be specified: Drag down the "Special" menu and choose "I/O Port Names..."
+, then enter the names for the input/output. Each name should be separated by
+at least one space.
+
+<H3>2.2 Draw/Edit a State</H3>
+To draw a state, either drag down the "Edit" menu and choose "New Node",
+or press the hot key "Shift-N". Then a crossbar cursor will appear in the
+window. Press and hold (don't release) the left mouse button, and move the 
+mouse to get a different shape of node. Release the button to finish the 
+drawing. 
+<BR><BR>
+To edit a state, first select the state by pressing the left mouse button 
+on it. Then either drag down the "Edit" menu and choose "Edit Item", or 
+press the hot key "e".
+
+<H3>2.3 Draw/Edit a Transition</H3>
+To draw a transition, either drag down the "Edit" menu and choose "New Arc",
+or press the hot key "Shift-A". Then a crossbar cursor will appear in the 
+window. Press the left mouse button on the periphery of the starting state.
+Move the mouse and press the left mouse button to get more delicate arc.
+To finish the drawing, move the mouse on the periphery of the ending state
+and press the left mouse button.
+<BR><BR>
+To edit a transition, first select the transition by pressing the left mouse 
+button on it. Then either drag down the "Edit" menu and choose "Edit Item", 
+or press the hot key "e".
+
+<H3>2.4 Delete a State/Transition</H3>
+Fisrt select the state/transition by pressing the left mouse button on it, 
+then drag down the "Edit" menu and choose "Delete".
+
+<H3>2.5 Move/Reshape a State/Transition</H3>
+To move a state, press and hold the left mouse button on it, then move the 
+mouse to the desired position. To reshape a state, first select the state,
+and move the cursor to the up/down/left/right periphery of the state to get 
+an up/down/left/right arrow-shape cursor, then press and hold the left mouse 
+button and move the mouse to reshape it. 
+<BR><BR>
+To move/reshape a transition, first select it, then some small rectagles will
+appear along the arc. Press and move one of the rectagles to move/reshape the
+arc.
+
+<H3>2.6 Internal Machines of States</H3>
+In the FSM, each state may be associated with an internal machine. This 
+internal machine can be a subsystem of any other Ptolemy domain or another
+FSM Galaxy.
+To specify the internal machine of a state, when edit a state, give the full
+path name and file name of the subsystem. For example, an VEM facet for the
+Galaxy of any other Ptolemy domain, or an STD file for the FSM Galaxy.
+
+<CENTER><H2>3 Working in Ptolemy</H2></CENTER>
+From the point of view of implementation, a stand-alone FSM domain in Ptolemy 
+is not very interesting, because in most of applications, in addition to the
+control part, they contains many other parts, such as signal processing. 
+Moreover, there are various Ptolemy domains. With the FSM domain mixed with 
+them**, we can get a much more powerful FSM model.
+
+<H3>3.1 Make an Icon in VEM</H3>
+Unlike other domains, an FSM galaxy is edited in a previous mentioned STD file
+using Tycho instead of VEM. However, to work with other domains, an icon in 
+VEM is required to represent the corresponding FSM galaxy described in an STD
+file. In Ptolemy, the Tycho can be started by pressing key "Y". To make an 
+icon in VEM for the STD file, first open the file in term of Tycho started in
+Ptolemy. Then drag down the "Special" menu and choose "Make Icon...". This 
+will load the FSM galaxy into the Ptolemy kernel, and make an icon with 
+appropriate input/output ports in the specified palette in VEM.
+<BR><BR>
+The icon looks like a star (blue outline), but it is actually an galaxy.
+It may cause confusion, but the reason is to avoid using octool handle. 
+There are two different ways to make an icon in VEM: ptkSetMkSchemIcon 
+and ptkSetMkStar. The former one needs an OctFactHandle as one argument 
+and is used for other "VEM" galaxy. The FSM galaxy uses Tycho as the editor 
+instead of VEM, so there is no OctFactHandle for an FSM galaxy. Therefore
+the latter one, which uses the star (or galaxy) name instead, is more 
+appropriate for this case.
+
+<H3>3.2 Look Inside an FSM Galaxy</H3>
+Similar to the galaxy icon in other domain, when the key "I" is pressed on 
+the icon to look inside the galaxy, the corresponding STD file which describes
+the FSM galaxy will be automatically invoked in Tycho. 
+(Note: if the environment variable "PT_DISPLAY" is set to other editor instead
+of Tycho, it must be unset for the look-inside to work.)
+
+<HR>
+*The drawing mechanisms of this editor have been mainly developed by Wan-teh 
+ Chang.
+<BR>
+**Currently, the FSM domain can work with the SDF domain without problem.
+<BR><BR>
+<HR>
+Reference:
+<BR>
+<TABLE><TD>[1] Bilung Lee, "Fusing Dataflow with Finite State Machines",
+Technical Report, Memorandum No. UCB/ERL M96/20, University of California 
+at Berkeley, May 1996.
+<TD><A HREF="http://ptolemy.eecs.berkeley.edu/~bilung/papers/msReport/msReport.ps"></A>
+<TD><A HREF="http://ptolemy.eecs.berkeley.edu/~bilung/papers/msReport/msReport.pdf"></A>
+</TABLE>
+
+<HR>
+

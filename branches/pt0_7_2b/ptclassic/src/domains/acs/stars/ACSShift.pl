@@ -2,7 +2,7 @@ defcorona {
     name { Shift }
     domain { ACS }
     desc { This star shifts the input left (+) or right (-) a number of specificed bits }
-    version { @(#)ACSShift.pl	1.1 01/19/99 }
+    version { @(#)ACSShift.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company.

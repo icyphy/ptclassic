@@ -2,21 +2,21 @@ defstar {
 	name { TableInt }
 	domain { CGC }
 	desc {
-Implements a real-valued lookup table.  The "values" state contains the
+Implements an integer-valued lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
-	version { $Id$ }
-	author { J. T. Buck }
+	version { @(#)CGCTableInt.pl	1.4	05/07/97 }
+	author { Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
 	}
 	input {
 		name { input }
@@ -38,9 +38,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { YES }
 		desc { "If YES, check range of index at runtime, else omit"}
 	}
+	initCode {
+		addInclude("<stdio.h>");
+	}
 	go {
 		addCode(readIdx);
-		if (runTimeCheck) addCode(check);
+		if (int(runTimeCheck)) addCode(check);
 		addCode(lookup);
 	}
 	constructor {

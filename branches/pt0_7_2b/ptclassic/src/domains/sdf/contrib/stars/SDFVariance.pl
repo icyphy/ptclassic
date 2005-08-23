@@ -3,13 +3,14 @@ defstar {
 	domain { SDF } 
 	desc { Compute Mean and Variance }
 	author { N. Becker }
+	version { @(#)SDFVariance.pl	1.6	3/7/96 }
+	location { SDF user contribution library }
         copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { SDF main library }
 	input {
 	  name { in }
 	  type { float }
@@ -44,28 +45,28 @@ limitation of liability, and disclaimer of warranty provisions.
 	  SumXsqr = 0;
 	  SumX = 0;
 	  count = 0;
-	  skipcount = (int)skip;
-	  in.setSDFParams( (int)block, (int)block - 1);
+	  skipcount = int(skip);
+	  in.setSDFParams( int(block), int(block) - 1);
 	}
 	code {
-	  inline double sqr( double x ) {
+	  inline double mySqr( double x ) {
 	    return x * x;
 	  }
 	}
 	go {
-	  for( int i = (int)block - 1; i >= 0; i-- ) {
+	  for( int i = int(block) - 1; i >= 0; i-- ) {
 	    if( skipcount )
 	      skipcount--;
 	    else {
 	      count++;
 	      float input = (float)(in%i);
 	      SumX += input;
-	      SumXsqr += sqr( input );
+	      SumXsqr += mySqr( input );
 	    }
 	  }
 	  if( count ) {
 	    mean%0 << (SumX / count);
-	    variance%0 << ( (SumXsqr/count) - sqr( SumX/count ) );
+	    variance%0 << ( (SumXsqr/count) - mySqr( SumX/count ) );
 	  }
 	  else {
 // have to output something

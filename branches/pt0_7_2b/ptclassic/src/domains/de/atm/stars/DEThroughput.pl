@@ -10,26 +10,29 @@ defstar{
 Measures throughput of a set of traffic-loaded trunk lines.
        }
 
-       version {$Id$}
+       version {@(#)DEThroughput.pl	1.8	06 Oct 1996}
        author { Allen Lao }
 
        copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-       location {ATM demo library}
+       location { DE ATM library }
 
-       explanation {
+	htmldoc {
 To be placed after an SDF compiled galaxy switch and before a
-NullRemove star.  The SDF switch, for each time slot, issues an
+<tt>DENullRemove</tt>
+star.  The SDF switch, for each time slot, issues an
 actual packet for a line if it is active, and a "null" packet if
-idle.  This star passes the packets received on its "input" MPH
-through to its "output" MPH, and when triggered on "demand" port,
-produces a figure corresponding to the avg. throughput over each
-line on a MPH, as well as one for the avg. throughput over all
-lines considered as a whole.
+idle.  This star passes the packets received on its <i>input</i> MPH
+through to its <i>output</i> MPH, and when triggered on <i>demand</i>
+port, produces a figure corresponding to the avg. throughput over
+each line as well as one for the avg. throughput over all
+lines considered as a whole.  (Packets are of type
+<tt>VoiceData</tt>
+)
        }
 
        ccinclude { "VoiceData.h" }
@@ -104,7 +107,7 @@ lines considered as a whole.
 	     OutDEPort *rport;
 
 	     Envelope  inEnv;
-	     VoiceData*  v;
+	     const VoiceData*  v;
       
 	     int  countReal, countNull, count;
 	     countReal = countNull = count = 0;
@@ -114,9 +117,9 @@ lines considered as a whole.
 
 		if (iport->dataNew) {
 		    iport->get().getMessage(inEnv);
-		    v = (VoiceData*) inEnv.myData();
+		    v = (const VoiceData*) inEnv.myData();
 
-		    // update totals as appropiate depending on whether this
+		    // update totals as appropriate depending on whether this
 		    // packet is null or not
 			
 		    if (v -> nulltestMessage()) {

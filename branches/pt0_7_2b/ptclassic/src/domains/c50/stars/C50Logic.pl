@@ -1,7 +1,7 @@
 defstar {
 	name { Logic }
 	domain { C50 }
-	version { $Id$ }
+	version { @(#)C50Logic.pl	1.6  01 Oct 1996 }
 	author { Luis Gutierrez }
 	acknowledge { Brian L. Evans, Edward A. Lee }
 	copyright {
@@ -17,21 +17,11 @@ The inputs are integers interpreted as Boolean values,
 where zero means FALSE and a nonzero value means TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
-	explanation {
+	htmldoc {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
 of TRUE values among the inputs.
 The other operations are self-explanatory.
-.ir "logic"
-.ir "Boolean logic"
-.ir "not (logical operation)"
-.ir "and (logical operation)"
-.ir "exclusive or"
-.ir "xor (logical operation)"
-.ir "xnor (logical operation)"
-.ir "nand (logical operation)"
-.ir "or (logical operation)"
-.ir "nor (logical operation)"
 	}
 	inmulti {
 		name { input }
@@ -162,48 +152,40 @@ non-zero integer (not necessarily 1).
 	}
 
 	codeblock(prepareXor) {
+	lmmr	dbmr,#$addr(input#1)
 	lar	ar1,#$addr(output)
-	mar	*,ar1
-	lacl	#ffffh
-	sacb				; accL=accbL=ffffh
-	sach	*,ar0			; clear output
+	mar	*,ar1			
+	lamm	dbmr
+	lmmr	dbmr,#$addr(input#2)
+	sacb
+	sacl	*			
 	}
 
-//repeat n times
+//repeat n-2 times
 
 	codeblock(doXor,"int i") {
-	lar	ar0,#$addr(input#@i)
-	lacl	*,ar1
-	or	*,ar0
-	crlt	
+	lamm	dbmr			; acc = n-1 input
+	opl	*			; output = output || n-1 input
+	lmmr	dbmr,#$addr(input#@i)	; dbmr = n intput(after 2 cycles)
+	crlt				; if input is 0 then accB = 0
+	nop				; pipeline delay
 	}
 
 
 	codeblock(endXor) {
-	mar	*,ar1
-	lacl	*,ar2
-	lar	ar2,#0001h
-	xc	1,eq
-	sbrk	#01h
-	exar
+	lamm	dbmr			; get last input
+	crlt				; if last input = 0 accB = 0
+	opl	*			; oputput = output || last in
+	xc	1,eq			; if acc = 0 then accH = 1; else
+	cmpl
+	bsar	1
+	bsar	15
+	and	*			 
 	nop
 	xc	1,neq
-	sbrk	#01h
-	smmr	ar2,#$addr(output)
+	lacl	#1
 	}
 
-	codeblock(endXnor){
-	mar	*,ar1
-	lacl	*,ar2
-	lar	ar2,#0000h
-	xc	1,eq
-	adrk	#01h
-	exar
-	nop
-	xc	1,neq
-	adrk	#01h
-	smmr	ar2,#$addr(output)
-	}	
 
 	codeblock(invertAcc){
 	xor	#0001h,0
@@ -265,11 +247,9 @@ non-zero integer (not necessarily 1).
 			header << "positive logic";
 			addCode(header);
 			addCode(prepareXor);
-			for( i=1; i<=numinputs; i++)
+			for( i=3; i<=numinputs; i++)
 				addCode(doXor(i));
-			if (test == XORID) addCode(endXor);
-			else addCode(endXnor);
-			return;
+			addCode(endXor);
 			break;
 		}
 

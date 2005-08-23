@@ -1,19 +1,27 @@
 defstar {
 	name { Comb }
 	domain { CG56 }
-	desc { Comb Filter }
-	version { $Id$ }
+	desc { Comb filter }
+	version { @(#)CG56Comb.pl	1.16 06 Oct 1996 }
+	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-DSP56000 - A comb filter with a one-pole lowpass filter
-           in the delay loop.  The pole location is given
-           by the pole parameter.  The reverberation time
-           is given by the time input.  This filter is
-           from fig. 5 of J. A. Moore, `About this
-           reverberation business', Computer Music
-           Journal, Vol.  3, No. 2.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 dsp library }
+	htmldoc {
+<p>
+A comb filter with a one-pole lowpass filter in the delay loop.
+The pole location is given by the pole parameter.
+The reverberation time is given by the time input [1, fig. 5].
+<h3>References</h3>
+<p>[1]  
+J.A. Moore, "About this reverberation business",
+<i>Computer Music Journal</i>,
+vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 
         input  {
@@ -64,8 +72,8 @@ DSP56000 - A comb filter with a one-pole lowpass filter
         state  {
                 name { X }
 	        type { fix }
-	        default { 1.0 }
-	        desc { value of pole }
+	        default { ONE }
+	        desc { internal state }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
          }
 
@@ -99,15 +107,15 @@ DSP56000 - A comb filter with a one-pole lowpass filter
         move    m1,m0
 
         }
-        start {
+        setup {
                 delayBuf.resize(delay);
         }		
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
-                X=1.0-pole;
-                gencode(std);
+                X=1.0-pole.asDouble();
+                addCode(std);
         }		
 
 	execTime { 

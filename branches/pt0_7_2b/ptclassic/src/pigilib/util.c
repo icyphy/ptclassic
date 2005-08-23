@@ -1,19 +1,53 @@
+/* 
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
 /* util.c  edg
 Version identification:
-$Id$
+@(#)util.c	1.33    02/05/97
 Utility functions.
 */
 
-/* Includes */
-#include <stdio.h>
-#include <strings.h>
-#include <pwd.h>
-#include <search.h>
+/* Standard includes */
 #include "local.h"
-#include "err.h"
-#include "util.h"
+#include <stdio.h>
+#include <string.h>
+#include <pwd.h>
+#include "tcl.h"
+
+/* Octtools includes */
+#include "oct.h"
 #include "rpc.h"
 
+/* Pigilib includes */
+#include "err.h"
+#include "util.h"
+#include "octIfc.h"
+#include "vemInterface.h"
+#include "kernelCalls.h"
+#include "icon.h"
 
 /* UMalloc  12/10/88
 Allocate using malloc.
@@ -29,8 +63,6 @@ UMalloc(outPtr, bytes)
 char **outPtr;
 int bytes;
 {
-    extern char *malloc();
-
     ERR_IF2((*outPtr = (char *) malloc(bytes)) == NULL, 
 	"UMalloc: malloc() failed");
     return(TRUE);
@@ -49,8 +81,6 @@ boolean
 StrDup(outPtr, in)
 char **outPtr, *in;
 {
-    extern char *malloc();
-
     ERR_IF2((*outPtr = (char *) malloc(strlen(in) + 1)) == NULL, 
 	"StrDup: malloc() failed");
     (void) strcpy(*outPtr, in);
@@ -63,58 +93,10 @@ Duplicates string and returns pointer to new string
 */
 char *
 DupString(string)
-char *string;
+const char *string;
 {
     return(strcpy((char *) calloc(strlen(string)+1, sizeof(char)), string));
 }
-
-
-/* TildeExpand  4/28/88
-Copied from OCT.  Modified a little.
-Inputs: input = string "~xxx..."
-    buffer = buffer of chars
-Outputs: buffer = expanded string
-Caveats: does not skip white space at beginning of string.
-*/
-void
-TildeExpand(input, buffer)
-char *input;
-char *buffer;
-{
-    char *end;
-    int name_length;
-    struct passwd *entry;
-
-    if (input[0] != '~') {
-	strcpy(buffer, input);
-	return;
-    }
-    
-    end = index(input,'/');
-    if (end == (char *) 0) {
-	end = input + strlen(input);
-    }
-
-    name_length = end - input - 1;
-
-    strncpy(buffer, input+1, name_length);
-    buffer[name_length] = '\0';
-
-    if (name_length == 0) {
-	entry = getpwuid(getuid());
-    } else {
-	entry = getpwnam(buffer);
-    }
-    
-    if (entry == (struct passwd *) 0) {
-	return;
-    }
-
-    strcpy(buffer, entry->pw_dir);
-    strcat(buffer, end);
-    return;
-}
-
 
 /* SkipWhite  4/28/88
 */
@@ -139,7 +121,7 @@ char *name;
 {
     char *base;
 
-    if ((base = rindex(name, '/')) != NULL) {
+    if ((base = strrchr(name, '/')) != NULL) {
 	return(++base);  /* skip over '/' */
     }
     return(name);
@@ -175,7 +157,8 @@ char *dir, *baseName, **outPtr;
 	ERR_IF1(!StrDup(outPtr, baseName));
     } else {
 	ERR_IF1(!UMalloc(&buf, strlen(dir) + strlen(baseName) + 2));
-	*outPtr = sprintf(buf, "%s/%s", dir, baseName);
+	sprintf(buf, "%s/%s", dir, baseName);
+	*outPtr = buf;
     }
     return(TRUE);
 }
@@ -193,9 +176,10 @@ char **strPtr;
 
     if (dir == NULL) {
 	ERR_IF2((tmp = RPCXGetDefault("vem", "technology")) == NULL,
-	    "UGetTechDir: can not read .Xdefaults 'vem.technology'");
+	    "UGetFullTechDir: cannot read .Xdefaults 'vem.technology'");
 	ERR_IF1(!UMalloc(&dir, strlen(tmp) + 32));
 	sprintf(dir, "%s/ptolemy", tmp);
+	free(tmp);
     }
     *strPtr = dir;
     return (TRUE);
@@ -224,11 +208,11 @@ boolean bit;
 }
 
 
-/***** UniqName routines  11/30/89
-Uses <search.h> package for hash table.
+/***** UniqName routines
+Uses Tcl's hash table library procedures.
 */
 
-static boolean UniqNameInitDone = FALSE;
+static Tcl_HashTable uniqNameTable;
 
 /*
 Clears all names
@@ -236,53 +220,55 @@ Clears all names
 boolean
 UniqNameInit()
 {
-    if (UniqNameInitDone) {
-	hdestroy();
-    }
-    ERR_IF2(!hcreate(100), "UniqNameInit: cannot create hash table");
-    UniqNameInitDone = TRUE;
+    static int UniqNameInitDone = 0;
+
+    if (UniqNameInitDone)
+	Tcl_DeleteHashTable(&uniqNameTable);
+    else
+	UniqNameInitDone = 1;
+    Tcl_InitHashTable(&uniqNameTable, TCL_STRING_KEYS);
     return TRUE;
 }
 
 /*
-Outputs: return = str with unique name or NULL if error.  Can free() str.
-Updates: 3/8/90 = fix for uvax: ++ lvalue
-    3/20/90 = check for full hash table
+Output: return = str with unique name or NULL if error.  Can free() str.
 */
 char *
 UniqNameGet(s)
 char *s;
 {
+    int new;
+    Tcl_HashEntry *item;
+    int n;
     char buf[100];
-    int *ip;
 
-    ENTRY item, *found, *hsearch();
-    item.key = s;
-    found = hsearch(item, FIND);
-    if (found == NULL) {
-	item.data = 0;
-	if (!(found = hsearch(item, ENTER))) {
-	    ErrAdd("UniqNameGet: hash table is full!");
-	    return NULL;
-	}
+    item = Tcl_CreateHashEntry(&uniqNameTable, s, &new);
+    if (new) {
+	n = 0;  /* instance number starts from 1 */
+    } else {
+	n = (int) Tcl_GetHashValue(item);
     }
-    ip = (int *) &found->data;
-    return(DupString(sprintf(buf, "%s%d", s, ++ (*ip))));
+
+    n++;
+    Tcl_SetHashValue(item, (ClientData) n);
+    sprintf(buf, "%s%d", s, n);
+    return DupString(buf);
 }
 /***** End UniqName routines */
 
 /***** DupSheet routines  1/24/89
 Updates: 4/13/90 = allow multiple DupSheets
+1/30/97: no longer need version with only one string parameter.
 */
 
-boolean
+void
 DupSheetInit(ds)
 DupSheet *ds;
 {
     *ds = NULL;
 }
 
-boolean
+void
 DupSheetClear(ds)
 DupSheet *ds;
 {
@@ -291,59 +277,188 @@ DupSheet *ds;
     p = *ds;
     while (p != NULL) {
 	hold = p->next;
-	UFree((char *) p);
+  	UFree((char *) p);
 	p = hold;
     }
     *ds = NULL;
-    return(TRUE);
 }
 
+/* DupSheetAdd is used to record compiling galaxies.
+ * We need to record both the path and the domain name.
+ * NOTE: formerly, this relied on the passed string pointers staying
+ * valid indefinitely.  That strikes me as unsafe, since they are
+ * references to Oct facet storage that perhaps could get reclaimed?
+ * Anyway, hashstring'ing the path and domain eliminates the worry,
+ * and costs no extra space because other places will do the same.
+ */
 boolean
-DupSheetAdd(ds, item)
+DupSheetAdd(ds, item, item2)
 DupSheet *ds;
-char *item;
+const char *item;
+const char *item2;
 {
     DupSheetNode *new;
     
-    ERR_IF1(!UMalloc(&new, sizeof(DupSheetNode)));
-    new->info = item;
+    ERR_IF1(!UMalloc((char **)&new, sizeof(DupSheetNode)));
+    new->info = HashString(item);
+    new->moreinfo = HashString(item2);
     new->next = *ds;
     *ds = new;
     return(TRUE);
 }
 
+/* Check to see if list contains a match. */
 boolean
-DupSheetIsDup(ds, item)
+DupSheetIsDup(ds, item, item2)
 DupSheet *ds;
-char *item;
+const char *item;
+const char *item2;
 {
     DupSheetNode *p;
 
     for (p = *ds; p != NULL; p = p->next) {
-	if (strcmp(p->info, item) == 0) {
+	if (strcmp(p->info, item) == 0 &&
+	    strcmp(p->moreinfo, item2) == 0) {
 	    return(TRUE);
 	}
     }
     return(FALSE);
 }
 
-boolean
-IsBalancedParen(str)
-char *str;
+/* Given the spot that locates the curson in a facet, set
+   the KnownBlocks currentDomain to correspond to the domain
+   of the facet.  As a side effect, if the domain property of
+   the facet has not been defined, it will be set to current domain
+   of the KnownBlocks object.
+   Returns a pointer to the string identifying the previous domain,
+   or NULL if it fails.
+        EAL, 9/23/90
+*/
+const char *
+getDomainS(spot)
+RPCSpot *spot;
 {
-    int count = 0;
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
+    const char *domain;
+    const char *oldDomain;
 
-    while (*str != '\0') {
-	switch (*str++) {
-	case '(':
-	    count++;
-	    break;
-	case ')':
-	    count--;
-	    break;
-	default:
-	    break;
-	}
+    oldDomain = curDomainName();
+
+    /* get current facet */
+    facet.objectId = spot->facet;
+
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
+        return NULL;
     }
-    return (count == 0);
+    if (!GOCDomainProp(&facet, &domain, oldDomain)) {
+        PrintErr(ErrGet());
+        return NULL;
+    }
+    return domain;
+}
+
+const char *
+setCurDomainS(spot)
+RPCSpot *spot;
+{
+    const char *domain;
+    const char *oldDomain;
+    domain = getDomainS(spot);
+    if (!domain) return NULL;
+    oldDomain = curDomainName();
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(domain)) {
+	PrintErr("Domain error in current facet.");
+	return NULL;
+    }
+    return oldDomain;
+}
+
+/* Get domain corresponding to the facet */
+const char *
+getDomainF(facetPtr)
+octObject *facetPtr;
+{
+    const char *domain;
+    const char *oldDomain;
+    oldDomain = curDomainName();
+    if (!GOCDomainProp(facetPtr, &domain, oldDomain)) {
+        PrintErr(ErrGet());
+        return NULL;
+    }
+    return domain;
+}
+
+/* Given a facet, set the KnownBlocks currentDomain to correspond
+   to the domain of the facet.
+   As a side effect, if the facet domain property has not been set,
+   it will be set to current domain in the KnownBlocks object.
+   Returns a pointer to the string identifying the old domain, or
+   NULL if this fails.
+        EAL, 9/23/90
+*/
+const char *
+setCurDomainF(facetPtr)
+octObject *facetPtr;
+{
+    const char *domain;
+    const char *oldDomain;
+    domain = getDomainF(facetPtr);
+    if (!domain) return NULL;
+    oldDomain = curDomainName();
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(domain)) {
+	PrintErr("Domain error in current facet.");
+	return NULL;
+    }
+    return oldDomain;
+}
+
+/* Get the domain corresponding to an instance. */
+const char *
+getDomainInst(instPtr)
+octObject *instPtr;
+{
+    octObject mFacet = {OCT_UNDEFINED_OBJECT, 0};
+    static char domain[32];
+    char srcName[512], *fullName;
+    char* retval = 0;
+
+    if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr)) {
+	return setCurDomainF(instPtr);
+    }
+    if (!MyOpenMaster(&mFacet, instPtr, "interface", "r")) {
+	PrintErr(ErrGet());
+	return NULL;
+    }
+
+    octFullName(&mFacet, &fullName);
+    if (!IconFileToSourceFile(fullName, srcName, domain)) {
+	PrintErr(ErrGet());
+    }
+    else {
+	retval = domain;
+    }
+    free(fullName);
+    FreeOctMembers(&mFacet);
+    return(retval);
+}
+
+/* Set the domain to correspond to an instance. */
+
+const char *
+setCurDomainInst(instPtr)
+octObject *instPtr;
+{
+    const char* oldDomain;
+    const char* domain;
+    oldDomain = curDomainName();
+    domain = getDomainInst(instPtr);
+    if (!domain) return NULL;
+    if (!KcSetKBDomain(domain)) {
+	PrintErr("Domain error in instance.");
+	return NULL;
+    }
+    return oldDomain;
 }

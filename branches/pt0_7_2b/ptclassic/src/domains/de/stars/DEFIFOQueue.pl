@@ -3,25 +3,29 @@ defstar {
 	domain {DE}
 	derivedFrom { QueueBase }
 	desc {
-FIFO queue with finite or infinite length.
-Events on the "demand" input trigger "outData" if the queue is not empty.
-If the queue is empty, then a "demand" event enables the next future
-"inData" particle to pass immediately to "outData".
+This star is a first-in first-out (FIFO) queue with finite or infinite length.
+Events on the "demand" input trigger a dequeue on the "outData"  port
+if the queue is not empty. If the queue is empty, then a "demand" event
+enables the next future "inData" particle to pass immediately to "outData".
 The first particle to arrive at "inData" is always passed directly
 to the output, unless "numDemandsPending" is initialized to 0.
 If "consolidateDemands" is set to TRUE (the default), then "numDemandsPending"
-is not permitted to rise above unity.
-The size of the queue is sent to the "size" output whenever an "inData"
-or "demand" event is processed.
+is not permitted to rise above unity. The size of the queue is sent to the
+"size" output whenever an "inData" or "demand" event is processed.
 Input data that doesn't fit in the queue is sent to the "overflow" output.
 	}
-	version { $Id$}
-	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
-	copyright { 1991 The Regents of the University of California }
+	version { @(#)DEFIFOQueue.pl	1.10	10/01/96}
+	author { Soonhoi Ha and E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 	seealso {QueueBase, Stack, PriorityQueue}
-	explanation {
-.IE "queue"
+	htmldoc {
+<a name="queue"></a>
 This star queues inputs in a finite or infinite length FIFO queue.
 After the queue has grown to capacity,
 any "inData" inputs are sent to the "overflow" output, and not stored.
@@ -29,12 +33,12 @@ If the "capacity" parameter is a negative number,
 then the capacity is taken to be infinite.
 Note that storage is allocated dynamically, so a large capacity
 does not necessarily imply a large storage usage.
-.pp
+<p>
 If "consolidateDemands" is set to FALSE, then every "demand" input
 will eventually stimulate an output, even if successive demands arrive
 when the queue is empty, and even if successive demands arrive with the
 same time stamp.
-.pp
+<p>
 If "consolidateDemands" is set to TRUE (the default), then "numDemandsPending"
 is not permitted to rise above unity.
 This means that
@@ -47,7 +51,7 @@ the next "inData" particle to pass immediately to the output by
 setting the state "numDemandsPending" to unity.
 But if more than one "demand" event arrives in this time period, the
 effect is the same as if only one such event had arrived.
-.pp
+<p>
 When "demand" inputs and "inData" inputs have the same time
 stamp, then if the queue is not empty, the star produces as many
 outputs as possible before collecting the inData.
@@ -58,7 +62,7 @@ particle will pass directly to the "outData", even if the capacity
 of the queue is zero.  If there is more than one
 "inData" particle with the same time stamp, the remaining "inData" particles
 will be collected after the output has been produced.
-.pp
+<p>
 Consider the following example.  The FIFOQueue has capacity 3 and size 2.
 Three "inData" particles are waiting
 at the input, and all three have the same time stamp.  Two "demand"
@@ -71,7 +75,7 @@ third will be sent to "overflow".  The queue has reached capacity.
 If "consolidateDemands" had been FALSE, two outputs would have been
 produced first, reducing the queue size to 0, and making room
 for all three pending "inData" particles.
-.pp
+<p>
 Consider the next example.  A FIFOQueue star is wired up with the "outData"
 fed back to the "demand" input, with no delay, and "numDemandsPending"
 is initialized to unity (the default).  The first "inData" particle
@@ -82,11 +86,11 @@ this way is a no-op, passing input particles directly to the output.
 Even if two "inData" particles arrive with the
 same time stamp, they will both be passed to the output with the same
 time stamp, even though it takes two successive firings to accomplish this.
-.pp
+<p>
 As a third example, a FIFOQueue with capacity zero will pass
 "inData" particles to the output only if there is a pending demand.
 Otherwise, the inData particle will be sent to "overflow".
-.pp
+<p>
 Each time a data or demand input arrives, the size of the queue
 after processing all inputs is sent to the "size" output.
 	}
@@ -128,7 +132,6 @@ after processing all inputs is sent to the "size" output.
 		arglist { "()" }
 		type { void }
 		code {
-		    NULL;
 		    // Nothing to do
 		}
 	}
@@ -141,8 +144,21 @@ after processing all inputs is sent to the "size" output.
 		    return queue.length();
 		}
 	}
-	start {
-		DEQueueBase::start();
-		queue.initialize();
+	method {
+		name { zapQueue }
+		code {
+			while (Qsize() > 0) {
+				Particle* pp = (Particle*) queue.get();
+				pp->die();
+			}
+			queue.initialize();
+		}
+	}
+	setup {
+		DEQueueBase::setup();
+		zapQueue();
+	}
+	destructor {
+		zapQueue();
 	}
 }

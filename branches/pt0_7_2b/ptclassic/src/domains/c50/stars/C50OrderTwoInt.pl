@@ -4,14 +4,14 @@ defstar {
 	desc {
 Takes two inputs and outputs the greater and lesser of the two integers.
 	}
-	version { @(#)C50OrderTwoInt.pl	1.5	3/27/96 }
+	version { @(#)C50OrderTwoInt.pl	1.6	7/22/96 }
 	author { Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+	}	
 	location { C50 main library }
 	input {
 		name {upper}
@@ -31,19 +31,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(order) {
-	lar	ar0,#0012h		; lesser -> ar0 -> ar2
-	lar	ar1,#0012h		; greater ->ar1 -> ar2
-	mar	*,ar0			; arp =0
-	bldd	#$addr(upper),*+	; ar2 = upper; ar0->ar2
-	bldd	#$addr(lower),*		; ar3 = lower; ar0 -> ar3
-	lamm	ar2			; acc = ar2 = upper
-	sub	*			; acc -= ar3 = lower
-	nop				; wait until conds. are stable
-	xc	2,LT			; if upper > lower 
-	mar	*-,ar1			; xchange ar0, ar1
-	mar	*+			; arp = 1
+	lar	ar0,#0012h		
+	setc	ovm			
+	mar	*,ar0			
+	bldd	#$addr(upper),*+	
+	bldd	#$addr(lower),*-
+	lacc	*+,16		
+	sub	*,16,ar1
+	lar	ar1,#0012h		
+	xc	2,LT
+	mar	*+,ar0			
+	mar	*-,ar1	
 	bldd	*,#$addr(greater),ar0
 	bldd	*,#$addr(lesser)
+	clrc	ovm
 	}
 
  	go {
@@ -51,6 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	exectime {
-		return 7;	
+		return 13;	
 	}
 }

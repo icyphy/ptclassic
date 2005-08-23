@@ -8,43 +8,43 @@ The supported styles are 'hold' for zero-order hold,
 'connect' for connected dots, and 'dot' for unconnected dots.
 An interactive help window describes other options for the plot.
     }
-    version { $Id$ }
+    version { @(#)DETkStripChart.pl	1.7   06 Oct 1996 }
     author { Eduardo N. Spring, Jose Luis Pino, and Edward A. Lee }
     copyright {
-Copyright (c) 1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    explanation {
+	htmldoc {
 This star is derived from DETclScript, and does little more than
 document the functionality of the script and specify the script file
 to be loaded.
-.pp
-The \fIyRange\fR parameter specifies the vertical range of each plot.
+<p>
+The <i>yRange</i> parameter specifies the vertical range of each plot.
 Each range is specified as a pair of number in the form (low,high).
 If only one range is specified, then it applied to all plots.  If more
 than one range is specified, then one range should be specified for each 
 input.  I.e., then number of ranges specified should equal the number of 
 inputs.
-.pp
-The \fITimeWindow\fR parameter specifies the amount of simulated time
+<p>
+The <i>TimeWindow</i> parameter specifies the amount of simulated time
 that can be viewed at one time in the window.  In other words, it is
 the time represented by the width of the plot window.
-.pp
-The \fIPlotStyle\fR parameter determines the plotting style.
+<p>
+The <i>PlotStyle</i> parameter determines the plotting style.
 There are currently three styles: zero order hold,
 connected lines, and unconnected dots.
 These are specified by the strings "hold", "dot", or "connect".
 The PlotStyle can be different for each input porthole.
-.pp
-The \fIPlotLabels\fR parameter specifies labels for each plot.
+<p>
+The <i>PlotLabels</i> parameter specifies labels for each plot.
 It can take any of three forms.  If it is empty, or has just the single 
 string "default", then it uses the name of the porthole connected to the
 corresponding input.  Alternatively, it can specify one label for each 
 input, with the labels separated by spaces.
     }
-    location { DE tcltk library }
+    location { DE Tcl/Tk library }
     defstate {
 	name { title }
 	type { string }
@@ -100,18 +100,26 @@ input, with the labels separated by spaces.
 	default { "5" }
 	desc { Height of each plot in centimeters }
     }
-    // The following must be "begin" not "setup" so that the number
-    // of portholes has been fixed (in case there is a HOF star on the input).
-    begin {
-        int i; 
+    setup {
 	if (output.numberPorts() > 0) {
 	    Error::abortRun(*this, "Outputs are not supported");
 	    return;
 	}
-// FIXME: The following path is TEMPORARY for testing
-
-//	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
-	tcl_file = "/users/eal/StripChart/tkStripChart.tcl";
+        for (int i = 0; i < style.size(); i++ ) {
+            if (strcmp(style[i],"hold") &&
+                strcmp(style[i],"dot")  &&
+                strcmp(style[i],"connect")) {
+                Error::abortRun(*this,
+				"style must be one of hold, dot, or connect");
+                return;
+            }
+        }
+    }
+    // The following must be "begin" not "setup" so that the number
+    // of portholes has been fixed (in case there is a HOF star on the input).
+    begin {
+        int i; 
+	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
 
 	if (signalLabels.size() < 1 ||
 	    (strcmp(signalLabels[0],"default") ==0)) {
@@ -125,17 +133,9 @@ input, with the labels separated by spaces.
             }
 	    signalLabels.setCurrentValue(names);
 	} else if (signalLabels.size() != input.numberPorts()) {
-	    Error::abortRun(*this,"Number of signalLabels is not equal to the number of input ports");
+	    Error::abortRun(*this, "Number of signalLabels is not equal to the number of input ports");
 	    return;
 	}
-        for (i = 0 ; i < style.size() ; i++ ) {
-            if (strcmp(style[i],"hold") &&
-                strcmp(style[i],"dot")  &&
-                strcmp(style[i],"connect")) {
-                Error::abortRun(*this,"style must be one of hold, dot, or connect");
-                return;
-            }
-        }
 	if (style.size() != input.numberPorts()) {
 	    if (style.size() != 1) {
 		Error::abortRun(*this,"Number of styles is not equal to the number of input ports");
@@ -169,8 +169,3 @@ input, with the labels separated by spaces.
 	tcl_file.clearAttributes(A_SETTABLE);
     }
 }
-
-
-
-
-

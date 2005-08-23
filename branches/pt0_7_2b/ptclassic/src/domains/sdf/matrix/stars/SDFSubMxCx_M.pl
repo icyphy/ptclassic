@@ -1,10 +1,10 @@
 defstar {
 	name { SubMxCx_M }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFSubMxCx_M.pl	1.3 12/1/95 }
 	author { Bilung Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -50,13 +50,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		const ComplexMatrix& matrix = *(const ComplexMatrix*)pkt.myData();
 
                 if ( int(startRow)+int(numRows) > matrix.numRows() ) {
-                  Error::abortRun(*this,"Submatrix rows extend beyond "
-                                        ,"the rows of input matrix.");
+                  Error::abortRun(*this, "Submatrix rows extend beyond ",
+				  "the rows of input matrix.");
                   return;
                 }
                 if ( int(startCol)+int(numCols) > matrix.numCols() ) {
-                  Error::abortRun(*this,"Submatrix columns extend beyond "
-                                        ,"the columns of input matrix.");
+                  Error::abortRun(*this, "Submatrix columns extend beyond ",
+                                  "the columns of input matrix.");
                   return;
                 }
 
@@ -64,7 +64,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		if (pkt.empty()) {
 		  // input empty, send out a zero matrix 
 		  ComplexMatrix& result = *(new ComplexMatrix(int(numRows),int(numCols)));
-		  result = (0,0);
+		  Complex zero(0,0);
+		  result = zero;
 		  output%0 << result;
     		}
 		else {

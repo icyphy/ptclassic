@@ -7,20 +7,20 @@ An FIR filter with a magnitude frequency response that is shaped
 like the standard raised cosine or square-root raised cosine
 used in digital communications.
 	}
-	version { $Id$ }
+	version { @(#)CGCRaisedCosine.pl	1.4	10/16/97 }
 	author { Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 See the SDFRaisedCos star.
 	}
 	seealso { FIR, Window }
-	ccinclude { "PTDSPRaisedCosine.h" }
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
 		name { length }
 		type { int }
@@ -60,11 +60,11 @@ See the SDFRaisedCos star.
 		int center = int(length)/2;
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
-			taps[i] = PTDSPSqrtRaisedCosine(i - center,
-					int(symbol_interval), int(excessBW));
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
+					int(symbol_interval), excessBW);
 		    else
-			taps[i] = PTDSPRaisedCosine(i - center,
-					int(symbol_interval), int(excessBW));
+			taps[i] = Ptdsp_RaisedCosine(i - center,
+					int(symbol_interval), excessBW);
 		}
 		CGCFIR :: setup();
 	}

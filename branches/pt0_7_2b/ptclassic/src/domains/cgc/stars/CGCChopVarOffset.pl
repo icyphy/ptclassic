@@ -3,10 +3,10 @@ defstar {
 	domain { CGC }
 	derivedFrom { Chop }
 	author { S. Ha }
-	version { $Id$ }
-	location { CGC control palette }
+	version { @(#)CGCChopVarOffset.pl	1.6	04/05/97 }
+	location { CGC main library }
 	copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -21,18 +21,33 @@ determined at run time through a control input.
 
 	constructor { 
 		noInternalState();
-		offset.setAttributes(A_NONCONSTANT | A_NONSETTABLE); 
+		offset.setAttributes(A_NONCONSTANT|A_NONSETTABLE); 
 	}
 
 	codeblock (init) {
-		$ref(offset) = $ref(offsetCntrl);
+	$ref(offset) = $ref(offsetCntrl);
 	}
+        codeblock(range) {
+        int hiLim = $val(nwrite) - $ref(offset) - 1;
+        if (hiLim >= $val(nwrite)) hiLim = $val(nwrite) - 1;
+        else if ($val(use_past_inputs)) hiLim = $val(nwrite) - 1;
+
+        int loLim = $val(nwrite) - $val(nread) - $ref(offset);
+        if (loLim < 0) loLim = 0;
+
+        int inidx = $val(nread) - $val(nwrite) + $ref(offset);
+        if (inidx < 0) inidx = 0;
+        }
 	go {
-		addCode(decl);	// look at CGCChop star
+		addCode(decl);			// look at CGCChop star
 		addCode(init);
-		addCode(out);	// look at CGCChop star
+		addCode(range);
+		if (input.resolvedType() == COMPLEX) 
+		  addCode(complexOut);		// look at CGCChop star
+		else
+		  addCode(nonComplexOut);	// look at CGCChop star
 	}
 	exectime {
-		return int(nwrite) + 1;
+		return CGCChop::myExecTime() + 8;
 	}
 }

@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSCGTarget.cc";
 /**********************************************************************
-Copyright (c) 1998-2000 The Regents of the University of California.
+Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: @(#)ACSCGTarget.cc	1.9 08/15/00
+ Version: @(#)ACSCGTarget.cc	1.5 05/15/98
 
 ***********************************************************************/
 

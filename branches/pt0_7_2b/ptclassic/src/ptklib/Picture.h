@@ -2,7 +2,7 @@
 #define _Picture_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Picture.h	1.4  09/01/99
 
 Author: Luis Gutierrez
 ( based on code for XYPlot written by Edward A. Lee and D. Niehaus)
@@ -11,7 +11,7 @@ Defines and maintains a TK XY plot.
 It uses the C functions defined in $PTOLEMY/src/ptklib/ptkPlot.c,
 but puts an object-oriented wrapper around them.
 
-Copyright (c) 1990-1997 The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,7 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Do the right thing for sol2 boolean defs.  sol2compat.h must be included
  * first so sys/types.h is included correctly.  See octtools/include/port.h
  */
-#include "sol2compat.h"
+/*#include "sol2compat.h"*/
 
 #include "Block.h"
 #include "InfString.h"
@@ -91,7 +91,7 @@ protected:
 	// A static variable used to create names that are
 	// guaranteed to be unique.  After each use, it should
 	// be incremented.
-	static unique;
+	static int unique;
 
 	// A unique string for each instance of this object identifies
 	// the star within which it sits for the benefit of Tcl routines.

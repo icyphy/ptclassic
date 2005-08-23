@@ -238,7 +238,7 @@ DumpExternals(PIMAGE_SYMBOL pSymbolTable, FILE *fout, unsigned cSymbols)
 		s = symbol;
 /*  Ptolemy specific hack: We want to use this with c++, so we want
  * the info after the @
- * /
+ */
 #ifdef NEVER
 		f = strchr(s, '@');
 		if (f) {

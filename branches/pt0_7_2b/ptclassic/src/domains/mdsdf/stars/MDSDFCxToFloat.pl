@@ -9,9 +9,14 @@ real values that are the values of each corresponding entry of the
 FloatMatrix and 0 imaginary value.
 I.e. ComplexMatrix.entry(i) = FloatMatrix.entry(i).
   }
-  version { $Id$ }
+  version { @(#)MDSDFCxToFloat.pl	1.4 12/1/95 }
   author { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { MDSDF library }
   input {
     name { input }

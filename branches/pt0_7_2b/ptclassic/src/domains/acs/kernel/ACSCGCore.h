@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  James A. Lundblad
  Date of creation: 3/18/98
- Version: $Id$
+ Version: @(#)ACSCGCore.h	1.6 09/08/99
 
 The ACS CG Core class provides a base class for all derived CG Core category classes. May instance variables and methods are stolen from CGCStar.
 
@@ -82,6 +82,11 @@ public:
     	/* virtual */ StringList declareStates(Attribute a=ANY);
     	/* virtual */ StringList initCodeStates(Attribute a=ANY);
 
+	// We're now in CG core territory.
+	/* virtual */ int isCG() const { return TRUE; }
+
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 protected:
 
@@ -155,6 +160,30 @@ protected:
 
 	virtual StringList arrayStateIndexRef(const State *, const char*) = 0;
 
+	// Add declarations, to be put at the beginning of the main section
+	int addDeclaration(const char* decl, const char* name = NULL) {
+		if (!name) name = decl;
+		return addCode(decl, "mainDecls", name);
+	}
+
+	// Add global declarations, to be put ahead of the main section
+	int addGlobal(const char* decl, const char* name = NULL) {
+		if (!name) name = decl;
+		return addCode(decl, "globalDecls", name);
+	}
+
+	// Add main initializations, to be put at the beginning of the main 
+	// section. By giving the name, you can have only one initialization
+	// routine among all star instances.
+	int addMainInit(const char* decl, const char* name = NULL) {
+		return addCode(decl, "mainInit", name);
+	}
+
+	// This function checks whether "state" is to be set from a command-line
+	// argument. If it is, returns the name to be specified on the command-
+	// line. The function returns "" otherwise.
+	StringList cmdArg(const State* state) const;
+	int isCmdArg (const State* state) const;
 
 private:
 
@@ -167,6 +196,5 @@ private:
 
 
 };
-
 
 #endif // _ACSCGCore_h

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: $Id$
+ Version: @(#)ACSFixSimCore.h	1.6 09/08/99
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -51,14 +51,23 @@ public:
 	// ACSCore* makeNew( ACSCorona & ).
 	ACSFixSimCore(ACSCorona & corona_);
 
+	// provides fixed-point support.
 	/* virtual */ void wrapup();
 
-//protected:
+	// tells target this is a fixed point core.
+	/* virtual */ int isFixedPoint() const { return TRUE; }
+
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
+
+protected:
+
+	// provides fixed-point support.
 	/* virtual */ void setup();
 	StringState OverflowHandler;
 	IntState ReportOverflow;
 	IntState RoundFix;
-# line 51 "SDFFix.pl"
+
 	int overflows, totalChecks;
 	int checkOverflow (Fix& fix);
 

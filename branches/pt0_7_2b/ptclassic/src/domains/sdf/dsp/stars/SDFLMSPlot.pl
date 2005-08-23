@@ -3,29 +3,34 @@ defstar {
 	domain { SDF }
 	derivedFrom { LMS }
 	desc {
-Adaptive filter using LMS adaptation algorithm.  In addition,
-the tap coefficients are plotted using the xgraph program, with a
-separate plot for the magnitude and phase.  If "trace" is NO, only the
-final tap values are plotted; if it is YES, a trace of each tap is
-plotted as it adapts.
+This star is exactly like the LMS star, except that, in addition
+to the functions of LMS, it makes a plot of the tap coefficients.
+It can produce two types of plots: a plot of the final tap values
+or a plot that traces the time evolution of each tap value.
+The time evolution is obtained if the value of the parameter "trace" is "YES".
 	}
-	version {$Id$}
+	version {@(#)SDFLMSPlot.pl	1.12	10/03/96}
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
-	explanation {
-This star is exactly like the LMS star, except that, in addition,
-it makes a plot of the tap coefficients.  It can produce two types
-of plots: a plot of the final tap values or a plot that traces the
-time evolution of each tap value: the time evolution is obtained
-if \fItrace\fP is YES.
-.lp
-\fIgraphTitle\fP is used for the title of the plot; \fIgraphOptions\fP
-is handed to the xgraph program as option values on the command line.
-.lp
-If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	seealso {LMS, Xgraph, XMgraph}
+	location { SDF dsp library }
+	htmldoc {
+<a name="adaptive filter with coefficient plotting"></a>
+<a name="filter, adaptive, with coefficient plotting"></a>
+<a name="filter, LMS, with coefficient plotting"></a>
+<a name="LMS adaptive filter with coefficient plotting"></a>
+The value of the <i>graphTitle</i> parameter
+is used for the title of the plot; the value of <i>graphOptions</i>
+is handed to the xgraph program as option values on the command line.
+<p>
+If <i>trace</i> is YES, then there may not be more than 64 taps in the filter,
+since this is the maximum number of plots that the xgraph program can handle.
+	}
+	seealso {LMS, XMgraph, LMSTkPlot, LMSPlotCx, LMSTkPlotCx}
 	hinclude { "Display.h" }
 	state {
 		name { graphOptions }
@@ -53,8 +58,8 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 		// remove saveTapsFile as a settable param
 		saveTapsFile.clearAttributes(A_SETTABLE);
 	}
-	start {
-		SDFLMS::start();
+	setup {
+		SDFLMS::setup();
 		int nPlots = 1;
 		if (int(trace)) {
 			nPlots = taps.size();

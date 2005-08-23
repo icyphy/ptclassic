@@ -1,7 +1,7 @@
 # Makefile for CGC NOW (Networks Of Workstations) udp library
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.10 7/23/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,44 +39,50 @@ ROOT =	../../../../../..
 VPATH = $(ROOT)/src/domains/cgc/targets/NOWam/libudpam
 
 # get configuration info
-CONFIG =$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-BDFKERNEL = $(ROOT)/src/domains/bdf/kernel
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
-CGCSTARS = $(ROOT)/src/domains/cgc/stars
-PARDIR = $(ROOT)/src/domains/cg/parScheduler
-CGTARDIR = $(ROOT)/src/domains/cg/targets
+SRCS = 	management.c misc.c transport.c
 
-INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
+HDRS =	am.h misc.h udpam.h transport.h
 
-PL_SRCS = \
-	CGCNOWamSend.pl \
-	CGCNOWamReceive.pl
+OBJS = 	$(SRCS:.c=.o)
 
-PLSRC = $(PL_SRCS:.pl=.cc)
+LIBNONSHARED = libudpam.a
 
-SRCS = CGCNOWamTarget.cc $(PLSRC) 
-EXTRA_SRCS = $(PL_SRCS)
+MISC_FILES = Makefile.dist
 
-HDRS=$(SRCS:.cc=.h)
+# This probably only works under Solaris
+#OS =	AIX
+OS =	SOLARIS
 
-OBJS = $(SRCS:.cc=.o)
+# Give me those printfs!
+DEBUG = -DDEBUG 
 
-all:	makefile $(OBJS)
+# GNU make extension, add our stuff to CFLAGS
+CFLAGS += -D$(OS) $(DEBUG)
 
-# "make install" puts things in the official place
-install:	all
-		@echo Installation complete.
-
-LIB=none	# required by common.mk
+C_INCL = -I$(VPATH) $(PTCOMPAT_INCSPEC)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
+
+# sol2 and sol2.cfront
+ifneq (,$(filter sol%,$(PTARCH)))
+all: makefile $(SRCS) $(LIBNONSHARED)
+
+install: makefile $(SRCS) $(LIBDIR)/$(LIBNONSHARED)
+else
+# Non solaris platforms
+all: makefile
+	@echo "NOW active message library not supported on non-Solaris platforms"
+install: makefile
+	@echo "NOW active message library not supported on non-Solaris platforms"
+endif
+
+lint:	$(LIBCSRCS)
+	lint -u $(INCL) $(LIBCSRCS) > lint
+
 # Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 

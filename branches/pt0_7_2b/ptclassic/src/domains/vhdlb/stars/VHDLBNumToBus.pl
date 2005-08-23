@@ -8,13 +8,13 @@ May need additional bus-splits at the output to extract individual bits.
 	}
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Sometimes it is necessary to convert an integer value into a multi-bit repre-
 sentation so that the values can be used by a digital circuit.  This star
 converts a given integer number into a 32-bit, 16-bit, or 8-bit representation.  The

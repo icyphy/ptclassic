@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy CGC DSP stars
-# $Id$
+# @(#)make.template	1.8 8/24/96
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -49,11 +49,13 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(CGCSTARSDIR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) \
- $(PTCOMPAT_INCSPEC) -I$(ROOT)/src/utils/libcephes
+ $(PTCOMPAT_INCSPEC) -I$(ROOT)/src/utils/libptdsp
 
 # source files for all stars, using preprocessor
 # put base stars first, i.e., those that other stars are derived from
 PL_SRCS= \
+ CGCBiquad.pl \
+ CGCFastFIR.pl \
  CGCFIR.pl \
  CGCGoertzelBase.pl \
  CGCLMS.pl \
@@ -67,6 +69,7 @@ PL_SRCS= \
  CGCGoertzelPower.pl \
  CGCIIR.pl \
  CGCLMSOscDet.pl \
+ CGCParametricEq.pl \
  CGCRaisedCosine.pl \
  CGCSinc.pl \
  CGCWindow.pl
@@ -81,9 +84,9 @@ OBJS= $(SRCS:.cc=.o)
 HDRS= $(SRCS:.cc=.h)
 
 DOMAIN=CGC
-STAR_MK=cgcstars
+STAR_MK=cgcdspstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libcgcstars.$(LIBSUFFIX)
+PTLIB=libcgcdspstars.$(LIBSUFFIX)
 
 all:		makefile stars_all
 

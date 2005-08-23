@@ -1,19 +1,45 @@
+static const char file_id[] = "ComplexState.cc";
 
-#include <std.h>
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "ComplexState.h"
-#include "FloatState.h"
+#include "KnownState.h"
 #include "Tokenizer.h"
 
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ComplexState.cc	2.15	03/16/96
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: I. Kuroda and J. T. Buck
- Date of creation: 6/15/89
+ Date of creation: 6/15/90
  Revisions:
 
  Functions for class ComplexState
@@ -25,70 +51,92 @@ $Id$
 
 **************************************************************************/
 
+// the type
+const char* ComplexState :: type() const { return "COMPLEX";}
+
+// the value as a string
+StringList ComplexState :: currentValue() const {
+	StringList s; 
+	s = "(";
+	s += val.real();
+	s += ",";
+	s += val.imag();
+	s += ")\n";
+	return s;
+}
+
+void ComplexState :: setInitValue(const Complex& arg) {
+	StringList sl;
+	sl << "(" << arg.real() << "," << arg.imag() << ")";
+	State::setInitValue(hashstring(sl));
+	val = arg;
+}
+
+// clone
+State* ComplexState :: clone () const {
+	LOG_NEW; ComplexState *s = new ComplexState;
+	s->val = val;
+	return s;
+}
+
 void ComplexState  :: initialize() {
-	const  char* specialChars =  "*+-/(),";
-	Tokenizer lexer(initValue,specialChars);
+	const  char* specialChars =  "*+-/(),!";
+	Tokenizer lexer(initValue(),specialChars);
 
-	double realval;
-	double imagval;
-	ParseToken t =getParseToken(lexer, parent()->parent());
+	ParseToken t =getParseToken(lexer);
 
-        if(!strcmp(t.tok,"ID")) {
-			val = ((ComplexState*)t.s)->val;
+	// possibility one: a galaxy ComplexState name
+
+	if (t.tok == T_ID) {
+		if (!t.s->isA("ComplexState")) {
+			parseError ("invalid state type: ", t.s->fullName());
 			return;
-			}
-
-	if(strcmp(t.tok,"OP")) return;
-	if(t.cval != '(') return;
-	t =  evalExpression(lexer, parent()->parent());
-	if(!strcmp(t.tok,"ERROR")) return;
-	if(!strcmp(t.tok,"EOF")) return;
-	{if(!strcmp(t.tok,"FLOAT")) realval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) val = *(double*)((FloatState*)t.s);
+		}
+		const ComplexState& cstate = *(const ComplexState*)t.s;
+		val = cstate.val;
 	}
-	t = getParseToken(lexer,  parent()->parent());
-	if(strcmp(t.tok,"SEPARATOR")) return;
-	if(t.cval != ',') return;
-	t =  evalExpression(lexer, parent()->parent());
-	if(!strcmp(t.tok,"ERROR")) return;
-	if(!strcmp(t.tok,"EOF")) return;
-	{if(!strcmp(t.tok,"FLOAT")) imagval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) val = *(double*)((FloatState*)t.s);
+	// possibility two:
+	// if it does not begin with '(', assume a purely real value.
+	// this may be any valid floating expression.
+	else if (t.tok != '(') {
+		setPushback(t);
+		t = evalFloatExpression(lexer);
+		if (t.tok == T_Float) val = t.doubleval;
+		// if wrong type, evalFloatExpression has already complained
+		else return;
 	}
-	t =getParseToken(lexer, parent()->parent());
-	if(strcmp(t.tok,"OP")) return;
-	if(t.cval != ')') return;
-	val = Complex(realval,imagval);
+	// possibility three: ( exp , exp )
+	// where each exp is a floating expression.
+	else {
+		// get real , imag
+		t =  evalFloatExpression(lexer);
+		if (t.tok != T_Float) return;
+		double realval = t.doubleval;
+		t = getParseToken(lexer);
+		if (t.tok != ',') {
+			parseError ("expected a comma");
+			return;
+		}
+		t =  evalFloatExpression(lexer);
+		if (t.tok != T_Float) return;
+		double imagval = t.doubleval;
+		val = Complex(realval,imagval);
+		t = getParseToken (lexer);
+		if (t.tok != ')') {
+			parseError ("expected )");
+			return;
+		}
+	}
+	// check for extra cruft (this also eats up any pushback token)
+	ParseToken t2 = getParseToken (lexer);
+	if (t2.tok != T_EOF)
+		parseError ("extra text after valid expression");
 	return;
 }
-
-ParseToken ComplexState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-	
-	double signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn);
-
-	if(!strcmp(t.tok,"EOF")) return t;
-	if(!strcmp(t.tok,"OP"))
-	{
-	if(t.cval == '-')
-		{signflag = -1;
-		t = getParseToken(lexer, blockIAmIn);
-		if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}	
-		}
-        }
-	if(!strcmp(t.tok,"FLOAT")) {
-					t.doubleval = signflag * t.doubleval;
-					return  t;
-				}
-        else if(!strcmp(t.tok,"ID")) {
-					t.doubleval = signflag * (*(double*)((FloatState*)t.s));
-					return t;
-				}
-        else {t.tok = "ERROR"; return t;}
-}
-
 
 // make knownstate entry
 static ComplexState proto;
 static KnownState entry(proto,"COMPLEX");
 
+// isa
+ISA_FUNC(ComplexState,State);

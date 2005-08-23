@@ -2,10 +2,32 @@ static const char file_id[] = "DecomGal.cc";
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)DecomGal.cc	1.15	11/10/97
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha 
  Date of creation: 4/92
@@ -18,8 +40,8 @@ $Id$
 #pragma implementation
 #endif
 
+#include <fstream.h>
 #include "DecomGal.h"
-#include "streamCompat.h"
 
 // loop all clusters with repetition counters
 void DecomGal :: loopAll() {
@@ -52,7 +74,9 @@ int DecomGal :: simplify() {
 				p->numIO() * int(c->repetitions)) {
 				// this port has enough delay. Remove it.
 				LOG_DEL; delete p->far();
-				p->disconnect(0);
+				// deleting far disconnected the ports, but
+				// do this too in case geo is persistent:
+				p->disconnect();
 				if (toBeDeleted) {
 					LOG_DEL; delete toBeDeleted;
 				}
@@ -81,15 +105,13 @@ void DecomGal :: decompose() {
 	if (numberClusts() <= 1) return;
 
 	SDFClusterGalIter nextClust(*this);
-	SDFCluster* c;
-
 	int change = TRUE;
-
 	while (change) {
 		change = FALSE;
 
 		// reset visit flags.
 		nextClust.reset();
+		SDFCluster* c;
 		while ((c = nextClust++) != 0) {
 			c->setVisit(0);
 		}
@@ -97,10 +119,11 @@ void DecomGal :: decompose() {
 		
 		// find a strongly connected components.
 		while ((c = nextClust++) != 0) {
-			SequentialList* clist;
+			SequentialList* clist = 0;
 			if (!(c->visited()) && (clist = findSCComponent(c))) {
 				makeCluster(clist);
 				LOG_DEL; delete clist;
+				clist = 0;
 				change = TRUE;
 				break;
 			}
@@ -116,11 +139,11 @@ void DecomGal :: decompose() {
 // find a strongly connected component
 // depth-first search.
 SequentialList* DecomGal :: findSCComponent(SDFCluster* c) {
+	if (c == 0) return 0;
+
 	c->setVisit(1);
-		
 	SDFClustPortIter nextP(*c);
 	SDFClustPort* p;
-
 	while ((p = nextP++) != 0) {
 		// downward direction.
 		if (p->isItInput()) continue;
@@ -129,7 +152,8 @@ SequentialList* DecomGal :: findSCComponent(SDFCluster* c) {
 		if (peer == c) continue;
 		if (peer->visited() > 0) {
 			return makeList(c, peer);
-		} else if (peer->visited() == 0) {
+		}
+		else if (peer->visited() == 0) {
 			SequentialList* tempList = findSCComponent(peer);
 			if (tempList) return tempList;
 		}
@@ -146,9 +170,8 @@ SequentialList* DecomGal :: makeList(SDFCluster* start, SDFCluster* stop) {
 	LOG_NEW; SequentialList* newList = new SequentialList;
 
 	SDFCluster* path = start;
-	
 	while (path != stop) {
-		newList->tup(path);
+		newList->prepend(path);
 
 		SDFClustPortIter nextP(*path);
 		SDFClustPort* p;
@@ -164,7 +187,7 @@ SequentialList* DecomGal :: makeList(SDFCluster* start, SDFCluster* stop) {
 			}
 		}
 	}
-	newList->tup(stop);
+	newList->prepend(stop);
 	return newList;
 }
 	
@@ -178,7 +201,7 @@ void DecomGal :: makeCluster(SequentialList* nlist) {
 	ListIter nodes(*nlist);
 	SDFCluster* c;
 	while ((c = (SDFCluster*) nodes++) != 0) {
-		if ((bag = (DecomClusterBag*) c->asBag())) break;
+		if ((bag = (DecomClusterBag*) c->asSpecialBag())) break;
 	}
 	if (!bag) {
 		LOG_NEW; bag = new DecomClusterBag;  
@@ -187,9 +210,10 @@ void DecomGal :: makeCluster(SequentialList* nlist) {
 
 	nodes.reset();
 	while ((c = (SDFCluster*) nodes++) != 0) {
-		if (c->asBag()) {
+		if (c->asSpecialBag()) {
 			if (c != bag) bag->merge((SDFClusterBag*)c, this);
-		} else {
+		}
+		else {
 			bag->absorb(c,this);
 		}
 	}
@@ -204,9 +228,9 @@ void DecomGal :: setUpClusters() {
 	SDFClusterGalIter nextC(*this);
 	SDFCluster* c;
 
-	// setup them
+	// set them up
 	while ((c = nextC++) != 0) {
-		DecomClusterBag* tBag = (DecomClusterBag*) c->asBag();
+		DecomClusterBag* tBag = (DecomClusterBag*) c->asSpecialBag();
 		if (tBag) {
 			tBag->createGalaxy(logstrm);
 			tBag->setUpGalaxy();
@@ -218,9 +242,8 @@ void DecomGal :: setUpClusters() {
 		*logstrm << "finishing setup\n";
 }
 
-// After finding out the new repetition numbers of each block,
-// we update the repetition of this bag and the numberTokens of the
-// portholes.
+// After finding out the new repetition numbers of each block, we update
+// the repetition of this bag and the numberTokens of the portholes.
 
 void DecomClusterBag :: setUpGalaxy() {
 
@@ -229,14 +252,9 @@ void DecomClusterBag :: setUpGalaxy() {
 	SDFCluster* c;
 
 	while ((c = nextC++) != 0) {
-		// if atomic cluster.
-		if (!c->asBag()) {
-			gal.removeBlock(*c);
-			nextC.reset();
-			cgal->addBlock(*c, c->readName());
-		} else {
-			Error :: abortRun("next ClusterBag is prohibited.");
-		}
+		gal->removeBlock(*c);
+		nextC.reset();
+		cgal->addBlock(*c, c->name());
 	}
 
 	// reference to compute the repetition property.
@@ -249,7 +267,8 @@ void DecomClusterBag :: setUpGalaxy() {
 	}
 	
 	// calculate new repetitions
-	loopSched->setup(*cgal);
+	loopSched->setGalaxy(*cgal);
+	loopSched->setup();
 
 	// update data members of this bag and portholes.
 	nextPort.reset();
@@ -262,7 +281,7 @@ void DecomClusterBag :: setUpGalaxy() {
 			flag = TRUE;
 			repetitions = refIter / fac;
 		}
-		p->numberTokens = inP->numberTokens * fac;
+		p->setNumXfer(inP->numXfer() * fac);
 
 		// detach the "inp" Port.
 		inP->parent()->removePort(*inP);
@@ -273,14 +292,14 @@ void DecomClusterBag :: setUpGalaxy() {
 // run the cluster, taking into account the loop factor
 void DecomClusterBag::go() {
 	loopSched->setStopTime(loop()+exCount);
-	loopSched->run(*cgal);
+	loopSched->run();
 	exCount += loop();
 }
 
 // destructor
 DecomClusterBag :: ~DecomClusterBag() {
 	LOG_DEL; delete cgal;
-	
+
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0) {

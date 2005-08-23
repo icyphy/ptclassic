@@ -9,16 +9,16 @@
 #endif
 /**************************************************************************
 Version identification:
-$Id$
+@(#)SubMatrix.h	1.6 03/19/96
 
-Copyright (c) 1991-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -32,7 +32,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -74,7 +76,7 @@ class ComplexSubMatrix: public ComplexMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  ComplexSubMatrix(const ComplexSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  ComplexSubMatrix(ComplexSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   ComplexSubMatrix(const ComplexSubMatrix& src);
@@ -90,10 +92,13 @@ class ComplexSubMatrix: public ComplexMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  ComplexSubMatrix& operator = (const ComplexSubMatrix& src);
   ComplexSubMatrix& operator = (Complex value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                       return(!(*this == src)); }
   /*virtual*/ Complex* operator [] (int row) { 
                                        return &data[row*parent->numCols()]; }
   /*virtual*/ const Complex* operator[] (int row) const {
@@ -133,7 +138,7 @@ class FixSubMatrix: public FixMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  FixSubMatrix(const FixSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  FixSubMatrix(FixSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   FixSubMatrix(const FixSubMatrix& src);
@@ -149,10 +154,13 @@ class FixSubMatrix: public FixMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  FixSubMatrix& operator = (const FixSubMatrix& src);
   FixSubMatrix& operator = (Fix value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                        return(!(*this == src)); }
   /*virtual*/ Fix* operator [] (int row) { 
                                         return &data[row*parent->numCols()]; }
   /*virtual*/ const Fix* operator[] (int row) const {
@@ -193,7 +201,7 @@ class FloatSubMatrix: public FloatMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  FloatSubMatrix(const FloatSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  FloatSubMatrix(FloatSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   FloatSubMatrix(const FloatSubMatrix& src);
@@ -209,10 +217,13 @@ class FloatSubMatrix: public FloatMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  FloatSubMatrix& operator = (const FloatSubMatrix& src);
   FloatSubMatrix& operator = (double value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                        return(!(*this == src)); }
   /*virtual*/ double* operator [] (int row) { 
                                       return &data[row*parent->numCols()]; }
   /*virtual*/ const double* operator[] (int row) const { 
@@ -252,7 +263,7 @@ class IntSubMatrix: public IntMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  IntSubMatrix(const IntSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  IntSubMatrix(IntSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   IntSubMatrix(const IntSubMatrix& src);
@@ -268,13 +279,17 @@ class IntSubMatrix: public IntMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  IntSubMatrix& operator = (const IntSubMatrix& src);
   IntSubMatrix& operator = (int value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
-  /*virtual*/ int* operator [] (int row) { return &data[row*parent->numCols()]; }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                       return(!(*this == src)); }
+  /*virtual*/ int* operator [] (int row) {
+                                       return &data[row*parent->numCols()]; }
   /*virtual*/ const int* operator[] (int row) const {
-                                             return &data[row*parent->numCols()]; }
+                                       return &data[row*parent->numCols()]; }
 
   void operator << (IntArrayState& src);
 

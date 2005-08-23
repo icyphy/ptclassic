@@ -7,14 +7,14 @@ Output a fixed-point constant output with value "level" (default 0.0).
 	}
         author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)SDFConstFix.pl	1.5	01 Oct 1996 }
 	location { SDF main library }
-        explanation {
+	htmldoc {
 The "OutputPrecision" is specified using an "l.r" format, where
 "l" is the number of bits to the left of the decimal place
 (including the sign bit) and "r" is the number of bits to the
@@ -34,8 +34,8 @@ number with 1 sign bit, 1 integer bit, and 22 fractional bits.
 	}
         defstate {
                 name { OutputPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc { Precision of the output in bits. }
         }
 	protected {
@@ -50,7 +50,7 @@ number with 1 sign bit, 1 integer bit, and 22 fractional bits.
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		   Error::abortRun( *this, "Invalid OverflowHandler" );
-		out.set_rounding( ((int) RoundFix) );
+		out.set_rounding( int(RoundFix) );
         }
 	go {
 		out = 0.0;

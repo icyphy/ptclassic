@@ -9,43 +9,41 @@ This is similar to FFTCx except that it is specialized for column
 FFTs to match ordering common to image processing.
 
 	}
-	version { $Id$ }
+	version { @(#)MDSDFFFTCxCol.pl	1.7 10/06/96 }
 	author { J. T. Buck, modified for MDSDF by Mike J. Chen }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
-	explanation {
-A number of input samples given by the parameter \fIsize\fR will
-be consumed at the input, zero-padded if necessary to make $2 sup order$
+	htmldoc {
+A number of input samples given by the parameter <i>size</i> will
+be consumed at the input, zero-padded if necessary to make 2<i> <sup>order</sup></i>
 samples, and transformed using a fast Fourier transform algorithm.
-.Id "FFT, complex"
-.Id "fast Fourier transform, complex"
-.Id "Fourier transform, fast, complex"
-If \fIdirection\fR is 1, then the forward Fourier transform is computed.
-If \fIdirection\fR is -1, then the inverse Fourier transform is computed.
-.lp
-Note a single firing of this star consumes \fIsize\fR inputs
-and produces $2 sup order$ outputs.
+<a name="FFT, complex"></a>
+<a name="fast Fourier transform, complex"></a>
+<a name="Fourier transform, fast, complex"></a>
+If <i>direction</i> is 1, then the forward Fourier transform is computed.
+If <i>direction</i> is -1, then the inverse Fourier transform is computed.
+<p>
+Note a single firing of this star consumes <i>size</i> inputs
+and produces 2<i> <sup>order</sup></i> outputs.
 This must be taken into account when determining for how many iterations
 to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
-.lp
-\fBBugs\fR: the routine currently used (from Gabriel) recomputes trig
-.Ir "Gabriel"
+<p>
+<b>Bugs</b>: the routine currently used (from Gabriel) recomputes trig
+<a name="Gabriel"></a>
 functions for each term, instead of using a table.
 Instead, FFTCx::setup() should compute a table of appropriate size
 in order to save time.
 This approach does not offer any improvement, obviously, if only
 one transform is performed.
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-Jae S. Lim, \fITwo-Dimensional Signal and Image Processing\fR,
+<h3>References</h3>
+<p>[1]  
+Jae S. Lim, <i>Two-Dimensional Signal and Image Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1990.
 	}
 	input {

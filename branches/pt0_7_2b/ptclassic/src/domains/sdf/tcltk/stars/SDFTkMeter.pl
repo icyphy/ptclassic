@@ -3,18 +3,17 @@ defstar {
 	domain {SDF}
 	derivedFrom { TclScript }
 	desc {
-Takes any number of inputs and dynamically
-displays their value on a set of sliding scales
+Dynamically display the value of any number of input signals on a set of bar meters.
 	}
-	version { $Id$ }
+	version { @(#)SDFTkMeter.pl	1.11	10/23/95 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	hinclude { "ptk.h" }
 	defstate {
 		name {label}
@@ -36,27 +35,25 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { "1.0" }
 		desc {High end of the scale}
 	}
+	defstate {
+		name {put_in_control_panel}
+		type {int}
+		default { "YES" }
+		desc {Specify to put bars in the control panel (vs. their own window)}
+	}
 	setup {
 	    if (output.numberPorts() > 0) {
 		Error::abortRun(*this, "Outputs not supported");
 		return;
 	    }
+	}
+	begin {
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkMeter.tcl";
-	    // For now, we pass the relevant parameter values to tcl
-	    // by setting global variables.  We need a better way.
-	    sprintf(buf,"%d",input.numberPorts());
-	    if((Tcl_SetVar(ptkInterp, "label", label, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "low", low, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "high", high, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "numInputs", buf, TCL_GLOBAL_ONLY)
-		== NULL)) {
-                Error::abortRun(*this,"Failed to set parameter values for tcl");
-                return;
-            }
-	    SDFTclScript::setup();
+	    SDFTclScript::begin();
 	}
 	constructor {
+	    // Hide irrelevant outputs and states.
 	    output.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
 	}

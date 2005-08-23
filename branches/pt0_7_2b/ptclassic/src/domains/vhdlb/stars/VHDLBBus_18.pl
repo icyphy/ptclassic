@@ -4,13 +4,13 @@ defstar {
 	desc { Converts an 8-bit wide bus into 8 bits }
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow the user to explicitly extract individual data
 out of a bus (a multi-port), this star is written to allow the user
 to convert an 8-bit-wide bus into 8 explicit wires.  If the output bus is not

@@ -1,21 +1,28 @@
 defstar {
 	name { Rotate }
 	domain { CG56 }
-	desc { Rotate a block of input data of N length  }
-	version { $Id$ }
+	desc { Rotate a block of input data }
+	version { @(#)CG56Rotate.pl	1.14 03/29/97 }
 	author { Chih-Tsung Huang }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-.Id "reverse"
-The star reads in an input block of length n and performs  a
-circular  shift  of the input.  If rotation is positive, the
-input is shifted to the left so that output[0] =
-input[rotation],  output[1]  =  input[rotation+1],  etc.  If
-rotation is negative, the input is shifted to the right so
-that output[rotation]  =  input[0],  output[rotation+1]  =
-input[1], etc.  The parameter rotation must be smaller  than
-the parameter length in absolute value.
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="reverse"></a>
+The star reads in an input block of length <i>length</i> and performs a
+circular shift of the input.
+If <i>rotation</i> is positive, then the input is shifted to the left so
+that output[0] = input[<i>rotation</i>], output[1] = input[<i>rotation</i> + 1],
+etc.
+If <i>rotation</i> is negative, then the input is shifted to the right so
+that output[<i>rotation</i>] = input[0], output[<i>rotation</i> + 1] = input[1],
+etc.
+The parameter <i>rotation</i> must be smaller than the parameter
+<i>length</i> in absolute value.
 	}
 	input {
 		name {input}
@@ -50,21 +57,21 @@ the parameter length in absolute value.
         move    #<$addr2(input,rotate),r0
         move    #<$addr(output),r1
         do      #$val(length)-$val(rotate),$label(lab2)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(output):(r1)+
 $label(lab2)
         move    #<$addr(input),r0
         do      #$val(rotate),$label(lab3)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(outpu):(r1)+
 $label(lab3)
 	}
         codeblock(other) {
         move    #<$addr(input),r0
         move    #<$addr(output),r1
         do      #$val(length),$label(lab4)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(outpu):(r1)+
 $label(lab4)
         }
         codeblock(one) {
@@ -72,7 +79,7 @@ $label(lab4)
         move    a,$ref(output)
         } 
 
-        start {
+        setup {
                 input.setSDFParams(int(length),int(length)-1);
                 output.setSDFParams(int(length),int(length)-1);
         }
@@ -85,14 +92,14 @@ $label(lab4)
 		rotate = rotation;
 
 		if (rotation < 0)
-			rotate = length + rotation;
+			rotate = (int)length + (int)rotation;
 
 		if (rotate > 0 && length > 1)
-			gencode(greater);
+			addCode(greater);
 		else if (length > 1)
-			gencode(other);
+			addCode(other);
 		else
-			gencode(one);
+			addCode(one);
 	}
 	exectime {
 		if (length > 1 && rotation == 0)

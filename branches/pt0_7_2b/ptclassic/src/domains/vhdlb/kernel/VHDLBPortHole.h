@@ -2,12 +2,34 @@
 #define _VHDLBPortHole_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLBPortHole.h	1.8 10/29/95
 
- Copyright (c) 1991 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
- Programmer: E. A. Lee
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Edward A. Lee
 
  These classes are portholes for stars that generate VHDLB code.  
 
@@ -21,7 +43,7 @@ $Id$
 #include "VHDLBGeodesic.h"
 
 class VHDLBPortHole : public CGPortHole {
-friend class ForkDestIter;
+friend class VHDLBForkDestIter;
 public:
 	VHDLBPortHole() {}
 	~VHDLBPortHole() {}
@@ -57,8 +79,8 @@ public:
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
-	// This is typesafe because allocateGeodesic
-	// makes myGeodesic of this type.
+	// This is typesafe because allocateGeodesic has been
+	// redefined to make myGeodesic of type VHDLFGeodesic.
 	VHDLBGeodesic& geo() { return *(VHDLBGeodesic*)myGeodesic;}
 
 	// const version
@@ -97,11 +119,11 @@ public:
 	PortHole& newPort();
 };
 
-class ForkDestIter : private ListIter {
+class VHDLBForkDestIter : private ListIter {
 public:
-	ForkDestIter(VHDLBPortHole* p) : ListIter(p->myDest()) {}
+	VHDLBForkDestIter(VHDLBPortHole* p) : ListIter(p->myDest()) {}
 	VHDLBPortHole* next() { return (VHDLBPortHole*) ListIter::next(); }
-	VHDLBPortHole* operator++ () { return next(); }
+	VHDLBPortHole* operator++ (POSTFIX_OP) { return next(); }
 	ListIter::reset;
 };
 #endif

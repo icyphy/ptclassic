@@ -1,38 +1,66 @@
-static const char *file_id = "DeclustScheduler.cc";
+static const char SccsId [] = "@(#)DeclustScheduler.cc	1.27 12/08/97";
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DeclustScheduler.cc	1.27	12/08/97
 
-Copyright (c) 1991 The Regents of the University of California.
-                        All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 Date of last revision: 5/92
-
+'
 *****************************************************************/
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "DeclustScheduler.h"
-#include "UserOutput.h"
 #include "miscFuncs.h"
-#include "streamCompat.h"
 
 // function to display the schedule
 StringList DeclustScheduler::displaySchedule() {
-	StringList out;
-	out += bestSchedule->display(myGal);
-	return out;
+    StringList out;
+    out << "{\n  { scheduler \"Sih's Declustering Parallel Scheduler\" }\n";
+    // bestSchedule may be NULL if there is manual assignment
+    if (assignManually())
+	out << myProcs()->display(galaxy());
+    else
+	out << bestSchedule->display(galaxy());
+    out << "}\n";
+    return out;
 }
 
 // set up processors
-void DeclustScheduler :: setUpProcs(int num) {
-	ParScheduler :: setUpProcs(num);
+ParProcessors* DeclustScheduler :: setUpProcs(int num) {
+	ParScheduler::setUpProcs(num);
 	LOG_DEL; delete schedA;
 	LOG_DEL; delete schedB;
 	LOG_NEW; schedA = new DCParProcs(num, mtarget);
 	LOG_NEW; schedB = new DCParProcs(num, mtarget);
+	parProcs = schedA;	// temporal set for manual scheduling.
+	return parProcs;
 }
 
 // destructor
@@ -42,18 +70,27 @@ DeclustScheduler::~DeclustScheduler() {
 	LOG_DEL; delete schedB;
 
 	// remove clusters
-	EClusts.removeClusters();
-	combinations.removeClusters();
+	EClusts.removeDCClusters();
+	combinations.removeDCClusters();
 }
 
 			/////////////////////
 			///  preSchedule  ///
 			/////////////////////
 
+// At first, check whether the galaxy contains any wormhole. If yes,
+// return FALSE since this scheduler does not work right for wormholes.
 // prepare scheduline: Here, we do the first two steps of declustering:
 // (1) find elementary clusters and (2) build a cluster hierarchy.
 
 int DeclustScheduler::preSchedule() {
+
+	// check if wormhole exists or not
+	if (withParallelStar()) {
+		Error::abortRun("Declustering algorithm can not handle ",
+			"parallel stars. Please use another scheduler");	
+		return FALSE;
+	}
 
 	if (logstrm)
 		*logstrm << "Created DCGraph, moving to elementary clusters\n";
@@ -61,17 +98,17 @@ int DeclustScheduler::preSchedule() {
 	EClusts.initialize();
 
 	// Finds elementary clusters and stores pointers to them in EClusts
-  	FindElemClusters();
+  	FindElemDCClusters();
 
 	if (logstrm)
 		*logstrm << "Finished elementary clusters\n";
 
-	// A list of clusters which are created in ClusterUpClusters
+	// A list of clusters which are created in DCClusterUpDCClusters
 	// The last cluster created is first in the list
 	combinations.initialize();
 
-	// Hierarchical Cluster Grouping
-	if(!ClusterUp(combinations)) {
+	// Hierarchical DCCluster Grouping
+	if(!DCClusterUp(combinations)) {
 		Error::abortRun("cluster grouping failed!");
 		return FALSE;
 	}
@@ -101,38 +138,42 @@ int DeclustScheduler::scheduleIt() {
 	}
 
 	// Initialize remaining clusters to elementary clusters
-	ClusterList remClusters(EClusts);
+	DCClusterList remDCClusters(EClusts);
 
-	// Cluster Hierarchy Decomposition
-	pulldown(&combinations, &remClusters);
+	// DCCluster Hierarchy Decomposition
+	pulldown(&combinations, &remDCClusters);
 	if (haltRequested()) return FALSE;
 
 	if (logstrm) {
 		*logstrm << "\n***  Remaining clusters after pulldown  ***\n";
-		*logstrm << remClusters.print();
+		*logstrm << remDCClusters.print();
 	}
 
 	// Examine the best schedule and use cluster shifting techniques
 	//	to improve it while breaking down the cluster granularity 
-	if (remClusters.listSize() > 0) scheduleAnalysis(remClusters);
+	if (remDCClusters.listSize() > 0) scheduleAnalysis(remDCClusters);
 	if (haltRequested()) return 0;
 
 	if (logstrm) {
 		*logstrm << "The best schedule after cluster shifting is \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	// If necessary, break down granularity of elementary clusters 
-	clusterBreakdown();
-	if (haltRequested()) return 0;
+	// Currently, cluster is not broken down if OSOPreq() is set.
+	if(!OSOPreq()) {
+		clusterBreakdown();
+		if (haltRequested()) return 0;
+	}
 
 	if (logstrm) {
 		*logstrm << "The best schedule after cluster breakdown is \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	// Important: set parProcs to the bestSchedule
 	parProcs = bestSchedule;
+	bestSchedule->finalizeGalaxy(myGraph);
 
 	return TRUE;
 }
@@ -158,7 +199,7 @@ static void assignNodes(DCNodeList &list, int proc) {
 	DCNodeListIter iter(list);
 	DCNode *n;
 	while ((n = iter++) != 0) {
-		n->assignProc(proc);
+		n->setProcId(proc);
 	}
 }
 
@@ -240,7 +281,7 @@ static DCNode* adjacentIn(DCNode* node, DCNodeList& nlist, int& direction) {
 
 int DeclustScheduler::clusterBreakdown() {
 	// Make sure the clusters are at the elementary level
-	EClusts.setClusters();
+	EClusts.setDCClusters();
 
 	DCNodeList SLP;
         if (!bestSchedule->findSLP(&SLP)) {
@@ -258,7 +299,7 @@ int DeclustScheduler::clusterBreakdown() {
 
 	DCNodeList SLPsection, bestBreak; // nodelist to hold SLP on curProc
 
-	while (SLP.mySize() > 0) {
+	while (SLP.size() > 0) {
 		// Start finding the next SLPsection
 		SLPsection.initialize();
 
@@ -269,7 +310,7 @@ int DeclustScheduler::clusterBreakdown() {
 		while (node && (node->getProcId() == curProc)) {
 			if (node->getType() == 0) SLPsection.insert(node);
 			node = (DCNode*) SLP.takeFromFront();
-			if (SLP.mySize()) node = (DCNode*) SLP.headNode();
+			if (SLP.size()) node = (DCNode*) SLP.headNode();
 			else node = 0;
 		}
 			
@@ -321,8 +362,8 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 	int bMspan = bestM;
 
 	// amount of IPC.
-	int incomms[numProcs];
-	int outcomms[numProcs];
+	LOG_NEW; int *incomms = new int [numProcs];
+	LOG_DEL; int *outcomms = new int [numProcs];
 
 	DCNodeList bestList;		// temporary storage for the best 
 	bestList.initialize();		// break path.
@@ -374,7 +415,7 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 				// upper bounds, not to overload destination
 				// processor
 				int ubound = bestM - 
-				   bestSchedule->getSchedule(ix)->getLoad();
+				   bestSchedule->getProc(ix)->getLoad();
 
 				if (direction < 0) {
 					z = node->getSamples(nextN);
@@ -417,6 +458,8 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 		}
 	}
 	copyNodes(bestList, slpsect);
+	LOG_DEL; delete [] incomms;
+	LOG_DEL; delete [] outcomms;
 	return bMspan;
 }
 
@@ -424,14 +467,14 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 			///  scheduleAnalysis  ///
 			//////////////////////////
 // Analyzes BestSchedule and tries various techniques to improve it.
-// remClusts holds the clusters remaining after pulldown. 
+// remDCClusts holds the clusters remaining after pulldown. 
 // When this function finishes, the cluster hierarchy has been broken
 //	down to the elementary cluster level.
 
-void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
+void DeclustScheduler::scheduleAnalysis(DCClusterList &remDCClusts) {
 
 	// Set the cluster property for each node to show the cluster it is in
-	remClusts.setClusters();
+	remDCClusts.setDCClusters();
 
 	// Now find the schedule-limiting-progression
 	DCNodeList SLP;
@@ -447,13 +490,13 @@ void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
 
 	while (notElem == 1) { 
 		if (haltRequested()) return;
-		ClusterList slpClusts;
-		slpClusts.findClusts(SLP);	// Find the SLP Clusters
+		DCClusterList slpDCClusts;
+		slpDCClusts.findDCClusts(SLP);	// Find the SLP DCClusters
 
 		// Try communication reduction routines
-		if (commReduction(remClusts, &slpClusts) != 0) {
+		if (commReduction(remDCClusts, &slpDCClusts) != 0) {
 			if (!bestSchedule->findSLP(&SLP)) return;
-			slpClusts.findClusts(SLP);
+			slpDCClusts.findDCClusts(SLP);
 			if (logstrm) {
 				*logstrm << "\nNew SLP after commReduction:\n";
 				*logstrm << SLP.print();
@@ -461,7 +504,7 @@ void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
 		}
 
 		// Try load shifting
-		if (loadShift(remClusts, &slpClusts) != 0) { 
+		if (loadShift(remDCClusts, &slpDCClusts) != 0) { 
 			if (!bestSchedule->findSLP(&SLP)) return;
 			if (logstrm) {
 				*logstrm << "\nNew SLP after loadShift:\n";
@@ -470,23 +513,23 @@ void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
 		}
 
 		// Break down the cluster granularity 
-		ClusterList cClusts(remClusts);
-		ClusterListIter iter(cClusts);
+		DCClusterList cDCClusts(remDCClusts);
+		DCClusterListIter iter(cDCClusts);
 		notElem = 0;
-		Cluster* clus;
+		DCCluster* clus;
 		while ((clus = iter++) != 0) {
-			Cluster* comp1 = clus->getComp1();
-			Cluster* comp2 = clus->getComp2();
+			DCCluster* comp1 = clus->getComp1();
+			DCCluster* comp2 = clus->getComp2();
 
 			if (comp1 != 0) { // clus is not elementary
 				clus->broken();	// Indicate broken cluster
-                        	remClusts.remove(clus);
-                        	remClusts.insert(comp1);
-                        	remClusts.insert(comp2);
+                        	remDCClusts.remove(clus);
+                        	remDCClusts.insert(comp1);
+                        	remDCClusts.insert(comp2);
 				notElem = 1;
 			}
 		}
-		remClusts.setClusters();
+		remDCClusts.setDCClusters();
 	}
 }
 
@@ -495,7 +538,7 @@ void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
 			///////////////////
 // Tries shifting slp clusters on heavily loaded to lightly loaded processors.
 
-int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
+int DeclustScheduler::loadShift(DCClusterList &, DCClusterList *slpC) {
 
 	if (logstrm) {
 		*logstrm << "\nStarting loadShift\n";
@@ -506,17 +549,18 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 
 	// Categorize each processor as being heavily(1) or lightly(-1) loaded
 	// We include at most one idle processor in lightly loaded procs.
-	int procs[numProcs];
-	for (int i = 0; i < numProcs; i++) procs[i] = 0;
+	LOG_NEW; int *procs = new int [numProcs];
+        int i;
+	for (i = 0; i < numProcs; i++) procs[i] = 0;
 	bestSchedule->categorizeLoads(procs);
 
 	// Find the SLP clusters which are on the heavy procs
-	ClusterList slpHeavy;
-	ClusterListIter iter(*slpC);
-	Cluster *clust;
+	DCClusterList slpHeavy;
+	DCClusterListIter iter(*slpC);
+	DCCluster *clust;
 	while ((clust = iter++) != 0) {
 		int pix = clust->getProc();
-		DCUniProc* myProc = bestSchedule->getSchedule(pix);
+		UniProcessor* myProc = bestSchedule->getProc(pix);
 
 		// Pick out the slp clusters which are on heavily loaded procs 
 		// 	and take less than 80% load of the processor
@@ -537,7 +581,7 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 		// Go through the lightly loaded processors
 		for (i = 0; i < numProcs; i++) {
 			if (procs[i] >= 0) continue;
-			int pload = bestSchedule->getSchedule(i)->getLoad();
+			int pload = bestSchedule->getProc(i)->getLoad();
 
 			// Make sure there is the possibility of a faster sched
 			if (clust->getExecTime() < (bestM - pload)) {
@@ -575,6 +619,7 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 			}
 		}
 	}
+	LOG_DEL; delete [] procs;
 	return changeFlag;
 }
 
@@ -584,13 +629,13 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 // Given a list of clusters, this routine returns the three with
 //	highest scores (#samples offproc - #samples onproc) > 0.
 
-static void highestScores(ClusterList *clusts, ClusterList &highest) {
+static void highestScores(DCClusterList *clusts, DCClusterList &highest) {
 
 	highest.initialize();
 
 	// find out the three clusters with highest scores.
-	ClusterListIter citer(*clusts);
-	Cluster *clus, *clus1 = 0, *clus2 = 0, *clus3 = 0;
+	DCClusterListIter citer(*clusts);
+	DCCluster *clus, *clus1 = 0, *clus2 = 0, *clus3 = 0;
 	int score, first = 0, second = 0, third = 0;
 	while ((clus = citer++) != 0) {
 		score = clus->getScore();
@@ -613,15 +658,15 @@ static void highestScores(ClusterList *clusts, ClusterList &highest) {
 }
 
 			///////////////////
-			///  prcClusts  ///
+			///  prcDCClusts  ///
 			///////////////////
 // Fills clist with the clusters from clustlist which are on proc
-static void prcClusts(ClusterList &clist, ClusterList &clustlist, int proc) {
+static void prcDCClusts(DCClusterList &clist, DCClusterList &clustlist, int proc) {
 
 	clist.initialize();
 
-	ClusterListIter iter(clustlist);
-	Cluster *cl;
+	DCClusterListIter iter(clustlist);
+	DCCluster *cl;
 	while ((cl = iter++) != 0) {
 		if (cl->getProc() == proc) clist.append(cl);
 	}
@@ -636,9 +681,9 @@ static void prcClusts(ClusterList &clist, ClusterList &clustlist, int proc) {
 // slpC is the list of clusters in the schedule limiting progression
 // Returns 1 if a faster schedule was found
 
-int DeclustScheduler::commReduction(ClusterList &remC, ClusterList *slpC) {
+int DeclustScheduler::commReduction(DCClusterList &remC, DCClusterList *slpC) {
 
-	ClusterList highestSLP;
+	DCClusterList highestSLP;
 
 	// Fill highestSLP with the 3 slp clusters with highest scores > 0 
 	remC.resetScore();
@@ -655,36 +700,36 @@ int DeclustScheduler::commReduction(ClusterList &remC, ClusterList *slpC) {
 	int bestMakespan = bestSchedule->getMakespan();
 	int changeflag = 0;
 
-	ClusterListIter iter(highestSLP);
-	Cluster* cls;
-	int canProcs[numProcs];
+	DCClusterListIter iter(highestSLP);
+	DCCluster* cls;
+	LOG_NEW; int *canProcs = new int [numProcs];
 
 	// Iterate through the 3 slp clusters with highest scores
 	while ((cls = iter++) != 0) {
-		int myP = cls->getProc();
+		int i, myP = cls->getProc();
 		if (haltRequested()) return FALSE;
 
 		// Find other valid processors that cls communications with
-		for (int i = 0; i < numProcs; i++) canProcs[i] = 0;
+		for (i = 0; i < numProcs; i++) canProcs[i] = 0;
 		myGraph->commProcs(cls, canProcs);
 
 		// find out the cluster switching candidates
-		ClusterList candClusts;
+		DCClusterList candDCClusts;
 
 		// Find cluster candidates for switching proc with cls
 		// Go through the list of processor candidates for cls
 		for (i = 0; i < numProcs; i++) {
+			DCClusterList Pclusts;
 			if (canProcs[i] == 0 || i == myP) continue;
 
 			// Fill Pclusts with clusters on processor i
-			ClusterList Pclusts;
-			prcClusts(Pclusts, remC, i);
-			highestScores(&Pclusts, candClusts);
+			prcDCClusts(Pclusts, remC, i);
+			highestScores(&Pclusts, candDCClusts);
 		}
 	
-		// scan through the candClusts list for switching
-		ClusterListIter canIter(candClusts);	
-		Cluster* cand;
+		// scan through the candDCClusts list for switching
+		DCClusterListIter canIter(candDCClusts);	
+		DCCluster* cand;
 		while ((cand = canIter++) != 0) {
 			// Try switching cluster locations
 			cls->switchWith(cand);
@@ -717,39 +762,38 @@ int DeclustScheduler::commReduction(ClusterList &remC, ClusterList *slpC) {
 			}
 		}
 	}
+	LOG_DEL; delete [] canProcs;
 	return changeflag;	// Return 1 if accepted a better schedule
 }
 
 			//////////////////
 			///  pulldown  ///
 			//////////////////
-// combClusts is a list of higher level clusters (not elementary) which
-//	were created in ClusterUp.  This function decomposes these clusters
+// combDCClusts is a list of higher level clusters (not elementary) which
+//	were created in DCClusterUp.  This function decomposes these clusters
 //	into their cluster components if doing so results in a faster schedule.
 // Changes the list *Cleft to contain the set of unbroken clusters, where
 //	Cleft initially contains the elementary clusters.
 
-int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
+int DeclustScheduler::pulldown(DCClusterList *combDCClusts, DCClusterList *Cleft) {
 
-	ClusterList reverse;
+	DCClusterList reverse;
 		
 	// initially best schedule is set to schedA
 	bestSchedule = schedA;
 	workSchedule = schedB;
 
-	// Schedule using the initial placement assigned in ClusterUp
+	// Schedule using the initial placement assigned in DCClusterUp
 	schedA->initialize();
 	mtarget->clearCommPattern();
 
-	// initially, all nodes are assigned to a single processor
-	combClusts->firstClust()->assignP(0);
 	int bestPeriod = schedA->listSchedule(myGraph);
 	int bestComm = schedA->commAmount();
 
 	if (logstrm) {
 		*logstrm << "\n-- schedule traces --------------------\n";
 		*logstrm << "Initial schedule: \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	bestSchedule->saveBestResult(myGraph);
@@ -758,19 +802,19 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 	if (Cleft->listSize() < 2) // If only one elementary cluster
 		return TRUE;
 
-	ClusterListIter iter(*combClusts);
-	Cluster *cl;
+	DCClusterListIter iter(*combDCClusts);
+	DCCluster *cl;
 	while ((cl = iter++) != 0) { // Go through each hierarchical cluster
 		reverse.insert(cl);
 
 		// Find which cluster component should be shifted off processor
-		Cluster* pullCluster = cl->pullWhich();
+		DCCluster* pullDCCluster = cl->pullWhich();
 
 		// candidate processors.
-		IntArray* canProcs = mtarget->candidateProcs(bestSchedule);
+		IntArray* canProcs = bestSchedule->candidateProcs(0);
 
 		// Shift onto each of these processors and listSchedule
-		int myProc = pullCluster->getProc();
+		int myProc = pullDCCluster->getProc();
 		int bestProc = myProc;
 
 		for (int ix = canProcs->size() - 1; ix >= 0; ix--) {
@@ -779,7 +823,7 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 			if (pix == myProc) continue;
 
 			// Assign the cluster to a processor 
-			pullCluster->assignP(pix);
+			pullDCCluster->assignP(pix);
 
 			// schedule the graph.
 			workSchedule->initialize();
@@ -806,18 +850,18 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 
 		if (bestProc != myProc) {
 			// Leave assignment on best processor
-			pullCluster->assignP(bestProc);
+			pullDCCluster->assignP(bestProc);
 
 			// Indicate that the cluster was broken
 			cl->broken();
 
 			if (logstrm) {
 				*logstrm << "New best schedule is: \n";
-				*logstrm << bestSchedule->display(myGal);
+				*logstrm << bestSchedule->display(galaxy());
 			}
 		}
 		else {	// Unbroken, assign to former processor
-			pullCluster->assignP(myProc);
+			pullDCCluster->assignP(myProc);
 		}
 	}
 
@@ -847,39 +891,47 @@ int DeclustScheduler::CommCost(int sP, int dP, int smps, int ty) {
 }
 
 			///////////////////
-			///  ClusterUp  ///
+			///  DCClusterUp  ///
 			///////////////////
 // Does hierarchical clustering of clusters to establish a parallelism
 //	hierarchy for the graph
-int DeclustScheduler::ClusterUp(ClusterList& Nclusts) {
+int DeclustScheduler::DCClusterUp(DCClusterList& Nclusts) {
 
-	ClusterList Clusts(EClusts);
+	DCClusterList DCClusts(EClusts);
 
-	while (Clusts.listSize() >= 2) {
+	while (DCClusts.listSize() >= 2) {
 
 		// Grab the smallest cluster in the list.
-		Cluster* smallest = Clusts.popHead(); 
+		DCCluster* smallest = DCClusts.popHead(); 
 
 		// find the partner.
-		Cluster* other = smallest->findCombiner(); 
-		if (!other) other = Clusts.popHead();
-		else	    Clusts.remove(other);
+		DCCluster* other = smallest->findCombiner(); 
+		if (!other) other = DCClusts.popHead();
+		else	    DCClusts.remove(other);
 
 		// make a macro cluster
-		LOG_NEW; Cluster *combined = new Cluster(smallest, other);
-		combined->setName(myGraph->genClustName(1));
-		Clusts.insertSorted(combined);
+		LOG_NEW; DCCluster *combined = new DCCluster(smallest, other);
+		combined->setName(myGraph->genDCClustName(1));
+		DCClusts.insertSorted(combined);
 		Nclusts.insert(combined);
 	}
+
+	// initially, all nodes are assigned to a single processor
+	if (EClusts.listSize() < 2) {
+		EClusts.firstDCClust()->assignP(0);
+	} else {
+		Nclusts.firstDCClust()->assignP(0);
+	}
+
 	return TRUE;
 }
 
 			//////////////////////////
-			///  FindElemClusters  ///
+			///  FindElemDCClusters  ///
 			//////////////////////////
 // Finds a set of elementary clusters for the graph.
 
-void DeclustScheduler::FindElemClusters()
+void DeclustScheduler::FindElemDCClusters()
 {
 	DCNodeListIter nodeiter(myGraph->BranchNodes);
 	DCNode *node;
@@ -903,7 +955,7 @@ void DeclustScheduler::FindElemClusters()
 	myGraph->replenish(0);
 
 	// create elementary clusters.
-	myGraph->formElemClusters(EClusts);
+	myGraph->formElemDCClusters(EClusts);
 }
 
 			//////////////////////////////
@@ -977,6 +1029,8 @@ void DeclustScheduler::NBranch(DCNode *BNode, DCNode *N1, DCNode *N2, int dir)
 	DCArc *cut, *other;
 	other = path2->head(); 	// The first arc in path2
 	while ((cut = arciter++) != 0) {
+		if (cut->betweenSameStarInvocs() && cut->getSrc()->sticky()) 
+			continue;
 		int finish = NoMerge(cut, other);
 		if (finish < bestFinish) {
 			bestFinish = finish;
@@ -988,6 +1042,8 @@ void DeclustScheduler::NBranch(DCNode *BNode, DCNode *N1, DCNode *N2, int dir)
 	arciter.reconnect(*path2);
 	other = path1->head(); 	// The first arc in path1
 	while ((cut = arciter++) != 0) {
+		if (cut->betweenSameStarInvocs() && cut->getSrc()->sticky()) 
+			continue;
 		int finish = NoMerge(cut, other);
 		if (finish < bestFinish) {
 			bestFinish = finish;
@@ -1142,12 +1198,19 @@ void DeclustScheduler::FindBestCuts(DCArcList *list1, DCArcList *list2,
 
 	while ((cut1 = iter1++) != 0) {
 
+		if (cut1->betweenSameStarInvocs() && cut1->getSrc()->sticky()) 
+			continue;
 		iter2.reset();
 		// If both cuts are on the same arclist, the second arc
 		// should be behind the first.
-		if (other)  while ((cut2 = iter2++) != cut1) cut2 = iter2++;
+		if (other)  {
+			while ((cut2 = iter2++) != cut1) 
+				;	// do nothing
+		}
 
 		while ((cut2 = iter2++) != 0) {
+			if (cut2->betweenSameStarInvocs() && cut1->getSrc()->sticky()) 
+				continue;
 			int finish = Merge(cut1, cut2, other);
 
 			if (finish < *bestFin) {

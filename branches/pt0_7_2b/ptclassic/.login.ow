@@ -1,0 +1,23 @@
+# sample ptolemy .login for use with Open Windows
+# @(#).login.ow	1.1	12/11/91
+
+set noglob noclobber filec
+
+stty dec
+eval `/usr/ucb/tset -s -Q -m su:\?$TERM sun:sun \?$TERM`
+set mail=/usr/spool/mail/$USER
+
+if (! $?DISPLAY) then
+	if ($TERM == "xterm") then
+		echo -n "DISPLAY? "
+		setenv DISPLAY $<
+	endif
+endif
+
+# If we get here, we're on a bare Sun tube.  Fire up Open Windows,
+# using .xinitrc.ow as the startup file.
+
+if ($TERM == "sun") then
+	exec Xrun.ow
+endif
+date

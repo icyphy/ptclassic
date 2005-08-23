@@ -1,11 +1,47 @@
-#include <Complex.h>
-#include "fft.h"
+/*
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
 
-const NEXTMX = 12;
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+static const char file_id[] = "nb_fft.cc";
+
+#include <ComplexSubset.h>
+#include "nb_fft.h"
+
+const int NEXTMX = 12;
 
 const int prime[ NEXTMX ] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
-Complex* fft::Compute( Complex* z1, Complex* z2 ) {
+				// AIX-4.1 under gcc-2.7.2 can't
+  				// handle having the definition of
+  				// getW in the .h file, so we move it here.
+Complex nb_fft::getW( int m, int n ) {
+    double angle = ( Pi2 * m ) / n;
+    return Complex( cos( angle ), sin( angle ) );
+}
+
+Complex* nb_fft::Compute( Complex* z1, Complex* z2 ) {
   int before = N;
   int after = 1;
   int next = 0;
@@ -34,7 +70,7 @@ Complex* fft::Compute( Complex* z1, Complex* z2 ) {
   return ( inzee == 1 ) ? z1 : z2 ;
 }
 
-void fft::fftstp( Complex* zin, int after, int now, int before, Complex* zout ) {
+void nb_fft::fftstp( Complex* zin, int after, int now, int before, Complex* zout ) {
   double angle = ( Inverse ? -Pi2 : Pi2 ) / ( now * after );
   Complex omega = Complex( cos( angle ), -sin( angle ) );
   Complex arg = 1;

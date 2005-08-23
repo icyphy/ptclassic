@@ -6,9 +6,14 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
-	version { $Id$ }
+	version { @(#)CGCUpSample.pl	1.12	7/11/96 }
 	author { E. A. Lee and S. Ha }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	input {
 		name {input}
@@ -32,25 +37,36 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	state {
 		name {fill}
-		type {FLOAT}
+		type {float}
 		default {0.0}
 		desc { Value to fill the output block. }
 	}
-	start {
+	setup {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
-	codeblock (initfill) {
-; initialization code for star $fullname() - class CG56UpSample
+	constructor {
+		noInternalState();
 	}
-	codeblock (sendsample) {
-	$ref2(output,phase) = $ref(input);
+	codeblock (sendOne,"int index") {
+	$ref2(output,@index) = $ref(input);
+	}
+	codeblock (sendAll,"int index") {
+	int i;
+	for (i = 0; i < $val(factor); i++) {
+		$ref2(output,i) = $val(fill);
+	}
+	$ref2(output,@index) = $ref(input);
 	}
 	go {
-		gencode(sendsample);
+		int index = int(factor) - int(phase) - 1;
+		if (output.staticBuf() && output.linearBuf())
+			addCode(sendOne(index));
+		else
+			addCode(sendAll(index));
 	}
-	execTime {
-		return 1;
+	exectime {
+		return 1 + int(factor);
 	}
 }

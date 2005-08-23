@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { IntGain } 
     desc { This is an amplifier; the output is the input multiplied by the integer "gain" (default 1). }
-    version { @(#)ACSIntGainFixSim.pl	1.1 08/26/99 }
+    version { @(#)ACSIntGainFixSim.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

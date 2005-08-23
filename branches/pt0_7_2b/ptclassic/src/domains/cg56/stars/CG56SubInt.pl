@@ -2,10 +2,10 @@ defstar {
     name {SubInt}
     domain {CG56}
     desc { Output the "pos" input minus all "neg" inputs. }
-    version { $Id$ }
+    version { @(#)CG56SubInt.pl	1.3	9/16/96 }
     author { Brian L. Evans and Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -22,6 +22,12 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {int}
+    }
+    state {
+        name { saturation }
+	type { int }
+	default { "YES" }
+	desc { If true, use saturation arithmetic }
     }
     constructor {
 	noInternalState();
@@ -40,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	move	(r0)+,x0
     }
     codeblock(repeat,"int n") {
-	rept	#@n
+	rep	#@n
     }
     codeblock(doOp) {
 	sub	x0,a	(r0)+,x0
@@ -48,8 +54,11 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock(finalDifference) {
 	sub	x0,a
     }
-    codeblock(saveResult) {
+    codeblock(saveResultSat) {
 	move	a,$ref(output)
+    }
+    codeblock(saveResultNoSat){
+	move	a1,$ref(output)
     }
     go { 
 	int numNegInputs = neg.numberPorts();
@@ -71,7 +80,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    addCode(finalDifference);	
 	}
-	addCode(saveResult);
+	if (int(saturation)) addCode(saveResultSat);
+	else addCode(saveResultNoSat);
     }
     exectime {
 	int instructionCycles = 0;

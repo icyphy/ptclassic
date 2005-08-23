@@ -6,19 +6,19 @@ Generate an random number with a uniform(u), exponential(e), or normal(n)
 distribution, as determined by the "distribution" parameter.
 Output is this random number constantly.
 	}
-	version { $Id$ }
+	version { @(#)SDFRanConst.pl	1.3 10/01/96 }
 	author { Bilung Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-This Star uses the GNU library <Uniform.h>.
-.Id "uniform noise"
-.Id "noise, uniform"
+	htmldoc {
+This Star uses the GNU library &lt;Uniform.h&gt;.
+<a name="uniform noise"></a>
+<a name="noise, uniform"></a>
 	}
 
 	output {
@@ -47,10 +47,17 @@ This Star uses the GNU library <Uniform.h>.
 	ccinclude { <ACG.h>, <Uniform.h>, <Normal.h>, <NegExp.h> }
 
 	protected {
+		Random *randomGen;
 		double random;
 	}
 	code {
 		extern ACG* gen;
+	}
+	constructor {
+		randomGen = NULL;
+	}
+	destructor {
+		delete randomGen;
 	}
 
 	setup {
@@ -60,7 +67,7 @@ This Star uses the GNU library <Uniform.h>.
 		double mOru = double(meanORupper);	// mean or upper
 		double vOrl = double(varianceORlower);	// variance or lower
 
-		Random *randomGen;
+		delete randomGen;
 		switch (c) {
 			case 'u' :
 			case 'U' : randomGen = new Uniform(vOrl, mOru, gen);
@@ -75,11 +82,11 @@ This Star uses the GNU library <Uniform.h>.
 			  Error::abortRun(*this, "unknown distribution.");
 			  break;
 		}			
+	}
 
-		// generate a random number
-		random = (*randomGen)();
-		
-		delete randomGen;
+	begin {
+	  // generate a random number
+	  random = (*randomGen)();
 	}
 
         go {

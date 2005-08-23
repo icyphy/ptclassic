@@ -1,0 +1,9 @@
+FROM knuth:
+su - ptolemy
+setenv PTOLEMY /common/projects/acs/merle3/ptol_ucb/ptolemy
+setenv COREGEN /local/tools/coregen/coregen
+set path=($COREGEN/bin/unix $path)
+setenv LD_LIBRARY_PATH /common/projects/acs/merle3/wildforce/lib:$LD_LIBRARY_PATH
+setenv JAVA_HOME
+cd $PTOLEMY
+pigi &

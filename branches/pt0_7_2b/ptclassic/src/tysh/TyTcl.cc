@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)TyTcl.cc	1.5     08/24/98
 		       
     Programmer:  Edward A. Lee (based on code by Alan Kamas and Joe Buck)
 
@@ -8,7 +8,7 @@ $Id$
     in the Tycho system. The constructor registers these
     commands with the interpreter passed as a argument.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,7 +41,7 @@ static const char file_id[] = "TyTcl.cc";
 
 #include "TyTcl.h"
 #include "tk.h"
-
+#include <string.h>		// sol2.cfront wants this for strcpy()
 // FIXME: This include is only needed for the "quote" macro
 //        Seems silly to include so much extra baggage - aok
 #include "isa.h"
@@ -67,11 +67,19 @@ int TyTcl::ptkCheckFont(int argc, char** argv) {
 
   if (argc != 2) return usage ("ptkCheckFont <fontName>");
 
+#if TCL_MAJOR_VERSION < 8
   XFontStruct *xf = Tk_GetFontStruct(interp, tkwin, argv[1]);
+#else
+  Tk_Font xf = Tk_GetFont(interp,tkwin,argv[1]);
+#endif
   if (!xf) {
     result("");
   } else {
+#if TCL_MAJOR_VERSION < 8
     result(Tk_NameOfFontStruct(xf));
+#else
+    result(Tk_NameOfFont(xf));
+#endif
   }
   return TCL_OK;
 }
@@ -137,10 +145,10 @@ struct InterpTableEntry {
 };
 
 // These macros define entries for the table
-#define ENTRY(verb) { quote(verb), TyTcl::verb }
+#define ENTRY(verb) { quote(verb), &TyTcl::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), TyTcl::action }
+#define ENTRY2(verb,action) { quote(verb), &TyTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {
@@ -158,9 +166,6 @@ void TyTcl::registerFuncs() {
 	}
 }
 
-// static member: tells which Tcl interpreter is "innermost"
-Tcl_Interp* TyTcl::activeInterp = 0;
-
 // dispatch the functions.
 int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
@@ -172,10 +177,6 @@ int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	}
 	int i = int(which);
 	// this code makes an effective stack of active Tcl interpreters.
-	Tcl_Interp* save = activeInterp;
-	activeInterp = interp;
-	int status = (obj->*(funcTable[i].func))(argc,argv);
-	activeInterp = save;
-	return status;
+	return (obj->*(funcTable[i].func))(argc,argv);
 }
 

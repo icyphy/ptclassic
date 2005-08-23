@@ -2,9 +2,9 @@
 #define _VHDLDependency_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLDependency.h	1.3 04/08/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLFiring.h"
 
 class VHDLDependency : public VHDLObj
 {
@@ -51,9 +50,9 @@ class VHDLDependency : public VHDLObj
   ~VHDLDependency();
 
   // Source of dependency.
-  VHDLFiring* source;
+  VHDLObj* source;
   // Sink of dependency.
-  VHDLFiring* sink;
+  VHDLObj* sink;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;

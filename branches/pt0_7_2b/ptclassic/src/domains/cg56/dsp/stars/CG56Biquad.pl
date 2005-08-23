@@ -1,56 +1,61 @@
 defstar {
-	name {BiQuad}
+	name {Biquad}
 	domain { CG56 }
 	desc {
 This star generates code for a second order IIR filter (a "biquad").
 Transfer function: (1 + n1*z^(-1) + n2*z^(-2))/(1 + d1*z^(-1) + d2*z^(-2))
 With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	}
-	version { $Id$}
+	version { @(#)CG56Biquad.pl	1.10 1/1/96}
 	author { J. Buck, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 dsp library }
 	input {
 		name { input }
-		type { float }
+		type { fix }
 	}
 	output {
 		name { output }
-		type { float }
+		type { fix }
 	}
 // Note: order of state declarations is important!  d1, d2, n1, n2
 // must be allocated in the order indicated.  The A_CONSEC attribute
 // tells the memory allocator to do this right.
 	state {
 		name { d1 }
-		type { float }
+		type { fix }
 		default { "-1.0" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { d2 }
-		type { float }
+		type { fix }
 		default { "-0.5" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n1 }
-		type { float }
+		type { fix }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n2 }
-		type { float }
+		type { fix }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM }
 	}
 	state {
 		name { state }
-		type { floatarray }
+		type { fixarray }
 		default { "0.0[2]" }
 		desc { Filter states }
-		attributes { A_RAM|A_YMEM }
+		attributes { A_RAM|A_YMEM|A_NONSETTABLE|A_NONCONSTANT }
 	}
 // code copied from Gabriel 56biquad star
 	codeblock (std) {
@@ -66,7 +71,7 @@ With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	}
 	exectime { return 9;}
 	go {
-		gencode(std);
+		addCode(std);
 	}
 }
 

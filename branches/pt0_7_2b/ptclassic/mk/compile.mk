@@ -2,9 +2,9 @@
 # in which a makefile is built from a make.template file.
 #
 # Version identification:
-# $Id$
+# @(#)compile.mk	1.22 02/17/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -58,18 +58,17 @@
 .c.o:
 	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
-# The optimizer in g++-2.7.2 has a bug that we workaround by turning
+# The optimizer in g++-2.7.2 and later have bugs that we workaround by turning
 # off the optimizer.  The problem is that when the optimizer is turned on, 
 # certain files end up needing  operator= or a copy constructor from 
 # a parent class.  Unfortunately, the parent class does not define what
 # is needed
 #
 # The following files use these two rules:
+#  de/contrib/stars/make.template
 #  de/tcltk/stars/make.template
 #  de/stars/make.template
 #  cg56/stars/make.template
-#  cp/stars/make.template (cp domain is present only on sun4)
-#  cp/infopad/stars/make.template (cp domain is present only on sun4)
 #  sdf/matlab/stars/make.template
 #
 # We include this rule in common.mk rather than config-g++.mk so that
@@ -77,19 +76,23 @@
 # UNOPTIMIZED_COMPILE_RULE.  Having this rule in config-g++.mk means
 # that we don't see architecture dependent variables.
 #
-UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
+UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 and later optimizer workaround here, see $$PTOLEMY/mk/compile.mk"
 
 UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
 					$(ARCHFLAGS) $(LOCALCCFLAGS) \
 					$(USERFLAGS) -I$(VPATH) $(INCL) -c 
 
-ifeq ($(strip $(LIB)),)
-LIB=dummylib
+ifeq ($(strip $(PTLIB)),)
+PTLIB=dummylib
+endif
+
+ifeq ($(strip $(LIB_DEBUG)),)
+LIB_DEBUG=dummydebuglib
 endif
 
 # Rule for building a C++ library
 # We use a GNU make conditional here
-$(LIB):	$(OBJS)
+$(PTLIB):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
 	rm -f $@
 	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
@@ -131,31 +134,50 @@ $(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
 	ln $(LIBNONSHARED) $(LIBDIR)
 
 # AIX used EXP for export lists
-$(EXP): $(LIB)
+$(EXP): $(PTLIB)
 
 # Rule for installing a C++ library
-$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
+$(LIBDIR)/$(PTLIB):	$(PTLIB) $(EXP)
 		rm -f $@
-		ln $(LIB) $(LIBDIR)
+		ln $(PTLIB) $(LIBDIR)
 
 # Rule for installing a C library
 $(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
 		rm -f $@
 		ln $(CLIB) $(LIBDIR)
 
+STARHTMS = $(PL_SRCS:.pl=.htm)
+starhtms: $(STARHTMS)
+
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-# Don't place $(STARDOCDIR) here, or the STARDOCDIR directory will be made
-# in non-star related directories.
-sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
-CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
+sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template \
+			 $(STARHTMS)
+
+CRUD=*.o *.so *.sl *.obj *.dll *.lib core *~ *.bak ,* LOG* $(KRUFT) 
 clean:
 	rm -f $(CRUD)
 
 # Make things "even cleaner".  Removes libraries, generated .cc and .h
 # files from preprocessor, etc.
 realclean:
-	rm -f $(CRUD) $(LIB) $(CLIB) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(REALCLEAN_STUFF)
+	rm -f $(CRUD) $(PTLIB) $(CLIB) \
+		$(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) \
+		$(PL_SRCS:.pl=.htm) \
+		TAGS starHTML.idx starHTML.idx.fst\
+		$(REALCLEAN_STUFF)
 
+# Remove the sources too, so that we can get them back from sccs
+extraclean: realclean
+	@if [ -d SCCS ]; then \
+		echo "SCCS dir present, removing sources"; \
+		rm -f $(PL_SRCS) $(SRCS) $(HDRS) $(SCRIPTS); \
+	else \
+		echo "SCCS dir not present, _not_ removing sources"; \
+	fi
+
+# The depend, makefile and makefiles rules are duplicated in
+# src/pitcl/make.template, so if you make changes below, please
+# change that file too.
 DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
@@ -187,17 +209,32 @@ makefile:	make.template $(MDEPS)
 
 makefiles:	makefile
 
+# Command used in "make TAGS"
+#
+# Override with something like
+#  gmake TAGS ETAGS="echo >>/tmp/allfiles"
+# to generate a line of all source and header files
+ETAGS =		etags++ -b
+
 # Convert relative VPATH to an absolute path.
 TAGS:		$(HDRS) $(SRCS)
-		etags++ -b $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%) \
+		$(ETAGS) $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%) \
 			$(SRCS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%)
 
 # Rule for detecting junk files
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OTHERSRCS) \
-		$(OBJS) $(LIB) \
+		$(OBJS) $(PTLIB) $(PL_SRCS:.pl=.htm) \
 		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
 		$(MISC_FILES) makefile make.template SCCS TAGS
+
+# Check out the star documentation for bogus html
+# weblint is not shipped with Ptolemy, you can get it from
+# http://www.khoros.unm.edu/staff/neilb/weblint.html
+# weblint uses perl
+weblint:
+	weblint  -x Netscape *.htm* | grep -v 'empty container element <[AP]>'
+
 
 # "check" does not print anything if nothing is being edited.
 sccsinfo:

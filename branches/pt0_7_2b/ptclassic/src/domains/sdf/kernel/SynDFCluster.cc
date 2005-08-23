@@ -1,9 +1,9 @@
 static const char file_id[] = "SynDFCluster.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SynDFCluster.cc	1.8	12/08/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -56,6 +56,7 @@ repetitions of the SDFCLusters inside itself.
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
+// Initialize function sets <code>numberTokens</code> and pointer to the Geodesic.
 void SynDFClusterPort :: initializeClusterPort()
 {
     ClusterPort :: initializeClusterPort();
@@ -68,50 +69,96 @@ void SynDFClusterPort :: initializeClusterPort()
     // and not from DFPortHole.
 }
 
-void SynDFClusterPort :: update()
+// This updates the numberTokens parameter
+void SynDFClusterPort :: updateNumxfer()
 {
-    int farClustLoopFac;
-    ClusterPort :: update();
+    int farClustLoopFac, myClustLoopFac;
     if (farSidePort && farSidePort->parent()) {
 	farClustLoopFac = ((SynDFCluster*)farSidePort->parent())->loopFactor();
-	numberTokens = farSidePort->numXfer() * farClustLoopFac
-	/ ((SynDFCluster*)parent())->loopFactor();
+	myClustLoopFac = ((SynDFCluster*)parent())->loopFactor();
+	if (myClustLoopFac == 0) {
+	    StringList message;
+	    message << "This SynDFCluster has a loopFac of 0.  This could "
+	    	    << "mean that it does not contain a valid DataFlowStar "
+	    	    << "inside.\n";
+	    Error::abortRun(*(parent()), message);
+	    return;
+	}
+	numberTokens = (farSidePort->numXfer() * farClustLoopFac) / 
+			myClustLoopFac;
     }
 }
 
+/****
+
+This updates ports after clustering operations typically.
+
+@Description
+It will re-compute the numbers produced or consumed based on the far side
+clusters <code>loopFac</code> (i.e, its repetitions).
+
+@SideEffects
+<code>numberTokens</code> is updated.
+
+****/
+void SynDFClusterPort :: update()
+{
+    ClusterPort :: update();
+    updateNumxfer();
+    DFPortHole& insidePort = (DFPortHole&)realPort();
+    myGeodesic = insidePort.geo();
+}
+
+/****
+Set the <code>tnob</code> private member of <code>SynDFCluster</code>.
+
+@Description
+<code>Galaxy::numberBlocks()</code> returns the number of clusters in
+<code>*this</code>.  Sometimes
+we would like to know the TOTAL number of atomic actors that are
+there in the hierarchy, not just the top-level number of clusters.
+Hence, this function goes through and computes this quantity.  Ideally,
+(FIXME) we should make <code>Galaxy::addBlock</code> a virtual function
+and redefine that to keep track of this number rather than computing
+it this way.
+For now, until we feel bored enough to want to recompile all of Ptolemy
+again, we do it this way.
+<p>
+WARNING: THIS FUNCTION SHOULD ONLY BE CALLED AFTER ALL CLUSTERING
+OPERATIONS HAVE BEEN DONE SINCE OTHERWISE THE NUMBER WILL HAVE TO BE
+RECOMPUTED.
+<p>
+Also, <code>SynDFCluster::totalNumberOfBlocks</code> calls this function
+if <code>tnob</code> < 0.  Hence,
+if <code>totalNumberOfBlocks</code> is called and the cluster is modified
+later, this function should be called explicitly to set tnob again.
+<p>
+In general, the Cluster methods <code>absorb, merge, group</code> will change
+this number and hence it should be recomputed after any of those
+operations.
+
+****/
 void SynDFCluster::setTotalNumberOfBlocks()
 {
-    // numberBlocks() returns the number of clusters in *this.  Sometimes
-    // we would like to know the TOTAL number of atomic actors that are
-    // there in the heirarchy, not just the top-level number of clusters.
-    // Hence, this function goes through and computes this quantity.  Ideally,
-    // (FIXME) we should make Galaxy::addBlock a virtual function and redefine
-    // that to keep track of this number rather than computing it this way.
-    // For now we do it this way.
-    // WARNING: THIS FUNCTION SHOULD ONLY BE CALLED AFTER ALL CLUSTERING
-    // OPERATIONS HAVE BEEN DONE SINCE OTHERWISE THE NUMBER WILL HAVE TO BE
-    // RECOMPUTED.
-
-    // Also, totalNumberOfBlocks calls this function if tnob < 0.  Hence,
-    // if totalNumberOfBlocks is called and the cluster is modified later,
-    // this function should be called explicitly to set tnob again.
-
-    // In general, the Cluster methods absorb, merge, and group will change
-    // this number and hence it should be recomputed after any of those
-    // operations.
     SynDFClusterIter nextClust(*this);
     SynDFCluster *c;
+    Block* b;
     tnob = 0;
 
-    // we assume that if there is only one cluster inside us, then that
-    // cluster is a star.
     if (numberBlocks() == 1) {
-	tnob = 1;
+	// check if it is a star or galaxy
+	b = head();
+	if (b->isItAtomic()) tnob = 1;
+	else tnob += ((SynDFCluster*)b)->totalNumberOfBlocks();
     } else {
 	while ((c=nextClust++) != NULL)	tnob += c->totalNumberOfBlocks();
     }
 }
 
+/****
+Calls <code>Cluster::convertStar</code> and sets the <code>loopFac</code> for the cluster.
+
+****/
 Cluster* SynDFCluster::convertStar(Star& s)
 {
     SynDFCluster* a = (SynDFCluster*)Cluster::convertStar(s);
@@ -119,31 +166,80 @@ Cluster* SynDFCluster::convertStar(Star& s)
     return a;
 }
 
+/****
+Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code>.
+
+****/
 int SynDFCluster::absorb(Cluster& c, int removeFlag)
 {
+    SynDFClusterPort *p;
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
     // attempt to keep tnob consistent if it is defined for this
     // cluster already.  If not, do nothing; let it be computed
     // when something else requires it.
     if (tnob != -1) tnob += ((SynDFCluster&)c).totalNumberOfBlocks();
-    return Cluster::absorb(c, removeFlag);
+    if (!Cluster::absorb(c, removeFlag)) return FALSE;
+    // Now we need to update the numberTokens on all our portholes.
+    // Recall that Cluster::absorb will only call update() on those
+    // ports that are added to this cluster after the absorb; namely,
+    // input and output ports of c that do not connect to ports in this
+    // cluster.
+    SynDFClusterPortIter nextPort(*this);
+    while ((p=nextPort++) != NULL) {
+	p->updateNumxfer();	
+    }
+    return TRUE;
 }
 
+/****
+Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code>.
+
+****/
 int SynDFCluster::merge(Cluster& c, int removeFlag)
 {
+    SynDFClusterPort *p;
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
     // attempt to keep tnob consistent if it is defined for this
     // cluster already.  If not, do nothing; let it be computed
     // when something else requires it.
     if (tnob != -1) tnob += ((SynDFCluster&)c).totalNumberOfBlocks();
-    return Cluster::merge(c, removeFlag);
+    if (!Cluster::merge(c, removeFlag)) return FALSE;
+    SynDFClusterPortIter nextPort(*this);
+    while ((p=nextPort++) != NULL) {
+	p->updateNumxfer();	
+    }
+    return TRUE;
 }
 
-SynDFCluster :: SynDFCluster() : loopFac(0), tnob(-1) {} // constructor
+// constructor
+SynDFCluster :: SynDFCluster() : Cluster(), loopFac(0), tnob(-1) {}
 
+// Return the number of input ports *this has.
+int SynDFCluster :: numInputs()
+{
+    int numInp = 0;
+    SynDFClusterPortIter nextP(*this);
+    SynDFClusterPort* p;
+    while ((p = nextP++) != NULL) {
+	if (p->isItInput()) numInp++;
+    }
+    return numInp;
+}
+
+// Return the number of outputs ports *this has.
+int SynDFCluster :: numOutputs()
+{
+    return numberPorts()-numInputs();
+}
+
+/****
+
+TNSE = Total Number of Samples Exchanged in a complete period of an SDF schedule.
+
+****/
 int SynDFCluster::computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPort* a)
 {
-    // Compute the TNSE+numInitDelays for the arc between c1 and c2
+    // Compute the TNSE for the arc between c1 and c2
 
     int numP, numC, reps;
     numP = a->numXfer();
@@ -153,7 +249,7 @@ int SynDFCluster::computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPo
 	Error::abortRun("Balance equations seem to be violated in SynDFCluster");
 	return -1;
     }
-    return reps*numP + a->numInitDelays();
+    return reps*numP;
 }
 
 

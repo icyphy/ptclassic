@@ -2,23 +2,20 @@ defstar {
 	name { ReadFileInt }
 	domain { C50 }
 	desc { Reads data from file for use by simulator.}
-	version { $Id$ }
+	version { @(#)C50ReadFileInt.pl	1.4	01 Oct 1996 }
 	author { A.Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
-	explanation {
-.Ir "TI DSK320C5x simulator"
-.Ir "simulator, TI DSK320C5x"
-.Id "file input"
+	location { C50 main library }
+	htmldoc {
+<a name="TI DSK320C5x simulator"></a>
+<a name="simulator, TI DSK320C5x"></a>
+<a name="file input"></a>
 Reads data from file for use by TI DSK320C5x simulator.
-	}
-	execTime {
-		return 2;
 	}
 	output {
 		name {output}
@@ -28,7 +25,9 @@ Reads data from file for use by TI DSK320C5x simulator.
 		name { fileName }
 		type { STRING }
 		default { "infile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		desc {
+'Root' of filename that gets the data. '.sim' is appended
+		}
 	}
 	state {
 		name { inVal}
@@ -47,16 +46,17 @@ input $ref(inVal) $val(fileName).sim -RD
                 addCode(logIn,"simulatorCmds");
 	}
 
-	// this codeblock produces code
 	codeblock (copy) {
 	mar	*,AR6
 	lar	AR6,#$addr(inVal)
 	sacl	*,#$addr(output)
 	}
+
 	go {
 		addCode(copy);
 	}
+
+	execTime {
+		return 2;
+	}
 }
-
-
-

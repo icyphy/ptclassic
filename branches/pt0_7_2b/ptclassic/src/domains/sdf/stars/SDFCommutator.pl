@@ -1,42 +1,51 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 8/17/90
- Converted to use preprocessor, 9/26/90
-
- Commutator takes n input streams and combines them to form one
- output stream.  On each firing it consumes one particle from each
- input stream and produces the n particles on the output stream.
-
-**************************************************************************/
-}
 defstar {
 	name {Commutator}
 	domain {SDF}
+	version {@(#)SDFCommutator.pl	2.11	3/2/95}
+	desc {
+Takes N input streams (where N is the number of inputs) and
+synchronously combines them into one output stream.
+It consumes B input particles from each
+input (where B is the blockSize), and produces N*B particles on the
+output.
+The first B particles on the output come from the first input,
+the next B particles from the next input, etc.
+	}
+	author { J. T. Buck and E. A. Lee}
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
 	inmulti {
 		name {input}
 		type {ANYTYPE}
 	}
 	output {
 		name {output}
-		type {ANYTYPE}
+		type {=input}
 	}	
-	constructor {
-		input.inheritTypeFrom(output);
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
 	}
-	start {
+	setup {
 		int n = input.numberPorts();
-		output.setSDFParams(n,n-1);
+		input.setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
 	}
 	go {
-		for (int i = input.numberPorts()-1; i >= 0; i--)
-			output%i = input()%0;
+		MPHIter nexti(input);
+		PortHole* p;
+		for (int i = input.numberPorts()-1; i >= 0; i--) {
+		    p = nexti++;
+		    for (int j = int(blockSize)-1; j >= 0; j--)
+			output%(j+i*int(blockSize)) = (*p)%j;
+		    }
 	}
 }
 

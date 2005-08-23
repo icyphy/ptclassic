@@ -3,6 +3,7 @@ defcore {
 	domain { ACS }
 	coreCategory { FPSim }
 	corona { XMGraph }
+        version {@(#)ACSXMGraphFPSim.pl	1.4 09/08/99}
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

@@ -1,6 +1,7 @@
-# Makefile to build ptcl, tycho and pigiRpc biPTRIM$Id$
-
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Makefile to build ptcl, tycho and pigiRpc binaries
+# @(#)ptbin.mk	1.83	02/22/99
+#
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,319 +26,379 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  Christopher Hylands
-
+# Programmers:  Christopher Hylands, Jose Luis Pino
+# Based on pigiRpc/makefile, originally by Joe Buck,
+#  with modifications from just about everyone on the Ptolemy Team.
+#
 # This makefile is included by makefiles that build standalone binaries.
 # By having one common makefile, we don't need to update lots of other
 # makefiles.  Currently, ptcl, pigiRpc and tycho use this file
 
 # Todo:
-# fix pigiVersion vs gVersion: installed pigilib/xfunctions.c
-# shared itcl libraries
-# Include Init_itcl in pigi and ptcl
-# make a cp version
-# make a non-shared library
+#   Check out with compile-sdf
+#   Make a non-shared library
+#
+# To create a custom executable, you should define a file named override.mk
+# in your $(ROOT)/obj.$(PTARCH)/$(PIGI) directory. You should also have a 
+# symbolic link from $(ROOT)/src.$(PTARCH)/$(PIGI)/SCCS to the ptolemy
+# SCCS directory $(PTOLEMY/src.$(PTARCH)/$(PIGI)/SCCS.
+# The override.mk file should define the variables necessary from stars.mk
+# to pull in the domains you want.  It also must define the $(PIGI) variable.
+# Here a minimal override.mk which will just pull in SDF:
+#
+# PIGI =	pigiRpc
+# SDFFULL =	1
 
-# The version number.
-VERSION =	0.6devel.$(BASENAME)
-
-# Names of binaries.
-PTINY	=	$(BASENAME).ptiny
-PTRIM	=	$(BASENAME).ptrim
-PIGI	=	$(BASENAME)
-
-# Below we have a few GNU make conditionals used to differentiate the binaries.
-ifeq ($(NEED_PALETTES),yes)
-# We need palette files here
-PTINY_PALETTES =	defpalettes-ptiny.o
-PTRIM_PALETTES =	defpalettes-ptrim.o
-PIGI_PALETTES =		defpalettes-pigi.o
-else
-PTINY_PALETTES =
-PTRIM_PALETTES =
-PIGI_PALETTES =
+ifndef VERSION
+	VERSION =	0.7.2devel.$(BASENAME)
 endif
 
-ifeq ($(NEED_HOF),no)
-# Don't need Higher Order Functions.  ptcl does not need HOF
-HOF_LIBS =
+ifdef ALLBINARIES
+ifndef PTRIM
+ifndef PTINY
+	FULL =		1
+endif
+endif
 endif
 
-ifeq ($(NEED_GRAPHICS),no)
-# Don't need graphics.  ptcl does not have tk
-ITCL_LIBSPEC =
-ITK_LIBSPEC =
-TK_LIBSPEC =
-X11_LIBSPEC =
-PTINY_TCL_STAR_LIBS =
-PTRIM_TCL_STAR_LIBS =
-TCL_STAR_LIBS =
+ifdef PTCL
+# To build ptcl with Tk, follow the steps below: 
+# 1. Recompile Star.cc:
+#    cd $PTOLEMY/obj.$PTARCH/kernel
+#    rm -f Star.o
+#    make USERFLAGS="-DPT_PTCL_WITH_TK -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include" install
+#
+# 2. Create the following  $PTOLEMY/obj.$PTARCH/ptcl/override.mk file
+# --start--
+#     GPP_FLAGS += -DPT_PTCL_WITH_TK -I../../src/ptklib -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include"
+#     PTCL_WITH_TK = 1
+#     TK = 1
+#     # If you are building under Unix,
+#     # copy src/tcltk/tk8.0.5pt/generic/tkConsole.c to src/ptcl and then
+#     # uncomment the next two lines:
+#     #LIBS += tkConsole.o
+#     #LIBFILES += tkConsole.o
+# --end--
+#
+# 3. Rebuild ptcl:
+#    cd $PTOLEMY/obj.$PTARCH/ptcl
+#    make clean
+#    make
+#		
+ifndef PTCL_WITH_TK
+	TK =
+endif
 endif
 
-# Below we define variables for each class of binary
+# Note that some of these settings will be filtered out by stars.mk
+ifdef FULL
+	PIGI = 		$(BASENAME)$(BINARY_EXT)
+	VERSION_DESC =	'With All Common Domains'
+	BDF =		1
+	C50 =		1
+	CGFULL =	1
+	CG56 =		1
+	CGCFULL =	1
+	DDF =		1
+	DEFULL =	1
+	FSM = 		1
+	HOF =		1
+	IPUS =		1
+	MDSDF =		1
+	PN =		1
+	ACS =		1
+	SDFFULL =	1
+	SR =		1
+	SRCGC =		1
+	VHDLFULL =	1
+	VHDLB =		1
+endif
 
-# Define libraries to be used at link time
-GENERIC_LIBS =	$(HOF_LIBS) \
-		$(SPECIAL_LIBS) \
-		$(ITCL_LIBSPEC) $(ITK_LIBSPEC) $(TK_LIBSPEC) $(TCL_LIBSPEC) \
-		$(X11_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
-PTINY_LIBS = 	$(PTINY_STAR_LIBS) $(PTINY_TCL_STAR_LIBS) $(GENERIC_LIBS)
-PTRIM_LIBS = 	$(PTRIM_STAR_LIBS) $(PTRIM_TCL_STAR_LIBS) $(GENERIC_LIBS)
-PIGI_LIBS = 	$(STAR_LIBS) $(TCL_STAR_LIBS) $(THREAD_LIBS) $(GENERIC_LIBS)
-PTCP_LIBS=	$(PTCP_STAR_LIBS) $(LWP_LIBS) $(GENERIC_LIBS)
+ifdef ACSBIN
+	PIGI=		$(BASENAME).acs$(BINARY_EXT)
+	VERSION_DESC =	'With Adaptive Computing Systems (ACS) Domain only'
+	ACS =		1
+endif
 
-# Define what stars you want to include
-ifeq ($(USE_SHARED_LIBS),yes) 
-# If we are using shared libraries, then we need not have .o files that
-# bring in the stars from the libraries.
-PTINY_STARS=
-PTRIM_STARS=
-ALLSTARS=
-PTCP_STARS=
-else
-PTINY_STARS = $(PTINY_SDFSTARS) \
-		$(DESTARS) \
-		$(PTINY_TCLSTARS) $(HOFSTARS)
-PTRIM_STARS = $(SDFSTARS) \
-		$(CGCSTARS) $(CGSTARS) \
-		$(DDFSTARS) $(DESTARS) $(BDFSTARS) \
-		$(PTRIM_TCLSTARS) $(HOFSTARS)
-ALLSTARS = $(THREAD_STARS) $(OPTIONAL_STARS) $(SDFSTARS) \
-		$(CGCSTARS) $(CG96STARS) $(CG56STARS) $(SilageSTARS) \
-		$(VHDLFSTARS) $(VHDLBSTARS) $(CGSTARS) \
-		$(DDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS) \
-		$(MDSDFSTARS) $(IPUSSTARS) \
-		$(TCLSTARS) $(HOFSTARS)
+ifdef PTINY
+	PIGI=		$(BASENAME).ptiny$(BINARY_EXT)
+	VERSION_DESC =	'With SDF (no image stars) and DE domains only'
+	DE =		1
+	HOF =		1
+	SDF =		1
+	SDFTK =		1
+	SDFDFM =	1
+	SDFDSP =	1
+	SDFMATRIX =	1
+	SDFMATLAB =	1
+endif
 
-PTCP_STARS = $(THORSTARS) $(DESTARS) $(CPSTARS)
-endif # $(USE_SHARED_LIBRARYS)
+ifdef PTRIM
+	PIGI =		$(BASENAME).ptrim$(BINARY_EXT)
+	VERSION_DESC =	'With SDF, DE, BDF, DDF and CGC domains only'
+	BDF =		1
+	CGCFULL =	1
+	CGFULL =	1
+	DDF =		1
+	DE =		1
+	HOF =		1
+	SDFFULL =	1
+endif
 
-# Define all the objects that end up in the binary
-PTINY_OBJS =	$(MAIN) $(PTINY_PALETTES) $(PTINYY_STARS) $(PTINY_TARGETS)
-PTRIM_OBJS =	$(MAIN) $(PTRIM_PALETTES) $(PTRIM_STARS) $(PTRIM_TARGETS)
-PIGI_OBJS =	$(MAIN) $(PIGI_PALETTES) $(PIGI_STARS) $(PIGI_TARGETS)
-PTCP_OBJS =	$(MAIN) $(PTCP_PALETTES) $(PTCP_STARS) $(PTCP_TARGETS)
+# build up the list of dependent directories and libraries
+include $(ROOT)/mk/stars.mk
 
-# Define what the binary is dependent on
-PTINY_DEPEND =  $(MAIN_DEPEND) $(PTINY_PALETTES) \
-			$(PTINY_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTINY_STARS) $(PTINY_TARGETS)
-PTRIM_DEPEND =  $(MAIN_DEPEND) $(PTRIM_PALETTES) \
-			$(PTRIM_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTRIM_STARS) $(PTRIM_TARGETS)
-PIGI_DEPEND =	$(MAIN_DEPEND) $(PIGI_PALETTES) \
-			$(PIGI_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PIGI_STARS) $(PIGI_TARGETS)
-PTCP_DEPEND =  	$(MAIN_DEPEND) $(PTCP_PALETTES) \
-			$(PTCP_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTCP_STARS) $(PTCP_TARGETS)
+# matlab.mk and mathematica.mk check these vars before traversing the path
+NEED_MATLABDIR = 	1
+NEED_MATHEMATICADIR = 	1
 
-PTINY_BINARIES = 	$(PTINY) $(PTINY).debug $(PTINY).debug.purify \
-			$(PTINY).debug.quantify $(PTINY).debug.purecov
-PTRIM_BINARIES = 	$(PTRIM) $(PTRIM).debug $(PTRIM).debug.purify \
-			$(PTRIM).debug.quantify $(PTRIM).debug.purecov
-PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
-			$(PIGI).debug.quantify $(PIGI).debug.purecov
-ALL_BINARIES = $(PTINY_BINARIES) $(PTRIM_BINARIES) $(PIGI_BINARIES) \
-			$(PIGI).cp
-# extra stuff to delete with 'make realclean'
-REALCLEAN_STUFF=	$(ALL_BINARIES)
+PIGI_OBJS += $(STARS) $(TARGETS) $(MISC_OBJS)
 
+PIGI_BINARIES = 	$(BASENAME) \
+			$(BASENAME).debug$(BINARY_EXT)\
+			$(BASENAME).debug.purify$(BINARY_EXT) \
+			$(BASENAME).debug.quantify$(BINARY_EXT) \
+			$(BASENAME).debug.purecov$(BINARY_EXT)
 
+EVERY_BINARY= $(PIGI_BINARIES) \
+		$(BASENAME).acs \
+		$(BASENAME).acs.debug \
+		$(BASENAME).acs.debug.purify \
+		$(BASENAME).acs.debug.quantify \
+		$(BASENAME).acs.debug.purecov \
+		$(BASENAME).ptiny \
+		$(BASENAME).ptiny.debug \
+		$(BASENAME).ptiny.debug.purify \
+		$(BASENAME).ptiny.debug.quantify \
+		$(BASENAME).ptiny.debug.purecov \
+		$(BASENAME).ptrim \
+		$(BASENAME).ptrim.debug \
+		$(BASENAME).ptrim.debug.purify \
+		$(BASENAME).ptrim.debug.quantify \
+		$(BASENAME).ptrim.debug.purecov
+
+REALCLEAN_STUFF =	$(EVERY_BINARY)
 
 ####################################################################
-
 # Variable definitions are above this point.  Rules are below this point.
 
 # We have three main binaries, ptiny, ptrim and pigi.
 # Each binary has the following versions:
 #		 vanilla, debug, quantify, purify, purecov
 # At the end we define a few special cases
-
+# We also have ptcp, which includes the CP domain.  The CP domain
+# is present on the sun4 only
 # See the calling makefile for the all: rule
-
-# Build vanilla and debug versions
-everything: makefile $(PTINY) $(PTRIM) $(PIGI) \
-		$(PTINY).debug $(PTRIM).debug $(PIGI).debug
-
-# Build absolutely everything, including Pure Inc versions
-ptitanic: makefile $(ALL_BINARIES)
-
-
-####################################################################
-# PTINY versions
-
-# Small version of Ptolemy, with only sdf domain (no image stars) and
-# de domain.
-$(PTINY): $(PTINY_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf (no image stars) and de only)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(CC) -c version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTINY_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
-
-# Same, with debugging symbols.
-$(PTINY).debug: $(PTINY_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf (no image stars) and de only,' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
-# Same, with debugging symbols and purify
-$(PTINY).debug.purify: $(PTINY_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf (no image stars) and de only,' \
-		'% with debug symbols and purify)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
-# Same, with quantify, for profiling.
-$(PTINY).debug.quantify: $(PTINY_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf (no image stars) and de only,' \
-		'% with debug symbols and quantify)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
-# Same, with purecov, for code coverage measurements.
-$(PTINY).debug.purecov: $(PTINY_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf (no image stars) and de only,' \
-		'% with debug symbols and purecov)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
-
-####################################################################
-# PTRIM versions
-
-# Small version of Ptolemy, with only sdf domain (no image stars) and
-# de domain.
-$(PTRIM): $(PTRIM_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf, ddf, bdf, de, and cgc (minus parallel targets))' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(CC) -c version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-		version.o -o $@
-
-
-# Same, with debugging symbols.
-$(PTRIM).debug: $(PTRIM_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
-		'% with debug symbols' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-		version.o -o $@
-
-# Same, with debugging symbols and purify
-$(PTRIM).debug.purify: $(PTRIM_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
-		'% with debug symbols and purify)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-		version.o -o $@
-
-# Same, with quantify, for profiling.
-$(PTRIM).debug.quantify: $(PTRIM_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
-		'% with debug symbols and quantify)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-		version.o -o $@
-
-# Same, with purecov, for code coverage measurements.
-$(PTRIM).debug.purecov: $(PTRIM_DEPEND)
-	$(CC) -c version.c
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
-		'% with debug symbols and purecov)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTINY_LIBS) \
-		version.o -o $@
-
 
 ####################################################################
 # PIGI versions
 
-# Small version of Ptolemy, with only sdf domain (no image stars) and
-# de domain.
-$(PIGI): $(PIGI_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(CC) -c version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(PIGI_LIBS) \
-		version.o -o $@
+INSTALL += makefile $(BINDIR)/$(PIGI)
 
+ifndef ALLBINARIES
+# On certain archs (hppa9), we can run strip -x and get a smaller binary
+# Note that doing a full strip on a binary will disable incremental linking
+# 
+# This is the defautl target
+$(PIGI): $(PT_DEPEND) $(ADD_OBJS)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		$(VERSION_DESC) \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
+	$(CC) -c version.c
+	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
+	$(STRIP_DEBUG) $@
 
 # Same, with debugging symbols.
-$(PIGI).debug: $(PIGI_DEPEND)
-	$(CC) -c version.c
+$(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
-		'(with debug symbols)' \
+		$(VERSION_DESC) \
+		'and debugging symbols.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
-		version.o -o $@
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
+	$(CC) -c version.c
+	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with debugging symbols and purify
-$(PIGI).debug.purify: $(PIGI_DEPEND)
-	$(CC) -c version.c
+$(PIGI).debug.purify: $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
-		'(with debug symbols and purify)' \
+		$(VERSION_DESC) \
+		'and debugging symbols and purify.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
-		version.o -o $@
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
+	$(CC) -c version.c
+	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with quantify, for profiling.
-$(PIGI).debug.quantify: $(PIGI_DEPEND)
-	$(CC) -c version.c
+$(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
-		'(with debug symbols and quantify)' \
+		$(VERSION_DESC) \
+		'and debugging symbols and quantify.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
-		version.o -o $@
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
+	$(CC) -c version.c
+	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with purecov, for code coverage measurements.
-$(PIGI).debug.purecov: $(PIGI_DEPEND)
-	$(CC) -c version.c
+$(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
-		'(with debug symbols and purecov)' \
+		$(VERSION_DESC) \
+		'and debugging symbols and purecov.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
-	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
-		version.o -o $@
-
-
-
-##########################################################################
-# Small version of Ptolemy with only thor, de, and cp domains.
-# All dataflow domains are intentionally excluded to help prevent
-# excessive core dumps.  Only available on the sun4 architecture.
-ifeq ($(PTARCH),sun4)
-$(PIGI).cp: $(PTCP_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'(with CP domain)' \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTCP_OBJS) $(PTCP_LIBS) \
-		version.o -o $@
-	$(STRIP_DEBUG) $@
+	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
+
+$(BINDIR)/$(PIGI): $(PIGI)
+		@echo Installing $<
+		rm -f $@
+		ln $< $@
+
 else
-$(PIGI).cp:
-	@echo "The CP domain is currently only supported on the sun4 platform"
-endif
+
+INSTALL += $(BINDIR)/$(BASENAME)$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).ptrim$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).ptiny$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).acs$(BINARY_EXT)
+
+
+# If the user wants to build anything but a full pigiRpc or ptcl, then
+# we want to be careful not to depend on the full set of dependencies.
+# The way we do this is that we declare everything but $(BASENAME)
+# to be .PHONY so that they will always be built.  Since the rules
+# for these binaries invokes a submake process, the new submake process
+# will have the proper dependencies for the specific binary we are building.
+.PHONY: $(BASENAME).ptrim$(BINARY_EXT) \
+	$(BASENAME).ptiny$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.purify$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.purify$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.quantify$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.quantify$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.purecov$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.purecov$(BINARY_EXT) \
+	$(BASENAME).acs$(BINARY_EXT) \
+	$(BASENAME).acs.debug$(BINARY_EXT) \
+	$(BASENAME).acs.debug.purify$(BINARY_EXT) \
+	$(BASENAME).acs.debug.quantify$(BINARY_EXT) \
+	$(BASENAME).acs.debug.purecov
+
+# The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
+# else we must have all the libs installed to build ptrim and ptiny, even
+# though ptrim and ptiny do not use all the libs.
+
+$(BASENAME)$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptrim$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny$(BINARY_EXT):
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs$(BINARY_EXT):
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+
+$(BASENAME).debug$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptrim.debug$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny.debug$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+
+$(BASENAME).debug.purify$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
+
+$(BASENAME).ptrim.debug.purify$(BINARY_EXT):
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny.debug.purify$(BINARY_EXT):
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.purify$(BINARY_EXT):
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+
+$(BASENAME).debug.quantify$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
+
+$(BASENAME).ptrim.debug.quantify$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny.debug.quantify$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.quantify$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+
+$(BASENAME).debug.purecov$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
+
+$(BASENAME).ptrim.debug.purecov$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny.debug.purecov$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.purecov$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+$(BINDIR)/$(BASENAME)$(BINARY_EXT): $(BASENAME)$(BINARY_EXT)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).ptrim$(BINARY_EXT): $(BASENAME).ptrim$(BINARY_EXT) 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).ptiny$(BINARY_EXT): $(BASENAME).ptiny$(BINARY_EXT) 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).acs$(BINARY_EXT): $(BASENAME).acs$(BINARY_EXT)
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+endif #ALLBINARIES
+
+
+install: $(INSTALL)
+
+# Build four binaries
+all: makefile $(PTLIB) $(PIGI) $(PIGI).acs $(PIGI).ptiny $(PIGI).ptrim
+
+# Print the names of all the binaries that can be produced
+echo_every_binary:
+	@echo $(EVERY_BINARY)
+
+# Build as many as 12 binaries
+everything: $(REALCLEAN_STUFF)
+
+# You might find it helpful to use the PTDEPEND rule to debug dependencies:
+# make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+# First, find out what the submake command is that build the binary:
+#   cxh@carson 153% make pigiRpc.acs
+#   make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS \
+# 	  pigiRpc.acs 
+#
+# Then use those same settings, but use the PTDEPEND target: 
+#   cxh@carson 154% make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+#
+PTDEPEND:
+	echo $(PT_DEPEND)
+

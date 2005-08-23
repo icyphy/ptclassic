@@ -2,21 +2,21 @@
 #define _PtGate_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PtGate.h	1.5	12/08/97
 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,6 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  J. T. Buck and T. M. Parks
  Date of creation: 6/14/93
@@ -40,8 +43,8 @@ This file defines classes that support multi-threading in the kernel.
 // PtGate is an abstract baseclass; derived classes typically provide the
 // desired semantics for use with a particular threads library (such
 // as Sun lightweight processes, Posix threads, etc.  The PtGate object
-// provides a "lock" and an "unlock" primitive.  Also, "clone" is a sort
-// of virtual constructor, permitting more identical PtGate objects to
+// provides a "lock" and an "unlock" primitive.  Also, "makeNew" is a sort
+// of virtual constructor, permitting more PtGate objects of the same type to
 // be constructed given a prototype.
 
 class PtGate
@@ -49,8 +52,8 @@ class PtGate
     friend class CriticalSection;
 public:
 	virtual ~PtGate();
-	// make a new, identical PtGate
-	virtual PtGate* clone() const = 0;
+	// make a new PtGate
+	virtual PtGate* makeNew() const = 0;
 protected:
 	// obtain exclusive use of the lock
 	virtual void lock() = 0;
@@ -139,7 +142,7 @@ private:
 // A KeptGate is a GateKeeper that contains its own PtGate pointer.
 class KeptGate : public GateKeeper {
 public:
-	KeptGate() : myGate(0), GateKeeper(myGate) {}
+        KeptGate() :  GateKeeper(myGate), myGate(0) {}
 private:
 	PtGate* myGate;
 };

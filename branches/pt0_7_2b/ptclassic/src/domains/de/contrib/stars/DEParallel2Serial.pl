@@ -1,7 +1,7 @@
 defstar {
 	name { Parallel2Serial }
 	domain { DE }
-	version { 1.0	6/23/97}
+	version { @(#)DEParallel2Serial.pl	1.4 06/24/97 }
 	author { J. Voigt }
 	copyright { copyright (c) 1997 Dresden University of Technology,
                     Mobile Communications Systems 
@@ -73,7 +73,6 @@ defstar {
 		    }
 		}
                 // reset the list
-                this->setup; 
 		demand.dataNew = FALSE;
 	    } 
 	}

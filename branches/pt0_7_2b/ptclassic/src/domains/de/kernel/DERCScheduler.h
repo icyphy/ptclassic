@@ -1,15 +1,13 @@
-#ifndef _PolisScheduler_h
-#define _PolisScheduler_h 1
+#ifndef _DERCScheduler_h
+#define _DERCScheduler_h 1
 
 /**************************************************************************
-
-Version identification:
-@(#)PolisScheduler.h	1.14     12/05/97
+                                                                           Version identification: @(#)DERCScheduler.h	1.8 05/28/98
 
  
-Author: Mudit Goel
+Author: Mudit Goel, Neil Smyth
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,22 +43,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEScheduler.h"
 #include "CQEventQueue.h"
 #include "Resource.h"
-#include "PolisEventQ.h"
 #include <string.h>
 
 
 	////////////////////////////////////
-	//  PolisScheduler
+	//  DERCScheduler
 	///////////////////////////////////
 
-class PolisScheduler : public DEBaseSched {
+class DERCScheduler : public DEBaseSched {
 
 	// stoping condition of the scheduler
 	double stopTime;
 
 public:
 	// Generate a list of all the distinct resources required by
-	// Polis stars
+	// RC stars
 	SequentialList *getResources();
 
 	// Stores the resource LinkedList
@@ -68,8 +65,7 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	PolisEventQ interruptQ;
-	PolisEventQ eventQ;
+	CQEventQueue eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
@@ -97,14 +93,13 @@ public:
 	StringList displaySchedule(); 
 
 	// Constructor sets default options
-	PolisScheduler () { stopTime = 100.0; }
+	DERCScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
 	double whenStop() { return stopTime ;}
 
 	// fetch an event on request.
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
-	/*virtual*/ BasePrioQueue* interruptQueue() { return &interruptQ; }
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
 
         // class identification

@@ -2,10 +2,33 @@ static const char file_id[] = "MacroParProcs.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)MacroParProcs.cc	1.3	12/08/97
 
 Copyright (c) 1995 Seoul National University
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
 Date of last revision: 
@@ -163,12 +186,14 @@ void MacroParProcs :: copyBigSchedule(MacroNode* node, IntArray& avail) {
 	// processor index
 	int ix = pf->assignedTo(1,0);
 
+        int i;
+
 	// schedule comm.
 	prepareComm(node);
 	scheduleIPC(ix);
 
 	// fill out the array pIndex[], and avail[].
-	for (int i = 0; i < optNum; i++)
+	for (i = 0; i < optNum; i++)
 		pIndex[i] = pf->assignedTo(1,i);
 
 	int ref = getProc(ix)->getAvailTime();
@@ -193,8 +218,8 @@ int MacroParProcs :: scheduleParNode(ParNode* pnode) {
 
 	// Compare the processor availability and the startTime profile
 	int tempIx;
-	int tempMax, refMin = -1;
-	for (int i = 0; i < num; i++) {
+	int i, tempMax, refMin = -1;
+	for (i = 0; i < num; i++) {
 		if (pf->getStartTime(i) == 0) {
 			tempIx = pf->assignedTo(invocNum,i);
 			tempMax = getProc(tempIx)->getAvailTime();

@@ -1,23 +1,23 @@
 defstar {
 	name { RampFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc {
 Generate a fixed-point ramp signal, starting at "value" (default 0.0)
 with step size "step" (default 1.0).
 A precision and an initial value can be specified for a parameter by using
-the notation ( <initial_value>, <precision> ).
+the notation ("initial_value","precision").
 	}
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCRampFix.pl	1.9	10/08/96 }
         location { CGC main library }
-	explanation { 
+	htmldoc {
 The value of the "step" and "value" parameters and their precision 
 in bits can currently be specified using two different notations. 
 Specifying only a value by itself in the dialog box would create a 
@@ -66,13 +66,31 @@ The precision of this state is the precision of the accumulation.
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 
+        defstate {
+                name { StepPrecision }
+                type { precision }
+                default { 2.14 }
+                desc { Precision of the step in bits. }
+        }
+        defstate {
+                name { ValuePrecision }
+                type { precision }
+                default { 2.14 }
+                desc { Precision of the value in bits. }
+        }
+
         setup {
 		CGCFix::setup();
 		// if the user specified an invalid precision string, the error
 		// will be automatically reported in the initialize method of
 		// class PrecisionState
 		output.setPrecision(OutputPrecision);
+		value.setPrecision(ValuePrecision);
+		step.setPrecision(StepPrecision);
         }
+
+        // an initCode method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::initCode()
 
 	go {
 		// insert code to clear overflow flag
@@ -85,6 +103,6 @@ The precision of this state is the precision of the accumulation.
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

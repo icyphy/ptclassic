@@ -1,10 +1,10 @@
 defstar {
 	name { Logic }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DELogic.pl	1.5	10/01/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -16,20 +16,10 @@ The inputs are integers interpreted as Booleans,
 where zero is a FALSE and nonzero is a TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
-	explanation {
+	htmldoc {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
 of TRUEs among the inputs.  The other operations are self explanatory.
-.ir "logic"
-.ir "Boolean logic"
-.ir "not (logical operation)"
-.ir "and (logical operation)"
-.ir "exclusive or"
-.ir "xor (logical operation)"
-.ir "xnor (logical operation)"
-.ir "nand (logical operation)"
-.ir "or (logical operation)"
-.ir "nor (logical operation)"
 	}
 	inmulti {
 		name { input }
@@ -73,12 +63,12 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 		else if ( strcasecmp ( cn, "NOR") == 0) test = NORID;
 		else if ( strcasecmp ( cn, "XOR") == 0) test = XORID;
 		else if ( strcasecmp ( cn, "XNOR") == 0) test = XNORID;
-		else Error::abortRun(*this,"Unrecognized test.");
+		else Error::abortRun(*this, "Unrecognized test ", cn);
 	}
 	go {
 	    InDEMPHIter nexti(input);
 	    InDEPort *p;
-	    int result;
+	    int result = FALSE;
 
 	    switch( test ) {
 		case NOTID:
@@ -87,21 +77,21 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 		    break;
 		case ANDID:
 		case NANDID:
-		    result = 1;
+		    result = TRUE;
 		    while ((p = nexti++) != 0)
 			result = result && int(p->get());
 		    if (test == NANDID) result = !result;
 		    break;
 		case ORID:
 		case NORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			result = result || int(p->get());
 		    if (test == NORID) result = !result;
 		    break;
 		case XORID:
 		case XNORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			if (int(p->get())) result = !result;
 		    if (test == XNORID) result = !result;

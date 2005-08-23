@@ -1,9 +1,14 @@
 defstar {
 	name { IntUnPacketize }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DEIntUnPacketize.pl	1.7 3/2/95 }
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 	desc {
 Convert a stream of packets into integer output data.  The "data"
@@ -17,7 +22,7 @@ data value from the current input packet is output.
 	hinclude { "IntVecData.h" }
 	input {
 		name { data }
-		type { packet }
+		type { message }
 	}
 	input {
 		name { demand }
@@ -29,32 +34,32 @@ data value from the current input packet is output.
 	}
 	protected {
 		int idx;
-		Packet pkt;
-		const IntVecData* currentPacket;
+		Envelope env;
+		const IntVecData* currentMessage;
 		int lastOutput;
 	}
 	constructor {
 		data.triggers();
 		data.before(demand);
 	}
-	start {
+	setup {
 		idx = 0;
-		currentPacket = 0;
+		currentMessage = 0;
 		lastOutput = 0;
 	}
 	go {
 		if (data.dataNew) {
-			// a new packet has arrived
-			data.get().getPacket(pkt);
+			// a new message has arrived
+			data.get().getMessage(env);
 			idx = 0;
-			TYPE_CHECK(pkt,"IntVecData");
-			currentPacket = (const IntVecData*)pkt.myData();
+			TYPE_CHECK(env,"IntVecData");
+			currentMessage = (const IntVecData*)env.myData();
 		}
 		if (demand.dataNew) {
 			// need to write new output
 			demand.dataNew = FALSE;
-			if (currentPacket && idx < currentPacket->length())
-				lastOutput = currentPacket->data[idx++];
+			if (currentMessage && idx < currentMessage->length())
+				lastOutput = currentMessage->data[idx++];
 			output.put(arrivalTime) << lastOutput;	
 		}
 	}

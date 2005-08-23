@@ -2,9 +2,9 @@
 #define _VHDLMux_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLMux.h	1.4 05/29/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -53,6 +53,9 @@ class VHDLMux : public VHDLFiring
  public:
   // Constructors.
   VHDLMux();
+  VHDLMux(const char* n, const char* t)
+    : inputList(new VHDLSignalList), output(NULL), control(NULL), type(t)
+      { setName(n); }
 
   // Destructor.
   ~VHDLMux();

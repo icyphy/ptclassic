@@ -1,19 +1,19 @@
 # Makefile for MDSDF domain support
 # Version identification:
-# $Id$
-# Copyright (c) 1990-1994 The Regents of the University of California.
+# @(#)make.template	1.5 3/7/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
 # 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -22,6 +22,9 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 #
 # Date of creation: 9/8/93
 #
@@ -36,7 +39,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/mdsdf/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 #SDF kernel
@@ -44,7 +47,7 @@ SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libmdsdf.a
+PTLIB=libmdsdf.$(LIBSUFFIX)
 
 # Library sources
 SRCS= \
@@ -58,19 +61,13 @@ HDRS= MDSDFPortHole.h MDSDFScheduler.h MDSDFStar.h MDSDFWormhole.h \
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
-# Commands to make some sources from templates
-
-MDSDFDomain.cc :	$(KERNDIR)/XDomain.ccP
-	cd $(VPATH); rm -f MDSDFDomain.cc; \
-	sed 's/<T>/MDSDF/g' $(KERNDIR)/XDomain.ccP > MDSDFDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

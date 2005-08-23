@@ -1,21 +1,21 @@
 static const char file_id[] = "MDSDFStar.cc";
 
 /*******************************************************************
-  Version $Id$
+Version @(#)MDSDFStar.cc	1.8 3/7/96
 
-Copyright (c) 1990-1994
-   The Regents of the University of California. All rights reserved.
+Copyright (c) 1993-1996 The Regents of the University of California.
+All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,6 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
     Programmer:		Mike J. Chen
     Date of creation:	13 August 1993
@@ -46,9 +49,9 @@ ISA_FUNC(MDSDFStar,DataFlowStar);
 const char* MDSDFStar::domain() const { return MDSDFdomainName; }
 
 // Constructor
-MDSDFStar::MDSDFStar() : rowRepetitions(0,1), colRepetitions(0,1),
-                         rowIndex(0), colIndex(0), startRowIndex(0),
-                         startColIndex(0) {}
+MDSDFStar::MDSDFStar() : rowIndex(0), colIndex(0),
+			 rowRepetitions(0,1), colRepetitions(0,1),
+			 startRowIndex(0), startColIndex(0) {}
 
 // Domain-specific initialization.  This sets up only the states of
 // each star in the galaxy and calls the user setup() routine.
@@ -68,7 +71,7 @@ void MDSDFStar::initialize() {
   initPortCounts();  // defined in DataFlowStar
 }
 
-int MDSDFStar::simRunStar(int rIndex, int cIndex, int deferFiring) {
+int MDSDFStar::simRunStar(int rIndex, int cIndex, int /*deferFiring*/) {
   if(!okSDF()) return FALSE;  // might want to change to MDSDF specific check
   rowIndex = rIndex;
   colIndex = cIndex;
@@ -106,7 +109,9 @@ int MDSDFStar::simRunStar(int rIndex, int cIndex, int deferFiring) {
   return 0;
 }
 
-int MDSDFStar::deferrable() {}
+// For Solaris2.3 CC, functions declared to return an int must return
+// something.
+int MDSDFStar::deferrable() {return 0;}
 
 
 // Result codes when testing if a star is runnable:
@@ -119,8 +124,8 @@ int MDSDFStar::notRunnable() {
 
   // Check to see whether the required number of row and column repetitions
   //   has been met
-  if(int(double(rowRepetitions)) <= rowIndex ||
-     int(double(colRepetitions)) <= colIndex)
+  if(int(rowRepetitions) <= (int)rowIndex ||
+     int(colRepetitions) <= (int)colIndex)
     return 2;
 
   // Step through all the input ports, checking to see whether the required
@@ -137,6 +142,90 @@ int MDSDFStar::notRunnable() {
   return 0; // star is runnable
 }
 
+// Resolve ANYSIZE inputs and outputs.  Function is called during
+// scheduling.  Returns 0 if there is an error, such as when
+// there are ANYSIZE outputs but no ANYSIZE input, or if there are
+// multiple inputs with ANYSIZE specifications.  Otherwise, returns
+// the number of rows that all ANYSIZE inputs and outputs are set to.
+int MDSDFStar::resolveANYSIZErows() {
+  if(numInputs()) {
+    BlockPortIter nextp(*this);
+    PortHole* p;
+    MDSDFPortHole* input = 0;
+    int resolvedSize;
 
+    // find the single input that is of type ANYSIZE, if multiple
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numRowXfer() == ANYSIZE && mp->isItInput()) {
+	if(input == 0)
+	  input = mp;
+        else return 0;  // multiple inputs with ANYSIZE rows
+      }
+    }
+    if(input == 0)
+      return 0;         // no input with ANYSIZE rows
+    // at this point, we should have only one input with ANYSIZE rows
+    resolvedSize = ((MDSDFPortHole*)(input->far()))->numRowXfer();
+    if(resolvedSize == ANYSIZE) {
+      resolvedSize = ((MDSDFStar*)(input->parent()))->resolveANYSIZErows();
+      if(resolvedSize == 0)
+	return 0;
+    }
+    // at this point, we have a valid resolved row size, set the input
+    // and all outputs with ANYSIZE rows to be this size;
+    nextp.reset();
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numRowXfer() == ANYSIZE)
+	mp->setRowXfer(resolvedSize);
+    }
+    return resolvedSize;
+  }
+  return 0;
+}
+
+// Resolve ANYSIZE inputs and outputs.  Function is called during
+// scheduling.  Returns 0 if there is an error, such as when
+// there are ANYSIZE outputs but no ANYSIZE input, or if there are
+// multiple inputs with ANYSIZE specifications.  Otherwise, returns
+// the number of columns that all ANYSIZE inputs and outputs are set to.
+int MDSDFStar::resolveANYSIZEcols() {
+  if(numInputs()) {
+    BlockPortIter nextp(*this);
+    PortHole* p;
+    MDSDFPortHole* input = 0;
+    int resolvedSize;
+
+    // find the single input that is of type ANYSIZE, if multiple
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numColXfer() == ANYSIZE && mp->isItInput()) {
+	if(input == 0)
+	  input = mp;
+        else return 0;  // multiple inputs with ANYSIZE columnss
+      }
+    }
+    if(input == 0)
+      return 0;         // no input with ANYSIZE columns
+    // at this point, we should have only one input with ANYSIZE columnss
+    resolvedSize = ((MDSDFPortHole*)(input->far()))->numColXfer();
+    if(resolvedSize == ANYSIZE) {
+      resolvedSize = ((MDSDFStar*)(input->parent()))->resolveANYSIZEcols();
+      if(resolvedSize == 0)
+	return 0;
+    }
+    // at this point, we have a valid resolved column size, set the input
+    // and all outputs with ANYSIZE columns to be this size;
+    nextp.reset();
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numColXfer() == ANYSIZE)
+	mp->setColXfer(resolvedSize);
+    }
+    return resolvedSize;
+  }
+  return 0;
+}
 
 

@@ -2,15 +2,15 @@ defstar {
 	name { Thresh }
 	domain { CGC }
 	desc {
-Compares input values to "threshold" (default 0.5).
-Output is 0 if input <= threshold, otherwise it is 1.
+Compares input values to "threshold" (default 0.5).  Output is 0
+if input is greater than or equal to threshold; otherwise, it is 1.
 	}
-	version {$Id$}
+	version {@(#)CGCThresh.pl	1.6 03/20/98}
 	author { J. Buck }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	constructor { noInternalState();}
 	codeblock (gen) {
-		$ref(output) = ($ref(input) > $val(threshold));
+		$ref(output) = ($ref(input) > $val(threshold)) ? 1 : 0;
 	}
 	go {
 		addCode(gen);

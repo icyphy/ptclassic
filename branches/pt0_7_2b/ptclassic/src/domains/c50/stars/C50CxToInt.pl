@@ -5,7 +5,7 @@ defstar {
 Outputs the magnitude of the complex number. 
 The output will wrap around in case of overflow
 	}
-    version { $Id$  }
+    version { @(#)C50CxToInt.pl	1.3   7/22/96  }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -32,7 +32,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	zap	
 	sqra	*+
 	sqra	*,ar1
-	sach	*,1
+	apac
+	sacl	*
     }
     go {
 	addCode(magnitude);

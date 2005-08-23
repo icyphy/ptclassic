@@ -2,16 +2,16 @@ defstar {
 	name { Xor }
 	domain { C50 }
 	desc { Exclusive or -- 2 inputs. }
-	version { $Id$ }
+	version { @(#)C50Xor.pl	1.3	01 Oct 1996 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions  library }
-	explanation {
+	location { C50 main library }
+	htmldoc {
 This star outputs the bit-wise exclusive-or of input1 and input2.
 	}
 	input {
@@ -35,6 +35,10 @@ This star outputs the bit-wise exclusive-or of input1 and input2.
 	lacc	*,0,AR6				;Accu = input1
 	xor	*,AR7				;Accu = input1 XOR input2
 	sacl 	*				;output = Accu
+	}
+
+	constructor {
+		noInternalState();
 	}
 
 	go {

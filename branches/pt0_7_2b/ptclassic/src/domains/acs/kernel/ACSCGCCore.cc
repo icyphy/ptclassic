@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/29/98
- Version: $Id$
+ Version: @(#)ACSCGCCore.cc	1.8 09/21/99
 
 ***********************************************************************/
 
@@ -41,9 +41,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixState.h"
 #include "FixArrayState.h"
 #include "CGUtilities.h"
+#include <ctype.h>
+#include <stdio.h>              // sprintf(), sscanf()
 
-int isCmdArg (const State* state);
-StringList cmdArg(const State* state);
+// isA
+ISA_FUNC(ACSCGCCore, ACSCGCore);
+
 
 // Generate initialization code for State variable.
 
@@ -351,7 +354,7 @@ StringList ACSCGCCore::setargStates(Attribute a)
   StateListIter stateIter(getReferencedStates());
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+    //  if (state->attributes() == a)
 	setarg_proc << setargState(state);
     }
 
@@ -362,7 +365,7 @@ int ACSCGCCore::runIt() {
 	StringList code = "\t{  /* star ";
 	code << fullName() << " (class " << className() << ") */\n";
 	addCode(code);
-	int status = ACSCGCore::run();
+	int status = CGStar::run();
 	if (!status) return status;
 
 	if (isItFork()) {
@@ -869,3 +872,4 @@ int ACSCGCCore::addRemoteFile(const char* filename, int CcodeFlag) {
     }
     return retval;
 }
+

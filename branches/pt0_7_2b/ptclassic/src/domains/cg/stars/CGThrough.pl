@@ -1,15 +1,21 @@
 defstar {
 	name { Through }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Generates conditional code, depending on the value of
 the Boolean state "control".
 	}
-	version {$Revision$ $Date$}
+	version {@(#)CGThrough.pl	1.7 10/01/96}
 	author { E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG demo library }
-	explanation {
+	htmldoc {
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}
@@ -37,9 +43,9 @@ It outputs lines of comments, instead of code.
 	}
 	go {
 	    if (control == TRUE)
-		gencode(trueblock);
+		addCode(trueblock);
 	    else
-		gencode(falseblock);
+		addCode(falseblock);
 	}
 }
 

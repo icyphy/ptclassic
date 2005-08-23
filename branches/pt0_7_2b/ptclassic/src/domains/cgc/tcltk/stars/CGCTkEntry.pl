@@ -2,15 +2,15 @@ defstar {
 	name {TkEntry}
 	domain {CGC}
 	desc { Output a constant signal with value determined by a Tk entry box (default 0.0).  }
-	version { $Id$ }
-	author { E. A. Lee }
+	version { @(#)CGCTkEntry.pl	1.8	1/1/96 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	output {
 		name {output}
 		type {float}
@@ -20,6 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type{float}
 		default {"0.0"}
 		desc {The value to send to the output.}
+		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {identifier}
@@ -38,7 +39,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Note that window names cannot start with upper case letters
 	codeblock (setup) {
 	    /* Establish the Tk window for setting the value */
-	    makeEntry("cp_high",		/* position in control panel */
+	    makeEntry(".high",		/* position in control panel */
 		      "$starSymbol(entry)",	/* name of entry pane */
 		      "$val(identifier)",	/* text identifying the pane */
 		      "$val(value)",		/* initial value of the entry */

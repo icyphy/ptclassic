@@ -1,21 +1,21 @@
 static const char file_id[] = "SimVSSTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SimVSSTarget.cc	1.55 09/10/99
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,7 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
@@ -38,12 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimVSSTarget.h"
 #include "KnownTarget.h"
-#include <ostream.h>
+#include "CGUtilities.h"
+#include "paths.h"
+#include <stdio.h>              // printf()
+#include <unistd.h>             // getpid()
+
 
 // Constructor.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 			     const char* desc) :
 VHDLTarget(name,starclass,desc) {
+  addState(synopsys.setState("$SYNOPSYS",this,"",
+			    "value for SYNOPSYS environment variable."));
+  // Needed by the "gvan" vhdl code analyzer.
+  addState(arch.setState("$ARCH",this,"",
+			    "value for ARCH environment variable."));
+  // Needed by the "(pt)vhdlsim" vhdl simulator.
+  addState(simarch.setState("$SIM_ARCH",this,"",
+			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code."));
   addState(startup.setState("startup",this,"YES",
@@ -55,8 +69,24 @@ VHDLTarget(name,starclass,desc) {
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
 
-  addStream("preSynch", &preSynch);
-  addStream("postSynch", &postSynch);
+  addCodeStreams();
+  initCodeStreams();
+  
+  // Set the default to not display the code.
+  displayFlag.setInitValue("NO");
+
+  // Use the process id to uniquely name the sockets.
+  int pid = (int) getpid();
+  // Because of the naming style we use and because the
+  // address name (path name) is limited to 14 characters
+  // by struct sockaddr, and because process ids are up to 5 digits,
+  // anything more than an additional character in length will
+  // fail (e.g., multiplying by 100 instead of 10).
+
+  // But now that we use struct sockaddr_un, we have 108 characters,
+  // so scaling up the id value is fine and will prevent applications
+  // from colliding with one another (even though this would be rare).
+  pairNumber = pid*1000;
 }
 
 // Clone the Target.
@@ -64,14 +94,106 @@ Block* SimVSSTarget :: makeNew() const {
   LOG_NEW; return new SimVSSTarget(name(), starType(), descriptor());
 }
 
-void SimVSSTarget :: setup() {
-  pairNumber = 0;
-  VHDLTarget :: setup();
+static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
+			  "VHDL code generation target for Synopsys simulation");
+static KnownTarget entry(proto,"SimVSS-VHDL");
+
+void SimVSSTarget :: begin() {
+  // Init members here to avoid erasing code and items created
+  // during begin method of stars.
+  VHDLTarget::setup();
+
+  initVHDLObjLists();
+  initCodeStreams();
+
+  VHDLTarget::begin();
 }
 
-static SimVSSTarget proto("SimVSS-VHDL", "CGStar",
-			 "VHDL code generation target for Synopsys simulation");
-static KnownTarget entry(proto,"SimVSS-VHDL");
+void SimVSSTarget :: setup() {
+  // NOTE: Do not init code streams here because doing so will clobber
+  // code generated in the VHDLCSend, VHDLCReceive stars' begin methods.
+
+  synopsys.initialize();
+  arch.initialize();
+  simarch.initialize();
+
+  // Test the values of parameters SYNOPSYS, ARCH, and SIM_ARCH.
+  // For each parameter, if it is set, then set it in the environment.
+  // Otherwise, leave the environment unchanged.
+
+  // putenv() requires us to save the string defining the setting:
+  // Under SunOS4.1.3, the man page for putenv() says:
+  //    string points to a string of the form `name=value'  putenv()
+  //    makes  the  value  of the environment variable name equal to
+  //    value by altering an existing variable  or  creating  a  new
+  //    one.   In  either  case,  the  string  pointed  to by string
+  //    becomes part of the environment, so altering the string will
+  //    change  the  environment.   The  space  used by string is no
+  //    longer used once a new string-defining  name  is  passed  to
+  //    putenv().
+
+  // char* for test purposes.
+  char* testString = 0;
+
+  printf("\n");
+
+  // Set SYNOPSYS in the environment if the target parameter is set.
+  StringList synopsysValue = synopsys.currentValue();
+  if (synopsysValue.length()) {
+      StringList synopsysSetting = "SYNOPSYS=";
+      synopsysSetting << synopsysValue;
+      char* saveSynopsysString = savestring(synopsysSetting);
+      putenv(saveSynopsysString);
+  }
+
+  // Report the value of SYNOPSYS in the environment.
+  testString = getenv("SYNOPSYS");
+  if (testString) {
+      printf("SYNOPSYS=%s\n", testString);
+  }
+  else {
+      printf("SYNOPSYS is unset\n");
+  }
+
+  // Set ARCH in the environment if the target parameter is set.
+  StringList archValue = arch.currentValue();
+  if (archValue.length()) {
+      StringList archSetting = "ARCH=";
+      archSetting << archValue;
+      char* saveArchString = savestring(archSetting);
+      putenv(saveArchString);
+  }
+
+  // Report the value of ARCH in the environment.
+  testString = getenv("ARCH");
+  if (testString) {
+      printf("ARCH=%s\n", testString);
+  }
+  else {
+      printf("ARCH is unset\n");
+  }
+
+  // Set SIM_ARCH in the environment if the target parameter is set.
+  StringList simarchValue = simarch.currentValue();
+  if (simarchValue.length()) {
+      StringList simarchSetting = "SIM_ARCH=";
+      simarchSetting << simarchValue;
+      char* saveSimarchString = savestring(simarchSetting);
+      putenv(saveSimarchString);
+  }
+
+  // Report the value of SIM_ARCH in the environment.
+  testString = getenv("SIM_ARCH");
+  if (testString) {
+      printf("SIM_ARCH=%s\n", testString);
+  }
+  else {
+      printf("SIM_ARCH is unset\n");
+  }
+
+  // By default, write a command file.
+  writeCom = 1;
+}
 
 // Routines to construct CG wormholes, using the
 // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
@@ -88,9 +210,14 @@ CommPair SimVSSTarget :: toCGC(PortHole&) {
 }
 
 void SimVSSTarget :: configureCommPair(CommPair& pair) {
+  pair.cgcStar->setState("destDir", hashstring(destDirectory));
+  pair.cgcStar->setState("filePre", hashstring(filePrefix));
+
   StringList prNum = pairNumber;
-  pair.cgcStar->setState("pairNumber", prNum);
-  pair.cgStar->setState("pairNumber", prNum);
+  const char* hashPrNum = hashstring(prNum);
+  
+  pair.cgcStar->setState("pairNumber", hashPrNum);
+  pair.cgStar->setState("pairNumber", hashPrNum);
   pairNumber++;
 }
 
@@ -110,14 +237,20 @@ void SimVSSTarget :: frameCode() {
   CodeStream code;
   code << headerComment();
 
-  StringList galName = galaxy()->name();
+//  StringList galName = galaxy()->name();
+  StringList galName = (const char *)filePrefix;
   StringList topName = galName;
   topName << "_top";
 
+  StringList temp_top_uses = "";
+  temp_top_uses << top_uses;
+  top_uses.initialize();
   top_uses << "-- top-level use clauses\n";
+  top_uses << temp_top_uses;
   top_uses << "library SYNOPSYS,IEEE;\n";
   top_uses << "use SYNOPSYS.ATTRIBUTES.all;\n";
   top_uses << "use IEEE.STD_LOGIC_1164.all;\n";
+  top_uses << "use std.textio.all;\n";
 
   top_entity << "-- top-level entity\n";
   top_entity << "entity ";
@@ -127,45 +260,24 @@ void SimVSSTarget :: frameCode() {
   top_entity << topName;
   top_entity << ";\n";
 
+  StringList label = galName;
+  label << "_proc";
+  topCompDeclList.put(label, &mainPortList, &mainGenList,
+		      galName, &mainPortList, &mainGenList);
+
   top_architecture << "-- top-level architecture\n";
   top_architecture << "architecture ";
   top_architecture << "structure";
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
-  top_architecture << "component C2V\n";
-  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
-  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
-  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
-  top_architecture << indent(1) << "       data : out INTEGER   ;\n";
-  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
-  top_architecture << "end component;\n";
-  top_architecture << "\n";
-  top_architecture << "component V2C\n";
-  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
-  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
-  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
-  top_architecture << indent(1) << "       data : in  INTEGER   ;\n";
-  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
-  top_architecture << "end component;\n";
-  top_architecture << "\n";
-  top_architecture << "component ";
-  top_architecture << galName;
-  top_architecture << "\n";
-  top_architecture << addGenericRefs(&mainGenList);
-  top_architecture << addPortRefs(&mainPortList);
-  top_architecture << "\n";
-  top_architecture << "end component;\n";
+  top_architecture << addComponentDeclarations(&topCompDeclList);
   top_architecture << "\n";
   top_architecture << addSignalDeclarations(&topSignalList);
   top_architecture << "\n";
   top_architecture << "begin\n";
 
-  StringList label = galName;
-  label << "_proc";
-  registerCompMap(label, galName, &mainPortMapList, &mainGenMapList);
-
-  top_architecture << addComponentMaps(&topCompMapList);
+  top_architecture << addComponentMappings(&topCompDeclList);
   top_architecture << "end ";
   top_architecture << "structure";
   top_architecture << ";\n";
@@ -173,7 +285,8 @@ void SimVSSTarget :: frameCode() {
   // Generate the top-level configuration.
   top_configuration << "-- top-level configuration\n";
   top_configuration << "configuration ";
-  top_configuration << "parts";
+  top_configuration << galName;
+  top_configuration << "_parts";
   top_configuration << " of ";
   top_configuration << topName;
   top_configuration << " is\n";
@@ -181,12 +294,11 @@ void SimVSSTarget :: frameCode() {
   top_configuration << indent(1) << "for all:" << galName;
   top_configuration << " use entity work." << galName;
   top_configuration << "(behavior); end for;\n";
-  top_configuration << indent(1) << "for all:C2V use entity work.C2V";
-  top_configuration << "(CLI); end for;\n";
-  top_configuration << indent(1) << "for all:V2C use entity work.V2C";
-  top_configuration << "(CLI); end for;\n";
+  top_configuration << cli_configs;
   top_configuration << "end for;\n";
-  top_configuration << "end parts;\n";
+  top_configuration << "end ";
+  top_configuration << galName;
+  top_configuration << "_parts;\n";
 
   // Generate the entity_declaration.
   entity_declaration << "-- entity_declaration\n";
@@ -210,70 +322,6 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  code << "\n
---C2V.vhdl
-
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity C2V is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: out INTEGER	;
-		  done		: out STD_LOGIC	);
-end C2V;
-
-architecture CLI of C2V is
-
-	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is \"c2v_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"c2v_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"c2v_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"c2v_close\";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
-
-begin
-end;
-";
-
-  code << "\n
---V2C.vhdl
-
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity V2C is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: in INTEGER	;
-		  done		: out STD_LOGIC	);
-end V2C;
-
-architecture CLI of V2C is
-
-	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is \"v2c_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"v2c_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"v2c_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"v2c_close\";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-
-begin
-end;
-";
-
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
@@ -285,9 +333,7 @@ end;
   code << "\n" << loopOpener;
   
   // myCode contains the main action of the main process
-  code << preSynch;
   code << myCode;
-  code << postSynch;
   
   code << "\n" << loopCloser;
   code << "\n" << architecture_body_closer;
@@ -307,6 +353,26 @@ end;
 // Write the code to a file.
 void SimVSSTarget :: writeCode() {
   writeFile(myCode,".vhdl",displayFlag);
+
+  // Write a .synopsys_vss.setup file to satisfy gvan and ptvhdlsim
+  // so that they can find the PTVHDLSIM library directory.
+  StringList setupText = "";
+  setupText << "-- Synopsys VSS Setup File" << "\n";
+  setupText << "-- DO NOT DELETE" << "\n";
+  setupText << "-- Synopsys neds this in order to find" << "\n";
+  setupText << "-- the PTVHDLSIM library" << "\n";
+  setupText << "" << "\n";
+  setupText << "PTVHDLSIM : $PTOLEMY/obj.$PTARCH/utils/ptvhdlsim" << "\n";
+  setupText << "\n";
+
+  // Write the file, but do not display it.
+  rcpWriteFile(targetHost, destDirectory, ".synopsys_vss.setup",
+	       setupText, 0);
+
+  if (writeCom) {
+    writeComFile();
+  }
+  singleUnderscore();
 }
 
 // Write the command log to a file.
@@ -314,10 +380,11 @@ int SimVSSTarget :: compileCode() {
   if (int(analyze)) {
     // Generate the command to analyze the VHDL code here.
     StringList command = "";
-    command << "cd " << (const char*) destDirectory;
-    command << " ; ";
-    command << "gvan " << filePrefix << ".vhdl";
-    system(command);
+    if (progNotFound("gvan")) return FALSE;
+    command << "gvan -nc " << filePrefix << ".vhdl";
+    StringList error = "";
+    error << "Could not compile " << filePrefix << ".vhdl";
+    if (systemCall(command, error, targetHost)) return FALSE;
   }
   // Return TRUE indicating success.
   return TRUE;
@@ -330,25 +397,25 @@ int SimVSSTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";
     if (int(interactive)) {
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
-      command << "vhdldbx " << filePrefix;
-      system(command);
+      if (progNotFound("vhdldbx")) return FALSE;
+      command << "vhdldbx -nc " << filePrefix;
+      StringList error = "";
+      error << "Could not compile " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     else {
-      StringList comCode = "";
-      comCode << "run\n";
-      comCode << "quit\n";
-      writeFile(comCode, ".com", 0);
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
-      command << "vhdlsim -i " << filePrefix << ".com " << filePrefix;
-      system(command);
+      if (progNotFound("ptvhdlsim")) return FALSE;
+      command << "ptvhdlsim -nc -i " << filePrefix << ".com "
+	      << filePrefix << "_parts";
+      StringList error = "";
+      error << "Could not simulate " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     sysCommand << "cd " << (const char*) destDirectory;
     sysCommand << " ; ";
+
     sysCommand << sysWrapup;
-    system(sysCommand);
+    (void) system(sysCommand);
   }  
   // Return TRUE indicating success.
   return TRUE;
@@ -356,168 +423,39 @@ int SimVSSTarget :: runCode() {
 
 ISA_FUNC(SimVSSTarget,VHDLTarget);
 
-
-// Add in generic refs here from genList.
-StringList SimVSSTarget :: addGenericRefs(VHDLGenericList* genList) {
-  StringList all, opener, body, closer;
-  int level = 0;
-  level++;
-  opener << indent(level) << "generic(\n";
-
-  int genCount = 0;
-  VHDLGenericListIter nextGeneric(*genList);
-  VHDLGeneric* ngen;
-  while ((ngen = nextGeneric++) != 0) {
-    level++;
-    if (genCount) {
-      body << ";\n";
+// Method called by comm stars to place important code into structure.
+void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer,
+				  const char* dtype) {
+  // direction == 0 --> C2V ; direction == 1 --> V2C.
+  // Create a string with the right VHDL data type
+  StringList vtype = "";
+  StringList name = "";
+  if (strcmp(dtype, "INT") == 0) {
+    vtype = "INTEGER";
+    if (direction) {
+      name = "V2Cinteger";
     }
-    body << indent(level) << ngen->name << ": " << ngen->type;
-    if (strlen(ngen->defaultVal) > 0) {
-      body << " := " << ngen->defaultVal;
+    else {
+      name = "C2Vinteger";
     }
-    genCount++;
-    level--;
   }
-  closer << "\n";
-  closer << indent(level) << ");\n";
-  level--;
-
-  if (genCount) {
-    all << opener << body << closer;
-  }
-  return(all);
-}
-
-// Add in port refs here from portList.
-StringList SimVSSTarget :: addPortRefs(VHDLPortList* portList) {
-  StringList all, opener, body, closer;
-  int level = 0;
-  level++;
-  opener << indent(level) << "port(\n";
-
-  int portCount = 0;
-  VHDLPortListIter nextPort(*portList);
-  VHDLPort* nport;
-  while ((nport = nextPort++) != 0) {
-    level++;
-    if (portCount) {
-      body << ";\n";
+  else if (strcmp(dtype, "FLOAT") == 0) {
+    vtype = "REAL";
+    if (direction) {
+      name = "V2Creal";
     }
-    body << indent(level) << nport->name << ": " << nport->direction
-	 << " " << nport->type;
-    portCount++;
-    level--;
-  }
-  closer << "\n";
-  closer << indent(level) << ");\n";
-  level--;
-
-  if (portCount) {
-    all << opener << body << closer;
-  }
-  return(all);
-}
-
-// Add in signal declarations here from signalList.
-StringList SimVSSTarget :: addSignalDeclarations(VHDLSignalList* signalList) {
-  StringList all;
-  int level = 0;
-  VHDLSignalListIter nextSignal(*signalList);
-  VHDLSignal* signal;
-  while ((signal = nextSignal++) != 0) {
-    all << indent(level) << "signal " << signal->name << ": "
-	<< signal->type << ";\n";
-  }
-  return(all);
-}
-
-// Add in component mappings here from compMapList.
-StringList SimVSSTarget :: addComponentMaps(VHDLCompMapList* compMapList) {
-  int level = 0;
-  StringList all;
-  VHDLCompMapListIter nextCompMap(*compMapList);
-  VHDLCompMap* compMap;
-  while ((compMap = nextCompMap++) != 0) {
-    level++;
-    all << indent(level) << compMap->label << ": "
-		       << compMap->name << "\n";
-
-    // Add in generic maps here from genMapList.
-    if (compMap->genMapList->head()) {
-      level++;
-      all << indent(level) << "generic map(\n";
-      VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
-      VHDLGenericMap* ngenmap;
-      int genCount = 0;
-      while ((ngenmap = nextGenMap++) != 0) {
-	level++;
-	if (genCount) {
-	  all << ",\n";
-	}
-	all << indent(level) << ngenmap->name << " => "
-			   << ngenmap->mapping;
-	genCount++;
-	level--;
-      }
-      all << "\n";
-      all << indent(level) << ")\n";
-      level--;
+    else {
+      name = "C2Vreal";
     }
-
-    // Add in port maps here from portMapList.
-    if (compMap->portMapList->head()) {
-      level++;
-      all << indent(level) << "port map(\n";
-      VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
-      VHDLPortMap* nportmap;
-      int portCount = 0;
-      while ((nportmap = nextPortMap++) != 0) {
-	level++;
-	if (portCount) {
-	  all << ",\n";
-	}
-	all << indent(level) << nportmap->name << " => "
-			   << nportmap->mapping;
-	portCount++;
-	level--;
-      }
-      all << "\n";
-      all << indent(level) << ")\n";
-      level--;
-    }
-    
-    all << indent(level) << ";\n";
-    level--;
   }
-  return(all);
-}
-
-// Register component mapping.
-void SimVSSTarget :: registerCompMap(StringList label, StringList name,
-				     VHDLPortMapList* portMapList,
-				     VHDLGenericMapList* genMapList) {
-//  Problem: inList uses name, not label, for generic VHDL objects.
-//  Will just comment this out for now.  If get repeated registrations
-//  of a comp map, will deal with that.
-//  if (compMapList.inList(label)) return;
+  else {
+    Error::abortRun(*this, dtype, ": type not supported");
+    return;
+  }
   
-  // Allocate memory for a new VHDLCompMap and put it in the list.
-  VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->label = label;
-  newCompMap->name = name;
-  newCompMap->genMapList = genMapList;
-  newCompMap->portMapList = portMapList;
-  topCompMapList.put(*newCompMap);
-}
-
-// Method called by C2V star to place important code into structure.
-void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
-  // Construct unique label and signal names and put comp map in main list
+  // Construct unique label and signal names and put comp in main list
   StringList label;
-  StringList name;
   StringList goName, dataName, doneName;
-  name = "C2V";
   StringList rootName = name;
   rootName << pairid;
 
@@ -526,69 +464,77 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
   dataName << rootName << "_data";
   doneName << rootName << "_done";
   
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
-  genMapList->initialize();
-  portMapList->initialize();
-  
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
-  registerCompMap(label, name, portMapList, genMapList);
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
+
+  genList->put("pairid", "INTEGER", "", pairid);
+  genList->put("numxfer", "INTEGER", "", numxfer);
+
+  portList->put("go", "STD_LOGIC", "IN", goName, NULL);
+  if (direction) {
+    mainPortList.put(dataName, vtype, "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    portList->put("data", vtype, "IN", dataName, NULL);
+  }
+  else {
+    portList->put("data", vtype, "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    mainPortList.put(dataName, vtype, "IN", dataName, NULL);
+  }
+  portList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
+
+  topCompDeclList.put(label,  portList, genList, name, portList, genList);
 
   // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "IN", "INTEGER");
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
-  // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
-  // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, "INTEGER", dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+  mainPortList.put(goName, "STD_LOGIC", "OUT", goName, NULL);
+  topSignalList.put(goName, "STD_LOGIC", NULL);
+  topSignalList.put(doneName, "STD_LOGIC", NULL);
+  mainPortList.put(doneName, "STD_LOGIC", "IN", doneName, NULL);
 }
 
-// Method called by V2C star to place important code into structure.
-void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
-  // Construct unique label and signal names and put comp map in main list
-  StringList label;
-  StringList name;
-  StringList goName, dataName, doneName;
-  name = "V2C";
-  StringList rootName = name;
-  rootName << pairid;
+// Method to write out com file for VSS if needed.
+void SimVSSTarget :: setWriteCom() {
+  writeCom = 1;
+}
 
-  label << rootName;
-  goName << rootName << "_go";
-  dataName << rootName << "_data";
-  doneName << rootName << "_done";
-  
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
-  genMapList->initialize();
-  portMapList->initialize();
-  
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
-  registerCompMap(label, name, portMapList, genMapList);
+// Method to write out com file for VSS if needed.
+void SimVSSTarget :: writeComFile() {
+  // Make sure to do the com file uniquely too!!!
+  StringList comCode = "";
+  comCode << "run\n";
+  comCode << simWrapup;
+  comCode << "quit\n";
+  writeFile(comCode, ".com", 0);
+}
 
-  // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "OUT", "INTEGER");
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
-  // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
-  // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, "INTEGER", dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+// Add additional codeStreams.
+void SimVSSTarget :: addCodeStreams() {
+  addStream("cli_configs", &cli_configs);
+  addStream("top_uses", &top_uses);
+  addStream("top_entity", &top_entity);
+  addStream("top_architecture", &top_architecture);
+  addStream("top_configuration", &top_configuration);
+
+  VHDLTarget::addCodeStreams();
+}
+
+// Initialize codeStreams.
+void SimVSSTarget :: initCodeStreams() {
+  cli_configs.initialize();
+  top_uses.initialize();
+  top_entity.initialize();
+  top_architecture.initialize();
+  top_configuration.initialize();
+
+  VHDLTarget::initCodeStreams();
+}
+
+// Initialize VHDLObjLists.
+void SimVSSTarget :: initVHDLObjLists() {
+  mainGenList.initialize();
+  mainPortList.initialize();
+  topSignalList.initialize();
+  topCompDeclList.initialize();
+
+  VHDLTarget::initVHDLObjLists();
 }

@@ -1,40 +1,43 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer:  D. G. Messerschmitt and E. A. Lee
-Date of creation: 1/16/90
-Modified to use preprocessor: 10/3/90, by EAL
-
-Fork has a single input, and a multiple output. It copies its
-input to each of the outputs.
-
-Fork is generally used where it is desired to connect a Star
-output to multiple other Star inputs
-
-************************************************************************/
-}
 defstar {
 	name {Fork}
 	domain {SDF}
-	desc { "A fork function: copies input particles to each output" }
+	desc { Copy input particles to each output. }
+	version {@(#)SDFFork.pl	2.9 02/12/97}
+	author { D. G. Messerschmitt }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+This star is generally used to connect a single output port
+to multiple input ports.  It will be automatically inserted
+when multiple inputs are connected to the same output using the graphical
+interface, or when the "nodeconnect" command is used in the interpreter.
+However, there are times when automatically inserted Fork stars
+are not desirable.  For instance, when there is a delay on one
+of the arcs, then the Fork must be inserted by the user explicitly
+to avoid ambiguity about the location of the delay.
+Also, when multi-portHoles are used, auto-forking can cause problems.
+In this situation, one may get,
+for example, two outputs and several inputs on the same net.
+There is currently no way to automatically decipher what the user
+intends.  Hence, the Fork star should be inserted explicitly.
+	}
 	input {
 		name{input}
 		type{ANYTYPE}
 	}
 	outmulti {
 		name{output}
-		type{ANYTYPE}
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		type{= input}
 	}
 	go {
-                for(int i=output.numberPorts(); i>0; i--)
-			(output())%0 = input%0;
+		MPHIter nextp(output);
+		PortHole* p;
+		while ((p = nextp.next()) != 0)
+			(*p)%0 = input%0;
 	}
 }

@@ -4,21 +4,36 @@ defstar
     domain { DE }
     descriptor
     {
-This star cooperates with a (possibly preemptive) arbitrator.
-A "request" TRUE is generated in response to new "input" particles,
-which are queued internally.  If the queue ever becomes empty,
-a "request" FALSE is generated and the star reverts back to its
-initial state.
-
-When a "grant" TRUE is received in response to a "request",
-an "output" particle is sent.  This must be acknowledged by an
-"ackIn" particle before the next "output" can be sent. Any "ackIn"
-particle which is received in response to an "output" is sent to
-"ackOut".  All other "ackIn" particles are discarded.
+Cooperate with a (possibly preemptive) arbitrator through the
+"request" and "grant" controls.  "Input" particles are passed to
+"output", and an "ackIn" particle must be received before the next
+"output" can be sent.  This response is made available on "ackOut".
     }
-    version { $Id$ }
+    explanation
+    {
+A <i> request </i> TRUE is generated in response to a new <i> input.</i>
+After a <i> grant </i> TRUE response is received, the <i> input </i> will
+be passed to the <i> output.</i>  After this <i> output </i> is
+acknowledged by an <i> ackIn </i> response, the next <i> input </i> is
+passed to the <i> output </i> if it is available, and the process
+repeats.  If no new <i> input </i> is available when the <i> ackIn </i>
+is received, a <i> request </i> FALSE is generated.  When the <i> grant </i>
+FALSE response is received, the star reverts to its original idle state.
+.lp
+Note that the star will not generate any spurious outputs on either <i>
+output </i> or <i> request </i> while it is waiting for a response on
+the <i> grant </i> or <i> ackIn </i> inputs.  Also, only those <i> ackIn </i>
+particles received in response to an <i> output </i> will be sent to <i>
+ackOut.</i>
+    }
+    version { @(#)DEHandShake.pl	1.12 10/03/96 }
     author { T.M. Parks }
-    copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
     location { DE main library }
 
     input
@@ -51,7 +66,7 @@ particle which is received in response to an "output" is sent to
     {
 	name { request }
 	type { int }
-	desc { Indicates presence or absence of queued "input" particles. }
+	desc { Indicates presence or absence of "input" particles. }
     }
 
     input
@@ -61,30 +76,29 @@ particle which is received in response to an "output" is sent to
 	desc { Enables and disables sending of "output" particles. }
     }
 
-    defstate
-    {
-	name { capacity }
-	type { int }
-	default { 0 }
-	desc
-	{
-Capacity of internal queue. Specify capacity <= 0 for unbounded queueing.
-	}
-    }
-
-    ccinclude { "DataStruct.h" }
-
     protected
     {
-	int req : 1;	// request has been issued
+	int idle : 1;	// arbitration is idle
+	int req : 1;	// request is pending
+	int rel : 1;	// release is pending
 	int open : 1;	// output is enabled
 	int wait : 1;	// waiting for acknowledge
-	Queue queue;
     }
 
-    start
+    constructor
     {
-	req = open = wait = FALSE;
+	input.triggers(request);
+	input.before(ackIn);
+	ackIn.triggers(output);
+	ackIn.triggers(ackOut);
+	grant.triggers();
+	grant.before(ackIn);
+    }
+
+	setup
+    {
+	idle = TRUE;
+	req = rel = open = wait = FALSE;
     }
 
     go
@@ -92,45 +106,41 @@ Capacity of internal queue. Specify capacity <= 0 for unbounded queueing.
 	if (grant.dataNew)	// new control received
 	{
 	    open = int(grant.get());	// enable or disable output
-	    if (req && open && !wait && queue.length() > 0)	// send data
+	    if (req && open)		// request acknowledged
 	    {
-		wait = TRUE;
-		output.put(arrivalTime) = *(Particle*)queue.get();
-		ackIn.dataNew = FALSE;	// clear out any old particles
+		req = FALSE;
 	    }
-	}
-
-	if (input.dataNew)	// new data received
-	{
-	    Particle& pp = input.get();
-	    if (int(capacity) <= 0 || queue.length() < int(capacity))
+	    else if (rel && !open)	// release acknowledged
 	    {
-		queue.put(pp.clone());	// put data in queue
-		if (!req)		// generate request
-		{
-		    request.put(arrivalTime) << (req = TRUE);
-		}
-		else if (open && !wait)	// send data
-		{
-		    wait = TRUE;
-		    output.put(arrivalTime) = *(Particle*)queue.get();
-		    ackIn.dataNew = FALSE;	// clear out any old particles
-		}
+		rel = FALSE;
+		idle = TRUE;
 	    }
 	}
 
 	if (ackIn.dataNew && wait)	// acknowledge received
 	{
 	    wait = FALSE;
-	    ackOut.put(arrivalTime) = ackIn.get();	// pass data through
-	    if (queue.length() == 0)	// release
+	    ackOut.put(arrivalTime) = ackIn.get();
+	    if (!input.dataNew)		// generate release
 	    {
-		request.put(arrivalTime) << (req = FALSE);
+		rel = TRUE;
+		request.put(arrivalTime) << FALSE;
 	    }
-	    else if (open)	// send data
+	}
+
+	if (input.dataNew)	// new data available
+	{
+	    if (idle)		// generate request
+	    {
+		idle = FALSE;
+		req = TRUE;
+		request.put(arrivalTime) << TRUE;
+	    }
+	    else if (open && !req && !rel && !wait)	// send data
 	    {
 		wait = TRUE;
-		output.put(arrivalTime) = *(Particle*)queue.get();
+		output.put(arrivalTime) = input.get();
+		ackIn.dataNew = FALSE;	// discard any old particle
 	    }
 	}
     }

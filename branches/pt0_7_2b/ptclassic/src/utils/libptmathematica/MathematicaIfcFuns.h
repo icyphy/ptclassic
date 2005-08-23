@@ -3,9 +3,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MathematicaIfcFuns.h	1.5	07/09/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -47,6 +47,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
    a makefile because the makefile refers to Mathematica files that they
    do not have.  A negative side effect of this is that if these files
    change, then this file will not be automatically recompiled (cxh) */
+
+/* Create typedefs to define Mathematica 2.2 as Mathematica 3.0 types */
+#define USING_OLD_TYPE_NAMES 1
+
+/* mathlink.h is a C include file */
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <mathlink.h>
+#ifdef __cplusplus
+}
+#endif
+
+#define PTMLLONG long
+
+/* Backwards compatibility with Mathematica 2.2 */
+
+#ifndef MLVERSION
+#undef PTMLLONG 
+#define PTMLLONG int
+typedef int mldlg_result;
+
+typedef ml_charp  kcharp_ct;
+typedef ml_charpp kcharpp_ct;
+typedef unsigned long ulong_ct;
+#endif
 
 #endif

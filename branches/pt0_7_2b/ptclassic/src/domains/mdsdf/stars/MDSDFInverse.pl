@@ -2,9 +2,14 @@ defstar {
 	name { Inverse }
 	domain { MDSDF }
 	desc { Invert a square floating-point matrix.}
-	version { $Id$ }
+	version { @(#)MDSDFInverse.pl	1.4 12/1/95 }
 	author { Mike J. Chen }
-	copyright { 1993 The Regents of the University of California }
+        copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
         location  { MDSDF library }
 	input {
 		name { input }
@@ -34,5 +39,3 @@ defstar {
 	  delete &result;
         }
 }
-
-

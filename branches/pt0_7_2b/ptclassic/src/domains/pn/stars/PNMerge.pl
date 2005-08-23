@@ -2,12 +2,11 @@ defstar
 {
     name { Merge }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNMerge.pl	1.5 03/29/96 }
     desc { Merge two increasing sequences, eliminating duplicates. }
     author { T. M. Parks }
-    copyright
-    {
-Copyright (c) 1990-1994 The Regents of the University of California.
+    copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -32,40 +31,38 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	name { output }
 	type { int }
-    }
-
-    protected
-    {
-	int getA:1;	// Should we get data from port a?
-	int getB:2;	// Should we get data from port b?
+	attributes { P_DYNAMIC }
     }
 
     begin
     {
 	// Read both inputs the first time.
-	getA = getB = TRUE;
+	a.receiveData();
+	b.receiveData();
     }
 
     go
     {
-	if (getA) a.receiveData();
-	if (getB) b.receiveData();
-	getA = getB = FALSE;
+	output.receiveData();	// Initialize the output.
 
-	if (a%0 < b%0)
+	if (int(a%0) < int(b%0))
 	{
 	    output%0 = a%0;
-	    getA = TRUE;
+	    output.sendData();
+	    a.receiveData();
 	}
-	else if (a%0 > b%0)
+	else if (int(a%0) > int(b%0))
 	{
 	    output%0 = b%0;
-	    getB = TRUE;
+	    output.sendData();
+	    b.receiveData();
 	}
 	else	// Remove duplicates.
 	{
 	    output%0 = a%0;
-	    getA = getB = TRUE;
+	    output.sendData();
+	    a.receiveData();
+	    b.receiveData();
 	}
     }
 }

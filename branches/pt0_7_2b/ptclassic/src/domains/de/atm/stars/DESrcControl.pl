@@ -1,34 +1,48 @@
-defstar {
+defstar { 
 	name {SrcControl}
 	domain {DE}
         derivedfrom { RepeatStar }
 	desc {
-Communicates with an MQ Telephone to control DEVoiceSrc stars' transmissions
+Communicates with an
+.c MQTelephone
+star to control
+.c DEVoiceSrc
+stars' transmissions
 	}
 
-	version {$Id$}
+	version {@(#)DESrcControl.pl	1.8	01 Oct 1996}
 	author { Allen Y. Lao }
 	copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-	location { ATM demo library }
+	location { DE ATM library }
 
-	explanation {
-Receives VoiceData type SendData and StopSendData packets from an MQ
-Telephone to control possibly multiple source star instances.  When idle,
-it accepts SendData packets containing info which should be mapped onto
+	htmldoc {
+Receives 
+<tt>VoiceData</tt>
+type SendData and StopSendData packets from an 
+<tt>MQTelephone</tt>
+star to control possibly multiple 
+<tt>DEVoiceSrc</tt>
+star instances.  When idle, it accepts SendData packets containing info which
+should be mapped onto
 the headers of generated source packets, incoming VPI and destination
 VCI numbers.  (Also, headers will have a source VCI number field.)  It will
-send to the source traffic stars Transmit packets to ask them to begin 
+send to the 
+<tt>DEVoiceSrc </tt>
+stars Transmit packets to ask them to begin 
 transmitting with this necessary information.  When transmission is complete
 as specified by the call duration field of the original SendData packet, it
-sends back to its associated telephone an acknowledgement (ACK) packet. 
-Also, while active, a StopSendData will terminate call activity which is
-replied to with an ACK. In both cases, stopTransmit packets are sent to the
-source traffic blocks.
+sends back to its associated
+<tt>MQTelephone</tt>
+star an Acknowledgement (ACK) packet. 
+Also, while active, a StopSendData packet will terminate call activity which is
+replied to with an ACK. In both cases, StopTransmit packets are sent to the
+<tt>DEVoiceSrc</tt>
+stars.
        }
 
        input {
@@ -50,7 +64,7 @@ source traffic blocks.
                name {numVci}
                type {int}
                default {"1"}
-               desc { VCI of associated telephpne }
+               desc { VCI of associated telephone }
        }
 
        ccinclude { "VoiceData.h" }
@@ -97,7 +111,7 @@ source traffic blocks.
 
                    phoneIn.get().getMessage(inEnv);
                    if (!voiceCheck (inEnv, *this)) return;
-                   VoiceData*  v = (VoiceData*) inEnv.myData();
+                   const VoiceData*  v = (const VoiceData*) inEnv.myData();
                 
                    if (!v->isitSDMessage())  {
                        Error :: abortRun (*this,
@@ -139,7 +153,7 @@ source traffic blocks.
                        //  the caller interrupted by MQ telephone
                        phoneIn.get().getMessage(inEnv);
                        if (!voiceCheck (inEnv, *this)) return;
-                       VoiceData*  v1 = (VoiceData*) inEnv.myData();
+                       const VoiceData*  v1 = (const VoiceData*) inEnv.myData();
                     
                        if (!v1->isitSSDMessage()) {
                            Error :: abortRun (*this,
@@ -173,7 +187,7 @@ source traffic blocks.
                            return;
                        }
 
-                       Particle& p = feedbackIn.get();
+                       feedbackIn->get();
 
                        if (feedbacksLeft != 0)  {
                            // this situation indicates that there are leftover events

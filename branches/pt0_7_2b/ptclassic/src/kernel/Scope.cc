@@ -1,13 +1,13 @@
-static const char file_id[] = "StateScope.cc";
+static const char file_id[] = "Scope.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 /**************************************************************************
 Version identification:
-$Id$	%Q%
+@(#)Scope.cc	1.5	1996
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,44 +36,117 @@ ENHANCEMENTS, OR MODIFICATIONS.
 		       
 **************************************************************************/
 
-#include "StateScope.h"
+#include "Scope.h"
 #include "Wormhole.h"
 
-void StateScope::remove(Block& b) {
+StringList Scope::fullName() const {
+    StringList fullNm;
+    if (parentScope())
+	fullNm << parentScope()->fullName() << '.';
+    fullNm << name();
+    return fullNm;
+}
+			     
+State* Scope::lookup(const char* name) {
+    State* state = stateWithName(name);
+    if (!state && parentScope())
+	return parentScope()->lookup(name);
+    return state;
+}
+			     
+void Scope::remove(Block& b) {
     Galaxy::removeBlock(b);
-    b.setParentScope((StateScope*)NULL);
+    b.setScope((Scope*)NULL);
+    optionalDestructor();
 }
 
-StateScope::~StateScope() {
-    GalTopBlockIter nextBlock(*this);
-    Block *block;
-    while ((block = nextBlock++)) {
-	block->setParentScope((StateScope*)NULL);
+void Scope::optionalDestructor() {
+    if (numberBlocks() == 0 && childScopes.size() == 0) {
+	if (parentScope()) parentScope()->removeChild(*this);
+	delete this;
     }
-    BlockListIter nextChildScope(childScopes);
-    while ((block = nextChildScope++))
-	delete block;
+}
+
+void Scope::removeChild(Scope& child) {
+    child.setParentScope((Scope*)NULL);
+    childScopes.remove(&child);
+    optionalDestructor();
+}
+    
+Scope::~Scope() {
+    if (numberBlocks() != 0 || childScopes.size() != 0) {
+	Error::abortRun("~Scope: Attempt to delete a non-empty scope",
+		   	this->name());
+	GalTopBlockIter nextBlock(*this);
+	Block *block;
+	while ((block = nextBlock++)) {
+	    block->setScope((Scope*)NULL);
+	}
+	BlockListIter nextChildScope(childScopes);
+	while ((block = nextChildScope++))
+	    delete block;
+    }
+    if (parentScope()) parentScope()->removeChild(*this);
     StateListIter nextState(states);
     State* state;
     while ((state=nextState++))
 	delete state;
 }
-    
-StateScope::StateScope(Galaxy& galaxyToScope, StateScope* parentScope) {
+
+Scope* Scope::createScope(Galaxy& galaxyToScope) {
+    GalTopBlockIter nextBlock(galaxyToScope);
+    Block *block;
+    block = nextBlock++;
+    if (!block) return NULL;
+
+    /* If the galaxy has clusters, a Scope hierarchy already
+       exists. Shouldn't this return the top most scope of the
+       blocks inside the clusters?  FIXME */
+    if (block->isItCluster()) return NULL;
+
+    if (block->scope()) {
+	if (block->scope()->parentScope() &&
+	    block->scope()->parentScope() != galaxyToScope.scope())
+        {
+	    StringList msg;
+	    msg << "createScope: scope "
+		<< block->scope()->parentScope()->fullName() 
+		<< " inconsistant.";
+	    Error::warn(msg);
+	    block->scope()->setParentScope(galaxyToScope.scope());
+	}
+	return block->scope();
+    }
+    return new Scope(galaxyToScope);
+}
+
+Scope::Scope(Galaxy& galaxyToScope):prntScope(0){
     GalTopBlockIter nextBlock(galaxyToScope);
     Block *block;
     while ((block = nextBlock++)) {
-	block->setParentScope(this);
+	if (block->scope()) {
+	    StringList message;
+	    message << "Scope Constructor: " << block->name()
+			<< " is already in the "
+			<< block->scope()->fullName()
+			<< " scope.  A memory leak will result.";
+	    Error::warn(message);
+	}
+	block->setScope(this);
 	Galaxy::addBlock(*block);
-	StateScope* childScope = NULL;
+	Scope* child = NULL;
 	if (!block->isItAtomic())
-	    childScope=new StateScope(block->asGalaxy(),this);
-	if (block->isItWormhole()) 
-	    childScope =
-		new StateScope(((Wormhole*)block)->insideGalaxy(),this);
-	if (childScope) childScopes.put(*childScope);
+	    child = createScope(block->asGalaxy());
+	if (block->isItWormhole()) {
+	    Galaxy& wormGalaxy = ((Star*)block)->asWormhole()->insideGalaxy();
+	    wormGalaxy.setScope(this);
+	    child = createScope(wormGalaxy);
+	}
+	if (child) {
+	    childScopes.put(*child);
+	    child->setParentScope(this);
+	}
     }
-    setParent(parentScope);
     setName(galaxyToScope.name());
     StateListIter nextState(galaxyToScope.states);
     State *state;

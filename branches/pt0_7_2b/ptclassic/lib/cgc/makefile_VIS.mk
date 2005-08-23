@@ -1,6 +1,6 @@
 # Ptolemy makefile skeleton used by makefile_C CGC target
 # Version:
-# $Id$
+# @(#)makefile_VIS.mk	1.2 8/2/96
 # Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -26,6 +26,14 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+ROOT =	$(PTOLEMY)
+include $(ROOT)/mk/config-$(PTARCH).mk
+C_INCL =
+
+# We turn the optimizer off here, because -O2 conflicts with the default
+# optimizer needed for the VIS code
+OPTIMIZER = 
+
 # redefine the compile to cc (not gcc)
 CC = cc
 
@@ -36,7 +44,7 @@ VIS_INCL = -I${VSDKHOME}/include ${VSDKHOME}/util/vis.il
 # We are not assuming GNU make, so we can't include common.mk,
 # so we have to set up our own .c.o rule
 .c.o:
-	$(CC) -c $(VISFLAGS) $(VIS_INCL) -o $@ $<
+	$(CC) -c $(VISFLAGS) $(VIS_INCL) $(OTHERCFLAGS) $<
 
 # The GNU make info page says:
 #  "`N' is made automatically from `N.o' by running the linker 

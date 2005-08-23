@@ -3,9 +3,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MatlabPtIfc.h	1.2	07/03/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -49,12 +49,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class MatlabPtIfc : public MatlabIfc {
 public:
 	// convert Ptolemy particles to Matlab matrices
-	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
+	mxArray* PtolemyToMatlab(Particle& particle, DataType portType,
 				int* errflag);
 
 	// convert Matlab matrices to Ptolemy particles
 	int MatlabToPtolemy(Particle& particle, DataType portType,
-			    Matrix* matlabMatrix, int* warnflag,
+			    mxArray* matlabMatrix, int* warnflag,
 			    int* errflag);
 };
 

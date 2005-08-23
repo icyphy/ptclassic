@@ -1,21 +1,21 @@
 static const char file_id[] = "VHDLFiring.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLFiring.cc	1.17 08/27/97
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,11 +24,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Edward A. Lee, Michael C. Williamson
 
- Methods for VHDL CompDecls.
+ Methods for VHDL firings.
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -39,10 +41,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLFiring :: VHDLFiring() {
-  VHDLObj::initialize();
-}
-
-VHDLFiring :: VHDLFiring(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
+  starClassName = "UNINITIALIZED";
+  genericList = new VHDLGenericList;
+  portList = new VHDLPortList;
+  variableList = new VHDLVariableList;
+  // Leave action blank since it's optional.
+  action = "";
+  genericMapList = new VHDLGenericList;
+  portMapList = new VHDLPortList;
+  signalList = new VHDLSignalList;
+  // Leave decls blank since it's optional.
+  decls = "";
+  noSensitivities = 0;
+  noOutclocking = 0;
+  groupNum = -1;
+  latency = 10;
   VHDLObj::initialize();
 }
 
@@ -52,17 +65,18 @@ VHDLFiring :: ~VHDLFiring() {}
 // Return a pointer to a new copy of the VHDLFiring.
 VHDLFiring* VHDLFiring :: newCopy() {
   VHDLFiring* newFiring = new VHDLFiring;
-  newFiring->name = this->name;
+  newFiring->setName(this->name);
   newFiring->starClassName = this->starClassName;
   newFiring->genericList = this->genericList->newCopy();
   newFiring->portList = this->portList->newCopy();
+  newFiring->decls = this->decls;
   newFiring->variableList = this->variableList->newCopy();
-  newFiring->portVarList = this->portVarList->newCopy();
   newFiring->action = this->action;
-  newFiring->varPortList = this->varPortList->newCopy();
   newFiring->genericMapList = this->genericMapList->newCopy();
   newFiring->portMapList = this->portMapList->newCopy();
   newFiring->signalList = this->signalList->newCopy();
+  newFiring->noSensitivities = this->noSensitivities;
+  newFiring->noOutclocking = this->noOutclocking;
 
   return newFiring;
 }

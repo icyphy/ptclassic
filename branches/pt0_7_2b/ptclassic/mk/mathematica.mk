@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@
 # Programmer:  Brian L. Evans
 #
 # mathematica.mk: Common definitions for the Ptolemy interface to Mathematica
-# $Id$
+# @(#)mathematica.mk	1.12	03/26/98
 #
 # We have to handle four cases:
 # (1/2) Mathematica is/is not installed at compile time
@@ -36,22 +36,56 @@
 # Mathematica is installed if the mathRootDir script returns a non-empty string
 # -- If Mathematica is not installed, set MATHEMATICADIR to
 #    $(ROOT)/src/compat/mathematica
-# -- If Matlab is installed, then set MATHEMATICADIR accordingly
+# -- If Mathematica is installed, then set MATHEMATICADIR accordingly
 #
 # The Mathematica include files are in $(MATHEMATICADIR)/Source/Includes.
-# At link time, Ptolemy is linked against libexttools.a (MatlabIfc class)
+# At link time, Ptolemy is linked against libexttools.so (MathematicaIfc class)
 # and either
-# (a) libptmathematica.a if Mathematica is not installed, or
-# (b) libMFelf.a if Mathematica is installed.
+# (a) libptmathematica.so if Mathematica is not installed, or
+# (b) libMLelf.a if Mathematica is installed.
 #
-MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
-ifeq ("$(MATHEMATICADIR)","")
-MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
-MATLABEXT_LIB = 	-lptmathematica
-else
-MATLABEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf.a
+
+# Set the name of the Mathematica library to libML.a if it's not set
+ifndef MATHLINKLIBNAME
+	MATHLINKLIBNAME = ML
 endif
-MATLAB_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+
+ifndef MATHLINK2LIBNAME
+	MATHLINK2LIBNAME = ML
+endif
+
+# MATHEMATICAARCH is set in the config makefiles.
+
+# matlabRootDir traverses the user's path, so we only run it when
+# we really need it.
+ifdef NEED_MATHEMATICADIR
+	ifeq ("$(INCLUDE_MATHEMATICA)","no")
+		MATHEMATICADIR = 	$(ROOT)/src/compat/mathematica
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+		MATHEMATICAEXT_LIB = 	-lptmathematica
+	else
+		ifndef MATHEMATICADIR
+			MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+		endif
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+		ifeq ("$(MATHEMATICADIR)","")
+		MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
+		MATHEMATICAEXT_LIB = 	-lptmathematica
+		else
+		ifeq ($(wildcard $(MATHEMATICADIR)/Bin/MathLink),)
+			# Mathematica3.x
+			MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions \
+					-l$(MATHLINKLIBNAME)
+
+			MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions
+		else
+			# Mathematica2.x
+			MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
+						-l$(MATHLINK2LIBNAME)
+		endif
+		endif
+	endif
+endif
 
 # Ptolemy interface directories
 EXTTOOLSLIB = $(ROOT)/src/utils/libexttools

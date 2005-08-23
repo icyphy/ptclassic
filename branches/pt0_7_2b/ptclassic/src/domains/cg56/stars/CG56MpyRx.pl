@@ -1,18 +1,20 @@
 defstar {
     name { MpyRx }
     domain { CG56 }
-    desc { Multiply any number of rectangular complex inputs, producing an output. }
-    version { $Id$ }
+    desc {
+Multiply any number of rectangular complex inputs, producing an output.
+    }
+    version { @(#)CG56MpyRx.pl	1.9	01 Oct 1996 }
     author { Kennard White (ported from Gabriel) }
     copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 arithmetic library }
-    explanation {
-.Id "multiplication"
+    location { CG56 main library }
+	htmldoc {
+<a name="multiplication"></a>
 The inputs are multiplied and the result is written on the output.
     }
     inmulti {
@@ -38,6 +40,9 @@ The inputs are multiplied and the result is written on the output.
 	desc { input#() }
 	attributes { A_NONCONSTANT|A_NONSETTABLE }
     }
+    constructor {
+	noInternalState();
+    }
     codeblock(cbZero) {
 	clr	a
 	move	a,$ref(output)
@@ -54,30 +59,30 @@ The inputs are multiplied and the result is written on the output.
     protected {
 	int	runtime;
     }
-    start {
+    setup {
 	int n = input_r.numberPorts();
 	if ( n != input_i.numberPorts() ) {
-	    Error::abortRun(*this,"must have same number of real & imag input ports");
+	    Error::abortRun(*this,
+			    "must have same number of real & imag input ports");
 	    return;
 	}
 	switch ( n ) {
-	case 0:
+	  case 0:
 	    runtime = 2;
 	    break;
-	case 1:
-	    char buf[256];
-	    sprintf( buf, "input_r#%d", 1); // this is absurd
-	    CGPortHole *pr = (CGPortHole*) genPortWithName( buf);
-	    forkInit( *pr, output_r);
-	    sprintf( buf, "input_i#%d", 1); // this is absurd
-	    CGPortHole *pi = (CGPortHole*) genPortWithName( buf);
+	  case 1:
+            {    
+	    CGPortHole* pr = (CGPortHole*) genPortWithName("input_r#1");
+	    forkInit(*pr, output_r);
+	    CGPortHole *pi = (CGPortHole*) genPortWithName("input_i#1");
 	    forkInit( *pi, output_i);
 	    runtime = 0;
 	    break;
-	case 2:
+	    }
+	  case 2:
 	    runtime = 7;
 	    break;
-	default:
+	  default:
 	    Error::abortRun(*this,"more than two inputs not implemented yet");
 	    return;
 	}
@@ -89,13 +94,13 @@ The inputs are multiplied and the result is written on the output.
 	    addCode(cbZero);
 	    break;
 	case 1:
-	    ; /* fork'd */
+	    ; /* forked */
 	    break;
 	case 2:
 	    addCode(cbTwoInput);
 	    break;
 	default:
-	    ; // NOT IMP
+	    ; /* not implemented */
 	}
     }
     exectime {

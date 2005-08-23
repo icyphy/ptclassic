@@ -1,155 +1,147 @@
 defstar {
-    name {Window}
-    domain {SDF}
-    desc {
-Generates various standard window functions, including Rectangular,
-Hanning, Hamming, and Blackman.
-    }
-    version { $Id$ }
-    author { Kennard White }
-    copyright { 1991 The Regents of the University of California }
-    location { SDF dsp library }
-    explanation {
-This star produce on its output values that are samples of
-a standard windowing function.  The window function to be sampled
-is determined by the \fIname\fR string parameter.  Possible values
-are: \fBRectangle\fR, \fBHanning\fR, \fBHamming\fR, \fBBlackman\fR, 
-and \fBSteepBlackman\fR.
-.lp
-The parameter \fIlength\fR is the length of the window to produce.  Note
-that most windows functions have zero value at the first and last
-sample.
-The parameter \fIperiod\fR specifies the period of the output signal:
-the window will be zero-padded if required.  A \fIperiod\fR of 0
-means a period equel to \fIlength\fR, and a negative period will
-produce only one window then be zero for all later samples.
-    }
-    output {
-        name {output}
-        type {float}
-    }
-    defstate {
-	name {name}
-	type {string}
-	default {"HANNING"}
-	desc {Name of the window function to generate.}
-    }
-    defstate {
-	name {length}
-	type {int}
-	default {256}
-	desc {Length of the window function to produce.} 
-    }
-    defstate {
-	name {period}
-	type {int}
-	default {0}
-	desc {Period of the output. Period 0 implies "length" period, and
-	  negative period is non-periodic (single cycle).}
-	attributes { A_NONCONSTANT|A_SETTABLE }
-    }
-//  defstate {
-//	name {iter}
-//	type {int}
-//	default {0}
-//	desc {Which period we are in.}
-//	attributes { A_NONCONSTANT|A_NONSETTABLE }
-//  }
-    protected {
-	int winType;
-	int realLen;
-	int realPeriod;
-	double scale0;
-	double scale1;
-	double freq1;
-	double scale2;
-	double freq2;
-    }
-    code {
-	extern "C" {
-	    extern int strcasecmp( char*, char*);
+	name {Window}
+	domain {SDF}
+	desc {
+Generate standard window functions or periodic repetitions of standard
+window functions.  The possible windows are Rectangle, Bartlett,
+Hanning, Hamming, Blackman, SteepBlackman, and Kaiser.  One period of
+samples is produced at each firing.
 	}
-#define SDFWinType_Null		(0)
-#define SDFWinType_Rectangle	(1)
-#define SDFWinType_Hanning	(2)
-#define SDFWinType_Hamming	(3)
-#define SDFWinType_Blackman	(4)
-#define SDFWinType_SteepBlackman	(5)
-    }
-    start {
-	char *wn = name;
+	htmldoc {
+<p>
+This star produces on its output values that are samples of a standard
+windowing function.
+The windowing function is determined by the <i>name</i> string parameter.
+Possible values are: <b>Rectangle</b>, <b>Bartlett</b>, <b>Hanning</b>,
+<b>Hamming</b>, <b>Blackman</b>, <b>Kaiser</b> and <b>SteepBlackman</b>.
+Upper- and lower-case characters in the names are equivalent.
+<p>
+The parameter <i>length</i> is the length of the window to produce.
+Note that most window functions have a zero value at the first and last sample.
+The parameter <i>period</i> specifies the period of the output signal:
+the window will be zero-padded if required.
+A <i>period</i> of 0 means a period equal to <i>length</i>.
+A negative period will produce only one window, and then output zero
+for all later samples.
+A period of less than the window length will be equivalent to a period of
+the window length (i.e., <i>period</i> = 0).
+<h3>References</h3>
+<p>[1]  
+Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,
+Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
+	}
+	version { @(#)SDFWindow.pl	1.23	06 Oct 1996 }
+	author { Kennard White }
+	acknowledge { William Chen and Brian L. Evans}
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF dsp library }
 
-	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
-	    winType = SDFWinType_Rectangle;
-	} else if ( strcasecmp( wn, "Hanning")==0 ) {
-	    winType = SDFWinType_Hanning;
-	} else if ( strcasecmp( wn, "Hamming")==0 ) {
-	    winType = SDFWinType_Hamming;
-	} else if ( strcasecmp( wn, "Blackman")==0 ) {
-	    winType = SDFWinType_Blackman;
-	} else if ( strcasecmp( wn, "SteepBlackman")==0 ) {
-	    winType = SDFWinType_SteepBlackman;
-	} else {
-	    Error::abortRun(*this, ": Unknown window name");
-	    return;
+	output {
+		name { output }
+		type { float }
 	}
-	realLen = int(length);
-	if ( realLen < 4 ) {
-	    /* Dont want to risk divide by zero */
-	    Error::abortRun(*this, ": Window length too small");
-	    return;
-	}
-	realPeriod = int(period);
-	if ( realPeriod <= 0 )
-	    realPeriod = realLen;
-	output.setSDFParams( realPeriod, realPeriod-1);
 
-	double base_w = M_PI/(realLen-1);
-	double sin_base_w = sin(base_w);
-	double sin_2base_w = sin(2*base_w);
-	double d = - (sin_base_w/sin_2base_w) * (sin_base_w/sin_2base_w);
-	scale0 = 0; scale1 = 0; freq1 = 0; scale2 = 0; freq2 = 0;
-	/* 
-	 *  Window defs taken from Jackson, Digital Filters and Signal
-	 *  Processing, Second Ed, chap 7.
-	 */
-	switch ( winType ) {
-	case SDFWinType_Rectangle:
-	    scale0 = 1;
-	    break;
-	case SDFWinType_Hanning:
-	    scale0 = .5;	scale1 = -.5;	freq1 = 2*base_w;
-	    break;
-	case SDFWinType_Hamming:
-	    scale0 = .54;	scale1 = -.46;	freq1 = 2*base_w;
-	    break;
-	case SDFWinType_Blackman:
-	    /* This is a special case of SteepBlackman */
-	    d = -.16;		/* scale0 = .42, scale1 = -.5, scale2=.08 */
-	    /*FALLTHROUGH*/
-	case SDFWinType_SteepBlackman:
-	    /* See Jackson 2ed, eqns 7.3.6 through 7.3.10 */
-	    scale0 = (d+1)/2;	scale1 = -.5;	freq1 = 2*base_w;
-	    			scale2 = -d/2;	freq2 = 4*base_w;
-	    break;
-	default:
-	    Error::abortRun(*this, ": Invalid window type");
-	    return;
+	defstate {
+		name {name}
+		type {string}
+		default {"Hanning"}
+		desc {
+Name of the window function to generate:
+Rectangle, Bartlett, Hanning, Hamming, Blackman, SteepBlackman, or Kaiser.
+		}
 	}
-	    
-    }
-    go {
-	int i;
-	double val;
 
-	for ( i=0; i < realLen; i++) {
-	    val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
-	    output%(realPeriod-i-1) << val;
+	defstate {
+		name {length}
+		type {int}
+		default {256}
+		desc {Length of the window function to produce.} 
 	}
-	for ( ; i < realPeriod; i++) {
-	    output%(realPeriod-i-1) << double(0.0);
+
+	defstate {
+		name {period}
+		type {int}
+		default {0}
+		desc {
+Period of the output. Period 0 implies "length" period, and
+a negative period is non-periodic (single cycle).
+		}
+		attributes { A_NONCONSTANT|A_SETTABLE }
 	}
-	if ( int(period) < 0 )
-	    realLen = 0;
-    }
-}	
+
+	defstate {
+		name {WindowParameters}
+		type {floatarray}
+		default {0}
+		desc {
+An array of numeric parameters for the window.
+For the Kaiser window, the first entry in this state is taken as the
+beta parameter which is proportional to the stopband attenuation of
+the window.
+		}
+	}
+
+	protected {
+		int realLen;
+		int realPeriod;
+		double* windowTaps;
+	}
+
+	constructor {
+		windowTaps = 0;
+	}
+
+	ccinclude { <string.h>, <math.h>, "ptdspWindow.h" }
+
+	setup {
+		const char* wn = name;
+		int winType = Ptdsp_WindowNumber(wn);
+		if (winType == PTDSP_WINDOW_TYPE_NULL) {
+		    Error::abortRun(*this, "Unknown window name ", wn);
+		    return;
+		}
+
+		// Don't want to risk divide by zero
+		realLen = int(length);
+		if ( realLen < 4 ) {
+		    Error::abortRun(*this, "Window length is too small ",
+				    "(should be greater than 3)");
+		    return;
+		}
+
+		realPeriod = int(period);
+		if ( realPeriod < realLen ) realPeriod = realLen;
+		output.setSDFParams(realPeriod, realPeriod-1);
+
+		delete [] windowTaps;
+		windowTaps = new double[realLen];
+		int validWindow = Ptdsp_Window(windowTaps, realLen, winType,
+					      (double *) WindowParameters);
+		if (! validWindow) {
+		    delete [] windowTaps;
+		    Error::abortRun(*this, "Could not compute the taps for a ",
+				    wn, " window: Ptdsp_Window failed.");
+		    return;
+		}
+	}
+
+	go {
+		int i = 0;
+		for (; i < realLen; i++) {
+		    output%(realPeriod-(i+1)) << windowTaps[i];
+		}
+		for (; i < realPeriod; i++) {
+		    output%(realPeriod-(i+1)) << double(0.0);
+		}
+		if ( int(period) < 0 ) realLen = 0;
+	}
+
+	destructor {
+		delete [] windowTaps;
+	}
+}

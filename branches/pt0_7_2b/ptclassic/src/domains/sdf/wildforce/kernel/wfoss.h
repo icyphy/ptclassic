@@ -35,8 +35,13 @@
 #endif
 
 #if ( !defined( WIN32 ) )
+
+#if (__GNUC__ == 2) && (__GNUC_MINOR__ < 91)
+/* Don't include sys/inttypes.h under egcs-1.1.1 (__GNUC_MINOR__ == 91)
+   or g++-2.95.1 (__GNUC_MINOR__ == 95) */
 #include <sys/inttypes.h>
 #include <sys/types.h>
+#endif
 
 #ifndef UCHAR
 #define UCHAR unsigned char

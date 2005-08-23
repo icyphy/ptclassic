@@ -1,0 +1,66 @@
+# Makefile for Ptolemy XXX stars
+# @(#)make.template	1.3   01/23/96
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/xxx/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# XXXDIR is the directory containing XXX domain support
+XXXDIR = $(ROOT)/src/domains/xxx/kernel
+INCL = -I$(XXXDIR) -I$(KERNDIR)
+
+# Library name
+PTLIB=libxxxstars.$(LIBSUFFIX)
+
+# source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
+PL_SRCS= \
+  XXXNop.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=xxxstars
+DOMAIN=XXX
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+XXXNop.o: XXXNop.cc XXXNop.h \
+ ../../../../src/domains/xxx/kernel/XXXStar.h \
+ ../../../../src/kernel/Star.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/DataStruct.h ../../../../src/kernel/type.h \
+ ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
+ ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
+ ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
+ ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Error.h \
+ ../../../../src/domains/xxx/kernel/XXXPortHole.h

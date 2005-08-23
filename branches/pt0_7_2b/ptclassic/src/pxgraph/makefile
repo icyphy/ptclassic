@@ -1,9 +1,7 @@
-# Ptolemy-style makefile for pxgraph
-# This is a Ptolemy version of xgraph, where the only difference is that
-# it accepts binary input if you use the -binary command line switch.
-# Version identification:
-# @(#)make.template	1.19	06 Oct 1996
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Ptolemy-style makefile to create a link for the Java pxgraph script
+#
+# @(#)makefile	1.10 02/04/99
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,67 +34,51 @@ VPATH = ../../src/pxgraph
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
- st.o params.o
+MISC_FILES = README.txt
+all: sources
+	@echo "There are two versions of pxgraph:"
+	@echo "the older one that uses X11 sources"
+	@echo "   $$PTOLEMY/src/pxgraph/pxgraph"
+	@echo "the newer one that is implemented in Java "
+	@echo "   $$PTOLEMY/tycho/java/ptolemy/plot"
+	@echo " The default is to use the Java version."
+	@echo " If you want to use the X11 version,"
+	@echo " see $$PTOLEMY/src/pxgraph/README.txt"
+	cd pxgraph; $(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-SRCS = $(OBJS:.o=.c)
-HDRS = dialog.h hard_devices.h params.h plotter.h st.h xgout.h xgraph.h xtb.h
+install: all $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
 
-all:	makefile pxgraph
+$(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
+	rm -f $@
+	(cd $(BINDIR); ln -s ../tycho/java/ptolemy/plot/pxgraph .)
 
-# Use the $(LINKER) so the binary is statically linked for distribution.
-# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
-# here.
-pxgraph:	$(OBJS)
-	rm -f pxgraph
-	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+FORCE:
+$(BINDIR)/pxgraph.x11: FORCE
+	rm -f $@
+	@if [ -f pxgraph/pxgraph$(BINARY_EXT) ]; then \
+		echo "Now installing pxgraph/pxgraph.x11";\
+		cp pxgraph/pxgraph$(BINARY_EXT) $(BINDIR)/pxgraph.x11;\
+	else \
+		echo "pxgraph/pxgraph$(BINARY_EXT) does not exist,";\
+		echo "so we will use the Java version of pxgraph.";\
+		echo "If you want to use the";\
+		echo "X11 version of pxgraph, see";\
+		echo "$$PTOLEMY/src/pxgraph/README.txt";\
+	fi;
 
-pxgraph.debug:	$(OBJS)
-	rm -f pxgraph
-	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+makefiles:
+sources: makefile $(MISC_FILES)
+	@if [ ! -d pxgraph ]; then echo "making pxgraph dir"; mkdir pxgraph; fi
+	cd pxgraph; ../$(VPATH)/pxgraph/configure \
+		--srcdir=../$(VPATH)/pxgraph
 
-
-OUT = $(BINDIR)/pxgraph
-
-$(OUT):	pxgraph
-	rm -f $(OUT)
-	ln pxgraph $(OUT)
-
-install:	makefile $(OUT)
-
-.c.o:
-	$(CC) $(CFLAGS) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) -c $<
-
-# "make clean" removes .o files and other cruft
 clean:
-		rm -f *.o core *~ *.bak *#
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-# Don't add pxgraph.htm, since rman might not be built yet
-sources:	$(SRCS) $(HDRS) make.template #pxgraph.htm
-
-# Convert to html using rman
-pxgraph.htm: pxgraph.man
-	nroff -man $^ | rman -f HTML > $@
-
-
+	cd pxgraph; $(MAKE) clean
 depend:
-		cd $(VPATH); \
-		$(DEPEND) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) $(SRCS)|cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
+	echo no dependencies to make in this directory
 
-makefile:	make.template
-		cd $(VPATH); $(MAKE) -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
-
-# Rule for detecting junk files
 checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(OBJS) \
-		ORIGINAL README.ANNOUNCE README.GENERAL README.HARDCOPY \
-		README.INSTALL TAGS bitmaps examples pxgraph.man \
-		makefile make.template SCCS
+	@checkextra -v makefile $(MISC_FILES) pxgraph SCCS
 
 sccsinfo:
-		sccs info
+	@sccs check || true

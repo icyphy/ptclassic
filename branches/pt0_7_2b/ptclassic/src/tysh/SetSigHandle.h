@@ -2,13 +2,13 @@
 #define _SetSigHandle_h 1
 /****************************************************************************
 Version identification:
-@(#)SetSigHandle.h
+@(#)SetSigHandle.h	1.7	1/11/96
 
 Author: Joel R. King
 
 Sets up the signal handlers for Tycho.
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,22 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "SetSigHandle.h"
-
-/****************************************************************************/
-
+// Function prototypes
 int setSignalHandlers(void);
-int setCoreLimitDebug(void);
-int setCoreLimitRelease(void);
-
-/****************************************************************************/
+int setCoreLimit(void);
 
 #endif

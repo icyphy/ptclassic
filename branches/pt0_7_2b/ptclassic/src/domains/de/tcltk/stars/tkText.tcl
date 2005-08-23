@@ -1,10 +1,32 @@
 # Tcl/Tk source for a display that shows the values of the star inputs
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkText.tcl	1.3	1/10/96
 #
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
@@ -80,6 +102,11 @@ if {![winfo exists $s]} {
     # (Tk bug)
     update
 
+    # Zero out the linecount array (Fix from Tom Lane 1/9)
+    if {[info exists ${starID}_lineCount]} {
+	unset ${starID}_lineCount
+    }
+
     set ${starID}(lineCount) 0
 
     # Store the window name in the star data structure
@@ -92,24 +119,29 @@ if {![winfo exists $s]} {
 	upvar #0 $starID param
 	global $starID
 
+ 	# Shorthand for referring to ${starID}_lineCount array (Tom Lane 1/96)
+ 	upvar #0 ${starID}_lineCount lineCount
+
 	set c $param(win).f
 	set inputVals [grabInputs_$starID]
+ 	set inputStates [grabInputsState_$starID]
 	for {set i 0} {$i < $param(numInputs)} {incr i} {
-	    set in [lindex $inputVals $i]
-	    $param(win).f.m$i.t yview -pickplace end
-	    $param(win).f.m$i.t insert end [schedtime]
-	    $param(win).f.m$i.t insert end ": "
-	    $param(win).f.m$i.t insert end $in
-	    $param(win).f.m$i.t insert end "\n"
-	}
-	incr ${starID}(lineCount)
-	if {$param(lineCount) >= $param(number_of_past_values)} {
-	    incr ${starID}(lineCount) -1
-	    for {set i 0} {$i < $param(numInputs)} {incr i} {
-		$param(win).f.m$i.t delete 1.0 2.0
+ 	    if {[lindex $inputStates $i]} {
+ 		set in [lindex $inputVals $i]
+ 		$param(win).f.m$i.t yview -pickplace end
+ 		$param(win).f.m$i.t insert end [schedtime]
+ 		$param(win).f.m$i.t insert end ": "
+ 		$param(win).f.m$i.t insert end $in
+ 		$param(win).f.m$i.t insert end "\n"
+ 		if {! [info exists lineCount($i)]} {
+ 		    set lineCount($i) 1
+ 		} elseif {$lineCount($i) < $param(number_of_past_values)} {
+ 		    incr lineCount($i)
+ 		} else {
+ 		    $param(win).f.m$i.t delete 1.0 2.0
+ 		}
 	    }
 	}
-
 	if {$param(wait_between_outputs)} {
 	    set ${starID}(tkTextWaitTrig) 0
 	    $param(win).att.cont configure -state normal

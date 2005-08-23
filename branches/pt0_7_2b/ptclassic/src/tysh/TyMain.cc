@@ -1,10 +1,10 @@
 /**************************************************************************
 Top-level program for Tycho, a visual interface for Ptolemy.
 
-$Id$
+@(#)TyMain.cc	1.10	2/25/96
 Programmer:  E. A. Lee
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -42,9 +42,11 @@ static const char file_id[] = "TyMain.cc";
 #include "Linker.h"
 #include "SimControl.h"
 #include "Error.h"
+#include "SetSigHandle.h"
 #include "InfString.h"
 #include "TyConsole.h"
 #include <stdio.h>
+#include <iostream.h>
 #include <sys/file.h>
 #include <tcl.h>
 #include <errno.h>
@@ -71,17 +73,15 @@ extern int		isatty _ANSI_ARGS_((int fd));
 extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
 };
 
-char *tyFilename = NULL;
-
 /* This defines the default domain for Tycho */
 
-char DEFAULT_DOMAIN[] = "SDF";
+extern char DEFAULT_DOMAIN[];
 
-static void PrintVersion ()
+static void PrintSigErrorMessage ()
 {
-    InfString pid = (int)getpid();
-    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "(proc. id. ",
-		(char*)pid, ")} {", tyFilename, "}", NULL);
+    Tcl_VarEval(ptkInterp, "::tycho::inform {Unable to set the \
+signal handlers, the program will continue but if a serious error occurs it \
+may not be handled appropriately.}", NULL);
 }
 
 /*
@@ -95,8 +95,8 @@ static void PrintVersion ()
 int
 main(int argc, char **argv) {
 
-    tyFilename = argv[0];
-
+    int sigReturn;
+    
     // The following creates a Tcl interpreter, adds the ptcl and itcl 
     // extensions, and creates a top-level Tk window.
     TyConsole console(argc, argv);
@@ -109,18 +109,13 @@ main(int argc, char **argv) {
     // Initialize the incremental linking module
     Linker::init(argv[0]);
 
-    PrintVersion();
-
+    if ((sigReturn = setSignalHandlers()) != 0) {
+        // This will never happen. See SetHandle.cc for explanation.
+        PrintSigErrorMessage();
+    }
+    
     Tk_MainLoop();
     console.tyExit(0);
+    return 0;
 }
 
-// the following stub is here until we support the Gantt chart
-// under Tycho.
-
-extern "C" int displayGanttChart(const char* file) {
-	InfString cmd;
-	cmd << "gantt " << file;
-	system(cmd);
-	return 0;
-}

@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspZigZag.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [  ]
-
-  Author      [ Paul Haskell ]
-
-  Copyright   [ 
+/*******************************************************************
+Version identification:
+@(#)ptdspZigZag.c	1.7 8/6/96
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -34,32 +26,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
- ]
 
-  Version     [ $Id$ ]
+ Programmer: Paul Haskell
 
-******************************************************************************/
+       Functions for forward/inverse zig-zag scan of a matrix. 
+
+********************************************************************/
 
 #include "ptdspZigZag.h"
 
-/*---------------------------------------------------------------------------*/	
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Zig-zag scans an image ]
-  Description [ This function zig-zag scans a matrix representing an
-                image stored in inImg and  returns the result in
-		"outImg".This is useful before quantizing a DCT
-		transformed image. ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_ZigZagInverse ]
-******************************************************************************/
-
-/*
-  This function zig-zag scans a matrix representing an image stored in
-  inImg and  returns the result in "outImg".This is useful before
-  quantizing a DCT  transformed image.
+/* This function zig-zag scans a matrix representing an image stored
+   in inImg and returns the result in outImg. This is useful before
+   quantizing a DCT transformed image.
 */
 void 
 Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
@@ -68,18 +46,18 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   double* tmpPtr = outImg;
 
   /* For each row and col... */
-  for(row = 0; row < height; row += bSize) {
-    for(col = 0; col < width; col += bSize) {
+  for (row = 0; row < height; row += bSize) {
+    for (col = 0; col < width; col += bSize) {
       /* Do zig-zag scan. */
       indx = 0;
       /* K is length of current (semi)diagonal, L is iteration along
 	 diag. */
-      for(k = 1; k < bSize; k++) { /* Top triangle */
-	for(l = 0; l < k; l++) { /* down */
+      for (k = 1; k < bSize; k++) { /* Top triangle */
+	for (l = 0; l < k; l++) { /* down */
 	  tmpPtr[indx++] = inImg[col + (row+l)*width + (k-l-1)];
 	}
 	k++; /* NOTE THIS! */
-	for(l = 0; l < k; l++) { /* back up */
+	for (l = 0; l < k; l++) { /* back up */
 	  tmpPtr[indx++] = inImg[col + (row+k-l-1)*width + l];
 	}
       }
@@ -90,12 +68,12 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
       else { k = bSize-1; }
 
       for(; k > 1; k--) { /* Bottom triangle */
-	for(l = 0; l < k; l++) { /* down */
+	for (l = 0; l < k; l++) { /* down */
 	  tmpPtr[indx++] = inImg[col + (row+bSize-k+l)*width +
 				 (bSize-l-1)];
 	}
 	k--; /* NOTE THIS! */
-	for(l = 0; l < k; l++) { /* back up */
+	for (l = 0; l < k; l++) { /* back up */
 	  tmpPtr[indx++] = inImg[col + (row+bSize-l-1)*width +
 				 bSize-k+l];
 	}
@@ -109,36 +87,28 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   }
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Inverts run length encoding on a DCT image ]
-  Description [ This function reads 2 double array, representing two
-                coded DCT images (one high priority and one
-		low-priority), inverts the run-length
-		encoding, and outputs the resulting image. </p>
-		Protection is built in to avoid crashing even if some
-		of the coded input data is affected by loss. ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_ZigZagScan ]
-******************************************************************************/
+/* This function inverse zig-zag scans an image, stored in inImg as a
+   double array, and outputs the result in outImg.
+*/
 void
-Ptdsp_ZigZagInverse (double * inImg, double * outImg,
+Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
 		     int width, int height,  int bSize) {    
 
   int k, indx, l, row, col;
-  double* tmpPtr = inImg; 
-  for( row = 0; row < height; row += bSize) {
-    for( col = 0; col < width; col += bSize) {
+  int displace = 0;
+  for ( row = 0; row < height; row += bSize) {
+    for ( col = 0; col < width; col += bSize) {
       /* Invert the zigzag. */
       /* k is length of current (semi)diagonal; l is iteration on
 	 diag. */
-      k = 0; indx = 0;
-      for(k = 1; k < bSize; k++) { /* Top triangle */
-	for(l = 0; l < k; l++) { /* down */
-	  outImg[col + (row+l)*width + (k-l-1)] = tmpPtr[indx++];
+      k = 0; indx = displace;
+      for (k = 1; k < bSize; k++) { /* Top triangle */
+	for (l = 0; l < k; l++) { /* down */
+	  outImg[col + (row+l)*width + (k-l-1)] = inImg[indx++];
 	}
 	k++;						/* NOTE THIS! */
-	for(l = 0; l < k; l++) {			/* back up */
-	  outImg[col + (row+k-l-1)*width + l] = tmpPtr[indx++];
+	for (l = 0; l < k; l++) {			/* back up */
+	  outImg[col + (row+k-l-1)*width + l] = inImg[indx++];
 	}
       }
 
@@ -146,21 +116,21 @@ Ptdsp_ZigZagInverse (double * inImg, double * outImg,
       if (bSize % 2) { k = bSize; }
       else { k = bSize-1; }
       
-      for(; k > 1; k--) {			/* Bottom triangle */
-	for(l = 0; l < k; l++) { /* down */
+      for (; k > 1; k--) {			/* Bottom triangle */
+	for (l = 0; l < k; l++) { /* down */
 	  outImg[col + (row+bSize-k+l)*width +
-		(bSize-l-1)] = tmpPtr[indx++];
+		(bSize-l-1)] = inImg[indx++];
 	}
 	k--; /* NOTE THIS! */
-	for(l = 0; l < k; l++) {		/* back up */
+	for (l = 0; l < k; l++) {		/* back up */
 	  outImg[col + (row+bSize-l-1)*width +
-		bSize-k+l] = tmpPtr[indx++];
+		bSize-k+l] = inImg[indx++];
 	}
       }
 
       /* Have to do last element. */
-      outImg[col + (row + bSize - 1) * width + bSize - 1] = tmpPtr[indx];
-      tmpPtr += bSize * bSize;;
+      outImg[col + (row + bSize - 1) * width + bSize - 1] = inImg[indx];
+      displace += bSize * bSize;;
     }
   }
 }

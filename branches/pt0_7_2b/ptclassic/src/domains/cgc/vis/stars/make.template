@@ -1,4 +1,4 @@
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,8 +22,8 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Makefile for Ptolemy CGC stars
-# $Id$
+# Makefile for Ptolemy CGC VIS stars
+# @(#)make.template	1.11	04/07/97
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -42,26 +42,33 @@ include $(CONFIG)
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 CGCDIR = $(ROOT)/src/domains/cgc/kernel
+CGCSTAR = $(ROOT)/src/domains/cgc/stars
 
 # VSDKHOME is an environment variable that must
 # be set if you are to use the VIS stars
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) 
+INCL = -I$(CGCSTAR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) 
 
 # Library name
-LIB=libcgcvisstars.$(LIBSUFFIX)
+PTLIB=libcgcvisstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # put base stars first
 PL_SRCS= \
- CGCBiquad.pl \
- CGCPackVis64.pl \
- CGCUnpackVis64.pl \
- CGCQuadAdd16.pl \
- CGCQuadSub16.pl \
- CGCQuadMult16x16.pl \
- CGCQuadFir.pl \
- CGCQuadBiquad.pl \
- CGCQuadFFTCx.pl
+ CGCVISAddSh.pl \
+ CGCVISBiquad.pl \
+ CGCVISFFTCx.pl \
+ CGCVISFIR.pl \
+ CGCVISMpyDblSh.pl \
+ CGCVISMpySh.pl \
+ CGCVISPackSh.pl \
+ CGCVISParametricEq.pl \
+ CGCVISStereoBiquad.pl \
+ CGCVISInterleaveIn.pl \
+ CGCVISInterleaveOut.pl \
+ CGCVISStereoIn.pl \
+ CGCVISStereoOut.pl \
+ CGCVISSubSh.pl \
+ CGCVISUnpackSh.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

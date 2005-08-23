@@ -1,26 +1,19 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: E. A. Lee
-Date of creation: 10/28/89
-
-This star hard limits input samples to keep the in the range
-of (\fIbottom, top\fR).
-
-************************************************************************/
-}
-
 defstar {
 	name {Limit}
 	domain {SDF}
-	desc {
-		"Hard limiter."
+	desc { 
+The output of this star is the value of the input limited
+to the range between "bottom" and "top" inclusive.
 	}
+	version {@(#)SDFLimit.pl	1.8 3/2/95}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
 	input {
 		name{input}
 		type{float}
@@ -33,13 +26,13 @@ defstar {
 		name{bottom}
 		type{float}
 		default{"0.0"}
-		desc {"Lower limit of the output"}
+		desc {Lower limit of the output.}
 	}
 	defstate {
 		name{top}
 		type{float}
 		default{"1.0"}
-		desc {"Upper limit of the output"}
+		desc {Upper limit of the output.}
 	}
 	go {
 	   if(double(input%0) > double(top))

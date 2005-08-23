@@ -2,17 +2,17 @@ defstar {
     name { MpyCx }
     domain { CG56 }
     desc { Multiply any number of rectangular complex inputs, producing an output. }
-    version { $Id$ }
+    version { @(#)CG56MpyCx.pl	1.4 01 Oct 1996 }
     author { Jose Luis Pino, Kennard White (ported from Gabriel) }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 arithmetic library }
-    explanation {
-.Id "multiplication"
+    location { CG56 main library }
+	htmldoc {
+<a name="multiplication"></a>
 The inputs are multiplied and the result is written on the output.
     }
     inmulti {
@@ -29,6 +29,9 @@ The inputs are multiplied and the result is written on the output.
 	default { 0 }
 	desc { input#() }
 	attributes { A_NONCONSTANT|A_NONSETTABLE }
+    }
+    constructor {
+	noInternalState();
     }
     codeblock(cbZero) {
 	clr	a

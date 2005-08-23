@@ -2,18 +2,28 @@ defstar{
     name { DynMerge }
     domain { DE }
     author { J. Voigt }
-    version { 1.0 9/4/97
-        }
-    copyright { copyright (c) 1997 Dresden University of Technology
-                WiNeS-project }
-    desc { On demand a new PortHole is added to or removed from a MultiPortHole during runtime. All particles to one of its inputportholes are sent out 
-unchanged through the only output. Because the particles are sent unchanged, 
-I can use anytype-portholes here. }
-    explanation { 
-This star works (only) in connection with DEDynBlock. The "createPortHole()" 
-and "removePortHole()" methods are called from there, whenever a block is 
-dynamically instantiated or deleted.
-}
+    version { @(#)DEDynMerge.pl	1.3	01/15/98 }
+    copyright { 
+copyright (c) 1997 Dresden University of Technology, WiNeS-Project.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. 
+    }
+    desc { This star implements a dynamic merge function. On demand a new 
+porthole is added to or removed from an input-multiporthole during runtime. 
+All particles to one of its inputportholes are sent out unchanged through the 
+only output. Because the particles are sent unchanged, I can use 
+anytype-portholes here. 
+    }
+    htmldoc { 
+This star works (only) in connection with <tt>DEDynMap</tt> and/or 
+<tt>DEDynMapGr</tt>. The <i>createPortHole</i> and <i>removePortHole</i> 
+methods are called from there, whenever a block is dynamically instantiated or 
+deleted.
+<p>
+The first porthole of the input-multiporthole has to be connected to a 
+<tt>DEDynMap</tt> or <tt>DEDynMapGr</tt>-star. 
+    }
     location { $PTOLEMY/src/domains/de/contrib/stars }
     inmulti {
         name { in }
@@ -61,4 +71,3 @@ dynamically instantiated or deleted.
         }
     }
 }   
-

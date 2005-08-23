@@ -1,10 +1,32 @@
 static const char file_id[] = "Sub56Target.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)Sub56Target.cc	1.15 7/30/96
 
- Copyright (c) 1992 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: J. Pino
 
@@ -18,108 +40,49 @@ $Id$
 #endif
 
 #include "Sub56Target.h"
-#include "UserOutput.h"
-#include "CG56Star.h"
 #include "KnownTarget.h"
-#include <ctype.h>
+#include "MotorolaTarget.h"
 
 Sub56Target :: Sub56Target(const char* nam, const char* desc,
-			 unsigned x_addr, unsigned x_len,
-			 unsigned y_addr, unsigned y_len) :
-	CG56Target(nam,desc,x_addr,x_len,y_addr,y_len), uname(0)
+			   const char* assocDomain) :
+CG56Target(nam, desc, assocDomain),
+MotorolaTarget(nam, desc, "CG56Star", assocDomain)
 {
 	initStates();
 }
 
-void Sub56Target :: initStates() {
-	addState(dirName.setState("dirName",this,"~/DSPcode",
-                                  "directory for all output files"));
-}
-
-Sub56Target :: ~Sub56Target() {
-	LOG_DEL; delete dirFullName; dirFullName = 0;
-	LOG_DEL; delete uname;
-}
-
-int Sub56Target :: run() {
-	StringList rts = "\trts\n";
-	addCode(rts);
-	StringList ptolemyMain = "ptolemyMain\n";
-	addCode(ptolemyMain);
-	mySched()->setStopTime(1);
-	int i = Target::run();
-	addCode(rts);
-	return i;
-}
-
 Sub56Target::Sub56Target(const Sub56Target& arg) :
-	CG56Target(arg)
+	CG56Target(arg),MotorolaTarget(arg)
 {
 	initStates();
 	copyStates(arg);
 }
 
-int Sub56Target :: setup (Galaxy& g) {
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(dirName);
-	if (!CG56Target::setup(g)) return FALSE;
-	uname = (char*)g.readName();
-	return TRUE;
+void Sub56Target :: initStates() {
+	xMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	yMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+}
+
+/*virtual*/ void Sub56Target :: mainLoopCode() {
+	myCode << "	rts\n" << "ptolemyMain\n";
+	scheduler()->compileRun();
+	myCode << "	rts\n";
 }
 
 void Sub56Target :: headerCode () {
+	myCode << "	org p:\n" << "ptolemyInit\n";
 	CG56Target :: headerCode();
-	const char* path = expandPathName("~ptolemy/lib/cg56");
-	StringList inc = "\tinclude '";
-	inc += path;
-	inc += "/intequlc.asm'\n\tinclude '";
-	inc += path;
-	inc += "/ioequlc.asm'\n";
-	addCode(inc);
-	addCode(
-		"	org	p:\n"
-		"ptolemyInit\n"
-		"	movep	#0,x:m_bcr\n\n");
 };
 
-int Sub56Target :: genFile (StringList& stuff, const char* suffix) {
-	int status;
-	StringList bname = uname;
-	bname += suffix;
-	char* fullName = writeFileName(bname);
-	UserOutput o;
-	if (!o.fileName(fullName)) {
-		Error::abortRun(*this, "can't open file for writing: ",
-				fullName);
-		status = FALSE;
-	}
-	else {
-		o << stuff;
-		o.flush();
-		status = TRUE;
-	}
-	LOG_DEL; delete fullName;
-	return status;
-}
-
-Block* Sub56Target::clone() const {
+ 
+Block* Sub56Target::makeNew() const {
 	LOG_NEW; return new Sub56Target(*this);
-}
-
-void Sub56Target :: wrapup () {
- 	inProgSection = TRUE;
-	StringList map = mem->printMemMap(";","");
-	addCode (map);
-	CGTarget::wrapup();
-// put the stuff into the files.
-	if (!genFile(myCode, ".asm")) return;
-// directive to change to the working directory
-	StringList cd = "cd "; cd += dirFullName; cd += ";";
 }
 
 ISA_FUNC(Sub56Target,CG56Target);
 
-//make an instance
-static Sub56Target proto("sub-CG56","generate subroutines pigiInit & pigi Main",0,4096,0,4096);
+// register an instance
+static Sub56Target proto("sub-CG56",
+			 "generate subroutines pigiInit and pigiMain");
 
 static KnownTarget entry(proto, "sub-CG56");

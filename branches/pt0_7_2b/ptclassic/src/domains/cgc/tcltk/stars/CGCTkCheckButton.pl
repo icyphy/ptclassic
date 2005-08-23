@@ -2,20 +2,20 @@ defstar {
     name {TkCheckButton}
     domain {CGC}
     desc { A simple tk on/off input source. }
-    version { $Id$ }
+    version { @(#)CGCTkCheckButton.pl	1.3 06 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     derivedFrom { TclScript }
     location { CGC Tcl/Tk library }
-    explanation {
+	htmldoc {
 This is an asynchronous source star
 with a tk graphical user interface.  The star outputs one of two
-values as specified by the \fIonValue\fR and \fIoffValue\fR parameters.
+values as specified by the <i>onValue</i> and <i>offValue</i> parameters.
     }
     state {
 	name {identifier}

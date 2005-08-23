@@ -1,5 +1,5 @@
       Program Optfir
-c $Id$
+c @(#)optfir.f	1.1	11/2/90
 c
 c   This program designs optimal equirriple FIR digital filters
 c

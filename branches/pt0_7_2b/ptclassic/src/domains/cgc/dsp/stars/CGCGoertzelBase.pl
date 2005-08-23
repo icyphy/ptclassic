@@ -1,13 +1,13 @@
 defstar {
 	name { GoertzelBase }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCGoertzelBase.pl	1.4	10/08/96 }
 	desc {
 Base class for Goertzel algorithm stars.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -21,7 +21,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { k }
 		type { int }
 		default { 0 }
-		desc { the DFT coefficient to compute (k < N) }
+		desc { the DFT coefficient to compute (k less than N) }
 	}
 	defstate {
 		name { N }
@@ -33,7 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { size }
 		type { int }
 		default { 32 }
-		desc { amount of data to read (N <= size) }
+		desc { amount of data to read (N less than or equal to size) }
 	}
 	defstate {
 		name { d1 }
@@ -64,7 +64,11 @@ first-order feedback coefficient which is a function of k and N }
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
-	setup {
+        method {
+            name {CheckParameterValues}
+            arglist { "()" }
+            type { void }
+            code {
 		if ( int(k) < 0 ) {
 		  Error::abortRun(*this,
 			"The value for state k must be nonnegative.");
@@ -92,8 +96,16 @@ first-order feedback coefficient which is a function of k and N }
 			"number of data samples read, given by state size.");
 		   return;
 		}
+	    }
+	}
+	setup {
+                // FIXME: Parameters are not always resolved properly
+                // before setup but should be.  For now, check parameters
+                // in go method and guard against division by N = 0
+                // CheckParameterValues();
+                // double Nd = double(int(N));
+		double Nd = double(int(N) ? int(N) : 1);
 		double kd = int(k);
-		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
 		d1 = 2.0 * cos(theta);
 		input.setSDFParams(int(size), int(size)-1);
@@ -101,6 +113,7 @@ first-order feedback coefficient which is a function of k and N }
 	codeblock(decl) {
 		double acc = 0.0;
 		double d1val = $ref(d1);
+		int i;
 	}
 	codeblock(filter) {
 		/* Run all-pole section of Goertzel's algorithm N iterations.
@@ -111,8 +124,8 @@ first-order feedback coefficient which is a function of k and N }
 		   ONLY to pass their values to derived stars */
 		$ref(state1) = 0.0;
 		$ref(state2) = 0.0;
-		for (int i = $val(N)-1; i >= 0; i--) {
-		  acc = $ref(input,i);
+		for (i = $val(N)-1; i >= 0; i--) {
+		  acc = $ref2(input,i);
 		  acc += d1val * $ref(state1);
 		  acc -= $ref(state2);
 		  $ref(state2) = $ref(state1);
@@ -120,7 +133,11 @@ first-order feedback coefficient which is a function of k and N }
 		}
 	}
 	go {
+		CheckParameterValues();
 		addCode(decl);
 		addCode(filter);
+	}
+	exectime {
+		return (3 + 3 + 7*int(N));
 	}
 }

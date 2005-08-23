@@ -1,35 +1,41 @@
 defstar {
-	name { ProPortDA }
+	name { PrPrtDA }
 	domain { CG56 }
 	desc { An input/output star for the Ariel ProPort }
-	version { $Id$ }
+	version { @(#)CG56PrPrtDA.pl	1.16 03/29/97 }
+	acknowledge { Gabriel version by Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-.PP
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<p>
 This star is an interrupt driven D/A star for the Ariel Proport board.
 The star takes its two inputs and outputs them to the two
 channels on the Proport board each time it fires.
-.PP
+<p>
 If the star is repeated in a schedule (for example, if it is
 connected to a star that consumes more than one sample each time
 it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter \fIforceInterrupts\fP to "yes".
+parameter <i>forceInterrupts</i> to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fP is "default=4".
+parameter <i>interruptBufferSize</i> is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
-.PP
+<p>
 In the event of a real-time violation, execution will abort
 and the following error code will be left in register y0:
-.IP "\fB123061\fP"
+<p><b>123061</b>  
 An interrupt occurred and the output buffer was empty.
 	}
-        seealso { ProPortAD, ProPortADDA }
+        seealso { PrPrtAD, PrPrtADDA }
 	input {
 		name {input1}
 		type {FIX}
@@ -218,7 +224,7 @@ $label(empty)
         move    x:$starSymbol(proportda)_savereg+2,m0
         rti
         }        
-	start {
+	setup {
 		bufLen = interruptBufferSize;
 		saveReg.resize(3);
 		outIntBuffer.resize(bufLen);
@@ -226,12 +232,12 @@ $label(empty)
 	initCode {
 		const char     *f = forceInterrupts;
 		if (f[0] == 'n' || f[0] == 'N')
-			gencode(pollingInit);
+			addCode(pollingInit);
 		else {
-			gencode(interruptInit);
+			addCode(interruptInit);
 			genInterruptCode(interrupt);
 			genInterruptCode(interrupt1);
-			gencode(interruptCont);
+			addCode(interruptCont);
 		}
 	}
 	go {
@@ -240,10 +246,10 @@ $label(empty)
 		if (p[0] == 'n' || p[0] == 'N') {
 			//polling
 				if (q[0] == 'y' || q[0] == 'Y')
-				gencode(abortyes);
-			gencode(polling);
+				addCode(abortyes);
+			addCode(polling);
 		} else {
-			gencode(interruptIn);
+			addCode(interruptIn);
 		}
 	}
 	execTime {
@@ -256,7 +262,7 @@ $label(empty)
 	wrapup {
 		const char     *i = forceInterrupts;
 		if (i[0] == 'y' || i[0] == 'Y') {
-			gencode(interruptTerminate);
+			addCode(interruptTerminate);
 		}
 	}
 }    

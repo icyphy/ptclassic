@@ -2,7 +2,7 @@
 #
 # @Author: Christopher
 #
-# @Version: $Id$
+# @Version: @(#)testDEStars.tcl	1.2 12/09/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -34,14 +34,14 @@
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $env(PTOLEMY) src domains sdf test testDEDefs.tcl]
+    source [file join $env(PTOLEMY) src domains de test testDEDefs.tcl]
 } {}
 
 #######################################################################
 #### deallstars
 # Create all the stars
 test deallstars { create all the stars} {
-    domain de
+    domain DE
     foreach star [knownlist] {
 	star star[::tycho::autoName star] $star
     }

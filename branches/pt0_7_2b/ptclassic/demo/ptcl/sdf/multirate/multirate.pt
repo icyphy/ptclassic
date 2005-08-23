@@ -1,0 +1,65 @@
+domain SDF
+defgalaxy singen {
+	domain SDF
+	newstate sample_rate FLOAT "2*PI"
+	newstate frequency FLOAT "PI/50"
+	star Ramp1 Ramp
+	setstate Ramp1 step "2*PI*frequency/sample_rate"
+	setstate Ramp1 value 0.0
+	star Sin1 Sin
+	connect Ramp1 output Sin1 input
+	alias out Sin1 output
+}
+reset
+# Creating universe 'multirate'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star FIR1 FIR
+	setstate FIR1 taps "< ~ptolemy/src/domains/sdf/demo/lpf20th.fir"
+	setstate FIR1 decimation 2
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 5
+	star FIR2 FIR
+	setstate FIR2 taps "< ~ptolemy/src/domains/sdf/demo/lpf20th.fir"
+	setstate FIR2 decimation 1
+	setstate FIR2 decimationPhase 0
+	setstate FIR2 interpolation 1
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Before filtering"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x300+0+0 -0 input -P"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star UpSample1 UpSample
+	setstate UpSample1 factor 5
+	setstate UpSample1 phase 0
+	setstate UpSample1 fill 0.0
+	star DownSample1 DownSample
+	setstate DownSample1 factor 2
+	setstate DownSample1 phase 0
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "After filtering"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "=800x300+0+325 -P -0 direct -1 polyphase"
+	setstate "XMgraph.input=21" ignore 0
+	setstate "XMgraph.input=21" xUnits 1.0
+	setstate "XMgraph.input=21" xInit 0.0
+	star singen1 singen
+	setstate singen1 sample_rate "2*PI"
+	setstate singen1 frequency "PI/20"
+	connect UpSample1 output FIR2 signalIn
+	connect FIR2 signalOut DownSample1 input
+	node node1
+	nodeconnect singen1 out node1
+	nodeconnect FIR1 signalIn node1
+	nodeconnect Xgraph1 input node1
+	nodeconnect UpSample1 input node1
+	connect DownSample1 output "XMgraph.input=21" "input#1"
+	connect FIR1 signalOut "XMgraph.input=21" "input#2"
+run 25
+wrapup

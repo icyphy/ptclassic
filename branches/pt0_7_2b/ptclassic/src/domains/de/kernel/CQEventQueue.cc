@@ -1,21 +1,21 @@
-static const char file_id[] = "EventQueue.cc";
+static const char file_id[] = "CQEventQueue.cc";
 /**************************************************************************
 Version identification:
-@(#)EventQueue.cc	2.4	11/25/92
+@(#)CQEventQueue.cc	1.6 03/02/95
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,7 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
  Date of creation: 10/11/91
@@ -38,10 +40,10 @@ This file contains member functions for EventQueue..
 #pragma implementation
 #endif
 
-#include "EventQueue.h"
+#include "CQEventQueue.h"
 #include "Particle.h"
 
-Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
+Event* CQEventQueue:: getEvent(Particle* p, PortHole* ph) {
 	Event* temp;
 	// a free event instance
 	if (freeEventHead) {
@@ -57,7 +59,7 @@ Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
 }
 
 // delete the free events.
-void EventQueue:: clearFreeEvents() {
+void CQEventQueue:: clearFreeEvents() {
 	if (!freeEventHead) return;
 	while (freeEventHead->next) {
 		Event* temp = freeEventHead;
@@ -69,15 +71,15 @@ void EventQueue:: clearFreeEvents() {
 }
 
 // Put the unused particles into the plasmas.
-void EventQueue:: clearParticles() {
+void CQEventQueue:: clearParticles() {
 	Event* temp = freeEventHead;
 	while (temp) {
-		temp->p->die();
+		if (temp->p) temp->p->die();
 		temp = temp->next;
 	}
 }
 
-void EventQueue:: putFreeLink(CqLevelLink* p) {
+void CQEventQueue:: putFreeLink(CqLevelLink* p) {
 	if (p->fineLevel) {
 		Event* temp = (Event*) p->e;
 		putEvent(temp);
@@ -85,14 +87,14 @@ void EventQueue:: putFreeLink(CqLevelLink* p) {
 	CalendarQueue:: putFreeLink(p);
 }
 
-void EventQueue :: initialize() {
+void CQEventQueue :: initialize() {
 	// first maintain free links and free events.
 	clearFreeEvents();
 	CalendarQueue :: initialize();
 	clearParticles();
 }
 
-EventQueue :: ~EventQueue() {
+CQEventQueue :: ~CQEventQueue() {
 	initialize();
 	clearFreeEvents();
 }

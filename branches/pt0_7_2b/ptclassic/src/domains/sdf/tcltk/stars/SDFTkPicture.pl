@@ -1,7 +1,7 @@
 defstar {
 	name		{ TkPicture }
 	domain		{ SDF }
-	version		{ $Id$ }
+	version		{ @(#)SDFTkPicture.pl	1.1 06/25/97 }
 	author		{ Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

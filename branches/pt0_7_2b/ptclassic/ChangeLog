@@ -1,0 +1,861 @@
+2002-08-29  Ptolemy  <ptolemy@andrews.eecs.berkeley.edu>
+
+	* tycho/kernel/gui/TWidget.itcl:
+	clipboard fix under Windows XP (Edward A. Lee)
+
+2001-08-03  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* Updates to ACS from Ken Smith
+
+2001-07-04  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* mk/config-sol2.mk
+	GCC-2.95.2 does need to include -lg++ (Christian Sgraja)
+
+2000-09-25  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* Added mk/config-sol8.mk
+
+2000-09-21  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* Cygwin 1.1.2 Changes from Xavier Warzee
+Ptolemy0.7.2devel port to Cygwin 1.1.2/Xfree :
+
+About X11 :
+You must recompile the Xaw library to resolve some undefined symbols like 
+sys_nerr and sys_errlist.
+
+The Xfree/Xserver seems not stable. We use  Xwin32 version 5.0 from Starnet 
+(www.starnet.com)
+Which is free for evaluation.
+
+You may set the following variable like that : PTOLEMY=/home/ptolemy
+You must avoid to set the PTOLEMY variable with the disk specification like
+PTOLEMY=C:/cygwin/home/ptolemy. (In that case, for instance, it is 
+impossible to build Tcl/Tk)
+The Cygwin environment manages for you the mount of its file system onto a 
+Windows disk.
+
+$PTOLEMY/mk/config-nt4.mk
+line 58
+replace
+CPLUSPLUS = g++ -I$(ROOT)/src/compat/cfront 鳳T_EGCS
+By
+CPLUSPLUS = g++ -I$(ROOT)/src/compat/cfront 鳳T_EGCS 貿permissive
+
+Line 100
+Replace
+SYSLIBS=$(SHARED_COMPILER_FLAG) $(SHARED_SYSLIBS) 僕m
+By
+SYSLIBS=$(SHARED_COMPILER_FLAG) $(SHARED_SYSLIBS) 僕stdc++ 僕m
+
+line 123
+replace
+X11EXT_LIBSPEC= -lXext 僕SM 僕ICE
+By
+X11EXT_LIBSPEC= -lXpm -lXext 僕SM 僕ICE
+
+$PTOLEMY/mk/stars.mk
+line 429 deleted
+$(ACST)/HWSchedule.o
+$PTOLEMY/src/octtools/Packages/utility/pipefork.c
+line 108 :
+replace
+if (waitPid == forkpid && WIFEXITED(status)) {
+by
+if (waitPid == forkpid && WIFEXITED(status.w_status)) {
+
+$PTOLEMY/src/octtools/include/port.h
+lines 589 to 593 added
+#ifdef __CYGWIN__
+#define sys_errlist _sys_errlist
+#define sys_nerr _sys_nerr
+#include <ctype.h>
+#endif
+
+$PTOLEMY/src/compat/ptolemy/compat.h
+replace line 391
+extern char * _sys_errlist[];
+by
+extern const char *const _sys_errlist[];
+
+lines 399 to 403 added
+#ifdef NEED_SYS_ERRLIST
+�
+#else /* PT_NT4VC */
+#if defined  (__CYGWIN__)
+#define sys_nerr _sys_nerr
+#define sys_errlist _sys_errlist
+#include <errno.h>
+#else /* __CYGWIN__ */
+#if defined (__GLIBC__) && (__GLIBC__ >= 2)
+#include <errno.h>
+#else
+extern int sys_nerr;
+extern const char *const sys_errlist[];
+extern int errno;
+#endif /* (__GLIBC__) && (__GLIBC__ >= 2)*/
+#endif /* __CYGWIN__ */
+#endif /* PT_NT4VC */
+#endif /* PTNBSD_386 */
+#endif /* NEED_SYS_ERRLIST */
+
+
+$PTOLEMY/src/kernel/State.h
+replace line 72, 73
+extern char * _sys_errlist[];
+extern int sys_nerr;
+by
+#define sys_errlist _sys_errlist
+#define sys_nerr _sys_nerr
+
+
+2000-08-14  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* src/domains/acs/
+	Extensive changes from Eric Pauer
+	
+2000-04-18  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* Added src/domains/acs/demo/magtest
+	ACS demo from Eric Pauer
+	
+	
+1999-11-24  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* src/octtools/tkoct/oct2ptcl/make.template:
+	Christian Sgraja: Install oct2ptcl properly
+	
+	* src/octtools/tkoct/top/make.template:
+	Christian Sgraja: Removed $(OUT), it was obsolete
+	
+	* MAKEARCH
+	Christian Sgraja: Don't create links for tkoct and tkgraph, we do
+	not ship those directories
+	
+1999-11-16  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* acs/stars/ACSBufferCGFPGA.pl
+	Ken Smith:
+	We're starting to see some problems with connections in the FPGA
+	target. As a workaround, we will be adding the Buffer star to the
+	palette.  The Buffer will help to isolate multiple wire instances.
+	
+	* acs/stars/ACSAddCGFPGA.pl:
+	* acs/stars/ACSFIRCGFPGA.pl:
+	Ken Smith:
+	Problems calculating the pipe delay
+
+	* sdf/wildforce/stars/make.template:
+	* sdf/wildforce/stars/xbar_cfg.dat:
+	Added xbar_cfg.dat
+	
+1999-11-11  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* acs/targets/HWTarget.cc
+	Ken Smith:
+	HWalg_resolver(): Use iloop in inner loop, not loop
+	HWexport_wgscript(void): Remove the leading slash from the src
+	directories 
+
+1999-11-10  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* de/kernel/Resource.cc:
+	Claudio Passerone: Floating point operations under Linux were
+	causing problems with timestamps.
+
+1999-11-01  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* src/tcltk/tcl_shared
+	If we are on hppa.cfront, then build static libs
+
+1999-10-31  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* src/ptlang/ptlang.y
+	Don't include unistd.h under nt4.vc
+
+	* src/ptlang/ptlang.vc
+	Define PT_NT4VC when compilingg
+	
+1999-10-30  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* acs/targets/HWSchedule.cc
+	hppa.cfront: Added cast for abs
+
+	* acs/targets/acs_vhdl_lang.cc
+	hppa.cfront: ifdef out methods that use strstreambuf
+	HP C++ HPCPLUSPLUS  A.10.34 fails to compile the following with:
+	 acs_vhdl_lang.cc", line 554: error: bad operands for <<: ostream << const strstreambuf* (1634)
+	 acs_vhdl_lang.cc", line 554: error: pointer operand for << (1422)
+
+	* src/compat/ptolemy/compat.h
+	Removed trailing garbage in #endif
+	
+	* acs/targets/ACSCGFPGATarget.cc ACSCGFPGATarget.h Arch.h
+	Connectivity.h Delay.h DoubleArray.h Fpga.h HWSchedule.h
+	Pipealign.h Port_Timing.h Sg_Constructs.h StringArray.h
+	acs_vhdl_lang.h HWTarget.cc   
+	hppa.cfront: No need to qualify members of class within class definition
+	* acs/targets/HWTarget.cc
+	hppa.cfront: When calling add_pin, pass 1 instead of 1.0	
+	
+1999-10-29  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* build-nt4.vc.mk.vc
+	Build sdf under nt4.vc
+
+	* bin/makevcgen
+	NT4 has problems recoginizing variable names if we use
+	[A-Za-z0-9_]+
+	so we use: 
+	[A-Za-z0-9_][A-Za-z0-9_]*
+	instead
+
+
+1999-10-28  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	
+	* bin/makevcgen
+	Use /bin/sh instead of tcl
+	
+	* bin/xv
+	try to find and execute an image viewer (xv, gqview, ee or gimp)
+	(From Wolfgang Reimer's 0.7.1p1-10 patch)
+	
+	* bin/html2ps
+	updated	
+
+	* pigiRpc/pigiMain.cc
+	* ptcl/ptclInit.cc
+	Note by W. Reimer: Glibc 2.1 does not support __setfpucw() any
+	longer. Instead there is a macro _FPU_SETCW. Actually, the whole
+	fix is not required any longer because in the default FPU control
+	word of libc 5.3.12 and newer (glibc) the interrupt mask bit for
+	invalid operation (_FPU_MASK_IM) is already set.
+	
+	* build-nt4.vc.mk.vc
+	KERNEL_LIB: Pass in PTLIB because usually we build a static
+	libptolemy.a 
+
+	* kernel/Display.cc
+	nt4.vc: Moved last #endif into the right place
+	
+1999-10-27  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* bin/g++-setup
+	* .cshrc
+	GCC_EXEC_PREFIX changed in gcc-2.95.1.  Note the trailing / is
+	necessary 
+	
+	* mk/config-nt4.mk:
+	If we compile with -g, then the link can take a long time
+
+	* acs/utils/wordlength
+	Added .p files
+
+	* Cleaned up release notes and what's new
+	
+	* Moved untested domains into a new palette
+	
+	* tycho/gui/gui.tcl:
+	Ptolemy Classic compiled under NT does not support shared libs
+	so [info sharedlibext] will return the empty string, so
+	trying to view the Ptolemy copyright will try to load it as
+	a shared library. 
+	
+1999-10-22  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* mk/config-hppa.mk
+	-ldce is necessary to get pthread_once in gcc-2.951
+
+	* sdf/kernel/SDFWormhole.cc:
+	disable "not enough output tokens..." error message in
+	SDFfromUniversal :: sendData (Bilung Lee)
+
+	* sdf/kernel/SDFTarget.cc:
+	Use selfFiringRequested() and nextFiringTime() to coordinate the
+	future event firing between inside and outside domain. (Bilung Lee)
+	
+1999-10-21  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* acs/targets/HWTarget.cc
+	Print better error message if COREGEN environment variable
+	is not set.
+
+	* src/gnu/makefile
+	install_gnu rule:
+	For HPUX, don't include CC=$(GNU_BUILD_CC), it causes problems
+	building bison with the native /bin/cc
+	
+1999-10-20  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* ACSCGFPGATarget.h:
+	Declare DEBUG_* symbols to be like
+	static const int DEBUG_TOPLEVEL;
+	The problem here was that the ACS-CGFPGA target was
+	not working properly
+	
+	* ACSCGFPGATarget.cc:
+	Declare DEBUG_* symbols to be like
+	const int ACSCGFPGATarget::DEBUG_TOPLEVEL = 0;
+
+	* acs_vhdl_lang.cc:
+	Declare const strings to be like:
+        static const char begin_scope[];
+	
+	* acs_vhdl_lang.cc:
+	Declare const strings to be like:
+	const char VHDL_LANG::begin_scope[]="begin ";	
+	
+	* sdf/wildforce/make.template
+	Updated to include pe0_controller.m68
+	
+	* sdf/wildforce/make.template/pe0_controller.m68
+	New binary file for wildforce
+	
+	* MAKEARCH
+	Added octgc
+
+1999-10-13  Christopher Hylands  <cxh@eecs.berkeley.edu>
+
+	* MAKEARCH
+	sdf/wildforce
+	
+	* mk/stars.mk
+	ACS and Wildforce
+
+	* mk/config-sol2.mk
+	Wildforce defines
+	
+	* src/domains/acs
+	Updated with lots of changes
+	
+	* src/domains/sdf/wildforce
+	New directory
+	
+	---Changes for 0.7.1p2 above here--- 
+1999-10-06  Christopher Hylands
+
+	* mk/config-hppa.mk
+	Updated for gcc-2.95.1
+
+	* src/compat/cfront/ACG.h
+	hppa: asLong needs to be declared to return an unsigned long
+	
+	* lib/tcl/pigilib.tcl
+	Updated to handle the case where ptolemy is in a different
+	location than the one it was installed in
+	
+	* mk/stars.mk
+	* acs/kernel/ACSCGFPGACore.h
+	Renamed acs/target/IntArray to ACSIntArray
+	to avoid problems on statically linked platforms
+	
+	* acs/target/IntArray.h
+	* acs/target/IntArray.cc
+	Removed
+	
+	* acs/target/ACSIntArray.h
+	* acs/target/ACSIntArray.cc
+	Added
+
+	* sdf/wildforce
+	Renamed sdf/wildforce/kernel/IntArray to WFIntArray
+	
+1999-10-05  Christopher Hylands
+
+	* mk/stars.mk
+	static: typo: sdfwildforce -> sdfwildforcestars.o
+
+	* mk/config-sol2.5.static.mk
+	Updated gcc-2.95.1.  PTARCH==sol2.5.static is useful
+	for tracking down problems with statically linked platforms
+	such as NT
+	
+1999-10-04  Christopher Hylands
+
+	* pigilib/pigiLoader.cc
+	nt4: Added include <unistd.h> for access()
+
+	* pigilib/POct.cc
+	nt4: include unistd.h for getuid()
+
+
+	* vhdl/targets/SynthTarget.cc
+	nt4: include unistd.h for cuserid()
+
+
+	
+1999-09-30  Christopher Hylands
+
+	* mk/stars.mk
+	Added .o file to TARGETS for ACS non-shared libraries, such as NT
+
+1999-09-21  Christopher Hylands
+
+	* src/domains/de/kernel/DERCScheduler.cc
+	* src/domains/de/kernel/Resource.cc
+	Leak fixes from Luciano Lavagno.	
+	
+	* src/domains/c50/dsp/stars/C50LMS.pl
+	* src/domains/acs/kernel/ACSCGCCore.cc
+	* src/domains/acs/kernel/ACSCGCCore.cc
+	NT: Added include stdio.h for sprintf()
+	
+	* src/domains/vhdl/targets/SynthArchTarget.cc:
+	NT: include stdio.h for cuserid()
+	
+1999-09-20  Christopher Hylands
+
+	* src/gnu/makefile
+	We need to use --with-gxx-include-dir to workaround a bug
+	in gcc-2.95.1 where prefix is not a subdir of exec-prefix.
+	See http://egcs.cygnus.com/ml/gcc-bugs/1999-08/msg00528.html
+	http://egcs.cygnus.com/ml/gcc-bugs/1999-08/msg01102.html
+
+	* mk/config-default.mk
+	* mk/config-nt4.mk
+	* src/octtools/Xpackages/makefile
+	OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
+	but config-nt4.mk overrides it and sets it to nothing because Cygwin
+	cannot compile iv because of signal issues.
+	
+	* src/octtools/makefile
+	OCTTOOLS_ATTACHE_DIR is usually set to attache in
+	$PTOLEMY/mk/config-default.mk
+	but config-nt4.mk overrides it and sets it to nothing because Cygwin
+	cannot compile attache because of curses issues
+	
+	* domains/cgc/kernel/CGCStar.cc
+	* domains/cgc/kernel/CGCPortHole.cc
+	NT: Added include stdio.h for sprintf()
+
+1999-09-17  Christopher Hylands
+
+	* utils/ptplay/make.template
+	Sol7: Modified use of findstring
+	
+1999-09-10  Christopher Hylands
+		
+	* domains/acs/stars/ACSAddCGFPGA.pl
+	* domains/acs/stars/ACSCompareCGFPGA.pl
+	* domains/acs/stars/ACSMuxCGFPGA.pl
+	* domains/acs/stars/ACSShiftCGFPGA.pl
+	* domains/acs/stars/ACSSubCGFPGA.pl
+	* domains/acs/targets/IntArray.cc
+	* domains/acs/targets/acs_vhdl_lang.cc
+	* domains/acs/targets/HWTarget.cc
+	* domains/acs/targets/IntArray.cc
+	* domains/acs/stars/ACSAddCGFPGA.pl
+	* domains/acs/stars/ACSCompareCGFPGA.pl
+	* domains/acs/stars/ACSShiftCGFPGA.pl
+	* domains/acs/stars/ACSSubCGFPGA.pl
+	SunCC 4.1: Multiple declarations for loop
+	
+	* domains/acs/targets/acs_vhdl_lang.h:
+	SunCC 4.1:
+	Error: "VHDL_LANG::tie_it(const char*, const int, const int, const char*)" was previously declared "VHDL_LANG::tie_it(const char*, int, int, const char*)".
+	Fixed by adding consts to decl in .h file
+	
+	* domains/acs/targets/ACSCGFPGATarget.cc
+	SunCC4.1: Error: String/char constants may not include line separator.
+
+	* src/domains/acs/targets/acs_vhdl_lang.h: 
+	* src/domains/acs/targets/acs_vhdl_lang.cc: 
+	Sun CC 4.1 fails to compile lines like the following in
+	acs_vhdl_lang.h: 
+	static const char begin_scope[]="begin ";
+	with the message
+	Error: A member cannot be initialized except in a constructor.
+	
+	* src/domains/acs/targets/ACSCGFPGATarget.h
+	* src/domains/acs/targets/ACSCGFPGATarget.cc
+	SunCC4.1 fails to compile lines in ACSCGFPGATarget.h like:
+	static const int DEBUG=0;
+	the error message is:
+	Error: A member cannot be initialized except in a constructor.
+	
+	* kernel/Linker.cc:
+	NT: Added include unistd.h for getpid
+	
+	* kernel/Matrix.cc:	
+	* kernel/SubMatrix.cc:	
+	* domains/sdf/kernel/SDFCluster.cc:
+	* domains/sdf/stars/SDFFix.pl:
+	* domains/sdf/stars/SDFTestMultirate.pl:
+	* domains/sdf/image/stars/SDFMotionCmp.pl:
+	* domains/sdf/atm/stars/SDFBanyanGal.cc:
+	* domains/hof/stars/HOFBase.pl:
+	NT: Added include stdio.h for sprintf()
+
+	* domains/sdf/targets/CompiledUniverse.cc:
+	NT: Added include stdio.h for sscanf()
+
+
+1999-09-09  Christopher Hylands
+
+	* mk/matlab.mk
+	Set MATLABEXT2_LIB equal to MATLABEXT_LIB
+
+	* src/gnu/makefile
+	Work around a problem with GNU make-3.77 under Solaris 2.7 
+	with the wildcard makefile directive
+
+	* tycho/java/ptolemy/plot/ptplot.in
+	Removed -verbose:class and fixed typo
+
+		* mk/config-sol7.mk
+	Added note about compiling with gcc-2.95.1
+	Solaris 7 does not need uint32_t and int32_t defined for the
+	Wildforce stars, it has them defined in /usr/include/sys/int_types.h
+
+	* mk/config-sol2.5.mk
+	Moved most of the solaris specific code into config-sol2.mk
+
+	* MAKEARCH
+	Added sdf/wildforce
+
+	* sdf/makefile
+	Only go down in the wildforce directory if the makefile variable
+	WILDFORCE is set.
+
+	* mk/stars.mk
+	SDFWildforce libs
+	Added libsdfwildforce as a dependency
+
+	* mk/config-sol2.mk
+	Added wildforce specific makefile code here so that we can
+	build on more than sol2.5.mk
+
+	* mk/config-g++.mk
+	Set up for gcc-2.95.1
+	
+	* sdf/wildforce/makefile
+	Added kernel directory
+
+	* sdf/wildforce/stars/SDFWF4.pl:
+	Added include sys/types.h for Solaris 7
+
+1999-09-01  Christopher Hylands
+
+	* src/gnu/makefile
+	* .cshrc
+	* bin/g++-setup
+	* src/gnu/README
+	Modified for gcc-2.95.1
+ 	We had to modify gcc-2.95/gcc/gcc/Makefile.in so
+ 	that gcc_tooldir was not set to the crazy sed
+ 	statement that configure produced if
+ 	exec_prefix is not a subdirectory of prefix
+ 	    prefix = /users/cxh/pt/gnu/common
+ 	    exec_prefix = /users/cxh/pt/gnu/sol2.5
+	
+	* sdf/targets/CompiledUniverse.cc:
+	g++-2.95.1: initialization to `char *' from `const char *'
+	discards qualifiers 
+	Fix was to add (char *) before the ? operator
+	
+	* ptklib/BarGraph.h:
+	* ptklib/XYPlot.h:
+	"ANSI C++ forbids declaration `unique' with no type."  The fix
+	was 'static unique' -> 'static int unique' 
+	
+	* domains/sdf/contrib/kernel/nb_fft.cc:
+	gcc-2.95.1: "ANSI C++ forbids declaration `NEXTMX' with no type"
+	fix was 'const NEXTMX = 12;' to 'const int NEXTMX = 12;'	
+
+	* domains/bdf/kernel/BDFScheduler.h:
+	"ANSI C++ forbids declaration `getBoolValue' with no type"
+	Fix was to declare getBoolCalue to return an int
+
+	* mk/config-sol2.mk
+	* mk/config-sol2.5.mk
+	Modified config-sol2.mk so that we use
+	X11_INCSPEC =	-isystem /usr/openwin/include 
+	So that domains/sdf/dfm/stars/SDFFileEval.pl does not fail
+	to compile with:	
+	/usr/openwin/include/X11/Xlib.h:1894: ANSI C++ forbids declaration
+	`XSetTransientForHint' with no type 
+	
+	* cg56/stars/CG56CircToLin.pl:
+	* cg56/stars/CG56LinToCirc.pl:
+	g++-2.95.1: "passing `const char *' as argument 2 of
+	`CG56CircToLin::oneComplex(int, char *)' discards qualifiers"
+	The fix was to add (char *) casts
+
+		* ptcl/PTcl.cc:
+	g++-2.95.1: "passing `const char *' as argument 2 of
+	`Tcl_SetResult(Tcl_Interp *, char *, void (*)(char *))' discards
+	qualifiers" 
+	The fix was to add (char *)
+	
+	* tysh/TyConsole.cc:
+	g++-2.95.1: passing `const char *' as argument 3 of
+	`Tcl_SetVar(Tcl_Interp *, char *, char *, int)' discards qualifiers 
+	Added (char *) to ternary ?
+
+	* pitcl/PITcl.cc:
+	g++-2.95.1: passing `const char *' as argument 2 of
+	`Tcl_SetResult(Tcl_Interp *, char *, void (*)(char *))' discards
+	qualifiers 
+	Fixed by adding (char *) to ternary ? op
+
+	* pigilib/ptkConsoleWindow.cc:
+	g++-2.95.1: passing `const char *' as argument 2 of
+	`Tcl_GetVar(Tcl_Interp *, char *, int)' discards qualifiers 
+	Added (char *) to ternary ? op 
+
+	* ptklib/Picture.h:
+	ANSI C++ forbids declaration `unique' with no type
+	
+1999-08-27  Christopher Hylands
+
+	* domains/de/kernel/{Resource.cc,Resource.h,DERCScheduler.cc}
+	Changes from Claudio Passerone
+	
+	* Added src/octtools/octgc
+	
+1999-06-01  Christopher Hylands
+
+	* mk/config-sol7.mk
+	Added settings provided by Dirk Forchel to compile xv.
+
+1999-05-04  Christopher Hylands
+
+	* Updated NT installation instrructs with information from
+	Tim Kurzweg <tim@ee.pitt.edu>		
+
+1999-04-29  Christopher Hylands
+
+	* src/pxgraph/pxgraph/xgraph.c
+	Added about box back in (reported by Jonathan M Hill)
+	Fixes for "warning: subscript has type `char'"
+	The problem is that isspace and isdigit are macros under solaris 
+
+	* src/pxgraph/pxgraph/xgraph.h
+	Modified version string to use SCCS keywords
+	Added include stdio.h to fix warnings
+
+	* src/pxgraph/pxgraph/parms.c
+	Fixes for "warning: subscript has type `char'"
+	The problem is that isspace and isdigit are macros under solaris 
+
+1999-04-19  Christopher Hylands
+
+	* src/kernel/Scheduler.h
+	Add selfFiringRequested() and nextFiringTime() to coordinate the
+	future event firing between inside and outside domain.
+	Bilung Lee
+	
+	* DERCScheduler.cc
+        a) Moved invocation of method getResources() from run() to setup()
+        b) Changed getResources() -> The scheduling policy is not assigned
+           when creating a resource. Instead, it is done during begin by
+           the various stars.
+	Claudio Passerone: Polis
+ 
+	* DETarget.cc, DETarget.h:
+	Added isResource() method to check if the Resource Contention
+	Scheduler is activated.
+	Claudio Passerone: Polis
+
+	
+	* Resource.cc:
+    a) Added two new methods getSchedPolicy() and registerPriority()
+    b) In newEventFromEventQ: feedbackIn with value 0.0 is used to emit
+       events (it used to be with any value).
+    c) Changed handling of scheduling policy since they were incorrect.
+       Now there are 6 scheduling policies.
+    Note that in the case statement, not
+    all the breaks are executed.
+    d) Changed the way events are rescheduled.
+    f) Changed log of missed events (the string was wrong).
+    g) canAccessResource() changed for the new scheduling policies
+    h) removeFinishedStar() changed to update the lastFired HashTable.
+	Claudio Passerone: Polis
+
+	
+	* Resource.h
+	Claudio Passerone: Polis
+	a) Added two new methods getSchedPolicy() and registerPriority()
+	b) Defined useful macros for scheduling policies
+	c) Included HashTable.h
+	d) Added an hashtable lastFired to hold executions of stars
+	Claudio Passerone: Polis
+
+	
+	* DERCStar.h
+	Claudio Passerone: Polis
+	a) Added lastFiredPr, pointer to the list of stars for non time based
+	scheduling.
+	Claudio Passerone: Polis
+
+	
+1999-03-15  Christopher Hylands 
+
+	* src/octtools/Packages/utility/csystem.c:
+	nt: If /bin/bash.exe cannot be found, print a message
+	
+1999-03-11  Christopher Hylands
+
+	* pigilib/pigiLoader.cc:
+	reportErrors(): If we can't open the tmpFileName, report the
+	filename and the reason why
+
+1999-03-10  Christopher Hylands
+
+	* Various updates to doc/html/nt docs
+
+1999-03-02  Christopher Hylands
+
+	* ptolemy/tycho/java/ptolemy/plot/plot.in:
+	Don't bother checking for classes.zip, it could be anywhere.
+
+1999-02-25  Christopher Hylands
+
+	* mk/stars.mk:
+	Added $(ACSDIR)/targets to the list of CUSTOM_DIRS.
+	Building an ACS only pigi was failing.
+	(Reported by Brian Evans)	
+
+1999-02-23  Christopher Hylands
+
+	* src/kernel/Display.cc:
+	If fopen() fails, print the reason why.
+
+1999-02-22  Christopher Hylands
+
+	* $PTOLEMY/src/domains/sdf/contrib/stars/SDFRfft.pl
+	Array Bounds Read where we set Result[i] because the for loop was
+	i<fftlength instead of i<fftlength/2
+	
+	* mk/ptbin.mk:
+	Added a comment that describes the proper override.mk
+	to use to build ptcl with tk
+	
+	* MAKEARCH
+	Call exit 0 so that if the touch fails we don't fail.
+	touch under NT sometimes fails.
+
+	* lib/tcl/ptkGantt.tcl:
+	Print an error message if the file does not contain
+	'numberOfProcessors' or 'period'
+	
+	* src/pigibli/icon.c:
+	Start up Tycho on the right hand side
+
+	* tycho/edit/textedit/EditMail.itcl
+	Optional arguments were incorrectly declared 
+	(reported by Wolfgang Reimer) 
+	
+	* src/domains/de/contrib/demo/DynBlockIntTest/TestGalaxy:
+	Fixed problem with %pInput (reported by Wolfgang Reimer)
+	
+1999-02-22  Wolfgang Reimer
+
+	* mk/config-linux.mk:
+	- Changed tcl/itcl library path in config-linux.mk 
+        because it was changed from 0.7.1 to 0.7.2
+        - Commented out "GNULIB=/usr/lib" in order to
+	avoid linking of the native tcl/tk libs
+        (which come with RedHat Linux). These native libraries
+        will not work in conjunction with Ptolemy. Defining
+        "GNULIB=/usr/lib" wrongly puts the system directory
+        /usr/lib in front of the Ptolemy specific tcl/tk
+        lib directory. Also GNULIB must not be empty
+        otherwise the makefiles generated by the CGC domain
+        will not work. So uncommenting the above mentioned
+        line will leave GNULIB as it is.
+
+	* src/tcltk/itcl3.0.1pt/itcl/unix/configure.in:
+	* src/tcltk/itcl3.0.1pt/itcl/unix/configure:
+	There was a missing pair of brackets in configure.in which causes
+        autoconf to produce an erroneous output file (configure):
+        ...
+        checking whether C compiler is gcc... checking how to run the C
+preprocessor... gcc -E
+        /users/ptolemy-0.7.2-1/src/tcltk/itcl3.0.1pt/itcl/unix/configure:
+s%@CPP@%gcc: command not found
+        ...
+
+       * src/domains/cg/macroScheduler/MacroScheduler.h:
+       * src/domains/vhdl/kernel/VHDLTarget.h
+
+	This is just a cosmetic patch to get rid of annoying
+        egcs-1.1.1 warnings of type: 
+          return-type of ... defaults to `int'
+	
+1999-02-20  Christopher Hylands
+
+	* mk/config-nt4.mk:
+	Define -DPT_NO_TIMER which makes everything run slower,
+	but also stops pigi from hanging in the Tk demos
+
+1999-02-11  Christopher Hylands
+
+	* doc/html/nt/ptntbugs.html:
+	Added note about how to workaround Tk demos not running.
+
+	* src/domains/hof/icons/
+	Added more Nop icons, added numbering for moreNop palette 
+	(Tom Lane)
+	
+1999-02-10  Christopher Hylands
+
+	* doc/html/nt/ptntinstall.html:
+	* doc/html/nt/ptntbugs.html
+	Added info about unset LIB and chmod
+
+	* bin/pigiEnv.sh:
+	If TYCHO is set, then print a warning if it is not set to
+	$PTOLEMY/tycho	
+	
+	* Fixed various FSM demos that were not caught by ptfixtree
+	
+1999-02-08  Christopher Hylands
+
+	* src/pigilib/palette.c
+	Make-Schem-Icon (@) was failing:	
+	Missed a reference to %cCursor (Reported by Bilung Lee)
+
+	* src/utils/ptplay/make.template:
+	sol7:Compare with sol instead of sol2
+	
+	* src/ptcl/ptclAppInit.tcl
+	Ptcl with Tk: no need to declare TkConsoleCreate() or
+	TkConsoleInit(), Use Tk_Init instead of Tk_SafeInit.
+	(Olaf Lenzmann)
+	
+	* mk/ptbin.mk
+	If the PTCL_WITH_TK makefile variable is defined, then be sure to
+	not override the TK variable 
+
+	* src/utils/ptspawn
+	Helper App for the Microsoft Windows Visual C port
+	(Olaf Lenzmann)
+	
+	* src/utils/makefile
+	Updated to include ptspawn directory	
+	
+	* src/kernel/Display.cc
+	(Olaf Lenzmann) Added support for ptspawn
+	
+1999-02-06  Christopher Hylands  
+
+	* src/compat/ptolemy/compat.h:
+	* mk/config-sol7.mk:
+	sol7: Define PTSOL7 and check for it so that we don't declare 
+	bind()
+	
+	* src/utils/ptplay/make.template:
+	Added targets for sol2.6 and sol7	
+
+	* tycho/java/configure.in:
+	Look for java in /usr/java as well
+
+	* src/compat/cfront/std.h:
+	sol7.cfront: Don't declare random() 
+
+	* octtools/vem/utility/color.c:
+	sol7.cfront: Don't use // style C comments	
+	

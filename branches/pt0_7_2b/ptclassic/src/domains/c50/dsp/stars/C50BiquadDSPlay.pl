@@ -2,37 +2,38 @@ defstar {
 	name { BiquadDSPlay }
 	domain { C50 }
 	desc { Second order IIR filter (Biquad) }
-	version { $Id$ }
-	author { A.Baensch, ported from Gabriel }
+	version {@(#)C50BiquadDSPlay.pl	1.5	05/26/98}
+	author { A.Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
+	htmldoc {
 Second order IIR filter (Biquad).  This biquad is tailored to use the
 coefficients from the DSPlay filter design tool.
-If DSPlay gives the coefficients: A B C D E then define the parameters
+If DSPlay gives the coefficients: A, B, C, D and E then define the parameters
 as follows:
-.sp 0.5
-.(l
-a = A
-b = B
-c = C
-d = -(D+1)
-e = -E
-.)l
-.sp 0.5
-.pp
-This only works if a, b, c, d, and e are in the range (-1,+1).
+<p>
+<ul>
+<li> a = A
+<li> b = B
+<li> c = C
+<li> d = -(D &#43 1)
+<li> e = -E
+</ul>
+<p>
+<p>
+This only works if a, b, c, d, and e are in the range (-1,&#43<sub></sub>1).
 The transfer function realized by the filter is:
-.EQ
-H(z) ~ = ~ { { a ~ + ~ b z sup { -1 } ~ + ~ c z sup { - 2 } } over
-{ 1 ~ - ~ (d ~ + ~ 1) z sup { - 1 } ~ - ~ e z sup { -2 } }  }
-.EN
-.pp
+<pre>
+a &#43 b&#183z<sup>-1</sup> &#43 c&#183z<sup>-2</sup>
+-----------------------
+1 - (d &#43 1)&#183z<sup>- 1</sup> - e&#183z<sup>-2</sup>
+</pre>
+<p>
 The default coefficients implement a low pass filter.
         }
         input {
@@ -43,36 +44,7 @@ The default coefficients implement a low pass filter.
 		name { output }
 		type { fix }
 	}
-	state {
-		name { a }
-		type { fix }
-		desc { coef }
-		default { "4.5535887e-06" }
-	}
-	state {
-		name { b }
-		type { fix }
-		desc { coef }
-		default { "9.1071774e-06" }
-	}
-	state {
-		name { c }
-		type { fix }
-		desc { coef }
-		default { "4.5535887e-06" }
-	}
-	state {
-		name { d }
-		type { fix }
-		desc { coef }
-		default { 0.9939553 }
-	}
-	state {
-		name { e }
-		type { fix }
-		desc { coef }
-		default { "-0.993973494" }
-	}
+	
 	state {
 		name { state }
 		type { fixarray }
@@ -84,21 +56,10 @@ The default coefficients implement a low pass filter.
 		name { coef }
 		type { fixarray }
 		desc { internal }
-		default { "0[6]" }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+		default { "4.5535887e-06 9.1071774e-06  4.5535887e-06 0.9939553 1 -0.993973494" }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
 	}
 
-        codeblock(coefinit) {
-        .ds     $addr(coef)			;put coef into memory location
-        .q15	$val(a)
-        .q15	$val(b)
-        .q15	$val(c)
-        .q15	$val(d)
-        .q15	07fffh
-        .q15  	$val(e)
-        .text
-
-        }
         codeblock(std) {
 	zap					;clear P-Reg and Accu
         lar     AR0,#$addr(state)		;Address state		=> AR0
@@ -124,9 +85,7 @@ $label(lpMup)					;Accu=Accu+(P-Reg)
 	dmov	*				;state(1) => state(2)
 	bldd	#$addr(input),*			;input => state(1)
 	} 
-        initCode {
-                addCode(coefinit);
-  	}
+
         go {
                 addCode(std);
 	}

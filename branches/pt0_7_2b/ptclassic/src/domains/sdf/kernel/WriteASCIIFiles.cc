@@ -1,9 +1,9 @@
-static const char file_id[] = "WriteFiles.cc";
+static const char file_id[] = "WriteASCIIFiles.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)WriteASCIIFiles.cc	1.5	04/08/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,10 +36,10 @@ to an ASCII file.
 
 **************************************************************************/
 
-#include <stdlib.h>
+#include <stdio.h>
 #include "type.h"
 #include "miscFuncs.h"
-#include "WriteFiles.h"
+#include "WriteASCIIFiles.h"
 
 /*
 Save an array of double precision floating-point numbers to an ASCII file
@@ -67,10 +67,10 @@ int doubleArrayAsASCFile(const char* filename, const char* formatstr,
 		for (i = 0; i < length; i++) {
 		    // write the value to file in ASCII format
 		    if (writeIndexFlag) {
-			fprintf(fp, formatstr, i, dptr);
+			fprintf(fp, formatstr, i, *dptr);
 		    }
 		    else {
-			fprintf(fp, formatstr, dptr);
+			fprintf(fp, formatstr, *dptr);
 		    }
 		    dptr++;
 

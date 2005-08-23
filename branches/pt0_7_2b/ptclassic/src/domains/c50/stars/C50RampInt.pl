@@ -2,7 +2,7 @@ defstar {
 	name { RampInt }
 	domain { C50 }
 	desc { Integer Ramp Generator }
-	version {$Id$}
+	version {@(#)C50RampInt.pl	1.5	06 Oct 1996}
 	author { Luis Javier Gutierrez}
 	copyright{
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-Generates an integer ramp signal, starting at \fIvalue\fR (default 0)
-with step size \fIstep\fR (default 1) saturating upon reaching largest
-integer if \fIsaturation\fR is "YES".
+	htmldoc {
+Generates an integer ramp signal, starting at <i>value</i> (default 0)
+with step size <i>step</i> (default 1) saturating upon reaching largest
+integer if <i>saturation</i> is "YES".
 	}
 	output {
 		name { output }
@@ -32,7 +32,7 @@ integer if \fIsaturation\fR is "YES".
 		type { int }
 		default { 0 }
 		desc { initial value output by RampInt }
-		attributes{ A_UMEM|A_CONSTANT }
+		attributes{ A_SETTABLE }
 	}
 	state {
 		name { saturation }
@@ -45,7 +45,7 @@ integer if \fIsaturation\fR is "YES".
 		type { int }
 		default { 0 }
 		desc { internal accumulator }
-		attributes { A_NONSETTABLE|U_YMEM|A_NONCONSTANT }
+		attributes { A_NONSETTABLE|A_UMEM|A_NONCONSTANT }
 	}
 	setup {
 		sum = int(value);
@@ -54,11 +54,19 @@ integer if \fIsaturation\fR is "YES".
 		if (int(saturation)) {
 			addCode(saturate);
 		}
-		addCode(accumulate)
+		addCode(accumulate);
+		if (int(saturation)) {
+			addCode(clearSaturation);
+		}
 	}
 
 	codeblock(saturate){
 	setc	ovm
+	}
+
+
+	codeblock(clearSaturation){
+	clrc	ovm
 	}
 
         codeblock(accumulate) {
@@ -76,3 +84,10 @@ integer if \fIsaturation\fR is "YES".
 		return 8;
 	}
 }
+
+
+
+
+
+
+

@@ -4,10 +4,10 @@ This is a replacement version of the methods for the Error class
 in Ptolemy -- link this in instead of Error.cc to go through the
 error handler in Tycho instead of the default.
 
-$Id$
+@(#)TyError.cc	1.7    03/30/97
 Programmer: J. Buck and E. A. Lee
 
-Copyright (c) 1995 The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,24 +45,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // the gate object ensures that messages come out in one piece even
 // with multi-threading.
-
-KeptGate gate;
+static KeptGate gate;
 
 typedef const char cc;
 
+// Post an error or warning message, if possible.
+// If it is an error message, then Tcl error is called.
+//
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
   CriticalSection region(gate);
-  const char* status = warn ? "warning: " : "";
+  InfString msg = warn ? "Warning: " : "Error:: ";
+  msg << "{";
   if (!m2) m2 = "";
   if (!m3) m3 = "";
-  InfString msg = status;
   if (obj) msg << obj << ": ";
   msg << m1 << m2 << m3;
-  if (Tcl_VarEval(ptkInterp, "ptkImportantMessage .ptkMessage \"", (char*)msg, "\"", NULL)
-      != TCL_OK) {
-    fprintf(stderr, (char*)msg);
-    fflush(stderr);
-  }
+  msg << "}\n";
+  Tcl_VarEval(ptkInterp, (char*)msg, (char*)NULL);
 }
 
 void
@@ -130,7 +129,7 @@ Error :: message (cc* m1, cc* m2, cc* m3) {
 // marking is not supported in this implementation
 int Error :: canMark() { return 0;}
 
-void Error :: mark(const NamedObj& o) {
+void Error :: mark(const NamedObj& /* o */) {
 //	StringList n = o.fullName();
 //	PigiErrorMark(n);
 }

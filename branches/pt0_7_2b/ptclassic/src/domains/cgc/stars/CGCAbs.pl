@@ -2,7 +2,7 @@ defstar {
 	name { Abs }
 	domain { CGC } 
 	desc { Output the absolute value of the input value. }
-	version { $Id$ }
+	version { @(#)CGCAbs.pl	1.2 01 Oct 1996 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 Outputs absolute value of the input.
-.Id "absolute value"
+<a name="absolute value"></a>
 	}
 	input {
 		name { input }

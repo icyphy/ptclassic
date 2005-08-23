@@ -41,6 +41,7 @@ class StringArray
  StringArray::~StringArray(void);
  int StringArray::population(void);
  int StringArray::add(const char*);
+ void StringArray::set(const int,const char*);
  char* StringArray::get(int);
  int StringArray::prefix(const char*);
 };

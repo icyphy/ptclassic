@@ -2,20 +2,20 @@ defstar {
 	name {Limit}
 	domain {CGC}
 	desc { Hard limiter. }
-	version { $Id$ }
+	version { @(#)CGCLimit.pl	1.6 06 Oct 1996 }
 	author { Kennard White }
 	acknowledge { SDF version by E. A. Lee }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star hard limits input samples to keep the in the range
-of (\fIbottom, top\fR).
-.Id "hard limiter"
+of (<i>bottom, top</i>).
+<a name="hard limiter"></a>
 	}
 	input {
 		name{input}

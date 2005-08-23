@@ -5,10 +5,10 @@ defstar {
 The output is equal to the remainder after dividing the
 integer input by the integer "modulo" parameter.
 	}
-	version { $Id$ }
+	version { @(#)CG56ModuloInt.pl	1.5	12/08/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -36,11 +36,11 @@ limitation of liability, and disclaimer of warranty provisions.
 Invisible parameter of the mask to implement integer modulo arithmetic
 by powers of two.
 		}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
 	codeblock(powerOfTwo) {
 	move	$ref(input),a
-	move	$val(powerOfTwoMask),x0
+	move	$ref(powerOfTwoMask),x0
 	and	x0,a
 	move	a,$ref(output)
 	}
@@ -51,12 +51,14 @@ by powers of two.
 		    return;
 		}
 
-		// convert the modulo parameter to a mask (stop at 16 bits)
-		int regValue = 0x01;		// 1, 2, 4, 8, ...
-		int mask = 0x00;		// 0, 1, 3, 7, ...
+		// convert the modulo parameter to a mask
+		// stop at 15 unsigned bits
+		int regValue = 0x02;		// 2, 4, 8, ...
+		int mask = 0x01;		// 1, 3, 7, ...
 		int modValue = int(modulo);
-		for (int i = 0; i < 16; i++) {
-		    if ( regValue == modValue ) break;
+		int i;
+		for (i = 1; i < 16; i++) {
+		    if ( modValue == regValue ) break;
 		    mask = (mask << 1) | 0x01;
 		    regValue <<= 1;
 		}

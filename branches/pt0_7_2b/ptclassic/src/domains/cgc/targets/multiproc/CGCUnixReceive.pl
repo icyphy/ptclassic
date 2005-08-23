@@ -4,11 +4,16 @@ defstar {
 	desc {
 Receive star between Unix processors.
 	}
-	version { $Id$ }
+	version { @(#)CGCUnixReceive.pl	1.8	04/07/97 }
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+        copyright {
+Copyright (c) 1991-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { CGC local library }
-	explanation {
+	htmldoc {
 Produce code for inter-process communication (receive-side)
 	}
 	private {
@@ -28,97 +33,34 @@ Produce code for inter-process communication (receive-side)
 		attributes { A_NONSETTABLE }
 	}
 	state {
-		name { IPCHandlerName }
+		name { socketId }
 		type { STRING }
-		default { "IPCHandler" }
-		desc { Name od sender's IPC handler function. }
+		default { "sid" }
+		desc { socket id }
 		attributes { A_NONSETTABLE }
 	}
-	state {
-		name { hostPort }
-		type { int }
-		default { 0 }
-		desc { Host port number }
-		attributes { A_NONSETTABLE }
-	}
-	state {
-		name { hostAddr }
-		type { STRING }
-		default { " " }
-		desc { Host address for server }
-		attributes { A_NONSETTABLE }
-	}
-
 	setup {
 		numData = output.numXfer();
 	}
-
-	codeblock (ipcHandler) {
-
-    void $val(IPCHandlerName)() {
-	int len;
-	struct sockaddr_in addr, far_addr;
-
-	/* Open a TCP socket (an Internet stream socket */
-	if (($starSymbol(sId) = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		printf("cannot open stream socket in $val(IPCHandlerName).\n");
-		exit(1);
-	}
-
-	/* Bind local address */
-	bzero((char*) &addr, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons($val(hostPort));
-
-	if (bind($starSymbol(sId),(struct sockaddr*) &addr,sizeof(addr)) < 0) {
-		printf("bind on port $val(hostPort) failed.\n");
-		exit(1);
-	}
-
-	listen($starSymbol(sId), 5);
-
-	/* wait for connection from a sender */
-	len = sizeof(far_addr);
-	$starSymbol(newSId) = accept($starSymbol(sId), 
-		(struct sockaddr*) &far_addr, &len);
-	if ($starSymbol(newSId) < 0) {
-		printf("accept error on port $val(hostPort).\n");
-		exit(1);
-	}
-	printf("accept connection on port $val(hostPort).\n");
-    }	
-	}
-	initCode {
-		StringList IPCproc = processCode(ipcHandler);	
-		addProcedure(IPCproc);
-		addGlobal(processCode("int $starSymbol(sId);\n"));
-		addGlobal(processCode("int $starSymbol(newSId);\n"));
-		addInclude("<stdio.h>");
-		addInclude("<sys/types.h>");
-		addInclude("<sys/socket.h>");
-		addInclude("<netinet/in.h>");
-		addInclude("<arpa/inet.h>");
-	}
-		
 	codeblock (block) {
 	int i, pos;
-	double fData;
+	union {
+		unsigned long l;
+		float f;
+	} myData;
+
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
-		if (read($starSymbol(newSId), &fData, sizeof(fData)) != sizeof(fData)) {
+		if (read($val(socketId), &myData.l, sizeof(myData)) != sizeof(myData)) {
 			printf("write fails.\n");
 			break;
 		}
-		$ref(output,pos) = fData;
+		myData.l = ntohl(myData.l);
+		$ref(output,pos) = myData.f;
 	}
 	}
 	go {
-		gencode(block);
-	}
-	wrapup {
-		gencode("\tclose($starSymbol(sId));\n");
-		gencode("\tclose($starSymbol(newSId));\n");
+		addCode(block);
 	}
 }
 

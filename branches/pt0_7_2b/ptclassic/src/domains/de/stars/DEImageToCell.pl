@@ -1,9 +1,14 @@
 defstar {
 	name		{ ImageToCell }
 	domain		{ DE }
-	version		{ $Id$ }
+	version		{ @(#)DEImageToCell.pl	1.5 3/2/95 }
 	author		{ Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location	{ DE main library }
 	desc {
 This star packetizes an image. Each image is divided up into chunks

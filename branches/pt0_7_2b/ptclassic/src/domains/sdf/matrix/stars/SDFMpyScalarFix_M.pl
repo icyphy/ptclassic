@@ -2,9 +2,14 @@ defstar {
   name { MpyScalarFix_M }
   domain { SDF }
   desc { Multiply a fixed-point matrix by a scalar input gain value. }
-  version { $Id$ }
+  version { @(#)SDFMpyScalarFix_M.pl	1.6 12/09/97 }
   author { Bilung Lee, modified from SDFGainFix.pl by Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
     name { input }
@@ -97,10 +102,13 @@ parameter.  The keywords for overflow handling methods are :
       for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
         if(int(UseArrivingPrecision))
           fixIn = matrix.entry(i);
-        else
-          fixIn = Fix(in_len, in_IntBits, matrix.entry(i));
+        else {
+	  // Use a temporary variable to avoid gcc2.7.2/2.8 problems
+	  Fix tmp = Fix(in_len, in_IntBits, matrix.entry(i));
+          fixIn = tmp;
+	}
         result.entry(i).set_ovflow(OV);
-        result.entry(i) = fixIn * Fix(gain%0);
+        result.entry(i) = fixIn * (const Fix&)(gain%0);
       }
 
       output%0 << result;

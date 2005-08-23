@@ -1,27 +1,43 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: J. T. Buck
-Date of creation: 7/23/90
-
-This star is a two-pole, two-zero IIR filter (a biquad).
-
-************************************************************************/
-}
-
 defstar {
-	name {BiQuad}
+	name {Biquad}
 	domain {SDF}
+	version {@(#)SDFBiquad.pl	2.17 10/06/96}
 	desc {
-		"Second order IIR filter\n"
-		"Default is Butterworth with cutoff 0.1 times sample freq.\n"
-		"Transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)\n"
-		"where z1 = {z sup -1}, z2 = {z sup -2}."
+A two-pole, two-zero digital IIR filter (a biquad).
+The default is a Butterworth filter with a cutoff 0.1 times sampling frequency.
+	}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF dsp library }
+	htmldoc {
+<p>
+This two-pole, two-zero IIR filter has a transfer function of
+<pre>
+    n<sub>0</sub> + n<sub>1</sub>z<sup>-1</sup> + n<sub>2</sub>z<sup>-2</sup>
+   -------------------
+    1 + d<sub>1</sub>z<sup>-1</sup> + d<sub>2</sub>z<sup>-2</sup>
+</pre>
+<p>
+<a name="filter, biquad"></a>
+<a name="biquad filter"></a>
+<a name="filter, IIR"></a>
+<a name="IIR filter"></a>
+It is implemented in direct form II [1].
+The default coefficients give a Butterworth filter with a
+cutoff of 0.1 times sampling frequency.
+<a name="filter, Butterworth"></a>
+<a name="Butterworth filter"></a>
+<p>
+<b>This star will eventually be replaced by a general IIR star.</b>
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	input {
 		name{input}
@@ -60,16 +76,18 @@ defstar {
 		name {state1}
 		type { float }
 		default { "0.0" }
-		desc { "state1 (internal)"}
+		desc { internal state. }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name {state2}
 		type { float }
 		default { "0.0" }
-		desc {"state2 (internal)"}
+		desc {internal state. }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	go {
-		double t = float(input%0) - double(d1) * double (state1) -
+		double t = double(input%0) - double(d1) * double (state1) -
 			double(d2) * double(state2);
 		double o = t * double(n0) + double(state1) * double(n1) +
 			double(state2) * double(n2);

@@ -1,21 +1,21 @@
 static const char file_id[] = "DataFlowStar.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)DataFlowStar.cc	1.10	03/27/97
 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,13 +24,19 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  J. T. Buck
 
 DataFlowStar is the baseclass for stars in the various dataflow domains.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
@@ -39,8 +45,8 @@ DataFlowStar is the baseclass for stars in the various dataflow domains.
 // stars should override these methods or avoid calling them; if not,
 // errors will be reported.
 
-DataFlowStar::DataFlowStar() : noTimes(0), repetitions(0,1), nInP(0),
-master(0) {}
+DataFlowStar::DataFlowStar() : repetitions(0,1),
+noTimes(0), nInP(0), master(0) {}
 
 // default runCost is 0
 unsigned DataFlowStar::runCost() { return 0;}
@@ -71,6 +77,7 @@ void DataFlowStar :: initialize() {
 void DataFlowStar :: initPortCounts() {
 	BlockPortIter nextp(*this);
 	PortHole* p;
+	nInP = 0;
 	while ((p = nextp++) != 0)
 		if (p->isItInput()) nInP++;
 }
@@ -83,13 +90,23 @@ void DataFlowStar :: schedError() const {
 // execute SDF star -- OVERRIDE if not SDF!
 int DataFlowStar :: run() {
 	BlockPortIter next(*this);
-	for(int i = numberPorts(); i > 0; i--)
-		(next++)->receiveData();
+	PortHole* nextPort;
+	int i;
+	for(i = numberPorts(); i > 0; i--) {
+	  nextPort = next.next();
+	  if (nextPort->isItInput()) {
+	    nextPort->receiveData();
+	  }
+	}
 	int status = Star::run();
 	// we send the data even on error
 	next.reset();
-	for(i = numberPorts(); i > 0; i--)
-		(next++)->sendData();
+	for(i = numberPorts(); i > 0; i--) {
+	  nextPort = next.next();
+	  if (nextPort->isItOutput()) {
+	    nextPort->sendData();
+	  }
+	}
 	return status;
 }
 
@@ -99,6 +116,17 @@ void DataFlowStar::endLoop() {}
 
 // isA function
 ISA_FUNC(DataFlowStar,Star);
+
+// make a duplicate DataFlowStar.  This will call Star::clone 
+// and then set DataFlowStar specific data members such as
+// repetitions.
+/* virtual */ Block* DataFlowStar::clone () const {
+	DataFlowStar* star = (DataFlowStar*)Star::clone();
+	if (star) {
+	  star->repetitions = repetitions;
+	}
+	return star;
+}
 
 // scheduling functions below assume SDF semantics can be used.
 

@@ -1,10 +1,21 @@
 defstar {
   name      { PackInt_M }
   domain    { SDF }
-  desc      { Takes integer inputs and produces IntMatrix messages. }
-  version   { $Id$ }
+  desc      { 
+Produces a matrix with integer value entries. The entries are
+read in from values in a sequence of integer particles
+in rasterized order, e.g. for a MxN matrix, the first row is 
+filled from left to right using the first N values from the
+first N particles.
+  }
+  version   { @(#)SDFPackInt_M.pl	1.9 10/6/95 }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
 	name { input }
@@ -32,9 +43,8 @@ defstar {
   }
   go {
     // collect inputs and put into the matrix
-    IntMatrix *matrix = new IntMatrix(int(numRows),int(numCols),input);
-    Envelope pkt(*matrix);
-    output%0 << pkt;
+    IntMatrix& matrix = *(new IntMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 

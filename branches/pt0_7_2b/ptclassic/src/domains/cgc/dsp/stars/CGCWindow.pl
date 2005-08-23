@@ -6,34 +6,34 @@ defstar {
 Generates standard window functions:
 Rectangle, Bartlett, Hanning, Hamming, Kaiser, Blackman, and SteepBlackman.
 }
-	version { $Id$ }
+	version { @(#)CGCWindow.pl	1.5	10/06/96 }
 	author { Brian L. Evans }
 	acknowledge { Jose Luis Pino and Kennard White }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-.lp
+	htmldoc {
+<p>
 This star produces on its output values that are samples of a standard
 windowing function.  The window function to be sampled is determined by
-the \fIname\fR string parameter.  Possible values are: \fBRectangle\fR,
-\fBBartlett\fR, \fBHanning\fR, \fBHamming\fR, \fBBlackman\fR, and
-\fBSteepBlackman\fR.  Upper and lower case characters in the names are
+the <i>name</i> string parameter.  Possible values are: <b>Rectangle</b>,
+<b>Bartlett</b>, <b>Hanning</b>, <b>Hamming</b>, <b>Blackman</b>, and
+<b>SteepBlackman</b>.  Upper and lower case characters in the names are
 equivalent.
-.lp
-The parameter \fIlength\fR is the length of the window to produce.  Note
+<p>
+The parameter <i>length</i> is the length of the window to produce.  Note
 that most windows functions have zero value at the first and last sample.
-The parameter \fIperiod\fR specifies the period of the output signal:
-the window will be zero-padded if required.  A \fIperiod\fR of 0
-means a period equal to \fIlength\fR.  A negative period will
+The parameter <i>period</i> specifies the period of the output signal:
+the window will be zero-padded if required.  A <i>period</i> of 0
+means a period equal to <i>length</i>.  A negative period will
 produce only one window, and then outputs zero for all later samples.
 A period of less than window length will be equivalent to a period of
 window length (i.e, period=0).
-.lp
+<p>
 One period of samples are produced on every firing.
 	}
 
@@ -78,11 +78,11 @@ the window.
 		value.setAttributes(A_NONSETTABLE|A_CONSTANT);
 	}
 
-	ccinclude { <string.h>, <math.h>, "PTDSPWindow.h" }
+	ccinclude { <string.h>, <math.h>, "ptdspWindow.h" }
 
 	setup {
 		const char* wn = name;
-		int winType = PTDSPWindowNumber(wn);
+		int winType = Ptdsp_WindowNumber(wn);
 		if (winType == PTDSP_WINDOW_TYPE_NULL) {
 		    Error::abortRun(*this, "Unknown window name ", wn);
 		    return;
@@ -97,12 +97,12 @@ the window.
 		}
 
 		double* windowTaps = new double[realLen];
-		int validWindow = PTDSPWindow(windowTaps, realLen, winType,
+		int validWindow = Ptdsp_Window(windowTaps, realLen, winType,
 					      (double *) WindowParameters);
 		if (! validWindow) {
 		    delete [] windowTaps;
 		    Error::abortRun(*this, "Could not compute the taps for a ",
-				    wn, " window: PTDSPWindow failed.");
+				    wn, " window: Ptdsp_Window failed.");
 		    return;
 		}
 

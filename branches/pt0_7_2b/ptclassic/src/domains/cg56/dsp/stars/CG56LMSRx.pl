@@ -2,10 +2,15 @@ defstar {
     name { LMSRx }
     domain { CG56 }
     desc { Complex LMS filter. }
-    version { $Id$ }
+    version { @(#)CG56LMSRx.pl	1.16 09/10/99 }
     author { Kennard White (ported from Gabriel) }
     acknowledge { Gabriel version by Steve How and Maureen O'Reilly }
-    copyright { 1991 The Regents of the University of California }
+    copyright {
+Copyright (c) 1991-1999 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { CG56 library }
     input {
 	name { input_r }
@@ -31,20 +36,23 @@ defstar {
 	name { output_i }
 	type { FIX }
     }
-    explanation {
-	DSP56000 - complex lms filter star.
-        The number of initial coefficients specify the order.
-        	y = c' * x	c[n+1] = c[n] + (step_size)(x)(e')
-	where x = input, c = coefficients, y = output,
-	      e = error (desired output - actual output,
-        and ' represents the complex conjugate.
-	Default step size 0.01
-        Error_delay must specify the total delay between
-           	the filter output and the error input.
-	 Last_tap_min constrains the minimum magnitude of both
-		the real & imaginary parts of the last tap.
-        Default coefficients give a 7th order filter, with the
-        		middle real tap = 0.5 and all others zero.
+	htmldoc {
+For this complex LMS filter star,
+the number of initial coefficients specify the order.
+<pre>
+y = c' * x
+c[n+1] = c[n] + step_size * x * e'
+</pre>
+<p>
+where <i>x</i> = input, <i>c</i> = coefficients, <i>y</i> = output, <i>e</i> = error
+(desired output - actual output), and ' represents the complex conjugate.
+Default <i>step_size</i> is 0.01
+The parameter <i>error_delay</i> must specify the total delay between
+the filter output and the error input, and
+<i>last_tap_min</i> constrains the minimum magnitude of both
+the real and imaginary parts of the last tap.
+Default coefficients give a 7th-order filter, with the middle real
+tap equal to 0.5 and all other taps zero.
     }
     state {
 	name { init_taps_r }
@@ -106,7 +114,9 @@ defstar {
 	default { 0 }
 	attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
     }
-    start {
+    // For sprintf()
+    ccinclude { <stdio.h> }
+    setup {
 	int d = int(decimation);
 	input_r.setSDFParams( d, d-1);
 	input_i.setSDFParams( d, d-1);
@@ -121,27 +131,27 @@ defstar {
     }
     initCode {
 	addCode(cbInit);
-	int k;
-	addCode("	org	x:$addr(coef_table)");
+	int k = 0;
+	addCode("	org	x:$addr(coef_table)\n");
 	for ( k=0; k < numTaps; k++) {
-	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", init_taps_r[k]);
+	    char buf[100];
+	    sprintf(buf, "	dc	%.15f\n", double(init_taps_r[k]));
 	    addCode(buf);
 	}
-	addCode("	org	y:$addr(coef_table)");
+	addCode("	org	y:$addr(coef_table)\n");
 	for ( k=0; k < numTaps; k++) {
-	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", init_taps_i[k]);
+	    char buf[100];
+	    sprintf(buf, "	dc	%.15f\n", double(init_taps_i[k]));
 	    addCode(buf);
 	}
-	addCode("	org	p:");
+	addCode("	org	p:\n");
     }
     go {
 	addCode(cbHeader);
 	addCode(cbSetup);
 	addCode(cbUpdateTaps);
 
-	if ( double(last_tap_min) > 0 ) {
+	if (last_tap_min.asDouble() > 0.0) {
     	    addCode(cbLastTapConstrait);
 	} else {
     	    addCode(cbStoreLastTap);
@@ -153,25 +163,30 @@ defstar {
 
     execTime {
 	int coretime = 8 * int(numTaps) + 3 * int(decimation) + 28;
-	if ( double(last_tap_min) > 0.0 )
+
+	if ( last_tap_min.asDouble() > 0.0 ) {
 	    coretime += 14;
+	}
+
 	if ( int(numTaps) <= 2 ) {
 	    coretime += int(decimation) <= 1 ? 0 : 3;
-	} else {
+	}
+	else {
 	    coretime += int(decimation) <= 1 ? 6 : 9;
 	}
+
 	return coretime;
     }
 
     codeblock(cbExample) {
-	;	decimation (e.g. =3)
-	;	time ->
-	;	x0	x1	x2	|  x0	 x1	x2
-	;	e	no_info	no_info	|  e	 n/i	n/i
-	;			lms_out	|		lms_out
-	;	note: total delay between e_in and the last x(decimation-1) =
-	;	      (* error_delay  decimation)
-	;	      where error_delay is delay in feedback loop
+;	decimation (e.g. =3)
+;	time ->
+;	x0	x1	x2	|  x0	 x1	x2
+;	e	no_info	no_info	|  e	 n/i	n/i
+;			lms_out	|		lms_out
+;	note: total delay between e_in and the last x(decimation-1) =
+;	      (* error_delay  decimation)
+;	      where error_delay is delay in feedback loop
     }
 
     codeblock(cbInit) {

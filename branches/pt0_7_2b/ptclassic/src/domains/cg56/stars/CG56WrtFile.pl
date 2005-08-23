@@ -1,62 +1,73 @@
 defstar {
-	name { WriteFile }
+	name { WrtFile }
 	domain { CG56 }
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
-	version { $Id$ }
-	author { J. Buck }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-This star relies on a feature of the Sim56Target, which captures code lines
-beginning with "!" and uses them as commands for the simulator.
+	version { @(#)CG56WrtFile.pl	1.20 04/07/97 }
+	author { J. Buck, Chih-Tsung Huang, Jose L. Pino }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	execTime {
-		return (input.bufSize() > 1) ? 2 : 0;
+	location { CG56 main library }
+	htmldoc {
+<a name="simulator, Motorola DSP56000"></a>
+<a name="Motorola DSP56000 simulator"></a>
+<a name="file output"></a>
+Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
 	input {
 		name {input}
-		type {FIX}
+		type {ANYTYPE}
 	}
 	state {
 		name { fileName }
 		type { STRING }
-		default { "outfile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		default { "" }
+		desc { 'Root' of the filename that gets the data.}
 	}
 	state {
 		name { outVal}
 		type { FIX }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
 	}
-	start {
-		if (input.bufSize() > 1) {
-			// these attributes allocate memory
-			outVal.setAttributes(A_YMEM|A_NOINIT);
-		}
-	}
-	// this codeblock tells the simulator to log writes to the
-	// input, which works when the buffersize is 1.
-	codeblock (logIn) {
-!output $ref(input) $val(fileName).sim -RF
-}
-	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is > 1.
-	codeblock (logOut) {
-!output $ref(outVal) $val(fileName).sim -RF
-}
-	initCode {
-		if (input.bufSize() == 1) gencode(logIn);
-		else gencode(logOut);
-	}
-	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
+	ccinclude { <Uniform.h>, <ACG.h> }
+	protected {
+		StringList logFileNameString;
+	}
+	// declare the static random-number generator in the .cc file
+	code {
+		extern ACG* gen;
+	}
+        setup {
+		if (fileName.null()) {
+                	Uniform random(0.0, 1.0, gen);
+			int uniqueId = int(32000.0 * (random)());
+			logFileNameString = "$starSymbol(";
+			logFileNameString << "cgwritefile)_" << uniqueId;
+		}
+		else {
+			logFileNameString = "$val(fileName)";
+		}
+        }
+        initCode {
+		StringList logOut = "output $ref(outVal) ";
+		logOut << logFileNameString << " "
+		       << (strcmp(input.resolvedType(),INT) ? "-RF" : "-RD");
+		addCode(logOut, "simulatorCmds");
+	}
 	go {
-		if (input.bufSize() > 1) gencode(copy);
+		addCode(copy);
+	}
+	execTime {
+		return 2;
 	}
 }

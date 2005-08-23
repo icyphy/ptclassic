@@ -1,7 +1,7 @@
 defstar {
-	name { QuadBiquad }
+	name { VISBiquad }
 	domain { SDF }
-	version { @(#)SDFQuadBiquad.pl	1.2 05/06/96 }
+	version { @(#)SDFVISBiquad.pl	1.15	7/10/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,7 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  An IIR Biquad filter.
+An IIR Biquad filter.
 	}
 	input {
 	  name { signalIn }
@@ -23,233 +23,242 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>, <math.h>, <stdio.h>}
+	hinclude {<vis_types.h>}
+        ccinclude {<vis_proto.h>}
 	defstate {
 	  name {numtaps}
 	  type {floatarray}
-	  default {
-	".067455 .135 .067455"
-	  }
+	  default { ".067455 .135 .067455" }
 	  desc { Filter tap numerator values (n0+n1*z^-1+n2*z^-2). }
 	}		
 	defstate {
 	  name {dentaps}
 	  type {floatarray}
-	  default {
-	"-1.1430 .41280"
-	  }
+	  default { "-1.1430 .41280" }
 	  desc { Filter tap denominator values (1+d1*z^-1+d2*z^-2). }
 	}
 	defstate {
-	  name {state1}
-	  type {float}
-	  default {"0"}
-	  desc { Internal state. }
-	  attributes{ A_NONCONSTANT|A_NONSETTABLE }
-	}
-	defstate {
-	  name {state2}
-	  type {float}
-	  default {"0"}
-	  desc { Internal state. }
-	  attributes{ A_NONCONSTANT|A_NONSETTABLE }
+	  name {scalefactor}
+	  type {int}
+	  default {"1"}
+	  desc {
+2^scalefactor is used to scale down the magnitude
+of the numerator and denominator coefficients
+between 0 and 1.
+	  }
+	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
-	  name { scale }
+	  name { scaledata }
 	  type { float }
 	  default { "32767.0" }
 	  desc { Filter tap scale }
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
+      	defstate {
+	  name { scaletaps }
+	  type { float }
+	  default { "32767.0" }
+	  desc { Filter tap scale }
+	  attributes { A_CONSTANT|A_SETTABLE }
+	}
+	setup {
+          signalIn.setSDFParams(1,1);
+	}
 	code {
-#define TWO (2)
-#define THREE (3)
 #define NUMPACK (4)
-#define UPPERBOUND (32767) 
-#define LOWERBOUND (-32768)
+	  static vis_d64 mult4x4(vis_d64 mult1,vis_d64 mult2)
+	    {
+	      vis_d64 upper,lower,prod;
+	      
+	      upper = vis_fmul8sux16(mult1,mult2);
+	      lower = vis_fmul8ulx16(mult1,mult2);
+	      return prod = vis_fpadd16(upper,lower);
+	    }
+	  static void settaps(vis_d64* filtertaps, vis_s16* tapmatrix,vis_d64* betatop,vis_d64*
+			      betabott,vis_s16 scaledown, vis_d64 scaletaps){
+
+	    vis_d64 t0,t1,t2,t3,top,bottom;
+	    vis_s16 statemem[8];
+
+	    vis_alignaddr(0,6);
+
+	    tapmatrix[0] = 0;
+	    tapmatrix[1] = 0;
+	    tapmatrix[2] = (vis_s16)scaletaps/scaledown*filtertaps[4];
+	    tapmatrix[3] = (vis_s16)scaletaps/scaledown*filtertaps[3];
+	    tapmatrix[4] = (vis_s16)scaletaps/scaledown*filtertaps[2];
+	    tapmatrix[5] = 0;
+	    tapmatrix[6] = 0;
+	    tapmatrix[7] = 0;
+	    tapmatrix[8] = 0;
+	    tapmatrix[9] = 0;
+	    tapmatrix[10] = (vis_s16)scaletaps/scaledown*(-(filtertaps[4]*filtertaps[0]));
+	    tapmatrix[11] = (vis_s16)scaletaps/scaledown*(filtertaps[4]-(filtertaps[3]*filtertaps[0]));
+	    tapmatrix[12] = (vis_s16)scaletaps/scaledown*(filtertaps[3]-(filtertaps[2]*filtertaps[0]));
+	    tapmatrix[13] = (vis_s16)scaletaps/scaledown*filtertaps[2];
+	    tapmatrix[14] = 0;
+	    tapmatrix[15] = 0;
+	    tapmatrix[16] = 0;
+	    tapmatrix[17] = 0;
+	    tapmatrix[18] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[4]*filtertaps[0]*filtertaps[0]-filtertaps[4]*filtertaps[1]);
+	    tapmatrix[19] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[3]*filtertaps[0]*filtertaps[0]-filtertaps[4]*filtertaps[0]-filtertaps[3]*filtertaps[1]);
+	    tapmatrix[20] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[2]*filtertaps[0]*filtertaps[0] -
+	       filtertaps[3]*filtertaps[0]-filtertaps[2]*filtertaps[1]+filtertaps[4]);
+	    tapmatrix[21] = (vis_s16)scaletaps/scaledown * (filtertaps[3]-(filtertaps[2]*filtertaps[0]));
+	    tapmatrix[22] = (vis_s16)scaletaps/scaledown * filtertaps[2];
+	    tapmatrix[23] = 0;
+	    tapmatrix[24] = 0;
+	    tapmatrix[25] = 0;
+	    tapmatrix[26] = (vis_s16)scaletaps/scaledown *
+	      (2*filtertaps[4]*filtertaps[0]*filtertaps[1] -
+	       filtertaps[4]*filtertaps[0]*filtertaps[0]*filtertaps[0]);
+	    tapmatrix[27] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[4]*filtertaps[0]*filtertaps[0]-filtertaps[4]*filtertaps[1] -
+	       filtertaps[3]*filtertaps[0]*filtertaps[0]*filtertaps[0]+2*filtertaps[3]*filtertaps[0]*filtertaps[1]);
+	    tapmatrix[28] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[3]*filtertaps[0]*filtertaps[0] -
+	       filtertaps[2]*filtertaps[0]*filtertaps[0]*filtertaps[0] -
+	       filtertaps[3]*filtertaps[1]-filtertaps[4]*filtertaps[0]+2*filtertaps[2]*filtertaps[0]*filtertaps[1]);
+	    tapmatrix[29] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[4]-filtertaps[3]*filtertaps[0] -
+	       filtertaps[2]*filtertaps[1]+filtertaps[2]*filtertaps[0]*filtertaps[0]);
+	    tapmatrix[30] = (vis_s16)scaletaps/scaledown*(filtertaps[3]-(filtertaps[2]*filtertaps[0]));
+	    tapmatrix[31] = (vis_s16)scaletaps/scaledown*filtertaps[2];
+	    
+	    statemem[0] = (vis_s16)scaletaps/scaledown*(-filtertaps[1]);
+	    statemem[1] = (vis_s16)scaletaps/scaledown*(-filtertaps[0]);
+	    statemem[2] = (vis_s16)scaletaps/scaledown*(filtertaps[0]*filtertaps[1]);
+	    statemem[3] = (vis_s16)scaletaps/scaledown*(filtertaps[0]*filtertaps[0]-filtertaps[1]);
+	    statemem[4] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[1]*filtertaps[1]-filtertaps[0]*filtertaps[0]*filtertaps[1]);
+	    statemem[5] = (vis_s16)scaletaps/scaledown *
+	      (2*filtertaps[0]*filtertaps[1]-filtertaps[0]*filtertaps[0]*filtertaps[0]);
+	    statemem[6] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[0]*filtertaps[0]*filtertaps[0]*filtertaps[1]-2*filtertaps[0]*filtertaps[1]*filtertaps[1]);
+	    statemem[7] = (vis_s16)scaletaps/scaledown *
+	      (filtertaps[0]*filtertaps[0]*filtertaps[0]*filtertaps[0]
+	       -3*filtertaps[0]*filtertaps[0]*filtertaps[1]+filtertaps[1]*filtertaps[1]);
+
+	    top = vis_fzero();
+	    bottom = vis_fzero();
+	    t0 = vis_ld_u16(statemem+0);
+	    t1 = vis_ld_u16(statemem+1);
+	    t2 = vis_ld_u16(statemem+2);
+	    t3 = vis_ld_u16(statemem+3);
+	    top = vis_faligndata(t3,top);
+	    top = vis_faligndata(t2,top);
+	    top = vis_faligndata(t1,top);
+	    top = vis_faligndata(t0,top);
+	    t0 = vis_ld_u16(statemem+4);
+	    t1 = vis_ld_u16(statemem+5);
+	    t2 = vis_ld_u16(statemem+6);
+	    t3 = vis_ld_u16(statemem+7);
+	    bottom = vis_faligndata(t3,bottom);
+	    bottom = vis_faligndata(t2,bottom);
+	    bottom = vis_faligndata(t1,bottom);
+	    bottom = vis_faligndata(t0,bottom);
+	    *betatop=top;
+	    *betabott=bottom;
+	  }
 	}
 	protected {
-	  short *numerator;
-	  short *denominator;
-	  short *state;
-	  short *outarray;
-	  double *inarray;
-	  float *result_filt;
-	  short n0,d0;
-	  double scaledown,s1,s2;
-	  float *result;
+	  vis_d64 betabott,betatop,filtertaps[5];
+	  vis_f32 currentstate;
+	  vis_s16 scaledown,*tapmatrix;
 	}
 	constructor {
-	  numerator = 0;
-	  denominator = 0;
-	  state = 0;
-	  outarray = 0;
-	  inarray = 0;
-	  result_filt = 0;
-	  result = 0;
-	  scaledown = s1 = s2 = 0;
-	  n0 = d0 = 0;
+	  betabott=betatop=0;
+	  currentstate=vis_fzeros();
+	  scaledown=0;
+	  tapmatrix=0;
 	}
 	destructor {
-	  free(numerator);
-	  free(denominator);
-	  free(state);
-	  free(outarray);
-	  free(inarray);
-	  free(result_filt);
-	  free(result);
+	  free(tapmatrix);
 	}
 	begin {
-	  int i;
-	  short *indexcount;
-	  double intmp,norm;
-
   	  // allocate tap and state arrays
-	       free(numerator);
-	  free(denominator);
-	  free(state);
-	  free(inarray);
-	  free(outarray);
-	  free(result_filt);
-	  free(result);
-	  result = (float *) memalign(sizeof(float),sizeof(float));
-          numerator = (short *) memalign(sizeof(float),sizeof(short)*TWO);
-          denominator = (short *) memalign(sizeof(float),sizeof(short)*TWO);
-	  state = (short *) memalign(sizeof(float),sizeof(short)*TWO);
-	  inarray = (double *) memalign(sizeof(double),sizeof(double));
-	  outarray = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
-	  result_filt = (float *) memalign(sizeof(double),sizeof(float)*TWO);
-
-	  // find largest coefficient
-	  norm = fabs(dentaps[0]) > fabs(dentaps[1]) ? fabs(dentaps[0]) :fabs(dentaps[1]);
-	  norm = norm > fabs(numtaps[0]) ? norm : fabs(numtaps[0]);
-	  norm = norm > fabs(numtaps[1]) ? norm : fabs(numtaps[1]);
-	  norm = norm > fabs(numtaps[2]) ? norm : fabs(numtaps[2]);
-
-	  // scale down the entire transfer function
-	  if(norm > 1.0)
-	    scaledown = 1.0/(norm);
-	  else
-	    scaledown = 1.0;
-
-	  // initialize d0 and n0
-	       d0 = (short) (scale*scaledown);
-	  intmp = scale*scaledown*numtaps[0];
-	  if (intmp <= (double)(LOWERBOUND)){
-	    n0 = (short)(LOWERBOUND);
-	  }
-	  else if (intmp >= (double)(UPPERBOUND)){
-	    n0 = (short)(UPPERBOUND);
-	  }
-	  else{ 
-	    n0 = (short)(intmp);
-	  }
-
-	  // initialize denominator array
-	  indexcount = denominator;
-	  for(i=0;i<2;i++){
-	    intmp = scale*scaledown*dentaps[i];
-	    if (intmp <= (double)(LOWERBOUND)){
-	      *indexcount++ = (short)(LOWERBOUND);
-	    }
-	    else if (intmp >= (double)(UPPERBOUND)){
-	      *indexcount++ = (short)(UPPERBOUND);
-	    }
-	    else{ 
-	      *indexcount++ = (short)(intmp);
-	    }
-	  }
-
-	  // initialize num array
-	  indexcount = numerator;
-	  for(i=0;i<2;i++){
-	    intmp = scale*scaledown*numtaps[i+1];
-	    if (intmp <= (double)(LOWERBOUND)){
-	      *indexcount++ = (short)(LOWERBOUND);
-	    }
-	    else if (intmp >= (double)(UPPERBOUND)){
-	      *indexcount++ = (short)(UPPERBOUND);
-	    }
-	    else{ 
-	      *indexcount++ = (short)(intmp);
-	    }
-
-	  }
-	  s1 = double(state1);
-	  s2 = double(state2);
+	  if (tapmatrix) free(tapmatrix);
+	  tapmatrix = (vis_s16*)memalign(sizeof(vis_d64),sizeof(vis_s16)*32);
+	
+	  filtertaps[0] = dentaps[0];
+	  filtertaps[1] = dentaps[1];
+	  filtertaps[2] = numtaps[0];
+	  filtertaps[3] = numtaps[1];
+	  filtertaps[4] = numtaps[2]; 
+	  scaledown = (short) 1 << scalefactor;
+	  settaps(filtertaps,tapmatrix,&betatop,&betabott,scaledown,scaletaps);
 	}
 	go {	
-	  short *invalue;
-	  short next_state_sh;
-	  int numloop;
-	  double next_state_dbl,out_dbl;
-	  double *outvalue;
-	  double *packedfilt;
-	  double upper, lower;
-	  double split_result;
-	  float splithi, splitlo;
-	  float *statetmp,*numtmp,*dentmp;
-	  short *result_den;
-	  short *result_num;
+	  vis_d64 repeatstate,accumquad0,accumquad1,accumquad2,accumquad3;
+	  vis_d64 quad0,quad1,quad2,quad3,statetop,statebott;
+	  vis_d64 in0,in1,*indextaps;
+	  vis_f32 accumpair0hi,accumpair0lo,accumpair1hi,accumpair1lo;
+	  vis_f32 accumpair2hi,accumpair2lo,accumpair3hi,accumpair3lo;
+	  vis_f32 accumpair0,accumpair1,accumpair2,accumpair3;
+	  vis_f32 statetophi,statetoplo,statebotthi,statebottlo;
+	  vis_s32 result0,result1,result2,result3;
+	  vis_u32 fu,ffu;
+	  vis_s16 out0,out1,out2,out3;
 
-	  vis_write_gsr(8);
-	  *inarray = double(signalIn%0);
-       	  invalue = (short *) inarray;
-	  dentmp = (float *) denominator;
-	  numtmp = (float *) numerator;
+	  in1 = double(signalIn%0);
+	  in0 = double(signalIn%1);
+	  
+	  repeatstate = vis_freg_pair(currentstate,currentstate);
+	  statetop = mult4x4(repeatstate,betatop);
+	  statetophi = vis_read_hi(statetop);
+	  statetoplo = vis_read_lo(statetop);
+	  statebott = mult4x4(repeatstate,betabott);
+	  statebotthi = vis_read_hi(statebott);
+	  statebottlo = vis_read_lo(statebott);
+	  
+	  indextaps = (vis_d64*) tapmatrix;
+	  accumquad0 = mult4x4(in0,*indextaps++);
+	  quad0 = mult4x4(in1,*indextaps++);
+	  accumquad1 = mult4x4(in0,*indextaps++);
+	  quad1 = mult4x4(in1,*indextaps++);
+	  accumquad2 = mult4x4(in0,*indextaps++);
+	  quad2 = mult4x4(in1,*indextaps++);
+	  accumquad3 = mult4x4(in0,*indextaps++);
+	  quad3 = mult4x4(in1,*indextaps++);
 
-	  for(numloop=3;numloop>=0;numloop--){
-	    // initialize state array
-		 state[0] = (short) s1;
-	    state[1] = (short) s2;
-	    statetmp = (float *) state;
+	  accumquad0 = vis_fpadd16(accumquad0,quad0);
+	  accumpair0hi = vis_read_hi(accumquad0);
+	  accumpair0lo = vis_read_lo(accumquad0);
+	  accumquad1 = vis_fpadd16(accumquad1,quad1);
+	  accumpair1hi = vis_read_hi(accumquad1);
+	  accumpair1lo = vis_read_lo(accumquad1);
+	  accumquad2 = vis_fpadd16(accumquad2,quad2);
+	  accumpair2hi = vis_read_hi(accumquad2);
+	  accumpair2lo = vis_read_lo(accumquad2);
+	  accumquad3 = vis_fpadd16(accumquad3,quad3);
+	  accumpair3hi = vis_read_hi(accumquad3);
+	  accumpair3lo = vis_read_lo(accumquad3);
 
-	    // find product of state and denominator
-		upper = vis_fmuld8sux16(*statetmp,*dentmp);
-	    lower = vis_fmuld8ulx16(*statetmp,*dentmp);
-	    split_result = vis_fpadd32(upper,lower);
-            splithi = vis_read_hi(split_result);
-            splitlo = vis_read_lo(split_result);
-	    result_filt[0] = vis_fpadd32s(splithi,splitlo);
+	  accumpair0 = vis_fpadd16s(accumpair0hi,accumpair0lo);
+	  accumpair0 = vis_fpadd16s(accumpair0,statetophi);
+	  result0 = *((vis_s32*) &accumpair0);
+	  out0 = (result0+(result0>>16))<<(scalefactor+1);
+	  accumpair1 = vis_fpadd16s(accumpair1hi,accumpair1lo);
+	  accumpair1 = vis_fpadd16s(accumpair1,statetoplo);
+	  result1 = *((vis_s32*) &accumpair1);
+	  out1 = (result1+(result1>>16))<<(scalefactor+1);
 
-	    // find product of state and numerator
-		 upper = vis_fmuld8sux16(*statetmp,*numtmp);
-	    lower = vis_fmuld8ulx16(*statetmp,*numtmp);
-	    split_result = vis_fpadd32(upper,lower);
-            splithi = vis_read_hi(split_result);
-            splitlo = vis_read_lo(split_result);
-	    result_filt[1] = vis_fpadd32s(splithi,splitlo);
-
-	    // find next_state
-		 packedfilt = (double *) result_filt;
-	    *result = vis_fpackfix(*packedfilt);
-	    result_den = (short *) result;
-	    result_num = (result_den +1);
-	    next_state_dbl = (double)(1/scaledown)*(invalue[numloop] - *result_den);
-	    if (next_state_dbl <= (double)(LOWERBOUND)){
-	      next_state_sh = (short)(LOWERBOUND);
-	    }
-	    else if (next_state_dbl >= (double)(UPPERBOUND)){
-	      next_state_sh = (short)(UPPERBOUND);
-	    }
-	    else{ 
-	      next_state_sh = (short) next_state_dbl;
-	    }
-	    out_dbl = (double)(n0*next_state_sh/scale + *result_num);
-	    if (out_dbl <= (double)(LOWERBOUND)){
-	      outarray[numloop] = (short)(LOWERBOUND);
-	    }
-	    else if (out_dbl >= (double)(UPPERBOUND)){
-	      outarray[numloop] = (short)(UPPERBOUND);
-	    }
-	    else{ 
-	      outarray[numloop] = (short) out_dbl;
-	    }
-	    // update states
-		 s2 = (double)s1;
-	    s1 = (double) next_state_sh;
-	  }
-	  outvalue = (double *) outarray;
-	  signalOut%0 <<  *outvalue;
+	  ffu = out0 << 16 | out1 & 0xffff;
+	  accumpair2 = vis_fpadd16s(accumpair2hi,accumpair2lo);
+	  accumpair2 = vis_fpadd16s(accumpair2,statebotthi);
+	  result2 = *((vis_s32*) &accumpair2);
+	  out2 = (result2+(result2>>16))<<(scalefactor+1);
+	  accumpair3 = vis_fpadd16s(accumpair3hi,accumpair3lo);
+	  accumpair3 = vis_fpadd16s(accumpair3,statebottlo);
+	  result3 = *((vis_s32*) &accumpair3);
+	  out3 = (result3+(result3>>16))<<(scalefactor+1);
+    
+	  fu = out2 << 16 | out3 & 0xffff;
+	  signalOut%0 << vis_to_double(ffu,fu);
+	  currentstate = vis_to_float(fu);
 	}
 }

@@ -1,5 +1,5 @@
-#ifndef _PTDSPNearestNeighbor_h
-#define _PTDSPNearestNeighbor_h 1
+#ifndef _ptdspNearestNeighbor_h
+#define _ptdspNearestNeighbor_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -28,14 +28,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Bilung Lee and Brian Evans
-Version: $Id$
+Version: @(#)ptdspNearestNeighbor.h	1.3	7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void PTDSPNearestNeighbor(int* theindex, double* thedistance,
+extern void Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
 	const double* trnVector, const double* codebook,
 	const double* halfCodewordPower, int sizeCodebook, int dimension);
 

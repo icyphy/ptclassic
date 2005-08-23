@@ -2,15 +2,15 @@ defstar {
 	name {VDecoder}
 	domain {SDF}
 	desc { Viterbi Decoder }
+	location { SDF user contribution library }
+	version { @(#)SDFVDecoder.pl	1.7	2/3/96 }
 	author { N. Becker }
-        copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-        }
-	location { SDF main library }
-	hinclude { "Decoder.h" }
+	}
 	input {
 	    name {I}
 	    type {int}
@@ -23,21 +23,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	    name {out}
 	    type {int}
 	}
-	private {
-	    Decoder D;
-	}
 	defstate {
-	  name{ Gain }
-	  type{ float }
-	  default{ 1 }
-	  desc{ The nominal level of the input }
+	    name{ Gain }
+	    type{ float }
+	    default{ 1 }
+	    desc{ The nominal level of the input }
 	}
-	conscalls{ D ((int)Gain) }
+	hinclude { "Decoder.h" }
+	private {
+	    Decoder decoder;
+	}
+	conscalls{ decoder(double(Gain)) }
 	setup {
-	  D.Reset();
-	  D.SetGain( (int)Gain );
+	    decoder.Reset();
+	    decoder.SetGain( double(Gain) );
 	}
 	go {
-	    out%0 << D( I%0, Q%0 );
+	    out%0 << decoder(int(I%0), int(Q%0));
 	}
 }

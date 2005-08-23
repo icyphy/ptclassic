@@ -1,5 +1,5 @@
 #!/bin/sh
-# Version: $Id$
+# Version: @(#)xv	1.1 10/28/99
 # xv - try to find and execute an image viewer (xv, gqview, ee or gimp)
 
 list='"xv" "gqview -t" "ee" "gimp"'

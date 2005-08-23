@@ -2,17 +2,15 @@ defstar {
   name { VSynchComm }
   domain { CGC }
   desc { Base class for CGC-VHDL synchronous communication }
-  version { $Id$ }
-  author { Michael C. Williamson, Jose Luis Pino }
+  version { @(#)CGCVSynchComm.pl	1.14 04/08/97 }
+  author { Michael C. Williamson and Jose Luis Pino }
   copyright { 
-    Copyright (c) 1994,1993 The Regents of the University of California.
-      All rights reserved.
-      See the file $PTOLEMY/copyright for copyright notice,
-      limitation of liability, and disclaimer of warranty provisions.
-    }
-
+Copyright (c) 1993-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location { VHDL Target Directory }
-  explanation { }
   public {
     int numXfer;
   }
@@ -24,61 +22,74 @@ defstar {
   defstate {
     name {destDir}
     type {string}
-    default {"~/PTOLEMY_SYSTEMS"}
+    default {""}
   }
   defstate {
     name {filePre}
     type {string}
     default {"CGCVHDL"}
   }
+  defstate {
+    name {classname}
+    type {string}
+    default {"CGCVSynchComm"}
+  }
+  defstate {
+    name {sndrcv}
+    type {string}
+    default {"sndrcv"}
+  }
+  defstate {
+    name {format}
+    type {string}
+    default {"%"}
+  }
+
+  // Define prototype for destDirectoryName
+  hinclude { "CGTarget.h" }
+
+  // Define constant SOCK_BASE_NAME
+  ccinclude { "CLIConstants.h" }
+
+  constructor {
+    StringList destDirName = destDirectoryName("MIXED");
+    destDir.setInitValue(destDirName);
+  }
+
   setup {
   }
 
-  initCode {
-    CodeStream *compileOptions, *linkOptions;
-    if ((compileOptions = getStream("compileOptions")) == FALSE)
-      return;
-    if ((linkOptions = getStream("linkOptions")) == FALSE)
-      return;
-    linkOptions->put("-lsocket -lnsl","socket Link");
-    addInclude("<stdio.h>");
-    addInclude("<string.h>");
-    addInclude("<unistd.h>");
-    addInclude("<sys/types.h>");
-    addInclude("<sys/socket.h>");
-    addInclude("<sys/un.h>");
-    addGlobal("#define BUFFSIZE 32", "buffer");
-    addDeclaration("
+  codeblock (firstDecl) {
   /* Decls */
-  int $starSymbol(count) = 0;
-  int $starSymbol(intptr) = 0;
-  int $starSymbol(nbytes) = 12;
+  int $starSymbol(count);
+  int $starSymbol(intptr);
+  int $starSymbol(nbytes);
   int $starSymbol(nearsock), $starSymbol(xmitsock), $starSymbol(status);
   char $starSymbol(buffer)[BUFFSIZE];
-  char *$starSymbol(dummy) = \"  CGCVSend socket error\";
-  char *$starSymbol(nearstring) = \"/tmp/snd$val(pairNumber)\\0\";
-  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
-  int $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
-  int $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
-  int $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
+  char *$starSymbol(dummy);
+  char *$starSymbol(nearstring);
+  }
+
+  codeblock (secondDecl) {
+  struct sockaddr_un $starSymbol(nearaddr), $starSymbol(xmitaddr);
+  int $starSymbol(nearnamelen);
+  int $starSymbol(xmitaddrlen);
+  int $starSymbol(nearaddrlen);
   int $starSymbol(i);
-");
+  }
 
-// This must be the first call to add code to mainInit.
-    StringList command = "";
-    command << "cd " << (const char*) destDir;
-    command << " ; ";
-    command << "vhdlsim -i " << filePre << ".com " << "parts";
-
-    StringList startvss = "";
-    startvss << "
-  /* Start VSS Simulator */
-  system(\"";
-    startvss << command << "&";
-    startvss << "\");\n";
-    addCode(startvss, "mainInit", "startVSS");
-    addCode("
+  codeblock (genInit) {
   /* Init */
+  $starSymbol(count) = 0;
+  $starSymbol(intptr) = 0;
+  $starSymbol(nbytes) = 12;
+  }
+
+  codeblock (body) {
+  $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
+  $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
+  $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
+
   for ($starSymbol(i)=0 ; $starSymbol(i) < BUFFSIZE ; $starSymbol(i)++) {
     $starSymbol(buffer)[$starSymbol(i)] = (char) 0;
   }
@@ -86,47 +97,81 @@ defstar {
   if ($starSymbol(nearsock) == -1) {
     perror($starSymbol(dummy));
   }
-  $starSymbol(nearaddr).sa_family = AF_UNIX;
-  (void) strncpy($starSymbol(nearaddr).sa_data, $starSymbol(nearstring), $starSymbol(nearnamelen)+1);
-  (void) unlink($starSymbol(nearaddr).sa_data);
-  if(bind($starSymbol(nearsock), &$starSymbol(nearaddr), $starSymbol(nearaddrlen)) == -1) {
+  $starSymbol(nearaddr).sun_family = AF_UNIX;
+  (void) strcpy($starSymbol(nearaddr).sun_path,
+		$starSymbol(nearstring));
+  (void) unlink($starSymbol(nearaddr).sun_path);
+  if(bind($starSymbol(nearsock),
+	  (struct sockaddr *) &$starSymbol(nearaddr),
+	  (strlen($starSymbol(nearaddr).sun_path) +
+	   sizeof($starSymbol(nearaddr).sun_family))) == -1) {
     perror($starSymbol(dummy));
   }
   if(listen($starSymbol(nearsock), 5) == -1) {
     perror($starSymbol(dummy));
   }
-  $starSymbol(xmitsock) = accept($starSymbol(nearsock), &$starSymbol(xmitaddr), &$starSymbol(xmitaddrlen));
+  $starSymbol(xmitsock) = accept($starSymbol(nearsock),
+				 (struct sockaddr *) &$starSymbol(xmitaddr),
+				 &$starSymbol(xmitaddrlen));
   if($starSymbol(xmitsock) < 0) {
     perror($starSymbol(dummy));
   }
-");
   }
 
-  go {
-    addCode("
-  /* Go */
-  $starSymbol(intptr) = 0;
-  $starSymbol(status) = 0;
-  if($starSymbol(status) >= 0) {
-    (void) sprintf($starSymbol(buffer), \"%d\", $ref(input));
-    $starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    if($starSymbol(status) < 0) {
-      perror($starSymbol(dummy));
-    }
-  }
-");
-  }
-
-  wrapup {
-    addCode("
+  codeblock (wrap) {
   /* Wrapup */
   (void) shutdown($starSymbol(xmitsock),2);
   (void) close($starSymbol(xmitsock));
-  (void) unlink($starSymbol(xmitaddr).sa_data);
+  (void) unlink($starSymbol(xmitaddr).sun_path);
   (void) shutdown($starSymbol(nearsock),2);
   (void) close($starSymbol(nearsock));
-  (void) unlink($starSymbol(nearaddr).sa_data);
-");
+  (void) unlink($starSymbol(nearaddr).sun_path);
   }
 
+  initCode {
+    addLinkOption("-lsocket");
+    addLinkOption("-lnsl");
+    addInclude("<stdio.h>");
+    addInclude("<string.h>");
+    addInclude("<unistd.h>");
+    addInclude("<sys/types.h>");
+    addInclude("<sys/socket.h>");
+    addInclude("<sys/un.h>");
+    addGlobal("#define BUFFSIZE 32", "buffer");
+    addDeclaration(firstDecl);
+    addDeclaration(secondDecl);
+
+    // This must be the first call to add code to mainInit.
+    StringList command;
+    command << "cd " << (const char*) destDir;
+    command << " ; ";
+    command << "ptvhdlsim -nc -i " << filePre << ".com " << filePre
+	    << "_parts";
+
+    StringList startvss;
+    startvss << "\n";
+    startvss << "  /* Start VSS Simulator */\n";
+    startvss << "  system(\"";
+    startvss << command << "&";
+    startvss << "\");\n";
+    addCode(startvss, "mainInit", filePre);
+    addCode(genInit);
+    
+    StringList oneLine = "  $starSymbol(dummy) = \"  ";
+    oneLine << classname;
+    oneLine << " socket error\";";
+    addCode(oneLine);
+
+    oneLine = "  $starSymbol(nearstring) = \"";
+    oneLine << SOCK_BASE_NAME;
+    oneLine << sndrcv;
+    oneLine << "$val(pairNumber)\";";
+    addCode(oneLine);
+
+    addCode(body);
+  }
+
+  wrapup {
+    addCode(wrap);
+  }
 }

@@ -4,7 +4,7 @@ defstar {
 	desc { The output of this star is the input modulo the 
 		"modulo" parameter. The input, output, and modulo
 		are all integers. }
-	version { $Id$  }
+	version { @(#)CGCModuloInt.pl	1.2	2/13/96  }
 	author { Siamak Modjtahedi }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -33,6 +33,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	initCode {
 		addInclude("<math.h>");
 	}
+        setup {
+		if ( int(modulo) == 0 ) {
+		    Error::abortRun(*this,
+				    "The modulo parameter cannot be zero");
+		    return;
+		}
+	}
 	go {
 		addCode(out);
 	}
@@ -40,6 +47,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(output) = $ref(input) % $ref(modulo);
 	}
 	exectime {
-		return 23;	/* value taken from CG96Sin */
+		return 1;
 	}
 }

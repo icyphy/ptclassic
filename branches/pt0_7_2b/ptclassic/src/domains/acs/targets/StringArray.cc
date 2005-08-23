@@ -63,6 +63,11 @@ int StringArray::add(const char* new_string)
   return(total++);
 }
 
+void StringArray::set(const int index, const char* new_string)
+{
+  strcpy(strings[index],new_string);
+}
+
 char* StringArray::get(int index)
 {
   if ((index >= total) || (index < 0))

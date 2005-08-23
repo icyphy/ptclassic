@@ -1,12 +1,17 @@
 defstar {
-	name { FictionSend }
+	name { MultiSimSend }
 	domain { CG56 }
 	desc {
 Send star for Fiction target
 	}
-	version { $Id$ }
+	version { @(#)CG56MultiSimSend.pl	1.3	3/9/96 }
 	author { S. Ha and K. Asawaree }
-	copyright { 1992 The Regents of the University of California }
+	copyright { 
+Copyright (c) 1992-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { local library }
 	input {
 		name { input }

@@ -2,20 +2,20 @@ defstar {
 	name { Pulse }
 	domain { C50 }
 	desc { Pulse generator }
-	version { $Id$ }
+	version { @(#)C50Pulse.pl	1.8  04/08/97 }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-        explanation {
-.Id "pulse generator"
+	htmldoc {
+<a name="pulse generator"></a>
 A variable length pulse generator.
 A pulse begins when a non-zero trigger is received.
-The pulse duration varies between 1 and \fImaxDuration\fP
+The pulse duration varies between 1 and <i>maxDuration</i>
 as the control varies between -1.0 and 1.0.
 	}
 
@@ -64,17 +64,17 @@ as the control varies between -1.0 and 1.0.
 	setup {
 		double temp = onVal.asDouble();
 		if (temp >= 0)	{
-			iOnVal = int(32768*temp);
+			iOnVal = int(32768*temp + 0.5);
 		} else {
-			iOnVal = int(32768*(1-temp));
+			iOnVal = int(32768*(2+temp) + 0.5);
 		}
 
 		temp = offVal.asDouble();
 
 		if ( temp >= 0) {
-			iOffVal = int(32768*temp);
+			iOffVal = int(32768*temp + 0.5);
 		}else{
-			iOffVal = int(32768*(1-temp));
+			iOffVal = int(32768*(2+temp) + 0.5);
 		}
 	}
 	
@@ -83,7 +83,7 @@ as the control varies between -1.0 and 1.0.
 	lar	ar0,#$addr(counter)	; ar0-> counter
 	mar	*,ar3			; arp = 3
 	lacl	*,ar0			; load acc low with input, high acc = 0
-	setc	sxm			; set sign xtension mode
+	setc	sxm			; set sign extension mode
 	xc	1,neq			; if non-zero input clear counter
 	sach	*,0
 	lacc	*,15,ar1		; load acc with counter/2
@@ -91,7 +91,7 @@ as the control varies between -1.0 and 1.0.
 	lar	ar1,#$addr(duration)	; ar1 -> duration
 	lacc	*,0,ar0			; load acc with duration/2
 	add	#4000h,1		; acc = 0.5*(duration + 1)
-	sfl				; shift acc left for nxt inst
+	sfr				; shift acc right for nxt inst
 	samm	treg0			; treg0 = 0.5*(duration+1)
 	mpy	#$val(maxDuration)	; p = 0.5(maxDur*(duration+1)/2)
 	pac				; acc = p = newLength/2

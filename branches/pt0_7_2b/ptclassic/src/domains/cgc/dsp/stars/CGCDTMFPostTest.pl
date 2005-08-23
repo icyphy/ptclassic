@@ -1,31 +1,31 @@
 defstar {
 	name { DTMFPostTest }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCDTMFPostTest.pl	1.5	06 Oct 1996 }
 	desc {
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.
 	}
-	explanation {
+	htmldoc {
 The assumption is that the 100 msec DTMF interval has been split into
 roughly four parts.  This star looks at the last three detection results,
 which are represented as integers.  A new digit has been detected
 if two consecutive detected digits are the same followed by a third
 detected digit that is different.
-.PP
+<p>
 This test is useful for two reasons.
 First, it filters redundant hits so that only one is reported.
 Second, it improves robustness against noisy DTMF signals and speech input.
-.UH REFERENCES
-.IP [1]
+<h3>References</h3>
+<p>[1]  
 Pat Mock, "Add DTMF Generation and Decoding to DSP-uP Designs,"
 Electronic Data News, March 21, 1985.  Reprinted in
-\fIDigital Signal Processing Applications with the TMS320 Family\fR,
+<i>Digital Signal Processing Applications with the TMS320 Family</i>,
 Texas Instruments, 1986.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -77,21 +77,22 @@ internal state to store the second-to-last valid integer
 	}
 	codeblock(decl) {
 		int retval = 0;
+		int inputValue = $val(initialLastInput);
+		int lastValue = $ref(last);
+
 	}
 	codeblock(test) {
-
-		/* if the current input is valid, then compare it
-		   with the last and second-to-last valid inputs
-		   and then update the last and second-to-last inputs;
-		   otherwise, return FALSE */
+		/* if the current input is valid, then compare it with the
+		   last and second-to-last valid inputs; else, return FALSE */
 		if ( $ref(valid) ) {
-		  int inputValue = $ref(input%0);
-		  int lastValue = $ref(last);
+		  inputValue = $ref(input);
 		  retval = ( inputValue == lastValue &&
-		             lastValue != $val(secondToLast) );
-		  $ref(secondToLast) = $val(last);
-		  $ref(last) = inputValue;
+		             lastValue != $ref(secondToLast) );
 		}
+
+		/* Update the last and second-to-last input storage */
+		$ref(secondToLast) = lastValue;
+		$ref(last) = inputValue;
 	}
 	codeblock(sendOutput) {
 

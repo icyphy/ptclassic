@@ -1,0 +1,26 @@
+reset
+newuniverse Kahn74fig2
+domain PN
+target default-PN
+
+     star DelayInt1 DelayInt
+	 setstate DelayInt1 init 0
+     star DelayInt2 DelayInt
+	 setstate DelayInt2 init 1
+     star Printer Printer
+     star Commutator Commutator
+	 numports Commutator input 2
+     star Distributor Distributor
+	 numports Distributor output 2
+     node node0
+	 nodeconnect Commutator output node0
+	 nodeconnect Distributor input node0
+	 nodeconnect Printer input node0
+     connect DelayInt1 output Commutator input#1
+     connect DelayInt2 output Commutator input#2
+     connect Distributor output#1 DelayInt1 input
+     connect Distributor output#2 DelayInt2 input
+
+run 10
+wrapup
+

@@ -1,17 +1,17 @@
 /* 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -20,11 +20,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 */
 /*
     ptkTemplate.c  aok
-    Version: $Id$
+    Version: @(#)ptkTemplate.c	1.9 11/01/96
 */
 
 
@@ -41,14 +43,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 #define PTKCODE
 
+#include "local.h"		/* include "ansi.h" and "compat.h" */
+#include <stdio.h>
+
 #ifdef PTKCODE
 #include "ptkTkSetup.h"
 #endif
 
 #ifndef VAXLISP
 
+/* Octtools include files */
 #include "copyright.h"
 #include "port.h"
+#include "errtrap.h"		/* define errProgramName */
 
 /*
  * the VAXLISP version defines it own main
@@ -59,15 +66,42 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  */
 
-#include "rpcApp.h"
+#include "oct.h"
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 
-extern long UserMain();
+#include "rpcApp.h"		/* define STREAM */
+
+
+#ifdef PTKCODE
+
+/* These are defined in octtools/Xpackages/rpc/appInit.c */
+extern octStatus vemInitializeApplication
+	  ARGS((char **display, RPCSpot *spot,
+		lsList *cmdList, long *userOptionWord));
+extern octStatus vemSendMenu ARGS((RPCFunction *array, long count));
+
+/* These are defined in octtools/Xpackages/rpc/appNet.c */
+extern rpcStatus RPCApplicationFunctionComplete();
+extern void RPCByteSwappedApplication
+	ARGS((int a, int b, int c, int d, int32 int32val));
+extern rpcStatus RPCConnectToServer
+	ARGS((char *host, int port, char *protocol,
+	      STREAM *sendStream, STREAM *receiveStream));
+extern rpcStatus RPCApplicationProcessEvents
+	ARGS((RPCFunction funcArray[], long size));
+
+#endif	/* PTKCODE */
+
+
+#include "main.h"			/* define UserMain */
+
 
 #ifndef PTKCODE
 RPCMain(argc, argv)
 #endif
 #ifdef PTKCODE
-ptkRPCInit(argc, argv)
+int ptkRPCInit(argc, argv)
 #endif
 int argc;
 char **argv;
@@ -75,9 +109,9 @@ char **argv;
     RPCFunction *CommandArray;          /* menu/function array */
     RPCSpot spot;
     lsList cmdList;
-    long userOptionWord;
-    char *display;
-    long size;
+    long userOptionWord = 0L;
+    char *display = 0;
+    long size = 0L;
     static int been_here_before = 0;            /* for 'wbaker' */
 
 #ifndef aiws
@@ -104,17 +138,13 @@ char **argv;
 
         /* determine the application is byte swapped relative to the server */
 
-        RPCByteSwappedApplication(atoi(argv[5]),
-                                         atoi(argv[6]),
-                                         atoi(argv[7]),
-                                         atoi(argv[8]),
-                                         atoi(argv[9]));
-            
+        RPCByteSwappedApplication(atoi(argv[5]), atoi(argv[6]), atoi(argv[7]),
+				  atoi(argv[8]), atoi(argv[9]));
+
         /* host port protocol */
-        if (RPCConnectToServer(argv[2], atoi(argv[3]), argv[4],
-                                        &RPCSendStream,
-                                        &RPCReceiveStream) == RPC_ERROR) {
-            (void) fprintf(stderr, "RPC Error: can not connect to the server\n");
+        if (RPCConnectToServer(argv[2], atoi(argv[3]), argv[4], &RPCSendStream,
+			       &RPCReceiveStream) == RPC_ERROR) {
+            (void) fprintf(stderr, "RPC Error: cannot connect to the server\n");
             exit(RPC_BAD_EXIT);
         }
 
@@ -125,15 +155,18 @@ char **argv;
 
     if (vemInitializeApplication(&display, &spot, &cmdList, &userOptionWord)
         != OCT_OK) {
-        (void) fprintf(stderr, "RPC Error: application: error in initialization\n");
+        (void) fprintf(stderr,
+		       "RPC Error: application: error in initialization\n");
         exit(RPC_BAD_EXIT);
     }
 
-    if ((size = UserMain(display, &spot, cmdList, userOptionWord, &CommandArray)) < 0) {
-        (void) fprintf(stderr, "RPC Error: UserMain returned a value less than zero\n");
+    size = UserMain(display, &spot, cmdList, userOptionWord, &CommandArray);
+    if (size < 0) {
+        (void) fprintf(stderr,
+		       "RPC Error: UserMain returned value less than zero\n");
         exit(RPC_BAD_EXIT);
     }
-    
+
     if (RPCApplicationFunctionComplete() != RPC_OK) {
         exit(RPC_BAD_EXIT);
     }

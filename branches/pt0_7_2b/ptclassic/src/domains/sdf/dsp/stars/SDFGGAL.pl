@@ -3,9 +3,20 @@ defstar
     name { GGAL }
     derivedFrom { GAL }
     domain { SDF } 
-    desc { Ganged Gradient Adaptive Lattice filters. }
-    version { $Id$ }
+    desc {
+Ganged Gradient Adaptive Lattice filters.
+This means that there are actually two lattice filters,
+one of which is adapted using the stochastic gradient algorithm,
+and the other which tracks the first.
+    }
+    version { @(#)SDFGGAL.pl	1.5 04/01/97 }
     author { T. M. Parks }
+    copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { SDF dsp library }
 
     input
@@ -32,7 +43,7 @@ defstar
 
     destructor
     {
-	LOG_DEL; delete b;
+	LOG_DEL; delete [] b;
     }
 
     setup
@@ -40,7 +51,7 @@ defstar
 	// Reallocate array only if size has changed.
 	if (previousOrder != order)
 	{
-	    LOG_DEL; delete b;
+	    LOG_DEL; delete [] b;
 	    LOG_NEW; b = new double[order+1];
 	}
 

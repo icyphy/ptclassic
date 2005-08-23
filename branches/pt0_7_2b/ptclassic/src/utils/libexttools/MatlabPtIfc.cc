@@ -2,9 +2,9 @@ static const char file_id[] = "MatlabPtIfc.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MatlabPtIfc.cc	1.5	08/25/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,23 +43,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MatlabPtIfc.h"
 #include "MatlabIfcFuns.h"
 
-Matrix* MatlabPtIfc :: PtolemyToMatlab(
+mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	Particle& particle, DataType portType, int* errflag) {
     // can't use a switch because enumerated data types
     // are assigned to strings and not to integers
-    Real* realp = 0;
-    Real* imagp = 0;
-    Matrix* matlabMatrix = 0;
+    double* realp = 0;
+    double* imagp = 0;
+    mxArray* matlabMatrix = 0;
     if ( portType == INT || portType == FLOAT || portType == FIX ) {
-	matlabMatrix = mxCreateFull(1, 1, MXREAL);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxREAL);
 	realp = mxGetPr(matlabMatrix);
 	*realp = double(particle);
     }
     else if ( portType == COMPLEX ) {
-	matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxCOMPLEX);
 	realp = mxGetPr(matlabMatrix);
 	imagp = mxGetPi(matlabMatrix);
-	Complex temp = particle;
+	Complex temp = (const Complex &)particle; // Cast needed for nt4.vc
 	*realp = real(temp);
 	*imagp = imag(temp);
     }
@@ -71,12 +71,12 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxCOMPLEX);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	Real* realp = mxGetPr(matlabMatrix);
-	Real* imagp = mxGetPi(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
+	double* imagp = mxGetPi(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		Complex temp = Amatrix[irow][icol];
@@ -93,11 +93,11 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	Real* realp = mxGetPr(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = double(Amatrix[irow][icol]);
@@ -112,11 +112,11 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	Real* realp = mxGetPr(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = Amatrix[irow][icol];
@@ -131,11 +131,11 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	Real* realp = mxGetPr(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = double(Amatrix[irow][icol]);
@@ -144,8 +144,8 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
     }
     else {
 	*errflag = TRUE;
-	matlabMatrix = mxCreateFull(1, 1, MXREAL);
-	Real* realp = mxGetPr(matlabMatrix);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxREAL);
+	double* realp = mxGetPr(matlabMatrix);
 	*realp = 0.0;
     }
 
@@ -156,7 +156,7 @@ Matrix* MatlabPtIfc :: PtolemyToMatlab(
 // copy a Matlab output matrix to a Ptolemy matrix
 int MatlabPtIfc :: MatlabToPtolemy(
 	Particle& particle, DataType portType,
-	Matrix* matlabMatrix, int* warnflag, int* errflag) {
+	mxArray* matlabMatrix, int* warnflag, int* errflag) {
     // error and warning flags
     *errflag = FALSE;
     int incompatibleOutportPort = FALSE;
@@ -166,11 +166,11 @@ int MatlabPtIfc :: MatlabToPtolemy(
     int rows = mxGetM(matlabMatrix);
     int cols = mxGetN(matlabMatrix);
 
-    if ( mxIsFull(matlabMatrix) ) {
+    if ( !mxIsSparse(matlabMatrix) ) {
 
 	// for real matrices, imagp will be null
-	Real* realp = mxGetPr(matlabMatrix);
-	Real* imagp = mxGetPi(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
+	double* imagp = mxGetPi(matlabMatrix);
 
 	// copy Matlab matrices (in column-major order) to Ptolemy
 	if ( portType == COMPLEX_MATRIX_ENV ) {

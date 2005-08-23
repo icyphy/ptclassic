@@ -1,23 +1,22 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 10/8/90
-
- Output is natural log of input.  We abort the run on zero or negative input.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Log }
 	domain { SDF } 
-	desc { 	"Outputs natural log of input" }
+	desc { Output the natural logarithm of the input value. }
+	version {@(#)SDFLog.pl	1.11 10/01/96}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+Outputs natural logarithm of the input.
+If the input is zero or negative, then the run of the universe that
+contains this star will be aborted.
+<a name="logarithm"></a>
+	}
 	input {
 		name { input }
 		type { float }
@@ -28,7 +27,7 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		float t = input%0;
+		double t = input%0;
 		if (t <= 0) {
 			Error::abortRun (*this, ": log of x, x <= 0");
 			output%0 << -100.0;

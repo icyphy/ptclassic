@@ -7,11 +7,11 @@ defstar
 Just like StereoIn, except that a Tk slider is put in the master
 control panel to control the volume.
     }
-    version { @(#)CGCVISTkStereoIn.pl	1.2 08/08/96 }
+    version { @(#)CGCVISTkStereoIn.pl	1.4 04/08/97 }
     author { Sunil Bhave }
     location { CGCVIS Tcl/Tk library }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -40,10 +40,6 @@ limitation of liability, and disclaimer of warranty provisions.
 			   "$val(volume)");
       }
 
-      /* Test code for the new custom control panels */
-      /*connectControl("$val(starName)",
-		     "attenuate",
-		     $starSymbol(setVolume));*/
     }
 
     codeblock (setVolumeDef) {

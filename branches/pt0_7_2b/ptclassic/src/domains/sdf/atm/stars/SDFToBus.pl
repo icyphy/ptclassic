@@ -7,17 +7,17 @@ defstar {
 Converts from MPH to multiple single ports or vice-versa
 	}
 
-	version { $Id$ }
+	version { @(#)SDFToBus.pl	1.3	10/23/95 }
 	author { Allen Y. Lao }
 
         copyright { 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-        location  { ATM demo library }
+        location  { SDF ATM library }
 
 	inmulti {
 		name { input }

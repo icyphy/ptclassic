@@ -5,25 +5,37 @@ defstar {
 	desc {
 Generate a rectangular pulse of width "width".  If "period" is greater
 than zero, then the pulse is repeated with the given period.  The height
-of the pulse is a complex quantity.  The magnitude of the height, which
-is a function of the square root of the noise power "SqrPthn" and the
-signal-to-noise ratio "SNRn", is equal to SqrPthn * 10^(SNRn/20).  The
-phase of the height is equal to Pi ( 2 Fpor (count - sdelay) / Fsimu -
-bandwidth (count - sdelay)^2 / (Te Fsimu^2) + 4 dopplercount Fe Tp vn / c ).
+of the pulse is a complex quantity that is a function of the Doppler
+parameters.
 	}
-	version { $Id$ }
+	version { @(#)SDFRectCxDoppler.pl	1.8	10/07/96 }
 	author { Karim-Patrick Khiar }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-This pulse generator is similiar to the \fIRect\fR star, except
+	htmldoc {
+This pulse generator is similiar to the <i>Rect</i> star, except
 that it is complex-valued and supports several additional options
 for Doppler effects.  This star was initially intended for radar
 simulations.
+
+<p>
+
+The magnitude of the height of the pulse is equal to:
+<pre>
+SqrPthn * 10 <sup>SNRn/20</sup>
+
+</pre>
+The phase of the height of the pulse is equal to:
+<pre>
+Pi(2.Fpor(count-sdelay)/Fsimu - 
+bandwidth(count-sdelay)<sup>2</sup>/Te.Fsimu<sup>2</sup> + 
+4.dopplercount.Fe.Tp.vn/c)
+</pre>
+
 	}
 	location { SDF main library }
 	defstate {
@@ -35,7 +47,7 @@ simulations.
 	defstate {
 		name { Te }
 		type { float }
-		default { "30.0*10^-6"  }
+		default { "30e-6" }
 		desc { Duration time }
 	}
 	defstate {
@@ -103,7 +115,7 @@ simulations.
 		type { int }
 		default { 0 }
 		desc { Internal state }
-		attributes { A_SETTABLE|A_NONCONSTANT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	hinclude { <math.h> }
 	constructor {

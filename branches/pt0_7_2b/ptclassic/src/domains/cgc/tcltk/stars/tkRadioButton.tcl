@@ -1,10 +1,10 @@
-# Tcl/Tk source for a telephone keypad, to be used with the TkSource star
-# For use with a two-output, zero-input TclScript star.
+# Tcl/Tk source for a radio button widget.
+# For use with the CGCTkRadioButton Star.
 #
 # Authors: Jose Luis Pino
-# Version: $Id$
+# Version: @(#)tkRadioButton.tcl	1.5 2/28/96
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,24 +34,49 @@
 # See the documentation of the TclScript star for an explanation of
 # how the Tcl/Ptolemy interface works.
 
-set s .middle.radio$uniqueSymbol
+proc ${uniqueSymbol}setupTcl {identifier initialChoice pairs} {
+    global uniqueSymbol
 
-frame $s -bd 3 -relief raised
-pack append .middle $s {top fill}
-label $s.lbl -text "WOW"
-pack append $s $s.lbl {top fill}
+    set s .middle.radio$uniqueSymbol
 
-set pairs "{One 1.0} {Two 2.0}"
+    frame $s -bd 3 -relief raised
+    label $s.lbl -text $identifier
+    pack append $s $s.lbl {top fill}
 
-foreach pair $pairs {
-    set pairlbl [lindex $pair 0]
-    radiobutton $s."p_$pairlbl" -text $pairlbl -val [lindex $pair 1] \
-	    -var $s -com "${uniqueSymbol}setOutputs [lindex $pair 1]"
-    pack append $s $s."p_$pairlbl" { top fill expand }
+    frame $s.buttons
+
+    foreach pair $pairs {
+	set pairlbl [lindex $pair 0]
+	set pairValue [lindex $pair 1]
+	radiobutton $s.buttons."p_$pairlbl" -text $pairlbl -val \
+		$pairValue -var $s \
+		-com "${uniqueSymbol}setOutputs $pairValue"
+	pack $s.buttons $s.buttons."p_$pairlbl" -side left
+    }
+    pack append $s $s.buttons {top fill}
+    pack append .middle $s {top fill}
+
+    $s.buttons."p_$initialChoice" select
 }
 
 proc ${uniqueSymbol}callTcl {} {
     global uniqueSymbol
-    global pairs
-    ${uniqueSymbol}setOutputs [lindex [lindex $pairs 1] 1]
+    global $uniqueSymbol
+    set initialChoice [set ${uniqueSymbol}(initialChoice)]
+    set pairs [set ${uniqueSymbol}(pairs)]
+    foreach pair $pairs {
+	if { [lindex $pair 0] == $initialChoice } {
+	    ${uniqueSymbol}setOutputs [lindex $pair 1]
+	    break
+	}
+    }
 }
+
+${uniqueSymbol}setupTcl [set ${uniqueSymbol}(identifier)] \
+	[set ${uniqueSymbol}(initialChoice)] \
+	[set ${uniqueSymbol}(pairs)]
+
+
+
+
+

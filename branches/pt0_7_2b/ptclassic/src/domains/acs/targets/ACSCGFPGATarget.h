@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)ACSCGFPGATarget.h      1.0     06/16/99
+ Version: @(#)ACSCGFPGATarget.h	1.6 08/02/01
 ***********************************************************************/
 #ifndef _ACSCGFPGATarget_h
 #define _ACSCGFPGATarget_h
@@ -41,11 +41,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSIntArray.h"
 #include "DoubleArray.h"
 #include "StringArray.h"
+#include "CoreList.h"
+#include "Connection_List.h"
 #include "Arch.h"
-#include "MemPort.h"
+#include "Port.h"
 #include "Pin.h"
 #include "acs_vhdl_lang.h"
 #include "Sg_Constructs.h"
+#include "BindingRule.h"
 #include "Directory.h"
 #include "ACSPortHole.h"
 #include "ACSCGFPGACore.h"
@@ -63,7 +66,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/wait.h>
 
 class Signal_State;
-class MemPort;
+class Port;
 class Arch;
 class ACSPortHole;
 class ACSStar;
@@ -107,15 +110,19 @@ public:
   Arch* arch;
   static const int NUM_FPGAS=5;
   static const int NUM_MEMS=5;
+  static const int NUM_SYSS=3;
 
   Directory* hw_path;
   Directory* sim_path;
   Directory* core_path;
 
   // Design specific
-  SequentialList* smart_generators;
+  CoreList* smart_generators;
   Directory* design_directory;
   Directory* compile_directory;
+  int multirate;
+  int automatic_addressing;
+  int automatic_wordlength;
 
   // Dynamic constructor
   Sg_Constructs* construct;
@@ -140,6 +147,7 @@ public:
   static const int DEBUG_WAIT=0;
   static const int DEBUG_PTPRECISION=0;
   static const int DEBUG_PTCONNECT=0;
+  static const int DEBUG_PACK=0;
   static const int DEBUG_SCHEDULER=0;
   static const int DEBUG_IOSCHEDULER=0;
   static const int DEBUG_PIPESYNTH=0;
@@ -157,11 +165,14 @@ public:
   static const int DEBUG_RESOLVER=0;
   static const int DEBUG_ALGCREATE=0;
   static const int DEBUG_ALGINTEGRATE=0;
+  static const int DEBUG_ALGSUPPORT=0;
   static const int DEBUG_ADDSTAR=0;
   static const int DEBUG_SEQUENCER=0;
   static const int DEBUG_BW=0;
+  static const int DEBUG_WORDCOUNT=0;
   static const int DEBUG_PORTSIZE=0;
   static const int DEBUG_REVISE=0;
+  static const int DEBUG_WHITESTAR=0;
   
   
   ////////////////////
@@ -176,11 +187,11 @@ public:
   //////////////////////                                           
   void setup(void);
   void HWinitialize(void);
-  int HWalg_query(void);
+  int HWalg_query(CoreList*);
   void HWdup_component(ACSCGFPGACore*);
-  void HWsg_queryprec(ACSCGFPGACore*);
+  void HWsg_query_params(ACSCGFPGACore*);
   void HWsg_updateprec(ACSCGFPGACore*,
-		       SequentialList*,
+		       StringArray*,
 		       int,
 		       const char*,
 		       const char*);
@@ -197,15 +208,18 @@ public:
   void HWannounce_vhdldone(void);
   
   int HWstar_assignids(ACSCGFPGACore*&);
-  void HWassign_devices(void);
-  void HWtest_assignments(void);
-  void HWassign_fpga(void);
-  void HWassign_memory(void);
+  void HWassign_devices(CoreList*);
+  void HWassign_memory(CoreList*);
+  void HWassign_fpga(CoreList*);
   int Ptquery_majorbit(const int,
 		       ACSCGFPGACore*&);
   int Ptquery_bitlen(const int,
 		     ACSCGFPGACore*&);
+  int HWpack_ports(CoreList*);
   void HWunirate_sched(void);
+  void HWmultirate_sg(CoreList*);
+  void HWmultirate_controlpins(ACSCGFPGACore*,
+			       ACSIntArray*);
 
   int HWsynth_pipealigns(void);
   int HWadd_delayto(ACSCGFPGACore*,
@@ -234,57 +248,70 @@ public:
   void HWio_sched(void);
 
 
-  void HWunirate_sequencer(Fpga*,const int);
+  void HWsequencer(void);
+  void HWmultirate_sequencer(Fpga*,const int);
   
   void HWbw_resolver(void);
   void HWlink_resolver(Pin*,Pin*,Pin*,Pin*,
 		       ACSCGFPGACore*,Pin*,int,Connectivity*,int);
-  void HWalg_resolver(void);
+  void HWalg_resolver(CoreList*);
+  void HWresolve_drivingsignals(CoreList*, const int);
+  void HWresolve_ictrlsignals(CoreList*);
+  void HWresolve_ectrlsignals(void);
+  void HWresolve_ctrlpins(Fpga*,ACSCGFPGACore*,Pin*,ACSIntArray*);
 
   void HWsig_compare(const int,Pin*,const int,Pin*,const int,Pin*);
-  int HWresolver_extrules(int,int);
-  int HWresolver_ctrlrules(int,int);
+  void HWsig_compare_ext(const int,Pin*,const int,Pin*,const int,Pin*);
+  int HWresolver_extrules_driving(int,int);
+  int HWresolver_extrules_driven(int,int);
+  int HWresolver_ctrlrules(const int,const int,const int,const int);
   int HWresolver_construles(int,int);
-  void HWalg_setup(void);
+  void HWmacro(CoreList*);
+  void HWalg_setup(CoreList*);
+  void HWwhite_star(ACSCGFPGACore*,CoreList*);
+  void HWdark_star(ACSCGFPGACore*,CoreList*);
+  void HWlib_needs(CoreList*);
   void HWalg_create(const int);
   void HWalg_integrate(const int);
-  void HWexport_simulation(SequentialList*);
+  void HWexport_simulation(CoreList*);
   void HWexport_synthesis(Fpga*,const int);
-  void HWexport_controlinfo(SequentialList*);
+  void HWexport_controlinfo(CoreList*);
   void HWcleanup(void);
 
   //////////////////////////////////////////////////////////////////////////////
   // HWio_add.cc
   //////////////////////////////////////////////////////////////////////////////
+  ACSIntArray* HWpack_bits(ACSIntArray*, const int, CoreList*);
+  void HWadd_packer(Port*, const int, const int, const int, CoreList*, ACSIntArray*);
   int HWadd_support(void);
-  int HWsegment_alg(void);
+  int HWsegment_alg(CoreList*);
   int HWreturn_fpgadevice(ACSCGFPGACore*);
-  int HWio_add(void);
-  void HWio_add_sequencer(Fpga*, const int);
-  void HWio_add_addressgen(Fpga*, const int, MemPort*, const int);
-  void HWbalance_bw(SequentialList*);
-  void HWio_add_dataio(Fpga*, const int, MemPort*, const int);
-  void HWio_add_bidirmem(Fpga*, const int,
-			 MemPort*, const int);
-  void HWio_add_dualmem(Fpga*, const int,
-			MemPort*, const int,
+  int HWio_add(CoreList*);
+  void HWio_add_sequencer(Fpga*);
+  void HWio_add_addressgen(Fpga*, Port*, const int);
+  void HWio_add_dataio(Fpga*, Port*, const int);
+  void HWio_add_bidirio(Fpga*, 
+			 Port*, const int);
+  void HWio_add_dualio(Fpga*,
+			Port*, const int,
 			const int);
-  void HWio_reconnect_src(ACSCGFPGACore*,ACSCGFPGACore*);
-  void HWio_reconnect_snk(ACSCGFPGACore*,ACSCGFPGACore*);
+  void HWio_reconnect_src(ACSCGFPGACore*, ACSCGFPGACore*, const int);
+  void HWio_reconnect_snk(ACSCGFPGACore*, ACSCGFPGACore*, const int);
   void HWio_add_reconnect(ACSCGFPGACore*,
 			  ACSCGFPGACore*,
 			  Pin*,
 			  int,
 			  int,
 			  int,
-			  MemPort*);
-  void HWio_add_wordcounter(Fpga*, const int,
-			    SequentialList*&,
+			  Port*);
+  void HWio_remaplut(ACSCGFPGACore*);
+  void HWio_add_wordcounter(Fpga*,
+			    CoreList*&,
 			    const int,
 			    ACSCGFPGACore*&,const char*,const int,
 			    ACSCGFPGACore*&,const char*,
 			    const int, const int);
-  void HWremap_ioport(ACSCGFPGACore*);
+  void HWremap_ioport(ACSCGFPGACore*,CoreList*);
 
   ////////////////////////////////////////////////////////////////////////////
   // HWutils.cc
@@ -293,14 +320,16 @@ public:
   ACSCGFPGACore* fetch_fpgacore(Star *);
   ACSCorona* fetch_corona(Star *);
   ACSCGFPGACore* HWfind_star(int);
-  void HWset_bw(SequentialList*);
+  void HWset_wordcount(CoreList*);
+  void HWset_bw(CoreList*);
+  void HWset_requirements(ACSCGFPGACore*);
   Pin* HWfind_origin(int,int);
-  SequentialList* HWfind_loop(ACSCGFPGACore*);
-  int HWall_bwset(SequentialList*);
+  CoreList* HWfind_loop(ACSCGFPGACore*);
+  int HWall_bwset(CoreList*);
+  int HWall_wordset(CoreList*);
   void HWset_dirty(ACSCGFPGACore*);
-  int bselcode(int,int);
-  int HWbit_sizer(const int);
-  void HWdisplay_connectivity(char*,SequentialList*);
+  int bselcode_old(int,int);
+  void HWdisplay_connectivity(char*,CoreList*);
   void HWdisplay_connects(Pin*);
   int intparam_query(const char*);
   int HWtest_contentions(void);
@@ -317,19 +346,22 @@ public:
 		     int,
 		     const int);
   char* HWexport_pnames(void);
+  char* HWexport_delaychain(void);
   int HWpause_for_wordgui(void);
-  void HWrevise(void);
+
+  // Post-matlab update of the algorithm
+  void HWrevise(CoreList*);
   int HWnetlist_import(void);
-  int HWrevise_fixed(void);
+  int HWrevise_const(CoreList*);
+  int HWrevise_fixed(CoreList*);
   int HWrevise_pins(ACSCorona&,
 		    ACSCGFPGACore*,
 		    ACSIntArray*,
-		    SequentialList*,
+		    StringArray*,
 		    int,
 		    char,
 		    ofstream&);
-  int HWrevise_partition(void);
-  int HWrevise_pipes(void);
+  int HWrevise_pipes(CoreList*);
 };
 
 #endif

@@ -1,19 +1,21 @@
 defstar {
 	name { Reverse }
 	domain { C50 }
-	desc { Reverse a block of input data of length N }
-	version { $Id$ }
-	author { A. Baensch }
+	desc {
+On each execution, read a block of "N" samples (default 64)
+and writes them out backwards.
+	}
+	version {@(#)C50Reverse.pl	1.7	05/26/98}
+	author { A. Baensch, Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 control library }
-	explanation { Reverse a block of input data of length N }
+	location { C50 main library }
 
-        input {
+	input {
 		name {input}
 		type {ANYTYPE}
 	}
@@ -21,47 +23,87 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {=input}
 	}
-        state {
+	state {
                 name {N}
                 type {int}
                 default {64}
-		desc {Number of particles read and written.}
+		desc {Number of particles read and written}
 	}
+	protected {
+		// number of inputs
+		int numInputs;
+	}
+
 	setup {
                 input.setSDFParams(int(N),int(N)-1);
                 output.setSDFParams(int(N),int(N)-1);
+		numInputs = int(N);
+	
         }
 
- 	codeblock(main) {
-        mar 	*,AR0				;
-	lar     AR0,#$addr(input)+$val(N)	;Address last input 	=> AR0
-        splk	#$addr(output),BMAR		;Address output		=> BMAR
-        rpt     #$val(N)-1			;for number of N
-	 bldd	*-,BMAR				;output(i) = input(N-i)
+ 	codeblock(std,"") {
+        mar 	*,AR0			
+	lar	ar0,#($addr(input)+@(numInputs-1))
+        rpt     #@(numInputs-1)		;for number of N
+	bldd	*-,#$addr(output)	;output(i) = input(N-i)
         }
+
+	codeblock(cmplx,""){
+	lacc	#@numInputs
+	samm	brcr
+	mar	*,ar1
+	lacc	#$addr(output)
+	samm	bmar
+	lar	ar1,#($addr(input)+@(2*(numInputs - 1)))
+	rptb	$label(rev)
+	rpt	#1
+	bldd	*+,bmar
+	sbrk	#4
+	lamm	bmar
+	add	#2
+$label(rev)
+	samm	bmar
+	}
+
         codeblock(one) {
-        splk    #$addr(input),BMAR		;Address input		=> BMAR
-        bldd    BMAR,#$addr(output)		;output = input
+	lmmr	ar1,#$addr(input)
+	nop
+	nop
+	smmr	ar1,#$addr(output)
+	}
+
+	codeblock(oneCx){
+	lmmr	ar0,#$addr(input)
+	lmmr	ar1,#($addr(input)+1)
+	smmr	ar0,#$addr(output)
+	smmr	ar1,#($addr(output)+1)
 	}
 
         go {
-                if(N>1)
-	            addCode(main);
-		else
-	            addCode(one);
+                if ( numInputs > 1) {
+			if (input.resolvedType() == COMPLEX)
+				addCode(cmplx());
+			else
+				addCode(std());
+		} else {
+			if (input.resolvedType() == COMPLEX)
+				addCode(oneCx);
+			else
+				addCode(one);
+		}
         }
         exectime {
-                if(int(N)>1)
-	            return 2*int(N)+4;
-		else
-	            return 3;
-      }
+                if ( numInputs > 1) {
+			if (input.resolvedType() == COMPLEX)
+				 return (7*numInputs + 7);
+			else
+				 return (3 + numInputs);
+		} else {
+			if (input.resolvedType() == COMPLEX)
+				return 4;
+			else 
+				return 2;
+		}
+	}
 }
-
-
-
-
-
-
-
 

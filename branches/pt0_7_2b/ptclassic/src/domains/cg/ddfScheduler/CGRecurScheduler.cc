@@ -9,25 +9,26 @@ static const char file_id[] = "CGRecurScheduler.cc";
 #include "DataStruct.h"
 #include "distributions.h"
 #include "KnownBlock.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGRecurScheduler.cc	1.5	12/08/97
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -36,7 +37,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
 
@@ -641,8 +644,8 @@ int CGRecurScheduler :: recursiveDownLoad(int invoc, int pix,
 	Geodesic* dataG = 0;
 	if (syncId == 0) {
 		if (!addDataSend(invoc, pix, pgId, t)) return FALSE;
-		CGClustPortIter nextp(*cbagC);
-		CGClustPort* tempP;
+		CGMacroClustPortIter nextp(*cbagC);
+		CGMacroClustPort* tempP;
 		while ((tempP = nextp++) != 0) {
 			if (tempP->isItOutput()) break;
 		}
@@ -665,7 +668,7 @@ int CGRecurScheduler :: recursiveDownLoad(int invoc, int pix,
 	if (syncId == 0) {
 		CGStar* ds = cloneStar("BlackHole");
 		if (!ds) return FALSE;
-		ds->setNameParent("dummy", galaxy());
+		//ds->setNameParent("dummy", galaxy());
 		dummyStars.put(*ds);
 		ds->repetitions = 1;
 		if (!addDataReceive(outG, invoc, pix, pgId, t, ds)) 
@@ -708,7 +711,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 	StringList funcName = "recur_";
 	funcName << galaxy()->name();
 
-	CGClustPort* p = 0;
+	CGMacroClustPort* p = 0;
 	if (createFunc) {
 		// call the function
 		if (newPG <= saveK) 
@@ -717,7 +720,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 
 		// return type
 		if (syncId == 0) {
-			CGClustPortIter nextp(*cbagD);
+			CGMacroClustPortIter nextp(*cbagD);
 			while ((p = nextp++) != 0) {
 				if (p->isItInput()) break;
 			}
@@ -748,7 +751,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 	BlockList selfStarList;
 	selfStarList.initialize();
 
-	CGClustPortIter nextCp(*cbagC);
+	CGMacroClustPortIter nextCp(*cbagC);
 	while ((p = nextCp++) != 0) {
 		if (p->isItInput()) continue;
 		PortHole* farP = copyPortHole(p);
@@ -758,7 +761,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 			CGMacroCluster* tb = p->far()->parentClust();
 			selfS = cloneStar("Self");
 			if (!selfS) return FALSE;
-			selfS->setNameParent(tb->realName(), galaxy());
+			selfS->setNameParent(tb->realName(), 0);
 			selfStarList.put(*selfS);
 			DFPortHole* srcP = 
 				(DFPortHole*) selfS->portWithName("output");
@@ -771,8 +774,8 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 			selfGeo = srcP->geo();
 
 			// alias this geodesic to cbagD input.
-			CGClustPortIter nextDp(*cbagD);
-			CGClustPort* dp;
+			CGMacroClustPortIter nextDp(*cbagD);
+			CGMacroClustPort* dp;
 			while ((dp = nextDp++) != 0) {
 				if (dp->far()->parentClust() == tb) break;
 			}
@@ -896,8 +899,8 @@ int CGRecurScheduler :: initRecurCode(int invoc, int pix, int pId,
         ///////////////////////////////////
 
 int CGRecurScheduler :: addDataSend(int invoc,int pix, int pgId, CGTarget* t) {
-	CGClustPortIter nextCp(*cbagC);
-	CGClustPort* p;
+	CGMacroClustPortIter nextCp(*cbagC);
+	CGMacroClustPort* p;
 
 	int count = 0;
 	while ((p = nextCp++) != 0) {
@@ -921,8 +924,8 @@ int CGRecurScheduler :: addDataSend(int invoc,int pix, int pgId, CGTarget* t) {
 
 int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix, 
 					int pgId, CGTarget* t, CGStar* ds) {
-	CGClustPortIter nextCp(*cbagC);
-	CGClustPort* p;
+	CGMacroClustPortIter nextCp(*cbagC);
+	CGMacroClustPort* p;
 
 	int count = 0;
 	int stride = int(pow(numSelf, pgId)) * optNum;
@@ -930,8 +933,8 @@ int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix,
 		if (p->isItInput()) continue;
 
 		CGMacroCluster* temps = p->far()->parentClust();
-		CGClustPortIter nextDp(*cbagD);
-		CGClustPort* dp;
+		CGMacroClustPortIter nextDp(*cbagD);
+		CGMacroClustPort* dp;
 		while ((dp = nextDp++) != 0) {
 			if (dp->far()->parentClust() == temps) break;
 		}
@@ -961,7 +964,8 @@ int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix,
 
 int CGRecurScheduler :: addControlSend(Geodesic* gd, int invoc, int pix,
 					int pgId, CGTarget* t, int flag) {
-	for (int i = 1; i < optNum; i++) {
+        int i;
+	for (i = 1; i < optNum; i++) {
 		int temp = pix + i;
 		CGStar* snd = syncCommStar(dataSendStars, invoc, temp, 0);
 		if (!snd) return FALSE;
@@ -993,12 +997,11 @@ CGStar* CGRecurScheduler :: dummyConnect(CGStar* s, int direction) {
 		ds = cloneStar("BlackHole");
 	} else {
 		ds = cloneStar("Const");
+		StringList temp = "Const_auto";
+		temp << localId++;
+		ds->setNameParent(hashstring(temp), 0);
 	}
 	if (!ds) return FALSE;
-
-	StringList temp = "dummy";
-	temp << localId++;
-	ds->setNameParent(hashstring(temp), 0);
 
 	DFPortHole* srcP, *destP;
 	if (!direction) {
@@ -1042,15 +1045,16 @@ void CGRecurScheduler :: buildDataSyncs(Profile* pf) {
 
 	for (int i = 1; i <= pf->numInstance(); i++) {
 		// control syncs first
-		for (int k = 0; k < numSyn; k++) {
+                int k;
+		for (k = 0; k < numSyn; k++) {
 			int refP = k * optNum;
 			int syncP = pf->assignedTo(i, refP);
 			Target* t = mtarget->child(syncP);
-			int pgId;
+			int pgId, m;
 			if (!refP) pgId = 0;
 			else pgId = int (log(refP) / log(numSelf)) + 1;
 
-			for (int m = pgId; m < saveK; m++) {
+			for (m = pgId; m < saveK; m++) {
 			   int stride = int(pow(numSelf, m)) * optNum;
 			   for (int n = 1; n < numSelf; n++) {
 				int temp = refP + stride * n;

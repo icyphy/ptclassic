@@ -2,17 +2,19 @@ defstar {
 	name { IIDGaussian }
 	domain {CGC}
 	desc {
-Generate pseudo-IID-Gaussian random variables.  
+Generate random variables that are approximately independent identically
+distributed Gaussian random variables.  The values range from "lower"
+to "upper".
 	}
-	version { $Id$ }
+	version { @(#)CGCIIDGaussian.pl	1.9	7/12/96 }
 	author { Soonhoi Ha }
-	copyright { 1992 The Regents of the University of California }
-	location { CGC main library }
-	explanation {
-Use two library functions drand48() and srand48(long) in Sun machines.
-For other machines, we may want to change this random number generation 
-part. The code should be modified for portability.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { CGC main library }
 	output {
 		name { output }
 		type { float }
@@ -34,28 +36,50 @@ part. The code should be modified for portability.
 		type { int }
 		default { 1 }
 	}
+
 	initCode {
-		addGlobal("double drand48();\n");
-		addCode(initSeed);
+		// Declare prototypes for srand and rand functions
+		addInclude("<stdlib.h>");
+		// Declare prototype for sqrt
 		addInclude("<math.h>");
+		// Initialize the random number generator
+		addCode(initSeed);
 	}
+
 	go {
-		addCode(random);
+		addCode(randomGen);
 	}
-	// "code" to initialize the seed
+
+	// initialize the seed of the random number generator
 	codeblock(initSeed) {
-    srand48($val(seed));
+/* Initialize the random number generator */
+srand($val(seed));
 	}
-	// "common" part of random number generation
-	codeblock(random) {
+
+	// generate a random number
+	codeblock(randomGen) {
 		int i;
-		double sum = 0;
+		double sum = 0.0;
+		/* Sum a large number of zero-mean random numbers that  */
+		/* are uniformly distributed on the interval [-0.5,0.5] */
+		/* to approximate a Gaussian distribution		*/
 		for (i = 0; i < 27; i++) {
-			sum += (drand48() - 0.5);
+		    /* RAND_MAX is an ANSI C standard constant */
+		    /* If not defined, then just use the lower 15 bits */
+		    double randomValue = 0.0;
+		    int randomInt = rand();
+#ifdef RAND_MAX
+		    randomValue = ((double) randomInt) / ((double) RAND_MAX);
+#else
+		    randomInt &= 0x7FFF;
+		    randomValue = ((double) randomInt) / 32767.0;
+#endif
+		    sum += (randomValue - 0.5);
 		}
 		if ($val(var) != 1.0) sum *= sqrt($val(var));
-		$ref(output) = sum * 2/3 + $val(mean);
+		$ref(output) = (2.0/3.0) * sum + $val(mean);
 	}
+
 	exectime {
 		return 300;
 	}

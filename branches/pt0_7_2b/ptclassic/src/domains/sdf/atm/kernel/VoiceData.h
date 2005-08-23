@@ -2,21 +2,21 @@
 #define _VoiceData_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)VoiceData.h	1.4	3/2/95
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,7 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer:  Paul Haskell
 Date of creation: 4/5/91
@@ -176,13 +178,13 @@ public:
     void receiveMessage(int *VCI) {
           data[4] = 031;
           data[5] = 031;
-          data[6] = char((*VCI)&0377);	
+          data[6] = (char)((*VCI)&0377);	
     }
 
     void calltermMessage(int *VCI) {
           data[4] = 041;
           data[5] = 041;
-          data[6] = char((*VCI)&0377);	
+          data[6] = (char)((*VCI)&0377);	
     }
 
     void stopMessage() {
@@ -205,7 +207,7 @@ public:
     void callDurMessage(int *duration) {
           data[4] = 013;
           data[5] = 013;
-          data[6] = char((*duration)&0377);	
+          data[6] = (char)((*duration)&0377);	
     }
 
     // control messages with two pieces of data to put in
@@ -213,65 +215,65 @@ public:
     void requestMessage(int *VCI1,int *VCI2) {
           data[4] = 023;
           data[5] = 023;
-          data[6] = char((*VCI1)&0377);
-          data[7] = char((*VCI2)&0377);
+          data[6] = (char)((*VCI1)&0377);
+          data[7] = (char)((*VCI2)&0377);
     }
 
     void sendDataMessage(int *duration,int *VCI) {
           data[4] = 033;
           data[5] = 033;
-          data[6] = char((*duration)&0377);
-          data[7] = char((*VCI)&0377);
+          data[6] = (char)((*duration)&0377);
+          data[7] = (char)((*VCI)&0377);
     }
 
     void inquireMessage(int *switchnum,int *VPI) {
           data[4] = 017;
           data[5] = 017;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void upDateMessage(int *switchnum,int *VPI) {
           data[4] = 027;
           data[5] = 027;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void downDateMessage(int *switchnum,int *VPI) {
           data[4] = 037;
           data[5] = 037;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void sotMessage(int* IVCI, int* OVCI) {
           data[4] = 057;
           data[5] = 057;
-          data[2] = char((*IVCI)&0377);
-          data[3] = char((*OVCI)&0377);
+          data[2] = (char)((*IVCI)&0377);
+          data[3] = (char)((*OVCI)&0377);
     }
 
     void eotMessage(int* IVCI, int* OVCI) {
           data[4] = 022;
           data[5] = 022;
-          data[2] = char((*IVCI)&0377);
-          data[3] = char((*OVCI)&0377);
+          data[2] = (char)((*IVCI)&0377);
+          data[3] = (char)((*OVCI)&0377);
     }
 
     void transmitMessage(int *IVCI, int *OVCI, int *VPI) {
           data[4] = 047;
           data[5] = 047;
-          data[6] = char((*IVCI)&0377);
-          data[7] = char((*OVCI)&0377);
-          data[8] = char((*VPI)&0377);
+          data[6] = (char)((*IVCI)&0377);
+          data[7] = (char)((*OVCI)&0377);
+          data[8] = (char)((*VPI)&0377);
     }
 
     void srtuMessage(int *IVCI,int *OVCI,int *SCPE,int *DCPE) {
-          data[0] = char((*IVCI)&0377);
-          data[1] = char((*OVCI)&0377);
-          data[2] = char((*SCPE)&0377);
-          data[3] = char((*DCPE)&0377);
+          data[0] = (char)((*IVCI)&0377);
+          data[1] = (char)((*OVCI)&0377);
+          data[2] = (char)((*SCPE)&0377);
+          data[3] = (char)((*DCPE)&0377);
     }
 
     int nulltestMessage() const {

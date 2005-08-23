@@ -4,7 +4,7 @@ defstar {
   desc {
 In each instant, a character is read from the serial port.
 }
-  version { $Id$ }
+  version { @(#)SRSerialIn.pl	1.3 12/08/97 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -36,7 +36,7 @@ character is ready, the output is made absent.  }
     desc { The baud rate }
   }
 
-  ccinclude { <stdio.h>, <fcntl.h>, <termios.h>, <errno.h> }
+  ccinclude { <stdio.h>, <fcntl.h>, <termios.h>, <errno.h>, <unistd.h> }
   hinclude { <termios.h> }
 
   protected {
@@ -49,6 +49,8 @@ character is ready, the output is made absent.  }
   }
 
   setup {
+    char rate[20];
+
     if ( fileDescriptor != -1 ) {
       close( fileDescriptor );
     }
@@ -83,7 +85,6 @@ character is ready, the output is made absent.  }
     case 19200: bbits = B19200; break;
     case 38400: bbits = B38400; break;
     default:
-      char rate[20];
       sprintf(rate,"%d",int(baudRate));
       Error::abortRun( *this, "Unknown baud rate", rate );
     }

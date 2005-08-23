@@ -1,85 +1,40 @@
-ident
-{
-/**************************************************************************
-Version identification:
-$Id$ 
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Tom Parks
- Date of creation: 1/14/91
-
- This star emulates a server.  If input events arrive when it is not busy,
- it delays them by the service time.  If they arrive when it is busy,
- it delays them by more.  It must become free, and then serve them.
-
- The service time can be changed using an addtional input.
-
-**************************************************************************/
-}
-
 defstar
 {
     name { VarServer }
     domain { DE }
-    desc
-    {
-This star emulates a server.  If input events arrive when it is not
-busy, it delays them by the service time (variable).  If they arrive
-when it is busy, it delays them by more.  It must become free, and then
-serve them. The service time can be changed using an additional input.
+    derivedFrom { Server }
+    desc {
+This star emulates a server with a variable service time.
+If input events arrive when it is idle, they will be serviced
+immediately and will be delayed only by the service time.
+If input events arrive while another event is being serviced,
+they will be queued.  When the server becomes free, it will
+service any events waiting in its queue.
+    }
+    version { @(#)DEVarServer.pl	1.10 06/04/96 }
+    author { T. M. Parks }
+    copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
 
-    input
-    {
-	name { input }
-	type { anytype }
-    }
-
-    input
-    {
+    input {
 	name { newServiceTime }
 	type { float }
     }
 
-    output
-    {
-	name { output }
-	type { = input }
+    constructor {
+	// state is no longer constant
+	serviceTime.clearAttributes(A_CONSTANT|A_SETTABLE);
     }
 
-    defstate
-    {
-	name { serviceTime }
-	type { float }
-	default { 1.0 }
-	desc { Initial service time. }
-	attributes { A_NONCONSTANT | A_SETTABLE }
-    }
-
-    constructor
-    {
-	delayType = TRUE;
-    }
-
-    go
-    {
+    go {
 	if (newServiceTime.dataNew)
-	{
-	    serviceTime = float(newServiceTime.get());
-	}
+	    serviceTime = newServiceTime.get();
 
 	if (input.dataNew)
-	{
-	   // No overlapped execution. set the time.
-	   if (arrivalTime > completionTime)
-		completionTime = arrivalTime + double(serviceTime);
-	   else
-		completionTime += double(serviceTime);
-
-	   Particle& pp = input.get();
-           output.put(completionTime) = pp;
-	}
+	    DEServer::go();
     }
 }

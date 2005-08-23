@@ -19,24 +19,14 @@ capabilities:
 
 The first line of the table gives the default settings.
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
-and its contents stored in an array.  The size of the array is currently
-limited to 20,000 samples.  To read longer files, use the 
-.c ReadFile
-star.  This latter star reads one sample at a time, and hence also
-uses less storage.
-.Id "file read"
-.Id "waveform from file"
-.Id "reading from a file"
-.Ir "halting a simulation"
-.Ir "simulation, halting"
+something of the form "&lt; filename".
 	}
-	version { $Id$ }
+	version { @(#)VHDLWaveForm.pl	1.4 10/01/96 }
 	author { Michael C. Williamson, S. Ha }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
