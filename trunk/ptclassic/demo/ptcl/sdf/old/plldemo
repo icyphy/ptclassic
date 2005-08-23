@@ -1,0 +1,337 @@
+domain SDF
+defgalaxy pd {
+	domain SDF
+	star Fork.output=41 Fork
+	numports Fork.output=41 output 4
+	star ComplexProduct1 ComplexProduct
+	star ComplexReal1 ComplexReal
+	star BlackHole1 BlackHole
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain 0.25
+	connect Fork.output=41 output#4 ComplexProduct1 input
+	connect Fork.output=41 output#1 ComplexProduct1 input
+	connect Fork.output=41 output#3 ComplexProduct1 input
+	connect Fork.output=41 output#2 ComplexProduct1 input
+	connect ComplexReal1 real BlackHole1 input
+	connect ComplexReal1 imag FloatGain1 input
+	connect ComplexProduct1 output ComplexReal1 input
+	alias in Fork.output=41 input
+	alias out FloatGain1 output
+}
+domain SDF
+defgalaxy loopfilter {
+	domain SDF
+	newstate wnTimeStep FLOAT "wnT/N"
+	newstate zeta FLOAT 0.70710678118655
+	star BiQuad1 BiQuad
+	setstate BiQuad1 d1 "-1.0"
+	setstate BiQuad1 d2 0.0
+	setstate BiQuad1 n0 "1 + wnTimeStep/(2*zeta)"
+	setstate BiQuad1 n1 "-1"
+	setstate BiQuad1 n2 0.0
+	setstate BiQuad1 state1 0.0
+	setstate BiQuad1 state2 0.0
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain "2*zeta*wnTimeStep"
+	alias in BiQuad1 input
+	connect BiQuad1 output FloatGain2 input
+	alias out FloatGain2 output
+}
+domain SDF
+defgalaxy vco {
+	domain SDF
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate YES
+	setstate Integrator1 state 0.0
+	star Cos1 Cos
+	star Sin1 Sin
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain "-1"
+	star RealComplex1 RealComplex
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star FloatGain4 FloatGain
+	setstate FloatGain4 gain 1.0
+	alias in Integrator1 data
+	node node1
+	nodeconnect Integrator1 output node1
+	nodeconnect Cos1 input node1
+	nodeconnect Sin1 input node1
+	connect Sin1 output FloatGain3 input
+	connect FloatGain3 output RealComplex1 imag
+	alias out RealComplex1 output
+	connect FloatDC1 output Integrator1 reset
+	connect Cos1 output FloatGain4 input
+	connect FloatGain4 output RealComplex1 real
+}
+domain SDF
+defgalaxy data {
+	domain SDF
+	newstate rotateReal FLOAT 1.0
+	newstate rotateImag FLOAT 0.0
+	star Quantizer1 Quantizer
+	setstate Quantizer1 thresholds "0.25 0.5 0.75"
+	setstate Quantizer1 levels "0.785398 2.35619449  3.9269908 5.497787"
+	star Cos2 Cos
+	star Sin2 Sin
+	star RealComplex2 RealComplex
+	star Repeat1 Repeat
+	setstate Repeat1 numTimes N
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper 1.0
+	star CxGain1 CxGain
+	setstate CxGain1 gain "(rotateReal,rotateImag)"
+	node node2
+	nodeconnect Quantizer1 output node2
+	nodeconnect Cos2 input node2
+	nodeconnect Sin2 input node2
+	connect Cos2 output RealComplex2 real
+	connect Sin2 output RealComplex2 imag
+	alias out Repeat1 output
+	connect IIDUniform1 output Quantizer1 input
+	connect RealComplex2 output CxGain1 input
+	connect CxGain1 output Repeat1 input
+}
+domain SDF
+defgalaxy laser {
+	domain SDF
+	newstate var FLOAT "2*PI*deltanuT/N"
+	newstate initPhase FLOAT 0
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0
+	setstate IIDGaussian1 variance var
+	star Integrator2 Integrator
+	setstate Integrator2 feedbackGain 1.0
+	setstate Integrator2 top 0.0
+	setstate Integrator2 bottom 0.0
+	setstate Integrator2 saturate YES
+	setstate Integrator2 state initPhase
+	star Sin3 Sin
+	star Cos3 Cos
+	star RealComplex3 RealComplex
+	star FloatDC2 FloatDC
+	setstate FloatDC2 level 0.0
+	connect IIDGaussian1 output Integrator2 data
+	node node3
+	nodeconnect Integrator2 output node3
+	nodeconnect Cos3 input node3
+	nodeconnect Sin3 input node3
+	connect Cos3 output RealComplex3 real
+	connect Sin3 output RealComplex3 imag
+	alias out RealComplex3 output
+	connect FloatDC2 output Integrator2 reset
+}
+domain SDF
+defgalaxy display {
+	domain SDF
+	newstate rotate complex "(0.707, 0.707)"
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title "QPSK constellation"
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "-nl -P =350x300+500+0 -0 s"
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	star Xscope1 Xscope
+	setstate Xscope1 title "in-phase eye diagram"
+	setstate Xscope1 saveFile ""
+	setstate Xscope1 options "-x 'BAUD INTERVALS' -y 'I' =500x300+0+0 -0 in-phase"
+	setstate Xscope1 ignore 0
+	setstate Xscope1 xUnits "1.0/N"
+	setstate Xscope1 xInit "-1.5 + 1.5/N"
+	setstate Xscope1 traceLength "3*N"
+	star Xscope2 Xscope
+	setstate Xscope2 title "quadrature eye diagram"
+	setstate Xscope2 saveFile ""
+	setstate Xscope2 options "-x 'BAUD INTERVALS' -y 'Q' =500x300+0+350 -0 quadrature"
+	setstate Xscope2 ignore 0
+	setstate Xscope2 xUnits "1.0/N"
+	setstate Xscope2 xInit "-1.5 + 1.5/N"
+	setstate Xscope2 traceLength "3*N"
+	star ComplexReal2 ComplexReal
+	star DownSample1 DownSample
+	setstate DownSample1 factor N
+	setstate DownSample1 phase "N/2"
+	star ComplexReal3 ComplexReal
+	star CxGain2 CxGain
+	setstate CxGain2 gain rotate
+	connect ComplexReal2 real Xscope1 input
+	connect ComplexReal2 imag Xscope2 input
+	connect DownSample1 output ComplexReal3 input
+	connect ComplexReal3 real XYgraph1 xInput
+	connect ComplexReal3 imag XYgraph1 input
+	alias in CxGain2 input
+	node node4
+	nodeconnect CxGain2 output node4
+	nodeconnect DownSample1 input node4
+	nodeconnect ComplexReal2 input node4
+}
+domain SDF
+defgalaxy variance {
+	domain SDF
+	newstate displayEvery FLOAT 10
+	newstate DontPlotFirst FLOAT 59000
+	star DownSample2 DownSample
+	setstate DownSample2 factor displayEvery
+	setstate DownSample2 phase 0
+	star IntRamp1 IntRamp
+	setstate IntRamp1 step 1
+	setstate IntRamp1 value 1
+	star Reciprocal1 Reciprocal
+	setstate Reciprocal1 magLimit 0.0
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star Sqrt1 Sqrt
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "phase-error std versus time"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -x 'BAUD' -y DEGREES =250x300+850+100 -0 sigma"
+	setstate Xgraph1 ignore DontPlotFirst
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star DownSample3 DownSample
+	setstate DownSample3 factor displayEvery
+	setstate DownSample3 phase 0
+	star BiQuad2 BiQuad
+	setstate BiQuad2 d1 "-1"
+	setstate BiQuad2 d2 0
+	setstate BiQuad2 n0 1
+	setstate BiQuad2 n1 0
+	setstate BiQuad2 n2 0
+	setstate BiQuad2 state1 0.0
+	setstate BiQuad2 state2 0.0
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	connect IntRamp1 output DownSample2 input
+	connect DownSample2 output Reciprocal1 input
+	connect FloatProduct.input=21 output Sqrt1 input
+	connect Sqrt1 output Xgraph1 input
+	connect Reciprocal1 output FloatProduct.input=21 input#2
+	connect DownSample3 output FloatProduct.input=21 input#1
+	connect BiQuad2 output DownSample3 input
+	alias in Fork.output=21 input
+	connect Fork.output=21 output#1 FloatProduct.input=22 input#1
+	connect FloatProduct.input=22 output BiQuad2 input
+	connect Fork.output=21 output#2 FloatProduct.input=22 input#2
+}
+domain SDF
+defgalaxy noise {
+	domain SDF
+	newstate var FLOAT "N/(2*photonsPerT)"
+	star IIDGaussian2 IIDGaussian
+	setstate IIDGaussian2 mean 0.0
+	setstate IIDGaussian2 variance var
+	star IIDGaussian3 IIDGaussian
+	setstate IIDGaussian3 mean 0.0
+	setstate IIDGaussian3 variance var
+	star RealComplex4 RealComplex
+	connect IIDGaussian2 output RealComplex4 real
+	connect IIDGaussian3 output RealComplex4 imag
+	alias out RealComplex4 output
+}
+reset
+# Creating universe 'plldemo'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate N FLOAT 10
+	newstate wnT FLOAT 0.0469
+	newstate deltanuT FLOAT "1e-5"
+	newstate photonsPerT FLOAT 45.3
+	star ComplexProduct.input=21 ComplexProduct
+	numports ComplexProduct.input=21 input 2
+	star ComplexSum1 ComplexSum
+	star ComplexProduct.input=22 ComplexProduct
+	numports ComplexProduct.input=22 input 2
+	star ComplexReal4 ComplexReal
+	star RectPolar1 RectPolar
+	star ComplexReal5 ComplexReal
+	star RectPolar2 RectPolar
+	star Unwrap1 Unwrap
+	setstate Unwrap1 outPhase 0.0
+	setstate Unwrap1 prevPhase 0.0
+	star FloatGain5 FloatGain
+	setstate FloatGain5 gain "180/PI"
+	star ComplexFIR1 ComplexFIR
+	setstate ComplexFIR1 taps "< ~ptolemy/src/domains/sdf/demo/W2N10.taps"
+	setstate ComplexFIR1 decimation 1
+	setstate ComplexFIR1 decimationPhase 0
+	setstate ComplexFIR1 interpolation 1
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "phase: before & after"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "-0 before -1 after -x 'BAUD INTERVALS' -y 'DEGREES' =600x350+500+450"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits "1.0/N"
+	setstate XMgraph.input=21 xInit 0
+	star Xhistogram1 Xhistogram
+	setstate Xhistogram1 title "almost-Gaussian phase error"
+	setstate Xhistogram1 saveFile ""
+	setstate Xhistogram1 binWidth 0.5
+	setstate Xhistogram1 options "-x DEGREES =450x200+0+700 -0 h"
+	star BlackHole2 BlackHole
+	star BlackHole3 BlackHole
+	star FloatGain6 FloatGain
+	setstate FloatGain6 gain "180/PI"
+	star pd1 pd
+	star loopfilter1 loopfilter
+	setstate loopfilter1 wnTimeStep "wnT/N"
+	setstate loopfilter1 zeta 0.70710678118655
+	star vco1 vco
+	star data1 data
+	setstate data1 rotateReal 0.707
+	setstate data1 rotateImag 0.707
+	star laser1 laser
+	setstate laser1 var "2*PI*deltanuT/N"
+	setstate laser1 initPhase 0.0
+	star display1 display
+	setstate display1 rotate "(0.707, 0.707)"
+	star variance1 variance
+	setstate variance1 displayEvery N
+	setstate variance1 DontPlotFirst "0`"
+	star noise1 noise
+	setstate noise1 var "N/(2*photonsPerT)"
+	connect loopfilter1 out vco1 in
+	node node5
+	nodeconnect ComplexProduct.input=22 output node5
+	nodeconnect ComplexProduct.input=21 input#1 node5
+	nodeconnect ComplexReal4 input node5
+	connect ComplexReal4 real RectPolar1 x
+	connect ComplexReal4 imag RectPolar1 y
+	node node6
+	nodeconnect laser1 out node6
+	nodeconnect ComplexProduct.input=22 input#1 node6
+	nodeconnect ComplexReal5 input node6
+	connect vco1 out ComplexProduct.input=22 input#2 1
+	connect Unwrap1 output FloatGain5 input
+	connect ComplexSum1 output ComplexFIR1 signalIn
+	node node7
+	nodeconnect ComplexFIR1 signalOut node7
+	nodeconnect pd1 in node7
+	nodeconnect display1 in node7
+	connect ComplexProduct.input=21 output ComplexSum1 input
+	connect noise1 out ComplexSum1 input
+	connect RectPolar2 phase Unwrap1 input
+	connect ComplexReal5 real RectPolar2 x
+	connect ComplexReal5 imag RectPolar2 y
+	connect pd1 out loopfilter1 in
+	connect data1 out ComplexProduct.input=21 input#2
+	connect FloatGain5 output XMgraph.input=21 input#1
+	connect RectPolar1 magnitude BlackHole2 input
+	connect RectPolar2 magnitude BlackHole3 input
+	node node8
+	nodeconnect FloatGain6 output node8
+	nodeconnect Xhistogram1 input node8
+	nodeconnect XMgraph.input=21 input#2 node8
+	nodeconnect variance1 in node8
+	connect RectPolar1 phase FloatGain6 input
+run 400
+wrapup

@@ -1,0 +1,14 @@
+For EECS20 Demos, start the Sun audiotool application,
+and play the following files:
+	sorrydave.au
+	decimated_2.au
+	decimated_4.au
+	dec_interp_2.au
+	dec_interp_4.au
+The audiofiles (.au extension) in this directory can be played using
+the Sun audiotool application.
+
+The files are created using the Ptolemy systems in lec3.
+Regrettably, these applications create files in raw format (.raw extension).
+One extremely primitive program that can convert them is
+/usr/demo/SOUND/bin/soundtool.

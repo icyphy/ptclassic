@@ -1,0 +1,51 @@
+domain SDF
+defgalaxy expjx {
+	domain SDF
+	star RectToCx1 RectToCx
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	star Cos1 Cos
+	star Sin1 Sin
+	alias in "Fork.output=21" input
+	connect "Fork.output=21" "output#1" Cos1 input
+	connect "Fork.output=21" "output#2" Sin1 input
+	connect Cos1 output RectToCx1 real
+	connect Sin1 output RectToCx1 imag
+	alias out RectToCx1 output
+}
+domain SDF
+defgalaxy expgen {
+	domain SDF
+	newstate sample_rate float "2*PI"
+	newstate frequency float "PI/50"
+	star Ramp1 Ramp
+	setstate Ramp1 step "2*PI*frequency/sample_rate"
+	setstate Ramp1 value 0.0
+	star expjx1 expjx
+	connect Ramp1 output expjx1 in
+	alias out expjx1 out
+}
+reset
+# Creating universe 'complexExponential'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star expgen1 expgen
+	setstate expgen1 sample_rate "2*PI"
+	setstate expgen1 frequency "PI/50"
+	star CxToRect1 CxToRect
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "complex exponential"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "=800x300+0+0 -0 real -1 imag"
+	setstate "XMgraph.input=21" ignore 0
+	setstate "XMgraph.input=21" xUnits 1.0
+	setstate "XMgraph.input=21" xInit 0.0
+	connect expgen1 out CxToRect1 input
+	connect CxToRect1 real "XMgraph.input=21" "input#1"
+	connect CxToRect1 imag "XMgraph.input=21" "input#2"
+run 200
+wrapup

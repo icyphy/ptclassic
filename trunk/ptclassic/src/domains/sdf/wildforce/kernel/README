@@ -1,0 +1,12 @@
+original_wf4.tar contains the original unmodified Annapolis
+distribution of the include files we needed to change.
+
+This directory contains the modified files:
+
+-rw-r--r--   1 ptolemy      7830 Sep 24  1998 wf4.h
+-rw-rw-r--   1 ptolemy     10631 Sep 25  1998 wf4api.h
+-rw-rw-r--   1 ptolemy     12284 Sep 24  1998 wf4errs.h
+-rw-r--r--   1 ptolemy      2835 Sep 24  1998 wf4ulib.h
+-rw-rw-r--   1 ptolemy      1911 Jun 10 14:47 wfoss.h
+
+We'll need to do a patch for these.

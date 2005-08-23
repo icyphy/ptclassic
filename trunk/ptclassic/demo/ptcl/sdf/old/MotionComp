@@ -1,0 +1,27 @@
+reset
+# Creating universe 'MotionComp'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ReadImage1 ReadImage
+	setstate ReadImage1 fileName "~ptolemy/src/domains/sdf/demo/ptseq#"
+	setstate ReadImage1 frameId 0
+	star MotionCmp1 MotionCmp
+	setstate MotionCmp1 blockSize 4
+	star MotionCmpInv1 MotionCmpInv
+	star DisplayImage1 DisplayImage
+	setstate DisplayImage1 command xv
+	setstate DisplayImage1 imageName ""
+	setstate DisplayImage1 saveImage n
+	star RunLen1 RunLen
+	setstate RunLen1 Thresh 3
+	star RunLenInv1 RunLenInv
+	connect ReadImage1 output MotionCmp1 input
+	connect MotionCmpInv1 output DisplayImage1 inData
+	connect RunLen1 outData RunLenInv1 input
+	connect RunLenInv1 outData MotionCmpInv1 diffIn
+	connect MotionCmp1 diffOut RunLen1 input
+	connect MotionCmp1 mvOut MotionCmpInv1 mvIn
+run 3
+wrapup

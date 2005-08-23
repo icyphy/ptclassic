@@ -1,0 +1,83 @@
+# Makefile for Ptolemy thread class library.
+# Version  @(#)make.template	1.5 3/11/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+# Author:	T. M. Parks
+# Created:	21 October 1994
+
+# Root of Ptolemy directory tree.
+ROOT= ../../..
+
+# Directory with source files.
+VPATH= $(ROOT)/src/thread/posix
+
+# Configuration info.
+CONFIG= $(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# Library name
+PTLIB= libposixthread.$(LIBSUFFIX)
+
+# Extra directories to include
+INCL= $(PTCOMPAT_INCSPEC) -I$(KERNDIR)
+ifeq ($(INCLUDE_GTHREADS),yes)
+INCL += -I$(ROOT)/thread/include.$(PTARCH)
+endif
+
+# Library sources.  CC_WITH_H includes all .cc files with a
+# corresponding .h file with the same root.
+CC_WITH_H= \
+ PosixThread.cc \
+ PosixMonitor.cc \
+ PosixCondition.cc
+
+# The complete list of .cc files used in the library
+SRCS= $(CC_WITH_H)
+
+# Header files.  When adding a new header, add it here only if there is
+# no corresponding .cc file; otherwise add the .cc file to CC_WITH_H.
+HDRS= $(CC_WITH_H:.cc=.h)
+
+# Library objects
+OBJS= $(SRCS:.cc=.o)
+
+all:	makefile $(PTLIB)
+
+# "make install" puts things in the official place
+install:	makefile $(LIBDIR)/$(PTLIB)
+
+EXTRA_SRCS=
+
+include $(ROOT)/mk/common.mk
+PosixThread.o: PosixThread.cc PosixThread.h \
+ ../../../src/kernel/PtThread.h ../../../src/kernel/DataStruct.h \
+ ../../../src/kernel/type.h ../../../src/kernel/logNew.h \
+ ../../../src/compat/ptolemy/compat.h
+PosixMonitor.o: PosixMonitor.cc PosixMonitor.h \
+ ../../../src/kernel/PtGate.h ../../../src/kernel/logNew.h
+PosixCondition.o: PosixCondition.cc PosixCondition.h \
+ ../../../src/kernel/PtCondition.h PosixMonitor.h \
+ ../../../src/kernel/PtGate.h ../../../src/kernel/type.h \
+ ../../../src/kernel/logNew.h

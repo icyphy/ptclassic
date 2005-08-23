@@ -1,0 +1,26 @@
+reset
+# Creating universe 'ColorImage'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ReadRgb1 ReadRgb
+	setstate ReadRgb1 fileName "~ptolemy/src/domains/sdf/demo/ppimage"
+	setstate ReadRgb1 frameId 0
+	star Rgb2Yuv1 Rgb2Yuv
+	star Yuv2Rgb1 Yuv2Rgb
+	star DisplayRgb1 DisplayRgb
+	setstate DisplayRgb1 command xv
+	setstate DisplayRgb1 imageName ""
+	setstate DisplayRgb1 saveColor n
+	connect ReadRgb1 output1 Rgb2Yuv1 input1
+	connect ReadRgb1 output2 Rgb2Yuv1 input2
+	connect ReadRgb1 output3 Rgb2Yuv1 input3
+	connect Rgb2Yuv1 output1 Yuv2Rgb1 input1
+	connect Rgb2Yuv1 output2 Yuv2Rgb1 input2
+	connect Rgb2Yuv1 output3 Yuv2Rgb1 input3
+	connect Yuv2Rgb1 output1 DisplayRgb1 rinput
+	connect Yuv2Rgb1 output2 DisplayRgb1 ginput
+	connect Yuv2Rgb1 output3 DisplayRgb1 binput
+run 1
+wrapup

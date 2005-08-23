@@ -1,0 +1,48 @@
+<!-- documentation file generated from DEMobile_Station.pl by ptlang -->
+<html>
+<head>
+<title>DE Mobile_Station star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="Mobile_Station star, DE domain">Mobile_Station star in DE domain</a></h1>
+<p>
+That star receives the demands for creating a new mobile station 
+    from the activation. It checks the position and places the mobile in the 
+    right cell. If the the received position is not inside of one of the rooms, 
+    it demands a new position rather than dropping that mobile away.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/domain.idx#cell_list ">DEcell_list</a><br>
+<b>Location:</b> The WiNeS-Library<br>
+<b>Version:</b> 1.3 "12/08/97"<br>
+<b>Author:</b> A. Wernicke, J. Voigt<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>R_Pos</font></b></i></td><td>Complex</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>start</font></b></i></td><td>int</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>restart</font></b></i></td><td>int</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>Rx_Pos</font></b></i></td><td>Complex</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>cellnum</font></b></i></td><td>int</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>bandw</font></b></i></td><td>int</td>
+</tr>
+</table>
+<br><b>See:</b> <a href="DEMobile_Station.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#Mobile_Station facet, DE user">Mobile_Station users</a>
+<p><hr><p>
+copyright (c) 1996 - 1997 Dresden University of Technology,
+                Mobile Communications Systems
+</body>
+</html>

@@ -1,0 +1,17 @@
+# CAUTION: automatically generated file by a rule in tycommon.mk
+# This file will source the .itcl files list in the
+# makefile SIMPLE_TESTS and GRAPHICAL_TESTS variables
+# This file is different from all.itcl in that all.itcl
+# will source all the .itcl files in the current directory
+#
+# Set the following to avoid endless calls to exit
+set reallyExit 0
+#Do an update so that we are sure tycho is done displaying
+update
+set savedir "[pwd]"
+if {"testAddBlock.itcl testBlocks.itcl testConnect.itcl testConnected.itcl testDescriptor.itcl testGalaxyPort.itcl testKnown.itcl testName.itcl testOnFiring.itcl testPorts.itcl testPredicates.itcl testRemove.itcl testRun.itcl testTarget.itcl" != ""} {foreach i [list testAddBlock.itcl testBlocks.itcl testConnect.itcl testConnected.itcl testDescriptor.itcl testGalaxyPort.itcl testKnown.itcl testName.itcl testOnFiring.itcl testPorts.itcl testPredicates.itcl testRemove.itcl testRun.itcl testTarget.itcl] {puts $i; cd "$savedir"; source $i}}
+puts stderr testDummy.itcl
+cd "$savedir"
+source testDummy.itcl
+set reallyExit 1
+doneTests

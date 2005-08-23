@@ -1,0 +1,38 @@
+reset
+# Creating universe 'timeout'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Timeout1 Timeout
+	setstate Timeout1 timeout 0.5
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 0.0
+	star "XMgraph.input=31" XMgraph
+	numports "XMgraph.input=31" input 3
+	setstate "XMgraph.input=31" title "Timout Violations"
+	setstate "XMgraph.input=31" saveFile ""
+	setstate "XMgraph.input=31" options "-P -0 set -1 expired -2 clear"
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 value 0.0
+	setstate FloatRamp1 step 1.0
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 value 0.0
+	setstate FloatRamp2 step 1.0
+	star Poisson1 Poisson
+	setstate Poisson1 meanTime 1.0
+	setstate Poisson1 magnitude 1.0
+	connect Timeout1 alarm "XMgraph.input=31" "input#2"
+	connect Clock1 output FloatRamp2 input
+	node node1
+	nodeconnect FloatRamp1 output node1
+	nodeconnect Timeout1 Clear node1
+	nodeconnect XMgraph.input=31 input#3 node1
+	node node2
+	nodeconnect FloatRamp2 output node2
+	nodeconnect Timeout1 Set node2
+	nodeconnect XMgraph.input=31 input#1 node2
+	connect Poisson1 output FloatRamp1 input
+run 10
+wrapup

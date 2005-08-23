@@ -1,0 +1,116 @@
+### State transition diagram : lightSwitch_FSM.std
+
+### Canvas widget dimensions
+$this configure -canvasheight 349
+$this configure -canvaswidth 666
+
+### Member variables
+$this setPorts  {update(int) mode(int) select(int) adjust(int) time(float)} toggleLightSwitch(int) timeout(int)
+
+### Creating the nodes
+set node_0 [$slate create LabeledOval 246.0 122.0 335.0 207.0 -outline black -fill white -tags node  -text {Wait Mode}]
+set nodeInfo($node_0,inEdges) {}
+set nodeInfo($node_0,outEdges) {}
+# Slave Process:
+set nodeInfo($node_0,slave) {$PTOLEMY/src/domains/fsm/demo/digiWatch/CheckTimeout}
+
+set node_1 [$slate create LabeledOval 446.0 120.0 533.0 204.0 -outline black -fill white -tags node  -text {Light On}]
+set nodeInfo($node_1,inEdges) {}
+set nodeInfo($node_1,outEdges) {}
+# Slave Process:
+set nodeInfo($node_1,slave) {}
+
+set node_2 [$slate create LabeledOval 62.0 122.0 150.0 204.0 -outline black -fill white -tags node  -text {Light Off}]
+set nodeInfo($node_2,inEdges) {}
+set nodeInfo($node_2,outEdges) {}
+# Slave Process:
+set nodeInfo($node_2,slave) {}
+
+### Initial state
+$slate addtag init_state withtag $node_2
+$slate itemconfigure $node_2 -width 5.0
+
+### Creating the arcs
+set arc [$slate create line 456.106 188.915 298.0 325.0 128.442 198.266 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_1
+lappend nodeInfo($node_1,outEdges) $arc
+set edgeInfo($arc,dest) $node_2
+lappend nodeInfo($node_2,inEdges) $arc
+set point [$slate create rectangle 454.106 186.915 458.106 190.915 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 296.0 323.0 300.0 327.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 126.442 196.266 130.442 200.266 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.80597
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) -1.57143
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 292.0 278.0 -fill black -text {update || mode || select || adjust /  toggleLightSwitch}]
+set edgeInfo($arc,label_deltax) -6.0
+set edgeInfo($arc,label_deltay) -47.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 246.073 162.059 149.986 161.953 -arrow last -tags arc -fill black -smooth 0]
+set edgeInfo($arc,src) $node_0
+lappend nodeInfo($node_0,outEdges) $arc
+set edgeInfo($arc,dest) $node_2
+lappend nodeInfo($node_2,inEdges) $arc
+set point [$slate create rectangle 244.073 160.059 248.073 164.059 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 147.986 159.953 151.986 163.953 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) -0.0549451
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) 0.0238095
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 197.0295 175.006 -fill black -text {timeout}]
+set edgeInfo($arc,label_deltax) -1.0
+set edgeInfo($arc,label_deltay) 13.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 130.179 128.746 191.0 90.0 266.234 128.875 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_2
+lappend nodeInfo($node_2,outEdges) $arc
+set edgeInfo($arc,dest) $node_0
+lappend nodeInfo($node_0,inEdges) $arc
+set point [$slate create rectangle 128.179 126.746 132.179 130.746 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 189.0 88.0 193.0 92.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 264.234 126.875 268.234 130.875 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 1.41667
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) -1.46809
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 195.0 98.0 -fill black -text {mode}]
+set edgeInfo($arc,label_deltax) 4.0
+set edgeInfo($arc,label_deltay) 8.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) Default
+
+set arc [$slate create line 323.216 135.691 389.0 89.0 453.882 137.889 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_0
+lappend nodeInfo($node_0,outEdges) $arc
+set edgeInfo($arc,dest) $node_1
+lappend nodeInfo($node_1,inEdges) $arc
+set point [$slate create rectangle 321.216 133.691 325.216 137.691 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 387.0 87.0 391.0 91.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 451.882 135.889 455.882 139.889 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.880597
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) -0.676923
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 382.0 98.0 -fill black -text {mode / toggleLightSwitch}]
+set edgeInfo($arc,label_deltax) -7.0
+set edgeInfo($arc,label_deltay) 9.0
+set edgeInfo($arc,preemptive) YES
+set edgeInfo($arc,entryType) History
+
+### End of File

@@ -1,0 +1,34 @@
+reset
+# Creating universe 'upDownCount'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Clock1 Clock
+	setstate Clock1 interval 3.33
+	setstate Clock1 magnitude 1.0
+	star Clock2 Clock
+	setstate Clock2 interval 2.0
+	setstate Clock2 magnitude 1.0
+	star UDCounter1 UDCounter
+	setstate UDCounter1 resetValue 0
+	star Null1 Null
+	star "Merge.input=21" Merge
+	numports "Merge.input=21" input 2
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Count value"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -0 N =800x300+0+0"
+	connect Null1 output UDCounter1 reset
+	node node1
+	nodeconnect Clock2 output node1
+	nodeconnect UDCounter1 countUp node1
+	nodeconnect Merge.input=21 input#1 node1
+	node node2
+	nodeconnect Clock1 output node2
+	nodeconnect UDCounter1 countDown node2
+	nodeconnect Merge.input=21 input#2 node2
+	connect "Merge.input=21" output UDCounter1 demand
+	connect UDCounter1 output Xgraph1 input
+run 30
+wrapup

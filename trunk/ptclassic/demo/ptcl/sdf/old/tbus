@@ -1,0 +1,23 @@
+reset
+# Creating universe 'tbus'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate busWidth int 4
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 1.0
+	setstate FloatRamp1 value 0.0
+	star Distributor1 Distributor
+	setstate Distributor1 blockSize 1
+	star XMgraph1 XMgraph
+	setstate XMgraph1 title "X graph"
+	setstate XMgraph1 saveFile ""
+	setstate XMgraph1 options ""
+	setstate XMgraph1 ignore 0
+	setstate XMgraph1 xUnits 1.0
+	setstate XMgraph1 xInit 0.0
+	connect FloatRamp1 output Distributor1 input
+	busconnect Distributor1 output XMgraph1 input busWidth
+run 10
+wrapup

@@ -1,0 +1,70 @@
+### State transition diagram : 3bCounter_FSM.std
+
+### Canvas widget dimensions
+$this configure -canvasheight 324
+$this configure -canvaswidth 458
+
+### Member variables
+$this setPorts  {start(int) stop(int) count(int)} {bit0(int) bit1(int) bit2(int)} end(int)
+
+### Creating the nodes
+set node_0 [$slate create LabeledOval 277.0 118.0 368.0 213.0 -outline black -fill white -tags node  -text Counting]
+set nodeInfo($node_0,inEdges) {}
+set nodeInfo($node_0,outEdges) {}
+# Slave Process:
+set nodeInfo($node_0,slave) {$PTOLEMY/src/domains/fsm/demo/modulus8/Counting}
+
+set node_1 [$slate create LabeledOval 75.0 117.0 164.0 211.0 -outline black -fill white -tags node  -text {Not Counting}]
+set nodeInfo($node_1,inEdges) {}
+set nodeInfo($node_1,outEdges) {}
+# Slave Process:
+set nodeInfo($node_1,slave) {}
+
+### Initial state
+$slate addtag init_state withtag $node_1
+$slate itemconfigure $node_1 -width 5.0
+
+### Creating the arcs
+set arc [$slate create line 120.011 117.003 220.0 46.0 313.009 119.045 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_1
+lappend nodeInfo($node_1,outEdges) $arc
+set edgeInfo($arc,dest) $node_0
+lappend nodeInfo($node_0,inEdges) $arc
+set point [$slate create rectangle 118.011 115.003 122.011 119.003 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 218.0 44.0 222.0 48.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 311.009 117.045 315.009 121.045 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 92.0
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) -4.89474
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 217.0 69.0 -fill black -text {start}]
+set edgeInfo($arc,label_deltax) -3.0
+set edgeInfo($arc,label_deltay) 23.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) Default
+
+set arc [$slate create line 315.391 212.417 218.0 284.0 119.0 210.997 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_0
+lappend nodeInfo($node_0,outEdges) $arc
+set edgeInfo($arc,dest) $node_1
+lappend nodeInfo($node_1,inEdges) $arc
+set point [$slate create rectangle 313.391 210.417 317.391 214.417 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 216.0 282.0 220.0 286.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 117.0 208.997 121.0 212.997 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 6.6
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) 94.0
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 216.0 263.0 -fill black -text {stop || end}]
+set edgeInfo($arc,label_deltax) -2.0
+set edgeInfo($arc,label_deltay) -21.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+### End of File

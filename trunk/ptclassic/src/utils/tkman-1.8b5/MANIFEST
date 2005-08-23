@@ -1,0 +1,33 @@
+gcksum crc   length name
+----------   ------ ----
+1618423202   172472 tkman.tcl
+ 427293389    13706 searchbox.tcl
+ 702430500    13962 taputils.tcl
+ 320090335     1566 face.xbm
+ 993975989     6084 ANNOUNCE-tkman
+ 248457753     4153 README-tkman
+3211696326    14279 Makefile
+2749688892     1239 Copyright
+3200329304        2 backslash
+2166402948    44349 tkman-help.html
+  97938197    45906 tkman-help.tcl
+  49979962    41503 tkman.1
+3762691292    12053 CHANGES
+1204228778     1355 contrib/AIcons.xpm
+2304624814     2860 contrib/README-contrib
+1120896516     2489 contrib/TkMan.xpm
+1051232169     2768 contrib/calltkman.tcl
+1445657931      875 contrib/hman.xbm
+2650037587     4413 contrib/local-man.tcl
+1893227269      982 contrib/remote.tcl
+1732430069      371 contrib/retkman
+2085213163     2734 contrib/sco_bindings.tcl
+ 688839364     3598 contrib/sgi_bindings.tcl
+ 332232973     1744 contrib/solaris_bindings.tcl
+3529450522     3278 contrib/tkman.bitmap
+1280390714     3278 contrib/tkman.xbm
+4265993158     3159 contrib/tkman.xpm
+2321757176     1656 contrib/tkman_selection.txt
+4146362654     3245 contrib/tkmanclient
+3569340869      184 contrib/tmp
+ 532256557     1607 contrib/xman-mandesc.tcl

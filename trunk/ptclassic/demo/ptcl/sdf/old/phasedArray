@@ -1,0 +1,118 @@
+domain SDF
+defgalaxy antenna {
+	domain SDF
+	newstate spacingOverSpeed FLOAT "10.0E-6"
+	newstate carrierFrequency FLOAT 157080
+	newstate samplePeriod FLOAT "1.0E-6"
+	star Sin1 Sin
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "- spacingOverSpeed"
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step samplePeriod
+	setstate FloatRamp1 value 0.0
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain 3.0
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain 2.0
+	star FloatSum1 FloatSum
+	star FloatSum2 FloatSum
+	star FloatSum3 FloatSum
+	star FloatGain4 FloatGain
+	setstate FloatGain4 gain carrierFrequency
+	star FloatGain5 FloatGain
+	setstate FloatGain5 gain carrierFrequency
+	star FloatGain6 FloatGain
+	setstate FloatGain6 gain carrierFrequency
+	star FloatGain7 FloatGain
+	setstate FloatGain7 gain carrierFrequency
+	star Cos1 Cos
+	star Cos2 Cos
+	star Cos3 Cos
+	star Cos4 Cos
+	star Fork.output=31 Fork
+	numports Fork.output=31 output 3
+	star Fork.output=41 Fork
+	numports Fork.output=41 output 4
+	alias direction Sin1 input
+	connect Sin1 output FloatGain1 input
+	connect Fork.output=31 output#2 FloatGain3 input
+	connect Fork.output=31 output#3 FloatGain2 input
+	alias out1 Cos1 output
+	alias out2 Cos2 output
+	alias out3 Cos3 output
+	alias out4 Cos4 output
+	connect FloatSum3 output FloatGain5 input
+	connect FloatSum2 output FloatGain6 input
+	connect FloatSum1 output FloatGain7 input
+	connect Fork.output=31 output#1 FloatSum3 input
+	connect Fork.output=41 output#2 FloatSum3 input
+	connect FloatGain3 output FloatSum2 input
+	connect Fork.output=41 output#3 FloatSum2 input
+	connect FloatGain2 output FloatSum1 input
+	connect Fork.output=41 output#4 FloatSum1 input
+	connect FloatGain4 output Cos1 input
+	connect FloatGain5 output Cos2 input
+	connect FloatGain6 output Cos3 input
+	connect FloatGain7 output Cos4 input
+	connect FloatGain1 output Fork.output=31 input
+	connect FloatRamp1 output Fork.output=41 input
+	connect Fork.output=41 output#1 FloatGain4 input
+}
+reset
+# Creating universe 'phasedArray'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ComplexFIR1 ComplexFIR
+	setstate ComplexFIR1 taps "< ~ptolemy/src/domains/sdf/demo/analytic.cx"
+	setstate ComplexFIR1 decimation 1
+	setstate ComplexFIR1 decimationPhase 0
+	setstate ComplexFIR1 interpolation 1
+	star Cut1 Cut
+	setstate Cut1 nread 832
+	setstate Cut1 nwrite 400
+	setstate Cut1 offset 432
+	star PolarRect1 PolarRect
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title "Directional Phased Array Response"
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "=1100x250+0+0 -0 gain"
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	star Cut2 Cut
+	setstate Cut2 nread 832
+	setstate Cut2 nwrite 400
+	setstate Cut2 offset 400
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 step "1.57079633E-2"
+	setstate FloatRamp2 value 0.0
+	star FloatSum4 FloatSum
+	star BlackHole1 BlackHole
+	star antenna1 antenna
+	setstate antenna1 spacingOverSpeed "10.0E-6"
+	setstate antenna1 carrierFrequency "PI*150000"
+	setstate antenna1 samplePeriod "1.0E-6"
+	star ComplexReal1 ComplexReal
+	star RectPolar1 RectPolar
+	connect Cut1 output PolarRect1 magnitude
+	connect PolarRect1 x XYgraph1 xInput
+	connect PolarRect1 y XYgraph1 input
+	connect Cut2 output PolarRect1 phase
+	connect antenna1 out1 FloatSum4 input
+	connect antenna1 out2 FloatSum4 input
+	connect antenna1 out3 FloatSum4 input
+	connect antenna1 out4 FloatSum4 input
+	connect FloatSum4 output ComplexFIR1 signalIn
+	connect ComplexFIR1 signalOut ComplexReal1 input
+	node node1
+	nodeconnect FloatRamp2 output node1
+	nodeconnect antenna1 direction node1
+	nodeconnect Cut2 input node1
+	connect ComplexReal1 real RectPolar1 x
+	connect RectPolar1 magnitude Cut1 input
+	connect ComplexReal1 imag RectPolar1 y
+	connect RectPolar1 phase BlackHole1 input
+run 1
+wrapup

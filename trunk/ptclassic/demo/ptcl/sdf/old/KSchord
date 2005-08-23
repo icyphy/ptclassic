@@ -1,0 +1,53 @@
+domain SDF
+defgalaxy karplusStrongGal {
+	domain SDF
+	newstate delayLength int 50
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	star FloatRect1 FloatRect
+	setstate FloatRect1 height 1.0
+	setstate FloatRect1 width delayLength
+	setstate FloatRect1 period 0
+	setstate FloatRect1 count 0
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FIR1 FIR
+	setstate FIR1 taps "0.5 0.5"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	connect IIDGaussian1 output FloatProduct.input=21 input#1
+	connect FloatRect1 output FloatProduct.input=21 input#2
+	connect FloatProduct.input=21 output FloatSum.input=21 input#1
+	connect FIR1 signalOut FloatSum.input=21 input#2
+	connect FloatSum.input=21 output Fork.output=21 input delayLength
+	connect Fork.output=21 output#2 FIR1 signalIn
+	alias out Fork.output=21 output#1
+}
+reset
+# Creating universe 'KSchord'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatSum1 FloatSum
+	star Play1 Play
+	setstate Play1 gain 3000
+	setstate Play1 saveFile ""
+	star karplusStrongGal1 karplusStrongGal
+	setstate karplusStrongGal1 delayLength 90
+	star karplusStrongGal2 karplusStrongGal
+	setstate karplusStrongGal2 delayLength 60
+	star karplusStrongGal3 karplusStrongGal
+	setstate karplusStrongGal3 delayLength 45
+	connect karplusStrongGal1 out FloatSum1 input
+	connect karplusStrongGal2 out FloatSum1 input
+	connect karplusStrongGal3 out FloatSum1 input
+	connect FloatSum1 output Play1 input
+run 15000
+wrapup

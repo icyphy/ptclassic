@@ -1,0 +1,89 @@
+### State transition diagram : game_FSM.std
+
+### Canvas widget dimensions
+$this configure -canvasheight 288
+$this configure -canvaswidth 562
+
+### Member variables
+$this setPorts  {time(float) coin(int) ready(int) stop(int)} {redLt(int) blueLt(int) yellowLt(int) greenLt(int) ringBell(int) flashTilt(int)} {exit(int) error(int)}
+
+### Creating the nodes
+set node_10 [$slate create LabeledOval 71.0 79.0 167.0 174.0 -outline black -fill white -tags node  -text {Game Off}]
+set nodeInfo($node_10,inEdges) {}
+set nodeInfo($node_10,outEdges) {}
+# Slave Process:
+set nodeInfo($node_10,slave) {}
+
+set node_11 [$slate create LabeledOval 300.0 80.0 397.0 176.0 -outline black -fill white -tags node  -text {Game On}]
+set nodeInfo($node_11,inEdges) {}
+set nodeInfo($node_11,outEdges) {}
+# Slave Process:
+set nodeInfo($node_11,slave) {$PTOLEMY/src/domains/fsm/demo/reflexGame/gameOn_FSM.std}
+
+### Initial state
+$slate addtag init_state withtag $node_10
+$slate itemconfigure $node_10 -width 5.0
+
+### Creating the arcs
+set arc [$slate create line 300.02 129.366 166.951 128.647 -arrow last -tags arc -fill black -smooth 0]
+set edgeInfo($arc,src) $node_11
+lappend nodeInfo($node_11,outEdges) $arc
+set edgeInfo($arc,dest) $node_10
+lappend nodeInfo($node_10,inEdges) $arc
+set point [$slate create rectangle 298.02 127.366 302.02 131.366 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 164.951 126.647 168.951 130.647 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.028169
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) -0.0447761
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 236.486 119.007 -fill black -text {exit / ringBell, redLt}]
+set edgeInfo($arc,label_deltax) 3.0
+set edgeInfo($arc,label_deltay) -10.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 319.593 89.4574 232.0 21.0 144.664 86.3594 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_11
+lappend nodeInfo($node_11,outEdges) $arc
+set edgeInfo($arc,dest) $node_10
+lappend nodeInfo($node_10,inEdges) $arc
+set point [$slate create rectangle 317.593 87.4574 321.593 91.4574 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 230.0 19.0 234.0 23.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 142.664 84.3594 146.664 88.3594 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) -1.33333
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) 1.5641
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 235.0 43.0 -fill black -text {error / flashTilt, redLt}]
+set edgeInfo($arc,label_deltax) 3.0
+set edgeInfo($arc,label_deltay) 22.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 143.703 167.227 227.0 219.0 317.39 164.824 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_10
+lappend nodeInfo($node_10,outEdges) $arc
+set edgeInfo($arc,dest) $node_11
+lappend nodeInfo($node_11,inEdges) $arc
+set point [$slate create rectangle 141.703 165.227 145.703 169.227 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 225.0 217.0 229.0 221.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 315.39 162.824 319.39 166.824 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) -1.64865
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) 1.18367
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 229.0 206.0 -fill black -text {coin / blueLt}]
+set edgeInfo($arc,label_deltax) 2.0
+set edgeInfo($arc,label_deltay) -13.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) Default
+
+### End of File

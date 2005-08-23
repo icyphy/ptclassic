@@ -1,0 +1,105 @@
+domain SDF
+defgalaxy cexp {
+	domain SDF
+	star Exp1 Exp
+	star ComplexReal1 ComplexReal
+	star Cos1 Cos
+	star Sin1 Sin
+	star RealComplex1 RealComplex
+	star ComplexProduct1 ComplexProduct
+	connect ComplexReal1 real Exp1 input
+	node node1
+	nodeconnect ComplexReal1 imag node1
+	nodeconnect Cos1 input node1
+	nodeconnect Sin1 input node1
+	connect Cos1 output RealComplex1 real
+	connect Sin1 output RealComplex1 imag
+	connect RealComplex1 output ComplexProduct1 input
+	connect Exp1 output ComplexProduct1 input
+	alias in ComplexReal1 input
+	alias out ComplexProduct1 output
+}
+reset
+# Creating universe 'cep'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate ncoefs FLOAT 10
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 .8 .3 0 .5 .8"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic NO
+	setstate WaveForm1 period 0
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order 8
+	setstate ComplexFFT1 size ncoefs
+	setstate ComplexFFT1 direction 1
+	star Log1 Log
+	star ComplexFFT2 ComplexFFT
+	setstate ComplexFFT2 order 8
+	setstate ComplexFFT2 size 256
+	setstate ComplexFFT2 direction "-1"
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value {0.5 1 [128] 0 [127]}
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star ComplexFFT3 ComplexFFT
+	setstate ComplexFFT3 order 8
+	setstate ComplexFFT3 size 256
+	setstate ComplexFFT3 direction 1
+	star ComplexFFT4 ComplexFFT
+	setstate ComplexFFT4 order 8
+	setstate ComplexFFT4 size 256
+	setstate ComplexFFT4 direction "-1"
+	star cexp1 cexp
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Stabilization using the cepstrum"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "-0 original -1 stabilized -P =800x400+0+0"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star Cut1 Cut
+	setstate Cut1 nread 256
+	setstate Cut1 nwrite ncoefs
+	setstate Cut1 offset 0
+	star ComplexReal2 ComplexReal
+	star BlackHole1 BlackHole
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Cepstrum of autocorrelation of a(n)"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 cep =800x400+0+425"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain 2.0
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain 1.0
+	connect WaveForm2 output FloatProduct.input=21 input#1
+	connect ComplexFFT3 output cexp1 in
+	connect cexp1 out ComplexFFT4 input
+	connect FloatProduct.input=21 output ComplexFFT3 input
+	connect ComplexFFT4 output Cut1 input
+	connect Cut1 output XMgraph.input=21 input#2
+	connect ComplexReal2 imag BlackHole1 input
+	connect ComplexFFT1 output Log1 input
+	connect Log1 output FloatGain1 input
+	connect FloatGain1 output ComplexFFT2 input
+	connect ComplexFFT2 output ComplexReal2 input
+	node node2
+	nodeconnect ComplexReal2 real node2
+	nodeconnect Xgraph1 input node2
+	nodeconnect FloatProduct.input=21 input#2 node2
+	node node3
+	nodeconnect WaveForm1 output node3
+	nodeconnect FloatGain2 input node3
+	nodeconnect XMgraph.input=21 input#1 node3
+	connect FloatGain2 output ComplexFFT1 input
+run 1
+wrapup

@@ -1,0 +1,33 @@
+domain SDF
+defgalaxy wormGuts {
+	domain DDF
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Variable number of repetitions"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P =600x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star Repeater1 Repeater
+	alias repeat Repeater1 control
+	alias data Repeater1 input
+	connect Repeater1 output Xgraph1 input
+}
+reset
+# Creating universe 'repeater'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Ramp2 Ramp
+	setstate Ramp2 step 1.0
+	setstate Ramp2 value 0.0
+	star wormGuts1 wormGuts
+	connect Ramp1 output wormGuts1 repeat
+	connect Ramp2 output wormGuts1 data
+run 10
+wrapup

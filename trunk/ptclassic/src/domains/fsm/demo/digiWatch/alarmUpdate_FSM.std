@@ -1,0 +1,116 @@
+### State transition diagram : alarmUpdate_FSM.std
+
+### Canvas widget dimensions
+$this configure -canvasheight 315
+$this configure -canvaswidth 586
+
+### Member variables
+$this setPorts  {select(int) adjust(int)} {incrAlarmMin(int) incrAlarmHr(int) toggleUpdMd(int)} {}
+
+### Creating the nodes
+set node_61 [$slate create LabeledOval 352.0 125.0 438.0 208.0 -outline black -fill white -tags node  -text {Set Hour}]
+set nodeInfo($node_61,inEdges) {}
+set nodeInfo($node_61,outEdges) {}
+
+set node_60 [$slate create LabeledOval 119.0 122.0 205.0 201.0 -outline black -fill white -tags node  -text {Set Minute}]
+set nodeInfo($node_60,inEdges) {}
+set nodeInfo($node_60,outEdges) {}
+
+### Initial state
+$slate addtag init_state withtag $node_60
+$slate itemconfigure $node_60 -width 5.0
+
+### Creating the arcs
+set arc [$slate create line 197.955 139.835 276.0 110.0 356.82 147.41 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_60
+lappend nodeInfo($node_60,outEdges) $arc
+set edgeInfo($arc,dest) $node_61
+lappend nodeInfo($node_61,inEdges) $arc
+set point [$slate create rectangle 195.955 137.835 199.955 141.835 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 274.0 108.0 278.0 112.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 354.82 145.41 358.82 149.41 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.602564
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) -0.5
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 276.0 115.0 -fill black -text {select / toggleUpdMd}]
+set edgeInfo($arc,label_deltax) 0.0
+set edgeInfo($arc,label_deltay) 5.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 431.838 145.094 455.0 120.0 496.0 156.0 466.0 195.0 435.701 179.888 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_61
+lappend nodeInfo($node_61,outEdges) $arc
+set edgeInfo($arc,dest) $node_61
+lappend nodeInfo($node_61,inEdges) $arc
+set point [$slate create rectangle 429.838 143.094 433.838 147.094 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 453.0 118.0 457.0 122.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 494.0 154.0 498.0 158.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 464.0 193.0 468.0 197.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 433.701 177.888 437.701 181.888 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.581081
+set edgeInfo($arc,outXneg) 0
+set edgeInfo($arc,inSlope) -0.328947
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 494.0 121.0 -fill black -text {adjust / incrAlarmHr}]
+set edgeInfo($arc,label_deltax) -2.0
+set edgeInfo($arc,label_deltay) -35.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 123.793 179.624 88.0 201.0 59.0 161.0 88.0 118.0 124.006 143.003 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_60
+lappend nodeInfo($node_60,outEdges) $arc
+set edgeInfo($arc,dest) $node_60
+lappend nodeInfo($node_60,inEdges) $arc
+set point [$slate create rectangle 121.793 177.624 125.793 181.624 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 86.0 199.0 90.0 203.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 57.0 159.0 61.0 163.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 86.0 116.0 90.0 120.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 122.006 141.003 126.006 145.003 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.474359
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) -0.486842
+set edgeInfo($arc,inXneg) 1
+set edgeInfo($arc,label) [$slate create text 69.0 119.0 -fill black -text {adjust / incrAlarmMin}]
+set edgeInfo($arc,label_deltax) 10.0
+set edgeInfo($arc,label_deltay) -42.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+set arc [$slate create line 358.435 188.338 266.0 230.0 192.438 189.401 -arrow last -tags arc -fill black -smooth 1]
+set edgeInfo($arc,src) $node_61
+lappend nodeInfo($node_61,outEdges) $arc
+set edgeInfo($arc,dest) $node_60
+lappend nodeInfo($node_60,inEdges) $arc
+set point [$slate create rectangle 356.435 186.338 360.435 190.338 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 264.0 228.0 268.0 232.0 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set point [$slate create rectangle 190.438 187.401 194.438 191.401 -fill {} -outline {}]
+lappend edgeInfo($arc,points) $point
+set edgeInfo($arc,outSlope) 0.597222
+set edgeInfo($arc,outXneg) 1
+set edgeInfo($arc,inSlope) -0.916667
+set edgeInfo($arc,inXneg) 0
+set edgeInfo($arc,label) [$slate create text 273.0 221.0 -fill black -text {select / toggleUpdMd}]
+set edgeInfo($arc,label_deltax) 7.0
+set edgeInfo($arc,label_deltay) -9.0
+set edgeInfo($arc,preemptive) NO
+set edgeInfo($arc,entryType) History
+
+### End of File

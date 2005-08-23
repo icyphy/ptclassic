@@ -1,0 +1,21 @@
+puts stdout SDFinDDF
+source SDFinDDF.pt
+reset
+puts stdout fibonacci
+source fibonacci.pt
+reset
+puts stdout ifThenElse
+source ifThenElse.pt
+reset
+puts stdout picture
+source picture.pt
+reset
+puts stdout repeater
+source repeater.pt
+reset
+puts stdout router
+source router.pt
+reset
+puts stdout timing
+source timing.pt
+reset

@@ -1,0 +1,44 @@
+reset
+# Creating universe 'testPacket'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 1.0
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 value 0.0
+	setstate FloatRamp1 step 1.0
+	star Packetize1 Packetize
+	setstate Packetize1 maxLength 5
+	star Null1 Null
+	star UnPacketize1 UnPacketize
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Packetized signal output"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-0 original -1 output -P =800x400+0+0"
+	star "RanGen.distribution=e1" RanGen
+	setstate "RanGen.distribution=e1" distribution e
+	setstate "RanGen.distribution=e1" meanORupper 5.0
+	setstate "RanGen.distribution=e1" varianceORlower 0.0
+	star VarServer1 VarServer
+	connect Null1 output Packetize1 demand
+	node node1
+	nodeconnect FloatRamp1 output node1
+	nodeconnect Packetize1 data node1
+	nodeconnect XMgraph.input=21 input#1 node1
+	connect UnPacketize1 output "XMgraph.input=21" "input#2"
+	node node2
+	nodeconnect Clock1 output node2
+	nodeconnect FloatRamp1 input node2
+	nodeconnect UnPacketize1 demand node2
+	connect "RanGen.distribution=e1" output VarServer1 newServiceTime
+	node node3
+	nodeconnect Packetize1 output node3
+	nodeconnect RanGen.distribution=e1 input node3
+	nodeconnect VarServer1 input node3
+	connect VarServer1 output UnPacketize1 data
+run 50
+wrapup

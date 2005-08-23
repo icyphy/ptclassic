@@ -1,0 +1,39 @@
+(Message inbox:620) 
+
+t: kennard
+f: huangc (Chih-Tsung Huang)
+s: [1mcg96.conf [m
+d: 13 November 92   (Friday)    15:46:32 PST
+-
+
+This is the list for cg96.conf.
+
+Thanks,
+
+Chih-Tsung
+
+FloatPad		Pad
+FloatDC			Const
+FloatGain		Gain
+FloatSum		Add
+FloatDiff		Sub
+FloatProduct		Mpy
+FloatImpulse		Impulse
+FloatPad		Pad
+FloatRect		Rect
+FloatRamp		Ramp
+FloatThresh		Thresh
+Quantizer		Quant
+Crosscor		Crosscor		dsp
+BlockFIR		BlockFIR		dsp
+BlockLattice		BlockLattice		dsp
+BlockRLattice		BlockRLattice		dsp
+Burg			Burg			dsp
+FIR			FIR			dsp
+LMS			LMS			dsp
+Lattice			Lattice			dsp
+OMAMagnavoxOut		OMAMagnavoxOut		dsp
+RLattice		RLattice		dsp
+LevDur			LevDur			dsp
+IIR			IIR			dsp
+

@@ -1,0 +1,21 @@
+reset
+# Creating universe 'DctImage'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ReadImage1 ReadImage
+	setstate ReadImage1 fileName "~ptolemy/src/domains/sdf/demo/ptimage2"
+	setstate ReadImage1 frameId 0
+	star Dct1 Dct
+	setstate Dct1 BlockSize 8
+	star DctInv1 DctInv
+	star DisplayImage1 DisplayImage
+	setstate DisplayImage1 command xv
+	setstate DisplayImage1 imageName ""
+	setstate DisplayImage1 saveImage n
+	connect ReadImage1 output Dct1 input
+	connect Dct1 output DctInv1 input
+	connect DctInv1 output DisplayImage1 inData
+run 1
+wrapup
