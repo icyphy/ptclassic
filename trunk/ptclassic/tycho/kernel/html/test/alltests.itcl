@@ -1,0 +1,28 @@
+# CAUTION: automatically generated file by a rule in tycommon.mk
+# This file will source the .itcl files list in the
+# makefile SIMPLE_TESTS and GRAPHICAL_TESTS variables
+# This file is different from all.itcl in that all.itcl
+# will source all the .itcl files in the current directory
+#
+# Set the following to avoid endless calls to exit
+if {![info exists reallyExit]} {set reallyExit 0}
+# Exiting when there are no more windows is wrong
+::tycho::TopLevel::exitWhenNoMoreWindows 0
+#Do an update so that we are sure tycho is done displaying
+update
+set savedir "[pwd]"
+if {"testCacheManager.itcl testMail.itcl" != ""} {foreach i [list testCacheManager.itcl testMail.itcl] {puts $i; cd "$savedir"; if [ file exists $i ] {source $i}}}
+puts stderr testHTML.itcl
+cd "$savedir"
+source testHTML.itcl
+puts stderr testResourceHTTP.itcl
+cd "$savedir"
+source testResourceHTTP.itcl
+puts stderr testResourceRemote.itcl
+cd "$savedir"
+source testResourceRemote.itcl
+catch {doneTests}
+# IMPORTANT: DON'T CALL exit HERE.
+# If exit is present, then the Builder will exit Tycho
+# whenever the tests are run
+#exit
