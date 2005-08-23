@@ -51,7 +51,7 @@ ITCL_SRCS =
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	index.html
 
-MISC_FILES = img
+MISC_FILES = #img
 
 OPTIONAL_FILES = codeDoc
 
