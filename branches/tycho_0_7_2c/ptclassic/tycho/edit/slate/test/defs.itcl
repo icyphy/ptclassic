@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)defs.itcl	1.9 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,10 +31,21 @@
 #######################################################################
 
 ############################################################################
+#### Define a proc that can be used to create a new canvas
+#
+proc _icanvas {} {
+    catch {itcl::delete object .s}
+    ::tycho::icanvas .s
+    pack .s
+    wm deiconify .
+    raise .
+}
+
+############################################################################
 #### Define a proc that can be used to create a new slate
 #
 proc _slate {} {
-    catch {delete object .s}
+    catch {itcl::delete object .s}
     ::tycho::slate .s
     pack .s
     wm deiconify .
@@ -56,7 +67,7 @@ proc _update {} {
 #### Define a proc that creates a clean slate
 #
 proc _clean {} {
-    if { [::info which -command .s] == "" } {
+    if { [::info commands .s] == "" } {
 	_slate
     }
     .s delete all
@@ -90,13 +101,14 @@ proc _hieritem {} {
 #
 proc _done {} {
     _update
-    catch {delete object .s}
+    catch {itcl::delete object .s}
     # wm iconify .
 }
 
 
 ############################################################################
-#### Define a proc to simulate an interaction sequence
+#### Define a proc to simulate an interaction sequence,
+# calling Shape classes directly.
 #
 proc _interact {prefix tag xinc yinc n args} {
     set x 100
@@ -110,7 +122,27 @@ proc _interact {prefix tag xinc yinc n args} {
 	update idletasks
 	incr n -1
     }
-    eval ${prefix}release $tag .s.canvas .s $x $y
+    eval ${prefix}release $tag .s.canvas .s
+    .s coords $tag
+}
+
+############################################################################
+#### Define a proc to simulate an interaction sequence,
+# calling via the slate.
+#
+proc _interactslate {prefix tag xinc yinc n args} {
+    set x 100
+    set y 100
+    eval .s ${prefix}click $tag $x $y $args
+    update idletasks
+    while { $n > 0 } {
+	set x [expr $x + $xinc]
+	set y [expr $y + $yinc]
+	eval .s ${prefix}drag $tag $x $y
+	update idletasks
+	incr n -1
+    }
+    eval .s ${prefix}release $tag
     .s coords $tag
 }
 
@@ -126,3 +158,68 @@ proc _finally2 {prefix tag xinc yinc n args} {
     eval $prefix [list [.s coords $tag]] \
 	    [expr $xinc * $n] [expr $yinc * $n] $args
 }
+
+#######################################################################
+#### _interaction
+#
+# Simulate a series of mouse interactions on an item. This
+# procedure will work only if test Follower-2 passes. The
+# optional args are passed to ::tycho::Interactor::event{}
+# to get the correct event names.
+#
+# "tag" is the tag which is initiating the click (can also be an
+# item id.) "id" is the ID of the item being moused on.
+#
+# The functionality of this proc is tested in the
+# Follower-basic-1 test.
+#
+proc _interaction {tag id x y xinc yinc n args} {
+    # Because the interactor bindings use the "current" item,
+    # we have to fool them into thinking that there really
+    # is a current item. To do so, add the current tag to a
+    # canvas item (NB: Cannot add directly to a complex item
+    # -- see the comment to addtag{} in IncrCanvas.
+    if [string match {[A-Z]*} [.s type $id]] {
+        .s addtag current withtag [.s primary $id]
+    } else {
+        .s addtag current withtag $id
+    }
+
+    # To simulate click, get bound script from the bound tag
+    # and evaluate. Because the code looks at the "current" item,
+    # manually add the tag here
+    set script [.s bind $tag \
+	    [eval ::tycho::Interactor::event Click $args]]
+    regsub -all %x $script $x script
+    regsub -all %y $script $y script
+    uplevel #0 $script
+
+    # Now repeatedly "drag" mouse. Note: get the script from
+    # the item id not the tag.
+    # Note also: the -modifiers option needs to be removed
+    array set temp $args
+    catch {unset temp(-modifiers)}
+    set nomodifiers [array get temp]
+    set i 0
+    while { $i < $n } {
+	incr i
+	set x [expr $x + $xinc]
+	set y [expr $y + $yinc]
+	set script [.s bind $id \
+		[eval ::tycho::Interactor::event Motion $nomodifiers]]
+	regsub -all %x $script $x script
+	regsub -all %y $script $y script
+	uplevel #0 $script
+    }
+
+    # Eval the release event
+    set script [.s bind $id \
+	    [eval ::tycho::Interactor::event Release $nomodifiers]]
+    regsub -all %x $script $x script
+    regsub -all %y $script $y script
+    uplevel #0 $script
+
+    # Remove the "current" tag
+    .s dtag current
+}
+

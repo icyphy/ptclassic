@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testBuilderDialog.itcl	1.5 04/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,12 +52,15 @@ if {[namespace ptolemy {info classes BuilderDialog}] == {} } {
     }
 }
 
+# We only test the things that can be tested quickly here.
+# It would be nice if tests had levels.
+
 ######################################################################
 #### Test the Class Diagram
 # 
 test BuilderDialog-1.1 {Build the Class Diagram} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Build {{Class Diagram Only}}
+    $bd menubar invoke buildclassdiagram
     delete object [$bd displayer]
     file writable [file join $TYCHO doc tychoClasses.dag]
 } {1}
@@ -65,10 +68,30 @@ test BuilderDialog-1.1 {Build the Class Diagram} {
 ######################################################################
 #### Test the Indices
 # 
-test BuilderDialog-2.1 {Build the Indices} {
+test BuilderDialog-1.2 {Build the Indices} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Build {{Indices Only}}
+    $bd menubar invoke buildindices
     delete object [$bd displayer]
     file writable [file join $TYCHO lib idx tycho.idx]
 } {1}
 
+######################################################################
+#### Test the test menu
+# 
+test BuilderDialog-2.1 {Test the test menu} {
+    set bd [::tycho::view BuilderDialog]
+    $bd menubar invoke slate_tests
+    delete object [$bd displayer]
+    list dummy
+} {dummy}
+
+######################################################################
+#### Test the Distribution
+# 
+test BuilderDialog-3.1 {Build the Distribution} {
+    set bd [::tycho::view BuilderDialog]
+    $bd menubar invoke fulldistribution
+    delete object [$bd displayer]
+    # It would be nice if we knew where the distribution was to appear.
+    file writable [::tycho::Builder::getDistBuildDir]
+} {1}

@@ -1,8 +1,8 @@
-# Makefile for the Tycho tycho.typt.editors package, bin/ directory
+# Makefile for the Tycho tycho.typt.edit package, bin/ directory
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.2 05/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors/bin
+VPATH =		$(ROOT)/typt/edit/bin
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) editors
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) edit
 
 MISC_FILES = README.txt
 
@@ -60,7 +60,7 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all: sources $(MISC_SRCS)
-	chmod a+x editors
+	chmod a+x edit
 
 install: all
 

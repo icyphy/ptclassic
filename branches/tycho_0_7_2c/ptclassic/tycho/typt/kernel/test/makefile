@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, typt/kernel/test directory.
 #
-# $Id$
+# @(#)makefile	1.6 04/20/97
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,10 +30,10 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/test
+VPATH =		$(ROOT)/typt/kernel/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -41,7 +41,10 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-SIMPLE_TESTS =
+SIMPLE_TESTS = \
+	testBlock.itcl \
+	testGalaxy.itcl \
+	testUniverse.itcl
 
 GRAPHICAL_TESTS = \
 	testDomainInfo.itcl \
@@ -49,7 +52,8 @@ GRAPHICAL_TESTS = \
 	testPtWelcomeMessage.itcl
 
 ITCL_SRCS = \
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS)
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -58,16 +62,16 @@ MISC_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_simple test_graphics
+tests:: test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "set TYCHO $$PTOLEMY/tycho; foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
+		pitcl
 
 # These tests require a graphics terminal
-test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -e testDomainInfo.itcl
-	tycho -e testProfile.itcl
-	tycho -e testPtWelcomeMessage.itcl
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -ptiny -noconsole -e alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

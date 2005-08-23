@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)Compile.itcl	1.37	08/05/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -30,11 +30,49 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+##############################################################################
+#### compileC
+# Invoke an external program using compileCTcl.
+# The format of the command is similar that of the Tcl "exec" command, 
+# except it takes in the following command: <br>
+# ::tycho::compileC filename args <br>
+# Where args can be any of the following: -autodestroy, -autostart, and -modal.
+#
+set compiler {}
+proc ::tycho::compileC {filename args} {
+    global tcl_platform compiler
+
+    # Initialize array names
+    array set option {-autodestroy 0}
+    array set option {-autostart 0}
+    array set option {-modal 0}
+    array set option $args
+
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the tcl \"exec\" command is not supported on the\
+		Macintosh.\nThe command:\n$filename\ncannot be executed"
+    }
+
+    # NOTE: Unix-ism.
+    # WARNING: winfo doesn't work for some reason!
+    # Now always creating a new widget
+    if {$compiler=={}} {
+        set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
+    }
+
+    if [catch {eval $compiler compile $filename $args} msg] {
+        # The command failed.  It would be nice to check to see
+        # whether the program exists, and generate a suitable message,
+        # but it's not clear how to do this.
+        error "$filename failed to compile.  Be sure that the file exists"
+     }
+}
+
 
 #######################################################################
 #### Compile
 # The Compile baseclass provides a common interface that can be used
-# to compile files and load them in.  Child clases, such as CompileCTcl
+# to compile files and load them in.  Child classes, such as CompileCTcl
 # derive from this class and refine the functionality.
 #
 # <p>
@@ -46,40 +84,51 @@
 # </pre></tcl>
 #
 class ::tycho::Compile {
-
+    inherit ::tycho::Object
     constructor {args} {}
     destructor {}
     
     ###################################################################
     ####                            options                        ####
 
-    # View of controlling widget, used to post status messages.
-    itk_option define -view view View {}
-
-
     ###################################################################
     ####                         public methods                    ####
 
+    # Compile each file in the list of filenames.
+    public method compile {filenames args}
+
     # Compile and load in each file in the list of filenames.
-    method compileAndLoad { filenames}
+    public method compileAndLoad {filenames args}
+
+    # Compile and run in each file in the list of filenames.
+    public method compileAndRun {filenames}
+
+    # FIXME: Comment me!
+    public variable view {}
+
+    # Compile the file.
+    method compileFiles {args}
 
     ###################################################################
     ####                   protected methods                       ####
 
     # Check the source files for necessary features.
-    protected checkSourceFiles {}
-
-    # Compile the file.
-    protected compileFiles {}
+    protected method checkSourceFiles {}
 
     # Create a makefile.
-    protected createMakefile {}
+    protected method createMakefile {}
+
+    # Initialize variables from the filename list.
+    protected method initialize {filenames}
 
     # Run make and then load the result back into Tycho.
     protected method loadFiles {}
 
     # Determine the name of the makefile.
     protected method makefileName {}
+
+    # Print status messages to the controlling widget, if any.
+    protected method putStatus {msg}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -98,19 +147,25 @@ class ::tycho::Compile {
 
     # Name of the makefile to use.
     protected variable makefile makefile
-}
 
-#######################################################################
-#### -view configuration
-# Description of view option.
-#
-configbody ::tycho::Compile::view {
+    # Name of the Exec widget used to compile
+    protected variable monitorWidget {}
+
+    ###################################################################
+    ####                     private variables                     ####
+    private variable editorWidget {}
+    private variable errorList {}
+    private variable errorCount {}
 }
 
 #######################################################################
 #### constructor
 #
 body ::tycho::Compile::constructor {args} {
+    # monitorWidget is the execModal widget
+    # NOTE: editor name is $editorName
+    set editorName [$this cget -view]
+    set editorWidget $editorName.history.text
 }
 
 
@@ -126,30 +181,42 @@ body ::tycho::Compile::destructor {} {
     ####                      public methods                       ####
 
 #######################################################################
-#### compileAndLoad
-# Compile and load in each file in the list of filenames.
+#### compile
+# Compile each file in the list of filenames. This will initialize
+# makefile name, sources, etc, then invoke compileFiles. Args takes
+# in the following forms: -autostart, -autodestroy, -modal.
 #
-body ::tycho::Compile::compileAndLoad {filenames} {
-    if {[llength $filenames] == 0} {
-	error "::tycho::Compile::compileAndLoad must be passed a list of files"
-    }
-    set filenameList $filenames
-    set firstFile [lindex $filenameList 0]
-    set dirname [file dirname $firstfile]
-    set basename [file rootname [file tail $firstfile]]
-
-    # Should we check that thie files exist here?
-
+body ::tycho::Compile::compile {filenames args} {
+    initialize $filenames
+    # Should we check that the files exist here?
     checkSourceFiles
     set makefile [makefileName]
     createMakefile
-    compileFiles
+
+    eval compileFiles $args
+}
+
+#######################################################################
+#### compileAndLoad
+# Compile and load in each file in the list of filenames.
+#
+body ::tycho::Compile::compileAndLoad {filenames args} {
+    eval compile $filenames $args
     loadFiles
 }
+#######################################################################
+#### compileAndRun
+# Compile and load in each file in the list of filenames.
+#
+body ::tycho::Compile::compileAndRun {filenames} {
+    initialize $filenames
+}
+
 
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
+
 
 #######################################################################
 #### checkSourceFiles
@@ -163,13 +230,76 @@ body ::tycho::Compile::checkSourceFiles {} {
 
 #######################################################################
 #### compileFiles
-# Compile the files
+# Quickly compile the files. This takes in arguments, which could be
+# any of the following: -autodestroy, -autostart, and -modal.
 #
-body ::tycho::Compile::compileFiles {} {
-    putStatus "About to make shared object, when complete, be sure to \
-	    close the Exec window to continue."
-    ::tycho::execWindow "make -f $makefile" $dirname
-    putStatus ""
+body ::tycho::Compile::compileFiles {args} {
+    # FIXME: compileString should be a preference.
+    # FIXME: dirname should be a preference.
+    
+    # Our basic functions:
+    array set option {-autodestroy 0 -autostart 0 -modal 0}
+    array set option $args
+
+    # Make sure we pass on arguments down to compileFiles
+    global TY_TESTING
+    if { [::info exists TY_TESTING] && $TY_TESTING } {
+	array set option {-autodestroy 1 -autostart 1 -modal 1}
+    }
+
+    #putStatus "About to make shared object, when complete, be sure to \
+    #        close the Exec window to continue."
+
+    # Compile.  If we already have a monitorWidget, reuse it. 
+    if {![winfo exists $monitorWidget]} {
+        if [regexp {[Mm]akefile} $makefile] {
+            set compileString "make"
+        } {
+            set compileString "make -f $makefile"
+        }
+
+        set monitorWidget \
+                [::tycho::view Monitor -toolbar 1 \
+                -autostart $option(-autostart) \
+                -autodestroy $option(-autodestroy) \
+                -command $compileString -dir $dirname]
+
+        # Basic initialization here
+        if {$compileString != {} } {
+            $monitorWidget configure -command $compileString
+        }
+        if {$dirname != {} } {
+            $monitorWidget configure -dir $dirname
+        }
+
+        $monitorWidget raiseWindow
+	# Make sure the window appears now
+	::tycho::safeUpdate $this
+
+        if {$option(-autostart)} {
+            if [winfo exists $monitorWidget] {
+                $monitorWidget getStatusWait
+            }
+        } else {
+            set editorName [$this cget -view]
+            # Raise current window back, since default is not autostart
+            #if {$editorName!={}} {$editorName raiseWindow}
+        }
+   } else {
+        #set retList [::tycho::execModal {} {} $monitorWidget]
+        $monitorWidget raiseWindow
+        $monitorWidget execProcess
+        $monitorWidget getStatusWait
+    }
+
+    # If modal, then we wait until monitorWidget (a type of monitor)
+    # exits.
+    if {$option(-modal)==1} {
+        #::tycho::Dialog::wait $monitorWidget
+        if [winfo exists $monitorWidget] {
+            $monitorWidget getStatusWait
+        }
+    }
 }
 
 #######################################################################
@@ -177,6 +307,20 @@ body ::tycho::Compile::compileFiles {} {
 # Create a makefile.   Usually subclasses modify this method.
 # The makefile that is created is named by the *makefile* protected variable.
 body ::tycho::Compile::createMakefile {} {
+}
+
+#######################################################################
+#### initialize
+# Initialize the some protected variables from the list of filenames.
+# 
+body ::tycho::Compile::initialize {filenames} {
+    if {[llength $filenames] == 0} {
+	error "::tycho::Compile::compileAndLoad must be passed a list of files"
+    }
+    set filenameList $filenames
+    set firstFile [lindex $filenameList 0]
+    set dirname [file dirname $firstFile]
+    set basename [file rootname [file tail $firstFile]]
 }
 
 #######################################################################
@@ -204,11 +348,9 @@ body ::tycho::Compile::loadFiles {} {
 body ::tycho::Compile::makefileName {} {
     if [file exists [file join $dirname makefile]] {
 	set makefile makefile
-    }
-    if [file exists [file join $dirname Makefile]] {
+    } elseif [file exists [file join $dirname Makefile]] {
 	set makefile Makefile
-    }
-    if [file exists [file join $dirname $basename.mk] {
+    } else {
 	set makefile $basename.mk
     }
 }
@@ -217,10 +359,8 @@ body ::tycho::Compile::makefileName {} {
 #### printStatus
 # Print status messages if -view was passed at construction time.
 #
-body ::tycho::Compile::printStatus {msg} {
-    if {$itk_option(-view) != {}} {
-	$itk_option(-view) printStatus $msg
+body ::tycho::Compile::putStatus {msg} {
+    if {$view != {}} {
+	$view putStatus $msg
     }
 }
-
-

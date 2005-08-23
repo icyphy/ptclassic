@@ -3,9 +3,9 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)URLPath.tcl	1.10 04/29/98
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -37,25 +37,30 @@
 # Read the header string from a file and set the elements of
 # the passed array, with each index being the name of a headed
 # variable. The file name can be a local file name or a
-# URL-style name. Return the mode if successful, or null
-# if there was no header or it was malformed.
+# URL-style name. Return 1 if a header was found and parsed,
+# or zero if there was no header or it was malformed. The
+# header can be multiline.
 #
 proc ::tycho::readFileHeader {filename var} {
-	upvar $var v
-	
-	set fo [::tycho::resource new $filename]
-	$fo open
-	set string [$fo gets]
-	while { string != "" } {
-		set string [$fo gets]
-	}
-	$fo close
-	delete object $fo
-	if [regexp {-\*-.*-\*-} $string header]
-		return ::tycho::parseHeaderString $string v
-	} else {
-		return ""
-	}
+    upvar $var v
+    set fo [::tycho::resource new $filename]
+    $fo open
+    set line [$fo gets]
+    while { ![$fo eof] && $line == "" } {
+	set line [$fo gets]
+    }
+    set string ""
+    while { [regexp -- {-\*-.*-\*-} $line line] } {
+        append string $line\n
+        set line [$fo gets]
+    }
+    $fo close
+    delete object $fo
+    if { $string == "" } {
+        return 0
+    } else {
+        return [::tycho::parseHeaderString $string v]
+    }
 }
 
 #####################################################################
@@ -144,7 +149,7 @@ proc ::tycho::readFileHeader {filename var} {
 # *aslocal* option.) If a network name and no path is given,
 # return <code>/</code>.
 # <li><code>::tycho::url pathtype</code> _name_: Return the
-# "type" of a path -- aboslute, relative, or volumerelative.
+# "type" of a path -- absolute, relative, or volumerelative.
 # If _name_ is a network name, always return
 # <code>absolute</code>. If it is a local name, return whatever
 # Tcl file{} returns. (To tell if a name is a network-style
@@ -173,11 +178,18 @@ proc ::tycho::readFileHeader {filename var} {
 # <li><code>::tycho::url tail</code> _name_: Return all
 # characters after the last directory separator.
 # </ul>
+#
+# <b>Implementation note</b>: In order to ensure that only
+# registered protocols are recognized, we have to use the
+# <code>::tycho::Registry</code> class to test if a string
+# that looks like it starts with a protocol actually is.
+#
 ensemble ::tycho::url {
     # Convert a local name using url-style slashes into a platform
     # dependent name.
     option aslocal {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):} $name _ protocol] \
+		&& [::tycho::registered protocol $protocol] } {
 	    error "Not a local name"
 	}
         # FIXME: Will this work reliably on the Mac???
@@ -185,16 +197,16 @@ ensemble ::tycho::url {
     }
     # Return the name excluding the last component.
     option dirname {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
 		# Empty path -- return name
 		return $name
             } else {
 		set pt [split $path /]
 		set path [join [lreplace $pt end end] /]
-		return $protocol$server$path
+		return $protocol:$server$path
 	    }
 	} else {
 	    # Local name
@@ -203,9 +215,9 @@ ensemble ::tycho::url {
     }
     # Expand the name into a normalized version.
     option expand {name} {
-        if [regexp {^[a-z]+:/*} $name] {
+        if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path != "" } {
                 set res {}
                 foreach c [split $path /] {
@@ -217,7 +229,7 @@ ensemble ::tycho::url {
                 }
                 set path [join $res /]
             }
-            return $protocol$server$path
+            return $protocol:$server$path
 	} else {
 	    # Local name
 	    ::tycho::expandPath $name
@@ -225,9 +237,9 @@ ensemble ::tycho::url {
     }
     # Return the name extension.
     option extension {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
 		return ""
 	    } else {
@@ -246,11 +258,10 @@ ensemble ::tycho::url {
     }
     # Return the platform-dependent path name from the arguments.
     option join {name args} {
-	if [regexp {^[a-z]+:} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name -- we need to figure out how much
             # if the name also contains server and path parts
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
-
             # Get the correct server name
             if { $server == "" && $args != "" } {
                 set server [string trim [lindex $args 0] /]
@@ -275,9 +286,9 @@ ensemble ::tycho::url {
 
             # Reconstruct the name and return it
             if { $server == "" } {
-                return $protocol/[join $plist /]
+                return $protocol:/[join $plist /]
             } else {
-                return $protocol//$server/[join $plist /]
+                return $protocol://$server/[join $plist /]
             }
 	} else {
 	    # Local name
@@ -286,9 +297,9 @@ ensemble ::tycho::url {
     }
     # Return the path component of the name.
     option path {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
             if { $path == "" } {
                 return "/"
             } else {
@@ -301,21 +312,26 @@ ensemble ::tycho::url {
     }
     # Return the "type" of a path
     option pathtype {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):} $name _ protocol] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    return "absolute"
+            return "absolute"
+        } elseif [regexp {^[a-z]:} $name] {
+            # Windoze path
+            return "absolute"
         } elseif {[regexp {^\$.*} $name] || [regexp {^\~.*} $name]} {
             # If it begins with $, then it's absolute. Currently ::file 
             # doesn't take care of this case (ie. [file pathtype \$PTOLEMY])
             return "absolute"
-        } else {
+         } else {
 	    # Local name
 	    file pathtype $name
 	}
     }
     #  Return the protocol component of the name.
     option protocol {name} {
-	if [regexp {^([a-z]+):/*} $name _ protocol] {
+	if { [regexp {^([a-z]+):} $name _ protocol] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
 	    return [string tolower $protocol]
 	} else {
@@ -325,11 +341,11 @@ ensemble ::tycho::url {
     }
     # Return the name up to the last period of the last component.
     option rootname {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
-		return $protocol$server
+		return $protocol:$server
 	    } else {
 		set pt [split $path /]
 		set path [join [lreplace $pt end end] /]
@@ -338,7 +354,7 @@ ensemble ::tycho::url {
                     set tt [join [lreplace \
                             [split [lindex $pt end] .] end end] .]
                 }
-                return $protocol$server$path/$tt
+                return $protocol:$server$path/$tt
 	    }
 	} else {
 	    # Local name
@@ -347,9 +363,9 @@ ensemble ::tycho::url {
     }
     # Return the server component of the name.
     option server {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//[^/]*)?} $name _ protocol server] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//[^/]*)?} $name _ protocol server
 	    return [string trimleft $server /]
 	} else {
 	    # Local name
@@ -358,14 +374,14 @@ ensemble ::tycho::url {
     }
     # Split a platform-dependent local name or a network name into a list
     option split {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+	if { [regexp {^([a-z]+):(//([^/]*))?(.*)$} $name \
+                    _ protocol _ server path] \
+		&& [::tycho::registered protocol $protocol] } {
 	    # Network name
-	    regexp {^([a-z]+:)(//([^/]*))?(.*)$} $name \
-                    _ protocol _ server path
 	    if { $path == "" } {
-		list $protocol $server
+		list $protocol: $server
 	    } else {
-		concat [list $protocol $server] \
+		concat [list $protocol: $server] \
                         [lreplace [split $path /] 0 0]
 	    }
 	} else {
@@ -375,10 +391,12 @@ ensemble ::tycho::url {
     }
     # Return the last component of the name
     option tail {name} {
-	if [regexp {^[a-z]+:/*} $name] {
+    set nn [string trimright $name /]
+	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
+		&& [::tycho::registered protocol $protocol] } {
+            # Need the following to parse correctly: ftp://ptolemy/pub/dir/
+            set path [string trimright $path /]
 	    # Network name
-            set name [string trimright $name /]
-	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    lindex [split $path /] end
 	} else {
 	    # Local name
@@ -393,19 +411,31 @@ ensemble ::tycho::url {
 # as this will interfere with url-style names) of url-style pathnames, 
 # return the path of the first file found relative to the
 # names in the list. Note that if the filename includes
-# direcctories, it is expected to be a Unix-style name
+# directories, it is expected to be a Unix-style name
 # containing slashes -- this is because this function is
 # typically used to look for files obtained from portable
-# files.
+# files. If <i>basepath</i> is supplied, then any entries in
+# the search path that are relative will be made relative to
+# this directory; otherwise they will be ignored.
 #
-proc ::tycho::urlPathSearch {name searchpath} {
-	set f [split $name /]
-	foreach p $searchpath {
-		set file [::tycho::url join [concat $p $f]]
-		if [::tycho::resource exists $file] {
-			return $file
-		}
+proc ::tycho::urlPathSearch {name searchpath {basepath {}}} {
+    set f [split $name /]
+    if { $basepath != "" } {
+        set b [::tycho::url split $basepath]
+    }
+    foreach p $searchpath {
+        if { [::tycho::url pathtype $p] == "relative" } {
+            if { $b != "" } {
+                set p [eval ::tycho::url join [concat $b [file split $p]]]
+            } else {
+                continue
+            }
+        }
+	set file [eval ::tycho::url join [concat [::tycho::url split $p] $f]]
+	if [::tycho::resource exists $file] {
+	    return $file
 	}
-	return ""
+    }
+    return ""
 }
 

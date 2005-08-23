@@ -3,7 +3,7 @@
 # edit the proc in $TYCHO/basic/kernel and copy it to
 # this file.
 #
-# @Version: $Id$
+# @Version: @(#)procs.tcl	1.1 07/29/98
 # @Author: H. John Reekie
 #
 # @Copyright (c) 1996- The Regents of the University of California.

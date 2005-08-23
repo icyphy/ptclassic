@@ -1,9 +1,10 @@
 # Welcome Message window.
 #
-# $Id$
-# Author: Edward A. Lee
+# @Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: @(#)WelcomeMessage.itcl	1.41 05/07/98
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,67 +30,43 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# The following silliness is need so that the hypertext links in the
-# welcome window work.
-if {[::info classes ::tycho::HTML] == {}} {
-    auto_load ::tycho::HTML
-}
-
 ##########################################################################
 #### welcomeMessage
 # For convenience, a procedure to create a Tycho welcome message.
 #
-proc ::tycho::welcomeMessage {} {
-    if [winfo exists .welcome] {
-	.welcome raiseWindow
-    } {
-	# FIXME: Get version and executable information.
-	uplevel #0 [list WelcomeMessage .welcome \
-		-version 0.1 \
-		-executable {} \
-		-persistent 0]
-	.welcome centerOnScreen
-    }
-}
-
-# COMPATIBILITY procedures.  The following procedures emulate the behavior
-# of similarly named procedures in pigi, the predecessor to Tycho.
-#
-proc ptkStartupMessage {version executable} {
-    if [winfo exists .welcome] {
-	.welcome raiseWindow
-    } {
-	WelcomeMessage [autoName .welcome] \
-		-version $version \
-		-executable $executable \
-		-persistent 0
-	.welcome centerOnScreen
-    }
+proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
+    set nm [::tycho::autoName .welcome]
+    uplevel #0 [list ::tycho::WelcomeMessage $nm \
+            -version $version \
+            -executable $binary \
+            -persistent 0]
+    $nm centerOnScreen
+    return $nm
 }
 
 ##########################################################################
 #### WelcomeMessage
-# Display the Ptolemy startup message.
+# A startup message window.
 #
 class ::tycho::WelcomeMessage {
-    inherit ::tycho::Message
+    inherit ::tycho::HTMLMessage
 
-    #### -version option
-    # Indicates the version of the executable that we are running.
+    # Specify the version of the executable that we are running.
     itk_option define -version version Version ""
 
-    #### -executable option
-    # Indicates the actual executable file that we are running.
+    # Specify the actual executable file that we are running.
     itk_option define -executable executable Executable ""
 
-    #### -persistent option
-    # Indicates whether the window should destroy itself after a timeout.
+    # Specify whether the window should destroy itself after a timeout.
     itk_option define -persistent persistent Persistent 1
 
     constructor {args} {}
 
-    # Indicator of whether the Ptolemy gif image has been created.
-    private variable ptolemygifexists 0
+    ##########################################################################
+    ####                       private variable                           ####
+
+    # Indicator of whether the gif image has been created.
+    private variable tychogifexists 0
 }
 
 ##########################################################################
@@ -97,51 +74,63 @@ class ::tycho::WelcomeMessage {
 #
 body ::tycho::WelcomeMessage::constructor {args} {
 
-    global TYCHO
-    if {!$ptolemygifexists} {
-	image create photo ptolemygif -palette 3/3/2  \
-		-file $TYCHO/tycho/kernel/ptolemyWelcome.gif
+    global ::TYCHO
+    if {[stylesheet get system slowNetwork] == 0} {  
+	# An option -palette 3/3/2 below restricts the palette,
+	# but it is better to restrict it in the source.
+	if {!$tychogifexists} {
+	    image create photo tychogif \
+		    -file [ file join $TYCHO kernel img tychologo.gif]
+	}
+	configure -image tychogif
     }
-    configure -image ptolemygif
 
     # Pack the copyright button.
-    addButton copyright -text "Copyright" -command \
-	    "::File::openContext $TYCHO/copyright"
+    addButton copyright -text "Copyright" \
+            -underline 0 \
+            -command \
+	    "::tycho::File::openContext \"[file join $TYCHO copyright.txt]\""
 
     # Pack the introduction button.
-    addButton intro -text "Introduction" -command \
-	    "::File::openContext $TYCHO/tycho/kernel/doc/introduction.html"
+    addButton intro -text "Home Page" \
+            -underline 0 \
+            -command \
+	    "::tycho::File::openContext \"[file join $TYCHO doc index.html]\""
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
     # Arrange for destruction, if appropriate.
     if {!$itk_option(-persistent)} {
-	after 20000 [list catch [list delete object $this]]
+	after 40000 [code [list catch [code delete object $this]]]
     }
 
     # Construct the HTML message that forms the welcome message.
+    append html "<body bgcolor=grey90>"
     append html "<center>"
     append html "<color value=firebrick><h1>Welcome to Tycho</h1></color>"
     if {$itk_option(-version) != {}} {
-	append html "Version: $itk_option(-version)"
+	append html "$itk_option(-version)"
     }
     if {$itk_option(-executable) != {}} {
 	append html \
-		{<p>Ptolemy executable you are running:<br>} \
+		{<br>Executable you are running:<br>} \
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 1990-1996, " \
+	    "Copyright \251 1995-1999, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
-	    "<a href=$TYCHO/copyright>See the copyright notice, " \
+	    "<a href=$TYCHO/copyright.txt>See the copyright notice, " \
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$TYCHO/tycho/kernel/doc/introduction.html>" \
-	    {Introduction to Tycho</a></h1>}
+    append html "<h1><a href=$TYCHO/doc/index.html>" \
+	    {Tycho Documentation</a></h1>}
 
-    configure -html $html
+    configure -textwidth 60
+    configure -textheight 17
+    configure -scrollbar 0
+    configure -title "Welcome to Tycho"
+    insertData $html
 }
-

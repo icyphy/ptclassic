@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)Glimpse.itcl	1.39	01/27/99
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -30,31 +30,37 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-catch {delete class Glimpse}
 #######################################################################
 #### options
 #
 
 #######################################################################
 #### Glimpse
-# Description of class.
+# Glimpse "is an indexing and query system that allows you to search through
+# all your files very quickly"
 #
-# <p>
+# The glimpse binary is not shipped with Tycho, see
+# see <A HREF="http://glimpse.cs.arizona.edu">http://glimpse.cs.arizona.edu</A>
+#
+# In Tycho, $TYCHO/makefile contains a 'glimpse' rule that will build
+# $TYCHO/.glimpse_index
+#
 # Here is an example of how to use the Glimpse:
 # <tcl><pre>
-#     ::tycho::Glimpse .x ...
+# ::tycho::Glimpse .g
+# .g centerOnScreen
 # </pre></tcl>
 #
 class ::tycho::Glimpse {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
     constructor {args} {}
     destructor {}
-    
+
     ###################################################################
     ####                            options                        ####
 
-    # One line description of findcommand option; listed in alphabetical order
+    # The command to execute on a find command.
     itk_option define -findcommand findcommand Findcommand ""
 
     ###################################################################
@@ -63,68 +69,41 @@ class ::tycho::Glimpse {
     # Call glimpse on the pattern and produce an index browser with the results
     method glimpseSearch {}
 
-    # One line description of the method
-    method NameB {}
+    # Bring up help for this widget
+    method help {}
+
+    # Update the glimpse_index entry widget
+    method _updateGlimpseIndex {}
 
     ###################################################################
-    ####                      public procs                         ####
+    ####                         public procs                      ####
 
-    # One line description procedure; listed in alphabetical order
-    proc NameA {anyargs} {}
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-    # One line description of the method; listed in alphabetical order
-    protected method methodName {}
+    # Update the Tycho glimpse database
+    proc updateTychoDatabase {}
 
     ###################################################################
-    ####                   protected variables                     ####
-
-    # Comments come before the variable declaration; variables listed
-    # in alphabetical order
-    protected variable variableName
-
-
-    ###################################################################
-    ####                   private methods                         ####
-
-    # One line description; listed in alphabetical order
-   #private method NameA {}
-
-    ###################################################################
-    ####                   private variables                       ####
-
-    # A comment before one or a group of private variables;
-    # alphabetical order unimportant
-    private variable variableName1
-    private variable variableName2
-
-    #private common variableName
+    ####                         private variables                 ####
+    private variable glimpseOutputFile {}
 }
-
-#######################################################################
-#### -findcommand configuration
-# Description of findcommand option.
-#
-configbody ::tycho::Glimpse::findcommand {
-}
-
 
 #######################################################################
 #### constructor
 #
 body ::tycho::Glimpse::constructor {args} {
-
-    global TYCHO
-    configure -queries {
-	{pattern {Search pattern:} {}}
-	{glimpse_index {Glimpse Index} {$TYCHO .glimpse_index}}
+    global PTOLEMY TYCHO tcl_library tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, Glimpse is not supported on the Mac,\nthere is\
+		no Tcl \"exec\" on the Mac."
     }
+
+    configure -queries [list \
+	{line pattern {Search pattern:} {}} \
+	[list line glimpse_index {Glimpse Index:} \
+                [file join $TYCHO .glimpse_index]] \
+    ]
 
     eval itk_initialize $args
 
-   
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
     # definition (as a default) because "$this" is known here.
@@ -134,14 +113,68 @@ body ::tycho::Glimpse::constructor {args} {
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
-	    -command "$this execCommand -findcommand"
-}
+	    -command "$this glimpseSearch"
 
+    set buttonList {Tycho}
+    # If the $PTOLEMY environment variable is set and 
+    # $PTOLEMY/src/.glimpse_index exists, then offer two buttons,
+    # one to set the index to use $PTOLEMY/src/.glimpse_index,
+    # one to set the index to use $TYCHO/.glimpse_index
+    if {[info exists PTOLEMY] && \
+            [file exists [::tycho::expandPath \
+            [file join $PTOLEMY src .glimpse_index]]]} {
+        lappend buttonList {Ptolemy}
+    }
+    if [file exists /usr/sww/doc/faq] {
+        lappend buttonList {SwwFaqs}
+    }
+    if [file exists [file join \
+            [file dirname [file dirname [file dirname $tcl_library]]] \
+            man .glimpse_index]] {
+        lappend buttonList {Tcl}
+    }
+    if {$buttonList != {Tycho}} {
+        lappend buttonList {Clear}
+        radio defaultIndex {Default Index:} $buttonList \
+                Tycho -command "$this _updateGlimpseIndex"
+    }
+
+    addButton update -text "Update Tycho DB" \
+            -command "::tycho::Glimpse::updateTychoDatabase"
+
+    addButton help -text "Help" -command "$this help"
+
+    if {! [file exists [file join $TYCHO .glimpse_index]]} {
+        set nm [::tycho::autoName .glimpseYNC]
+        ::tycho::YesNoCancel $nm \
+                -text "The glimpse file \
+                `[file join $TYCHO .glimpse_index]' \
+                does not exist.  Create it now?"
+        set response [::tycho::Dialog::wait $nm]
+        if {$response == -1 } {
+            ::tycho::silentError
+        }
+        if {$response == 1 } {
+            updateTychoDatabase
+        }
+    }
+
+    # Register this window so it appears on the menus
+    # FIXME: This should check that the "glimpse" mode actually exists
+    ::tycho::register window Glimpse $this \
+            -label [tycho::autoName "Glimpse "] \
+            -mode glimpse
+}
 
 #######################################################################
 #### destructor
 #
 body ::tycho::Glimpse::destructor {} {
+    # Delete the temporary output file
+    file delete -force $glimpseOutputFile
+
+    # Deregister this window
+    ::tycho::deregister window Glimpse $this
 }
 
 
@@ -152,15 +185,14 @@ body ::tycho::Glimpse::destructor {} {
 #####################################################################
 #### glimpseSearch
 # Use the glimpse command to generate an index.
-# Note that glimpse is not shipped with Tycho,
-# see http://glimpse.cs.arizona.edu
+
 #
-body tycho::Glimpse::glimpseSearch {} {
+body ::tycho::Glimpse::glimpseSearch {} {
     global TYCHO
     set pattern [get pattern]
-    set glimpse_index [get glimpse_index]
-    if {! [file exists [eval file join $glimpse_index]]} {
-        error "[eval file join $glimpse_index] does not exist.\n\
+    set glimpse_index [list [get glimpse_index]]
+    if {! [file exists [lindex $glimpse_index 0]]} {
+        error "$glimpse_index does not exist.\n\
                 If this is the Tycho glimpse file, and if you have glimpse\n\
                 installed, then you need to run\
                 (cd $TYCHO; make glimpse).\n\
@@ -168,78 +200,126 @@ body tycho::Glimpse::glimpseSearch {} {
                 http://glimpse.cs.arizona.edu"
     } 
     # Open the temporary index file, write the header.
-    set glimpseIndexFile [::tycho::tmpFileName glimpse .idx]
-    set fd [open $glimpseIndexFile w]
+    set glimpseOutputFile [::tycho::tmpFileName glimpse .idx]
+    set fd [open $glimpseOutputFile w]
     puts $fd "# <h1>This is a Tycho index file.  Use tycho to view it.</h1>\
             <nothtml"
     puts $fd "{Glimpse $pattern}\n{"
 
     # Unix only? exec glimpse and get the output:
-    set glimpseIndexDir [file dirname [eval file join $glimpse_index]]
-    set glimpseOut [exec glimpse -n -H $glimpseIndexDir $pattern]
+    set glimpseIndexDir [file dirname [file join [lindex $glimpse_index 0]]]
+
+    if {[::tycho::pathSearch glimpse] == {} } {
+	error "glimpse is not in your path.\nSee the glimpse home page\
+		(http://glimpse.cs.arizona.edu) for sources"
+
+    }
+
+    # glimpse options: -y = don't prompt -n = show line numbers
+    set glimpseOut [busy exec glimpse -y -n -H "$glimpseIndexDir" $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
-        puts $glimpseItem
-        regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
+        # FIXME: we substitute $TYCHO for any pathname that starts with
+        # */tycho/. Since we have paths like tycho/java/tycho, we need to
+        # substitute the _first_ /tycho/ or we will get a bogus path.
+        # We could use ::tycho::simplifyPath here, except we
+        # want to be able to use the glimpse index created by a user
+        # other than the user running glimpse, so we need to substitute
+        # in the user's $TYCHO so that they can edit the files that
+        # glimpse points to.  Note that simplifyPath will not do the
+        # proper substitution here, since the user's $TYCHO is not
+        # necessarily the same as the $TYCHO of the user who created
+        # the glimpse index.  
+        regsub {^[^t][^y][^c][^h][^o]*/tycho/(.*)} $glimpseItem \
+                {$TYCHO/\1} shortGlimpseItem
         regexp {(^[^ :]*): ([0-9]*):(.*)} $shortGlimpseItem dummy \
                 filename linenum patternline
-
+        if ![info exists filename] {
+            error "Internal Glimpse error: regexp `$shortGlimpseItem' failed!\n\
+                    line was: `$glimpseItem'\n\
+                    glimpse command returned: $glimpseOut" 
+        }
         puts $fd "{[list "$filename $patternline"] $filename {line $linenum}}"
     }
     puts $fd "}\n# >"
     close $fd
 
+    # Bring up the index browser
     set nm [::tycho::autoName .index]
     ::tycho::IndexBrowser $nm \
-            -file $glimpseIndexFile \
-            -width 100
+            -file $glimpseOutputFile \
+            -width 100 -closewindow 0
     $nm centerOnScreen
-
-    # Remove the temporary index file
-    tkwait window $nm
-    ::tycho::rm -f $glimpseIndexFile
 }
 
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Glimpse::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO util devtools doc usersGuides \
+	    GlimpseHelp.html] html
+}
 
 #####################################################################
-#### NameB
-# Description.
+#### _updateGlimpseIndex
+# Update the glimpse_index entry from the value of the 
+# Tycho/Ptolemy index buttons.  This method is public only because
+# of the way Tk handles radiobutton -command options.
 #
-body ::tycho::Glimpse::NameB {} {
+body ::tycho::Glimpse::_updateGlimpseIndex {} {
+    global TYCHO PTOLEMY tcl_library
+
+    clear glimpse_index
+
+    # In alphabetical order
+    switch [get defaultIndex] {
+        Clear {}
+        Ptolemy {insert glimpse_index [file join $PTOLEMY src .glimpse_index]}
+        SwwFaqs {insert glimpse_index \
+                [file join /usr sww doc faq .glimpse_index]}
+        Tcl {insert glimpse_index [file join \
+                [file dirname [file dirname [file dirname $tcl_library]]] \
+                man .glimpse_index]}
+        Tycho {insert glimpse_index [file join $TYCHO .glimpse_index]}
+
+        default {error \
+        "updateGlimpseIndex: Don't understand `[get defaultIndex]'"}
+    }
 }
 
     ###################################################################
     ###################################################################
-    ####                      public procedures                    ####
+    ####                      public procs                         ####
 
-#######################################################################
-#### NameA
-# Description.
+#####################################################################
+#####################################################################
+#### updateTychoDatabase
+# Update $TYCHO/.glimpse_index by running 'make glimpse'
 #
-body ::tycho::Glimpse::NameA {anyargs} {
+body ::tycho::Glimpse::updateTychoDatabase {} {
+    global TYCHO
+    if {[::tycho::pathSearch glimpseindex] == {} } {
+	error "glimpseindex is not in your path.\nSee the glimpse home page\
+		(http://glimpse.cs.arizona.edu) for sources"
+
+    }
+
+    # Save .glimpse_exclude, remove .glimpse*
+    file delete -force [file join $TYCHO glimpse_exclude]
+    file copy -force [file join $TYCHO .glimpse_exclude] \
+	    [file join $TYCHO glimpse_exclude]
+
+    eval file delete -force [glob [file join $TYCHO .glimpse*]]
+    file copy -force [file join $TYCHO glimpse_exclude] \
+	    [file join $TYCHO .glimpse_exclude]
+
+    # Create a monitor window and make it run make glimpse.
+    ::tycho::view Monitor -toolbar 1 \
+            -command [list glimpseindex -H "$TYCHO" "$TYCHO"] \
+            -dir [file join $TYCHO] \
+            -autostart 1 -autodestroy 1
+    file delete -force [file join $TYCHO glimpse_exclude]
 }
-
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### MethodName
-# Description.
-#
-body ::tycho::Glimpse::methodName {} {
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
-
-#######################################################################
-#### NameA
-# Description.
-#
-#body ::tycho::Glimpse::NameA {} {
-#}
-
-

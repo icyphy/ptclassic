@@ -3,9 +3,9 @@
 # @Author: Christopher Hylands
 # @Contributor: Edward A. Lee, based on ProfileTcl.itcl
 #
-# @Version: $Id$
+# @Version: @(#)ProfileJava.itcl	1.4 01/27/99
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -127,8 +127,10 @@ body ::tycho::ProfileJava::constructor {args} {
 # Open a help window.
 #
 body ::tycho::ProfileJava::help {} {
-    hyperJump [file join \$TYCHO editors visedit doc \
-	    usersGuides ProfileJavaHelp.html] {}
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO util devtools doc \
+	    usersGuides ProfileJavaHelp.html] html
 }
 
 #######################################################################

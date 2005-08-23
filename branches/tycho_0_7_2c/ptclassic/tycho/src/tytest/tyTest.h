@@ -1,11 +1,11 @@
 /* 
-   Test functions fo Tycho packages.
+   Test functions for Tycho packages.
 
 Authors: John Reekie.
 
-Version: $Id$
+Version: @(#)tyTest.h	1.4 04/08/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#include "tyTimer.h"
+#include "../tytimer/tytimer.h"
 
 /*
  * Tytest_TimerTask

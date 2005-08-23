@@ -2,9 +2,9 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)PtWelcomeMessage.itcl	1.19   04/24/98
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,14 +32,25 @@
 
 ##########################################################################
 #### ptkStartupMessage
-# For convenience, a procedure to create a Tycho welcome message.
+# If the user has not disable the welcomeWindow, then display it.
 #
 proc ptkStartupMessage {{version ""} {binary ""}} {
+    # Only bring up the welcomeWindow if the user has not disabled it.
+    if {[::tycho::stylesheet get interaction welcomeWindow]} { 
+	ptkStartupMessageAlways $version $binary
+    }
+}
+
+##########################################################################
+#### ptkStartupMessageAlways
+# Ignore the user's preferences and bring up the welcomeWindow.
+#
+proc ptkStartupMessageAlways {{version ""} {binary ""}} {
     set nm [::tycho::autoName .ptwelcome]
     uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
-            -version $version \
-            -executable $binary \
-            -persistent 0]
+	    -version $version \
+	    -executable $binary \
+	    -persistent 0]
     $nm centerOnScreen
 }
 
@@ -71,13 +82,17 @@ class ::tycho::PtWelcomeMessage {
 body ::tycho::PtWelcomeMessage::constructor {args} {
 
     global ::TYCHO ::PTOLEMY
-    # An option -palette 3/3/2 below restricts the palette,
-    # but it is better to restrict it in the source.
-    if {!$ptgifexists} {
-	image create photo ptgif \
-		-file $TYCHO/typt/lib/ptolemyWelcome.gif
+
+    # If the user is on a slow network, then don't show the image
+    if {![::tycho::stylesheet get system slowNetwork] } {
+	# An option -palette 3/3/2 below restricts the palette,
+	# but it is better to restrict it in the source.
+	if {!$ptgifexists} {
+	    image create photo ptgif \
+		    -file $TYCHO/typt/kernel/img/ptolemyWelcome.gif
+	}
+	configure -image ptgif
     }
-    configure -image ptgif
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
@@ -85,7 +100,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 
     # Pack the introduction button.
     addButton intro -text "Home Page" -command \
-	    "::tycho::File::openContext $PTOLEMY/doc/index.html"
+	    "::tycho::File::openContext $PTOLEMY/doc/html/index.html"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -96,6 +111,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     }
 
     # Construct the HTML message that forms the welcome message.
+    append html "<body bgcolor=grey90>"
     append html "<center>"
     append html "<color value=firebrick><h1>Welcome to Ptolemy</h1></color>"
     if {$itk_option(-version) != {}} {
@@ -103,25 +119,23 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     }
     if {$itk_option(-executable) != {}} {
 	append html \
-		{<p>Executable you are running:<br>} \
+		{<br>Executable you are running:<br>} \
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 1995-%Q%, " \
+	    "Copyright \251 1990-1999, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
 	    "<a href=$TYCHO/copyright>See the copyright notice, " \
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$PTOLEMY/doc/index.html>" \
+    append html "<h1><a href=$PTOLEMY/doc/html/index.html>" \
 	    {Introduction to Ptolemy</a></h1>}
 
-    configure -size 0
-    configure -htmlwidth 60
-    configure -htmlheight 15
-    configure -html $html
+    configure -textwidth 60
+    configure -textheight 17
     configure -scrollbar 0
+    configure -title "Welcome to Ptolemy"
+    insertData $html
 }
-
-

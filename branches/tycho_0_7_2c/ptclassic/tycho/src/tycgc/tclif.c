@@ -3,9 +3,9 @@
 
 Authors: John Reekie.
 
-Version: $Id$
+Version: @(#)tclif.c	1.5 04/29/98
 
-Copyright (c) 1997 The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 #include <stdlib.h>
-#include "../tytimer/tyTimer.h"
+#include "../tytimer/tytimer.h"
 
 
 /*
@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * name of a Tcl variable which will be updated with the value of the
  * counter each time the task executes.
  */
-int
+static int
 tclinterface(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   /* Check number of arguments */
   if (argc < 2) {
@@ -54,9 +54,19 @@ tclinterface(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
     sprintf(interp->result, "Too many arguments");
     return TCL_ERROR;
   }
-
+     
   /* Switch on the first argument */
-  if ( ! strcmp(argv[1], "setup") ) {
+  if ( ! strcmp(argv[1], "scriptfile") ) {
+    /* Return the name of the script to create the user interface */
+    interp->result = scriptFile;
+    return TCL_OK;
+
+  } else if ( ! strcmp(argv[1], "init") ) {
+    /* Call the function to register callbacks */
+    tychoSetup();
+    return TCL_OK;
+
+  } else if ( ! strcmp(argv[1], "setup") ) {
     /* If a counter name is supplied, remember it */
     if ( argc > 2 ) {
       strcpy(tclcountername,argv[2]);
@@ -67,43 +77,45 @@ tclinterface(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
     /* Call the setup function */
     setup();
     return TCL_OK;
-
+         
   } else if ( ! strcmp(argv[1], "execute") ) {
     int timedout;
-
-    /* Start the timer */
+         
+         /* Start the timer */
     Ty_TimerStart();
-    
+         
     /* Call the execute function, which must check Ty_TimerElapsed()
-     * return when it returns 1
-     */
+         * return when it returns 1
+         */
     timedout = execute();
-
+         
     /* If there is a tcl counter, update it with the iteration count */
     if ( updatetclcounter ) {
       char buffer[80];
       sprintf(buffer,"%d", iterationCounter);
       Tcl_SetVar(interp, tclcountername, buffer, 0);
     }
-
+         
     /* Return "1" if the timer timed out so we know that the task
-     * didn't terminate; return "0" if the iterayion count was reached
-     * so the scheduler can delete the task
-     */
+         * didn't terminate; return "0" if the iterayion count was reached
+         * so the scheduler can delete the task
+         */
     if ( timedout ) {
       interp->result = "1";
     } else {
       interp->result = "0";
     }
     return TCL_OK;
-
+         
   } else if ( ! strcmp(argv[1], "wrapup") ) {
     /* Call the wrapup function */
     wrapup();
     return TCL_OK;
-
-  } else {
-    sprintf(interp->result, "Invalid mode in module %s: %s", argv[1], moduleName);
-    return TCL_ERROR;
+         
   }
+
+  /* If we get to here, something went wrong */
+  sprintf(interp->result, "Invalid mode in module %s: %s", argv[1], moduleName);
+  return TCL_ERROR;
 }
+

@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)testLabeledFrame.itcl	1.7 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the test package is loaded
+package require slate.test
 
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
-} {}
-
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 100
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single LabeledFrame on the slate
@@ -52,7 +43,7 @@ proc _frame {args} {
     set f [.s create LabeledFrame 40 40 80 80 \
 	    -color green -tags foo \
 	    -text Hello \
-	    -graphics {rectangle 20 20 80 80; line 20 20 80 80; line 20 80 80 20}]
+	    -graphics {rectangle 20 20 80 80; line 20 20 80 80; line 20 80 80 20} ]
     eval .s itemconfigure $f $args
 }
 
@@ -108,7 +99,7 @@ set f [.s create LabeledFrame 140 140 180 180 \
         -tags foo \
         -text Foo \
         -textanchor s \
-        -graphics {line 0 0 100 100}]
+        -graphics {line 0 0 100 100} ]
 update
 foreach {opt val} {\
         -relief sunken \
@@ -136,8 +127,7 @@ foreach r {flat raised sunken} \
 		[.s component $f surface itemcget -fill] \
 		[.s component $f shaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -154,8 +144,7 @@ foreach r {ridge groove} \
 		[.s component $f notlit itemcget -fill] \
 		[.s component $f notshaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -166,8 +155,7 @@ foreach b {0 1 2} \
 	.s itemconfigure $f -borderwidth $b
 	.s component $f surface coords
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -177,8 +165,7 @@ foreach c {red blue yellow} {
 	.s itemconfigure $f -color $c
 	.s component $f surface itemcget -fill
     } ${c}3
-    update idletasks
-    after $SHORTTIME
+    _update
 }
 
 incr i
@@ -189,8 +176,7 @@ foreach a {n s e w nw sw ne se c} p {n s e w nw sw ne se center} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 _frame -text Bar
@@ -200,8 +186,7 @@ foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 #######################################################################
@@ -217,7 +202,7 @@ set i 0
 # Test that internal graphics are being rescaled properly
 _emptyframe -graphics {rectangle 25 25 75 75}
 test LabeledFrame-reshape-1 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects se
+    _interactslate reshape $f 1 1 40 -features se
     set result {}
     # Need to remove rounding errors here
     foreach c [.s coords [.s find withtag graphics.$f]] {
@@ -229,7 +214,7 @@ test LabeledFrame-reshape-1 {Reshape a corner} {
 # Test that text label is being moved correctly
 _frame -textanchor ne
 test LabeledFrame-reshape-2 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects e
+    _interactslate reshape $f 1 1 40 -features e
     .s component $f label coords
 } {120.0 40.0}
 

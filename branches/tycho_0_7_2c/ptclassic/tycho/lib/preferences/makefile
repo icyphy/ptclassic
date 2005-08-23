@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, lib/preferences directory.
 #
-# $Id$
+# @(#)makefile	1.5 04/08/97
 # Makefile Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,12 +45,15 @@ ITCL_SRCS =
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex doc test
+MISC_FILES =	tclIndex
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex
+REALCLEAN_STUFF =
 
-DIRS =		test
+DIRS =		
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = doc
 
 all install: tclIndex $(MISC_SRCS)
 

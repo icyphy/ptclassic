@@ -2,9 +2,9 @@
 #
 # @Author: Bilung Lee
 #
-# @Version: $Id$
+# @Version: @(#)testEditSTD.itcl	1.4 07/30/98
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,9 +36,9 @@
 # windows left at the end.  Currently, windows are left open for 4 seconds.
 # Run from within tycho (can just source this file and execute it).
 
-if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
-} {}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.visedit
 
 test EditSTD-1.1 {Open a std file and do a reload} {
     set view [::tycho::File::openContext sample.std]
@@ -46,7 +46,10 @@ test EditSTD-1.1 {Open a std file and do a reload} {
     
     update
     $view reload
+
     update
+    $view ioPorts
+
     after $duration removeobj $win
     list {}
 } {{}}

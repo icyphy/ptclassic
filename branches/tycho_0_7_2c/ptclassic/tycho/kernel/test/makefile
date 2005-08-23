@@ -1,10 +1,10 @@
 # Makefile for Ptolemy Tycho system, kernel/test directory.
 # Temporary until we get a "test" package
 #
-# $Id$
+# @(#)makefile	1.2 03/13/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -57,7 +57,7 @@ MISC_FILES =
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =
+OPTIONAL_FILES = doc	 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF = 

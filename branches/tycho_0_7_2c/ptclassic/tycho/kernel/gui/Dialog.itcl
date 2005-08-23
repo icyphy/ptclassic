@@ -2,9 +2,9 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)Dialog.itcl	1.24	01/17/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,16 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-#### FIXME - known bugs
-#
-# - This uses the buttonbox widget by Mark Ulferts.  This widget defers
-# mapping the buttons, and thus the size of the window is not known
-# until the window has been mapped.  This results in two artifacts:
-# the window is not properly centered on the screen by the centerOnScreen
-# method, and when using interactive placement, the initial window outline
-# is smaller than the window will finally end up being.  We need to
-# rewrite this buttonbox megawidget.
-
 ##########################################################################
 #### Dialog class.
 # This is a top-level dialog window to which buttons and other widgets
@@ -49,8 +39,8 @@
 # addButton method. For example,
 # <tcl><pre>
 # ::tycho::Dialog .m -text {A dialog}
-# .m addButton pushme -text {Push Me} -command &#92
-#      {::tycho::post thanks; delete object .m}
+# .m addButton pushme -text {Push Me} -underline 0 &#92
+#      -command {::tycho::post thanks; delete object .m}
 # .m centerOnScreen
 # </pre></tcl>
 # A childsite is provided for additional widgets below the label and
@@ -61,6 +51,11 @@
 # method. The reason for deferring the mapping is to avoid the visually
 # distracting effect of mapping a partial window and then filling it
 # in.
+# <p>
+# The Escape key is bound to dismiss the dialog.
+# If the -underline option is given to the <code>addButton</code> method,
+# then it specifies a character in the text label of the button to underline.
+# The character becomes a shortcut for invoking the button.
 # <p>
 # There are a couple of convenience procedures. The <code>new</code>
 # procedure will create and map a window onto the screen. The
@@ -90,6 +85,15 @@ class ::tycho::Dialog {
 
     # The message to display at the top of the widget.
     itk_option define -text text Text ""
+
+    # The font to use the message and labels
+    itk_option define -font font Font [::tycho::font helvetica]
+
+    # The font to use for buttons
+    itk_option define -buttonfont buttonFont Font [::tycho::font helvetica]
+
+    # The font to use for "message" displays
+    itk_option define -messagefont messageFont Font [::tycho::font helvetica]
 
     #####################################################################
     ####                        public methods                       ####
@@ -223,38 +227,48 @@ body ::tycho::Dialog::constructor {args} {
     pack $itk_component(top) -side top
     
     # Create a separator
+    # FIXME: If -borderwidth is 1.5, then under Itk3.0 and Windows the
+    # separator appears to be transparent
     itk_component add separator {
 	frame $itk_component(hull).separator \
 		-relief sunken \
 		-width 3 \
 		-height 3 \
-		-borderwidth 1.5
+		-borderwidth 1
     } {
 	keep -background
     }
     pack $itk_component(separator) -expand no -fill x \
 	    -after $itk_component(childsite)
     
-    # Create a button box.
-    # FIXME: We should replace this with a Tycho buttonbox, since the iwidgets
-    # button box uses a different policy for mapping to the screen.  The
-    # iwidgets policy makes it impossible to center a window on the screen
-    # because the size of the window will not actually be known until after
-    # the window is mapped.
+    # Create a button box, and pack it with a bit of space
+    # around it. Give the buttons some spacing too.
+    # Buttons are given a width of 14, although some subclasses
+    # may need to make this larger.
     itk_component add bbox {
-	buttonbox $itk_component(hull).bbox
+	::tycho::ButtonBox $itk_component(hull).bbox \
+		-spacingx 6 -spacingy 2 -buttonwidth 14
     } {
-	keep -background -cursor
+	keep -background -cursor -padx -pady
+	rename -font -buttonfont buttonFont Font
     }
-    pack $itk_component(bbox) -expand no \
+    pack $itk_component(bbox) -expand no -padx 2 -pady 4\
 	    -after $itk_component(separator)
     
     # FIXME: In itcl2.0-beta, the following silliness appears to be
     # necessary to enable commandResult to be an array.
-    set commandResult(junk) ""
+    #    set commandResult(junk) ""
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+  	    -padx        layout buttonPadX \
+  	    -pady        layout buttonPadY \
+  	    -font        fonts  labelFont \
+  	    -buttonfont  fonts  menuFont \
+  	    -messagefont fonts  messageFont
 
     # Most dialog windows don't want the user resizing. Those that
     # do should reverse this.
@@ -264,6 +278,9 @@ body ::tycho::Dialog::constructor {args} {
 	# then we never see the buttons
 	freezeWindowSize
     }
+    
+    # Bind Escape to dismiss the dialog.
+    bind $prefix <Escape> "$this prevWindow; delete object $this"
 }
 
 ######################################################################
@@ -272,13 +289,27 @@ body ::tycho::Dialog::constructor {args} {
 
 #########################################################################
 #### addButton
-# Add a button to the set of bottons at the bottom.
+# Add a button to the right of the existing buttons. 
 # The arguments are options understood by the Tk button command. The
-# most useful options are -command, which specified the command to
-# execute, -text, which specifies the label in the button, and -width,
-# which specifies the desired width of the button.  
+# most useful options are -command, which specifies the command to
+# execute, -text, which specifies the label in the button, -width,
+# which specifies the desired width of the button, and -underline,
+# which specifies which character in the text label to underline.
+# In addition, if -underline is given, the specified character is
+# bound to invoke the button.  In addition, the -row and -column options
+# can be used to specify the positioning of the button within a grid.
 body ::tycho::Dialog::addButton {args} {
     eval [concat $itk_component(bbox) add $args]
+    if [::tycho::getopt underline args] {
+        if [::tycho::getopt text args] {
+            set char [string index $text $underline]
+            if {$char != {}} {
+                # Assumes the tag of the button is the first arg.
+                bind $itk_component(hull) <Key-[string tolower $char]> \
+                        "$this invoke [lindex $args 0]; break"
+            }
+        }
+    }
 }
 
 #########################################################################
@@ -330,7 +361,7 @@ body ::tycho::Dialog::execCommand {option args} {
 		[uplevel #0 $itk_option($option) $args]} errcode] != 0} {
             # Schedule deletion of the object, since its state may be
             # corrupted.
-            after idle "delete object $this"
+            after idle "catch \{delete object $this\}"
             global ::errorInfo
             set saveInfo $errorInfo
 	    error "Failed to execute command:\n$errcode" \
@@ -367,6 +398,19 @@ body ::tycho::Dialog::invoke {args} {
 # if the window has menus.  If a second argument is given and has value 0,
 # then this auto-raise feature is disabled.
 #
+# This procedure has a special behavior of the global variable
+# TY_TESTING exists and is set. If the TY_TEST_MODAL global
+# variable exists and is not null, then it is taken to be
+# a list of scripts. This procedure evaluates the first
+# script in this list in the global context, with the name of
+# the dialog instance substituted for every occurrence of the string
+# "%0". It removes the script from the list so that the next modal
+# dialog will have the next dialog executed. This allows a series
+# of modal dialog invocation to be tested without user intervention.
+# The return result is the result of the dialog box.
+# In the case that TY_TEST_MODAL is not set, this procedure
+# returns the name of the dialog box.
+#
 body ::tycho::Dialog::wait {instance {autoraise 1}} {
     if ![$instance isa ::tycho::Dialog] {
         error "wait expects a Dialog but got: $instance"
@@ -376,22 +420,46 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
 
     set commandResult($instance) {}
     $instance centerOnScreen
-    # Do not continue in this thread until the window is dismissed.
     update idletasks
+
+    # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
         grab set $instance
-        # NOTE: Don't know why this has to be deferred.
-        # The catch is in case the object is gone already.
+        # NOTE: This seems to need to be both deferred and done now
+        # probably because window events might give the focus to some
+        # other window (e.g. if some window gets deleted).
         after 1 [list catch "$instance focusin"]
+        $instance focusin
         if $autoraise {
             # If the user mouses in another window, raise
             bind $instance <Button> "+raise $instance"
             # If the user moves the mouse in another window, raise
             bind $instance <Motion> "+raise $instance"
         }
-        
-        # We wait here for the window to be deleted.
-        tkwait window $instance
+        # If we are running the test suite
+        # then we don't use tkwait to wait for the dialog to
+        # close. If the TY_TEST_MODAL global variable is set,
+        # then execute the first script in that list with the
+        # dialog substitued for any occurrence of %0.
+        global TY_TESTING TY_TEST_MODAL
+	if { [::info exists TY_TESTING] && $TY_TESTING == 1 } {
+            if { [::info exists TY_TEST_MODAL] && $TY_TEST_MODAL != "" } {
+                set temp_script [lindex $TY_TEST_MODAL 0]
+                set TY_TEST_MODAL [lreplace $TY_TEST_MODAL 0 0]
+                if { $TY_TEST_MODAL == "" } {
+                    unset TY_TEST_MODAL
+                }
+                regsub -all %0 $temp_script $instance temp_script
+                after 1000
+                uplevel #0 $temp_script
+            } else {
+                return $instance
+            }
+        } else {
+	    # Normally, wait for the window to be deleted
+	    # and then return.
+	    tkwait window $instance
+	}
         
         # Because of the above grab, it is not safe to return before
         # the window actually disappears.  The grab may never be released
@@ -436,6 +504,8 @@ body ::tycho::Dialog::new {class instance args} {
         }
     }
     # NOTE: Not sure why this needs to be deferred.
-    after idle [list catch "$instance focusin"]
+    # after idle [list catch "$instance focusin"]
+    # The delay appears to be unnecessary now -- hjr, Dec 97
+    $instance focusin
     return $instance
 }

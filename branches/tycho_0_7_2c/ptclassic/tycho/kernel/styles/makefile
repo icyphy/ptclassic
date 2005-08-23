@@ -1,9 +1,9 @@
-# Makefile for Ptolemy Tycho system, kernel/test directory.
+# Makefile for Ptolemy Tycho system, kernel/styles directory.
 #
-# @(#)makefile	1.39 07/10/97
+# @(#)makefile	1.6 04/29/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,83 +33,37 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/test
+VPATH =		$(ROOT)/kernel/styles
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
-	testDefs.tcl
+TCL_SRCS = 
 
-SIMPLE_TESTS = \
-	testCacheManager.itcl \
-	testCircularList.itcl \
-	testClass.tcl \
-	testDigraph.itcl \
-	testForest.itcl \
-	testLoader.itcl \
-	testGraph.itcl \
-	testPath.itcl \
-	testMail.itcl \
-	testResource.itcl \
-	testResourceFTP.itcl \
-	testResourceHTTP.itcl \
-	testResourceRemote.itcl \
-	testStack.itcl \
-	testURLPath.itcl
+ITCL_SRCS =
 
-GRAPHICAL_TESTS = \
-	testExec.itcl \
-	testIndexBrowser.itcl \
-	testMenuSupport.itcl \
-	testMenuBar.itcl \
-	testMonitor.itcl \
-	testRevControl.itcl \
-	testToolBar.itcl \
-	testWidgets.itcl \
-	testFile.itcl
-
-	# Removed until test levels are implemented
-	# testBuilderDialog.itcl
-
-ITCL_SRCS =	\
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	alltychotests.tcl \
-	DirectedAcyclicGraph.itcl \
-	FileTester.itcl \
-	MenuSupportTester.itcl \
-	alltests.itcl all.itcl
-
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	chktycho dltest.html
+EXTRA_SRCS = \
+	console.style \
+	colors.style \
+	fonts.style \
+	interaction.style \
+	java.style \
+	layout.style \
+	stacktrace.style \
+	system.style \
+	text.style
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES = 		chktycho
+MISC_FILES =
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b RCS.itcl
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF = Path-5.1a Path-5.1b  RCS.itcl
-
-tests:: test_graphics
-
-# These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
-		$(ITCLSH)
-
-# These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
-
-FORCE:
-
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
+REALCLEAN_STUFF =
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

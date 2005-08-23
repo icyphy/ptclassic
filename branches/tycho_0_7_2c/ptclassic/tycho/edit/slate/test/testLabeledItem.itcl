@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)testLabeledItem.itcl	1.6 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the test package is loaded
+package require slate.test
 
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
-} {}
-
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 100
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single LabeledItem on the slate
@@ -84,8 +75,7 @@ foreach a {n s e w nw sw ne se c} p {n s e w nw sw ne se center} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 _item -text Bar
@@ -95,8 +85,7 @@ foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 #######################################################################
@@ -112,7 +101,7 @@ set i 0
 # Test that internal graphics are being rescaled properly
 _emptyitem -graphics {rectangle 25 25 75 75}
 test LabeledItem-reshape-1 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects se
+    _interactslate reshape $f 1 1 40 -features se
     set result {}
     # Need to remove rounding errors here
     foreach c [.s coords [.s find withtag graphics.$f]] {
@@ -124,7 +113,7 @@ test LabeledItem-reshape-1 {Reshape a corner} {
 # Test that text label is being moved correctly
 _item -textanchor ne
 test LabeledItem-reshape-2 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects e
+    _interactslate reshape $f 1 1 40 -features e
     .s component $f label coords
 } {120.0 40.0}
 

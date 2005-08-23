@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Tycho system, lib directory.
 #
-# $Id$
+# @(#)makefile	1.2 08/15/97
 # Author: Christopher Hylands, John Reekie
 #
 # Copyright (c) 1996-1997 The Regents of the University of California.
@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = generic demos doc tests
+DIRS = generic demos doc
 
 # Root of Tycho directory
 ROOT =		../..

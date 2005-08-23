@@ -1,9 +1,10 @@
 # Makefile for Ptolemy Tycho system, kernel directory.
 #
-# $Id$
-# Author: Christopher Hylands
+# @Author: Christopher Hylands
 #
-# Copyright (c) 1991-%Q% The Regents of the University of California.
+# @Version: @(#)makefile	1.178 04/29/98
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,64 +30,39 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
+# Root of Tycho directory
+ROOT =		..
 
-# Root of Ptolemy directory
-ROOT =		../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/tycho/kernel_itk
+VPATH =		$(ROOT)/kernel
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
-	Color.tcl \
-	Lib.tcl \
-	Options.tcl
-  
-ITCL_SRCS = \
-	Console.itcl \
-	DialogWindow.itcl \
-	Dismiss.itcl \
-	Edit.itcl \
-	EditText.itcl \
-	ErrorMessage.itcl \
-	File.itcl \
-	FileBrowser.itcl \
-	Font.itcl \
-	Message.itcl \
-	Preferences.itcl \
-	TopLevel.itcl \
-	YesNoCancel.itcl \
-	YesNoQuery.itcl
+# Sub directories to run make in.
+DIRS = test styles html basic gui model
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+TCL_SRCS = 
 
-MISC_FILES =		Ptolemy.xbm tclIndex
+ITCL_SRCS =
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pkgIndex.tcl Tycho.tcl
 
-all: tclIndex
+MISC_FILES =  $(DIRS) tclIndex img
 
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; itcl_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL_SH)
+# 'make realclean' should remove tclIndex
+REALCLEAN_STUFF =	tclIndex
 
-install: tclIndex
+# Title for the tydoc index page
+TYDOC_DESC =	Index of classes in tycho/kernel
 
-LIB=dummy		# required since no LIB
-# include common definitions, rules
-include $(ROOT)/mk/common.mk
+# Do make sources so that we ensure that the subdirectories are checked out
+all: sources $(MISC_SRCS) tclIndex
 
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+install: subinstall
 
+.PHONY: all install subinstall
+
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk

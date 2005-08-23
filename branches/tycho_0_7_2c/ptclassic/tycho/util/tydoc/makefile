@@ -1,10 +1,10 @@
-# Makefile for the Tycho tycho.util.tydoc package
+# Makefile for the Tycho tycho.edit.tydoc package
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.13 11/24/98
 #
-# @Copyright (c) 1995-1998 The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,29 +41,48 @@ VPATH =		$(ROOT)/util/tydoc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# The variables below are used to create distributions
+TYPACKAGE = 	tycho.util.tydoc
+TYPACKAGE_ROOTDIR = $(ROOT)/..
+TYPACKAGE_DIR = tycho/util/tydoc
+# If you change JVERSION, modify the version numbers in tydoc.tcl
+TYVERSION =	2.1
+TYDIST =	$(TYPACKAGE)$(TYVERSION)
+TYZIP =		$(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
+
 # Sub directories to run make in.
-DIRS =	
+DIRS =	 bin doc test #demo
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	TyDocMain.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	tydoc.tcl \
 	README.txt \
-	makefile \
-	pkgIndex.tcl
+	pkgIndex.tcl \
+	tydoc.style
 
-MISC_FILES = adm bin demos doc test
+MISC_FILES =  $(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	adm
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF =	tclIndex 
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+all: sources $(MISC_SRCS)
+
+install: all subinstall
+
+.PHONY: all install subinstall
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

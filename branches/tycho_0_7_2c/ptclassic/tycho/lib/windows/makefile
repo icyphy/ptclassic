@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, lib/windows directory.  Windows scripts
 #
-# Version: $Id$
+# Version: @(#)makefile	1.9 03/07/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -40,7 +40,9 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	tycho-windows
+	jtclsh.tcl \
+	tclblend.tcl \
+	tycho-windows.itk
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -51,6 +53,9 @@ REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/lib/windows
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = doc
 
 DIRS =
 

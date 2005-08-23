@@ -2,9 +2,9 @@
 #
 # @Authors: Kevin Chang
 #
-# @Version: $Id$ 
+# @Version: @(#)testResourceHTTP.itcl	1.5 07/21/98 
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,16 +30,74 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.html
 
-test Resource-1.1 {} {
+test http-error1 {Make sure that any HTTP write returns error.} {
+    # Test error generators in public procs in ResourceHTTP.
+    # Warning: These tests are very dependent on the syntax of error
+    # messages!
+    set site "http://a.b.c/"
+    set httpobj [::tycho::autoName httptest]
+    ::tycho::ResourceHTTP $httpobj
+    $httpobj connect $site
+    catch {$httpobj puts "Hello"} a1 ;#error
+    catch {$httpobj write "Hi"}   a2 ;#error
+    catch {$httpobj open w} b        ;#error
+    catch {$httpobj open r} c        ;#error
+    catch {$httpobj isopen} d        ;#okay
+    catch {delete object $httpobj}
+    list $a1 $a2 $b $c $d
+} {{HTTP files are not writable}\
+        {HTTP files are not writable}\
+        {File http://a.b.c/ is not writable}\
+        {Can't open a.b.c, 80}\
+        0}
 
-} {normal {}}
+test http-error2 {Make sure that public proc's error message are correct} {
+    set cmd "::tycho::ResourceHTTP"
+    catch {${cmd}::chmod a+rx http://noway} a
+    catch {${cmd}::delete http://ptolemy.eecs.berkeley.edu} b
+    catch {${cmd}::mkdir http://ptolemy.eecs.berkeley.edu/new} c
+    list $a $b $c
+} {{Cannot chmod HTTP files}\
+        {Cannot delete HTTP files}\
+        {Cannot mkdir HTTP files}}
 
 
+test http-contenttype1 {Check the contenttype of the ptolemy homepage} {
+    set site1 "http://ptolemy.eecs.BERKELEY.edu"
+    set site2 "$site1/image/ptolemySmall.gif"
+    set site3 "$site1/___notexists___"
+    set cmd "::tycho::ResourceHTTP::contenttype"
+    catch {$cmd $site1} a
+    catch {$cmd $site2} b
+    catch {$cmd $site3} c
+    list $a $b $c
+} {text/html\
+        image/gif\
+        {URL http://ptolemy.eecs.BERKELEY.edu/___notexists___ does not exist}}
 
+
+test http-dirlist {index.html shoudl contain the implied file names} {
+    # FIXME: This is not done yet. Need to elaborate this method.
+    # NOTE: This is also Ptolemy http server dependent
+    set site "http://PtoLeMy.eecs.berkeley.edu/icons/"
+    set cmd "::tycho::ResourceHTTP::dirlist"
+    $cmd $site
+} {back.xbm ball.xbm binary.xbm blank.xbm char/ ftp.xbm image.xbm index.xbm menu.xbm movie.xbm sound.xbm telnet.xbm text.xbm unknown.xbm}
+
+
+test http-exists {This should return 0 or 1} {
+    # Check whether a HTTP resource exists or not
+    set site1 "http://ptolemy.eecs.berkeley.edu"
+    set site2 "$site1/~eal"
+    set site3 "$site1/~kchang"
+    set site4 "$site1/~noperson"
+    set cmd "::tycho::ResourceHTTP::exists"
+    list [$cmd $site1] [$cmd $site2] [$cmd $site3] [$cmd $site4]
+} {1 1 1 0}
 
 
 

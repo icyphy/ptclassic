@@ -4,11 +4,11 @@ exec itclsh "$0" "$@"
 #
 # itcl2dag - Convert a set of itcl classes to a Tycho Directed Acyclic Graph
 # Authors: Christopher Hylands
-# Version: $Id$
+# Version: @(#)itcl2dag	1.4 03/29/98
 
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
-# See the file $TYCHO/copyright for copyright notice,
+# See the file $TYCHO/copyright.txt for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
 # Usage:
@@ -77,10 +77,16 @@ for {set n 0} {$n < $argc} {incr n} {
 }
 
 if {$argc == 0 || $argc == $switchCount} {
-    tychoStandardDAG
+    set retval [tychoStandardDAG]
 } else {
-    eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
-	[split [lrange $argv [expr $switchCount + 1] end]]
-}
+    if {$argc < 2 } {
+	error "Usage: itcl2dag \[-t title\] dagoutput itclinput"
+    }
+    set retval [eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
+	[split [lrange $argv [expr $switchCount + 1] end]]]
 
+}
+if {$retval != {}} {
+    puts stderr $retval
+}
 		

@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)testLine.itcl	1.6 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
-
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
-} {}
-
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 50
-}
-#set VERBOSE 1
+# Make sure that the test package is loaded
+package require slate.test
 
 
 #######################################################################
@@ -55,7 +45,7 @@ proc _line {} {
 }
 
 #######################################################################
-#### _aspect
+#### _feature
 
 #######################################################################
 #### _grapple
@@ -71,46 +61,44 @@ proc _line {} {
 # These methods are tested as a set.
 #
 set delta 40
-_line
-set coords {}
+set i 0
+
 foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
-    lappend coords \
-	    [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
+    incr i
+    _line
+    test Line-_reshapeclick.$i \
+            "Reshape a simple item, no ghosting, $i" {
+        _interact ::tycho::Line::_reshape $l 1 1 $delta -features $a
+    } [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
 }
-test Line-_reshapeclick.1 {Reshape a simple item, no ghosting} {
-    set result {}
-    foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
-	.s coords $l 50 50 150 50 150 150 50 150
-	lappend result \
-		[_interact ::tycho::Line::_reshape $l 1 1 $delta $a]
-    }
-    set result
-} $coords
 
-test Line-_reshapeclick.2 {Reshape a simple item by tag, with ghosting} {
-    set result {}
-    foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
-	.s coords $l 50 50 150 50 150 150 50 150
-	lappend result \
-		[_interact ::tycho::Line::_reshape foo 1 1 $delta $a -ghost 1]
-    }
-    set result
-} $coords
+foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
+    incr i
+    _line
+    test Line-_reshapeclick.$i \
+            "Reshape a simple item by tag, with ghosting, $i" {
+        _interact ::tycho::Line::_reshape foo 1 1 $delta \
+                -features $a -ghost 1
+    } [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
+}
 
+incr i
 _line
-test Line-_reshapeclick.4 {Reshape multiple aspects, no ghosting} {
-    _interact ::tycho::Line::_reshape $l 1 1 $delta vertex-0 vertex-2
+test Line-_reshapeclick.$i {Reshape multiple features, no ghosting} {
+    _interact ::tycho::Line::_reshape $l 1 1 $delta \
+            -features {vertex-0 vertex-2}
 } [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-0 vertex-2]
 
+incr i
 _line
-test Line-_reshapeclick.5 {Reshape multiple aspects, with ghosting} {
-    _line
-    _interact ::tycho::Line::_reshape $l 1 1 $delta vertex-1 end -ghost 1
+test Line-_reshapeclick.$i {Reshape multiple features, with ghosting} {
+    _interact ::tycho::Line::_reshape $l 1 1 $delta \
+            -features {vertex-1 end} -ghost 1
 } [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-1 end]
 
 
 ##########################################################################
-#### aspect
+#### feature
 
 #######################################################################
 #### center

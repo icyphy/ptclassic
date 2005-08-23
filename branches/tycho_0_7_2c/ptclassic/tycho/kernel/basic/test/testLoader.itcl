@@ -2,9 +2,9 @@
 #
 # @Authors: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testLoader.itcl	1.13 03/23/98
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,47 +30,34 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# @(#)testGraph.itcl	1.4  13 Oct 1996
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
 
-if {[string compare test [info procs test]] == 1} then { 
-    source testDefs.tcl
-} {}
-
-# If necessary load up the definition
-if {[namespace tycho {info proc loadIfNotPresent}] == {} } {
-    namespace tycho
-    source ../Loader.tcl
-}
+# For some bizarre reason, the tests require the GUI package:
+package require tycho.kernel.gui
 
 test Loader-1.1 {load up the profile command} {
     if ![info exists env(PTARCH)] {
 	error "env(PTARCH) does not exist, perhaps the PTARCH environment\
 		variable is not set?"
     }
-    set profiledir [file join $TYCHO lib profile]
-    set profileobjdir [file join $profiledir  obj.$env(PTARCH)]
+    set profileobjdir [file join $TYCHO obj.$env(PTARCH) profile]
     set profileobj [file join $profileobjdir \
 	    tclXprofile[info sharedlibextension]]
+    file delete -force $profileobjdir
     if ![file exists $profileobj] {
-	exec cd $profiledir; make all
-
-	#	set endtime [expr [clock seconds] +20]
-	#	while {[clock seconds] < $endtime} {
-	#	    puts -nonewline .
-	#	}
-
-	#    ::tycho::Exec .x -command {make all} -dir $profiledir
-	#   .x centerOnScreen
-	#    .x invoke ok
+	puts "About to run make tclexts"
+	set makeWindow [::tycho::execModal {make tclexts} $TYCHO]
+        # New Monitor cannot be just destroyed, since it also contains view.
+        #destroy [lindex $makeWindow 1]
+	update
+        set makeWindow [lindex $makeWindow 1]
+        $makeWindow getStatusWait
+        # Force to autodestroy no matter exit status is normal or not.
+        $makeWindow autoDestroy 2
     }
     ::tycho::loadIfNotPresent profile tclx [list \
 	    [list tclXprofile $profileobjdir]]
 } {}
 
-#test Loader-1.2 {load up the profile command} {
-#    puts "$profileobjdir"
-#    rename ::tycho::profile ::tycho::profile-loader-1.2
-#    ::tycho::loadIfNotPresent profile tclx	    
-#} {}
-
-doneTests

@@ -1,9 +1,9 @@
 # This directory contains templates for the various texteditors.
 #
-# $Id$
+# @(#)makefile	1.8 04/26/97
 # Makefile Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,17 +30,22 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../../..
+ROOT =		../../..
 # True source directory
-VPATH =		$(ROOT)/editors/textedit/doc/template
+VPATH =		$(ROOT)/editors/textedit/template
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS = \
+	Cmakefile.mk \
+	CppTemplate.cc \
+	CppTemplate.h \
 	HTMLTemplate.html \
-	ItclTemplate.html
+	ItclTemplate.itcl \
+	JavaTemplate.java \
+	testTemplate.itcl
 
 MISC_FILES =
 

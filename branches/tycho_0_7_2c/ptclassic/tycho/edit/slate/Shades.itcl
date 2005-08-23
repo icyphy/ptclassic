@@ -1,15 +1,17 @@
 ##########################################################################
-# Version: $Id$
-# Author: H. John Reekie
+# A class for managing ``shades'' of colors. <i>Experimental</i>.
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Version: @(#)Shades.itcl	1.12 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
 # 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,7 +25,9 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-#                                                         COPYRIGHTENDKEY
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 ##########################################################################
 
 
@@ -44,7 +48,10 @@
 # selection of colors (i.e. fewer but better colors) in a manner
 # that is independent of the X color names.
 #
+# FIXME: This class needs to be merged with Color.itcl,
+#
 class ::tycho::Shades {
+    inherit ::tycho::Object
 
     ###################################################################
     ## Public methods and procedures.
@@ -64,7 +71,7 @@ class ::tycho::Shades {
 	if { [info exists colorobjects($color) ] } {
 	    return $colorobjects($color)
 
-	} elseif { ! [lmember $colornames $color] } {
+	} elseif { ! [::tycho::lmember $colornames $color] } {
 	    #
 	    # The requested color is not valid, so return the
 	    # default color object. The default color is currently
@@ -76,7 +83,7 @@ class ::tycho::Shades {
 		# Find the default color and make sure it's valid
 		#
 		set defaultcolor "background"  ;# read from options db?
-		if { ! [lmember $colornames $defaultcolor] } {
+		if { ! [::tycho::lmember $colornames $defaultcolor] } {
 		    set defaultcolor [lhead $colornames]
 		}
 
@@ -84,7 +91,9 @@ class ::tycho::Shades {
 		# Create the default color object if necessary
 		#
 		if { ! [info exists colorobjects($defaultcolor)] } {
-		    set defaultcolorobject [info context]::[Shades #auto]
+		    set defaultcolorobject \
+			    [namespace current]::[::tycho::Shades \
+			    [::tycho::autoName shades]]
 		    $defaultcolorobject color $defaultcolor
 		    set colorobjects($defaultcolor) $defaultcolorobject
 		}
@@ -95,7 +104,8 @@ class ::tycho::Shades {
 	    #
 	    # Otherwise, create the color object, record it, and return it
 	    #
-	    set object [info context]::[Shades #auto]
+	    set object [namespace current]::[::tycho::Shades \
+		    [::tycho::autoName shades]]
 	    $object color $color
 	    set colorobjects($color) $object
 	}
@@ -194,10 +204,10 @@ class ::tycho::Shades {
 	    }
 
 	    default {
-		set light [butt $color 1]
-		set gloss [butt $color 2]
-		set matt  [butt $color 3]
-		set dark  [butt $color 4]
+		set light ${color}1
+		set gloss ${color}2
+		set matt  ${color}3
+		set dark  ${color}4
 	    }
 	}
     }

@@ -1,8 +1,8 @@
-# Makefile for the Tycho tycho.typt.editors package, demos/ directory
+# Makefile for the Tycho tycho.typt.edit package, demos/ directory
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.2 05/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors/demos
+VPATH =		$(ROOT)/typt/edit/demos
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk

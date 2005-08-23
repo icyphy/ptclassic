@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.10 07/21/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -44,24 +44,45 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+# These are tests that don't work in Itcl 3.0
+TCL_SRCS = \
+	testResourceFTP.itcl
 
-ITCL_SRCS = 
+SIMPLE_TESTS = \
+	testCacheManager.itcl \
+	testMail.itcl
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+# These tests are "graphical" only because ResourceRemote uses
+# tkwait{}. Too bad....
+GRAPHICAL_TESTS = \
+	testHTML.itcl \
+	testResourceHTTP.itcl \
+	testResourceRemote.itcl
+
+ITCL_SRCS = $(SIMPLE_TESTS) $(GRAPHICAL_TESTS) all.itcl alltests.itcl
+
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	dltest.html
 
 MISC_FILES = 
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-# Title for the tydoc index page
-TYDOC_DESC =
+tests:: test_simple test_graphics
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tytest $(GRAPHICAL_TESTS)
+
+FORCE:
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-

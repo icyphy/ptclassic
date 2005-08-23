@@ -1,9 +1,9 @@
 /* 
-   Test functions for Tycho packages.
+   Example Tycho "task" written in C.
 
 Authors: John Reekie.
 
-Version: $Id$
+Version: @(#)tyTimerTest.c	1.3 01/20/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
@@ -37,7 +37,7 @@ static volatile int
 taskcounter = 0;
 
 static char
-*tclcountername;
+tclcountername[40];
 
 /*
  * Tytest_TimerTask
@@ -64,7 +64,7 @@ Tytest_TestTask(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   if ( ! strcmp(argv[1], "setup") ) {
     /* Start the counter task. */
     taskcounter = 0;
-    tclcountername = argv[2];
+    strcpy(tclcountername,argv[2]);
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "execute") ) {
@@ -79,8 +79,11 @@ Tytest_TestTask(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
     }
 
     /* Update the Tcl variable and exit */
-    sprintf(buffer,"%d",taskcounter);
-    Tcl_SetVar(interp,tclcountername,buffer,0);
+    sprintf(buffer,"%d", taskcounter);
+    Tcl_SetVar(interp, tclcountername, buffer, 0);
+
+    /* Return "1" so we know that the task didn't terminate */
+    interp->result = "1";
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "wrapup") ) {

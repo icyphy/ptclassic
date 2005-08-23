@@ -2,9 +2,9 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)ColorBrowser.itcl	1.18	01/27/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,9 +34,12 @@
 #### querycolor
 # Query the user for a color and return it.  This procedure brings up
 # a simple color browser, and returns only when that browser is dismissed.
-# The returned string is the name of a color.  This name should be passed
-# to <code>ptkColor</code> before being used, to convert it to a standard
-# color format recognized by all installations.  If an argument is given,
+# The returned string is the name of a color.  If the user cancels the
+# dialog, the given default (or null if not given) is returned.
+# This name should be passed
+# to <code>::tycho::color</code> before being used, to convert it to a standard
+# color format recognized by all installations.  One argument is required:
+# a string that labels the query.  If a second argument is given,
 # it is the default color in the entry box.
 # <p>
 # This procedure indirectly calls <code>update</code>, a Tk utility
@@ -52,13 +55,18 @@
 # Tcl procedure that is not itself called from within an Itcl object,
 # then there is no cause for worry.
 #
-proc ::tycho::querycolor {{default {}}} {
+proc ::tycho::querycolor {string {default {}}} {
     set name [autoName .color]
-    uplevel #0 ::tycho::ColorBrowser $name
+    uplevel #0 [list ::tycho::ColorBrowser $name -text $string]
     if {$default != {}} {
         $name configure -default $default
     }
-    return [::tycho::Dialog::wait $name]
+    set color [::tycho::Dialog::wait $name]
+    if { $color == "" } {
+	return $default
+    } else {
+	return $color
+    }
 }
 
 ##########################################################################
@@ -67,8 +75,8 @@ proc ::tycho::querycolor {{default {}}} {
 # are displayed in a list box.  Clicking on any color (or using the standard
 # mechanism in Tycho list browsers to scroll through pattern matches) causes
 # the selected color to be displayed.  For example, to scroll through all
-# the greens, enter "*green*" in the entry box and repeatedly hit <Tab>.
-# Typing <Return> dismisses the window. Note that the display may not be
+# the greens, enter "*green*" in the entry box and repeatedly hit &lt;Tab&gt;.
+# Typing &lt;Return&gt; dismisses the window. Note that the display may not be
 # perfect, since it relies on Tk's colormap handling.  If you run out of
 # colors in your colormap, Tk selects the nearest color in the colormap.
 #
@@ -87,11 +95,11 @@ class ::tycho::ColorBrowser {
     ##################################################################
     ####                   protected methods                      ####
 
-    # Set the contents of the index.
-    protected method setContents {}
-
     # Set the contents of the entry box and display the color.
     protected method setEntry {string}
+
+    # Update the listbox with colors.
+    protected method updateListbox {}
 
     ##################################################################
     ####                   protected variables                    ####
@@ -108,33 +116,51 @@ class ::tycho::ColorBrowser {
 body ::tycho::ColorBrowser::constructor {args} {
     # Frame for displaying colors
     itk_component add color {
-	frame $itk_component(hull).color -height 1c -relief raised \
-                -borderwidth 5
+	frame $itk_component(hull).color \
+                -borderwidth 1 -relief sunken
     } {
 	keep -cursor
     }
     pack $itk_component(color) -side top -anchor nw\
-	    -expand yes -fill x -after $itk_component(radiosite)
+	    -expand yes -fill x -after $itk_component(querysite) \
+            -padx 8 -pady 8
+
+    # The text samples
+    itk_component add blacktext {
+        label $itk_component(color).blacktext \
+                -text "Black text" \
+                -foreground black \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor e
+    } {
+        keep -cursor
+    }
+    itk_component add whitetext {
+        label $itk_component(color).whitetext \
+                -text "White text" \
+                -foreground white \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor w
+    } {
+        keep -cursor
+    }
+    pack $itk_component(blacktext) \
+            -side top -expand yes -fill x -padx 12
+    pack $itk_component(whitetext) \
+            -side top -expand yes -fill x -padx 12
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
-    # Subscribe to the same preference set as an index browser
-    preference subscribe indexbrowser $this \
-	    -width width \
-	    -height height
+    # Subscribe to the same style parameters as an index browser
+    stylesheet subscribe \
+	    -width  layout browsers.indexBrowserWidth \
+	    -height layout browsers.indexBrowserHeight
 
-    setContents
+    # Load the colors
+    updateListbox
 }
 
-###################################################################
-#### destructor
-# Unsubscribe from all preferences
-#
-body ::tycho::ColorBrowser::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe indexbrowser $this
-}
 
     ##################################################################
     ##################################################################
@@ -147,7 +173,8 @@ body ::tycho::ColorBrowser::destructor {} {
 body ::tycho::ColorBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides ColorBrowserHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides \
+	    ColorBrowserHelp.html] html
 }
 
     ##################################################################
@@ -155,22 +182,28 @@ body ::tycho::ColorBrowser::help {} {
     ####                   protected methods                      ####
 
 ######################################################################
-#### setContents
-# Construct the list box contents from the ptkColorList array.
+#### updateListbox
+# Construct the list box contents from the color manager.
 #
-body ::tycho::ColorBrowser::setContents {} {
-    global ::ptkColorList
-    set colors [lsort [array names ptkColorList]]
-    configure -items $colors
+body ::tycho::ColorBrowser::updateListbox {} {
+    set colors [lsort [::tycho::ColorManager::colorList]]
+    clearListbox
+    appendItems $colors
 }
 
 ######################################################################
 #### setEntry
 # This method clears the current contents of the entry box and replaces
 # them with the string passed as an argument.  In addition, it displays
-# the color named in the entry box.
+# the color named in the entry box. If an empty string is passed, the
+# displayed color is unchanged.
 #
 body ::tycho::ColorBrowser::setEntry {string} {
-    ::tycho::ListBrowser::setEntry $string
-    $itk_component(color) configure -background [::ptkColor $string]
+    chain $string
+    if {$string != {}} {
+        set color [::tycho::color $string]
+        $itk_component(color) configure -background $color
+        $itk_component(blacktext) configure -background $color
+        $itk_component(whitetext) configure -background $color
+    }
 }

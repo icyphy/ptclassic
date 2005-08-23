@@ -1,9 +1,10 @@
-# Spell checker associated with an EditText widget.
+# Spell checker associated with an Edit widget.
 #
-# $Id$
-# Authors: Edward A. Lee
+# @Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: @(#)EditSpell.itcl	1.37	06/29/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,76 +30,62 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Default width (in characters) of the entry boxes.
-option add *EditSpell.entryWidth 30 widgetDefault
-
-# Color of the entry box background
-option add *EditSpell.entryBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-
-option add *EditSpell.entryfont [.tychoFonts defaultFont fixed]
 
 ##########################################################################
 #### EditSpell class.
-# Create a dialog box for checking the spelling in an EditText widget.
-# This dialog box should be child window of the EditText widget or its
-# top-level window so that it is removed when the parent is removed.
-# Note that this is a UNIX-specific spell checker.
+# This class provides a dialog box for checking the spelling in a
+# text editor.  Depending on the text editor, a subset of the text might
+# be checked.  For example, for programming language editors, comments are
+# typically spell checked.
+# <p>
+# This dialog box should be child window of the
+# Edit widget or its top-level window so that it is removed when
+# the parent is removed. To do this, just give it a name that is the
+# name of the Edit window (or its top-level parent) with an
+# additional field appended after a period. For example, if the name of
+# the top-level object is ".file0", the search object could be
+# ".file0.search". Note that this is a UNIX-specific spell checker.
 #
 class ::tycho::EditSpell {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
     constructor {args} {}
 
     #################################################################
     ####                        options                          ####
 
-    #### -edittext option
-    # The associated EditText object.
-    itk_option define -edittext edittext EditText {}
+    # Specify the associated Edit object.
+    itk_option define -edit edit Edit {}
 
-    #### -nochange option
-    # Check spelling, but do not allow changes.
+    # Specify whether changes are allowed in the text being checked.
     itk_option define -nochange nochange NoChange 0
 
     ##################################################################
     ####                     public methods                       ####
 
-    #### clearFindMatch
     # Clear the spelling error marks on the associated text window.
-    method clearFindMatch
+    method clearSpellMatch {}
 
-    #### dictionary
     # Open the personal dictionary for editing.
     method dictionary {}
 
-    #### learn
     # Add to the personal dictionary the word currently in the misspell window.
     method learn {}
 
-    #### next
     # Find the next misspelling and query the user for a replacement.
     method next {}
 
-    #### recheck
     # Check the spelling from the beginning.
     method recheck {}
 
-    #### replace
-    # Replace the selection with the contents of the entry query.
+    # Replace the selection with a spelling correction.
     method replace {}
 
     ###################################################################
-    ####                      protected variables                  ####
-
-    # Keep common configuration information
-    protected common dictsw 0
+    ####                      private variables                    ####
 
     # Where we are in the search.
-    protected variable upto {}
-
-    # For unique temporary file names
-    protected common count 0
+    private variable upto {}
 
     ###################################################################
     ####                      private methods                      ####
@@ -111,15 +98,15 @@ class ::tycho::EditSpell {
 }
 
 #####################################################################
-#### -edittext option
-# Set the associated EditText widget.
+#### -edit option
+# Set the associated Edit widget.
 # 
-configbody ::tycho::EditSpell::edittext {
-    if {$itk_option(-edittext) == {} || \
-	    [::info objects $itk_option(-edittext)] == {} || \
-	    ![$itk_option(-edittext) isa ::tycho::EditText]} {
-	error "EditSpell::find: Invalid -edittext option: \
-		$itk_option(-edittext)"
+configbody ::tycho::EditSpell::edit {
+    if {$itk_option(-edit) == {} || \
+	    [infoObjects $itk_option(-edit)] == {} || \
+	    ![$itk_option(-edit) isa ::tycho::Edit]} {
+	error "EditSpell::find: Invalid -edit option: \
+		$itk_option(-edit)"
     }
 }
 
@@ -127,59 +114,69 @@ configbody ::tycho::EditSpell::edittext {
 #### constructor
 #
 body ::tycho::EditSpell::constructor {args} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, EditSpell is not supported under the Macintosh,\nas it\
+		uses the Tcl exec command to start a \"spell\" process."
+    }
 
     configure -queries {
-	{word {Mispelling:} {}}
+	{line word {Mispelling:} {}}
     }
 
     eval itk_initialize $args
 
     $itk_component(bbox) buttonconfigure ok \
-	    -text {Next <Ret>} \
-	    -command [code "$this next"]
+	    -text {Next} \
+            -underline 0 \
+	    -command "$this next"
+    # NOTE: There is not facility in the base classes to remove the
+    # previous binding (to letter "o") to invoke this button and to
+    # add a new binding, so we do it by brute force.  Ugh.
+    bind $itk_component(hull) <Key-o> {}
+    bind $itk_component(hull) <Key-n> "$this invoke ok; break"
 
     addButton clear -text {Clear Marks} \
-	    -command [code "$this clearFindMatch"]
+            -underline 6 \
+	    -command "$this clearSpellMatch"
 
     addButton recheck -text {Recheck} \
-	    -command [code "$this recheck"]
+            -underline 0 \
+	    -command "$this recheck"
 
     if {$itk_option(-nochange) == 0} {
-	addButton replace -text {Repl <M-Ret>} \
-		-command [code "$this replace"]
-	bind $itk_component(hull) <Meta-Return> [code "$this replace; break"]
+	addButton replace -text {Change} \
+                -underline 1 \
+		-command "$this replace"
     }
 
-    #
     # Create a button box for dictionary buttons
-    #
     itk_component add dbox {
-	button $itk_interior.dbox -text {Dictionary}\
-		-command [code "$this dictionary"] -pady 0 -width 14
+ 	::tycho::ButtonBox $itk_component(childsite).dbox
     } {
-	keep -background -cursor
+ 	keep -background -font -padx -pady
     }
-    pack $itk_component(dbox) -side right -before $itk_component(word)
-
-    itk_component add lbox {
-	button $itk_interior.lbox -text {Learn} \
-		-command [code "$this learn"] -pady 0 -width 14
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(lbox) -side right -before $itk_component(word)
+    $itk_component(dbox) add dictionary -text {Dictionary} \
+            -underline 0 \
+            -command "$this dictionary"
+    bind $itk_component(hull) <Key-d> "$this dictionary"
+    $itk_component(dbox) add learn -text {Learn} \
+            -underline 0 \
+	    -command "$this learn"
+    bind $itk_component(hull) <Key-l> "$this learn"
+    pack $itk_component(dbox) -side right -before $itk_component(querysite)
 }
 
 ##################################################################
 ####                     public methods                       ####
 
 #####################################################################
-#### clearFindMatch
+#### clearSpellMatch
 # Clear the highlighting in the text window due to the spell check.
 # 
-body ::tycho::EditSpell::clearFindMatch {} {
-    set tw $itk_option(-edittext)
-    $tw clearFindMatch
+body ::tycho::EditSpell::clearSpellMatch {} {
+    set tw $itk_option(-edit)
+    [$tw textWinName] tag remove spellmatch 1.0 end
 }
 
 #####################################################################
@@ -188,7 +185,7 @@ body ::tycho::EditSpell::clearFindMatch {} {
 # to the user.
 # 
 body ::tycho::EditSpell::dictionary {} {
-    ::tycho::File::openContext "~/.tychodictionary.lst"
+    ::tycho::File::openContext [file join [::tycho::tychoDir] tychodict.lst]
     ::tycho::post {You must save your changes and \
 	    recheck for them to take effect}
 }
@@ -196,7 +193,8 @@ body ::tycho::EditSpell::dictionary {} {
 #####################################################################
 #### learn
 # Add to the personal dictionary the word currently in the misspell window.
-# The dictionary file is sorted is sorted while we are at it.
+# Then move to the next spelling error. The dictionary file is
+# sorted while we are at it.
 # 
 body ::tycho::EditSpell::learn {} {
     set changeto [get word]
@@ -207,6 +205,7 @@ body ::tycho::EditSpell::learn {} {
 	    writeDictionary $dict
 	}
     }
+    next
 }
 
 #####################################################################
@@ -219,12 +218,12 @@ body ::tycho::EditSpell::next {} {
     if {$upto == {}} {
 	recheck
     } {
-	set tw $itk_option(-edittext)
+	set tw $itk_option(-edit)
 	set tx [$tw textWinName]
-	set range [$tx tag nextrange findmatch $upto]
+	set range [$tx tag nextrange spellmatch $upto]
 	if {$range == {}} {
-	    if [::tycho::askuser "End of file.  Start at the top?"] {
-		set range [$tx tag nextrange findmatch 1.0]
+	    if [safeEval ::tycho::askuser "End of file.  Start at the top?"] {
+		set range [$tx tag nextrange spellmatch 1.0]
 		if {$range == {}} {
 		    # No more errors tagged.  Recheck
 		    recheck
@@ -244,49 +243,86 @@ body ::tycho::EditSpell::next {} {
 	insert word [$tw getSelection]
 	set upto $end
     }
+    # NOTE: Focus ends up in the text window.  Why?  Very annoying.
+    # The following regrettably returns the focus to the entry
+    # box always.  Also, why does it have to be postponed?  Not clear.
+    after idle "$this focusin"
 }
 
 #####################################################################
 #### recheck
+# Check the spelling from the beginning.
 # 
 body ::tycho::EditSpell::recheck {} {
-    set tw $itk_option(-edittext)
+    global tcl_platform
+    set tw $itk_option(-edit)
 
-    set filename "/tmp/tychoSpell[pid]x[incr count]"
-    $tw writeSpellText $filename
-    set errs [exec spell $filename]
+    set filename [::tycho::tmpFileName tychoSpell]
+    if {[$tw busy $tw writeSpellText $filename] != ""} {return}
+    if {$tcl_platform(platform) == "unix" \
+	    && $tcl_platform(os) != "CYGWIN32_NT"} {
+	set errs [exec spell $filename]
+    } else {
+	# Windows
+	if {[::tycho::pathSearch ispell.exe] == {} } {
+	    ::tycho::htmlmessage {Sorry, the <code>ispell</code> binary \
+		    cannot be found.  You can download this binary from \
+		    <a href="http://ptolemy.eecs.berkeley.edu/tycho/tychoTools/tychoTools.html"><code>http://ptolemy.eecs.berkeley.edu/tycho/tychoTools/tychoTools.html</code>. \
+		}
+	     return
+	}
+	set errs [exec ispell -u $filename]
+    }
     set dict [readDictionary]
     foreach exception $dict {
 	if {[set idx [lsearch -exact $errs $exception]] >= 0} {
 	    set errs [lreplace $errs $idx $idx]
 	}
     }
+    # remove single letter words
+    set idx 0
+    foreach error $errs {
+        if {[string length $error] == 1} {
+            set errs [lreplace $errs $idx $idx]
+        } {
+            incr idx
+        }
+    }
     if {$errs == {}} {
-	inform "Spelling OK."
+	safeEval ::tycho::inform "Spelling OK."
 	return
     }
-    exec rm $filename
+    file delete $filename
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
-    set result [$tw find -forwards -regexp -nocase -wholeword \
-	    -tags $tags $pattern 1.0]
+    # Search is case sensitive, regexp, and wholeword.
+    $tw findAll spellmatch 1 1 1 $pattern 1.0 end $tags
+    set text [$tw textWinName]
+    set result [$text tag nextrange spellmatch 1.0]
     if {$result == {}} {
+        # This should not happen.
 	error "Can't match reported spelling errors with text: $errs"
     } {
-	set upto [[$tw textWinName] index \
-		"[lindex $result 0] + [lindex $result 1] chars"]
-	clear word
-	insert word [$tw getSelection]
-	return 1
+	set upto [lindex $result 0]
+        # Set up reverse video for the found text. First lower the
+        # priority of the tag so selection is still visible as normal.
+        $text tag raise sel spellmatch
+        $text tag configure spellmatch \
+                -background [stylesheet get text spell.background]
+        $text tag configure spellmatch \
+                -foreground [stylesheet get text spell.foreground]
+        next
     }
 }
 
 #####################################################################
 #### replace
+# Replace the selection with a spelling correction.
+# Then move to the next spelling error.
 # 
 body ::tycho::EditSpell::replace {} {
-    set editWindow $itk_option(-edittext)
+    set editWindow $itk_option(-edit)
 
     set changeto [get word]
     if {[$editWindow getSelection] != {}} {
@@ -295,6 +331,7 @@ body ::tycho::EditSpell::replace {} {
     } {
 	error "No selection to change"
     }
+    next
 }
 
 #####################################################################
@@ -308,7 +345,7 @@ body ::tycho::EditSpell::replace {} {
 # file exists, but is not readable, issue a warning.
 # 
 body ::tycho::EditSpell::readDictionary {} {
-    set dictfile {~/.tychodictionary.lst}
+    set dictfile [file join [::tycho::tychoDir] tychodict.lst]
     if {[file exists $dictfile]} {
 	if {[file readable $dictfile]} {
 	    set fd [open $dictfile]
@@ -316,10 +353,10 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    warn "Personal dictionary file, ~/.tychodictionary.lst, \
-		    is not readable"
-	}
-    }
+            safeEval ::tycho::warn "Personal dictionary file, $dictfile,\
+                    is not readable"
+        }
+    } 
     return {}
 }
 
@@ -330,7 +367,7 @@ body ::tycho::EditSpell::readDictionary {} {
 # personal dictionary trigger an error.
 # 
 body ::tycho::EditSpell::writeDictionary {dict} {
-    set dictfile {~/.tychodictionary.lst}
+    set dictfile [file join [::tycho::tychoDir] tychodict.lst]
     set fd [open $dictfile w]
     set sorted [lsort $dict]
     foreach item $sorted {

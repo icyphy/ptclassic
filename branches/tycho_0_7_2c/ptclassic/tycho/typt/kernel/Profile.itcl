@@ -1,8 +1,8 @@
 # Procedure for posting a short description of a Ptolemy block.
-# $Id$
+# @(#)Profile.itcl	1.4	09/26/96
 # Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,8 +27,6 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-#### FIXME: This is temporarily just a direct copy of what was in pigi.
-
 ###################################################################
 # Global variables
 #
@@ -36,29 +34,22 @@
 # of the Ptolemy installation
 
 # used to collect profile information before displaying:
-set ptkProfileString ""
+if ![info exists ptkProfileString] {
+    set ptkProfileString ""
+}
 
 ###################################################################
-# Display the contents of the global string ptkDisplayProfile
+#### ptkDisplayProfile
+# Display the contents of the global string ptkDisplayProfile.
+# This is backward compatible with the profile command in pigi.
+# NOTE: This should be replaced with something that uses HTML
+# and has hyperlinks to the full documentation and the source code.
 #
 proc ptkDisplayProfile {} {
     global ptkProfileString
 
-    global unique
-    set w .profileWindow$unique
-    incr unique
-
-    ptkSafeDestroy $w
-    toplevel $w
-    wm title $w "Profile"
-    wm iconname $w "Profile"
-
-    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    message $w.msg -width 25c -text $ptkProfileString -justify left
-    pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
-
-    wm geometry $w +200+200
-    tkwait visibility $w
-    bind $w <Return> "ptkSafeDestroy $w"
-    bind $w <Button> "ptkSafeDestroy $w"
+    set nm [::tycho::autoName .m]
+    ::tycho::Message $nm -text $ptkProfileString
+    $nm centerOnScreen
 }
+

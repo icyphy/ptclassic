@@ -1,7 +1,7 @@
 static const char file_id[] = "CTestFile.c";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CTestFile.c	1.1 10/21/97
 
 Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.

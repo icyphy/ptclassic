@@ -1,9 +1,9 @@
 # Makefile for tycho directory that contains no target files
 #
 # Version identification:
-# $Id$
+# @(#)tydir.mk	1.11 06/24/98
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,12 +30,13 @@
 # Date of creation: 10/13/96
 # Author: Christopher Hylands
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean:
+all makefiles install clean sources depend realclean checkjunk sccsinfo \
+sccsclean itcldocs javadocs extraclean tests weblint idocs dists jsall \
+jsrestore:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
+		echo making $@ in $(ME)/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \

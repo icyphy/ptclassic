@@ -1,0 +1,5 @@
+rm update.tar update.tar.gz update.uu
+tar -cf update.tar generic/*.itk doc/*.n doc/*.html tests/*.test demos/*
+gzip update.tar
+uuencode update.tar.gz update.tar.gz > update.uu
+

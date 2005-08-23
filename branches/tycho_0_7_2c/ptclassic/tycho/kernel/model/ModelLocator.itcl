@@ -1,8 +1,8 @@
 #########################################################################
-# Version: $Id$
+# Version: @(#)ModelLocator.itcl	1.3 07/21/98
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -151,7 +151,7 @@ class ::tycho::ModelLocator {
 
     # Get access to the unique instance
     proc instance {} {
-        if { [info which ::tycho::modelLocator] == "" } {
+        if { [infoWhich ::tycho::modelLocator] == "" } {
             uplevel #0 ::tycho::ModelLocator ::tycho::modelLocator
         }
         return ::tycho::modelLocator
@@ -169,14 +169,14 @@ class ::tycho::ModelLocator {
 #
 body ::tycho::ModelLocator::constructor {args} {
     # Define the "reference" type
-    type define reference \
+    define reference \
             :leafonly 1 \
 	    -path "" \
 	    -proxy "" \
 	    -workdir ""
 
     # Define the "proxy" type
-    type define proxy \
+    define proxy \
             :leafonly 1 \
             -class "" \
             -extension "" \
@@ -267,7 +267,7 @@ body ::tycho::ModelLocator::load {proxy} {
 
     # Create the model
     set cls [attrget $proxy -class]
-    set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
+    set nm [::tycho::autoName [string tolower [namespaceTail $cls]]]
     set model [uplevel #0 $cls $nm]
  
     puts "Loading $cls $nm"

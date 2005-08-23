@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)parametric.tcl	1.2 03/03/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
@@ -33,7 +33,10 @@
 # Turn on debugging
 # controlPanel debug 1
 
-# Create the AudioIO control sub-panel and add to the main panel
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/parametric.html}
+
+## Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io
 controlPanel add controlPanel.io -side left
 

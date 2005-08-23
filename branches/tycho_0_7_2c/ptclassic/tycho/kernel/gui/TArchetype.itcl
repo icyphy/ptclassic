@@ -2,9 +2,9 @@
 # 
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)TArchetype.itcl	1.9  06/29/98
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -74,14 +74,14 @@
 # the cursor during time-consuming operations.
 #
 # <li>Widget construction. [incr Tk] has no means of saying
-# "do this when the constructor has completed." Themeth
+# "do this when the constructor has completed." The method
 # <b>whenConstructed</b> executes code when the widget has
 # completed construction, and the <b>whenMapped</b> method
 # executes code when a given component is mapped to the screen.
 #
 # <li>Style-sheets. Each Tycho package can define one or more
 # style-sheets that the user can edit to specify widget
-# apperances and user-interface options. The <b>stylesheet</b>
+# appearances and user-interface options. The <b>stylesheet</b>
 # method provides access to the stylesheet code.
 #
 # <li>Hyperlinking. Tycho has a uniform hyperlinking
@@ -120,7 +120,10 @@ class ::tycho::TArchetype {
     # Give the window or a subwindow the focus.
     method focusin {}
 
-     # Open a file and go to its internal point identified by name.
+    # Return the name of the hull as a Tk window name
+    method hull {}
+    
+    # Open a file and go to its internal point identified by name.
     method hyperJump {file {point {}}}
 
     # Remember explicitly-set options and then call the built-in
@@ -138,6 +141,12 @@ class ::tycho::TArchetype {
 
     # Return the type of widget to use for the hull
     protected method _hulltype {} {return "frame"}
+
+    # Test if destruction is disabled
+    protected method destructionDisabled {} {return $_disableDestruction}
+
+    # Evaluatea arguments and ensure that this widget will not be destroyed
+    protected method safeEval {args}
 
     # Register code to be evaluated when the widget has been constructed.
     protected method whenConstructed {command}
@@ -159,6 +168,9 @@ class ::tycho::TArchetype {
 
     ###################################################################
     ####                         private variables                 ####
+
+    # If non-zero, disable destruction.
+    private variable _disableDestruction 0
 
     # A flag saying whether this widget is already constructed
     private variable _isConstructed 0
@@ -195,12 +207,12 @@ body ::tycho::TArchetype::constructor {args} {
     #
     #  Create a hull with the same name as this object -- from itk::Widget
     # 
-    set itk_hull [info namespace tail $this]
+    set itk_hull [namespaceTail $this]
     set itk_interior $itk_hull
     set prefix $itk_hull
  
     itk_component add hull {
-        [_hulltype] $itk_hull -class [info namespace tail [info class]]
+        [_hulltype] $itk_hull -class [namespaceTail [info class]]
     } {
         keep -background -cursor
     }
@@ -308,7 +320,7 @@ body ::tycho::TArchetype::configure {args} {
 }
 
 #####################################################################
-#### currentPiint
+#### currentPoint
 # In derived classes, this method will return the current position
 # of the cursor in a form that will be understood by seeFragment{}.
 # In this base class, return an empty string.
@@ -324,6 +336,22 @@ body ::tycho::TArchetype::currentPoint {} {
 #
 body ::tycho::TArchetype::focusin {} {
     focus $itk_component(hull)
+}
+
+#########################################################################
+#### hull
+# Return the name of the hull component as a Tk window name. This
+# method should be used when a handle to a window may include the
+# global namespace qualifier (for example, <code>.mainConsole</code>,
+# but the Tk window name (<code>.mainConsole</code>) is needed
+# instead. Note that the <code>$this</code> variable includes
+# the global namespace qualifier, but commands such as winfo{}
+# require the Tk window name. This method is generally used as
+# shorthand for <code>info namespace tail $this</code> or
+# <code>component hull</code>.
+#
+body ::tycho::TArchetype::hull {} {
+    return $itk_hull
 }
 
 #####################################################################
@@ -366,7 +394,7 @@ body ::tycho::TArchetype::hyperJump {file {point {}}} {
 # user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
 #
-# Ths last action taken by this method is to see if this is the
+# The last action taken by this method is to see if this is the
 # most specific constructor, and, if it is, to execute any
 # pending code given to the whenConstructed{} method.
 #
@@ -387,7 +415,7 @@ body ::tycho::TArchetype::itk_initialize {args} {
 
     # If called from the most specific class, execute the
     # post-construction commands.
-    if { [uplevel info context] == [info class] } {
+    if { [uplevel infoContext] == [info class] } {
         foreach {scope cmd} $_whenConstructed {
             @scope $scope $cmd
         }
@@ -408,7 +436,7 @@ body ::tycho::TArchetype::seeFragment {point} {
 #####################################################################
 #### stylesheet
 # Access stylesheets of this widget. This method should be used
-# to set widget option preferences instead of direct access using the
+# to access widget option preferences instead of direct access using the
 # *::tycho::stylesheet* procedure, since it ensures that user-set
 # options are not overridden by style-sheets. The method has several
 # forms, depending on the value of the _mode_ argument:
@@ -419,7 +447,7 @@ body ::tycho::TArchetype::seeFragment {point} {
 # Get the value of the given _parameter_ of _stylesheet_,
 # where _parameter_ is parameter name with a style of the
 # style-sheet. The style user is the correct style for this
-# particular widget, based upon user's style prefeernces.
+# particular widget, based upon user's style preferences.
 # Color and font values are converted to raw X values
 # before returning.
 #
@@ -492,12 +520,43 @@ body ::tycho::TArchetype::stylesheet {mode args} {
 		eval ::tycho::stylesheet subscribe $this $sheet $opts
 	    }
 	}
+        default {
+            error "Invalid mode \"$mode\": must be one of \
+                    get, list, remove, or subscribe"
+        }
     }
 }
 
 #####################################################################
 #####################################################################
 ####                   protected methods                         ####
+
+
+#####################################################################
+#### safeEval
+# Prevent destruction of this object while evaluating the arguments.
+# Return the result of evaluating the arguments.
+# Destruction will be cancelled by invoking a silent error, and will
+# be scheduled for another attempt in the future.
+# <p>
+# This method is a workaround for a defect in Itcl. If "update",
+# "update idletasks", or "tkwait" is called directly or indirectly from
+# within an Itcl method, and during the update the Itcl object is
+# destroyed, then when update returns, you may get a catastrophic failure
+# of the application (a core dump).
+#
+body ::tycho::TArchetype::safeEval {args} {
+    set _disableDestruction 1
+    set retval {}
+    if [catch {set retval [eval $args]} msg] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        set _disableDestruction 0
+        error $saveInfo
+    }
+    set _disableDestruction 0
+    return $retval
+}
 
 ########################################################################
 #### whenConstructed
@@ -515,11 +574,10 @@ body ::tycho::TArchetype::stylesheet {mode args} {
 # be executed within an object's constructor.
 #
 body ::tycho::TArchetype::whenConstructed {command} {
-    set w [string trimleft $this :]
     if $_isConstructed {
         uplevel $command
     } else {
-        lappend _whenConstructed [uplevel info context] $command
+        lappend _whenConstructed [uplevel infoContext] $command
     }
 }
 
@@ -546,10 +604,10 @@ body ::tycho::TArchetype::whenMapped {component command} {
     if [winfo ismapped $w] {
         uplevel $command
     } else {
-        lappend _whenMapped($component) [uplevel info context] $command
+        lappend _whenMapped($component) [uplevel infoContext] $command
 
         # Make the binding to the component
-        bind $w <Map> "@scope [info context] $this _notifymapped $component"
+        bind $w <Map> "@scope [infoContext] $this _notifymapped $component"
     }
 }
 
@@ -581,7 +639,7 @@ body ::tycho::TArchetype::_notifymapped {component} {
         foreach {scope cmd} $local_copy {
             @scope $scope $cmd
         }
-        if { [::info which -command $w] != "" } {
+        if { [::infoWhichCommand $w] != "" } {
             bind $w <Map> {}
         }
     }

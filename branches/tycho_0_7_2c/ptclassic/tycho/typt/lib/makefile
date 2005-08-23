@@ -1,10 +1,10 @@
-# Makefile for Tycho/Ptolemy Editors directory
+# Makefile for Tycho/Ptolemy lib directory
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)makefile	1.3 9/10/96
+# @Version: @(#)makefile	1.8 04/07/97
 
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,28 +34,37 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors
+VPATH =		$(ROOT)/typt/lib
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS = \
-	Retarget.itcl
+ITCL_SRCS =
+
+TCL_SRCS = \
+	makeFacetForest.tcl \
+	ptlangTroffToHTML.tcl \
+	starindex.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex doc
+MISC_FILES =	PtolemyFacets.fst tclIndex doc
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex *.html
+REALCLEAN_STUFF =	tclIndex PtolemyFacets.fst *.html
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/editors
+TYDOC_DESC =	Index of classes in tycho/typt/lib
 
-DIRS =		test #doc
+DIRS =		#test doc
 
-all install: tclIndex $(MISC_SRCS)
+all install: tclIndex $(MISC_SRCS) PtolemyFacets.fst
+
+PtolemyFacets.fst: makeFacetForest.tcl
+	@echo "Updating $@, this may take a few minutes"
+	rm -f $@
+	echo 'source makeFacetForest.tcl; ptolemyStandardFacets' | $(ITCLSH)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

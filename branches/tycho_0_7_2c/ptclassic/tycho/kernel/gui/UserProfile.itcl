@@ -1,8 +1,8 @@
 #########################################################################
-# Version: $Id$
+# Version: @(#)UserProfile.itcl	1.15 07/21/98
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,124 +29,217 @@
 ##########################################################################
 
 
-##########################################################################
-#### StylePreferences
-#
-# The <i>StylePreferences</i> model contains the user-specified
-# preferences for access to style-sheets. When a widget subscribes
-# to a style-sheet, it is given access to just one style contained
-# within that style-sheet. This allows different widgets and
-# classes to have different style settings than other widgets
-# and styles. Because this information needs to be persistent,
-# this model is used to store it, and to provide methods to make
-# it easier for the user interface to select and manipulate
-# style selections. The model has two types:
+#####################################################################
+#### userprofile
+# Perform operations on the user profile. The user profile is a
+# persistent store of information specific to a particular user
+# of Tycho, and includes information such as widget style preferences,
+# the Tycho system directory, user name, and so on.
+# The procedure has several forms:
 #
 # <dl>
-#
-# <dt><b>map</b> <b>id</b>|<b>name</b> 
+# <dt><b>register</b> _filename_
 # <dd>
-# A mapping between names and item ids.
-# The <b>id</b> map maps from names into ids; the <b>name</b>
-# map maps from ids into names. Names are of four kinds,
-# which determines the purpose of the corresponding
-# preference item.
-# <ul>
-# <li>The string "global."
-# <li>A class name.
-# <li>A widget name.
-# <li>Any other string, which is taken to be a window title.
-# </ul>
+# Register a user profile. _filename_ is the name of the
+# file containing the profile. If it doesn't exists, then
+# it will be created with a blank profile. Currently, an
+# error will be raised if this is called more than once,
+# although later on we will allow a user profile to be changed.
 #
+# <dt><b>registerstyle</b> _stylesheet_ _style_ ?_class_?
+# <dd>
+# Register a style for a given stylesheet. If _class_ is not
+# provided, register a global preference. Otherwise, register
+# a preference for the given widget class. If a preference
+# already exists, overwrite it, else create a new one.
+#
+# <dt><b>getstyle</b> _stylesheet_ ?_widget_?
+# <dd>
+# Get a preferred style. If _widget_ is not provided, get
+# the preferred global style. Otherwise get the preferred
+# style for a widget. This will be the preferred style for its
+# class or for the first superclass with a registered style found
+# by traversing up the class hierarchy. If a global style has
+# been registered for _stylesheet_, that is the preferred global
+# style; otherwise, the preferred global style is "default."
+#
+# </dl>
+#
+ensemble ::tycho::userprofile {
+    # Register a user profile
+    option register {filename} {
+	set filename [::tycho::expandPath $filename]
+
+	# Create and configure the object
+        set profile [::tycho::UserProfile::instance]
+        $profile configure \
+		-modelname "user profile" \
+		-filename $filename
+
+	# Load it
+	if [::file exists $filename] {
+	    set fd [open $filename]
+	    $profile parse [read $fd]
+	    close $fd
+	}
+    }
+
+    # Register a style preference
+    option registerstyle {stylesheet style {class {}}} {
+	[::tycho::UserProfile::instance] \
+		registerstyle $stylesheet $style $class
+    }
+
+    # Get the preferred style of a widget
+    option getstyle {stylesheet {widget {}}} {
+	[::tycho::UserProfile::instance] \
+		getstyle $stylesheet $widget
+    }
+}
+
+##########################################################################
+#### UserProfile
+#
+# The <i>UserProfile</i> model contains persistent information about
+# the user, such as preferred widget styles, user id, and stuff
+# like that. The style settings are needed because, when a widget
+# subscribes to a style-sheet, it is given access to just one style
+# contained within that style-sheet. This allows different widgets and
+# classes to have different style settings than other widgets
+# and styles. These settings are considered to be part of the user
+# profile.
+#
+# This model has the following types:
+# <dl>
 # <dt><b>preference</b> _id_:
 # <dd>
-# Style preferences for. The attributes of the item are
+# A style preference. The attributes of the item are
 # the style preferences for each stylesheet. For example,
 # the item representing the class <b>::tycho::Edit</b> might
 # have attributes <b>-fonts small -colors default</b>.
-# 
+#
 # </dl>
 #
-class ::tycho::StylePreferences {
+class ::tycho::UserProfile {
     inherit ::tycho::DataModel
 
     constructor {args} {}
     destructor {}
 
     #################################################################
-    ####                     public methods                      ####
-
-    # Convert a name into an item id
-    method id {name}
-
-    # Convert an item id into a name
-    method name {id}
+    ####                    public variables                     ####
+    
+    # The filename to save myself to when destroyed
+    public variable filename
 
     #################################################################
-    ####                   private variables                     ####
+    ####                     public methods                      ####
 
-    # Counter for generating widget ids
-    private common _id 0
+    # Get the preferred style of a widget
+    method getstyle {stylesheet {widget {}}}
+
+    # Register a style preference
+    method registerstyle {stylesheet style {class {}}}
+
+    #################################################################
+    ####                     public procs                      ####
+
+    # Get the unique instance
+    proc instance {} {
+	if { [infoWhich ::tycho::userProfile] == "" } {
+	    uplevel #0 ::tycho::UserProfile ::tycho::userProfile
+	}
+        return ::tycho::userProfile
+    }
+
+    #################################################################
+    #### TEMPORARY
+
+    method _addmap {args} {}
+    method _addunmap {args} {}
+    method _describemap {args} {}
+    method _describeunmap {args} {}
 }
 
 
 ########################################################################
 #### constructor
 #
-body ::tycho::StyleSheet::constructor {args} {
-    # Define the "map" type
-    type define map :leafonly 1
-
+body ::tycho::UserProfile::constructor {args} {
     # Define the "preference" type
-    type define preference :leafonly
+    define preference :leafonly 1
+
+    # FIXME: Delete these some time later. They are needed
+    # so that loading existing profiles doesn't barf
+    define map :override 1
+    define unmap :override 1
 
     # Evaluate options
     eval configure $args
 }
 
+########################################################################
+#### destructor
+#
+body ::tycho::UserProfile::destructor {} {
+    # Save myself to the profile file.
+    # For some reason, the destructor is not called when you
+    # exit the program so the value of this code is dubious...
+    if ![catch {set fd [open $filename "w"]}] {
+		puts $fd [describe]
+		close $fd
+    }
+}
 
 #########################################################################
 #########################################################################
 ####                          public methods                         ####
 
 ########################################################################
-#### id
+#### getstyle
 #
-# Given an item id, return its name.
+# Get the preferred style for a given widget.
 #
-body ::tycho::StylePreferences::id {name} {
-    array set ids [assign map:id]
-    return $ids($name)
+body ::tycho::UserProfile::getstyle {stylesheet {widget {}}} {
+    if { $widget != "" } {
+        # See if the widget's class matches anything, going up the hierarchy
+        foreach class [$widget info heritage] {
+            set class [infoWhichCommand $class]
+            if [exists $class -$stylesheet] {
+                return [attrget $class -$stylesheet]
+            }
+        }
+    }
+    # See if there's a global preference    
+    if [exists global -$stylesheet] {
+		return [attrget global -$stylesheet]
+    }
+    # Nothing found
+    return "default"
 }
 
 ########################################################################
-#### name
+#### registerstyle
 #
-# Given an item name, return its id.
+# Register a style for a given stylesheet.
 #
-body ::tycho::StylePreferences::name {id} {
-    array set names [assign map:name]
-    return $names($id)
-}
-
-########################################################################
-#### getid
-#
-# Given an item name, return a new id.
-#
-body ::tycho::StylePreferences::get {name} {
-    if [exists preference:$name] {
-	error "name \"$name\" already exists in $modelname"
+body ::tycho::UserProfile::registerstyle {stylesheet style {class {}}} {
+    if { $class == {} } {
+        set name global
+    } else {
+        set name $class
     }
-    while ![exists preference:$_id] {
-	incr _id
+    # Create the item if it doesn't exist
+    if ![exists $name] {
+        add preference $name
     }
-    array set names [assign map:name]
-    array set ids [assign map:id]
-    
-    set names($_id) $name
-    set ids($name) $_id
+    # Add the preference
+    attrset $name -$stylesheet $style
 
-    assign map:name [array get names]
-    assign map:id [array get ids]
+    # Save the profile file. This appears to be necessary because
+    # the destructor is not called when we exit.
+    if ![catch {set fd [open $filename "w"]}] {
+		puts $fd [describe]
+		close $fd
+    }
 }

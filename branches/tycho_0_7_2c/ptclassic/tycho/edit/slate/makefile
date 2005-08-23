@@ -1,9 +1,10 @@
-# Makefile for Ptolemy Tycho system, slate directory.
+# Makefile for Tycho tycho.edit.slate package
 #
-# $Id$
-# Author: Christopher Hylands
+# @Author: Christopher Hylands
 #
-# Copyright (c)  The Regents of the University of California.
+# @Version: @(#)makefile	1.47 09/27/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,28 +30,76 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS =  kernel shapes pictures interactors combinators
+# Root of Tycho directory
+ROOT =		../..
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
+# True source directory
+VPATH =		$(ROOT)/edit/slate
 
-.PHONY:	TAGS
-TAGS:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ; \
-		) \
-	    fi ; \
-	done
-	-cat -s $(DOMAINS:%=%/TAGS) > $@
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
+include $(CONFIG)
 
+TYPACKAGE =     tycho.edit.slate
+TYPACKAGE_ROOTDIR = $(ROOT)/edit/
+TYPACKAGE_DIR = slate
+# If you change JVERSION, modify the version numbers in slate.tcl
+TYVERSION =     2.0
+TYDIST =        $(TYPACKAGE)$(TYVERSION)
+TYZIP =         $(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
 
+# Sub directories to run make in.
+DIRS =		bin test doc demo compat
+
+TCL_SRCS =
+  
+ITCL_SRCS = \
+	Animator.itcl \
+	Axis.itcl \
+	Bounder.itcl \
+	ComplexItem.itcl \
+	DragDropper.itcl \
+	Follower.itcl \
+	Frame.itcl \
+	Grapple.itcl \
+	IconItem.itcl \
+	IconFrame.itcl \
+	IconOval.itcl \
+	IconRect.itcl \
+	Interactor.itcl \
+	IncrCanvas.itcl \
+	LabeledFrame.itcl \
+	LabeledItem.itcl \
+	LabeledLine.itcl \
+	LabeledOval.itcl \
+	LabeledRect.itcl \
+	Line.itcl \
+	TextItemEdit.itcl \
+	Oval.itcl \
+	Point.itcl \
+	Polygon.itcl \
+	Rectangle.itcl \
+	Reshaper.itcl \
+	Repeater.itcl \
+	Selector.itcl \
+	Shades.itcl \
+	Shape.itcl \
+	Slate.itcl \
+	Slider.itcl \
+	SmartLine.itcl \
+	Solid.itcl \
+	Stepper.itcl \
+	Terminal.itcl
+
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl README.txt
+
+MISC_FILES = $(DIRS) tclIndex bin demo img 
+
+# 'make realclean' should remove tclIndex
+REALCLEAN_STUFF =	tclIndex
+
+# all install: $(MISC_SRCS) tclIndex
+
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk

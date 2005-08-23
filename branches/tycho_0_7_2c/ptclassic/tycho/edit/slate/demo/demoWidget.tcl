@@ -3,7 +3,7 @@
 # To run this demo, execute
 #    ./demo Widget
 #
-# $Id$
+# @(#)demoWidget.tcl	1.1 07/29/98
 # Author: John Reekie
 
 proc ::demo::demoWidget {} {

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.6 05/14/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -44,9 +44,15 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS = \
+	JRPCServer.tcl
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	JRPC.itcl \
+	RunPanel.itcl \
+	RunWindow.itcl \
+	Simulation.itcl \
+	SliderPanel.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	ptsim.tcl \
@@ -55,6 +61,9 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	pkgIndex.tcl
 
 MISC_FILES = $(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = adm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -65,9 +74,9 @@ TYDOC_DESC =
 # Do make sources so that we ensure that the subdirectories are checked out
 all: sources $(MISC_SRCS) tclIndex
 
-install: all
+install: all subinstall
 
-.PHONY: all
+.PHONY: all install subinstall
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

@@ -1,4 +1,4 @@
-# $Id$
+# @(#)evalTest.itcl	1.1 04/07/98
 # Itcl class used to test evaluation
 class evalTest {
     public proc testProc {}

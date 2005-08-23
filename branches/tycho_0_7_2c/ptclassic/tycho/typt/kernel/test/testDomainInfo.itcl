@@ -2,9 +2,9 @@
 #
 # @Authors: Edward A. Lee, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testDomainInfo.itcl	1.8 05/25/97
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,9 +31,124 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-#set VERBOSE 1
+# Uncomment this to get a full report, or set in your Tcl shell window.
+# set VERBOSE 1
 
-doneTests
+# If necessary load up the class definitions
+if {[namespace ptolemy {info classes DomainInfo}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
+    }
+    if {[namespace ptolemy {info classes Object}] == {} } {
+	uplevel #0 {
+	    set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+	}
+    }
+}
+
+namespace ::tycho
+
+######################################################################
+#### domains
+# Pretty much every binary has SDF in it.
+#
+test DomainInfo::domains-1.1 {Check out the domains command} {
+    # Create a domainInfo object in each domain
+    foreach domain [::tycho::DomainInfo::domains] {
+	catch {delete object .domainInfo}
+	::tycho::DomainInfo .domainInfo $domain
+    }
+    catch {delete object .domainInfo}
+    lsearch [::tycho::DomainInfo::domains] SDF
+
+} {1}
+
+######################################################################
+#### stars
+# Pretty much every binary has SDF Ramp in it.
+#
+test DomainInfo::stars-1.1 {Get information about a star} {
+    catch {delete object .sdf}
+    ::tycho::DomainInfo .sdf SDF
+    set retval1 [expr { [lsearch [.sdf stars] Ramp] != -1 }]
+    list $retval1 \
+	    [.sdf printStar Ramp] \
+	    [.sdf descriptor Ramp] \
+	    [.sdf multiports Ramp] \
+	    [.sdf ports Ramp] \
+	    [.sdf states Ramp]
+} {1 {Ramp
+	Descriptor { Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.}
+	Ports {
+	Output output
+	ot connected.
+}
+	MultiPorts {}
+	State
+	{	step FLOAT A_DYNAMIC
+} {	value FLOAT A_CONSTANT A_DYNAMIC
+}
+} {Descriptor { Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.}} {MultiPorts {}} {Ports {
+	Output output
+	ot connected.
+}} {States {{step {FLOAT A_DYNAMIC}} {value {FLOAT A_CONSTANT A_DYNAMIC}}}}}
+
+######################################################################
+#### knownBlocks
+# 
+test DomainInfo::knownBlocks-1.1 {Check out the knownBlocks command} {
+    set retval1 [expr { [lsearch [::tycho::DomainInfo::knownBlocks SDF] Ramp] \
+	    != -1 }]
+    list $retval1 [::tycho::DomainInfo::print Ramp SDF]
+} {1 {Star: Ramp
+Descriptor: Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
+Ports:
+	Output output
+	ot connected.
+
+States:
+	step type: FLOAT A_DYNAMIC
+	value type: FLOAT A_CONSTANT A_DYNAMIC
+______________________________________________________________________________
+
+}}
+
+######################################################################
+#### printStars
+test DomainInfo::printStars-1.1 {Check out the printStars command} {
+    catch {delete object .hof}
+    ::tycho::DomainInfo .hof HOF
+    # Print out everything, but just check to see that the Chain star
+    # exists
+    expr { [lsearch -glob [.hof printStars] {*Chain*}]   != -1 }
+} {1}
+
+######################################################################
+#### queryDomains
+test DomainInfo::queryDomains-1.1 {Check out the queryDomains command} {
+    set TY_TEST_MODAL {
+	{
+	    %0 clearSelection
+	    %0 goto end
+	    %0 select DE
+	}
+    }
+    ::tycho::DomainInfo::queryDomain {Which domain is your favorite?} {SDF}
+
+} {DE}
+
+######################################################################
+#### queryDomains
+test DomainInfo::diffDomains-1.1 {Check out the diffDomains proc} {
+    set diffresults [::tycho::DomainInfo::diffDomains HOF SDF]
+    list [lrange $diffresults 0 3] [llength $diffresults]
+} {{{} {} {} {}} 6}
+catch {delete object .sdf}
+catch {delete object .hof}
+catch {delete object .domainInfo}

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.10 07/29/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/edit/slate/demos
+VPATH =		$(ROOT)/edit/slate/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -44,24 +44,35 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+TCL_SRCS = \
+	defs.tcl \
+	demoAnimator.tcl \
+	demoBinding.tcl \
+	demoGrapple.tcl \
+	demoLabeledLine.tcl \
+	demoPaper1.tcl \
+	demoPaper2.tcl \
+	demoSelection1.tcl \
+	demoSelection2.tcl \
+	demoSmartLine.tcl \
+	demoWidget.tcl
 
-ITCL_SRCS = 
+ITCL_SRCS =
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	demo.tcl \
+	demo \
+	pkgIndex.tcl
 
-MISC_FILES = 
+MISC_FILES = tclIndex
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
-
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+include $(ROOT)/mk/tycommon.mk
 
 

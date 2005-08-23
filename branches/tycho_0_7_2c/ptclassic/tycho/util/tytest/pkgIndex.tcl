@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)pkgIndex.tcl	1.1 03/16/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

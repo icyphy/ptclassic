@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.3 03/25/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -46,22 +46,40 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS =	\
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+SIMPLE_TESTS =
 
+GRAPHICAL_TESTS = \
+	testDirSearch.itcl \
+	testItclClassList.itcl
+
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
+
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES = 
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-# Title for the tydoc index page
-TYDOC_DESC =
+tests:: test_graphics
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tytest $(GRAPHICAL_TESTS)
+
+FORCE:
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-

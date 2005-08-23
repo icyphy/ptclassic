@@ -2,7 +2,7 @@
 #
 # @Authors: Christopher Hylands, John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.4 08/25/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -44,7 +44,7 @@ include $(CONFIG)
 # The variables below are used to create distributions
 TYPACKAGE = 	tycho.util.idoc
 TYPACKAGE_ROOTDIR = $(ROOT)/tycho
-TYPACKAGE_DIR = util/idoc
+TYPACKAGE_DIR = tycho/util/idoc
 # If you change JVERSION, modify the version numbers in idoc.tcl
 TYVERSION =	1.0
 TYDIST =	$(TYPACKAGE)$(TYVERSION)
@@ -54,14 +54,22 @@ TYJARFILE =
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS =
 
-ITCL_SRCS = 
+ITCL_SRCS =  \
+	ClassModel.itcl \
+	ClassParser.itcl \
+	ClassViewer.itcl \
+	ItclParser.itcl \
+	ItclViewer.itcl \
+	JavaParser.itcl \
+	JavaViewer.itcl \
+	MultiPanel.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	idoc.tcl \
 	README.txt \
-	makefile \
+	idoc.style \
 	pkgIndex.tcl
 
 MISC_FILES = $(DIRS) tclIndex
@@ -70,7 +78,7 @@ MISC_FILES = $(DIRS) tclIndex
 OPTIONAL_FILES =	adm
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
 TYDOC_DESC =

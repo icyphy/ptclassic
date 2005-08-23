@@ -3,9 +3,9 @@
 #
 # @Authors: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)ptlangTroffToHTML.tcl	1.7 10/03/96
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,7 +44,16 @@ proc ptlangTroffToHTML {args} {
     foreach file $args {
 	set infile [open [::tycho::expandPath $file] r]
 	set tmpfile [open "/tmp/$file" w]
+        set delim 1
+        set ineq 0
         while {[gets $infile lineIn] >= 0} {
+	    # We put these replacements outside the explanation regexp
+	    # because we did not find out about them until we ran this
+	    # on all the stars and converted 'explanation' to 'html'
+            regsub -all {\\fI} $lineIn {<i>} lineIn
+            regsub -all {\\fP} $lineIn {</i>} lineIn
+            regsub -all {\\fR} $lineIn {</i>} lineIn
+	    regsub -all {\\fB} $lineIn {</b>} lineIn
             if [regexp {^[ 	]*explanation[ 	]*\{[ 	]*$} $lineIn] {
                 # Replace with htmldoc
                 puts $tmpfile "\thtmldoc \{"
@@ -55,9 +64,6 @@ proc ptlangTroffToHTML {args} {
                     # Replace certain formatting controls
                     regsub -all ">" $lineIn {\&gt;} lineIn
                     regsub -all "<" $lineIn {\&lt;} lineIn
-                    regsub -all "\\\\fI" $lineIn <i> lineIn
-                    regsub -all "\\\\fB" $lineIn <b> lineIn
-                    regsub -all "\\\\fR" $lineIn </i></b> lineIn
                     regsub -all {\\\\} $lineIn {\\} lineIn
                     regsub -all {REFERENCES} $lineIn {References} lineIn
 
@@ -66,39 +72,48 @@ proc ptlangTroffToHTML {args} {
                     set newline {}
                     set end 0
                     set count 0
-                    while {[regexp -indices {\$([^\$]*)\$} $line dummy eqn] \
-                            != 0} {
-                        puts "CHECK: Inline equations in $file"
-                        set start [lindex $eqn 0]
-                        set end [lindex $eqn 1]
-                        if {$start > 1} {
-                            append newline \
-                                    [string range $line 0 [expr $start-2]]
-                        }
-                        set eqnt [string range $line $start $end]
-                        regsub -all {~} $eqnt { } eqnt
-                        regsub -all {[\(\)=]} $eqnt {</i>&<i>} eqnt
-                        regsub -all {log|sin|cos|min|max} $eqnt {</i>&<i>} eqnt
-                        regsub -all {[0-9]+} $eqnt {</i>&<i>} eqnt
-                        regsub -all {sub[ 	]+([^ 	]*)} \
-                                $eqnt {<sub>\1</sub>} eqnt
-                        regsub -all {sup[ 	]+([^ 	]*)} \
-                                $eqnt {<sup>\1</sup>} eqnt
-                        append newline "<i>$eqnt</i>"
-                        set line [string range $line [expr $end+2] end]
-                        if {[incr count] > 10} {
-                            puts "Warning: unprocessed equations"
-                            break
+                    if $delim {
+                        while {[regexp -indices {\$([^\$]*)\$} \
+                                $line dummy eqn] != 0} {
+                            puts "CHECK: Inline equations in $file"
+                            set start [lindex $eqn 0]
+                            set end [lindex $eqn 1]
+                            if {$start > 1} {
+                                append newline \
+                                        [string range $line 0 [expr $start-2]]
+                            }
+                            set eqnt [string range $line $start $end]
+                            regsub -all {~} $eqnt { } eqnt
+                            regsub -all {[\(\)=]} $eqnt {</i>&<i>} eqnt
+                            regsub -all {log|sin|cos|min|max} $eqnt {</i>&<i>} eqnt
+                            regsub -all {[0-9]+} $eqnt {</i>&<i>} eqnt
+                            regsub -all {sub[ 	]+([^ 	]*)} \
+                                    $eqnt {<sub>\1</sub>} eqnt
+                            regsub -all {sup[ 	]+([^ 	]*)} \
+                                    $eqnt {<sup>\1</sup>} eqnt
+                            append newline "<i>$eqnt</i>"
+                            set line [string range $line [expr $end+2] end]
+                            if {[incr count] > 10} {
+                                puts "Warning: unprocessed equations"
+                                break
+                            }
                         }
                     }
                     append newline $line
                     set lineIn $newline
 
                     # Search for various common troff macros
-                    switch -regexp $lineIn {
-                        {^\.c[ 	]} {
+                    switch -regexp -- $lineIn {
+                        {^\.br} {
+                            puts $tmpfile "<br>"
+                        }
+                        {^\.c([ 	]+|$)} {
                             if [regexp {.c[ 	]*(.*)$} $lineIn dummy entry] {
                                 puts $tmpfile "<tt>$entry</tt>"
+                            } {
+                                if {[gets $infile lineIn] >= 0} {
+                                    puts $tmpfile "<tt>$lineIn</tt>"
+                                }
                             }
                         }
                         {^\.\(c} -
@@ -135,21 +150,29 @@ proc ptlangTroffToHTML {args} {
                                 puts $tmpfile "<h4>$entry</h4>"
                             }
                         }
-                        {^\.I[deEr]} {
+                        {^\.I[dDeErR]} {
                             if [regexp {^\.I[deEr][ 	]*\"?([^\"]*)\"?} \
                                     $lineIn dummy entry] {
                                 puts $tmpfile "<a name=\"$entry\"></a>"
                             }
                         }
-                        {^\.ir} {
-                            if [regexp {^\.ir][ 	]*\"?([^\"]*)\"?} \
+                        {^\.[iS]r} {
+                            if [regexp {^\.[iS]r][ 	]*\"?([^\"]*)\"?} \
                                     $lineIn dummy entry] {
                                 puts $tmpfile "<a name=\"$entry\"></a>"
                             }
                         }
-                        {^\.ip} {
-                            if [regexp {^\.ip[ 	]*\"?([^\"]*)\"?} \
-                                    $lineIn dummy entry] {
+                        {^\.\(l} {
+                            puts $tmpfile "<ul>"
+                            while {[gets $infile lineIn] >= 0} {
+                                if [regexp {^\.\)l} $lineIn] {break}
+                                puts $tmpfile "<li> $lineIn"
+                            }
+                            puts $tmpfile "</ul>"
+                        }
+                        {^\.(ip|IP)} {
+                            if [regexp {^\.(ip|IP)[ 	]*\"?([^\"]*)\"?} \
+                                    $lineIn dummy dummy2 entry] {
                                 puts $tmpfile "<p>$entry  "
                             } {
                                 puts $tmpfile "<p>"
@@ -157,6 +180,7 @@ proc ptlangTroffToHTML {args} {
                         }
                         {^\.sp} -
                         {^\.lp} -
+                        {^\.LP} -
                         {^\.PP} -
                         {^\.pp} {
                             puts $tmpfile {<p>}
@@ -168,11 +192,40 @@ proc ptlangTroffToHTML {args} {
                             }
                         }
                         {^\.cs} {}
+                        {^\.ti} {
+                            if {[gets $infile lineIn] >= 0} {
+                                puts $tmpfile "<blockquote>$lineIn</blockquote>"
+                            }
+                        }
+                        {^\.ul} {
+                            if {[gets $infile lineIn] >= 0} {
+                                puts $tmpfile "<em>$lineIn</em>"
+                            }
+                        }
                         {^\.(EQ)} {
                             puts $tmpfile "<pre>"
+                            set ineq 1
                             puts "WARNING: Equation in $file"
                         }
                         {^\.(EN)} {
+                            puts $tmpfile "</pre>"
+                            set ineq 0
+                        }
+                        {^\delim off} {
+                            if $ineq {
+                                set delim 0
+                            }
+                        }
+                        {^\delim \$\$} {
+                            if $ineq {
+                                set delim 1
+                            }
+                        }
+                        {^\.(TS)} {
+                            puts $tmpfile "<pre>"
+                            puts "WARNING: Table in $file"
+                        }
+                        {^\.(TE)} {
                             puts $tmpfile "</pre>"
                         }
                         {^\.} {
@@ -188,8 +241,8 @@ proc ptlangTroffToHTML {args} {
         }
 	close $infile
 	close $tmpfile
-        exec rm -f $file.bak
-        exec mv $file $file.bak
-        exec mv "/tmp/$file" $file
+#        exec rm -f $file.bak
+#        exec mv $file $file.bak
+#        exec mv "/tmp/$file" $file
     }
 }

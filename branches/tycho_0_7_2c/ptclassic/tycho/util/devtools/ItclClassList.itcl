@@ -1,10 +1,10 @@
-# Graphical front end used to generate a class diagram
+# Edit a list of Itcl Files that can be used to generate a class diagram
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)ItclClassList.itcl	1.23	01/27/99
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -36,52 +36,54 @@
 #
 
 #######################################################################
-#### ItclClassDiagram
+#### ItclClassList
 # This class brings up a dialog box that can be used to create a class
 # diagram for a set of itcl classes.
 #
 # <p>
-# Here is an example of how to use the ItclClassDiagram:
-# <tcl><pre>
-#  ::tycho::ItclClassDiagram .i
-#  .i centerOnScreen
+# Here is an example of how to use the ItclClassList:
+# <tcl quiet><pre>
+# ::tycho::view ItclClassList -file classList.icl -toolbar 1
 # </pre></tcl>
 #
-class ::tycho::ItclClassDiagram {
-    inherit ::tycho::Query
+class ::tycho::ItclClassList {
+    inherit ::tycho::Edit
 
     constructor {args} {}
     destructor {}
-    
-    ###################################################################
-    ####                            options                        ####
-
-    # One line description of xxxx option; listed in alphabetical order
-    itk_option define -xxxx xxxx Xxxx ""
 
     ###################################################################
     ####                         public methods                    ####
 
     # Bring up a filebrowser for the user to find a list of classes with.
-    method browseClassDiagram {browseFile}
-
-    # Bring up a filebrowser for the user to find a list of classes with.
-    method browseClassList {browseFile}
+    method browseClassDiagram {}
 
     # Bring up help for this widget
     method help {}
 
+    # Add all the itcl files in a directory that the user chooses
+    method includeDirectoryClasses {}
+
     # Add the tycho classes to the classListFile
-    method includeTychoClasses {dummy}
+    method includeTychoClasses {}
 
     # Update the class diagram using the classes in the classFileList
     method updateClassDiagram {}
 
     ###################################################################
-    ####                   private variables                       ####
+    ####                  protected methods                        ####
 
-    # File containing List of classes to be diagrammed
-    private variable classListFile {classList.cll}
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Insert files into the classListFile.
+    private method updateClassListFile {files} {}
+
+    ###################################################################
+    ####                   private variables                       ####
 
     # File containing the class diagram
     private variable classDiagramFile {classDiagram.dag}
@@ -90,37 +92,14 @@ class ::tycho::ItclClassDiagram {
 #######################################################################
 #### constructor
 #
-body ::tycho::ItclClassDiagram::constructor {args} {
-configure -queries [list \
-        [list mediated browseClassList {Browse Class List File} \
-        $classListFile \
-        "$this browseClassList"] \
-        [list mediated browseClassDiagram {Browse Class Diagram File} \
-        $classDiagramFile \
-        "$this browseClassDiagram"] \
-        [list mediated includeTychoClasses {} \
-        {Include Tycho Classes} \
-        "$this includeTychoClasses"]
-    ]
-
+body ::tycho::ItclClassList::constructor {args} {
     eval itk_initialize $args
-    eval preference exclude $this $args
 
-    addButton editClassList -text "Edit Class List File" \
-            -command "::tycho::File::openContext $classListFile"
-    addButton updateClassDiagram -text "Update class diagram" \
-            -command "$this updateClassDiagram"
-    addButton help -text "Help" \
-            -command "$this help"
+    if {$classDiagramFile == "classDiagram.dag"} {
+	set classDiagramFile [file join [file dirname [filename]] \
+                classDiagram.dag]
+    }
 }
-
-
-#######################################################################
-#### destructor
-#
-body ::tycho::ItclClassDiagram::destructor {} {
-}
-
 
     ###################################################################
     ###################################################################
@@ -130,84 +109,175 @@ body ::tycho::ItclClassDiagram::destructor {} {
 #### browseClassDiagram
 # Bring up a filebrowser for the user to find a list of classes with.
 #
-body ::tycho::ItclClassDiagram::browseClassDiagram {browseFile} {
-    set classDiagramFile [::tycho::queryfilename \
-            "Choose Class Diagram File Name" $browseFile]
-    insert browseClassDiagram $classDiagramFile
-} 
-
-#######################################################################
-#### browseClassList
-# Bring up a filebrowser for the user to find a list of classes with.
-#
-body ::tycho::ItclClassDiagram::browseClassList {browseFile} {
-    set classListFile [::tycho::queryfilename "Choose Class List File Name" \
-            $browseFile]
-    insert browseClassList $classListFile
+body ::tycho::ItclClassList::browseClassDiagram {} {
+    set tmpClassDiagramFile [::tycho::queryfilename \
+            "Choose Class Diagram File Name" $classDiagramFile]
+    # If the user hits cancel, then we will get a {} filename back
+    if {$tmpClassDiagramFile != {} } {
+        set classDiagramFile $tmpClassDiagramFile
+    }
 } 
 
 ######################################################################
 #### help
 # Open a help window.
 #
-body ::tycho::ItclClassDiagram::help {} {
+body ::tycho::ItclClassList::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors visedit doc usersGuides \
-            ItclClassDiagramHelp.html]
+	    [file join $TYCHO edit textedit doc usersGuides \
+            ItclClassListHelp.html] html
 }
+
+#####################################################################
+#### includeDirectoryClasses
+# Add all the *.itcl and *.itk files in a directory that the user chooses.
+# 
+body ::tycho::ItclClassList::includeDirectoryClasses {} {
+    set olddir [pwd]
+    cd [file dirname [filename]]
+
+    set itclFileList [glob -nocomplain {{*.itcl,*.itk}}]
+    if { [llength $itclFileList] > 0 } {
+	set firstItclFile [lindex $itclFileList 0]
+    } else {
+	set firstItclFile {}
+    }
+
+    set includeDirectory [::tycho::queryfilename \
+            "Choose a file from the directory you want\n\
+            to include all *.itcl and *.itk files from." \
+	    $firstItclFile]
+    cd $olddir
+
+    if {$includeDirectory != {} } {
+        if ![file isdirectory $includeDirectory] {
+            set includeDirectory [file dirname $includeDirectory]
+        }
+        if ![file isdirectory $includeDirectory] {
+            error "Sorry, $includeDirectory is not a directory, try again."
+        }
+        eval lappend files [glob \
+		[file join $includeDirectory {{*.itcl,*.itk}}]]
+	updateClassListFile $files
+    }
+}
+
 
 #####################################################################
 #### includeTychoClasses
 # Add the tycho classes to the classListFile
 #
-body ::tycho::ItclClassDiagram::includeTychoClasses { dummy } {
+body ::tycho::ItclClassList::includeTychoClasses {} {
     global tycho
     set olddir [pwd]
     cd $tycho
+
     # Generate a list of classes
+
+    # If you update this list, update
+    # $TYCHO/kernel/tychoMakeClassDAG.tcl
     set dirs [list \
-            kernel \
-            [file join editors textedit] \
-            [file join editors visedit] \
-            [file join editors slate] \
-            [file join typt editors ] \
+            [file join kernel basic] \
+            [file join kernel html] \
+            [file join kernel model] \
+            [file join kernel gui] \
+            [file join edit textedit] \
+            [file join edit visedit] \
+            [file join edit slate] \
+            [file join util devtools] \
+            [file join util tydoc] \
+            [file join typt edit ] \
             [file join typt kernel ] \
-            [file join lib tydoc ] \
+            [file join lib util ] \
+            [file join lib widgets ] \
     ]
 
     foreach dir $dirs {
-        eval lappend files [glob [file join $dir {*.itcl}]]
+	if [file isdirectory "$dir"] {
+	    eval lappend files [glob \
+		    [file join $dir {{*.itcl,*.tcl,*.tk,*.itk}}]]
+	}
     }
+    updateClassListFile $files
     cd $olddir
-
-    set openFileWindow [::tycho::File::isFileOpen $classListFile]
-
-    if { $openFileWindow != {} } {
-       $openFileWindow saveQuery
-    }
-    set fd [open $classListFile "a"]
-    foreach file $files {
-        puts $fd [file join "\$TYCHO" $file]
-    }
-    close $fd
 }
 
 #####################################################################
 #### updateClassDiagram
 # Update the class diagram using the classes in the classFileList
 #
-body ::tycho::ItclClassDiagram::updateClassDiagram {} {
-    global TYCHO
-    set fd [open $classListFile "r"]
-    set fileenv [split [read $fd]]
-    close $fd
-
-    if {$fileenv == {} } {
-        error "Read in $classDiagramFile, but it was empty!"
+body ::tycho::ItclClassList::updateClassDiagram {} {
+    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} \
+	    $classDiagramFile \
+            [split [get 0.0 end]]]
+    if {$retval != {} } {
+	::tycho::warn $retval
     }
-    
-   eval tychoMkClassGraph {{Tycho Class Hierarchy}} $classDiagramFile \
-            $fileenv
-    ::tycho::File::openContext $classDiagramFile
+    return [::tycho::File::openContext $classDiagramFile]
+}
+    ###################################################################
+    ###################################################################
+    ####                    protected methods                      ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::ItclClassList::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        $toolbar button includeTychoClasses  \
+                -text {Include Tycho} \
+                -underline 8 \
+                -command "$this includeTychoClasses" \
+                -description {Insert all Tycho classes into the \
+                current file.}
+        
+        $toolbar button includeDirectoryClasses \
+                -text {Include Directory} \
+                -underline 8 \
+                -command "$this includeDirectoryClasses" \
+                -description {Choose a file in a directory, and then \
+                insert all the *.itcl and *.itk files \
+                into the current file.}
+        
+        $toolbar button clearClassList \
+                -text Clear \
+                -underline 0 \
+                -command "$this deleteRange 0.0 end" \
+                -description {Clear the contents of the current file}
+        
+        $toolbar button browseClassDiagram \
+                -text {Diagram File Name} \
+                -underline 8 \
+                -command "$this browseClassDiagram" \
+                -description {Choose a filename for the class \
+                diagram output to go into.}
+        
+        $toolbar button updateClassDiagram \
+                -text {Update Class Diagram}\
+                -underline 0 \
+                -command "$this updateClassDiagram" \
+                -description {Generate a class diagram from the files \
+                listed in the current file.}
+    }
+}
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+
+#####################################################################
+#### updateClassListFile
+# Insert files into the classListFile.
+#
+body ::tycho::ItclClassList::updateClassListFile {myfiles} {
+    foreach myfile $myfiles {
+        insertData "[::tycho::simplifyPath $myfile TYCHO]\n"
+    }
 }

@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)testPolygon.itcl	1.5 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
-
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
-} {}
-
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 50
-}
-#set VERBOSE 1
+# Make sure that the test package is loaded
+package require slate.test
 
 
 #######################################################################
@@ -55,7 +45,7 @@ proc _polygon {} {
 }
 
 #######################################################################
-#### _aspect
+#### _feature
 
 #######################################################################
 #### _grapple
@@ -69,6 +59,9 @@ proc _polygon {} {
 #### _reshaperelease
 #
 # These methods are tested as a set.
+# Note that these fail under Solaris, but work fine under Windows NT.
+# The failures are because Tk is closing the polygon (I think,
+# it could be me doing it...)
 #
 set delta 40
 set i 0
@@ -78,7 +71,7 @@ foreach a {vertex-0 vertex-1 vertex-2 vertex-3 vertex-4} {
     _polygon
     test Polygon-_reshapeclick.$i \
             "Reshape a polygon item, no ghosting, $a" {
-        _interact ::tycho::Polygon::_reshape $p 1 1 $delta -aspects $a
+        _interact ::tycho::Polygon::_reshape $p 1 1 $delta -features $a
     } [_finally2 ::tycho::Polygon::reshape $p 1 1 $delta $a]
 }
 
@@ -88,28 +81,28 @@ foreach a {vertex-0 vertex-1 vertex-2 vertex-3 vertex-4} {
     test Polygon-_reshapeclick.$i \
             "Reshape a polygon item by tag, with ghosting, $a" {
         _interact ::tycho::Polygon::_reshape foo 1 1 $delta \
-                -aspects $a -ghost 1
+                -features $a -ghost 1
     } [_finally2 ::tycho::Polygon::reshape foo 1 1 $delta $a]
 }
 
 incr i
 _polygon
-test Polygon-_reshapeclick.$i {Reshape multiple aspects, no ghosting} {
+test Polygon-_reshapeclick.$i {Reshape multiple features, no ghosting} {
     _interact ::tycho::Polygon::_reshape $p 1 1 $delta \
-            -aspects {vertex-0 vertex-2}
+            -features {vertex-0 vertex-2}
 } [_finally2 ::tycho::Polygon::reshape $p 1 1 $delta vertex-0 vertex-2]
 
 incr i
 _polygon
-test Polygon-_reshapeclick.$i {Reshape multiple aspects, with ghosting} {
+test Polygon-_reshapeclick.$i {Reshape multiple features, with ghosting} {
     _polygon
     _interact ::tycho::Polygon::_reshape $p 1 1 $delta \
-            -aspects {vertex-1 vertex-3} -ghost 1
+            -features {vertex-1 vertex-3} -ghost 1
 } [_finally2 ::tycho::Polygon::reshape $p 1 1 $delta vertex-1 vertex-3]
 
 
 ##########################################################################
-#### aspect
+#### feature
 
 #######################################################################
 #### center

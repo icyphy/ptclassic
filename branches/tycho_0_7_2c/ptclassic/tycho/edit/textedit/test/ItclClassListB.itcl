@@ -1,4 +1,4 @@
-# Version: $Id$
+# Version: @(#)ItclClassListB.itcl	1.1 10/21/97
 # This class is used to test the ItclClassList
 class B {
     inherit A
