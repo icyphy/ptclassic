@@ -1,0 +1,700 @@
+# <h1>This is a Tycho index file.  Use tycho to view it.</h1> <nothtml
+{Tycho index}
+{
+{{-debug tycho option} {$TYCHO/doc/tyunix.html} {-debug tycho option}}
+{{-e tycho option} {$TYCHO/doc/tyunix.html} {-e tycho option}}
+{{-file
+option} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {-file
+option}}
+{-littleendian {$TYCHO/java/ptolemy/plot/doc/changes.htm} -littleendian}
+{{-master option} {$TYCHO/kernel/gui/doc/internals/console.html} {-master option}}
+{{-nowelcome tycho option} {$TYCHO/doc/tyunix.html} {-nowelcome tycho option}}
+{{-tty tycho option} {$TYCHO/doc/tyunix.html} {-tty tycho option}}
+{{.c extension} {$TYCHO/edit/textedit/doc/usersGuides/EditCHelp.html} {.c extension}}
+{{.C extension} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {.C extension}}
+{{.cc extension} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {.cc extension}}
+{.dag {$TYCHO/edit/visedit/doc/usersGuides/EditDAGHelp.html} .dag}
+{{.fst extension} {$TYCHO/edit/visedit/doc/usersGuides/EditForestHelp.html} {.fst extension}}
+{{.h extension} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {.h extension}}
+{{.H extension} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {.H extension}}
+{.icl {$TYCHO/edit/textedit/doc/usersGuides/ItclClassListHelp.html} .icl}
+{{.idx extension} {$TYCHO/doc/documentation.html} {.idx extension}}
+{.itcl {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} .itcl}
+{.itk {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} .itk}
+{.java {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} .java}
+{{.mk extension} {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} {.mk extension}}
+{.pal {$TYCHO/typt/edit/doc/usersGuides/EditPaletteHelp.html} .pal}
+{{.pl extension} {$TYCHO/typt/edit/doc/usersGuides/EditPtlangHelp.html} {.pl extension}}
+{.ptclrc {$TYCHO/doc/tyunix.html} .ptclrc}
+{.ptkrc {$TYCHO/doc/tyunix.html} .ptkrc}
+{.std {$TYCHO/edit/visedit/doc/usersGuides/EditSTDHelp.html} .std}
+{{.strl extension} {$TYCHO/edit/textedit/doc/usersGuides/EditEsterelHelp.html} {.strl extension}}
+{{.tcl extension} {$TYCHO/edit/textedit/doc/usersGuides/EditTclHelp.html} {.tcl extension}}
+{{.Tycho directory} {$TYCHO/doc/tyunix.html} {.Tycho directory}}
+{{.vc extension} {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} {.vc extension}}
+{abbreviations {$TYCHO/doc/abbreviations.html} abbreviations}
+{{addBlock pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {addBlock pitcl command}}
+{{addButton method} {$TYCHO/kernel/gui/doc/internals/dialog.html} {addButton method}}
+{{addButton method} {$TYCHO/kernel/gui/doc/internals/messageclasses.html} {addButton method}}
+{{addState pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {addState pitcl command}}
+{{addUniverse pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {addUniverse pitcl command}}
+{after {$TYCHO/doc/coding/update.html} after}
+{{aliasDown pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {aliasDown pitcl command}}
+{{aliasUp pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {aliasUp pitcl command}}
+{anchors {$TYCHO/doc/documentation.html} anchors}
+{{Apple Computer} {$TYCHO/doc/overview.html} {Apple Computer}}
+{appletprinting {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} appletprinting}
+{{askuser procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {askuser procedure}}
+{astronomy {$TYCHO/doc/tychoFaq.html} astronomy}
+{authors {$TYCHO/doc/authors.html} authors}
+{{authors: Tydoc} {$TYCHO/util/tydoc/doc/authors.html} {authors: Tydoc}}
+{{autoconf software package} {$TYCHO/doc/coding/buildtclexts.html} {autoconf software package}}
+{autosave {$TYCHO/kernel/gui/doc/internals/file.html} autosave}
+{{autosaveinterval option} {$TYCHO/kernel/gui/doc/internals/file.html} {autosaveinterval option}}
+{{Axis item type} {$TYCHO/edit/slate/doc/internals/c-graphing.html} {Axis item type}}
+{{background errors} {$TYCHO/kernel/gui/doc/internals/error.html} {background errors}}
+{{bar graph plot} {$TYCHO/java/ptolemy/plot/demo/BarGraph.htm} {bar graph plot}}
+{{base classes} {$TYCHO/kernel/gui/doc/internals/base.html} {base classes}}
+{{begin pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {begin pitcl command}}
+{binarydata {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} binarydata}
+{{bind command} {$TYCHO/doc/coding/scope.html} {bind command}}
+{bindings {$TYCHO/doc/bindings.html} bindings}
+{{bindings, shell window} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {bindings, shell window}}
+{{bitmap option} {$TYCHO/kernel/gui/doc/internals/dialog.html} {bitmap option}}
+{{blocks pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {blocks pitcl command}}
+{{Brahe, Tycho} {$TYCHO/doc/brahe.html} {Brahe, Tycho}}
+{{bubble and arc Editor} {$TYCHO/edit/visedit/doc/usersGuides/EditBubbleAndArcHelp.html} {bubble and arc Editor}}
+{{bug list} {$TYCHO/doc/bugs.html} {bug list}}
+{{bugs in the kernel} {$TYCHO/doc/bugs.html} {bugs in the kernel}}
+{{bugs in text editors} {$TYCHO/doc/bugs.html} {bugs in text editors}}
+{{bugs in visual editors} {$TYCHO/doc/bugs.html} {bugs in visual editors}}
+{{bugs in java} {$TYCHO/doc/bugs.html} {bugs in java}}
+{{bugs in Ptolemy/Tycho} {$TYCHO/doc/bugs.html} {bugs in Ptolemy/Tycho}}
+{{bugs in Tydoc} {$TYCHO/doc/bugs.html} {bugs in Tydoc}}
+{{BuilderDialog Widget} {$TYCHO/kernel/gui/doc/usersGuides/BuilderDialogHelp.html} {BuilderDialog Widget}}
+{{C editor} {$TYCHO/edit/textedit/doc/usersGuides/EditCHelp.html} {C editor}}
+{{C++ editor} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {C++ editor}}
+{{cancelcommand option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {cancelcommand option}}
+{{cancelcommand option } {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {cancelcommand option }}
+{{centerOnScreen method} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {centerOnScreen method}}
+{{check links command} {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} {check links command}}
+{{Class Diagram, Itcl Editor} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Class Diagram, Itcl Editor}}
+{{class diagram} {$TYCHO/doc/tychoClasses.html} {class diagram}}
+{CLASSPATH {$TYCHO/java/ptolemy/plot/doc/troubleshooting.htm} CLASSPATH}
+{{clear query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {clear query}}
+{{clear pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {clear pitcl command}}
+{{code rating system} {$TYCHO/doc/coding/rating.html} {code rating system}}
+{{code rating overview} {$TYCHO/doc/coding/rating.html} {code rating overview}}
+{{code rating levels} {$TYCHO/doc/coding/rating.html} {code rating levels}}
+{{code rating rules} {$TYCHO/doc/coding/rating.html} {code rating rules}}
+{{code rating tools} {$TYCHO/doc/coding/rating.html} {code rating tools}}
+{{code rating FAQ} {$TYCHO/doc/coding/rating.html} {code rating FAQ}}
+{{code command} {$TYCHO/doc/coding/scope.html} {code command}}
+{{coding style} {$TYCHO/doc/coding/index.html} {coding style}}
+{{color procedure} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {color procedure}}
+{{color dialog} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {color dialog}}
+{{color browser} {$TYCHO/kernel/gui/doc/usersGuides/ColorBrowserHelp.html} {color browser}}
+{{ColorBrowser class} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {ColorBrowser class}}
+{colors {$TYCHO/kernel/gui/doc/internals/dialogs.html} colors}
+{{command option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {command option}}
+{{command option, color browser} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {command option, color browser}}
+{{comment conventions} {$TYCHO/doc/coding/style.html} {comment conventions}}
+{{comment format conventions} {$TYCHO/util/tydoc/doc/overview.html} {comment format conventions}}
+{{Compiling within Tycho} {$TYCHO/kernel/gui/doc/internals/compile.html} {Compiling within Tycho}}
+{{compiling C files} {$TYCHO/edit/textedit/doc/usersGuides/EditCHelp.html} {compiling C files}}
+{{compromise shortcuts} {$TYCHO/doc/bindings.html} {compromise shortcuts}}
+{{configure script} {$TYCHO/doc/coding/buildtclexts.html} {configure script}}
+{{configure.in
+file} {$TYCHO/doc/coding/buildtclexts.html} {configure.in
+file}}
+{{connect pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {connect pitcl command}}
+{{connected pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {connected pitcl command}}
+{{console window} {$TYCHO/doc/tyunix.html} {console window}}
+{{cont pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {cont pitcl command}}
+{contact {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} contact}
+{{control key} {$TYCHO/doc/abbreviations.html} {control key}}
+{{control key} {$TYCHO/doc/abbreviations.html} {control key}}
+{{control key} {$TYCHO/doc/bindings.html} {control key}}
+{{control key} {$TYCHO/doc/bindings.html} {control key}}
+{{copyright conventions} {$TYCHO/doc/coding/style.html} {copyright conventions}}
+{{copyright for Itcl files} {$TYCHO/doc/coding/style.html} {copyright for Itcl files}}
+{{currentGalaxy pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {currentGalaxy pitcl command}}
+{{cursor navigation, Unix} {$TYCHO/doc/bindings.html} {cursor navigation, Unix}}
+{{customizing Tycho on startup} {$TYCHO/doc/tyunix.html} {customizing Tycho on startup}}
+{{debugging hints} {$TYCHO/doc/troubleshooting.html} {debugging hints}}
+{{default method} {$TYCHO/kernel/gui/doc/internals/dialog.html} {default method}}
+{{deferred redrawing} {$TYCHO/doc/coding/after.html} {deferred redrawing}}
+{{defGalaxy pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {defGalaxy pitcl command}}
+{{defWormhole pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {defWormhole pitcl command}}
+{{deiconify method} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {deiconify method}}
+{{developer tools user's guides} {$TYCHO/util/devtools/doc/usersGuides/index.html} {developer tools user's guides}}
+{{Dialog class} {$TYCHO/kernel/gui/doc/internals/dialog.html} {Dialog class}}
+{{dialog box shortcuts} {$TYCHO/doc/bindings.html} {dialog box shortcuts}}
+{{dialog classes} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {dialog classes}}
+{{dialog procedures} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {dialog procedures}}
+{{directed acyclic graph (DAG) editor} {$TYCHO/edit/visedit/doc/usersGuides/EditDAGHelp.html} {directed acyclic graph (DAG) editor}}
+{{DirSearch editor} {$TYCHO/kernel/gui/doc/usersGuides/DirSearchHelp.html} {DirSearch editor}}
+{{disable query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {disable query}}
+{{doc directory layout} {$TYCHO/doc/documentation.html} {doc directory layout}}
+{{doc tags} {$TYCHO/doc/coding/fileheader.html} {doc tags}}
+{documentation {$TYCHO/doc/documentation.html} documentation}
+{{documentation conventions} {$TYCHO/doc/coding/style.html} {documentation conventions}}
+{domain.idx {$TYCHO/typt/doc/usersGuides/ptindices.html} domain.idx}
+{{downloading Tycho} {$TYCHO/doc/tychoFaq.html} {downloading Tycho}}
+{{downloading Ptplot} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {downloading Ptplot}}
+{{Edit class} {$TYCHO/kernel/gui/doc/internals/edit.html} {Edit class}}
+{{edit text or graphics, Windows} {$TYCHO/doc/bindings.html} {edit text or graphics, Windows}}
+{{edit text, Windows} {$TYCHO/doc/bindings.html} {edit text, Windows}}
+{{EditBubbleAndArc class} {$TYCHO/edit/visedit/doc/usersGuides/EditBubbleAndArcHelp.html} {EditBubbleAndArc class}}
+{{EditC class} {$TYCHO/edit/textedit/doc/usersGuides/EditCHelp.html} {EditC class}}
+{{EditCpp class} {$TYCHO/edit/textedit/doc/usersGuides/EditCppHelp.html} {EditCpp class}}
+{{EditDAG class} {$TYCHO/edit/visedit/doc/usersGuides/EditDAGHelp.html} {EditDAG class}}
+{{EditEsterel class} {$TYCHO/edit/textedit/doc/usersGuides/EditEsterelHelp.html} {EditEsterel class}}
+{{EditHTML class} {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} {EditHTML class}}
+{{EditItcl class} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {EditItcl class}}
+{{EditJava class} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {EditJava class}}
+{{EditMake class} {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} {EditMake class}}
+{{EditPalette class} {$TYCHO/typt/edit/doc/usersGuides/EditPaletteHelp.html} {EditPalette class}}
+{{EditProgram class} {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} {EditProgram class}}
+{{EditPtcl class} {$TYCHO/typt/edit/doc/usersGuides/EditPtclHelp.html} {EditPtcl class}}
+{{EditPtlang class} {$TYCHO/typt/edit/doc/usersGuides/EditPtlangHelp.html} {EditPtlang class}}
+{{EditSTD class} {$TYCHO/edit/visedit/doc/usersGuides/EditSTDHelp.html} {EditSTD class}}
+{{EditTcl class} {$TYCHO/edit/textedit/doc/usersGuides/EditTclHelp.html} {EditTcl class}}
+{emacs {$TYCHO/doc/bindings.html} emacs}
+{emacs {$TYCHO/doc/releasenotes0.1.html} emacs}
+{emacs {$TYCHO/doc/releasenotes0.1.1.html} emacs}
+{emacs {$TYCHO/doc/releasenotes0.2.html} emacs}
+{emacs {$TYCHO/doc/releasenotes0.2.1.html} emacs}
+{emacs {$TYCHO/doc/tychoFaq.html} emacs}
+{emacs {$TYCHO/doc/releasenotes0.3.html} emacs}
+{{enable query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {enable query}}
+{{encapsulated postscript} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {encapsulated postscript}}
+{endian {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} endian}
+{entities {$TYCHO/lib/html_library/html/sample.html} entities}
+{entities {$TYCHO/lib/html_library-0.3/html/sample.html} entities}
+{{entry box queries} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {entry box queries}}
+{{environment
+variables} {$TYCHO/doc/tyunix.html} {environment
+variables}}
+{{error bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {error bitmap}}
+{{error handling} {$TYCHO/kernel/gui/doc/internals/error.html} {error handling}}
+{{error procedure} {$TYCHO/kernel/gui/doc/internals/error.html} {error procedure}}
+{{ErrorMessage class} {$TYCHO/kernel/gui/doc/internals/messageclasses.html} {ErrorMessage class}}
+{{escape key} {$TYCHO/doc/abbreviations.html} {escape key}}
+{{escape key} {$TYCHO/doc/bindings.html} {escape key}}
+{{Esterel editor} {$TYCHO/edit/textedit/doc/usersGuides/EditEsterelHelp.html} {Esterel editor}}
+{{Evaluate Body command} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Evaluate Body command}}
+{{Evaluate command} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Evaluate command}}
+{{Evaluate command} {$TYCHO/edit/textedit/doc/usersGuides/EditTclHelp.html} {Evaluate command}}
+{{Evaluate Body command} {$TYCHO/edit/textedit/doc/usersGuides/EditTclHelp.html} {Evaluate Body command}}
+{{example header} {$TYCHO/doc/coding/fileheader.html} {example header}}
+{{Exec Dialog} {$TYCHO/kernel/gui/doc/usersGuides/ExecHelp.html} {Exec Dialog}}
+{{Execing Processes} {$TYCHO/kernel/basic/doc/internals/exec.html} {Execing Processes}}
+{{expand pathname} {$TYCHO/kernel/basic/doc/internals/path.html} {expand pathname}}
+{{exporting graphics} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {exporting graphics}}
+{{extension .idx} {$TYCHO/kernel/gui/doc/usersGuides/IndexBrowserHelp.html} {extension .idx}}
+{FAQ {$TYCHO/doc/tychoFaq.html} FAQ}
+{{faq: general questions} {$TYCHO/doc/tychoFaq.html} {faq: general questions}}
+{{faq: installation} {$TYCHO/doc/tychoFaq.html} {faq: installation}}
+{{faq: why didn't you . . . } {$TYCHO/doc/tychoFaq.html} {faq: why didn't you . . . }}
+{{File class} {$TYCHO/kernel/gui/doc/internals/file.html} {File class}}
+{{File class user's guide} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {File class user's guide}}
+{{file access, Unix shortcuts} {$TYCHO/doc/bindings.html} {file access, Unix shortcuts}}
+{{file manipulation makefile rules} {$TYCHO/doc/coding/directories.html} {file manipulation makefile rules}}
+{{file headers} {$TYCHO/doc/coding/fileheader.html} {file headers}}
+{{file template} {$TYCHO/doc/coding/template.html} {file template}}
+{{file name dialog} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {file name dialog}}
+{{file option} {$TYCHO/kernel/gui/doc/internals/file.html} {file option}}
+{{file browser} {$TYCHO/kernel/gui/doc/usersGuides/FileBrowserHelp.html} {file browser}}
+{{file name completion} {$TYCHO/kernel/gui/doc/usersGuides/FileBrowserHelp.html} {file name completion}}
+{{FileBrowser class} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {FileBrowser class}}
+{{filename procs} {$TYCHO/kernel/basic/doc/internals/path.html} {filename procs}}
+{{Fill Region command} {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} {Fill Region command}}
+{{Fill Region} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {Fill Region}}
+{{filling text, Unix shortcuts} {$TYCHO/doc/bindings.html} {filling text, Unix shortcuts}}
+{{filling text} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {filling text}}
+{Find/Change {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} Find/Change}
+{focus {$TYCHO/doc/bindings.html} focus}
+{focus {$TYCHO/doc/bindings.html} focus}
+{{font utilities} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {font utilities}}
+{{font manager} {$TYCHO/kernel/gui/doc/usersGuides/FontDialogHelp.html} {font manager}}
+{{font, sizes} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {font, sizes}}
+{{font, families} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {font, families}}
+{{FontManager class} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {FontManager class}}
+{{fonts, examining} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {fonts, examining}}
+{{fonts, setting} {$TYCHO/kernel/gui/doc/internals/fontmanager.html} {fonts, setting}}
+{{forest editor} {$TYCHO/edit/visedit/doc/usersGuides/EditForestHelp.html} {forest editor}}
+{{format command} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {format command}}
+{{formatting documentation} {$TYCHO/doc/documentation.html} {formatting documentation}}
+{forms {$TYCHO/lib/html_library/html/sample.html} forms}
+{forms {$TYCHO/lib/html_library-0.3/html/sample.html} forms}
+{{Frame item type} {$TYCHO/edit/slate/doc/internals/c-3d.html} {Frame item type}}
+{{freezeWindowSize method} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {freezeWindowSize method}}
+{{galaxyPort pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {galaxyPort pitcl command}}
+{{geometry option} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {geometry option}}
+{{get method} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {get method}}
+{{get query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {get query}}
+{{getAnnotation pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getAnnotation pitcl command}}
+{{getClassName pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getClassName pitcl command}}
+{{getData pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getData pitcl command}}
+{{getDescriptor pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getDescriptor pitcl command}}
+{{getDomain pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getDomain pitcl command}}
+{{getFullName pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getFullName pitcl command}}
+{{getParent pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getParent pitcl command}}
+{{getSchedule pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getSchedule pitcl command}}
+{{getTarget pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {getTarget pitcl command}}
+{{GIF files} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {GIF files}}
+{{glimpse browser} {$TYCHO/util/devtools/doc/usersGuides/GlimpseHelp.html} {glimpse browser}}
+{{global variables} {$TYCHO/doc/coding/style.html} {global variables}}
+{{gnu make} {$TYCHO/doc/coding/directories.html} {gnu make}}
+{{graphics editor} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {graphics editor}}
+{headings {$TYCHO/lib/html_library/html/sample.html} headings}
+{headings {$TYCHO/lib/html_library-0.3/html/sample.html} headings}
+{{Help menu} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {Help menu}}
+{help {$TYCHO/doc/help.html} help}
+{history {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} history}
+{{home page} {$TYCHO/doc/index.html} {home page}}
+{{hourglass bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {hourglass bitmap}}
+{{HTML shortcuts} {$TYCHO/doc/bindings.html} {HTML shortcuts}}
+{HTML {$TYCHO/doc/documentation.html} HTML}
+{{HTML conventions} {$TYCHO/doc/documentation.html} {HTML conventions}}
+{{HTML extensions} {$TYCHO/doc/documentation.html} {HTML extensions}}
+{{HTML editor} {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} {HTML editor}}
+{{HTML class} {$TYCHO/kernel/html/doc/html.html} {HTML class}}
+{{HTML viewer} {$TYCHO/kernel/html/doc/HTMLHelp.html} {HTML viewer}}
+{HTTP {$TYCHO/doc/documentation.html} HTTP}
+{HTTP {$TYCHO/kernel/html/doc/html.html} HTTP}
+{hyperlinks {$TYCHO/doc/overview.html} hyperlinks}
+{{hypertext links} {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} {hypertext links}}
+{{IDoc Viewer} {$TYCHO/util/idoc/doc/ClassViewerHelp.html} {IDoc Viewer}}
+{{IDoc Bugs} {$TYCHO/util/tydoc/doc/bugs.html} {IDoc Bugs}}
+{{IDoc RFE} {$TYCHO/util/tydoc/doc/bugs.html} {IDoc RFE}}
+{image {$TYCHO/kernel/gui/doc/internals/dialog.html} image}
+{{image create command} {$TYCHO/kernel/gui/doc/internals/dialog.html} {image create command}}
+{images {$TYCHO/lib/html_library/html/sample.html} images}
+{images {$TYCHO/lib/html_library-0.3/html/sample.html} images}
+{{incr Tcl} {$TYCHO/doc/overview.html} {incr Tcl}}
+{{Incremental search} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {Incremental search}}
+{indentation {$TYCHO/doc/coding/style.html} indentation}
+{{index item completion} {$TYCHO/kernel/gui/doc/usersGuides/ColorBrowserHelp.html} {index item completion}}
+{{index browser} {$TYCHO/kernel/gui/doc/usersGuides/IndexBrowserHelp.html} {index browser}}
+{{index item completion} {$TYCHO/kernel/gui/doc/usersGuides/IndexBrowserHelp.html} {index item completion}}
+{{indexing documents} {$TYCHO/doc/documentation.html} {indexing documents}}
+{{info context command} {$TYCHO/doc/coding/scope.html} {info context command}}
+{{info which command} {$TYCHO/doc/coding/scope.html} {info which command}}
+{{info bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {info bitmap}}
+{{inform procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {inform procedure}}
+{{init pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {init pitcl command}}
+{{initState pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {initState pitcl command}}
+{{insert query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {insert query}}
+{{installation, what do I need} {$TYCHO/doc/tychoFaq.html} {installation, what do I need}}
+{{installing Tycho} {$TYCHO/doc/install.html} {installing Tycho}}
+{installshield {$TYCHO/java/ptolemy/plot/doc/install.htm} installshield}
+{{interactive documents} {$TYCHO/kernel/gui/doc/internals/introduction.html} {interactive documents}}
+{{Interactors: Mouse tracking interactors} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Mouse tracking interactors}}
+{{Interactors: Follower interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Follower interactor}}
+{{Interactors: Bounder interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Bounder interactor}}
+{{Interactors: Stepper interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Stepper interactor}}
+{{Interactors: Repeater interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Repeater interactor}}
+{{Interactors: TextItemEdit interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: TextItemEdit interactor}}
+{{Interactors: Selector interactor} {$TYCHO/edit/slate/doc/internals/i-classes.html} {Interactors: Selector interactor}}
+{interpreter {$TYCHO/kernel/gui/doc/internals/console.html} interpreter}
+{{Introduction to the Tycho Syntax Manager} {$TYCHO/doc/introduction.html} {Introduction to the Tycho Syntax Manager}}
+{{invoke method} {$TYCHO/kernel/gui/doc/internals/dialog.html} {invoke method}}
+{{isGalaxy pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {isGalaxy pitcl command}}
+{{isMultiPort pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {isMultiPort pitcl command}}
+{{isWormhole pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {isWormhole pitcl command}}
+{Itcl {$TYCHO/doc/overview.html} Itcl}
+{{Itcl Editor Body Template} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Itcl Editor Body Template}}
+{{Itcl Editor File Template} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Itcl Editor File Template}}
+{{Itcl Editor Test Template} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Itcl Editor Test Template}}
+{{Itcl Editor Generate doc} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Itcl Editor Generate doc}}
+{{Itcl Class List editor} {$TYCHO/edit/textedit/doc/usersGuides/ItclClassListHelp.html} {Itcl Class List editor}}
+{{itcl documentation} {$TYCHO/doc/documentation.html} {itcl documentation}}
+{{itcl and tcl internet
+resources} {$TYCHO/doc/itcllinks.html} {itcl and tcl internet
+resources}}
+{{itcl versions} {$TYCHO/doc/troubleshooting.html} {itcl versions}}
+{{itcl description} {$TYCHO/doc/tychoFaq.html} {itcl description}}
+{{itcl file body conventions} {$TYCHO/doc/coding/itclfilebody.html} {itcl file body conventions}}
+{{itcl comment conventions} {$TYCHO/doc/coding/itclfilebody.html} {itcl comment conventions}}
+{{itcl class comments} {$TYCHO/doc/coding/itclfilebody.html} {itcl class comments}}
+{{itcl class declaration body} {$TYCHO/doc/coding/itclfilebody.html} {itcl class declaration body}}
+{{itcl class definition bodies} {$TYCHO/doc/coding/itclfilebody.html} {itcl class definition bodies}}
+{ItclClassList {$TYCHO/edit/textedit/doc/usersGuides/ItclClassListHelp.html} ItclClassList}
+{Itk {$TYCHO/doc/overview.html} Itk}
+{{itkwish: starting
+tycho} {$TYCHO/doc/troubleshooting.html} {itkwish: starting
+tycho}}
+{iwidgets {$TYCHO/doc/tychoFaq.html} iwidgets}
+{{java documentation} {$TYCHO/doc/documentation.html} {java documentation}}
+{{java exceptions conventions} {$TYCHO/doc/coding/style.html} {java exceptions conventions}}
+{{java file template substitution} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {java file template substitution}}
+{{java profile viewer} {$TYCHO/util/devtools/doc/usersGuides/ProfileJavaHelp.html} {java profile viewer}}
+{{Java editor} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {Java editor}}
+{{Java Editor Body Template} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {Java Editor Body Template}}
+{{Java Editor File Template} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {Java Editor File Template}}
+{{Java Editor Generate doc} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {Java Editor Generate doc}}
+{{java, instead of Itcl} {$TYCHO/doc/tychoFaq.html} {java, instead of Itcl}}
+{{javadoc tags} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {javadoc tags}}
+{{javaHome preference} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {javaHome preference}}
+{{JavaScript Interface to Ptplot} {$TYCHO/java/ptolemy/plot/demo/Ptplot.htm} {JavaScript Interface to Ptplot}}
+{{JavaScript Ptplot Limitations} {$TYCHO/java/ptolemy/plot/demo/Ptplot.htm} {JavaScript Ptplot Limitations}}
+{{kernel gui package programmer's guides} {$TYCHO/kernel/gui/doc/internals/index.html} {kernel gui package programmer's guides}}
+{{kernel user's guides} {$TYCHO/kernel/gui/doc/usersGuides/index.html} {kernel user's guides}}
+{{key bindings} {$TYCHO/doc/bindings.html} {key bindings}}
+{{keyboard shortcut} {$TYCHO/doc/bindings.html} {keyboard shortcut}}
+{{knownBlocks pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {knownBlocks pitcl command}}
+{{knownDomains pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {knownDomains pitcl command}}
+{{knownTargets pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {knownTargets pitcl command}}
+{{knownUniverses pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {knownUniverses pitcl command}}
+{{LabeledFrame item type} {$TYCHO/edit/slate/doc/internals/c-labeled.html} {LabeledFrame item type}}
+{{LabeledItem item type} {$TYCHO/edit/slate/doc/internals/c-labeled.html} {LabeledItem item type}}
+{{LabeledOval item type} {$TYCHO/edit/slate/doc/internals/c-labeled.html} {LabeledOval item type}}
+{{LabeledRect item type} {$TYCHO/edit/slate/doc/internals/c-labeled.html} {LabeledRect item type}}
+{{line item shape} {$TYCHO/edit/slate/doc/internals/shapes.html} {line item shape}}
+{{line method} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {line method}}
+{{list browser} {$TYCHO/kernel/gui/doc/usersGuides/ListBrowserHelp.html} {list browser}}
+{lists {$TYCHO/lib/html_library/html/sample.html} lists}
+{lists {$TYCHO/lib/html_library-0.3/html/sample.html} lists}
+{Macintosh {$TYCHO/doc/overview.html} Macintosh}
+{{mailing list} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {mailing list}}
+{{make directories} {$TYCHO/kernel/basic/doc/internals/path.html} {make directories}}
+{{makefile structure} {$TYCHO/doc/coding/directories.html} {makefile structure}}
+{{makefile rules} {$TYCHO/doc/coding/directories.html} {makefile rules}}
+{{makefile editor} {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} {makefile editor}}
+{{makefile.in
+template file} {$TYCHO/doc/coding/buildtclexts.html} {makefile.in
+template file}}
+{markup {$TYCHO/lib/html_library/html/sample.html} markup}
+{markup {$TYCHO/lib/html_library-0.3/html/sample.html} markup}
+{{master
+shell} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {master
+shell}}
+{{mathematica pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {mathematica pitcl command}}
+{{matlab pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {matlab pitcl command}}
+{{mediated queries} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {mediated queries}}
+{{menu traversal} {$TYCHO/doc/bindings.html} {menu traversal}}
+{{MenuBar class} {$TYCHO/kernel/gui/doc/internals/decorators.html} {MenuBar class}}
+{{Message procedures} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {Message procedures}}
+{{Message class} {$TYCHO/kernel/gui/doc/internals/messageclasses.html} {Message class}}
+{{message classes} {$TYCHO/kernel/gui/doc/internals/messageclasses.html} {message classes}}
+{{meta key} {$TYCHO/doc/abbreviations.html} {meta key}}
+{{meta key} {$TYCHO/doc/bindings.html} {meta key}}
+{{Microsoft Word} {$TYCHO/doc/bindings.html} {Microsoft Word}}
+{{Microsoft Windows} {$TYCHO/doc/overview.html} {Microsoft Windows}}
+{{Microsoft visual c++} {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} {Microsoft visual c++}}
+{{modal dialogs} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {modal dialogs}}
+{{modal dialog} {$TYCHO/kernel/gui/doc/internals/dialog.html} {modal dialog}}
+{{modifying text, Unix} {$TYCHO/doc/bindings.html} {modifying text, Unix}}
+{{monitor pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {monitor pitcl command}}
+{{monitorPtcl pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {monitorPtcl pitcl command}}
+{{mouse navigation} {$TYCHO/doc/bindings.html} {mouse navigation}}
+{mydata {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} mydata}
+{{name attribute} {$TYCHO/doc/documentation.html} {name attribute}}
+{{name attribute} {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} {name attribute}}
+{{name completion} {$TYCHO/kernel/gui/doc/usersGuides/ListBrowserHelp.html} {name completion}}
+{namespace {$TYCHO/kernel/gui/doc/internals/introduction.html} namespace}
+{{naming conventions} {$TYCHO/doc/coding/style.html} {naming conventions}}
+{{new files, creating} {$TYCHO/doc/coding/newfiles.html} {new files, creating}}
+{{new procedure} {$TYCHO/kernel/gui/doc/internals/dialog.html} {new procedure}}
+{nmake {$TYCHO/edit/textedit/doc/usersGuides/EditMakeHelp.html} nmake}
+{no-compile.mk {$TYCHO/doc/coding/directories.html} no-compile.mk}
+{{nocommand option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {nocommand option}}
+{{Node item type} {$TYCHO/edit/slate/doc/internals/c-boxarrow.html} {Node item type}}
+{objectives {$TYCHO/doc/overview.html} objectives}
+{octtools {$TYCHO/typt/edit/doc/usersGuides/EditPaletteHelp.html} octtools}
+{{okcommand option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {okcommand option}}
+{{onFiring pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {onFiring pitcl command}}
+{{onFiringCancel pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {onFiringCancel pitcl command}}
+{{opening files} {$TYCHO/kernel/gui/doc/usersGuides/FileBrowserHelp.html} {opening files}}
+{other {$TYCHO/lib/html_library/html/sample.html} other}
+{other {$TYCHO/lib/html_library-0.3/html/sample.html} other}
+{{oval item shape} {$TYCHO/edit/slate/doc/internals/shapes.html} {oval item shape}}
+{overview {$TYCHO/doc/overview.html} overview}
+{{palette editor} {$TYCHO/typt/edit/doc/usersGuides/EditPaletteHelp.html} {palette editor}}
+{parentheses {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} parentheses}
+{{pathname manipulation procs} {$TYCHO/kernel/basic/doc/internals/path.html} {pathname manipulation procs}}
+{{performance in tcl} {$TYCHO/doc/coding/performance.html} {performance in tcl}}
+{{performance tools} {$TYCHO/doc/coding/performance.html} {performance tools}}
+{{performance hints} {$TYCHO/doc/coding/performance.html} {performance hints}}
+{{photo widget} {$TYCHO/kernel/gui/doc/internals/dialog.html} {photo widget}}
+{{pitcl interface to Ptolemy} {$TYCHO/typt/doc/internals/pitcl.html} {pitcl interface to Ptolemy}}
+{{platforms that Tycho runs under} {$TYCHO/doc/tychoFaq.html} {platforms that Tycho runs under}}
+{{platforms that Ptplot runs under} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {platforms that Ptplot runs under}}
+{{plot classes} {$TYCHO/java/ptolemy/plot/doc/main.htm} {plot classes}}
+{{plot classes} {$TYCHO/java/ptolemy/plot/doc/#main.htm#} {plot classes}}
+{{point item shape} {$TYCHO/edit/slate/doc/internals/shapes.html} {point item shape}}
+{{polygon item shape} {$TYCHO/edit/slate/doc/internals/shapes.html} {polygon item shape}}
+{{ports pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {ports pitcl command}}
+{{portsContained pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {portsContained pitcl command}}
+{{post procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {post procedure}}
+{postscript {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} postscript}
+{{preferences manager} {$TYCHO/kernel/gui/doc/usersGuides/PreferencesHelp.html} {preferences manager}}
+{{printing graphics} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {printing graphics}}
+{{printing text} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {printing text}}
+{{Problems Starting Tycho} {$TYCHO/doc/troubleshooting.html} {Problems Starting Tycho}}
+{{Problems creating indices} {$TYCHO/doc/troubleshooting.html} {Problems creating indices}}
+{{Problems Starting Ptplot} {$TYCHO/java/ptolemy/plot/doc/troubleshooting.htm} {Problems Starting Ptplot}}
+{{program editor} {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} {program editor}}
+{proofreading {$TYCHO/doc/coding/style.html} proofreading}
+{{Ptcl editor} {$TYCHO/typt/edit/doc/usersGuides/EditPtclHelp.html} {Ptcl editor}}
+{{Ptlang editor} {$TYCHO/typt/edit/doc/usersGuides/EditPtlangHelp.html} {Ptlang editor}}
+{{Ptolemy with Tycho} {$TYCHO/doc/tyunix.html} {Ptolemy with Tycho}}
+{{Ptolemy Star Index} {$TYCHO/typt/doc/usersGuides/ptindices.html} {Ptolemy Star Index}}
+{{Ptolemy Universe Index} {$TYCHO/typt/doc/usersGuides/ptindices.html} {Ptolemy Universe Index}}
+{{Ptolemy Domain Index} {$TYCHO/typt/doc/usersGuides/ptindices.html} {Ptolemy Domain Index}}
+{{Ptolemy Star/Demo Cross Reference} {$TYCHO/typt/doc/usersGuides/ptindices.html} {Ptolemy Star/Demo Cross Reference}}
+{{Ptolemy Retargeting editor} {$TYCHO/typt/edit/doc/usersGuides/RetargetHelp.html} {Ptolemy Retargeting editor}}
+{{Ptolemy Retargeting editor tutorial} {$TYCHO/typt/edit/doc/usersGuides/RetargetHelp.html} {Ptolemy Retargeting editor tutorial}}
+{{Ptolemy Retargeting editor bugs} {$TYCHO/typt/edit/doc/usersGuides/RetargetHelp.html} {Ptolemy Retargeting editor bugs}}
+{{ptolemy description} {$TYCHO/doc/tychoFaq.html} {ptolemy description}}
+{{Ptplot Width Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Width Argument}}
+{{Ptplot Height Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Height Argument}}
+{{Ptplot Background Color Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Background Color Argument}}
+{{Ptplot Foreground Color Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Foreground Color Argument}}
+{{Ptplot URL Base Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot URL Base Argument}}
+{{Ptplot File to plot Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot File to plot Argument}}
+{{Ptplot Title Text Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Title Text Argument}}
+{{Ptplot Title Font Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Title Font Argument}}
+{{Ptplot Label Font Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Label Font Argument}}
+{{Ptplot X Axis Label Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot X Axis Label Argument}}
+{{Ptplot Y Axis Label Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Y Axis Label Argument}}
+{{Ptplot Bars Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Bars Argument}}
+{{Ptplot No Lines Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot No Lines Argument}}
+{{Ptplot Ticks Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Ticks Argument}}
+{{Ptplot Small Points Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Small Points Argument}}
+{{Ptplot Large Points Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Large Points Argument}}
+{{Ptplot Reverse Video Argument} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Reverse Video Argument}}
+{{Ptplot Display Args} {$TYCHO/java/ptolemy/plot/demo/PtplotHelp.htm} {Ptplot Display Args}}
+{{ptplot changes} {$TYCHO/java/ptolemy/plot/doc/changes.htm} {ptplot changes}}
+{{ptplot FAQ} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot FAQ}}
+{{ptplot faq: general questions} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot faq: general questions}}
+{{ptplot description (short)} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot description (short)}}
+{{ptplot pronunciation} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot pronunciation}}
+{{ptplot copyright} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot copyright}}
+{{ptplot faq: installation} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot faq: installation}}
+{{ptplot installation, what do I need} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot installation, what do I need}}
+{{ptplot troubleshooting overview} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot troubleshooting overview}}
+{{ptplot bug list} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot bug list}}
+{{ptplot faq: How do I  . . .} {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} {ptplot faq: How do I  . . .}}
+{{ptplot troubleshooting } {$TYCHO/java/ptolemy/plot/doc/troubleshooting.htm} {ptplot troubleshooting }}
+{{puts command} {$TYCHO/doc/tyunix.html} {puts command}}
+{{puts command} {$TYCHO/kernel/gui/doc/internals/console.html} {puts command}}
+{{puts
+command} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {puts
+command}}
+{{queries option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {queries option}}
+{{Query class} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {Query class}}
+{{query procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {query procedure}}
+{{querycolor procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {querycolor procedure}}
+{{queryfilename procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {queryfilename procedure}}
+{{queryinfo procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {queryinfo procedure}}
+{{questhead bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {questhead bitmap}}
+{{question dialogs} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {question dialogs}}
+{{question bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {question bitmap}}
+{{radio button widgets} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {radio button widgets}}
+{{radio method} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {radio method}}
+{RCS {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} RCS}
+{{readonly option} {$TYCHO/kernel/gui/doc/internals/file.html} {readonly option}}
+{recolorize {$TYCHO/edit/textedit/doc/usersGuides/EditHTMLHelp.html} recolorize}
+{recolorize {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} recolorize}
+{{rectangle item shape} {$TYCHO/edit/slate/doc/internals/shapes.html} {rectangle item shape}}
+{{registering an editor} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {registering an editor}}
+{{release notes} {$TYCHO/doc/releasenotes.html} {release notes}}
+{{release notes 0.1} {$TYCHO/doc/releasenotes0.1.html} {release notes 0.1}}
+{{release notes 0.1.1} {$TYCHO/doc/releasenotes0.1.1.html} {release notes 0.1.1}}
+{{release notes 0.2} {$TYCHO/doc/releasenotes0.2.html} {release notes 0.2}}
+{{release notes 0.2.1} {$TYCHO/doc/releasenotes0.2.1.html} {release notes 0.2.1}}
+{{release notes 0.3} {$TYCHO/doc/releasenotes0.3.html} {release notes 0.3}}
+{{remove files} {$TYCHO/kernel/basic/doc/internals/path.html} {remove files}}
+{{remove query} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {remove query}}
+{{remove pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {remove pitcl command}}
+{{removing windows} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {removing windows}}
+{{reset pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {reset pitcl command}}
+{{resizing of windows} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {resizing of windows}}
+{retrospective {$TYCHO/doc/coding/rating.html} retrospective}
+{revcontrol {$TYCHO/kernel/gui/doc/usersGuides/RevControlHelp.html} revcontrol}
+{{revision control} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {revision control}}
+{{Right Fill Column command} {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} {Right Fill Column command}}
+{{Right Fill Column} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {Right Fill Column}}
+{{right mouse button} {$TYCHO/doc/bindings.html} {right mouse button}}
+{{run pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {run pitcl command}}
+{{running Tycho} {$TYCHO/doc/running.html} {running Tycho}}
+{{running Tycho} {$TYCHO/doc/tyunix.html} {running Tycho}}
+{{running a subprocess} {$TYCHO/kernel/basic/doc/internals/exec.html} {running a subprocess}}
+{safeEval {$TYCHO/doc/coding/update.html} safeEval}
+{{safeEval method} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {safeEval method}}
+{{safeUpdate procedure} {$TYCHO/doc/coding/update.html} {safeUpdate procedure}}
+{{SCCS and copyrights} {$TYCHO/doc/coding/style.html} {SCCS and copyrights}}
+{SCCS {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} SCCS}
+{{scope in Itcl} {$TYCHO/doc/coding/scope.html} {scope in Itcl}}
+{{scoping problems} {$TYCHO/doc/coding/scope.html} {scoping problems}}
+{sdl {$TYCHO/edit/textedit/doc/usersGuides/EditSDLHelp.html} sdl}
+{{SDL editor} {$TYCHO/edit/textedit/doc/usersGuides/EditSDLHelp.html} {SDL editor}}
+{search {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} search}
+{{Set Fill Prefix command} {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} {Set Fill Prefix command}}
+{{Set Fill Prefix} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {Set Fill Prefix}}
+{{setState pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {setState pitcl command}}
+{{setTarget pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {setTarget pitcl command}}
+{{setup under Unix} {$TYCHO/doc/tyunix.html} {setup under Unix}}
+{setup {$TYCHO/doc/tyunix.html} setup}
+{{shell window} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {shell window}}
+{{shell window, special features} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {shell window, special features}}
+{shells {$TYCHO/edit/textedit/doc/usersGuides/index.html} shells}
+{{shift key} {$TYCHO/doc/abbreviations.html} {shift key}}
+{{shift key} {$TYCHO/doc/bindings.html} {shift key}}
+{shortcuts {$TYCHO/doc/bindings.html} shortcuts}
+{{shortcuts introduction} {$TYCHO/doc/bindings.html} {shortcuts introduction}}
+{{shortcuts, overriding} {$TYCHO/doc/bindings.html} {shortcuts, overriding}}
+{{silent error} {$TYCHO/doc/coding/update.html} {silent error}}
+{{silent error} {$TYCHO/doc/coding/update.html} {silent error}}
+{simpleapp {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} simpleapp}
+{{slate user's guides} {$TYCHO/edit/slate/doc/usersGuides/index.html} {slate user's guides}}
+{{Slider widget user's guide} {$TYCHO/edit/slate/doc/usersGuides/SliderHelp.html} {Slider widget user's guide}}
+{{slow network preference} {$TYCHO/doc/tyunix.html} {slow network preference}}
+{{SmartLine item type} {$TYCHO/edit/slate/doc/internals/c-boxarrow.html} {SmartLine item type}}
+{{Solid item type} {$TYCHO/edit/slate/doc/internals/c-3d.html} {Solid item type}}
+{{special keys} {$TYCHO/doc/bindings.html} {special keys}}
+{{spelling checker} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {spelling checker}}
+{sponsors {$TYCHO/doc/sponsors.html} sponsors}
+{{stack trace} {$TYCHO/kernel/gui/doc/internals/error.html} {stack trace}}
+{{stack trace} {$TYCHO/kernel/gui/doc/internals/messageclasses.html} {stack trace}}
+{{standalone execution} {$TYCHO/doc/tyunix.html} {standalone execution}}
+{{standard output} {$TYCHO/doc/tyunix.html} {standard output}}
+{{standard output} {$TYCHO/kernel/gui/doc/internals/console.html} {standard output}}
+{{standard output} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {standard output}}
+{{state transition diagram editor} {$TYCHO/edit/visedit/doc/usersGuides/EditSTDHelp.html} {state transition diagram editor}}
+{{states pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {states pitcl command}}
+{{stateValue pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {stateValue pitcl command}}
+{{StatusBar class} {$TYCHO/kernel/gui/doc/internals/decorators.html} {StatusBar class}}
+{{subprocesses, running} {$TYCHO/kernel/basic/doc/internals/exec.html} {subprocesses, running}}
+{tab {$TYCHO/edit/textedit/doc/usersGuides/EditProgramHelp.html} tab}
+{tarorzip {$TYCHO/java/ptolemy/plot/doc/install.htm} tarorzip}
+{{Tcl
+extension to HTML} {$TYCHO/doc/documentation.html} {Tcl
+extension to HTML}}
+{Tcl {$TYCHO/doc/overview.html} Tcl}
+{{Tcl editor} {$TYCHO/edit/textedit/doc/usersGuides/EditItclHelp.html} {Tcl editor}}
+{{Tcl editor} {$TYCHO/edit/textedit/doc/usersGuides/EditTclHelp.html} {Tcl editor}}
+{{Tcl within HTML} {$TYCHO/kernel/gui/doc/internals/introduction.html} {Tcl within HTML}}
+{{Tcl shell window} {$TYCHO/kernel/gui/doc/usersGuides/TclShellHelp.html} {Tcl shell window}}
+{{tcl and itcl internet resources} {$TYCHO/doc/itcllinks.html} {tcl and itcl internet resources}}
+{{tcl extensions, building} {$TYCHO/doc/coding/buildtclexts.html} {tcl extensions, building}}
+{{tcl extensions, building} {$TYCHO/doc/coding/buildtclexts.html} {tcl extensions, building}}
+{{tcl extensions, overview} {$TYCHO/doc/coding/buildtclexts.html} {tcl extensions, overview}}
+{{tcl extensions, files} {$TYCHO/doc/coding/buildtclexts.html} {tcl extensions, files}}
+{{tcl extensions, adding} {$TYCHO/doc/coding/buildtclexts.html} {tcl extensions, adding}}
+{{tcl loader} {$TYCHO/kernel/basic/doc/internals/LoaderHelp.html} {tcl loader}}
+{{TclShell class} {$TYCHO/kernel/gui/doc/internals/console.html} {TclShell class}}
+{{technical rationale} {$TYCHO/doc/rationale.html} {technical rationale}}
+{{temporary files} {$TYCHO/kernel/basic/doc/internals/path.html} {temporary files}}
+{{Terminal item type} {$TYCHO/edit/slate/doc/internals/c-boxarrow.html} {Terminal item type}}
+{{test suite} {$TYCHO/doc/coding/testing.html} {test suite}}
+{{test styles} {$TYCHO/doc/coding/testing.html} {test styles}}
+{test {$TYCHO/lib/html_library/html/sample.html} test}
+{test {$TYCHO/lib/html_library-0.3/html/sample.html} test}
+{{testing modal dialog widgets} {$TYCHO/doc/coding/testing.html} {testing modal dialog widgets}}
+{{testing documentation} {$TYCHO/doc/coding/testing.html} {testing documentation}}
+{{testing the tycho script} {$TYCHO/doc/coding/testing.html} {testing the tycho script}}
+{{Testing Tycho} {$TYCHO/doc/coding/testing.html} {Testing Tycho}}
+{{text editors and shells} {$TYCHO/edit/textedit/doc/index.html} {text editors and shells}}
+{{text editor user's guides} {$TYCHO/edit/textedit/doc/usersGuides/index.html} {text editor user's guides}}
+{{text editors} {$TYCHO/edit/textedit/doc/usersGuides/index.html} {text editors}}
+{{text entry} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {text entry}}
+{{text questions} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {text questions}}
+{{text editors} {$TYCHO/kernel/gui/doc/usersGuides/EditHelp.html} {text editors}}
+{{the order of elements} {$TYCHO/doc/coding/fileheader.html} {the order of elements}}
+{{the order of elements} {$TYCHO/doc/coding/itclfilebody.html} {the order of elements}}
+{{this variable} {$TYCHO/doc/coding/scope.html} {this variable}}
+{Tk {$TYCHO/doc/overview.html} Tk}
+{{tkerror procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {tkerror procedure}}
+{{tkerror procedure} {$TYCHO/kernel/gui/doc/internals/error.html} {tkerror procedure}}
+{{toggle read-only command} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {toggle read-only command}}
+{{ToolBar class} {$TYCHO/kernel/gui/doc/internals/decorators.html} {ToolBar class}}
+{{TopLevel class} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {TopLevel class}}
+{tree {$TYCHO/edit/visedit/doc/usersGuides/EditForestHelp.html} tree}
+{{troubleshooting overview} {$TYCHO/doc/tychoFaq.html} {troubleshooting overview}}
+{{Troubleshooting Tycho} {$TYCHO/doc/troubleshooting.html} {Troubleshooting Tycho}}
+{twofiles {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} twofiles}
+{twoplots {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} twoplots}
+{{TYCHO environment
+variable} {$TYCHO/doc/tyunix.html} {TYCHO environment
+variable}}
+{{Tycho 0.1 Bugs} {$TYCHO/doc/bugs0.1.html} {Tycho 0.1 Bugs}}
+{{Tycho description (short)} {$TYCHO/doc/tychoFaq.html} {Tycho description (short)}}
+{{Tycho feature list} {$TYCHO/doc/tychoFaq.html} {Tycho feature list}}
+{{Tycho Slate} {$TYCHO/edit/slate/doc/index.html} {Tycho Slate}}
+{{Tycho Graphical Kernel} {$TYCHO/kernel/gui/doc/index.html} {Tycho Graphical Kernel}}
+{{tycho 0.2 overview} {$TYCHO/doc/releasenotes0.2.html} {tycho 0.2 overview}}
+{{tycho 0.2 changes} {$TYCHO/doc/releasenotes0.2.html} {tycho 0.2 changes}}
+{{tycho 0.2 backward compatibility} {$TYCHO/doc/releasenotes0.2.html} {tycho 0.2 backward compatibility}}
+{{tycho 0.2.1 overview} {$TYCHO/doc/releasenotes0.2.1.html} {tycho 0.2.1 overview}}
+{{tycho 0.2.1 changes} {$TYCHO/doc/releasenotes0.2.1.html} {tycho 0.2.1 changes}}
+{{tycho 0.2.1 backward compatibility} {$TYCHO/doc/releasenotes0.2.1.html} {tycho 0.2.1 backward compatibility}}
+{{tycho 0.3 overview} {$TYCHO/doc/releasenotes0.3.html} {tycho 0.3 overview}}
+{{tycho 0.3 changes} {$TYCHO/doc/releasenotes0.3.html} {tycho 0.3 changes}}
+{{tycho 0.3 backward compatibility} {$TYCHO/doc/releasenotes0.3.html} {tycho 0.3 backward compatibility}}
+{{tycho directory layout} {$TYCHO/doc/coding/directories.html} {tycho directory layout}}
+{{tycho namespace} {$TYCHO/kernel/gui/doc/internals/introduction.html} {tycho namespace}}
+{tychoClasses.dag {$TYCHO/doc/tychoClasses.html} tychoClasses.dag}
+{tychoMakeClassDAG.tcl {$TYCHO/doc/tychoClasses.html} tychoMakeClassDAG.tcl}
+{tychoMkIndex {$TYCHO/doc/documentation.html} tychoMkIndex}
+{{tyDebug variable} {$TYCHO/doc/troubleshooting.html} {tyDebug variable}}
+{{Tydoc Bugs} {$TYCHO/util/tydoc/doc/bugs.html} {Tydoc Bugs}}
+{{Tydoc RFE} {$TYCHO/util/tydoc/doc/bugs.html} {Tydoc RFE}}
+{{tydoc - The Tycho documentation system} {$TYCHO/doc/documentation.html} {tydoc - The Tycho documentation system}}
+{{tydoc documentation system introduction} {$TYCHO/util/tydoc/doc/index.html} {tydoc documentation system introduction}}
+{{tydoc and codeDoc.idx} {$TYCHO/util/tydoc/doc/overview.html} {tydoc and codeDoc.idx}}
+{{tylndir and private trees} {$TYCHO/doc/coding/directories.html} {tylndir and private trees}}
+{{typed response questions} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {typed response questions}}
+{{typed response questions} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {typed response questions}}
+{{typt (Tycho/Ptolemy interface)} {$TYCHO/typt/doc/index.html} {typt (Tycho/Ptolemy interface)}}
+{{unique filenames} {$TYCHO/kernel/basic/doc/internals/path.html} {unique filenames}}
+{{universal shortcuts} {$TYCHO/doc/bindings.html} {universal shortcuts}}
+{{Unix shortcuts} {$TYCHO/doc/bindings.html} {Unix shortcuts}}
+{{Unix shortcuts, abbreviations} {$TYCHO/doc/bindings.html} {Unix shortcuts, abbreviations}}
+{{unix external links (URLs)} {$TYCHO/doc/tyunix.html} {unix external links (URLs)}}
+{update {$TYCHO/doc/coding/update.html} update}
+{{update idletasks} {$TYCHO/doc/coding/update.html} {update idletasks}}
+{update {$TYCHO/kernel/gui/doc/internals/dialogs.html} update}
+{{useEnvClassPath preference} {$TYCHO/edit/textedit/doc/usersGuides/EditJavaHelp.html} {useEnvClassPath preference}}
+{{user's guides, adding} {$TYCHO/doc/documentation.html} {user's guides, adding}}
+{{version numbers} {$TYCHO/doc/releasenotes.html} {version numbers}}
+{{version control} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {version control}}
+{{View class} {$TYCHO/kernel/gui/doc/internals/view.html} {View class}}
+{{view proc} {$TYCHO/kernel/gui/doc/internals/view.html} {view proc}}
+{{visibility of windows} {$TYCHO/kernel/gui/doc/internals/toplevel.html} {visibility of windows}}
+{{visual editors} {$TYCHO/edit/visedit/doc/index.html} {visual editors}}
+{{visual editors users guides} {$TYCHO/edit/visedit/doc/usersGuides/index.html} {visual editors users guides}}
+{wait {$TYCHO/kernel/gui/doc/internals/dialog.html} wait}
+{{warn procedure} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {warn procedure}}
+{{warning bitmap} {$TYCHO/kernel/gui/doc/internals/dialog.html} {warning bitmap}}
+{{Welch, B.} {$TYCHO/doc/coding/performance.html} {Welch, B.}}
+{{welcome window} {$TYCHO/doc/tyunix.html} {welcome window}}
+{whenConstructed {$TYCHO/doc/coding/after.html} whenConstructed}
+{whenMapped {$TYCHO/doc/coding/after.html} whenMapped}
+{wildcards {$TYCHO/kernel/gui/doc/usersGuides/ListBrowserHelp.html} wildcards}
+{{Window menu} {$TYCHO/kernel/gui/doc/usersGuides/FileHelp.html} {Window menu}}
+{{window management, Windows} {$TYCHO/doc/bindings.html} {window management, Windows}}
+{{window management, Unix shortcuts} {$TYCHO/doc/bindings.html} {window management, Unix shortcuts}}
+{{window decorators} {$TYCHO/kernel/gui/doc/internals/decorators.html} {window decorators}}
+{{windows bugs} {$TYCHO/doc/tynt.html} {windows bugs}}
+{{Windows shortcuts} {$TYCHO/doc/bindings.html} {Windows shortcuts}}
+{{Windows external links (URLs)} {$TYCHO/doc/tynt.html} {Windows external links (URLs)}}
+{windowswithoutcygwin {$TYCHO/java/ptolemy/plot/doc/install.htm} windowswithoutcygwin}
+{{winfo command command} {$TYCHO/doc/coding/scope.html} {winfo command command}}
+{{winfo megawidget windowname} {$TYCHO/doc/coding/scope.html} {winfo megawidget windowname}}
+{{wrapup pitcl command} {$TYCHO/typt/doc/internals/pitcl.html} {wrapup pitcl command}}
+{xgraph {$TYCHO/java/ptolemy/plot/doc/main.htm} xgraph}
+{xgraph {$TYCHO/java/ptolemy/plot/doc/ptplotfaq.htm} xgraph}
+{xgraph {$TYCHO/java/ptolemy/plot/doc/#main.htm#} xgraph}
+{{XWD files} {$TYCHO/edit/visedit/doc/usersGuides/GraphicsHelp.html} {XWD files}}
+{{XXX editor} {$TYCHO/edit/textedit/templates/HTMLTemplate.html} {XXX editor}}
+{{yes-no questions} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {yes-no questions}}
+{{yes-no questions} {$TYCHO/kernel/gui/doc/internals/dialogs.html} {yes-no questions}}
+{{yescommand option} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {yescommand option}}
+{{YesNoCancel class} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {YesNoCancel class}}
+{{YesNoQuery class} {$TYCHO/kernel/gui/doc/internals/dialogclasses.html} {YesNoQuery class}}
+}
+# >
