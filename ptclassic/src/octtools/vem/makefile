@@ -177,7 +177,10 @@ INC_FILES = \
 	../windows/argsel.h ../windows/objsel.h ../windows/windows.h
 
 include:
-	ln -s $(VPATH)/include .
+	if [ ! -h include ]; then \
+		rm -rf include; \
+		ln -s $(VPATH)/include .; \
+	fi
 	-mkdir $(VPATH)/include
 	@echo -n Linking header files in ./include to actual header files...
 	@for file in $(INC_FILES); do\
