@@ -1,0 +1,67 @@
+# Makefile for Ptolemy C50 DSP stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/c50/dsp/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+C50DIR = $(ROOT)/src/domains/c50/kernel
+C50SDIR = $(ROOT)/src/domains/c50/stars
+C50DSP = $(ROOT)/src/domains/c50/dsp/stars
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+
+INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR) -I$(C50SDIR)
+
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
+# source files for all stars, using preprocessor
+# list base stars first
+PL_SRCS= \
+ C50FIR.pl \
+ C50Allpass.pl \
+ C50Biquad.pl \
+ C50BiquadDSPlay.pl \
+ C50Comb.pl \
+ C50LMS.pl \
+ C50LMSGanged.pl \
+ C50RaisedCos.pl \
+ C50Window.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=c50dspstars
+DOMAIN=C50DSP
+DOMAIN_2=C50
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
+LIB=libc50dspstars.$(LIBSUFFIX)
+
+all:		makefile stars_all
+
+# nothing to install -- use it where it lies
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

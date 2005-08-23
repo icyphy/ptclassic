@@ -1,0 +1,41 @@
+#
+# UDPAM Makefile
+#
+CC	  = gcc
+# Uncomment one of the following defs for OS
+#OS	  = AIX
+OS	  = SOLARIS
+
+# Give me those printfs!
+DEBUG     = -DDEBUG 
+
+CCFLAGS   = -g -D${OS} ${DEBUG} -D_REENTRANT 
+INCLUDES  = -I. -I/usr/now/include -I/usr/now/include/glib
+SHELL     = /bin/sh
+RM        = /bin/rm
+AR        = ar
+LINT      = /usr/sww/bin/lint
+# Lib directories and libs for Solaris, 
+LIBS	  = -L. -lsocket -lnsl -lposix4 -ludpam -lthread
+GLUNIXLIB = -L/usr/now/lib # -lglunix
+UDPAMOFILES = management.o transport.o misc.o
+UDPAMCFILES = management.c transport.c misc.c
+
+all:	libudpam.a 
+libudpam.a: ${UDPAMOFILES}
+	@echo Making libudpam.a ...
+	${AR} -rv $@ $?
+	
+management.o: management.c udpam.h am.h
+	${CC} ${CCFLAGS} ${INCLUDES} -c management.c
+transport.o: transport.c udpam.h am.h
+	${CC} ${CCFLAGS} ${INCLUDES} -c transport.c
+misc.o: misc.c udpam.h
+	${CC} ${CCFLAGS} ${INCLUDES} -c misc.c
+# Let lint complain and annoy me.
+lint:
+	${LINT} ${CCFLAGS} ${INCLUDES} ${UDPAMCFILES}
+# Make mom happy
+clean:	
+	${RM} -f *.o test libudpam.a
+# DO NOT DELETE THIS LINE -- make depend depends on it.

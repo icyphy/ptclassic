@@ -1,0 +1,84 @@
+# Test suite for the onFiring command in pitcl.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+
+# Uncomment this to get a full report, or set in your Tcl shell window.
+# set VERBOSE 1
+
+# Set the following to avoid endless calls to exit.
+set reallyExit 0
+
+######################################################################
+#### setup
+# Create a simple universe.
+
+test onfiring-0 {create a test universe} {
+    namespace ::pitcl {
+        addUniverse x SDF
+        addBlock a WaveForm
+        addBlock b Ramp
+        addBlock c Add
+        # FIXME: Make this a non-graphical test
+        addBlock d XMgraph
+        connect .x.a.output .x.c.input
+        connect .x.b.output .x.c.input
+        connect .x.c.output .x.d.input
+    }
+} {}
+
+######################################################################
+#### onFiring
+
+test onfiring-1 {Check the onFiring command} {
+    set handle [::pitcl::onFiring {lappend testresult}]
+    string match onFiring* $handle
+} {1}
+
+test onfiring-2 {Check the execution of the bound command} {
+    set testresult {}
+    ::pitcl::run .x
+    ::pitcl::wrapup .x
+    list $testresult
+} {{.x.a .x.b .x.c .x.d}}
+
+test onfiring-3 {Check the onFiringCancel command} {
+    ::pitcl::onFiringCancel $handle
+    set testresult {}
+    ::pitcl::run .x
+    ::pitcl::wrapup .x
+    list $testresult
+} {}
+
+doneTests

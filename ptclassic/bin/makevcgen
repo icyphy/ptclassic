@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Generate a MSVC++ nmake file from a Unix makefile
+
+# Copyright (c) 1999 The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
+#
+# Programmer: Christopher Hylands
+# Version: $Id$
+#
+# This shell script invokes the Tcl/Tk script 
+# tycho/edit/textedit/genVCMakefile.tcl and generates a Microsoft
+# Visual C nmake style makefile
+#
+# Usage:
+# makevcgen makefile
+
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+if [ -z "$PTARCH" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+fi
+
+echo "source $PTOLEMY/tycho/edit/textedit/genVCMakefile.tcl; genVCMakefile $1;exit" | $PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh
