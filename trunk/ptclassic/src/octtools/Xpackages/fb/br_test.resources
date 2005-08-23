@@ -1,0 +1,18 @@
+Browser*LImage.font: -adobe-helvetica-bold-r-*-*-12-*-*-*-*-*-*-*
+Browser*editor*font: 9x15
+Browser*editor.scrollVertical: whenNeeded
+Browser*editor.width: 720
+Browser*editor.height: 360
+Browser*close.label: Close
+Browser*close.font: -adobe-helvetica-bold-r-*-*-12-*-*-*-*-*-*-*
+Browser*refresh.label: Refresh from Disk
+Browser*refresh.font: -adobe-helvetica-bold-r-*-*-12-*-*-*-*-*-*-*
+Browser*directory*image: folder.bm
+Browser*file*image: file.bm
+Browser*LImage.borderWidth: 0
+Browser*browser.maxHeight: 300
+Browser*browser.box.orientation: vertical
+Browser*browser.box.width: 500
+Browser*browser.allowHoriz: False
+Browser*browser.allowVert: True
+Browser*forceBars: True
