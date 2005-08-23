@@ -47,7 +47,25 @@ DIRS = 		top oct2ptcl #tkoct tkgraph
 MAKEVARS =	\
 		"PTARCH=$(PTARCH)" 
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo:
+TMPVPATH = ../../../../src/octtools/tkoct
+
+makefiles:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo Updating makefile in domains/$(ME)/$$x ; \
+		  if [ ! -f $(TMPVPATH)/$$x/make.template \
+			-a -f $(TMPVPATH)/$$x/makefile ]; then \
+		     echo "make.template does not exist, linking make.template to makefile in $(TMPVPATH)/$$x"; \
+		     (cd $(TMPVPATH)/$$x; ln -s makefile make.template); \
+	          fi; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=$(TMPVPATH)/$$x $@ ; \
+		) \
+	    fi ; \
+	done
+
+all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in $$x ; \
