@@ -11,12 +11,12 @@
 # objects can be maintained.
 
 # subdomain.mk reads MYVPATH
-MYVPATH = ../../../../../../
+ME = cgc/vis/tcltk
+
+MYVPATH = ../../../../../../src/domains/$(ME)
 
 include ../../../../../mk/subdomain.mk
 
 
 DIRS = stars
-
-ME = cgc/vis/tcltk
 
