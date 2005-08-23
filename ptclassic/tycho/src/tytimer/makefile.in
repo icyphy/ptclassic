@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile.in	1.5 11/24/97
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -48,25 +48,25 @@ ROOT =	$(srcdir)/../..
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-OTHERCFLAGS = -I$(ROOT)/../src/compat/ptolemy
+OTHERCFLAGS = 
 
 # makefile stubs that include architecture dependencies.
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libtyevent$(TCL_SHLIB_SUFFIX)
+LIBR =		libtytimer$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
 	-I$(srcdir) \
 	$(TCL_INCLUDES)
 
-SRCS = 		tySched.c
-HDRS =		tySched.h
+SRCS = 		tytimer.c
+HDRS =		tytimer.h
 
 EXTRA_SRCS =	makefile.in test.tcl index.html
 
-OBJS =		tySched.o
+OBJS =		tytimer.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
@@ -75,11 +75,11 @@ LIBPATH = \
 	-L$(TCL_LIB_DIR) \
 	-L$(TK_LIB_DIR)
 
-all: $(LIB) $(MISC_SRCS) 
+all: $(LIBR) $(MISC_SRCS) 
 
-install: $(LIBDIR)/$(LIB)
+install: $(LIBDIR)/$(LIBR)
 
-$(LIB) : $(OBJS)
+$(LIBR) : $(OBJS)
 	$(TCL_SHLIB_LD) $(OBJS) -o $@ $(TCL_LD_SEARCH_FLAGS) $(LIBS)
 
 depend:

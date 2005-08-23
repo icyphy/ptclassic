@@ -1,0 +1,78 @@
+#! /bin/sh
+# Command-line program for the tycho.util.tydoc utility \
+    exec tclsh "$0" "$@"
+
+# @(#)tydoc	1.6 01/12/99
+# Author: John Reekie
+
+# Load up Itcl
+package require Itcl
+namespace import itcl::*
+
+# Create the tycho namespace
+namespace eval ::tycho {}
+
+# Set up the auto_path. WHat we do here is simply append
+# paths to the auto_path in the order that is likely to
+# be most rapid for finding the needed packages. Note that
+# it is important to append all possible paths before doing
+# a package require, in case this package requires other
+# packages.
+
+# Try TYDOC_LIBRARY
+if [info exists env(TYDOC_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(TYDOC_LIBRARY)] }  {
+	lappend auto_path $env(TYDOC_LIBRARY)
+    }
+}
+
+# Try TCL_PACKAGES
+if [info exists env(TCL_PACKAGES)] {
+    if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	lappend auto_path $env(TCL_PACKAGES)
+    }
+}
+
+# Try TYCHO, or PTOLEMY if there is not TYCHO
+if ![info exists env(TYCHO)] {
+    if [info exists env(PTOLEMY)] {
+	# TYCHO is not set, but PTOLEMY is.
+	if [file exists [file join $env(PTOLEMY) tycho]] {
+	    set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	}
+    } 
+}
+if [info exists env(TYCHO)] {
+    if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	lappend auto_path $env(TYCHO)
+    }
+}
+
+# Try loading the package. If it doesn't work, print a helpful
+# error message and exit
+if [catch {package require tycho.util.tydoc} err ] {
+    puts "Cannot load \"tycho.util.tydoc\"\
+	    Error was:\n--start--\n$errorInfo\n--end--\n\
+	    The auto_path variable lists the directories that were searched.\n\
+	    auto_path = $auto_path\n\
+	    You can:\n\
+	    1. Install tycho.util.tydoc in a subdirectory of your \
+	    Tcl library\n\
+	    2. Install tycho.util.tydoc in the directory given by the \
+	    TCL_PACKAGES variable\n\
+	    3. Set the TYDOC_LIBRARY variable to point to the \
+	    tydoc directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n\
+	    5. Set the PTOLEMY variable to point to your \
+	    Ptolemy installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.util.tydoc, version 3.0"
+
+# Run the main procedure
+eval tydoc $argv
+
+# Done

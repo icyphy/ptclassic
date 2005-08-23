@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)testURLPath.itcl	1.3 03/16/98
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
 
 
 #######################################################################
@@ -51,10 +51,17 @@ if {[string compare test [info procs test]] == 1} then {
 #
 # Some additional tests for the "join" and "aslocal" options follow.
 #
+# Make sure these protocols are registered:
+catch {::tycho::register protocol "file" -class ::tycho::ResourceFile}
+catch {::tycho::register protocol "http" -class ::tycho::ResourceHTTP}
+catch {::tycho::register protocol "ftp" -class ::tycho::ResourceFTP}
+
+
 set _count 0
 foreach _name {
     foo.bar
     /users/ptolemy/foo.bar
+    c:/users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs
     http://ptolemy.eecs/~ptdesign
@@ -80,6 +87,17 @@ foreach _name {
 	/users/ptolemy/foo
 	{}
 	{/ users ptolemy foo.bar}
+	foo.bar
+    }
+    {
+	c:/users/ptolemy
+	.bar
+	c:/users/ptolemy/foo.bar
+	absolute
+	{}
+	c:/users/ptolemy/foo
+	{}
+	{c: users ptolemy foo.bar}
 	foo.bar
     }
     {
@@ -152,6 +170,8 @@ foreach _name {
     {ptolemy foo bar}
     {/ users ptolemy foo.bar}
     {/users/ptolemy foo.bar}
+    {c: users ptolemy foo.bar}
+    {c:/users/ptolemy foo.bar}
     {file: {} users ptolemy foo.bar}
     {http: ptolemy.eecs}
     http://ptolemy.eecs
@@ -177,6 +197,8 @@ foreach _name {
     ptolemy/foo/bar
     /users/ptolemy/foo.bar
     /users/ptolemy/foo.bar
+    c:/users/ptolemy/foo.bar
+    c:/users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs/
     http://ptolemy.eecs/

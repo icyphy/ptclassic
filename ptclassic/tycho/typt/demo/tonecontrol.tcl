@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)tonecontrol.tcl	1.3 04/09/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
@@ -32,6 +32,9 @@
 
 # Turn on debugging
 # controlPanel debug 1
+
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/tonecontrol.html}
 
 # Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io

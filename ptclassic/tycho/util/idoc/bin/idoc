@@ -1,12 +1,12 @@
 #! /bin/sh
 # Command-line program for the tycho.util.idoc utility \
-    exec itclsh "$0" "$@"
+    exec itkwish "$0" "$@"
 
-# $Id$
+# @(#)idoc	1.2 07/24/98
 # Author: John Reekie
 
 # Create the tycho namespace
-namespace ::tycho
+namespace eval ::tycho {}
 
 # Set up the auto_path. What we do here is simply append
 # paths to the auto_path in the order that is likely to
@@ -72,4 +72,4 @@ puts "tycho.util.idoc, version 1.0"
 eval idoc $argv
 
 # Done
-
+exit

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)JRPCServer.tcl	1.9 05/08/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -44,6 +44,12 @@
 # the server.
 
 
+puts !!!$argv
+
+# Ugly nasty global variable for the command read from the socket
+# so far
+set _JRPC_command_ ""
+
 ########################################################################
 #### JRPCServer_CreateServer
 # Set up a server on a specific port
@@ -69,7 +75,9 @@ proc JRPCServer_CreateServer {port} {
 #
 proc _JRPCServer_RegisterClient {channel clientAddress clientPort} {
     if { "$clientAddress" != "127.0.0.1"} {
-	puts stderr "_JRPCServer_RegisterClient: Security Error! \
+	puts stderr "_JRPCServer_RegisterClient: Security Error! \n\
+		Someone is trying to connect from a machine other than the \
+		local machine.\n\
 		$clientAddress != 127.0.0.1"
 		exit
     }
@@ -82,20 +90,37 @@ proc _JRPCServer_RegisterClient {channel clientAddress clientPort} {
 # Event handler for reading from sockets.
 # 
 proc _JRPCServer_ReadOrClose {fd} {
+    global _JRPC_command_
+
     set line [gets $fd]
+    # puts !$line
+    # puts "_JRPCServer_ReadOrClose: $line"
+
+    # Check for cookie and execute command if one was got
+    if { $line == "_JRPC_EndCommand_Cookie_" } {
+	global debug
+	#if $debug {
+	    puts "JRPCServer: \"[string trimright $_JRPC_command_ \n]\""
+	#}
+        if [catch {uplevel #0 $_JRPC_command_} result] {
+            puts $fd [list 1 $result]
+            flush $fd
+        } else {
+            puts $fd [list 0 $result]
+            flush $fd
+        }
+        set _JRPC_command_ ""
+
+    } else {
+        append _JRPC_command_ $line \n
+    }
+    
+    # Exit if done
     if [eof $fd] {
         if ![catch {close $fd} errMsg] {
 	    puts "_JRPCServer_ReadOrClose: close $fd failed: $errMsg "
 	}
 	return;
-    }
-    if [catch {eval $line} result] {
-	global errorInfo
-	puts $fd [list 1 $result $errorInfo]
-	flush $fd
-    } else {
-	puts $fd [list 0 $result]
-	flush $fd
     }
 }
 
@@ -103,8 +128,15 @@ proc _JRPCServer_ReadOrClose {fd} {
 # If this file is sourced in a Tcl that has the java package loaded
 # then start up the server and wait forever
 #
-if {[lsearch [package names ] java] == 1} {
-    # FIXME: the port number is hardwired.
-    JRPCServer_CreateServer 19876
+if {[lsearch [package names] java] != -1} {
+    if { [llength $argv] >= 2 } {
+        set portnum [lindex $argv 2]
+    } else {
+        set portnum 19876
+    }
+    if { [llength $argv] >= 3 } {
+	set debug [lindex $argv 3]
+    }
+    JRPCServer_CreateServer $portnum
 }
 

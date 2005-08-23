@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)html.tcl	1.3 03/23/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -34,10 +34,41 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.kernel.basic
 package provide tycho.kernel.html 2.0
+
 global env auto_path
 set env(HTML_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(HTML_LIBRARY)] == -1 } {
     lappend auto_path $env(HTML_LIBRARY)
 }
+
+### PROTOCOLS
+::tycho::register protocol "http" \
+	-class ::tycho::ResourceHTTP \
+	-label "Hy-Time Transport Protocol (HTTP)"
+
+::tycho::register protocol "ftp" \
+	-class ::tycho::ResourceFTP \
+	-label "File Transfer Protocol (FTP)"
+
+::tycho::register protocol "mailto" \
+	-class ::tycho::ResourceMail \
+	-label "Mail Protocol"
+
+### MODES
+
+# Images
+::tycho::register mode "image" \
+	-command {::tycho::view HTML -file {%s} -image 1 -toolbar 1} \
+	-category "html" \
+	-underline 0
+
+# HTML viewer
+::tycho::register mode "html" \
+	-command {::tycho::view HTML -file {%s} -toolbar 1} \
+	-viewclass ::tycho::HTML \
+	-label {HTML Viewer}  \
+	-category "html" \
+	-underline 5
 

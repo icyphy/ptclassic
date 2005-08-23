@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)test.tcl	1.2 07/29/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -48,7 +48,7 @@ if [info exists ::TYCHO] {
 if [info exists ::TYCHO] {
     package require tycho.util.tytest
 } else {
-    source [file join $env(SLATE_LIBRARY) test testDefs.tcl]
+    source [file join $env(SLATE_LIBRARY) test defs2.tcl]
 }
 
 # We also have to load this helper file

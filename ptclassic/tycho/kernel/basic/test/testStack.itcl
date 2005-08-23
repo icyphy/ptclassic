@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testStack.itcl	1.7 03/23/98
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,15 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source testDefs.tcl
-} {}
-
-# If necessary load up the class definitions
-if {[namespace tycho {info classes Stack}] == {} } {
-    namespace tycho
-    source ../Stack.itcl
-}
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
 
 test Stack-1.1 {Build a Stack} {
     catch {delete object foo}
@@ -63,5 +57,3 @@ test Stack-1.3 {Build a Stack, push {} onto it twice} {
     set geta [foo pop]
     list $getnothing $getb $geta
 } {{} {} {}}
-
-doneTests

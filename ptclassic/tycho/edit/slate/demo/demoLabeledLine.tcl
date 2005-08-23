@@ -3,7 +3,7 @@
 # To run this demo, execute
 #    ./demo LabeledLine
 #
-# $Id$
+# @(#)demoLabeledLine.tcl	1.1 07/29/98
 # Author: John Reekie
 
 proc ::demo::demoLabeledLine {} {

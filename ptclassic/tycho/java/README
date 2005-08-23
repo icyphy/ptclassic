@@ -1,0 +1,11 @@
+ptplot3.1p1 - A Java plotting package
+implemented in Java.
+Ptplot is embeddable in applets and applications.
+For more information, see ptolemy/plot/doc/index.htm
+
+Installer notes 
+If you are using the auto installer, then note that
+under Windows, the Ptplot programs will be added to
+your start menu under Ptolemy -> Ptplot.  Note further
+that directory names with spaces do not work very well
+ because of limitations in the InstallShield tool.

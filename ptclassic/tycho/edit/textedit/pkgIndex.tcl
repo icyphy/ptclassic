@@ -1,10 +1,10 @@
-# Package index for the Tycho TextEdit package
+# Package index for the Tycho tycho.edit.textedit package
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)pkgIndex.tcl	1.3 04/29/98
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,5 +30,5 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-package ifneeded TextEdit 0.1 \
+package ifneeded tycho.edit.textedit 2.0 \
 	[list source [file join $dir textedit.tcl]]

@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)demo.tcl	1.2 07/29/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -37,14 +37,14 @@
 package provide slate.demo 1.0
 
 # Just in case someone hasn't loaded the slate package
-if [info exists itcl::version] {
+if [::info exists ::TYCHO] {
     package require tycho.edit.slate
 } else {
     package require slate
 }
 
 # All demo procs have their own namespace
-namespace eval ::tycho::demo {}
+namespace eval ::demo {}
 
 # Add demo procs to the auto-load
 global env auto_path

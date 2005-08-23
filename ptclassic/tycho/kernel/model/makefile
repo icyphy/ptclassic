@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.10 05/29/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -42,9 +42,12 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =	 bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS = \
+	DataModel.itcl \
+	Model.itcl \
+	ModelLocator.itcl
 
 ITCL_SRCS = 
 
@@ -54,7 +57,9 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES = adm bin demo doc test
+MISC_FILES =  $(DIRS) tclIndex
+
+OPTIONAL_FILES = adm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -63,7 +68,11 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+all: sources $(MISC_SRCS)
+
+install: all subinstall
+
+.PHONY: all install subinstall
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

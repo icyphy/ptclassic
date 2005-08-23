@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)ControlSubpanel.itcl	1.5	04/30/97
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -34,10 +34,22 @@
 #######################################################################
 #### ControlSubpanel
 # A superclass for control panels that can be packed into
-# in instance of ControlPanel. By default, this class
-# assume that its immediate parent is an instance of
-# ControlPanel -- if not, then set the *-controlpanel*
-# option when creating the widget.
+# in instance of ControlPanel. This class provides a graphical
+# widget for these sub-panels and a simple way of connecting
+# embedded control widgets into the control panels.
+#
+# To create a sub-panel sub-class, just:
+# <ol>
+# <li>In the constructor, create any graphical elements needed,
+# such as sliders and buttons.
+# <li>Implement the requestConnect{} method. This method will be
+# called by the ControlPanel{} at the appropriate time. The method
+# should call the protected method connect{} to connect connect
+# control widgets to callback names.
+# </ol>
+#
+# See the <a href="../../../typt/controls/"><code>$TYCHO/typt/controls/</code></a>
+# directory for examples of sub-panels.
 #
 class ::tycho::ControlSubpanel {
     inherit ::tycho::TWidget
@@ -60,8 +72,8 @@ class ::tycho::ControlSubpanel {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Connect a widget to a control
-    protected method connect {widget control}
+    # Connect a component to a control
+    protected method connect {component control {scale {}} {offset {}}}
 }
 
 #######################################################################
@@ -70,17 +82,23 @@ class ::tycho::ControlSubpanel {
 body ::tycho::ControlSubpanel::constructor {args} {
     # Initialize options
     eval itk_initialize $args
-
-    # If there's no control panel set, set it to the parent
-    if { $itk_option(-controlpanel) == "" } {
-        configure -controlpanel [winfo parent $this]
-    }
 }
 
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#######################################################################
+#### connect
+#
+# Connect a component to a control in the main control panel
+#
+body ::tycho::ControlSubpanel::connect \
+	{component control {scale {}} {offset {}}} {
+    $itk_option(-controlpanel) connect \
+            $itk_component($component) $control $scale $offset
+}
 
 #######################################################################
 #### requestConnect
@@ -90,17 +108,4 @@ body ::tycho::ControlSubpanel::constructor {args} {
 #
 body ::tycho::ControlSubpanel::requestConnect {} {
     ;# By default, do nothing
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### connect
-#
-# Connect a widget to a control in the main control panel
-#
-body ::tycho::ControlSubpanel::connect {widget control} {
-    $itk_option(-controlpanel) connect $widget $control
 }

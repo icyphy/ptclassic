@@ -1,6 +1,7 @@
 # Simple HTML display library by Stephen Uhler (stephen.uhler@sun.com)
 # Copyright (c) 1995 by Sun Microsystems
-# Version 0.3 Fri Sep  1 10:47:17 PDT 1995
+# Version: @(#)html_library.tcl	1.5 12/05/97
+# Based on Sun Version 0.3 Fri Sep  1 10:47:17 PDT 1995
 #
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -713,7 +714,16 @@ proc HMset_font {win tag font} {
 # generate an X font name
 proc HMx_font {family size weight style {adjust_size 0}} {
 	catch {incr size $adjust_size}
-	return "-*-$family-$weight-$style-normal-*-*-${size}0-*-*-*-*-*-*"
+	set font "-*-$family-$weight-$style-normal-*-*-${size}0-*-*-*-*-*-*"
+	if {![winfo exists .html_library_test_text_object]} {
+	    text .html_library_test_text_object
+	}
+	if {[catch {.html_library_test_text_object configure -font \
+		$font}] == 0} {
+	    return $font
+	} else {
+	    return fixed
+	}
 }
 
 # Optimize HMrender (hee hee)
@@ -1394,24 +1404,27 @@ proc HMcgiMap {data} {
 # version of the library routine, until the bug is fixed, make sure we
 # over-ride the library version, and not the otherway around
 
-auto_load tkFocusOK
-proc tkFocusOK w {
-    set code [catch {$w cget -takefocus} value]
-    if {($code == 0) && ($value != "")} {
-    if {$value == 0} {
-        return 0
-    } elseif {$value == 1} {
-        return 1
-    } else {
-        set value [uplevel #0 $value $w]
-        if {$value != ""} {
-        return $value
-        }
-    }
-    }
-    set code [catch {$w cget -state} value]
-    if {($code == 0) && ($value == "disabled")} {
-    return 0
-    }
-    regexp Key|Focus "[bind $w] [bind [winfo class $w]]"
-}
+# NOTE: commented out by hjr Dec 5, 1997, in response to a
+# report from Tom Lane. See the ptdesign logs for Dec5 1997.
+
+# auto_load tkFocusOK
+# proc tkFocusOK w {
+#     set code [catch {$w cget -takefocus} value]
+#     if {($code == 0) && ($value != "")} {
+#     if {$value == 0} {
+#         return 0
+#     } elseif {$value == 1} {
+#         return 1
+#     } else {
+#         set value [uplevel #0 $value $w]
+#         if {$value != ""} {
+#         return $value
+#         }
+#     }
+#     }
+#     set code [catch {$w cget -state} value]
+#     if {($code == 0) && ($value == "disabled")} {
+#     return 0
+#     }
+#     regexp Key|Focus "[bind $w] [bind [winfo class $w]]"
+# }

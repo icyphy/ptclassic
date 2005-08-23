@@ -3,7 +3,7 @@
 #
 # Author:  H. John Reekie
 #
-# Version: $Id$
+# Version: @(#)math.tcl	1.1 07/29/98
 #
 # Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.

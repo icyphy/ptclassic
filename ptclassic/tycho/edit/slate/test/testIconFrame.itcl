@@ -2,9 +2,9 @@
 #
 # @Author: John Reekie
 # 
-# @Version: $Id$
+# @Version: @(#)testIconFrame.itcl	1.8 07/29/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the test package is loaded
+package require slate.test
 
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
-} {}
-
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 100
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single IconFrame on the slate
@@ -107,8 +98,7 @@ foreach {opt val} {\
         .s itemcget $f $opt
     } $val
 }
-update
-after $SHORTTIME
+_update
 
 _clean
 set f [.s create IconFrame 140 140 180 180 \
@@ -139,8 +129,7 @@ foreach {opt val} {\
         .s itemcget $f $opt
     } $val
 }
-update
-after $SHORTTIME
+_update
 
 #### -relief
 
@@ -157,8 +146,7 @@ foreach r {flat raised sunken} \
 		[.s component $f surface itemcget -fill] \
 		[.s component $f shaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -175,8 +163,7 @@ foreach r {ridge groove} \
 		[.s component $f notlit itemcget -fill] \
 		[.s component $f notshaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
 
 #### -borderwidth
@@ -190,8 +177,7 @@ foreach b {0 1 2} \
 	.s itemconfigure $f -borderwidth $b
 	.s component $f surface coords
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 #### -color
@@ -204,22 +190,33 @@ foreach c {red blue yellow} {
 	.s itemconfigure $f -color $c
 	.s component $f surface itemcget -fill
     } ${c}3
-    update idletasks
-    after $SHORTTIME
+    _update
 }
 
-#### -anchor
+#### -textanchor
     
 _frame -text Bar
 set i 0
 foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
     incr i
-    test IconFrame-anchor-$i "Check anchoring, graphics, $a" {
+    test IconFrame-textanchor-$i "Check anchoring, graphics, $a" {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
+}
+
+#### -anchor
+
+set i 0
+_frame
+foreach a {n s e w nw sw ne se c} {
+    incr i
+    .s itemconfigure $f -anchor $a
+    test IconFrame-anchor-$i "Test -anchor $a" {
+        eval ::tycho::Rectangle::feature [.s coords [.s primary $f]] $a
+    } {100.0 100.0}
+    _update
 }
 
 #### -hsize
@@ -229,13 +226,22 @@ test IconFrame-hsize-1 {Test -hsize} {
     .s itemconfigure $f -hsize 100
     .s coords [.s primary $f]
 } {50.0 80.0 150.0 120.0}
-update
-after $SHORTTIME
+_update
 
-test IconFrame-hsize-2 {Test invalid -hsize} {
-    catch {.s itemconfigure $f -hsize 0} msg
-    set msg
-} {Invalid -hsize: 0}
+_frame -anchor se
+test IconFrame-hsize-2 {Test -hsize, non-center anchor} {
+    .s itemconfigure $f -hsize 100
+    .s coords [.s primary $f]
+} {0.0 60.0 100.0 100.0}
+_update
+
+_frame
+test IconFrame-hsize-3 {Test -hsize} {
+    .s itemconfigure $f -hsize 100
+    .s coords [.s primary $f]
+} {50.0 80.0 150.0 120.0}
+_update
+
 
 #### -vsize
 
@@ -244,56 +250,72 @@ test IconFrame-vsize-1 {Test -vsize} {
     .s itemconfigure $f -vsize 100
     .s coords [.s primary $f]
 } {70.0 50.0 130.0 150.0}
-update
-after $SHORTTIME
+_update
 
-test IconFrame-vsize-2 {Test invalid -vsize} {
+_frame -anchor se
+test IconFrame-vsize-2 {Test -vsize, non-center anchor} {
+    .s itemconfigure $f -vsize 100
+    .s coords [.s primary $f]
+} {40.0 0.0 100.0 100.0}
+_update
+
+test IconFrame-vsize-3 {Test invalid -vsize} {
     catch {.s itemconfigure $f -vsize 0} msg
     set msg
 } {Invalid -vsize: 0}
 
 
 #######################################################################
+#### Region
+#
+_frame
+test IconFrame-region-1 "Get the item region" {
+    .s region $f
+} {70.0 80.0 130.0 120.0}
+_update
+
+test IconFrame-region-1 "Change the item region" {
+    .s region $f 50 50 120 80
+    list [.s coords [.s primary $f]] \
+            [.s coords $f] \
+            [.s itemcget $f -hsize] \
+            [.s itemcget $f -vsize]
+} {{50.0 50.0 120.0 80.0} {85.0 65.0} 70 30}
+_update
+
+#######################################################################
 #### Terminals
 #
 _frame
 test IconFrame-terminal-1 "Create a terminal and access as component" {
-    .s call $f terminal input-1 Terminal 0 0 \
-            -anchor {50 0} \
-            -direction {0 -1} \
+    .s call $f terminal input-1 Terminal 50 0 \
+            -direction n \
             -length 20 \
-            -type input \
-            -style doublearrow
+            -style doublearrowout
     # Test: just make sure we get something
     expr { [.s component $f input-1] != "" }
 } {1}
-update
-after $SHORTTIME
-after $SHORTTIME
+_update
 
 test IconFrame-terminal-2 "Create a terminal and get coordinates" {
-    .s call $f terminal input-2 Terminal 0 0 \
-            -anchor {0 50} \
-            -direction {-1 0} \
+    .s call $f terminal input-2 Terminal 0 50 \
+            -direction w \
             -length 30 \
-            -type input \
-            -style blob -fill blue
+            -style circle -fill blue
     # Test: get the two ends of both terminals
     list \
-            [.s aspect [.s component $f input-1] origin terminal] \
-            [.s aspect [.s component $f input-2] origin terminal]
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
 } {{100.0 80.0 100.0 60.0} {70.0 100.0 40.0 100.0}}
-update
-after $SHORTTIME
+_update
 
-test IconFrame-terminal-3 "Resize and check terminals have moves" {
+test IconFrame-terminal-3 "Resize and check terminals have moved" {
     .s itemconfigure $f -hsize 100 -vsize 100
    # Test: get the two ends of both terminals
     list \
-            [.s aspect [.s component $f input-1] origin terminal] \
-            [.s aspect [.s component $f input-2] origin terminal]
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
 } {{100.0 50.0 100.0 30.0} {50.0 100.0 20.0 100.0}}
-update
-after $SHORTTIME
+_update
 
 

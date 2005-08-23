@@ -1,8 +1,8 @@
 ##########################################################################
-# @Version: $Id$
+# @Version: @(#)HTMLOutline.itcl	1.5 06/10/98
 # @Author: John Reekie
 #
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -65,7 +65,7 @@ proc ::tycho::htmlOutline {{file {}} args} {
 # It can be used to create the document and maintain its structure
 # without having to mess around with HTML links and stuff.
 #
-# The <i>HTMLOutline</i> model has the following options:
+# The HTMLOutline model has the following options:
 #
 # <dl>
 #   <dt><b>-bgcolor</b> _color_
@@ -85,6 +85,14 @@ proc ::tycho::htmlOutline {{file {}} args} {
 #   Text to be placed at the bottom of each page. This text will be
 #   enclosed between the two comments <code>&lt;!--footer--&gt;</code>
 #   and <code>&lt;!--/footer--&gt;</code>. This text will be automatically
+#   replaced each time the document is reparsed.
+#
+#   <dt><b>-header</b> _string_
+#   <dd>
+#   Text to be placed in the header of each page. This may include
+#   <meta> tags, <style> tags, or <link>. This text will be
+#   enclosed between the two comments <code>&lt;!--header--&gt;</code>
+#   and <code>&lt;!--/header--&gt;</code>. This text will be automatically
 #   replaced each time the document is reparsed.
 #
 #   <dt><b>-imagedir</b> _directory_
@@ -111,9 +119,17 @@ proc ::tycho::htmlOutline {{file {}} args} {
 #   <dd>
 #   The file suffix. The default is ".html".
 #
+#   <dt><b>-template</b> _string_
+#   <dd>
+#   The template for a new document. The default gives a well-structured
+#   document. It can be changed to changed the position of the
+#   navigation bar and so on. The default template includes a DIV
+#   tag of class "body" so that stylesheets can be written to control
+#   overall document formatting
+#
 # </dl>
 #
-# The <i>HTMLOutline</i> model has the following types:
+# The HTMLOutline model has the following types:
 #
 # <dl>
 # <dt><b>section</b> _name_
@@ -139,6 +155,8 @@ proc ::tycho::htmlOutline {{file {}} args} {
 #
 #   </dl>
 #
+# </dl>
+#
 class ::tycho::HTMLOutline {
     inherit ::tycho::DataModel
 
@@ -150,6 +168,9 @@ class ::tycho::HTMLOutline {
 
     # The footer for each file
     public variable footer ""
+
+    # The header for each file
+    public variable header ""
 
     # The background color
     public variable bgcolor "#ffffff"
@@ -169,6 +190,20 @@ class ::tycho::HTMLOutline {
     # The file suffix
     public variable suffix ".html"
 
+    # The document template
+    public variable template {
+<html>
+<head>
+<title></title>
+</head>
+<div class="body">
+<body>
+<h1></h1>
+</body>
+</div>
+</html>
+    }
+
     #################################################################
     ####                     public methods                      ####
 
@@ -186,6 +221,9 @@ class ::tycho::HTMLOutline {
 
     # Generate the file footer
     protected method _footer {}
+
+     # Generate the file header
+    protected method _header {}
 
     # Generate the files -- helper method
     protected method _generate {section inline}
@@ -235,8 +273,13 @@ body ::tycho::HTMLOutline::constructor {args} {
             -title ""
 
     lappend printable \
+            -bgcolor \
             -footer \
-            -inline
+            -header \
+            -inline \
+            -imagedir \
+            -images \
+	    -template
 }
 
 ########################################################################
@@ -266,8 +309,8 @@ body ::tycho::HTMLOutline::generate {} {
 #
 # Generate the out-of-line contents of a section. The argument
 # is the current section. The table of contents enclosed within
-# <code>&lt;!--contents--&gt;</code> and
-# <code>&lt;!--/contents--&gt;</code> are replaced. If this cannot be
+# <code>&lt;div class=\"contents\"&gt;</code> and
+# <code>&lt;div class=\"/contents\"&gt;</code> are replaced. If this cannot be
 # found, the contents is inserted after the top-level heading.
 #
 body ::tycho::HTMLOutline::_contents {section} {
@@ -282,25 +325,28 @@ body ::tycho::HTMLOutline::_contents {section} {
     # For each section, recursively call _generate{} and build contents
     # at the same time
     set contents ""
-    append contents "<!--contents-->\n"
-    append contents "<ul>\n"
-    foreach sec [match section $context] {
-        # Make new file
-        set subsection [concat $context $sec]
-        _generate $subsection [attrget $subsection -inline]
+    if { [match section $context] != "" } {
+	append contents "<div class=\"contents\">\n"
+	append contents "<ul>\n"
+	foreach sec [match section $context] {
+	    # Make new file
+	    set subsection [concat $context $sec]
+	    _generate $subsection [attrget $subsection -inline]
 
-        # Build table of contents
-        set sectitle [attrget $subsection -title]
-        append contents "<li><a href=\"$sec$suffix\">$sectitle</a>\n"
+	    # Build table of contents
+	    set sectitle [attrget $subsection -title]
+	    append contents "<li><a href=\"$sec$suffix\">$sectitle</a>\n"
+	}
+	append contents "</ul>\n"
+	append contents "</div class=\"contents\">"
     }
-    append contents "</ul>\n"
-    append contents "<!--/contents-->"
 
     # Restore the data
     set _data $data
 
     # Replace or insert the table of contents
-    if ![regsub "<!--contents-->.*<!--/contents-->" $_data $contents _data] {
+    if ![regsub "<div class=\"contents\">.*</div class=\"contents\">" \
+            $_data $contents _data] {
         # Failed to find it: insert after /h1
         regsub "</h1>" $_data "</h1>\n$contents" _data
     }
@@ -331,21 +377,18 @@ body ::tycho::HTMLOutline::_extract {section level} {
 #
 # Generate a file footer. If the <b>-footer</b>
 # option is null, do nothing. Otherwise, replace the text within
-# <code>&lt;!--footer--&gt;</code> and <code>&lt;!--/footer--&gt;</code>.
+# <code>&lt;div class=\"footer--&gt;</code> and <code>&lt;div class=\"/footer--&gt;</code>.
 # If it doesn't exist, insert the footer before the
 # <code>&lt;/body&gt;</code> tag if there is one, else at the
 # end of the document.
 #
 body ::tycho::HTMLOutline::_footer {} {
-    set string "\
-            <!--footer-->\n \
-            <br>\n \
-            <hr>\n \
-            <br>\n \
+    set string "<div class=\"footer\">\n \
             $footer\n \
-            <!--/footer-->"
+            </div class=\"footer\">"
 
-    if ![regsub "<!--footer-->.*<!--/footer-->" $_data $string _data] {
+    if ![regsub "<div class=\"footer\">.*</div class=\"footer\">" \
+            $_data $string _data] {
         # Failed to find it: insert before /body
         if ![regsub "</body>" $_data "$string\n</body>" _data] {
             # Oops.. append at end
@@ -368,14 +411,11 @@ body ::tycho::HTMLOutline::_generate {section inline} {
 
     # Make a backup of the file if it already exists
     if [file exists $filename] {
-        set backup [file join $directory \
-                $section.bak$suffix]
-        set fd [open $filename]
-        set data [read $fd]
-        close $fd
-        set fd [open $backup "w"]
-        puts $fd $data
-        close $fd
+        if ![file exists [file join $directory backup]] {
+            file mkdir [file join $directory backup]
+        }
+        file copy -force $filename [file join $directory \
+                backup [lindex $section end]$suffix]
     }
 
     # If the file exists, get its data. Otherwise create default data
@@ -384,20 +424,14 @@ body ::tycho::HTMLOutline::_generate {section inline} {
         set _data [read $fd]
         close $fd
     } else {
-        set _data " \
-                <html>\n \
-                <head>\n \
-                <title></title>\n \
-                </head>\n \
-                <body>\n \
-                <h1></h1>\n \
-                </body>\n \
-                </html>\n"
+        # Use the document template
+        set _data $template
     }
 
     # Modify the titles, the contents, the footer, and the navigation links
     _title $section
     _footer   ;# Note: do footer before doing contents
+    _header
     if $inline {
         _inline $section
     } else {
@@ -415,12 +449,37 @@ body ::tycho::HTMLOutline::_generate {section inline} {
 }
 
 ########################################################################
+#### _header
+#
+# Generate a file header. If the <b>-header</b>
+# option is null, do nothing. Otherwise, replace the text within
+# <code>&lt;!--header--&gt;</code> and <code>&lt;!--/header--&gt;</code>.
+# If it doesn't exist, insert the header after the
+# <code>&lt;/title&gt;</code> tag if there is one, otherwise
+# take a guess and insert at the beginning of the document.
+#
+body ::tycho::HTMLOutline::_header {} {
+    set string "\
+            <!--header-->\n \
+            $header\n \
+            <!--/header-->"
+
+    if ![regsub "<!--header-->.*<!--/header-->" $_data $string _data] {
+        # Failed to find it: insert after /title
+        if ![regsub "</title>" $_data "</title>\n$string" _data] {
+            # Oops.. prepend at start
+            set _data "$string\n$_data"
+        }
+    }
+}
+
+########################################################################
 #### _inline
 #
 # Generate the in-line contents of a section. The argument
 # is the current section. The table of contents enclosed within
-# <code>&lt;!--contents--&gt;</code> and
-# <code>&lt;!--/contents--&gt;</code> are replaced. If this cannot be
+# <code>&lt;div class=\"contents\"&gt;</code> and
+# <code>&lt;div class=\"/contents="&gt;</code> are replaced. If this cannot be
 # found, the contents is inserted after the top-level heading.
 #
 body ::tycho::HTMLOutline::_inline {section} {
@@ -431,35 +490,37 @@ body ::tycho::HTMLOutline::_inline {section} {
     }
     set newdata ""
     set contents ""
-    append contents <!--contents-->\n
-    append contents "<ul>\n"
-    foreach sec [match section $context] {
-        set sectitle [attrget [concat $context $sec] -title]
+    if { [match section $context] != "" } {
+	append contents "<div class=\"contents\">\n"
+	append contents "<ul>\n"
+	foreach sec [match section $context] {
+	    set sectitle [attrget [concat $context $sec] -title]
 
-        # Generate contents
-        append contents "<li><a href=\"#$sec\">$sectitle</a>\n"
+	    # Generate contents
+	    append contents "<li><a href=\"#$sec\">$sectitle</a>\n"
 
-        # Modify the section title if it exists, otherwise add new
-        # data
-        # FIXME: need to parameterize the <h2> tag
-        if ![regsub \
-                "(<a name=\"$sec\">\[ \n\]*)<h2>.*</h2>(\[ \n\]*</a>)" \
-                $_data \
-                "\\1<h2>$sectitle</h2>\\2" _data] {
-            # It's not there. Insert data before footer
-            regsub <!--footer--> $_data \
-                    "<a name=\"$sec\">\n \
-                    <h2>$sectitle</h2>\n \
-                    </a>\n \
-                    <p>\n\n\n \
-                    <!--footer-->" _data
-        }
+	    # Modify the section title if it exists, otherwise add new
+	    # data
+	    if ![regsub \
+		    "(<a name=\"$sec\">\[ \n\]*)<h2>.*</h2>(\[ \n\]*</a>)" \
+		    $_data \
+		    "\\1<h2>$sectitle</h2>\\2" _data] {
+		# It's not there. Insert data before footer
+		regsub <div class=\"footer\"> $_data \
+			"<a name=\"$sec\">\n \
+			<h2>$sectitle</h2>\n \
+			</a>\n \
+			<p>\n\n\n \
+			<div class=\"footer\">" _data
+	    }
+	}
+	append contents "</ul>\n"
+	append contents "</div class=\"contents\">"
     }
-    append contents "</ul>\n"
-    append contents "<!--/contents-->"
 
     # Replace or insert the table of contents
-    if ![regsub "<!--contents-->.*<!--/contents-->" $_data $contents _data] {
+    if ![regsub "<div class=\"contents\">.*</div class=\"contents\">" \
+            $_data $contents _data] {
         # Failed to find it: insert after /h1
         regsub "</h1>" $_data "</h1>\n$contents" _data
     }
@@ -470,8 +531,8 @@ body ::tycho::HTMLOutline::_inline {section} {
 #
 # Modify the navigation links. The section is the section
 # of this particular file. The text between
-# <code>&lt;!--navigation--&gt;</code> and
-# <code>&lt;!--/navigation--&gt;</code> are replaced. If this cannot be
+# <code>&lt;div class=\"navigation--&gt;</code> and
+# <code>&lt;div class=\"/navigation--&gt;</code> are replaced. If this cannot be
 # found, insert the navigation links prior to the footer.
 #
 body ::tycho::HTMLOutline::_navigation {section} {
@@ -479,18 +540,20 @@ body ::tycho::HTMLOutline::_navigation {section} {
     set within [lreplace $section end end]
     set sect [lindex $section end]
     set sections [match section $within]
-    if { [file pathtype $imagedir] == "relative" } {
-        set idir [file join $directory $imagedir]
-    } else {
-        set idir $imagedir
-    }
-    set nav "<!--navigation-->\n"
+    #if { [file pathtype $imagedir] == "relative" } {
+    #    set idir [file join $directory $imagedir]
+    #} else {
+    #    set idir $imagedir
+    #}
+    set idir $imagedir
+    set nav "<div class=\"navigation\">\n<br>\n"
 
     # Top
     append nav "<a href=\"index$suffix\"> \
             <img \
+            border=0 \
             src=\"[file join $idir [lindex $images 0]]\" \
-            alt=\"Top: $title\"></a>"
+            alt=\"Top: $title\"></a>\n"
 
     # Previous
     set index [lsearch -exact $sections $sect]
@@ -500,21 +563,20 @@ body ::tycho::HTMLOutline::_navigation {section} {
         set prevtitle [attrget [concat $within $prevname] -title]
         append nav "<a href=\"$prevfile\"> \
                 <img \
+                border=0 \
                 src=\"[file join $idir [lindex $images 1]]\" \
-                alt=\"Previous: $prevtitle\"></a>"
+                alt=\"Previous: $prevtitle\"></a>\n"
     }
     # Up
-    if { $within == "" } {
-        set upfile index$suffix
-        set uptitle $title
-    } else {
+    if { $within != "" } {
         set upfile $within$suffix
         set uptitle [attrget $within -title]
-    }
-    append nav "<a href=\"$upfile\"> \
+        append nav "<a href=\"$upfile\"> \
                 <img \
+                border=0 \
                 src=\"[file join $idir [lindex $images 2]]\" \
-                alt=\"Up: $uptitle\"></a>"
+                alt=\"Up: $uptitle\"></a>\n"
+    }
     # Next
     if { $index < [expr [llength $sections] - 1]} {
         set nextname [lindex $sections [expr $index+1]]
@@ -522,15 +584,17 @@ body ::tycho::HTMLOutline::_navigation {section} {
         set nexttitle [attrget [concat $within $nextname] -title]
         append nav "<a href=\"$nextfile\"> \
                 <img \
+                border=0 \
                 src=\"[file join $idir [lindex $images 3]]\" \
-                alt=\"Next: $nexttitle\"></a>"
+                alt=\"Next: $nexttitle\"></a>\n"
     }
-    append nav "\n<br>\n<!--/navigation-->"
+    append nav "\n<br>\n</div class=\"navigation\">"
 
     # Replace or insert the navigation links
-    if ![regsub "<!--navigation-->.*<!--/navigation-->" $_data $nav _data] {
+    if ![regsub "<div class=\"navigation\">.*</div class=\"navigation\">" \
+            $_data $nav _data] {
         # Failed to find it: insert before footer
-        regsub "<!--footer-->" $_data "\n<p>\n$nav\n<!--footer-->" _data
+        regsub "<div class=\"footer\">" $_data "\n<p>\n$nav\n<div class=\"footer\">" _data
     }
 }
 
@@ -594,7 +658,7 @@ body ::tycho::HTMLOutline::_title {section} {
     if ![regsub "<h1>.*</h1>" $_data \
             "<h1>$sectitle</h1>" \
             _data] {
-        # Failed to find heading. Substitute for <body> if it exists
+        # Failed to find heading. Insert after <body> if it exists
         if ![regsub "<body \[^>\]*>" $_data \
                 "\\0\n<h1>$sectitle</h1>" _data] {
             # That failed too. Insert after title
@@ -603,8 +667,8 @@ body ::tycho::HTMLOutline::_title {section} {
         }
     }
     # Background color
-    if ![regsub {<body ([^>]*) ?bgcolor=([^ >]) ?([^>]*)>} $_data \
-            "<body \\1 bgcolor=$bgcolor \\2>" _data] {
+    if ![regsub {<body ([^>]* )bgcolor=([^ >]*)([^>]*)>} $_data \
+            "<body \\1bgcolor=$bgcolor\\3>" _data] {
         # Not already there: add the bgcolor tag
         regsub {<body( ?[^>]*)>} $_data \
                 "<body bgcolor=$bgcolor\\1>" _data

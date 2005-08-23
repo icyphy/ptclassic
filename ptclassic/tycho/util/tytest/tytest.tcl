@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)tytest.tcl	1.2 03/16/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -35,9 +35,14 @@
 # Programming" book
 
 package provide tycho.util.tytest 1.0
+
+# Source the main defs file
+source [file join [file dirname [info script]] testDefs.tcl]
+
+# Do the auto-loading thing in case someone adds files later
+# additional files
 global env auto_path
 set env(TYTEST_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(TYTEST_LIBRARY)] == -1 } {
     lappend auto_path $env(TYTEST_LIBRARY)
 }
-

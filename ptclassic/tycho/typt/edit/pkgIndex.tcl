@@ -1,8 +1,8 @@
-# Package index for the tycho.typt.editors package
+# Package index for the tycho.typt.edit package
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)pkgIndex.tcl	1.3 05/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded tycho.typt.editors 0.2.1 \
-	[list source [file join $dir editors.tcl]]
+package ifneeded tycho.typt.edit 0.2.1 \
+	[list source [file join $dir edit.tcl]]
 
 

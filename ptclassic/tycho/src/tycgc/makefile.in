@@ -1,10 +1,10 @@
-# Makefile for compiling the sample cgc package
+# Makefile for compiling Tycho's CGC support package
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile.in	1.7 05/11/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -54,19 +54,19 @@ OTHERCFLAGS =
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libcgctest$(TCL_SHLIB_SUFFIX)
+LIBR =		libtycgc$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
 	-I$(srcdir) \
 	$(TCL_INCLUDES)
 
-SRCS = 		cgctest.c
-HDRS =		cgctest.h
+SRCS = 		tycgc.c
+HDRS =		tycgc.h
 
-EXTRA_SRCS =	makefile.in test.tcl
+EXTRA_SRCS =	makefile.in tclif.c test.tcl
 
-OBJS =		cgctest.o
+OBJS =		tycgc.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
@@ -75,11 +75,11 @@ LIBPATH = \
 	-L$(TCL_LIB_DIR) \
 	-L$(TK_LIB_DIR)
 
-all: $(LIB) $(MISC_SRCS) 
+all: $(LIBR) $(MISC_SRCS) 
 
-install: $(LIBDIR)/$(LIB)
+install: $(LIBDIR)/$(LIBR)
 
-$(LIB) : $(OBJS)
+$(LIBR) : $(OBJS)
 	$(TCL_SHLIB_LD) $(OBJS) -o $@ $(TCL_LD_SEARCH_FLAGS) $(LIBS)
 
 depend:
@@ -89,4 +89,4 @@ depend:
 include $(ROOT)/mk/tycommon.mk
 
 makefile: $(srcdir)/makefile.in
-	(cd ../..; ./config.status)
+	(cd ..; ./config.status)

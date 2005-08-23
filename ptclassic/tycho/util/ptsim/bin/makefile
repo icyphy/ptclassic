@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.4 04/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -59,12 +59,14 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
-	chmod a+x ptsim
+all: sources $(MISC_SRCS)
+	-chmod a+x ptsim
 
-install: all
+install: all tybin_install
+
+.PHONY: all install tybin_install
 
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+include $(ROOT)/mk/tycommon.mk
 
 

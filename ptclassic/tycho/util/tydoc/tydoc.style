@@ -1,10 +1,10 @@
 #
-# $Id$
+# @(#)tydoc.style	1.2 10/07/97
 #
 # The "tydoc" master style-sheet
 #
-modelconfigure -label "Tycho documentation system"
-modelconfigure -description {
+configure -title "Tycho documentation system"
+configure -description {
     This style contains settings for the Tycho
     documentation system.
 }

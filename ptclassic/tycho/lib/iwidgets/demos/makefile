@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands, John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.5 03/02/98
 
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -43,7 +43,7 @@ include $(CONFIG)
 ITCL_SRCS = 
 
 DEMO_SRCS = \
-	query \
+	labeledgrid \
 	widgettree
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
@@ -58,10 +58,12 @@ TYDOC_DESC =	Index of classes in tycho/lib/iwidgets/demos
 
 DIRS =		
 
-all install: $(MISC_SRCS)
+MISC_FILES = 	arrowclose.xbm arrowopen.xbm
 
-sources:: $(DEMO_SRCS)
+all:  $(MISC_SRCS)
 	chmod a+x $(DEMO_SRCS)
 
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+install: all
+
+# We have an all rule, so include tycommon.mk.
+include $(ROOT)/mk/tycommon.mk

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.5 04/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) gui
 
-MISC_FILES = 
+MISC_FILES = README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -59,13 +59,14 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
-
-# Make the shell script/s executable
-sources::
+all:  sources $(MISC_SRCS)
 	chmod a+x gui
 
+install: all tybin_install
+
+.PHONY: all install tybin_install
+
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+include $(ROOT)/mk/tycommon.mk
 
 

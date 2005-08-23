@@ -3,9 +3,9 @@
 #
 # @Author: Kevin Chang
 #
-# @Version: $Id$
+# @Version: @(#)testMail.itcl	1.3 03/23/98
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,9 +31,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.html
 
 
 # NOTE: We can test the error messages of ResourceMail, but we
@@ -59,12 +59,15 @@ test mail-badaddress0 {Mailing to a bad address that doesn't exists} {
 #
 test mail-badreceiver0 {Mailing to a bad user name that doesn't exist} {
     set mailobj [::tycho::resource new \
-            mailto:nopersonhere@ptolemy.eecs.berkeley.edu]
+            mailto:test_bounced_mail@ptolemy.eecs.berkeley.edu]
     $mailobj open
-    $mailobj puts "Subject: Auto Test 2, erase me."
+    $mailobj puts "Subject: Auto Test 2, ***** ERASE ME *****"
     $mailobj puts ""
-    $mailobj puts "This is an automated test of ResourceMail.itcl"
-    $mailobj puts "Please ignore this message, as it is generated"
+    $mailobj puts "You have just ran Tycho's automated test."
+    $mailobj puts "This bounced mail is a result of testMail.itcl"
+    $mailobj puts "to test ResourceMail.itcl."
+    $mailobj puts ""
+    $mailobj puts "Please erase this message, as it is generated"
     $mailobj puts "automatically within the test suite."
     set msg {}
     catch {$mailobj close} msg

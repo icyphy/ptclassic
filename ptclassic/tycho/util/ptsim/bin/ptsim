@@ -2,7 +2,7 @@
 # Command-line program for the tycho.util.ptsim utility \
     exec itclsh "$0" "$@"
 
-# $Id$
+# @(#)ptsim	1.1 03/04/98
 # Author: John Reekie
 
 # If the PTSIM_LIBRARY variable is set, add it to the auto_path

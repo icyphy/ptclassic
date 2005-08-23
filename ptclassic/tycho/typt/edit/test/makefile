@@ -1,9 +1,9 @@
-# Makefile for Ptolemy Tycho system, lib/tydoc/test directory.
+# Makefile for Tycho Ptolemy Edit test directory
 #
-# @(#)makefile	1.11 8/8/96
+# @(#)makefile	@(#)makefile	1.11 05/07/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,33 +33,44 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/lib/tydoc/test
+VPATH =		$(ROOT)/typt/edit/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =	test.itcl
+SIMPLE_TESTS =
+GRAPHICAL_TESTS = \
+	testEditPalette.itcl \
+	testEditPtcl.itcl \
+	testEditPtlang.itcl
+
+ITCL_SRCS = \
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl \
+	testRetarget.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	results
+MISC_FILES = \
+	SDFMyRamp.pl
+
+OPTIONAL_FILES = \
+	SDFMyRamp.htm
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	DocSysTest.html DocSysTestChild.html \
-				DocSysTestSimple.html index.html \
-			DocSysTestChild_rel.html	DocSysTest_rel.html
+REALCLEAN_STUFF =
 
-test:: $(ITCL_SRCS)
-	rm -f *.html
-	$(ITCLSH) test.itcl
-	-$(foreach HTMLFILE, $(REALCLEAN_STUFF), \
-	  echo $(HTMLFILE); \
-	  diff results/$(HTMLFILE) $(HTMLFILE);)
+tests:: test_graphics
 
-# Run tydoc on the iwidgets classes
-test_iwidgets:
-	../tydoc `echo 'puts [lindex $$auto_path [lsearch $$auto_path *iwidgets*]];exit' | itkwish`/*.itk
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tytest $(GRAPHICAL_TESTS)
+	tycho -pigi -e testRetarget.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

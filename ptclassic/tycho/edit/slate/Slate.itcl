@@ -1,15 +1,17 @@
 ##########################################################################
-# Version: $Id$
-# Author: H. John Reekie
+# A canvas mega-widget for manipulating complex graphical items.
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Version: @(#)Slate.itcl	1.105 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
 # 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,668 +25,1353 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-#                                                         COPYRIGHTENDKEY
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 ##########################################################################
 
 
-## README
-#
-# This is the primary interface to the Slate widget, and the whole
-# of the Visual Language Toolkit. Sooner or later, large parts of
-# the VL Toolkit will be recoded in "something else." When that happens,
-# the picture classes will no longer be directly accessible. To
-# ensure future compatibility, use the slate interface to the
-# picture classes _only_. There will be, of course, some speed
-# penalty, but not that much considering what you have to pay anyway...
-#
-# This is, of course, also the reason why some of the methods on
-# the slate seem just like useless wrappers around picture methods --
-# the picture methods will cease to exist one day.
-#
-
-
+#######################################################################
 ## slate pathName args
 #
-# A procedure to create a new widget, as recommended on the
-# itk web pages. This turns out to be useful to have anyway,
-# since we need to muck about with the binding order for the
-# widget, and itk doesn't seem to like having $this referenced
-# in the constructor...
+# Create a slate. This procedure creates a new widget, as
+# recommended on the itk web pages. In addition to creating
+# a new slate, this procedure changes the binding tags so
+# that events on the canvas are intercepted by the slate.
 #
 proc ::tycho::slate {pathName args} {
-    #
     # Create the widget
-    #
     uplevel ::tycho::Slate $pathName $args
 
+    # Muck about with the binding tags in order to make events
+    # on the canvas appear to be on the mega-widget. The default
+    # bindtags for the slate (say ".s") are:
     #
-    # Now muck about with the bindings in order to
-    # make events on the canvas appear to be on the mega-widget.
-    # This simply sets the bindtags for the canvas to be the
-    # the same as those for the megawidget, effectively removing
-    # the canvas itself from the event chain. It has the side-effect
-    # of causing some events to occur twice, but so far this appears
-    # to happen only with Enter and Leave events.
+    #    itk-delete-.s .s Slate . all
     #
-    bindtags [$pathName component canvas] [concat \
-	    [list lhead [bindtags [$pathName component canvas]]] \
-	    [ltail [bindtags $pathName]]]
+    # and for the canvas are:
+    #
+    #    itk-destroy-.s.canvas .s.canvas Canvas . all
+    #
+    # The following code changes the binding tags to:
+    #
+    #    itk-delete-.s Slate . all
+    #
+    # and:
+    #
+    #    itk-destroy-.s.canvas .s Canvas . all
+    #
+    # What this does is: a) make scripts bound to the _slate_ (.s)
+    # be matched when an event occurs on the _canvas_; b) removes
+    # the slate from its own binding tags so that scripts bound to
+    # events like Enter, Leave, Configure don't get executed
+    # twice twice.
+    #
+    # I don't what the itk-delete-.s and itk-destroy-.s.canvas
+    # tags are for.
+    #
+    # FIXME: probably doesn't work with obstcl
+    if [info exists ::itcl::version] {
+	set slatetags  [bindtags $pathName]
+	set canvastags [bindtags [$pathName component canvas]]
+
+	bindtags [$pathName component canvas] \
+		[lreplace $canvastags 1 1 [lindex $slatetags 1]]
+	bindtags $pathName [lreplace $slatetags 1 1]
+    }
 
     return $pathName
 }
 
-
-
 #######################################################################
 #### Slate
 #
-# A canvas mega-widget. The slate supports complex
-# canvas items, moving and dragging, connection between objects,
-# and constraints.
+# The slate extends the <a href="Slate.html">IncrCanvas</a>
+#  widget to support more complex
+# item manipulation, including symbolic features ("ne," "vertex-2"),
+# reshaping, alignment, and fast construction
+# of items. Because it inherits from IncrCanvas, it is (almost)
+# fully compatible with the standard Tk canvas and can thus be
+# "dropped-in" in place of a Tk canvas. (If you try this and it
+# doesn't work, <a href="mailto:tycho@eecs.berkeley.edu">let us
+# know</a>.)
+#
+# A note on this implementation:
+# complex items are not represented by [incr Tcl] objects, but by
+# manipulating tags on canvas items. An earlier implementation
+# that created an [incr Tcl] object for each complex item was
+# too cumbersome and slow.
+#
+# In addition to the Slate class itself, there are a number of
+# other classes that work with the slate to implement its full
+# functionality. These classes are grouped into several categories,
+# according to their function in the slate:
+#
+# <ul>
+# <li><a href="../internals/items.html"><i>ComplexItem</i> and subclasses</a>.
+# These classes implement the functionality needed by the slate to 
+# actually create complex items. Subclasses of ComplexItem includes things
+# like ``3D'' rectangles and
+# polygons, and ``smart'' objects like self-routing lines.
+#
+# <li><a href="../internals/shapes.html"><i>Shape</i> and
+# subclasses</a>. Shape classes add functionality
+# to items related to their shape. Facilities such as symbolic
+# points on an item ("ne," "vertex-2"), alignment, and reshaping
+# all depend on the shape classes.
+#
+# <li><a href="../internals/interactors.html"><i>Interactor</i>
+# and subclasses</a>. Interactors are objects that
+# manage user interaction with the slate. Interactors provide a powerful
+# mechanism for capturing and reusing standard patterns of interaction.
+# </ul>
+#
+# To create a slate, do not call the constructor directly, but call
+# the procedure <code>::tycho::slate</code>:
+#
+# <tcl><pre>
+#     ::tycho::slate .s
+#     pack .s -fill both -expand on
+#     wm deiconify .
+# </pre></tcl>
+#
+# The Slate class is designed to be fully compatible with the canvas,
+# so some of the methods are less efficient than they could be.
 #
 class ::tycho::Slate {
-    inherit itk::Widget
+    inherit ::tycho::IncrCanvas
 
     constructor {args} {}
     destructor {}
 
     ###################################################################
-    ## Methods dealing with pictures
+    ####                            options                        ####
 
-    method addtag   {tag searchSpec args} {}
-    method bbox     {args}                {}
-    method bind     {tagOrID args}        {}
-    method create   {class args}          {}
-    method delete   {picts}               {}
-    method deform   {x y args}            {}
-    method find     {searchSpec args}     {}
-    method lower    {args}                {}
-    method move     {picts args}          {}
-    method raise    {args}                {}
-    method roots    {picts}               {}
+    # The outline color of the highlight box
+    itk_option define -highlightcolor highlightColor HighlightColor "black"
 
+    # The fill color of the highlight box
+    itk_option define -highlightfill highlightFill HighlightFill ""
 
-    ###################################################################
-    ## Thin wrappers for methods dealing with pictures
+    # Highlight the selection if this flag is true
+    itk_option define -highlightselection highlightSelection \
+	    HighlightSelection 1
 
-    method coords {pict args} {eval $pict coords $args}
+    # The width of the highlight box
+    itk_option define -highlightwidth highlightWidth HighlightWidth 1
 
-
+    # Export the selection if this flag is true
+    itk_option define -exportselection exportSelection ExportSelection 1
 
     ###################################################################
-    ## Thin wrappers around canvas operations
+    ####                         public methods                    ####
 
-    method postscript {args} {
-	eval $itk_component(canvas) postscript $args
-    }
+    # Animate movement of an item
+    method animate {mode {tagOrID {}} {x {}} {y {}} args}
 
-    method xview {args} {
-	eval $itk_component(canvas) xview $args
-    }
+    # Delete items
+    method delete {args}
 
-    method yview {args} {
-	eval $itk_component(canvas) yview $args
-    }
+    # Return a representation of items
+    method describe {args}
 
+    # Get features of an item
+    method feature {id args}
 
+    # Create a "ghost" of one or more items
+    method ghost {tag args}
+
+    # Grapple an item
+    method grapple {id args}
+
+    # Add a highlight to an item
+    method highlight {tag args}
+
+    # Create an interactor on the slate
+    method interactor {class args}
+
+    # Move items
+    method move {tag xAmount yAmount}
+
+    # Start a move interaction sequence
+    method moveclick {tag x y args}
+
+    # Continue a move interaction sequence
+    method movedrag {tag x y}
+
+    # Terminate a move interaction sequence
+    method moverelease {tag}
+
+    # Move to an absolute location
+    method moveto {tag x y feature args}
+
+    # Recreate an item from a description generated by describe{}
+    method recreate {description args}
+
+    # Set or get the rectangular "region" of one or more items
+    method region {tag args}
+
+    # Reshape one or more features of an item
+    method reshape {tag x y args}
+
+    # Start a reshape interaction sequence
+    method reshapeclick {tag x y args}
+
+    # Continue a reshape interaction sequence
+    method reshapedrag {tag x y}
+
+    # Terminate a reshape interaction sequence
+    method reshaperelease {tag}
+
+    # Reshape by moving a feature to an absolute location
+    method reshapeto {tag x y feature args}
+
+    # Manipulate the selection
+    method select {option {id {}} args}
+
+    # Return an item's shape
+    method shape {id}
+
+    # Return the shape represented by a tag or ID
+    method shape* {tag args}
+
+    # Ungrapple an item
+    method ungrapple {id}
+
+    # Remove a highlight from an item
+    method unhighlight {tag}
 
     ###################################################################
-    ## Restricted access
+    ####                    protected methods                      ####
 
-    ## slatePictures
-    #
-    # A list of all pictures created on the slate. This may need to be
-    # modified in future to record only top-level pictures (?).
-    #
-    private variable slatePictures {}
+    # Claim the selection if enabled and appropriate
+    protected method claimSelection {}
 
+    # Call a method based on an item's shape
+    protected method shapecall {tag method args}
 
-    ## itemdict
-    #
-    # The mapping from canvas items to pictures.
-    #
-    private variable itemdict
+    ###################################################################
+    ####                   protected variables                     ####
 
+    ###################################################################
+    ####                    private variables                      ####
 
-    ## tagdict
-    #
-    # The mapping from tags to pictures.
-    #
-    private variable tagdict
+    # A list of active Animator objects
+    private variable animators ""
 
+    # The reshaping interactor
+    private variable _reshaper ""
+}
 
-    ## registerItem  pict item
-    ## registerItems pict items
-    #
-    # Register a picture with one or more items. For use by the
-    # Primitive class only.
-    #
-    # -- pict: The picture object to set as the owner of the items.
-    # -- item: A single canvas item.
-    # -- items: A list of canvas items.
-    #
-    method registerItem {pict item} {
-	set itemdict($item) $pict
-    }
-
-    method registerItems {pict items} {
-	foreach i $items {
-	    set itemdict($i) $pict
-	}
-    }
-
-
-    ## deregisterItem  item
-    ## deregisterItems items
-    #
-    # Cancel the registration of a picture with an item.
-    # For use by the Primitive class only.
-    #
-    # -- item: A single canvas item.
-    # -- items: A list of canvas items.
-    #
-    method deregisterItem {item} {
-	unset itemdict($item)
-    }
-
-    method deregisterItems {items} {
-	foreach i $items {
-	    unset itemdict($i)
-	}
-    }
-
-
-    ## registerTag tag pict
-    #
-    # Register a tag as belonging to a picture. For use by the
-    # Picture class only.
-    #
-    # -- tag: The tag we're adding.
-    # -- pict: A picture to tag.
-    #
-    method registerTag {tag pict} {
-	if { ! [info exists tagdict($tag)] } {
-	    set tagdict($tag) [list $pict]
-	} else {
-	    lappend tagdict($tag) $pict
-	}
-    }
-
-
-    ## deregisterTag tag pict
-    #
-    # Cancel the registration of tags to pictures.
-    # For use by the Picture class only.
-    #
-    # -- tag: The tag we're adding.
-    # -- pict: A picture to tag.
-    #
-    method deregisterTag {tag pict} {
-	set tagdict($tag) [ldelete $tagdict($tag) $pict]
-	
-	if { $tagdict($tag) == "" } {
-	    unset tagdict($tag)
-	}
-    }
-
-
-    ## _canvas
-    #
-    # Return the internal canvas. This is used by the picture classes
-    # and it not intended for general access.
-    #
-    # NOTE: This was called canvas{}, but apparently itk sees this
-    # in the same namespace as its component widgets.
-    #
-    method _canvas {} {
-	return $itk_component(canvas)
+#######################################################################
+#### demoslate
+# Create a sample slate for testing, tutorials, etc.
+#
+proc ::tycho::Slate::demoslate {} {
+    global env
+    uplevel #0 {
+	source [file join $env(SLATE_LIBRARY) demo init.tcl]
+	::tycho::demo::newslate
     }
 }
 
-
-## constructor
+#######################################################################
+#### constructor
+#
+# Do not call the constructor of the Slate directly: _always_
+# use the procedure ::tycho::slate{}.
 #
 body ::tycho::Slate::constructor {args} {
-    #
-    # Create the canvas and pack it
-    #
-    itk_component add canvas {
-	canvas $itk_interior.canvas
-    } {
-	keep -background -cursor -relief \
-		-height -width -borderwidth \
-		-xscrollcommand -yscrollcommand \
-		-scrollregion
-    }
-
-    pack $itk_component(canvas) -fill both -expand yes
-
-
-    #
     # Initialise options
-    #
-    eval itk_initialize $args
+    eval $this itk_initialize $args
+
+    # Create the selection handler
+    ::selection handle [namespace tail $this] "$this select get"
 }
 
-
-## addtag tag all
-## addtag tag withtag     tag
-## addtag tag overlapping x0 x1 y0 y1
-## addtag tag enclosed    x0 x1 y0 y1
+#######################################################################
+#### destructor
 #
-# Add a tag to picts. The searchSpec and args is the same
-# as for the find{} method.
-#
-body ::tycho::Slate::addtag {tag searchSpec args} {
-    foreach i [eval $this find $searchSpec $args] {
-	$i addtag $tag
-    }
+body ::tycho::Slate::destructor {} {
+    catch {delete object $animator}
 }
 
-
-## bbox {pictOrTag}+
+#######################################################################
+#### animate
 #
-# Return the bounding box of any number of picts. Each argument
-# can be a picture ID or a tag.
+# Animate movement of an item. This is a simple animation
+# mechanism that creates an instance of the Animator class
+# to perform animation. The animator object is set up to
+# move or reshape the item by the given coordinates
+# _x_ and _y_ coordinates.  The _mode_ argument can have
+# the following values:
+# <ul>
+# <li><b>move</b>: Move the item.
+# <li><b>reshape</b>: Reshape the item. The additional arguments
+# must contain a *-features* option for this to work correctly.
+# <li><b>wait</b>: Wait until animation completes. Note that
+# the animate{} method returns immediately, and the animation
+# proceeds in the background. To perform a series oa animations,
+# insert <code>animate wait</code> calls.
+# <li><b>done</b>: This is for use by the animation code itself.
+# _Do not use_.
+# </ul>
+# To move an object 50 pixels south-east, just execute:
+# <pre>
+#   $slate animate move $id 50 50 -duration 2000
+# </pre>
+# The -duration argument is the approximate time to complete
+# the animation, in "Tcl time." To reshape an object, execute
+# something like: 
+# <pre>
+#   $slate animate reshape $id 50 50 -features vertex-1
+# </pre>
+# Animation is asynchronous, so multiple animation calls
+# overlap in effect. To synchronize a series of animation
+# sequences, inserts calls like this:
+# <pre>
+#  $slate animate wait
+# </pre>
+# to wait for all executing animations to complete.
 #
-body ::tycho::Slate::bbox {args} {
+body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
+    switch -exact $mode {
+        "move" -
+        "reshape" {
+            # Mess around with arguments
+            set cargs {}
+            array set opts $args
+            foreach o {
+		prefix clickprefix dragprefix releaseprefix
+		activatecommand deactivatecommand dragcommand
+		distance duration interval
+	    } {
+                if [::info exists opts(-$o)] {
+                    lappend cargs -$o $opts(-$o)
+                }
+            }
+            set args [array get opts]
+            
+            # Create the Animator
+            set animator [eval [list $this interactor Animator \
+                    -distance [list $x $y] \
+                    -prefix [list $this $mode]] \
+                    $cargs]
+            lappend animators $animator
+            $animator configure \
+                    -deactivatecommand "$this animate done $animator"
 
-    set picts {}
-    foreach p $args {
-	if { [isObject $p] } {
-	    lappend picts $p
-	} else {
-	    lappend picts $tagdict($p)
-	}
-    }
-
-    return [eval $itk_component(canvas) bbox [eval concat $picts]]
-}
-
-
-## bind tagOrID [event [command]]
-#
-# Bind a command to an object or to all objects with a given tag.
-#
-# -- tagOrID: A valid pict ID, canvas item ID, or any string
-#    that represents a possible tag.
-#
-# -- event: If present, is the mouse event to be queried or to which
-#    a command is bound. If not present, then this method returns
-#    events for which there are bindings.
-#
-# -- command: If present, the command to bind to the object or tag.
-#    If not present, then return the binding(s) for the object or tag.
-#
-# Note: This command can only be used if the slate is being used
-# in ``binding'' mode. If it is being used in ``action'' mode
-# then the actions perform the bindings, and adding your own will
-# just ruin everything.
-#
-# Caveat: The bind command is not properly developed yet. There are
-# some interactions with canvas bindings, multiple bindings on the
-# same tag/object, and hierarchical pictures that need to be
-# explored and clarified.
-#
-# FIXME: Doesn't work properly if resetting bindings (event tags
-# not reset).
-#
-# FIXME: This code is very slow (25 ms on denon): can it be
-# improved?
-#
-body ::tycho::Slate::bind {tagOrID args} {
-
-    if { $args == "" } {
-	return [$itk_component(canvas) bind $tagOrID]
-    }
-
-    behead sequence args
-    if { $args == "" } {
-	return [$itk_component(canvas) bind $tagOrID $sequence]
-    }
-
-    behead command args
-
-    #
-    # From here on, treat four cases separately, according to whether
-    # a) the binding is to a tag or an object, and b) whether the
-    # command is blank (i.e. deleting a binding) or not.
-    #
-    if { [isObject $tagOrID] && $command != "" } {
-	#
-	# Binding to an object. This means the picture is "self-bound."
-	# If the picture is not marked, then mark it and set the event
-	# tags to _$tagOrID. If it is marked but doesn't have that
-	# event tag, then add it.
-	#
-	if { [$tagOrID cget -mark] == "" } {
-	    $tagOrID configure -mark 1
-	    $tagOrID _etag set [list _$tagOrID] -force
-	} elseif { ! [lmember [$tagOrID _etag get] _$tagOrID] } {
-	    $tagOrID _etag add _$tagOrID -force
-	}
-
-	#
-	# Bind the command to the event tag.
-	#
-	$itk_component(canvas) bind $tagOrID $sequence $command
-
-
-    } elseif { [isObject $tagOrID] && $command == "" } {
-	#
-	# Remove a binding from an object. First remove the binding
-	# for the specified sequence. Then, check if the event tag
-	# has any other bindings; if not, remove it from the event
-	# bindings.
-	#
-	$itk_component(canvas) bind $tagOrID $sequence {}
-
-	if { [$itk_component(canvas) bind _$tagOrID] == "" } {
-	    $tagOrID _etag delete _$tagOrID -force
-
-	    #
-	    # If that was the last event tag, then the picture is
-	    # no longer able to respond to events. So unmark it.
-	    #
-	    if { [$tagOrID _etag get] == "" } {
-		$tagOrID configure -mark ""
-	    }
-	}
-
-    } elseif { ! [isObject $tagOrID] && $command != "" } {
-	#
-	# Binding to an tag. There are potentially a whole bunch
-	# of pictures, so get the list of them.
-	#
-	if { [info exists tagdict($tagOrID)] } {
-	    set pictures $tagdict($tagOrID)
-	} else {
-	    set pictures {}
-	}
-
-	#
-	# For each picture, test if it is marked. If not, then mark it
-	# and set its event tags to its user tags. (If it is already
-	# marked, then all user tags will already have been propagated
-	# to its active components, so there is no need to do anything.)
-	#
-	foreach p $pictures {
-	    if { [$p cget -mark] == "" } {
-		$p configure -mark 1
-		$p _etag set [$p cget -tags] -force
-	    }
-	}
-
-	#
-	# Bind the command to the event tag.
-	#
-	$itk_component(canvas) bind $tagOrID $sequence $command
-
-
-    } elseif { ! [isObject $tagOrID] && $command == "" } {
-	#
-	# Remove a binding from a tag. Firstly, find the pictures.
-	#
-	$itk_component(canvas) bind $tagOrID $sequence {}
-
-	if { [info exists tagdict($tagOrID)] } {
-	    set pictures $tagdict($tagOrID)
-	} else {
-	    set pictures {}
-	}
-
-	#
-	# Now we have to check whether a picture needs to be
-	# unmarked: check the bindings for each of its event
-	# tags, and, if they are all empty, then there are no
-	# bindings on that picture any more and the picture
-	# must be unmarked and its event tags either cleared
-	# (if the picture has no parent) or set to its parent's
-	# event tags.
-	#
-	foreach p $pictures {
-	    set unmark 1
-	    foreach t [$p _etag get] {
-		if { [$itk_component(canvas) bind $t] != "" } {
-		    set unmark 0
-		    break
-		}
-	    }
-	    if { $unmark } {
-		$p configure -mark ""
-		if { [$p parent] != "" } {
-		    eval $p _etag set [[$p parent] _etag get] -force
-		} else {
-		    $p _etag set {} -force
-		}
-	    }
-	}
+            # Activate it
+            eval $animator activate $tagOrID 0 0 $args
+        }
+        "wait" {
+            # Wait until animation completes
+            while { $animators != "" } {
+                ::tycho::safeUpdate $this
+            }
+        }
+        "done" {
+            set t [lsearch -exact $animators $tagOrID]
+            if { $t < 0 } {
+                # uh-oh.... just print a message
+                puts "Uh-oh... bogus animator $tagOrID"
+            }
+            set animators [lreplace $animators $t $t]
+	    uplevel #0 delete object $tagOrID
+        }
+        default {
+            error "Invalid option \"$mode\""
+        }
     }
 }
 
-
-## create class args
+#######################################################################
+#### delete
 #
-# Create a new picture of type *class*.
+# Override the superclass method to delete highlights too.
 #
-# -- class: The class of the picture. This can be any sub-class
-#    of the _Picture_ class.
-#
-# -- args: The arguments to the constructor of the specified
-#    class, _but without the object name or the canvas option_.
-#
-body ::tycho::Slate::create {class args} {
-    #
-    # Create the pict object
-    #
-    # For some reason, $this puts a `::'in front of this object's
-    # name, which mucks things up later on. So get rid of it...
-    #
-    set pict [info context]::[eval ::tycho::$class \#auto \
-	    $args -slate [string trimleft $this ":"]]
-
-    #
-    # Keep a record of all picts created on the canvas.
-    # NB. we make sure that this is a sub-class of Picture, as
-    # other non-picture classes can also be created on the slate.
-    #
-    if { [lmember [$pict info heritage] "::tycho::Picture"] } {
-	lappend slatePictures $pict
+body ::tycho::Slate::delete {args} {
+    eval chain $args
+    set h {}
+    foreach a $args {
+	lappend h highlight.$a
     }
-
-    #
-    # Return it
-    #
-    return $pict
+    eval chain $h
 }
 
+#######################################################################
+#### describe
+#
+# Return a description of items on the canvas. This description will
+# be understood by recreate{} so that the item can be recreated or
+# duplicated later in various forms. <i>Do not make any assumptions
+# about the contents of the string returned by this method.</i>
+#
+# Note: If saving the description for later recreation, you may also need
+# to save other information about the complex item, such as its type
+# or whether it has certain tags that affect how you will recreate it.
+#
+# FIXME: Rethink the describe/recreate implementation
+#
+body ::tycho::Slate::describe {args} {
+    set description ""
 
-## delete picts
-#
-# Delete one or more picts. If picts is the string "all" then
-# delete all objects from the canvas.
-#
-body ::tycho::Slate::delete {picts} {
-    if { $picts == "all" } {
-	set picts $slatePictures
+    foreach id $args {
+        # Item type
+        lappend description [$this type $id]
+
+        # Coordinates
+        eval lappend description [$this coords $id]
+
+        # Add options only if they differ from the default. The -tags
+        # options is treated specially, to filter out hierarchy tags.
+        foreach {option x y default value} \
+                [eval concat [$this itemconfigure $id]] {
+            if { $option == "-tags" } {
+                set tags {}
+                foreach tag $value {
+                    if { ! [string match {[!_]*} $tag] } {
+                        lappend tags $tag
+                    }
+                }
+                if { $tags != "" } {
+                    lappend description -tags $tags
+                }
+            } elseif { $default != $value } {
+                lappend description $option $value
+            }
+        }
+        append description "\n"
     }
+    return $description
+}
 
-    foreach i $picts {
-	::delete object $i
-	set slatePictures [ldelete $slatePictures $i]
+#######################################################################
+#### feature
+#
+# Return the value of one or more "features" of an item. a feature
+# is a point on the item, such as its center or north-east corner.
+# The returned value is a list of coordinates, two (_x_ and _y_) for each
+# given feature.  The features of an item depend on its shape. If the
+# arguments contain the *-shape* option, the following argument
+# is the shape to use instead of the item's actual shape. All
+# items will respond correctly to the *rectangle* shape; only
+# some will respond correctly to other shapes. If no other arguments
+# are supplied, return a list of legal features. (Note that the 
+# legal features are not necessarily constant over the lifetime of an item 
+# -- for example, adding a vertex to a polygon will also add a feature.)
+# Complex items can choose to override the default behaviour of this
+# method by providing a feature{} procedure in their method table.
+#
+body ::tycho::Slate::feature {id args} {
+    set t [lsearch -exact $args -shape]
+    if { $t != -1 } {
+        $this shapecall $id feature \
+                -features [lreplace $args $t [expr $t+1]] \
+                -shape [lindex $args [expr $t+1]]
+    } else {
+        $this shapecall $id feature -features $args
     }
 }
 
-
-## find all
-## find withtag     tag
-## find overlapping x0 x1 y0 y1
-## find enclosed    x0 x1 y0 y1
+#######################################################################
+#### ghost
 #
-# Find an pict or picts given by the searchSpec. The picts returned are
-# always the top-most active pict: lower-level picts are not returned
-# if it makes sense for a higher-level one to be returned.
+# Create a ghost of an item and return the ID of the ghost item.
+# This is a grey outline of the item for use when moving and resizing
+# the item. Complex items can choose their own style of ghosting by
+# providing a ghost{} procedure in their method table. Each created
+# ghost item is tagged with "ghost" and "ghost._id_", where _id_ is
+# the item it ghosts, and any additional arguments to this method. If
+# the first argument is a tag, then each ghosted item is also tagged
+# with "ghost._tag_". The return value is a list of created items.
 #
-# Note that find{} will return pictures at multiple levels of the hierarchy
-# is that's what it finds! To remove component pictures, use the method
-# roots{}. In some cases, the top-elvel will need to be removed -- this can
-# easily be done with ldelete{}.
+# Note: It is the caller's responsibility to delete ghosts after
+# completion with a call such as <code>$slate delete ghost</code>.
 #
-body ::tycho::Slate::find {searchSpec args} {
-    set result {}
-    switch -exact $searchSpec {
-	"all" {
-	    #
-	    # Finding all picts simply requires returning the list
-	    #  kept in slatePictures.
-	    #
-	    set result $slatePictures
+body ::tycho::Slate::ghost {tag args} {
+    if { [string match {_*} $tag] } {
+	# If it's a complex item and it has a ghost{} method, call that
+        set class ::tycho::$itemClass($tag)
+	if { [::info exists ${class}::methodtable(ghost)] } {
+	    return [eval [set ${class}::methodtable(ghost)] \
+		    $tag $canvas $this \
+		    -tags [concat "ghost" "ghost.$tag" $args]]
+    	} else {
+	    set primary $::tycho::ComplexItem::primary($tag)
 	}
+    } elseif { ! [string match {[_0-9]*} $tag] } {
+    	# It's a tag, so do for each item
+    	set result {}
+    	foreach item [$this find withtag $tag] {
+	    lappend result [eval $this ghost $item "ghost.$tag" $args]
+    	}
+    	return $result
+    } else {
+	# Simple item
+	set primary $tag
+    }
 
-	"withtag" {
-	    #
-	    # Finding picts with a given tag depends on whether the tag
-	    # is "current" or not. If it's current, then I have to query
-	    # the canvas to find the current pict, since the current tag
-	    # is dynamically altered by the canvas itself. If there
-	    # is one, then return the active picture of that pict.
-	    #
-	    # If the tag is anything else, then just look up the tag
-	    # dictionary to find pictures with that tag.
-	    #
-	    if { $args == "current" } {
-		set current [$itk_component(canvas) find withtag current]
-		if { $current != "" } {
-		    set result [$itemdict($current) active]
-		}
+    # If we get to here, tag represents a single item
+    set shape [$this shape $tag]
+    set tags [concat "ghost" "ghost.$tag" $args]
+    switch -exact $shape {
+	"rectangle" -
+	"oval" {
+	    return [eval $canvas create $shape \
+		    [$canvas coords $primary] -outline grey \
+                    -tags [list $tags]]
+	}
+	"polygon" {
+	    return [eval $canvas create polygon \
+		    [$canvas coords $primary] -outline grey {-fill ""} \
+                    -tags [list $tags]]
+	}
+	"line" {
+	    return [eval $canvas create line \
+		    [$canvas coords $primary] -fill grey \
+		    -arrow [$canvas itemcget $primary -arrow] \
+                    -tags [list $tags]]
+	}
+	"default" {
+	    return [eval $canvas create rectangle \
+		    [region $tag] -outline grey \
+                    -tags [list $tags]]
+	}
+    }
+}
+
+#######################################################################
+#### grapple
+#
+# Attach grapples to an item. This method uses the <b>feature</b>
+# method to get the names of features of the item, and then creates
+# a grapple object for each, and binds an interactor to each. New
+# grapples will not be created for features that already have one.
+# The following optional arguments are recognized:
+#
+# <dl>
+# <dt><b>-features</b>
+# <dd>
+# The features to attach grapples to. The default is null, in which case
+# this method will use the grapples given by a call to <b>feature</b>.
+#
+# <dt><b>-button</b>
+# <dd>
+# The button to bind the interactor with. The default is button 1.
+#
+# <dt><b>-class</b>
+# <dd>
+# The class of item to create as the grapples. The default is
+# Grapple.
+#
+# <dt><b>-interactor</b>
+# <dd>
+# The interactor to bind to each grapple. If not supplied, an
+# instance of the Reshaper interactor will be created, which
+# will reshape the item to which the grapples are attached.
+#
+# <dt><b>-modifiers</b>
+# <dd>
+# The modifiers to bind the interactor with. The default is null.
+#
+# <dt><b>-options</b>
+# <dd>
+# Additional options to give to the grapples. The default is null.
+#
+# <dt><b>-tags</b>
+# <dd>
+# Tags to add to each grapple. In addition to any tags given here,
+# the tags <b>grapple</b>, <b>grapple.</b>_id_, and _feature_<b>.</b>_id_ \
+# are added to the grapple. These can be used to make additional
+# interactor bindings if needed.
+#
+# </dl>
+#
+body ::tycho::Slate::grapple {id args} {
+    # Extract options
+    array set opts {-interactor {} -tags {} -button 1 -modifiers {} \
+            -class Grapple -options {} -features {}}
+    array set opts $args
+	
+    if { $opts(-interactor) == "" } {
+        if { $_reshaper == "" } {
+            set _reshaper [$this interactor Reshaper]
+        }
+        set opts(-interactor) $_reshaper
+    }
+    if { $opts(-features) == "" } {
+    	set opts(-features) [$this feature $id]
+    }
+    set tags $opts(-tags)
+    unset opts(-tags)
+    
+    # Create the grapples
+    foreach a $opts(-features) {
+        if { [$this find withtag $a.$id] == "" } {
+            set g [eval $this create $opts(-class) [$this feature $id $a] \
+                    [list \
+                    -tags [concat $tags grapple grapple.$id $a.$id] \
+                    -item $id \
+                    -feature $a] \
+                    $opts(-options)]
+        }
+    }
+    $this raise grapple.$id $id
+    
+    # Bind the interactor to the whole lot
+    $opts(-interactor) bind grapple.$id \
+            -button $opts(-button) \
+            -modifiers $opts(-modifiers)
+}
+
+#######################################################################
+#### highlight
+#
+# Create a highlight around an item. This is a colored outline 
+# around the item's bounding box. Complex items can choose their
+# own style of highlighting by providing a highlight{} procedure.
+# Each created highlight item is tagged with "highlight" and
+# "highlight._id_", where _id_ is the item it highlights. If the
+# first argument is a tag, then each highlighted item is also tagged
+# with "highlight._tag_". Additional options can be:
+# <ul>
+# <li><b>-tags</b> _tags_: Also add these tags to the highlight item.
+# <li><b>-highlightcolor</b> _color_: The highlight color. Overrides the
+# slate's option with the same name.
+# <li><b>-highlightfill</b> _color_: The highlight fill color. Overrides the
+# slate's option with the same name.
+# <li><b>-highlightwidth</b> _int_: The highlight width. Overrides the
+# slate's option with the same name.
+# </ul>
+#
+# If a highlight already exists on each item, then it is deleted and
+# a new highlight drawn with the given options. The return value is
+# a list of the created highlight items.
+#
+body ::tycho::Slate::highlight {tag args} {
+    if { ! [string match {[_0-9]*} $tag] } {
+    	# It's a tag, so do for each item
+    	set result {}
+	array set opts {-tags {}}
+	array set opts $args
+	lappend opts(-tags) highlight.$tag
+    	foreach item [$this find withtag $tag] {
+	    lappend result [eval $this highlight $item [array get opts]]
+    	}
+    	return $result
+    }
+
+    # The tag must represent a single item. Extract options
+    array set opts {-tags {}}
+    array set opts \
+	    [list -highlightcolor $itk_option(-highlightcolor) \
+	    -highlightwidth $itk_option(-highlightwidth) \
+	    -highlightfill  $itk_option(-highlightfill)]
+    array set opts $args
+    lappend opts(-tags) "highlight" "highlight.$tag"
+
+    if { [string match {_*} $tag] } {
+	# If it's a complex item and it has a highlight{} method,
+	# call that.
+        set class ::tycho::$itemClass($tag)
+	if { [::info exists ${class}::methodtable(highlight)] } {
+	    return [eval [set ${class}::methodtable(highlight)] \
+		    $tag $canvas $this \
+		    [list -highlightwidth $opts(-highlightwidth) \
+		    -highlightcolor $opts(-highlightcolor) \
+		    -highlightfill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+        } else {
+            set primary $::tycho::ComplexItem::primary($tag)
+        }
+    } else {
+        # Simple item
+        set primary $tag
+    }
+    # If we get to here, tag represents a single item. Delete
+    # an existing highlight
+    $canvas delete highlight.$tag
+    
+    # Draw the highlight according to the shape of the item's primary
+    set shape [$canvas type $primary]
+    switch -exact $shape {
+        "rectangle" -
+	"oval" {
+	    set highlight [eval $canvas create $shape \
+		    [eval ::tycho::Rectangle::stretch [$canvas coords $primary] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+        }
+	"polygon" {
+	    set highlight [eval $canvas create polygon \
+		    [::tycho::Polygon::stretch [$canvas coords $primary] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+	}
+	"line" {
+	    set highlight [eval $canvas create line \
+		    [$canvas coords $primary] \
+                    [list \
+                    -arrow [$canvas itemcget $primary -arrow] \
+                    -width [expr $opts(-highlightwidth) * 2] \
+                    -fill $opts(-highlightcolor) \
+                    -tags $opts(-tags)]]
+	}
+	"default" {
+	    set highlight [eval $canvas create rectangle \
+		    [eval ::tycho::Rectangle::stretch [$this region $tag] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+ 	}
+    }
+    $canvas lower $highlight $tag
+    return $highlight
+}
+
+#######################################################################
+#### interactor
+#
+# Create an interactor on the slate and return it. This is just a
+# convenient interface to the interactor constructors. The first
+# argument is the name of the interactor class, following arguments
+# are options to the interactor.
+#
+body ::tycho::Slate::interactor {class args} {
+    uplevel #0 ::tycho::$class [::tycho::autoName $class] \
+	    [namespace tail $this] $canvas $args
+}
+
+#######################################################################
+#### move
+#
+# Move one or more items the specified amount. The first argument
+# can either be a tag or an id. This method override the
+# superclass' method to move highlight items as well.
+#
+body ::tycho::Slate::move {tag xAmount yAmount} {
+    # Move the items
+    chain $tag $xAmount $yAmount
+
+    # Move the highlights
+    $canvas move highlight.$tag $xAmount $yAmount
+
+    # Move the graples
+    $canvas move grapple.$tag $xAmount $yAmount
+}
+
+#######################################################################
+#### moveclick
+#
+# Start a move interaction sequence at coordinates
+# (_x_, _y_). Additional arguments include various flags that may
+# be supplied by the interactors that the slate uses to affect
+# the behavior of items, such as *-ghost*, which says that an
+# item is to be moved or reshaped using a "ghost" outline.
+#
+body ::tycho::Slate::moveclick {tag x y args} {
+    eval [list ::tycho::Shape::_moveclick $tag $canvas $this $x $y] $args
+}
+
+#######################################################################
+#### movedrag
+#
+# Continue a move interaction sequence with 
+# (_x_, _y_) as the new cursor position. There are no additional
+# arguments supplied.
+#
+body ::tycho::Slate::movedrag {tag x y} {
+    ::tycho::Shape::_movedrag $tag $canvas $this $x $y
+}
+
+#######################################################################
+#### moverelease
+#
+# Terminate the interaction sequence.
+#
+body ::tycho::Slate::moverelease {tag} {
+    ::tycho::Shape::_moverelease $tag $canvas $this
+}
+
+#######################################################################
+#### moveto
+#
+# Move the given _feature_ of one or more items to the absolute location
+# given by _x_ and _y_. If the arguments contain the *-shape* option,
+# then that shape is used instead of the default. If a tag is specified
+# and the tag denotes more than one item, then the items are treated
+# as a rectangle.
+#
+body ::tycho::Slate::moveto {tag x y feature args} {
+    set current [eval [list $this feature $tag $feature] $args]
+    set x [expr $x - [lindex $current 0]]
+    set y [expr $y - [lindex $current 1]]
+    $canvas move $tag $x $y
+}
+
+#######################################################################
+#### recreate
+#
+# Re-create a complex item from a description returned by describe{}.
+# By default, the complex item will be created in exactly the same
+# position as when describe was called, and without any hierarchy.
+# A number of options can modify this behavior (these options do not
+# have to be used, but are really just short-cuts to save other calls:
+# <ul>
+# <li>*-move* _x y_: Move the new complex item relative to the described
+# position.
+# <li>*-at* _x y_ ?_feature_?: Place the given _feature_ at (_x_,_y_).
+# The feature default to center.
+# <li>*-coords* _x0 y0_ ...: Use these coordinates instead of the ones
+# given by the description.
+# <li>*-in* _id_: Make the complex item a child of the complex item _id.
+# </ul>
+#
+# *-move*, *-at* and *-coords* are mutually exclusive.
+#
+# FIXME: Rethink the describe/recreate implementation
+#
+body ::tycho::Slate::recreate {description args} {
+    # What we'll do is just create the item in the default mode,
+    # and then move or tag it if there are options for doing so.
+    # This could be made a fair bit more efficient by modifying the
+    # description string _before_ applying it
+    set id [::tycho::apply $description $this]
+
+    # -move option
+    set move [::tycho::readoption move args]
+    if { $move != "" } {
+	$this move $id [lindex $move 0] [lindex $move 1]
+    } else {
+	# -at option
+	set at [::tycho::readoption at args]
+	if { $at != "" } {
+	    if { [llength $at] > 2 } {
+		set feature [lindex $at 2]
 	    } else {
-		if { [info exists tagdict([lindex $args 0])] } {
-		    set result $tagdict([lindex $args 0])
-		} else {
-		    set result {}
-		}
+		set feature center
+	    }
+	    $this moveto $id [lindex $at 0] [lindex $at 1] $feature
+	} else {
+	    # -coords option
+	    set coords [::tycho::readoption coords args]
+	    if { $coords != "" } {
+		eval $this coords $id $coords
 	    }
 	}
+    }
 
-	"overlapping" {
-	    #
-	    # Finding overlapping picts is fairly simple. First, use the
-	    # canvas to get overlapping canvas items. For each item, add
-	    # its picture to the result list, but avoid duplicates,
-	    #
-	    set canvasItems [eval $itk_component(canvas) \
-		    find overlapping $args]
+    # -in option
+    set in [::tycho::readopt in args]
+    if { $in != "" } {
+	$this itemconfigure $id \
+		-tags [::tycho::lunion [$this gettags $id] [$this gettags $in]]
+    }
 
-	    foreach i $canvasItems {
-		set p [$itemdict($i) active]
-		if { ! [lmember $result $p] } {
-		    lappend result $p
-		}
-	    }
+    return $id
+}
+
+#######################################################################
+#### region
+#
+# Set or get the "region" of an item or set of items. If the _tag_
+# argument is an item ID or if it is a tag that denotes a single
+# item, then that item is used to determine the region: if the
+# simple item or the primary component of a complex item is
+# an oval or a rectangle, the coordinates of that item is
+# the region. If not, the bounding box of the item less
+# less 2 in each direction is its region. If the first
+# argument is a tag that denotes more than one item, the bounding
+# box less 2 is the region; if it denotes no items, the method
+# returns null.
+#
+# If no additional arguments are given, return the region. If
+# additional arguments are given, scale the item or items so that
+# its region become the given arguments. In the latter case,
+# if the single item denoted is a complex item and contains
+# a "region" entry in its method table, then that procedure
+# is called instead. Complex items in which the number of
+# coordinates does not match the number of coordinates of their
+# primary (IconFrame, for example), will need to do this.
+#
+body ::tycho::Slate::region {tag args} {
+    set rectangular 0
+    set single 1
+    if { [string match {[0-9]*} $tag] } {
+	# Simple item
+	set item $tag
+	set prim $tag
+    } elseif { [string match {_*} $tag] } {
+	# Complex item
+        set class ::tycho::$itemClass($tag)
+	if { [::info exists ${class}::methodtable(region)] } {
+            return [eval [set ${class}::methodtable(region)] \
+                    $tag $canvas $this $args]
+	} else {
+	    set item $tag
+	    set prim [$this primary $tag]
 	}
+    } else {
+	# It's a tag, so find matching items
+	set match [$this findwithtag $tag]
+	
+	# If there are none, return
+	if { $match == "" } {
+	    return
+	} elseif { [llength $match] == 1 } {
+	    # One item
+	    set item [lindex $match 0]
+	    if { [string match {[0-9]*} $item] } {
+		# Simple item
+		set prim $item
+	    } elseif { [string match {_*} $item] } {
+		# Complex item
+		set prim [$this primary $item]
+	    }
+	} else {
+	    set item $match
+	    set single 0
+	    set region [eval ::tycho::Rectangle::shrink \
+		    [$canvas bbox $tag] 2]
+	}
+    }
+    # Get the region of a single item
+    if $single {
+	if [regexp {^(oval|rectangle)$} [$canvas type $prim]] {
+	    set region [$canvas coords $prim]
+	    set rectangular 1
+	} else {
+	    set region [eval ::tycho::Rectangle::shrink [$canvas bbox $prim] 2]
+	}
+    }
+    # No args? Just return
+    if { $args == "" } {
+	return $region
+    }
+    # Change the region of the item
+    if { $rectangular } {
+	# If there's one rectangular item, call coords{}
+	eval $this coords $item $args
+    } else {
+	# Otherwise figure out the scaling factors and call scale{}
+	if { $single } {
+	    set tag $item ;# to prevent another call to find{}
+	}
+	::tycho::assign x0 y0 x1 y1 $region
+	::tycho::assign a0 b0 a1 b1 $args
 
-	"enclosed" {
-	    #
-	    # Finding enclosed picts is more difficult. For each canvas
-	    # item, find the corresponding picture, and add it to
-	    # the result list only if all of its elements are in the
-	    # enclosed canvas items.
-	    #
-	    # This is not really quite what I want: I really want the
-	    # subset test to include only the active picts in the picture...
-	    #
-	    set canvasItems [eval $itk_component(canvas) \
-		    find overlapping $args]
+	set xscale [expr double($a1-$a0)/($x1-$x0)]
+	set yscale [expr double($b1-$b0)/($y1-$y0)]
 
-	    foreach i $canvasItems {
-		set p [$itemdict($i) active]
-		if { ! [lmember $result $p] } {
-		    if { [lsubset [$canvas find withtag $p] $canvasItems] } {
-			lappend result $p
+        $this move $tag [expr $a0-$x0] [expr $b0-$y0]
+	$this scale $tag $a0 $b0 $xscale $yscale
+    }
+}
+
+#######################################################################
+#### reshape
+#
+# Reshape an item by moving one or more of its features the specified
+# distance. If the arguments contain the *-shape* option, its value
+# is used instead of the item's actual shape.
+# If a tag is specified and the tag denotes more than one item,
+# then the items are treated as a rectangle.
+#
+body ::tycho::Slate::reshape {tag x y args} {
+    set t [lsearch -exact $args -shape]
+    if { $t != -1 } {
+        $this shapecall $tag reshape $x $y \
+                -features [lreplace $args $t [expr $t+1]] \
+                -shape [lindex $args [expr $t+1]]
+    } else {
+        $this shapecall $tag reshape $x $y -features $args
+    }
+}
+
+#######################################################################
+#### reshapeclick
+#
+# Start a reshape interaction sequence at coordinates
+# (_x_, _y_). Additional arguments include various
+# flags that control the reshaping process:
+# <ul>
+# <li><b>-ghost</b>: If supplied and true, use a "ghost" outline
+# during the reshaping.
+# <li><b>-shape</b>: The shape used to reshape the picture..
+# <li><b>-features</b>: The features to be reshaped. If not supplied,
+# then either a sensible default will be used or an error
+# will be raised (the usual case).
+# </ul>
+#
+body ::tycho::Slate::reshapeclick {tag x y args} {
+    eval $this shapecall $tag reshapeclick $x $y $args
+}
+
+#######################################################################
+#### reshapedrag
+#
+# Continue a reshape interaction sequence with 
+# (_x_, _y_) as the new cursor position. If the arguments
+# contain the *-shape* option, its value
+# is used instead of the item's actual shape. Other options
+# will be ignored.
+#
+body ::tycho::Slate::reshapedrag {tag x y} {
+    eval $this shapecall $tag reshapedrag $x $y
+
+    # If the item has a highlight, then rehighlight it so
+    # it changes shape too
+    if { [$this find withtag highlight.$tag] != "" } {
+        $this highlight $tag
+    }
+}
+
+#######################################################################
+#### reshaperelease
+#
+# Terminate the interaction sequence.  If the arguments
+# contain the *-shape* option, its value
+# is used instead of the item's actual shape.
+#
+body ::tycho::Slate::reshaperelease {tag} {
+    eval $this shapecall $tag reshaperelease
+}
+
+#######################################################################
+#### reshapeto
+#
+# Move a feature of an item or items to a specified location.
+# If the arguments contain the *-shape* option, its value
+# is used instead of the item's actual shape.
+#
+body ::tycho::Slate::reshapeto {tag x y feature args} {
+    set current [eval $this feature $tag $feature $args]
+    set x [expr $x - [lindex $current 0]]
+    set y [expr $y - [lindex $current 1]]
+    eval $this shapecall $tag reshape $x $y -features $feature $args
+}
+
+#######################################################################
+#### select
+#
+# Manipulate the selection. This method extends the superclass
+# method to allow the selection to be whole items (the superclass
+# only allows text with a text item to be the selection). These
+# are called a _text selection_ and an _item selection_. Text
+# selection and item selection are mutually exclusive: you can either
+# select text within an item that supports text (the canvas text
+# item or any complex item that has a <b>select</b> method), or you
+# can select multiple items. Each item in the item selection is tagged
+# woth the tag <b>sel</b>. This method has several forms, depending
+# on the value of the _mode_ argument. For more details on indexes,
+# see the Tk canvas documentation.
+#
+# <dl>
+# <dt><b>add</b> ?_id_ ...?
+# <dd>
+# Clear the text selection if there is one, and add all of the
+# given items to the item selection. Each item is given the
+# tag <b>sel</b> and highlighted with the highlight() method
+# if <b>highlightselection</b> is true. Claim the X selection if
+# <b>-exportselection</b> is true.
+#
+# <dt><b>adjust</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and adjust the end of the text selection
+# to be at the specified _index_. Claim the X selection if
+# <b>-exportselection</b> is true.
+#
+# <dt><b>clear</b>
+# <dd>
+# Clear both the item selection and the text selection.
+#
+# <dt><b>from</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and and set the text selection anchor point
+# to just before _index_. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# <dt><b>get</b>
+# <dd>
+# Return a description of the selection. If there is a text selection
+# just return the selected text; if there is an item selection return
+# the result of calling <b>describe</b> on the selected items.
+#
+# <dt><b>item</b>
+# <dd>
+# If there is a text selection in this slate, return the item
+# containing it. Otherwise return null. (Note: to find the
+# item selection, use <b>find withtag sel</b>.)
+# 
+# <dt><b>remove</b> ?_id_ ...?
+# <dd>
+# Remove all of the given items from the item selection. Each item
+# has the tag <b>sel</b> removed from its tag list and is unhighlighted
+# if it is highlighted. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# <dt><b>to</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and and set the end of the text selection
+# to just before _index_. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# </dl>
+#
+body ::tycho::Slate::select {mode {id {}} args} {
+    switch -exact $mode {
+	"add" {
+	    # Add to the item selection
+	    $canvas select clear
+	    foreach id [concat $id $args] {
+		if { ! [$this hastag $id sel] } {
+		    $this addtag "sel" withtag $id
+		    if $itk_option(-highlightselection) {
+			$this highlight $id -tags highlight.sel
 		    }
 		}
 	    }
+	    $this claimSelection
 	}
-    }
-    return $result
-}
-
-
-## lower tagOrID {belowThis}
-#
-# Lower the specified picture or item picture to the bottom, or below
-# a specified picture or tag in the display list.
-#
-# -- tagOrID: The item to lower. This can be a slate picture,
-#    a raw canvas item, or a tag.
-#
-# -- belowThis: If specified, the item or tag above which the picture
-#    is raised.
-#
-body ::tycho::Slate::lower {tagOrID args} {
-    eval $itk_component(canvas) lower $tagOrID $args
-}
-
-
-## move tagOrID x y
-#
-## move tagOrID "click" x y [-ghost]
-## move tagOrID "drag"  x y
-## move tagOrID "release"
-#
-# Move one or picts the specified amount. The first argument
-# can either be a tag or a picture. (This command is more useful if
-# it is a tag, otherwise, it is the same as calling move{} on the
-# picture directly.)
-#
-body ::tycho::Slate::move {tagOrID args} {
-
-    if { [isObject $tagOrID] } {
-	set pictures $tagOrID
-    } else {
-	set pictures [$this roots [$this find withtag $tagOrID]]
-    }
-
-    foreach p $pictures {
-	eval $p move $args
-    }
-}
-
-
-## raise tagOrID {aboveThis}
-#
-# Raise the specified picture or item picture to the top, or above
-# a specified picture or tag in the display list.
-#
-# -- item: The item to raise. This can be a slate picture,
-#    a raw canvas item, or a tag.
-#
-# -- aboveThis: If specified, the item or tag above which the picture
-#    is raised.
-#
-body ::tycho::Slate::raise {tagOrID args} {
-    eval $itk_component(canvas) raise $tagOrID $args
-}
-
-
-## roots {pict}+
-#
-# Give a list of pictures, return only the root pictures in that list.
-# This is useful in various kinds of `find' operations.
-#
-body ::tycho::Slate::roots {picts} {
-    set result {}
-    foreach p $picts {
-	set ok 1
-	foreach q [ldelete $picts $p] {
-	    if { [$p ancestor $q] } {
-		set ok 0
-		break
+	"adjust" {
+	    # Adjust the text selection
+	    $this unhighlight "sel"
+	    $this dtag "sel"
+	    eval chain adjust $id $args
+	    $this claimSelection
+	}
+	"clear" {
+	    # Clear the text and item selection
+	    $this unhighlight "sel"
+	    $this dtag "sel"
+	    $canvas select clear
+	}
+	"from" {
+	    # Adjust the text selection anchor
+	    $this unhighlight "sel"
+	    $this dtag "sel"
+	    eval chain from $id $args
+	}
+	"get" {
+	    # Get the selection
+	    if { [$canvas select item] != "" } {
+		chain get
+	    } else {
+		eval describe [$this find withtag "sel"]
 	    }
 	}
-	if { $ok } {
-	    lappend result $p
+	"item" {
+	    # Get the item with the text selection
+	    $this find withtag [$canvas select item]
+	}
+	"remove" {
+	    # Remove items from the selection
+	    foreach id [concat $id $args] {
+		$this unhighlight $id
+		$this dtag $id "sel"
+	    }
+	}
+	"to" {
+	    # Adjust the end of the text selection
+	    $this unhighlight "sel"
+	    $this dtag "sel"
+	    eval chain to $id $args
+	}
+	default {
+	    error "Invalid option \"$mode\": Must be one of add, adjust,\
+		    clear, from, get, item, remove, or to"
 	}
     }
-    return $result
+}
+
+#######################################################################
+#### shape
+#
+# Return the "shape" of an item. The shape of an item determines what
+# features it has, and how it can be reshaped. For each valid
+# shape, there is a class that implements operations on that
+# shape. Valid shapes are:
+# <ul>
+# <li><b>rectangle</b>: A rectangular shape with four coordinates,
+# being the top, left, bottom, and right coordinates. Items
+# with this shape are manipulated by the
+# <a href="Rectangle.html">Rectangle</a> class.
+# <li><b>oval</b>: An oval shape with four coordinates,
+# being the top, left, bottom, and right coordinates. Items
+# with this shape are manipulated by the
+# <a href="Oval.html"> Rectangle</a> class.
+# <li><b>line</b>: A line with at least four coordinates, where
+# each pair are the x and y coordinates of a vertex. Items
+# with this shape are manipulated by the
+# <a href="Line.html">  Rectangle</a> class.
+# <li><b>polygon</b>: A polygon with at least six coordinates, where
+# each pair are the x and y coordinates of a vertex. The last
+# pair may or may not be the same as the first. Items
+# with this shape are manipulated by the
+# <a href="Polygon.html">  Rectangle</a> class.
+# <li><b>point</b>: An item with just two coordinates, which
+# represent the coordinates of a particular point on the item.
+# By default, this is usually the center. Items
+# with this shape are manipulated by the
+# <a href="Point.html">  Rectangle</a> class.
+# </ul>
+#
+body ::tycho::Slate::shape {id} {
+    if { [string match {[0-9]*} $id] } {
+        set shape [$canvas type $id]
+        # Text, image, and bitmap items are treated as a "point"
+        regsub {text|bitmap|image} $shape point shape
+    } else {
+        set shape [$this itemcget $id -shape]
+    }
+    return $shape
+}
+
+#######################################################################
+#### shape*
+#
+# Return the "shape" represented by a tag or ID. If the tag represents
+# one item, the shape is that item's shape; if it represents more than one
+# item, the shape is always "rectangle"; if it represents no items, the
+# result is null. If the argument list contains the *-shape* option, then
+# its value overrides the default shape if the tag represents one item only.
+#
+body ::tycho::Slate::shape* {tag args} {
+    array set opts [concat {-shape {}} $args]
+    if ![string match {[_0-9]*} $tag] {
+        # It's a tag
+        set items [$this find withtag $tag]
+        if { [llength $items] > 1 } {
+            set shape [eval $this shape $items $method $args]
+        } elseif { [llength $items] > 1 } {
+            set shape rectangle
+        } else {
+            set shape {}
+        }
+    } elseif { $opts(-shape) != "" } {
+        # Argument overrides default
+        set shape $opts(-shape)
+    } elseif { [string match {[0-9]*} $tag] } {
+        # Simple item
+        set shape [$canvas type $tag]
+        # Text, image, and bitmap items are treated as a "point"
+        regsub {text|bitmap|image} $shape point shape
+    } else {
+        # Complex item
+        set shape [$this itemcget $tag -shape]
+    }
+    return $shape
+}
+
+#######################################################################
+#### shapecall
+#
+# Call a procedure in a Shape or ComplexItem class based on the
+# item's shape. The procedure name is obtained by prepending an
+# underscore to the _method_ argument. The arguments
+# can contain the following options:
+# <ul>
+# <li><b>*-shape*</b> _shape_: Override the item's default shape.
+# Note that this may not always behave sensibly.
+# </ul>
+#
+# (Note that many calls to shapecall{} include an x and y coordinate
+# as the first of the optional args. This is fine, and they will be
+# passed onto the procedure in the correct shape class. However,
+# there must always be an even number of arguments.)
+#
+# If the item is a complex item and its method table contains a
+# procedure with the right name, that procedure is called instead,
+# (with the *-shape* option included in the argument list).
+# (Note that it is the responsibility of the overriding method to
+# correctly deal with the *-shape* option.)
+#
+body ::tycho::Slate::shapecall {tag method args} {
+    array set opts [concat {-shape {}} $args]
+
+    # Try for complex item overriding.
+    if { [string match {_[0-9]*} $tag] } {
+	set class ::tycho::$itemClass($tag)
+	if { [::info exists ${class}::methodtable($method)] } {
+	    # There's an overriding method
+	    return [eval \
+		    [set ${class}::methodtable($method)] \
+		    $tag $canvas $this $args]
+	}
+    }
+
+    # Get the Shape class
+    set class ::tycho::[::tycho::capitalize \
+	    [eval [list $this shape* $tag] $args]]
+
+    # Call the procedure
+    eval ${class}::_$method $tag $canvas $this $args
+}
+
+#######################################################################
+#### ungrapple
+#
+# Remove grapples from an item. Grapples that are attached to the
+# given item are deleted, unless they have the <b>-sticky</b> option set.
+#
+body ::tycho::Slate::ungrapple {id} {
+    foreach g [$this find withtag grapple.$id] {
+        if ![$this itemcget $g -sticky] {
+            $this delete $g
+        }
+    }
+}
+
+#######################################################################
+#### unhighlight
+#
+# Delete highlights from all matching items.
+#
+body ::tycho::Slate::unhighlight {tag} {
+    if { [string match {_*} $tag] } {
+	# If it's a complex item and it has an unhighlight{} method,
+	# call that
+        set class ::tycho::$itemClass($tag)
+        if { [::info exists ${class}::methodtable(unhighlight)] } {
+            [set ${class}::methodtable(unhighlight)] $tag $canvas $this
+            return  ;# return empty string
+    	}
+    } elseif { ! [string match {[_0-9]*} $tag] } {
+    	# It's a tag, so do for each item
+    	foreach item [$this find withtag $tag] {
+	    $this unhighlight $item
+    	}
+    	return
+    }
+
+    # If we get to here, tag represents a single item
+    # Delete the highlight item
+    $canvas delete highlight.$tag
+}
+
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+#######################################################################
+#### claimSelection
+#
+# Claim the X selection if *-exportselection* is enabled and the
+# selection is not empty.
+#
+body ::tycho::Slate::claimSelection {} {
+    if { $itk_option(-exportselection) } {
+	::selection own -command "$this select clear" \
+		[namespace tail $this]
+    }
 }

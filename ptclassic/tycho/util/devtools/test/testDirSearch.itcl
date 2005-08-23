@@ -2,7 +2,7 @@
 #
 # @Authors: Edward A. Lee, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testDirSearch.itcl	1.2 03/23/98
 #
 # @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
@@ -32,7 +32,7 @@
 
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
-package require tycho.kernel.devtools
+package require tycho.util.devtools
 package require tycho.kernel.gui
 
 #set VERBOSE 1
@@ -41,17 +41,18 @@ package require tycho.kernel.gui
 #### test the DirSearch widget
 # 
 test EditDirSearch-1.1 {Test the DirSearch widget} {
-    cd [file join $TYCHO kernel]
+    cd [file join $env(DEVTOOLS_LIBRARY) test]
     # This is a proc, not a test body, so it is not executed in the global
     # scope, so we need to declare TY_TEST_MODAL as global
     global TY_TEST_MODAL
     # This script is executed inside Dialog::wait 
     set TY_TEST_MODAL {
 	{
-	    %0 insert entry  "*.tcl"
+	    %0 insert entry  "*.itcl"
 	    %0 insert regexp "foo"
 	    update idletasks
 	    after 500
+	    # FIXME: THis is broken: OK doesn't return the window
 	    set indexwin [%0 ok]
             $indexwin goto 1
             # Don't hit the ok button, we won't be able to close the window

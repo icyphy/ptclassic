@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)graphic.tcl	1.2 03/03/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
@@ -33,10 +33,13 @@
 # Turn on debugging
 # controlPanel debug 1
 
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/graphic.html}
+
 # Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io
 controlPanel add controlPanel.io -side left
 
 # Create the ten-band graphic eq sub-panel and add to the main panel
-::tycho::GraphicEQ controlPanel.eq
+::tycho::GraphicEq controlPanel.eq
 controlPanel add controlPanel.eq -side left

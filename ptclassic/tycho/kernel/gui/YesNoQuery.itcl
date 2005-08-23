@@ -1,9 +1,10 @@
 # Yes-no query box.
 #
-# $Id$
-# Authors: Wan-Teh Chang, Joel King, and Edward A. Lee
+# @Authors: Wan-Teh Chang, Joel King, and Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: @(#)YesNoQuery.itcl	1.18   12/05/97
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,33 +34,55 @@
 ##########################################################################
 #### askuser
 # Ask the user a question, and return 0 or 1 for answers No and Yes.
+# Also return 0 if the user dismisses the query window without responding.
 # This is done by opening a modal dialog box ("modal" means that nothing
 # further happens in this thread of control until this dialog box is
 # dismissed).
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
 #
-proc tycho::askuser {question} {
-    return [DialogWindow::newModal YesNoQuery [autoName .yesno] \
-	    -text $question]
+proc ::tycho::askuser {question} {
+    set name [autoName .yesno]
+    uplevel #0 [list ::tycho::YesNoQuery $name -text $question]
+    set response [::tycho::Dialog::wait $name]
+    if {$response == 1} {
+        return 1
+    } else {
+        return 0
+    }
 }
 
 ##########################################################################
 #### YesNoQuery
 # Query the user for a yes/no response to a question. The command to
 # execute in response to the user's answer can be specified using the
-# options "yescommand" and "nocommand". The value returned by whichever
+# options "-yescommand" and "-nocommand". The value returned by whichever
 # command is executed can be obtained by creating the dialog box using
-# the procedure newModal rather than directly creating an instance.
+# the procedure <code>wait</code> after creating the instance.
 # This functionality can be accessed more simply through the procedure
-# "tycho::askuser".
+# <code>::tycho::askuser</code>.
 #
-class tycho::YesNoQuery {
-    inherit DialogWindow
+class ::tycho::YesNoQuery {
+    inherit ::tycho::Dialog
 
-    # The command to execute on a yes response.
-    itk_option define -yescommand yescommand YesCommand "DialogWindow::answer 1"
+    # Specify the command to execute on a yes response.
+    itk_option define -yescommand yescommand YesCommand \
+	    "::tycho::Dialog::answer 1"
 
-    # The command to execute on a no response
-    itk_option define -nocommand nocommand NoCommand "DialogWindow::answer 0"
+    # Specify the command to execute on a no response
+    itk_option define -nocommand nocommand NoCommand \
+	    "::tycho::Dialog::answer 0"
 
     constructor {args} {}
 }
@@ -67,27 +90,29 @@ class tycho::YesNoQuery {
 ##########################################################################
 #### constructor
 #
-body tycho::YesNoQuery::constructor {args} {
+body ::tycho::YesNoQuery::constructor {args} {
 
     configure -bitmap question
 
     #
     # Pack the yes and no buttons.
     #
-    addButton yes -text "Yes <Ret>" -command \
-	    "$this execCommand -yescommand; delete object $this"
-    addButton no -text "No <Esc>" -command \
-	    "$this execCommand -nocommand; delete object $this"
+    addButton yes -text "Yes" \
+            -underline 0 \
+	    -command "$this execCommand -yescommand; \
+	    $this prevWindow; \
+	    delete object $this"
+    addButton no -text "No" \
+            -underline 0 \
+	    -command "$this execCommand -nocommand; \
+	    $this prevWindow; \
+	    delete object $this"
     default yes
 
-    bind $prefix <Return> "$this invoke yes"
-    bind $prefix <Escape> "$this invoke no"
+    # bind $prefix <Return> "$this invoke yes"
 
     #
     # Explicitly handle configs that may have been ignored earlier.
     #
     eval itk_initialize $args
-
-    # Grab the focus.
-    focus $prefix
 }

@@ -1,0 +1,34 @@
+# CAUTION: automatically generated file by a rule in tycommon.mk
+# This file will source the .itcl files list in the
+# makefile SIMPLE_TESTS and GRAPHICAL_TESTS variables
+# This file is different from all.itcl in that all.itcl
+# will source all the .itcl files in the current directory
+#
+# Set the following to avoid endless calls to exit
+if {![info exists reallyExit]} {set reallyExit 0}
+# Exiting when there are no more windows is wrong
+::tycho::TopLevel::exitWhenNoMoreWindows 0
+#Do an update so that we are sure tycho is done displaying
+update
+set savedir "[pwd]"
+if {"" != ""} {foreach i [list ] {puts $i; cd "$savedir"; if [ file exists $i ] {source $i}}}
+puts stderr testEditC.itcl
+cd "$savedir"
+source testEditC.itcl
+puts stderr testEditHTML.itcl
+cd "$savedir"
+source testEditHTML.itcl
+puts stderr testEditItcl.itcl
+cd "$savedir"
+source testEditItcl.itcl
+puts stderr testFiles.itcl
+cd "$savedir"
+source testFiles.itcl
+puts stderr testPtWidgets.itcl
+cd "$savedir"
+source testPtWidgets.itcl
+puts stderr testWidgets.itcl
+cd "$savedir"
+source testWidgets.itcl
+catch {doneTests}
+exit

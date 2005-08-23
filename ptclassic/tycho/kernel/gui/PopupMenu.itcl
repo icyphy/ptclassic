@@ -2,9 +2,9 @@
 # 
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)PopupMenu.itcl	1.11 06/29/98
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -43,22 +43,34 @@ class ::tycho::PopupMenu {
     destructor {}
 
     ###################################################################
+    ####                            options                        ####
+
+    # The command to call before posting the menu
+    itk_option define -command command Command {}
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Add a menu entry to a menu
-    method add {name inMenu args}
+    method add {type tag  {inMenu {}} args}
 
-    # Add a separator to a menu
-    method addSeparator {args}
+    # Add a command menu entry to a menu
+    method command {tag inMenu args}
+
+    # Clear a menu
+    method clear {{menu top}}
 
     # Get an option of a menu
-    method menucget {name option}
+    method menucget {menu {option {}}}
 
     # Set options of a menu
-    method menuconfigure {name args}
+    method menuconfigure {menu args}
 
     # "Post" the popup
     method post {x y}
+
+    # Add a separator to a menu
+    method separator {tag {inMenu top}}
 }
 
 
@@ -73,15 +85,12 @@ body ::tycho::PopupMenu::constructor {args} {
 		-background -foreground
     }
 
-    # Record its "path" and type
-    set itemtype(top) "menu"
-    set menupath(top) $itk_component(top)
-}
+    # Record its "path"
+    set _menupath(top) $itk_component(top)
+    set _menuentries($itk_component(top)) {}
+    set _tag($_menupath(top)) top
 
-#######################################################################
-#### destructor
-#
-body ::tycho::PopupMenu::destructor {} {
+    eval itk_initialize $args
 }
 
 ###################################################################
@@ -92,59 +101,56 @@ body ::tycho::PopupMenu::destructor {} {
 #####################################################################
 #### add
 #
-body ::tycho::PopupMenu::add {name args} {
-    if { ! [string match {-*} [lindex $args 0]] } {
-	set inMenu [lindex $args 0]
-	set args [lrange $args 1 end]
-    } else {
+body ::tycho::PopupMenu::add {type tag {inMenu {}} args} {
+    if { $inMenu == "" } {
+        set inMenu "top"
+    } elseif [string match {-*} $inMenu] {
+	set args [linsert $args 0 $inMenu]
 	set inMenu "top"
     }
-
-    eval ::tycho::MenuSupport::add [list $name] [list $inMenu] $args
+    eval chain [list $type $tag $inMenu] $args
 }
-
 
 #####################################################################
-#### addSeparator
+#### clear
 #
-body ::tycho::PopupMenu::addSeparator {args} {
-    if { ! [string match {-*} [lindex $args 0]] } {
-	set inMenu [lindex $args 0]
-	set args [lrange $args 1 end]
-    } else {
-	set inMenu "top"
-    }
-
-    eval ::tycho::MenuSupport::addSeparator [list $inMenu] $args
+body ::tycho::PopupMenu::clear {{menu top}} {
+    chain $menu
 }
 
+#####################################################################
+#### command
+#
+body ::tycho::PopupMenu::command {tag inMenu args} {
+    if [string match {-*} $inMenu] {
+	set args [linsert $args 0 $inMenu]
+	set inMenu "top"
+    }
+    eval chain [list $tag $inMenu] $args
+}
 
 #####################################################################
 #### menucget
 # Get a configuration option of a menu.
 #
-body ::tycho::PopupMenu::menucget {name {option {}}} {
-    if { [string match {-*} $name] } {
-	set option $name
-	set name "top"
+body ::tycho::PopupMenu::menucget {tag {option {}}} {
+    if { $option == "" } {
+	set option $tag
+	set tag "top"
     }
-
-    ::tycho::MenuSupport::menucget $name $option
+    chain $tag $option
 }
 
 #####################################################################
 #### menuconfigure
 # Get or configure options of a menu.
 #
-body ::tycho::PopupMenu::menuconfigure {args} {
-    if { ! [string match {-*} [lindex $args 0]] } {
-	set name [lindex $args 0]
-	set args [lrange $args 1 end]
-    } else {
-	set name "top"
+body ::tycho::PopupMenu::menuconfigure {menu args} {
+    if [string match {-*} $menu] {
+	set args [linsert $args 0 $menu]
+	set menu "top"
     }
-
-    eval ::tycho::MenuSupport::menuconfigure [list $name] $args
+    eval chain [list $menu] $args
 }
 
 #####################################################################
@@ -152,5 +158,15 @@ body ::tycho::PopupMenu::menuconfigure {args} {
 # Post the popup.
 #
 body ::tycho::PopupMenu::post {x y} {
+    if { $itk_option(-command) != "" } {
+	uplevel #0 $itk_option(-command)
+    }
     tk_popup $itk_component(top) $x $y
+}
+
+#####################################################################
+#### separator
+#
+body ::tycho::PopupMenu::separator {tag {inMenu top}} {
+    chain $tag $inMenu
 }

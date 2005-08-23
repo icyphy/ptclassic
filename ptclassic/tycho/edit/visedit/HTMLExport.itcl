@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)HTMLExport.itcl	1.6	06/10/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -56,10 +56,11 @@
 #     .h HTML2DAG [file join $TYCHO doc index.html] $dagfile
 #     ::tycho::openContext $dagfile
 #     .h HTML2PS index.html doc.ps
-#     delete .h
+#     delete object .h
 # </pre></tcl>
 #
 class ::tycho::HTMLExport {
+    inherit ::tycho::Object
     ###################################################################
     ####                         public methods                    ####
 
@@ -95,7 +96,7 @@ class ::tycho::HTMLExport {
     ####                   private variables                       ####
 
     # An array of files and links, the indice is the file being linked to.
-    protected variable DAGlist {}
+    protected variable DAGlist
 
     # A list of the files that we have seen so far.
     private variable filesSeen {}
@@ -129,13 +130,16 @@ body ::tycho::HTMLExport::HTML2DAG {indexfile DAGfile} {
     }
     set DAGfd [open $DAGfile w]
     puts $DAGfd "{configure -canvasheight 600} {configure -canvaswidth 800}"
-    puts $DAGfd "{titleSet title {HTML links for [file dirname $indexfile]}}"
-    puts $DAGfd "{titleSet subtitle {created: [clock format [clock clicks]]}}"
+    puts $DAGfd "{titleSet title {HTML links for \
+           [getTitleFromFile $indexfile]\n\
+            ([::tycho::simplifyPath $indexfile])}}"
+ 
+    puts $DAGfd "{titleSet subtitle {created: [clock format [clock seconds]]}}"
 
     # Don't cd until after the output file is open
     cd [file dirname $indexfile]
-    # Start at depth 0, generate a DAG
-    puts [HTMLLinks $indexfile 0 $DAGfd]
+    # Generate a DAG, start at depth 0, 
+    HTMLLinks $indexfile 1 0
 #    puts $DAGfd "\{add \{[::tycho::expandPath $indexfile]\} \
 #	    \{label \{[::tycho::expandPath $indexfile]\}\} \{\}\}"
 
@@ -145,8 +149,10 @@ body ::tycho::HTMLExport::HTML2DAG {indexfile DAGfile} {
 	if { $title == {} } {
 	    set title [file tail $DAGitem]
 	}
+        # The DAG viewer can't deal with nodes that are named $TYCHO
+        set shortPath [::tycho::simplifyPath $DAGitem]
 	puts $DAGfd "\{add \{$DAGitem\} \{label \{$title\} \
-	    link \{$DAGitem \{\}\}\} \{$DAGlist($DAGitem)\}\}"
+	    link \{$shortPath \{\}\}\} \{$DAGlist($DAGitem)\}\}"
     }
     
     close $DAGfd
@@ -289,7 +295,7 @@ body ::tycho::HTMLExport::getTitleFromFile {HTMLfile} {
 #
 body ::tycho::HTMLExport::HTMLFileList2PS {filelist} {
     global tcl_platform
-    if { $tcl_platform(platform) != unix } {
+    if { $tcl_platform(platform) != "unix" } {
 	error "Sorry, generating PostScript from HTML currently only works\
 		under Unix, netscape supports -remote only under Unix."
     }
@@ -397,4 +403,5 @@ body ::tycho::HTMLExport::addToDAG {HTMLfile link} {
     lappend DAGlist($link) $HTMLfile
     #puts "--$HTMLfile, $DAGlist($link), $link--"
 }
+
 

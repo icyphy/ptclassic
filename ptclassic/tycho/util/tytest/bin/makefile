@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.4 04/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest tytestsh
 
 MISC_FILES = README.txt
 
@@ -59,12 +59,12 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
-	chmod a+x tytest
+all: sources $(MISC_SRCS)
+	-chmod a+x tytest
+	-chmod a+x tytestsh
 
-install: all
+install: all tybin_install
 
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+include $(ROOT)/mk/tycommon.mk
 
 

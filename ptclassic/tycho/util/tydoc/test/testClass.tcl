@@ -1,8 +1,8 @@
-# Tests for the Class model.
+# Tests for the ClassModel model.
 #
 # @Author: Cliff Cordeiro
 #
-# @Version: $Id$
+# @Version: @(#)testClass.tcl	1.3 03/16/98
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -30,12 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
-
-# Load up the test definitions.
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.util.tydoc
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
@@ -46,18 +43,18 @@ if {[string compare test [info procs test]] == 1} then {
 # It would be nice if the tests would work in a vanilla itkwish binary.
 # Check for necessary classes and adjust the auto_path accordingly.
 #
-if {[namespace tycho {info classes Class}] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-    }
-}
+#if {[namespace tycho {info classes ClassModel}] == {} } {
+#    uplevel #0 {
+#	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+#    }
+#}
 
 ######################################################################
 #### Create a simple class
 # 
-test Class-1.1 {A simple class, check the description} {
+test ClassModel-1.1 {A simple class, check the description} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo method pooh
     boo variable chew
     boo describe
@@ -67,11 +64,11 @@ variable chew
 }
 
 ######################################################################
-#### Test toplevel Class attributes
+#### Test toplevel ClassModel attributes
 # 
-test Class-1.2 {Test toplevel Class attributes} {
+test ClassModel-1.2 {Test toplevel ClassModel attributes} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo modelconfigure -source "c.itcl"
     boo modelconfigure -language "COBOL"
     boo modelconfigure -name "::tycho::Glass"
@@ -84,9 +81,9 @@ test Class-1.2 {Test toplevel Class attributes} {
 ######################################################################
 #### Test parents
 # 
-test Class-1.3 {Test parents} {
+test ClassModel-1.3 {Test parents} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo parent mom -inheritance implementation
     boo parent dad -inheritance interface
     set x [boo parents]
@@ -96,9 +93,9 @@ test Class-1.3 {Test parents} {
 ######################################################################
 #### Test Constructor
 # 
-test Class-1.4 {Test Constructor} {
+test ClassModel-1.4 {Test Constructor} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo Constructor Tinker -protection private -modifiers duh -exceptions but
     boo Constructor Toy -protection protected
     set x [boo Constructors]
@@ -108,9 +105,9 @@ test Class-1.4 {Test Constructor} {
 ######################################################################
 #### Test Destructor
 # 
-test Class-1.5 {Test Destructor} {
+test ClassModel-1.5 {Test Destructor} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo Destructor Tango -protection private -modifiers adjective \
             -exceptions irrelevant
     boo Destructor Cash -protection package
@@ -122,9 +119,9 @@ test Class-1.5 {Test Destructor} {
 ######################################################################
 #### Test method
 # 
-test Class-1.6 {Test method} {
+test ClassModel-1.6 {Test method} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo method rhythm -protection private -modifiers green -type Int \
             -scope class -exceptions overruled
     boo method is -scope instance -type "O positive"
@@ -137,9 +134,9 @@ test Class-1.6 {Test method} {
 ######################################################################
 #### Test variable
 # 
-test Class-1.7 {Test variable} {
+test ClassModel-1.7 {Test variable} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo variable speed -protection protected -scope instance -type o \
             -modifiers louder -default faster
     boo variable racer -protection public -type hype -default renault
@@ -151,9 +148,9 @@ test Class-1.7 {Test variable} {
 ######################################################################
 #### Test annotation
 # 
-test Class-1.8 {Test annotation} {
+test ClassModel-1.8 {Test annotation} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo annotation description "This is."
     boo annotation explanation "This is it."
     set retval ""
@@ -164,9 +161,9 @@ test Class-1.8 {Test annotation} {
 ######################################################################
 #### Test nested annotations
 # 
-test Class-1.9 {Test nested annotations} {
+test ClassModel-1.9 {Test nested annotations} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo method heimlich
     boo annotation heimlich.manuever "Is that how you spell it?"
     boo variable temperature
@@ -179,9 +176,9 @@ test Class-1.9 {Test nested annotations} {
 ######################################################################
 #### Test nested parameters
 # 
-test Class-1.10 {Test nested parameters} {
+test ClassModel-1.10 {Test nested parameters} {
     catch {delete object boo}
-    ::tycho::Class boo
+    ::tycho::ClassModel boo
     boo method heimlich
     boo parameter heimlich manuever -type int -optional 1 -default "foot"
     boo variable weather

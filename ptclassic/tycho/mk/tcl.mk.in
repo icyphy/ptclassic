@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)tcl.mk.in	1.7 05/25/97
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,10 +32,18 @@
 
 # This makefile is an autoconf makefile, not a standard Ptolemy makefile
 
+# If this file is named tycho/src/tcl.mk, DON'T EDIT IT.  Instead,
+# do 'cd $TYCHO; make config_tclexts', which will create 
+# tycho/obj.$PTARCH/tcl.mk. 
+# tycho/src/tcl.mk exists so we can run 'make sources' in the
+# tycho/src directory.
+
 SHELL = 	/bin/sh
 
-srcdir =	@srcdir@
-VPATH =		@srcdir@
+# Don't set srcdir or VPATH in this file or you will override the values
+# in the makefile that includes this file.
+#srcdir =	@srcdir@
+#VPATH =		@srcdir@
 
 # Location of Tcl and Tk files
 TCL_SRC_DIR =		@TCL_SRC_DIR@
@@ -61,6 +69,8 @@ LIB_INSTALL_DIR =	$(TCL_LIB_DIR)
 # is a variable "LIB_INSTALL_DIR" defined in the Makefile.
 TCL_LD_SEARCH_FLAGS =	@TCL_LD_SEARCH_FLAGS@
 
+TK_SRC_DIR =		@TK_SRC_DIR@
+
 # -I switch(es) to use to make all of the X11 include files accessible:
 TK_XINCLUDES =		@TK_XINCLUDES@
 
@@ -84,8 +94,3 @@ TCL_INCLUDES = \
 	$(TK_XINCLUDES)
 
 CFLAGS =	$(TCL_CFLAGS) $(AC_FLAGS) $(INCLUDE) $(OTHERCFLAGS)
-
-.SUFFIXES: .c .o
-
-.c.o :
-	$(CC) -c $(CFLAGS) $<

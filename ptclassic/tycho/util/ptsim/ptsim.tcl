@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)ptsim.tcl	1.1 03/04/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

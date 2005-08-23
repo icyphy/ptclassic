@@ -2,7 +2,7 @@
 # Script for running single tests \
     exec wish80 "$0" "$@"
 
-# $Id$
+# @(#)test	1.2 07/29/98
 # Author: John Reekie
 
 # Try SLATE_LIBRARY

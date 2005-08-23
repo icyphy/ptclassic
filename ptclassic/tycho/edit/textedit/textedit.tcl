@@ -1,10 +1,10 @@
-# Package load file for the Tycho TextEdit package
+# Package load file for the Tycho tycho.edit.textedit package
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)textedit.tcl	1.3 02/26/98
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,9 +33,139 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-puts "Loading package: TychoTextEdit, version 0.1"
+package require tycho.kernel.basic
+package require tycho.kernel.gui
+package provide tycho.edit.textedit 2.0
 
-package provide TychoTextEdit 0.1
+set env(TEXTEDIT_LIBRARY) [file dirname [info script]]
+if { [lsearch -exact $auto_path $env(TEXTEDIT_LIBRARY)] == -1 } {
+    lappend auto_path $env(TEXTEDIT_LIBRARY)
+}
 
-set env(TYCHO_TEXTEDIT_LIBRARY) [file dirname [info script]]
-lappend auto_path [file join $env(TYCHO_TEXTEDIT)]
+### Stylesheets
+::tycho::register stylesheet "editcolors" \
+	[file join $env(TEXTEDIT_LIBRARY) editcolors.style] \
+	[file join ~ .Tycho styles editcolors.style]
+
+::tycho::register stylesheet "edithtml" \
+	[file join $env(TEXTEDIT_LIBRARY) edithtml.style] \
+	[file join ~ .Tycho styles edithtml.style]
+
+::tycho::register stylesheet "makefile" \
+	[file join $env(TEXTEDIT_LIBRARY) makefile.style] \
+	[file join ~ .Tycho styles makefile.style]
+
+### MODE MAPPINGS
+
+############# text editing modes
+::tycho::register extensions "c" .sched .c .y
+# .js is JavaScript
+::tycho::register extensions "c++" .C .cc .h .H .js
+::tycho::register extensions "esterel" .strl
+::tycho::register extensions "forest" .fst
+::tycho::register extensions "itcl" .itcl .itk
+::tycho::register extensions "java" .java
+
+# .vc is for Microsoft Visual c++
+::tycho::register extensions "makefile" .mk .template .vc
+::tycho::register extensions "ptcl" .pt .ptcl
+::tycho::register extensions "ptlang" .pl
+::tycho::register extensions "sdl" .sdl
+::tycho::register extensions "tcl" .tcl .tim .layout
+
+########### filename modes	
+::tycho::register filenames "makefile" Makefile makefile GNUmakefile
+
+
+### MODES
+
+# C
+::tycho::register mode "c" \
+	-command {::tycho::view EditC -file {%s}} \
+	-viewclass ::tycho::EditC \
+	-label {C Editor}  \
+	-category "text" \
+	-underline 0
+
+# C++
+::tycho::register mode "c++" \
+	-command {::tycho::view EditCpp -file {%s}} \
+	-viewclass ::tycho::EditCpp \
+	-label {C++ Editor}  \
+	-category "text" \
+	-underline 1
+
+# Esterel
+::tycho::register mode "esterel" \
+	-command {::tycho::view EditEsterel -file {%s}} \
+	-viewclass ::tycho::EditEsterel \
+	-label {Esterel Editor}  \
+	-category "text" \
+	-underline 0
+
+# HTML editor
+::tycho::register mode "edithtml" \
+	-command {::tycho::view EditHTML -file {%s}} \
+	-viewclass ::tycho::EditHTML \
+	-label {HTML Editor}  \
+	-category "text" \
+	-underline 0
+
+# Itcl
+::tycho::register mode "itcl" \
+	-command {::tycho::view EditItcl -file {%s}} \
+	-viewclass ::tycho::EditItcl \
+	-label {Itcl Editor}  \
+	-category "text" \
+	-underline 0
+
+# Java
+::tycho::register mode "java" \
+	-command {::tycho::view EditJava -file {%s}} \
+	-viewclass ::tycho::EditJava \
+	-label {Java Editor}  \
+	-category "text" \
+	-underline 0
+
+# Makefiles and Microsoft Visual C++
+::tycho::register mode "makefile" \
+	-command {::tycho::view EditMake -file {%s}} \
+	-viewclass ::tycho::EditMake \
+	-label {Makefile Editor}  \
+	-category "text" \
+	-underline 0
+
+# SDL -- System description language
+::tycho::register mode "sdl" \
+	-command {::tycho::view EditSDL -file {%s}} \
+	-viewclass ::tycho::EditSDL \
+	-label {SDL Editor} \
+	-category "text" \
+	-underline 0
+
+# Tcl
+::tycho::register mode "tcl"  \
+	-command {::tycho::view EditTcl -file {%s}} \
+	-viewclass ::tycho::EditTcl \
+	-label {Tcl Editor}  \
+	-category "text" \
+	-underline 0
+
+# Matlab console
+if {[uplevel #0 info commands matlab] != {}} {
+    ::tycho::register mode "matlab" \
+	    -command {::tycho::view Matlab -file {%s}} \
+	    -viewclass ::tycho::Matlab \
+	    -label {Matlab Console}  \
+	    -category "tool"
+}
+
+# Mathematica console
+if {[uplevel #0 info commands mathematica] != {}} {
+    ::tycho::register mode "mathematica" \
+	    -command {::tycho::view Mathematica -file {%s}} \
+	    -viewclass ::tycho::Mathematica \
+	    -label {Mathematica Console}  \
+	    -category "tool"
+}
+

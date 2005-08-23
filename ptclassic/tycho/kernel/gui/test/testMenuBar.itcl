@@ -4,9 +4,9 @@
 #
 # @Authors: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)testMenuBar.itcl	1.6 04/29/98
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,9 +32,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.gui
 
 ############################################################################
 #### Define a proc that can be used to create a test MenuBar widget
@@ -253,16 +253,16 @@ _stdmenubar
 test MenuBar-unpost-1 {Unpost top-level} {
     .m unpost ducati
     list \
-            [winfo ismapped .m.buttonducati.menuducati] \
-            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {0 0}
 update
 
 test MenuBar-post-1 {Post top-level menu} {
     .m post ducati
     list \
-            [winfo ismapped .m.buttonducati.menuducati] \
-            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {1 0}
 update
 
@@ -270,17 +270,19 @@ test MenuBar-post-2 {Post cascade menu} {
     .m unpost ducati
     .m post hypersport
     list \
-            [winfo ismapped .m.buttonducati.menuducati] \
-            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
 } {1 1}
 update
 
+# Unposting a bottom-level menu has been changed to unpost
+# the whole thing...
 test MenuBar-unpost-2 {Unpost bottom-level menu} {
     .m unpost hypersport
     list \
-            [winfo ismapped .m.buttonducati.menuducati] \
-            [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
-} {1 0}
+            [winfo ismapped [.m path ducati]] \
+            [winfo ismapped [.m path hypersport]]
+} {0 0}
 update
 
 

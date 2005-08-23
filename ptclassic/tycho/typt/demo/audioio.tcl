@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)audioio.tcl	1.2 03/03/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
@@ -31,21 +31,15 @@
 #######################################################################
 
 # Turn on debugging
-controlPanel debug 1
+# controlPanel debug 1
 
+# Add a help button
+controlPanel configure -helpfile {$tycho/typt/demo/audioio.html}
 
-# source $env(PTOLEMY)/src/domains/cgc/tcltk/lib/init.tcl
+# Create the AudioIO control sub-panel
+::tycho::AudioIO controlPanel.io
 
-# toplevel .t
-# set customControlPanel [::tycho::CustomControl #auto]
+# Add it to the main panel
+controlPanel add controlPanel.io -side left
 
-# set audioPanel [::tycho::AudioIO .t.a -custompanel $customControlPanel]
-# pack $audioPanel -side left -padx 3 -pady 6
-
-# set runPanel [::tycho::RunPanel .t.r \
-# 	-helpfile $TYCHO/domains/cgc/demo/audioio.html \
-# 	-helplabel "Help"]
-# pack .t.r -side left -anchor s -padx 3 -pady 7
-
-# makeRunWindow
 

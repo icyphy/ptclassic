@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands, John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.5 04/29/98
 
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -42,11 +42,13 @@ include $(CONFIG)
 
 ITCL_SRCS = \
 	labeledgrid.itk \
+	labeledcolumn.itk \
+	notebook.itk \
 	widgettree.itk
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex
+MISC_FILES =	doc tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex

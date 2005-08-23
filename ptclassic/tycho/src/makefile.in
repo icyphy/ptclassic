@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, src directory. These dirs use the compiler
 #
 # Author: Christopher Hylands
-# Version: $Id$
+# Version: @(#)makefile.in	1.19 05/19/98
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,7 +36,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual makefile.
 
-DIRS = profile tyjava
+DIRS = tytimer tytest tycgc
 
 srcdir = 	@srcdir@
 
@@ -52,20 +52,20 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Files that are under version control
-EXTRA_SRCS =	configure.in makefile.in
+EXTRA_SRCS =	configure.in makefile.in index.html
 
 # `make realclean` removes these files
-REALCLEAN_STUFF = java.mk tcl.mk makefile
+REALCLEAN_STUFF = tcl.mk makefile
 
 # `make checkjunk` ignores these files
-MISC_FILES =	java.mk tcl.mk config.cache config.log config.status \
+MISC_FILES =	tcl.mk config.cache config.log config.status \
 		configure $(DIRS)
 
 # We can't place an 'all' rule in corerules.mk, because any makefile that
 # defines its own all rule would have the rule defined twice.  With
 # GNU make, we could make the all rule a double-colon rule, but this might
 # not be portable.
-all install:
+all:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -75,8 +75,29 @@ all install:
 	    fi ; \
 	done
 
-# Grab the rules that are common to most makefiles.
-include $(ROOT)/mk/corerules.mk
+install: $(LIBDIR) $(LIBDIR)/tcl.mk
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $(ME)/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+
+# Avoid warnings about duplicate rules in this file and tycommon.m
+LIBR = dummylibr
+
+$(LIBDIR):
+	mkdir $@
+$(LIBDIR)/tcl.mk: tcl.mk
+	rm -f $@
+	cp tcl.mk $@
+depend:
+	@echo "no dependencies in this directory"
+
+# Get the rest of the rules
+include $(ROOT)/mk/tycommon.mk
 
 #----------------------------------------------------------------------
 # Rules for rebuilding the configure and Makefile files

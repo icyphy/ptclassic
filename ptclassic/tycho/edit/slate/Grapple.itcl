@@ -1,8 +1,8 @@
 #########################################################################
-# @Version: $Id$
+# @Version: @(#)Grapple.itcl	1.10 07/29/98
 # @Author: John Reekie
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,25 +29,17 @@
 ##########################################################################
 
 
-# Explicitly load the superclass. I don't really know why this is
-# needed, but the common arrays get upset otherwise.
-namespace ::tycho {
-    if { [::info classes ComplexItem] == "" } {
-	uplevel #0 {source $tychoslate/ComplexItem.itcl}
-    }
-}
-
 ##########################################################################
 ## Grapple
 #
 # A Grapple is a small item that serves as a grab handle for manipulating
 # graphical objects.
 #
-# <p><a name="#options"></a><b>Options</b>
+# <p><a name="Grapple class Options"></a><b>Options</b>
 #
 # <ul>
-# <li><b>-aspect</b>:
-# The aspect of the item to which this grapple is attached.
+# <li><b>-feature</b>:
+# The feature of the item to which this grapple is attached.
 #
 # <li><b>-fill</b>:
 # The fill color of the grapple.
@@ -56,23 +48,24 @@ namespace ::tycho {
 # The id of the item to which this grapple is attached.
 #
 # <li><b>-outline</b>:
-# The color of the outline of the oval. If "", 
-# the oval has no outline. By default, it is black.
+# The color of the outline of the grapple. If "", 
+# the grapple has no outline. By default, it is null.
+#
+# <li><b>-sticky</b>:
+# The grapple will not be deleted by the <b>ungrapple</b> method of
+# the Slate.
 #
 # <li><b>-width</b>:
-# The width of the outline of the oval, in pixels. By 
+# The width of the outline of the grapple, in pixels. By 
 # default, it is one.
 #
 # </ul>
 #
 # <p><b>Bugs</b>: (none)
 #
-# <p><b>Example</b>: Create a labelled oval:
-# <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   $slate create Grapple 40 40 100 80 -fill white -outline blue &#92
-# 		-width 4 -text Foo -tags moveable
-# </pre></tcl>
+# <p><b>Example</b>:
+#
+# See the demo directory.
 #
 # <p><b>Enhancements</b>: (none)
 #
@@ -90,8 +83,8 @@ class ::tycho::Grapple {
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-aspect* option
-    proc _aspect {id canvas slate aspect}
+    # Update the *-feature* option
+    proc _feature {id canvas slate feature}
 
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
@@ -101,6 +94,9 @@ class ::tycho::Grapple {
 
     # Update the *-outline* option
     proc _outline {id canvas slate outline}
+
+    # Update the *-sticky* option
+    proc _sticky {id canvas slate sticky}
 
     # Update the *-width* option
     proc _width {id canvas slate width}
@@ -119,17 +115,21 @@ class ::tycho::Grapple {
 
     # Default values of this item's options
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
 
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Grapple {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_aspect)   ::tycho::Grapple::_aspect
+    set methodtable(_feature)   ::tycho::Grapple::_feature
     set methodtable(_fill)     ::tycho::Grapple::_fill
     set methodtable(_item)     ::tycho::Grapple::_item
     set methodtable(_outline)  ::tycho::Grapple::_outline
+    set methodtable(_sticky)   ::tycho::Grapple::_sticky
     set methodtable(_width)    ::tycho::Grapple::_width
 
     set methodtable(construct) ::tycho::Grapple::construct
@@ -138,19 +138,20 @@ class ::tycho::Grapple {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-aspect)  ""
+    set optiondefault(-feature)  ""
     set optiondefault(-fill)    "cyan3"
     set optiondefault(-item)    ""
     set optiondefault(-outline) ""
     set optiondefault(-shape)   "point"
-    set optiondefault(-width)   "1"
+    set optiondefault(-sticky)  0
+    set optiondefault(-width)   1
 }
 
 ##########################################################################
-## -aspect option configuration
+## -feature option configuration
 #
-body ::tycho::Grapple::_aspect {id canvas slate aspect} {
-    set option(aspect) $aspect
+body ::tycho::Grapple::_feature {id canvas slate feature} {
+    set option(feature) $feature
 }
 
 ##########################################################################
@@ -180,6 +181,13 @@ body ::tycho::Grapple::_outline {id canvas slate outline} {
 }
 
 ##########################################################################
+## -sticky option configuration
+#
+body ::tycho::Grapple::_sticky {id canvas slate sticky} {
+    set option(sticky$id) $sticky
+}
+
+##########################################################################
 ## -width option configuration
 #
 body ::tycho::Grapple::_width {id canvas slate width} {
@@ -200,24 +208,19 @@ body ::tycho::Grapple::construct {id canvas slate tags x y args} {
 	    [::tycho::Rectangle::stretch $x $y $x $y 4] \
 	    [list -fill $option(fill$id) -outline $option(outline$id) \
 	    -width $option(width$id) -tags $tags]]
-
-    # Add the tags grapple and grapple._item_
-    # FIXME: Do in grapple{} method
-    $slate addtag grapple withtag $id
-    $slate addtag grapple.$option(item$id) withtag $id
 }
 
 ##########################################################################
 #### coords
 #
-# Set or read the oval's coordinates
+# Set or read the grapple's coordinates
 #
 body ::tycho::Grapple::coords {id canvas slate args} {
     set coords [$canvas coords $primary($id)]
 
     # No args: just return coordinates
     if { $args == "" } {
-        eval ::tycho::Rectangle::aspect $coords c
+        eval ::tycho::Rectangle::feature $coords c
     } else {
         eval $canvas coords $primary($id) \
                 [eval ::tycho::Rectangle::stretch $coords 4]

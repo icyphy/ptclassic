@@ -1,7 +1,6 @@
-/** One line description of file.
- @Author:
- @Version: $Id$
- @Copyright (c) 1997 The Regents of the University of California.
+/* One line description of file.
+
+ Copyright (c) 1998 The Regents of the University of California.
  All rights reserved.
  Permission is hereby granted, without written agreement and without
  license or royalty fees, to use, copy, modify, and distribute this
@@ -23,7 +22,85 @@
  ENHANCEMENTS, OR MODIFICATIONS.
  
                                         PT_COPYRIGHT_VERSION_2
-*/                                        COPYRIGHTENDKEY
+                                        COPYRIGHTENDKEY
+@ProposedRating Green (yourname@eecs.berkeley.edu)
+@AcceptedRating Green (reviewmoderator@eecs.berkeley.edu)
 
+*/
+
+package MyPackageName;
+
+//////////////////////////////////////////////////////////////////////////
+//// ClassName
+/** 
+Description of the class
+@author youname
+@version %W%	%G%
+@see classname
+@see full-classname
+*/
 public class ClassName {
+    /** Constructor
+     * @see full-classname#method-name()
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
+     */	
+    public ClassName() {
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    ////                         public methods                    ////
+
+    /** Description
+     * @see full-classname#method-name()
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
+     */	
+    public int APublicMethod() {
+        return 1;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ////                         protected methods                      ////
+
+    /** Description
+     * @see full-classname#method-name()
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
+     */	
+    protected int _AProtectedMethod() {
+        return 1;
+    }
+
+
+    ///////////////////////////////////////////////////////////////////
+    ////                         protected variables               ////
+
+    /** Description */
+    protected int _aprotectedvariable;
+
+
+    ///////////////////////////////////////////////////////////////////
+    ////                         private methods                   ////
+
+    // Private methods should not have doc comments, they should
+    // have regular C++ comments.
+    private int _APrivateMethod() {
+        return 1;
+    }
+
+
+    ///////////////////////////////////////////////////////////////////
+    ////                         private variables                 ////
+
+    // Private variables should not have doc comments, they should
+    // have regular C++ comments.
+    private int __aprivatevariable;
 }

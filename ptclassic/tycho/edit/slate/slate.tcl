@@ -1,10 +1,10 @@
-# Package load file for the Slate package
+# Package load file for the Tycho slate package
 #
 # @Author: John Reekie
 #
-# @Version: @(#)%%.tcl	1.1 02/10/98
+# @Version: @(#)slate.tcl	1.6 07/29/98
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,10 +34,41 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-package provide Slate 1.0
+# Prepare according to whether we are running Tycho, itcl or neither
+if [info exists ::TYCHO] {
+    package require tycho.kernel.basic
+    package provide tycho.edit.slate 2.0
+} else {
+    package provide slate 3.0
+    if ![info exists itcl::version] {
+	package require obstcl
+	obstcl::itclCompatibility
+    }
+}
+
+# Make sure the tycho namespace exists
+namespace eval ::tycho {}
+
+# Set up auto-loading
 global env auto_path
 set env(SLATE_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(SLATE_LIBRARY)] == -1 } {
     lappend auto_path $env(SLATE_LIBRARY)
 }
 
+# Load the compatibility procs if not running in Tycho
+if ![info exists ::TYCHO] {
+    source [file join $env(SLATE_LIBRARY) compat/procs.tcl]
+    source [file join $env(SLATE_LIBRARY) compat/math.tcl]
+    source [file join $env(SLATE_LIBRARY) compat/list.tcl]
+    source [file join $env(SLATE_LIBRARY) compat/classes.tcl]
+}
+
+# Create a global "slate" procedure if not running in Tycho
+if ![info exists ::TYCHO] {
+    uplevel #0 {
+	proc slate {name args} {
+	    eval ::tycho::slate $name $args
+	}
+    }
+}

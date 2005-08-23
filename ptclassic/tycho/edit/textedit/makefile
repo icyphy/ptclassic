@@ -1,9 +1,10 @@
-# Makefile for Ptolemy Tycho system, editors/textedit directory.
+# Makefile for Ptolemy Tycho system, tycho.edit.textedit package
 #
-# $Id$
-# Author: Christopher Hylands
+# @Author: Christopher Hylands
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Version: @(#)makefile	1.31 02/04/99
+#
+# @Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,67 +30,55 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
-
-# Root of Ptolemy directory
-ROOT =		../../..
+# Root of Tycho directory
+ROOT =		../..
 # Path (absolute or relative) to the object directory root
-OBJDIR =	../../..
+OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/tycho/editors/textedit
+VPATH =		$(ROOT)/edit/textedit
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS = \
+	genVCMakefile.tcl
   
 ITCL_SRCS = \
 	EditC.itcl \
-	EditCText.itcl \
 	EditCpp.itcl \
-	EditCppText.itcl \
+	EditEsterel.itcl \
 	EditHTML.itcl \
-	EditHTMLText.itcl \
 	EditItcl.itcl \
-	EditItclText.itcl \
+	EditJava.itcl \
 	EditMake.itcl \
-	EditMakeText.itcl \
-	EditPtlang.itcl \
-	EditPtlangText.itcl \
+	EditMail.itcl \
+	EditProgram.itcl \
+	EditSDL.itcl \
 	EditTcl.itcl \
-	EditTclText.itcl \
-	EditText.itcl \
-	EditVHDL.itcl \
-	EditVHDLText.itcl
+	HTMLOutline.itcl \
+	Matlab.itcl \
+	Mathematica.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	editcolors.style \
+	edithtml.style \
+	makefile.style \
+	pkgIndex.tcl \
+	textedit.tcl
 
-MISC_FILES =		doc img test tclIndex 
+MISC_FILES = doc img templates test tclIndex 
 
 # Sub directories to run make in.
-DIRS =			doc
+DIRS =	doc test templates
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF = tclIndex
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
+# Title for the tydoc index page
+TYDOC_DESC =	Index of classes in tycho/edit/textedit
 
-all install: tclIndex $(MISC_SRCS)
-
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
+all install: sources tclIndex $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

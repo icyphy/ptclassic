@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)HTMLMap2DAG.tcl	1.3	04/07/97
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -72,7 +72,7 @@ proc HTMLMap2DAG {mapfile} {
         }
     }
     close $mapfd
-    ::tycho::view EditForest [list -graph $web]
+    ::tycho::view EditForest -graph $web
 
     
 }

@@ -1,10 +1,10 @@
-# Makefile for Ptolemy Tycho system, kernel/demo directory.
+# Makefile for Ptolemy Tycho system, kernel/model/demo directory.
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.6 03/02/98
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,37 +31,42 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/demo
+VPATH =		$(ROOT)/kernel/model/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# Sub directories to run make in.
+DIRS =			
+
 TCL_SRCS = 
 
 ITCL_SRCS = \
-	dataview.itcl \
 	SimpleModel.itcl \
 	SimpleView.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+DEMO_SRCS = \
+	simpleview
 
-MISC_FILES =		doc test tclIndex
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
 
-# Sub directories to run make in.
-DIRS =			doc test
+MISC_FILES =	doc tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/kernel/demo
+TYDOC_DESC =	Index of classes in tycho/kernel/model/demo
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
+all: sources $(MISC_SRCS) tclIndex
+	chmod a+x $(DEMO_SRCS)
+
+install: all
 
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+include $(ROOT)/mk/tycommon.mk

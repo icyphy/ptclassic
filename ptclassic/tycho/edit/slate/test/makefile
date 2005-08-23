@@ -1,9 +1,9 @@
-# Makefile for Ptolemy Tycho system, editors/textedit directory.
+# Makefile for Ptolemy Tycho system, editors/slate/test directory.
 #
-# $Id$
+# @(#)makefile	1.32 07/29/98
 # Makefile Author: Christopher Hylands
 #
-# Copyright (c)  The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,68 +29,80 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
 ROOT =		../../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../../..
+
 # True source directory
 VPATH =		$(ROOT)/tycho/editors/slate
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS = \
+	defs2.tcl
   
 ITCL_SRCS = \
-	3d.itcl \
-	color.itcl \
-	composite.itcl \
-	frame.itcl \
-	highlight.itcl \
-	image.itcl \
-	line.itcl \
-	object.itcl \
-	oval.itcl \
-	picture.itcl \
-	polygon.itcl \
-	primitive.itcl \
-	rectangle.itcl \
-	ridge.itcl \
-	simple.itcl \
-	slate.itcl \
-	sticky.itcl \
-	tree.itcl
+	$(GRAPHICAL_TESTS) \
+	defs.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test #tclIndex 
+MISC_FILES = \
+	makefile \
+	test \
+	test.tcl \
+	pkgIndex.tcl
 
-# Sub directories to run make in.
-DIRS =			doc
+# If we get some SIMPLE_TESTS, then add $(SIMPLE_TESTS)
+# to ITCL_SRCS above.
+# SIMPLE_TESTS cannot be empty, or the script that builds alltests.itcl
+# and all.itcl will barf.
+SIMPLE_TESTS = \
+	dummy.tcl
+
+# Test in the order in which they are to be executed
+GRAPHICAL_TESTS = \
+	testIncrCanvas.itcl \
+	testSlate.itcl \
+	testShape.itcl \
+	testPolygon.itcl \
+	testRectangle.itcl \
+	testLine.itcl \
+	testFrame.itcl \
+	testLabeledItem.itcl \
+	testLabeledRect.itcl \
+	testLabeledFrame.itcl \
+	testIconItem.itcl \
+	testIconRect.itcl \
+	testIconFrame.itcl \
+	testInteractor.itcl \
+	testFollower.itcl \
+	testBounder.itcl 
+
+
+# Scripts that are generated
+TEST_SCRIPTS =  alltests.itcl all.itcl
+
+# make checkjunk should not complain about the OLD directory
+OPTIONAL_FILES = $(TEST_SCRIPTS)
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF = $(TEST_SCRIPTS)
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
+tests:: test_graphics
 
-all install: $(MISC_SRCS) #tclIndex
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS) $(TEST_SCRIPTS)
 
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS) $(TEST_SCRIPTS)
+	tytest $(GRAPHICAL_TESTS)
+
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 

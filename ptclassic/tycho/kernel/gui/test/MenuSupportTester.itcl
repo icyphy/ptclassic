@@ -2,9 +2,9 @@
 #
 # @Authors: John Reekie, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)MenuSupportTester.itcl	1.3 04/29/98
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -70,8 +70,9 @@ body ::tycho::MenuSupportTester::constructor {args} {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
     }
-    set menupath(top) $itk_component(top)
-    set menuentries($itk_component(top)) {}
+    set _menupath(top) $itk_component(top)
+    set _menuentries($itk_component(top)) {}
+    set _tag($_menupath(top)) top
     eval itk_initialize $args
 }
 
