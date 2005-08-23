@@ -46,7 +46,7 @@ EXTRA_SRCS =  \
 	index.html \
 	distribution.html
 
-MISC_FILES =	$(DIRS) img
+MISC_FILES =	$(DIRS) #img
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 OPTIONAL_FILES =	codeDoc
