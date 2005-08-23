@@ -1,0 +1,126 @@
+<!-- The @(#)distribution.html	1.3 05/07/98 -->
+<html>
+<head>
+<title>Distribution</title>
+</head>
+<body bgcolor="#faf0e6">
+<H1>Distribution</H1>
+<HR>
+
+ <P>
+
+ <P><B>Downloads</B>
+
+<dl>
+
+<dt><CODE>tycho.edit.slate</CODE>
+
+<dd>This is the slate package itself.
+
+<ul>
+
+<li><A
+HREF="dists/tycho.edit.slate2.0.zip"><code>tycho.edit.slate2.0.zip</code></A>
+
+<li><A
+HREF="dists/tycho.edit.slate2.0.tar.gz"><code>tycho.edit.slate2.0.tar.gz</code></A>
+
+</ul>
+
+ <P>
+<dt><CODE>tycho.kernel.basic</CODE>
+
+<dd>This is the "basic" package of the Tycho kernel, which
+contains some utilities that are required by the Slate.
+
+<ul>
+
+<li><A
+HREF="dists/tycho.kernel.basic2.0.zip"><code>tycho.kernel.basic2.0.zip</code></A>
+
+<li><A
+HREF="dists/tycho.kernel.basic2.0.tar.gz"><code>tycho.kernel.basic2.0.tar.gz</code></A>
+
+</ul>
+
+ <P>
+<dt><CODE>tcl++</CODE>
+
+<dd>tcl++ is an [incr Tcl] simulator written by Matt Newman that allows
+you to use the Slate with Tcl8.0.
+
+<ul>
+<li><A HREF="http://www.sensus.org/tcl/">Distribution site</A>
+<li><A HREF="dists/tcl++2.0.2.tar.gz">tcl++2.0.2.zip</A> (on this site) 
+<li><A HREF="dists/tcl++2.0.2.tar.gz">tcl++2.0.2.tar.gz</A> (on this site) 
+</ul>
+
+</dl>
+
+ <P><B>Installation instructions</B>
+
+ <P>These instructions assume that you do not already have
+Tycho installed.
+
+<ol>
+
+<li>Download the slate and basic packages into a suitable
+directory.  This is either the <CODE>lib</CODE> directory of your
+[incr Tcl] installation, or some other directory where you
+put Tcl packages.
+
+ <P>
+<li>Change to that directory and do either:
+
+<pre>
+    unzip -a tycho.kernel.basic2.0.zip
+    unzip -a tycho.edit.slate2.0.zip
+</pre>
+
+ <P>or
+
+<pre>
+    gzcat tycho.kernel.basic2.0.tar.gz | tar -xf -
+    gzcat tycho.edit.slate2.0.tar.gz | tar -xf -
+</pre>
+
+ <P>If you are running under windows and have WinZip
+installed, you can also double-click on the files.
+
+ <P> <li> Make sure that the Tcl package loader will be able to find
+these packages. If you didn't install them in the lib directory of
+your Tcl installation, then I suggest that you set an environment
+variable TCL_PACKAGES to the directory containing the two packages.
+
+ <P>To verify that the packages will load, start <CODE>itkwish</CODE>
+and go
+<pre>
+  lappend auto_path $env(TCL_PACKAGES)
+  package require tycho.edit.slate
+</pre>
+
+ <P>
+Any problems, just send me email.
+
+ <P><li> Try out the demos. Change to the directory
+<CODE>slate/demos</CODE> and run the various scripts in there to see
+some samples of the Slate doing its thing.
+
+ <P><li> Use it! Just be sure to do
+
+<pre>  package require tycho.edit.slate</pre>
+
+ <P>before trying to create a Slate object.
+
+</ol>
+
+ <P>
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/07/98,
+comments to: <A HREF="mailto:johnr@eecs.berkeley.edu"><author>johnr@eecs.berkeley.edu</author></A>
+
+</body>
+</html>
