@@ -2,9 +2,9 @@ static const char file_id[] = "CodeGen.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)CodeGen.cc	1.45	09/10/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
-Date of last revision: $Date$
+Date of last revision: 09/10/99
 
 special routines to generate the sub universes.
 *****************************************************************/

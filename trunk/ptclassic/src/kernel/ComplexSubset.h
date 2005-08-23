@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 // A small complex class -- a subset of the cfront and libg++ versions,
 // but written from scratch.
-// $Id$
+// @(#)ComplexSubset.h	1.9 03/26/98
 
 // checking _Complex_h is a hack allowing to use Complex.h from libg++
 // when included before ComplexSubset.h and vice versa

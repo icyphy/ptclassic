@@ -4,10 +4,10 @@ defstar {
     desc {
 Multiply any number of rectangular complex inputs, producing an output.
     }
-    version { $Id$ }
+    version { @(#)CG56MpyRx.pl	1.9	01 Oct 1996 }
     author { Kennard White (ported from Gabriel) }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

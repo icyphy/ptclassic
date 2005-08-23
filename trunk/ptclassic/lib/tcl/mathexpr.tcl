@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -46,7 +46,7 @@
 # before the Tcl command is passed to the Tcl interpreter.
 #
 # Author: Brian L. Evans
-# $Id$
+# @(#)mathexpr.tcl	1.13	01/22/97
 
 # If add_to_help has not been defined as a procedure, then define a dummy one
 #

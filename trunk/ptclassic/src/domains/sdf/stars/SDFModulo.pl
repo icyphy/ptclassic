@@ -5,10 +5,10 @@ defstar {
 The output is equal to the remainder after dividing
 the input by the "modulo" parameter.
 	}
-	version {$Id$}
+	version {@(#)SDFModulo.pl	1.5   4/27/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

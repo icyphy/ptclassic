@@ -1,10 +1,10 @@
 defstar {
 	name {Ramp}
 	domain {DE}
-	version { $Id$ }
+	version { @(#)DERamp.pl	1.3	3/2/95 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

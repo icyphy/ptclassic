@@ -1,5 +1,5 @@
 /******************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  Brian L. Evans
 Created: July 2, 1996
-Version: $Id$
+Version: @(#)ImplementationCost.cc	1.3	07/08/96
 
 This file defines an ImplementationCost class to track software
 and hardware implementation costs.

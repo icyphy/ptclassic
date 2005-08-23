@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Core for the unirate sequencer
 	}
-	version{ $Id$ }
+	version{ @(#)ACSUniSeqCGFPGA.pl	1.10 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% The Regents of the University of California
+Copyright (c) 1998-2001 The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,

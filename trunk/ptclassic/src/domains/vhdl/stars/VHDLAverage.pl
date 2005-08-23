@@ -5,10 +5,10 @@ defstar {
     Average some number of input samples or blocks of input samples.
       Blocks of successive input samples are treated as vectors.
   }
-  version { $Id$ }
+  version { @(#)VHDLAverage.pl	1.3 03/07/96 }
   author { Michael C. Williamson, E. A. Lee }
   copyright {
-    Copyright (c) 1990-%Q% The Regents of the University of California.
+    Copyright (c) 1990-1997 The Regents of the University of California.
       All rights reserved.
       See the file $PTOLEMY/copyright for copyright notice,
       limitation of liability, and disclaimer of warranty provisions.

@@ -7,10 +7,10 @@ Generates an output at the stopTime of the
 under which this block is running.
 	}
 
-	version {$Id$}
+	version {@(#)DEFStopTimer.pl	1.5	01 Oct 1996}
 	author { Allen Lao }
 	copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

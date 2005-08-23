@@ -5,7 +5,7 @@ defstar {
 An interpreter for the MIDI protocol.  It takes an incoming MIDI stream
 and fans it out to Note On and Note Off commands.
     }
-    version { $Id$ }
+    version { @(#)SRMIDIin.pl	1.4 02/21/97 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

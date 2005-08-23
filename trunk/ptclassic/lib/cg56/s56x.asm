@@ -1,7 +1,7 @@
 ;
 ; This is header code for the S56X target of the CG56 domain
 ; Authors: Kennard White & Jose Pino
-; Version: $Id$
+; Version: %W% %G%
 ;
 
 ; It is intended that this should always be used in conjuction
@@ -24,7 +24,7 @@
 ;
 ; qckMon reserves p-space below $B3
 ;
-	org	p:$B3
+	org	p:$D0
 
 ERROR
 ;	move	(r5)+
@@ -42,10 +42,10 @@ WAIT	jmp	*			; spin forever
 
 START
 ; Set device driver DMA ready flag
-	bset	#m_hf2,x:m_hcr
-	; XXX: These should go away when DMA is fixed
-	bclr	#0,x:m_pbddr		; clear read DMA flow control bit
-	bclr	#1,x:m_pbddr		; clear write DMA flow control bit
+;	bset	#m_hf2,x:m_hcr
+;	; XXX: These should go away when DMA is fixed
+;	bclr	#0,x:m_pbddr		; clear read DMA flow control bit
+;	bclr	#1,x:m_pbddr		; clear write DMA flow control bit
 
 ;
 ; Ptolemy generated code goes below here

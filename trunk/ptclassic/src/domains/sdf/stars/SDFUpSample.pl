@@ -10,10 +10,10 @@ the input sample first followed by the inserted samples. The maximum
 number, if the input is of some other type, such as complex, then fill
 particle will be obtained by casting "fill" to the appropriate type.
 	}
-	version {$Id$}
+	version {@(#)SDFUpSample.pl	2.10 04/27/96}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

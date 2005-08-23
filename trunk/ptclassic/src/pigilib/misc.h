@@ -2,7 +2,7 @@
 #define _MISC_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* misc.h  edg
 Version identification:
-$Id$
+@(#)misc.h	1.12	3/21/96
 */
 
 /* Define RPCSpot and lsList data types, respectively */

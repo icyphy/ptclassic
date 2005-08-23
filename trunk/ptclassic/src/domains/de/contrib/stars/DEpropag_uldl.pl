@@ -3,7 +3,7 @@ defstar {
        	domain { DE }
       	derivedfrom { DEcell_list }
 	author { A. Wernicke }
-	version { $Id$}
+	version { @(#)DEpropag_uldl.pl	1.6 06/11/98}
 	copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                     Mobile Communications Systems 
         }

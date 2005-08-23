@@ -1,10 +1,10 @@
 defstar {
   name		{ ShowImg }
   domain	{ MDSDF }
-  version	{ $Id$ }
+  version	{ @(#)MDSDFShowImg.pl	1.10 01 Oct 1996 }
   author	{ Joe Buck and Paul Haskell, modified for MDSDF by Mike J. Chen }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

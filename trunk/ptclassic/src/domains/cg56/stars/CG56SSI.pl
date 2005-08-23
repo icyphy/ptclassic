@@ -2,11 +2,11 @@ defstar {
     name { SSI }
     domain { CG56 }
     desc { A generic input/output star the DSP56001 SSI port. }
-    version { $Id$ }
+    version { @(#)CG56SSI.pl	1.22 03/29/97 }
     author { Kennard White and Chih-Tsung Huang (ported from Gabriel) }
     acknowledge { Gabriel version by Jeff Bier, Phil Lapsley, Eric Guntvedt. }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

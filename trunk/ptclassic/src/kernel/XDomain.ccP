@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
- Version: $Id$
+ Version: @(#)XDomain.ccP	1.15	7/30/96
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,

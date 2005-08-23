@@ -2,7 +2,7 @@
 # Copyright (c) 1999 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.3 09/07/99
 #
 # Important!  Do not run this makefile while in
 # ~ptolemy/src/domains/sdf/wildforce

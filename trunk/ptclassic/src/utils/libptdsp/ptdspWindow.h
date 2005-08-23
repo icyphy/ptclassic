@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Kennard White and Brian Evans
-Version: $Id$
+Version: @(#)ptdspWindow.h	1.4	7/23/96
 */
 
 #ifdef __cplusplus

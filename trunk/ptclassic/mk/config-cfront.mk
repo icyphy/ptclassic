@@ -2,8 +2,8 @@
 # This is not a complete config; it only overrides those options
 # specific to using non-g++ compilers
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-cfront.mk	1.18 02/13/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

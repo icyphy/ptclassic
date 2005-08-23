@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id$
+# @(#)checklen	1.2 8/6/94
 # print out the names of any files that are not significant in the first
 # 13 characters.  Linux has this problem with GNU ar.
 # Return a 0 if everything is 0k, otherwise return 1.

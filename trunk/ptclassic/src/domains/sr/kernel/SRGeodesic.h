@@ -3,9 +3,9 @@
 #ifndef _SRGeodesic_h
 #define _SRGeodesic_h
  
-/*  Version $Id$
+/*  Version @(#)SRGeodesic.h	1.7 04/07/97
  
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

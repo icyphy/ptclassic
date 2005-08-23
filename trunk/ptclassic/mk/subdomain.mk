@@ -1,6 +1,6 @@
 # Makefile included at the root of each domain (eg. SDF, DE, etc)
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)subdomain.mk	1.15	04/08/97
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

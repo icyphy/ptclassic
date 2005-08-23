@@ -2,7 +2,7 @@ defstar {
 	name { QntBtsInt }
 	domain { C50 }
 	desc { Integer quantizer }
-	version { $Id$ }
+	version { @(#)C50QntBtsInt.pl	1.6	06 Oct 1996 }
 	author { Luis Gutierrez}
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

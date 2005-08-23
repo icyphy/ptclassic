@@ -1,8 +1,8 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)misc.c	1.15 04/13/98
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without

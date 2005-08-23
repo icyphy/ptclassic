@@ -2,10 +2,10 @@ defstar {
 	name {Repeat}
 	domain {MDSDF}
 	desc { Output a constant matrix with the value given at the input.  }
-	version { $Id$ }
+	version { @(#)MDSDFRepeat.pl	1.2	3/2/95 }
 	author { Mike J. Chen and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

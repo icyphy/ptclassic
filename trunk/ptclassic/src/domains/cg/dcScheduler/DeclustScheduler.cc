@@ -1,9 +1,9 @@
-static const char SccsId [] = "$Id$";
+static const char SccsId [] = "@(#)DeclustScheduler.cc	1.27 12/08/97";
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DeclustScheduler.cc	1.27	12/08/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 static const char file_id[] = "DyConstruct.cc";
-// $Id$
+// @(#)DyConstruct.cc	1.3	01/01/96
 
 #ifdef __GNUG__
 #pragma implementation

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis
-Version: $Id$
+Version: @(#)ptdspRGBYUVConversion.h	1.2 7/23/96
 */
 
 #ifdef __cplusplus

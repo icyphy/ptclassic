@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSCore.h	1.13 09/08/99
 
 ***********************************************************************/
 #ifdef __GNUG__

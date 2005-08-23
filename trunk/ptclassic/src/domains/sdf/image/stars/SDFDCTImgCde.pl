@@ -1,10 +1,10 @@
 defstar {
   name { DCTImgCde }
   domain { SDF }
-  version { $Id$ }
+  version { @(#)SDFDCTImgCde.pl	1.27 04/08/97 }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1992-%Q% The Regents of the University of California.
+Copyright (c) 1992-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

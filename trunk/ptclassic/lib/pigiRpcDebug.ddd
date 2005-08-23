@@ -1,7 +1,7 @@
 #! /bin/sh
 # created 7/3/97, J. Voigt, Dresden University of Technology, 
 #                           Mobile Communications Systems
-# Version: $Id$
+# Version: @(#)pigiRpcDebug.ddd	1.1 07/30/97
 
 # This file is typically invoked from with pigiRpcShell as the $COMMAND.
 # It brings up the ddd-debugger running PIGIRPC.

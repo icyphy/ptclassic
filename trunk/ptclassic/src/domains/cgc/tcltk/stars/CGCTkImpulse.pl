@@ -5,10 +5,10 @@ defstar {
 Output a specified value when a button is pushed.
 Optionally synchronize by halting until the button is pushed.
         }
-	version { $Id$ }
+	version { @(#)CGCTkImpulse.pl	1.9	01/01/96 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

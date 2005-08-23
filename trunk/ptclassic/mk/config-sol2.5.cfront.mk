@@ -1,9 +1,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5
 # with SunSoft CC4.1 and SunSoftC 4.0
 
-# $Id$
+# @(#)config-sol2.5.cfront.mk	1.1 03/07/96
 
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -8,10 +8,10 @@ should have value between zero and N-1, inclusive, where N is the
 number of data inputs.  It can be used with Case to implement an
 if ... then construct.
 	}
-	version { $Id$ }
+	version { @(#)DDFEndCase.pl	1.16	3/6/96 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

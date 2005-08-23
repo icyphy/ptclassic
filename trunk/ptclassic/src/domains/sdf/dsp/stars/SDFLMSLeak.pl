@@ -1,10 +1,10 @@
 defstar {
 	name		{ LMSLeak }
 	domain		{ SDF }
-	version		{ $Id$ }
+	version		{ @(#)SDFLMSLeak.pl	1.9 10/06/96 }
 	author		{ E. A. Lee, Paul Haskell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

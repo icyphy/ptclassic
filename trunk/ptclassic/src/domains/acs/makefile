@@ -1,5 +1,5 @@
 # Makefile for ACS domain support
-# Copyright (c) 1998-%Q% The Regents of the University of California.
+# Copyright (c) 1998-2000 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  Eric Pauer (Sanders), Edward A. Lee, Christopher Hylands
-# $Id$
+# @(#)makefile	1.9 08/14/00
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/acs.
 # Instead run in from $PTOLEMY/obj.$PTARCH/domains/acs (through the symbolic

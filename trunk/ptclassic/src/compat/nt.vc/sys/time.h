@@ -1,5 +1,5 @@
 /* Dummy time.h include file for Microsoft VC++ 5.0 */
-/* $Id$ */ 
+/* @(#)time.h	1.6 01/05/99 */ 
 /* DERealTime.h includes Clock.h, which includes TimeVal.h, which
  * includes time.h (this file), which includes winsock2.h, which 
  * includes windef.h, which has the nasty line:

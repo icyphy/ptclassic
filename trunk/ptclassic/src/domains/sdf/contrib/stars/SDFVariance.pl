@@ -3,10 +3,10 @@ defstar {
 	domain { SDF } 
 	desc { Compute Mean and Variance }
 	author { N. Becker }
-	version { $Id$ }
+	version { @(#)SDFVariance.pl	1.6	3/7/96 }
 	location { SDF user contribution library }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

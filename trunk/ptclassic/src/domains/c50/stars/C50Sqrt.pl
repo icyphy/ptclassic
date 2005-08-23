@@ -2,7 +2,7 @@ defstar {
 	name { Sqrt }
 	domain { C50 }
 	desc { Square Root. }
-	version { $Id$ }
+	version { @(#)C50Sqrt.pl	1.4	01 Oct 1996 }
 	author { Luis Gutierrez, based on the CG56 version }	
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

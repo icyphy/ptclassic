@@ -1,11 +1,11 @@
 # This Tcl script works recursively on a Ptolemy tree.
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All Rights Reserved.
 # See $PTOLEMY/copyright for the complete copyright notice.
 #
 # Author: Kennard White
-# Version: $Id$
+# Version: @(#)ptfixtree.tcl	1.16	01/28/99
 
 proc pftUsage { {msg} "Usage Information" } {
     puts stderr $msg
@@ -235,7 +235,7 @@ proc pftSetCellMap { cell newcell } {
 	set celltail [file tail $newcell]
 	regsub "/$celltail$" $newcell "" newcelldir
 	set mapcelldirs($celldir) $newcelldir
-	puts "Adding $cell -> $newcell"
+	puts "Adding $celldir -> $newcelldir"
     }
 }
 

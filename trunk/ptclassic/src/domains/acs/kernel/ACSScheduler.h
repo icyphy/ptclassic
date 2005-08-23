@@ -1,7 +1,7 @@
 #ifndef _ACSScheduler_h
 #define _ACSScheduler_h
 
-/*  Version $Id$
+/*  Version @(#)ACSScheduler.h	1.6 09/08/99
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

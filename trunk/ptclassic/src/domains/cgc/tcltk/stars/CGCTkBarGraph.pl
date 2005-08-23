@@ -7,10 +7,10 @@ form.  The first 12 input signals will be assigned distinct colors.  After
 that, the colors are repeated. The colors can be controlled using X
 resources.
 	}
-	version { $Id$ }
+	version { @(#)CGCTkBarGraph.pl	1.10 7/15/96 }
 	author { Edward A. Lee and Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

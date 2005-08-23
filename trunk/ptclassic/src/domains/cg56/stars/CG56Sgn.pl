@@ -5,11 +5,11 @@ defstar {
 This star outputs the signum of its input.  The output is either -1.0
 or +0.99999999, since 1.0 is not a valid fixed point number on the DSP56001.
 	}
-	version {$Id$}
+	version {@(#)CG56Sgn.pl	1.11	01 Oct 1996}
 	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

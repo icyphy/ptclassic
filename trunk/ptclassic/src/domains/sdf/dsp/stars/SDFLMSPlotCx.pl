@@ -10,10 +10,10 @@ It can produce two types of plots: a plot of the final tap values
 or a plot that traces the time evolution of each tap value.
 The time evolution is obtained if the value of the parameter "trace" is "YES".
 	}
-	version {$Id$}
+	version {@(#)SDFLMSPlotCx.pl	1.16	10/03/96}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

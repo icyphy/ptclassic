@@ -7,11 +7,11 @@ values on the input.  If you want to use this star to operate over
 multiple data streams, then preceed this star with a Commutator and
 set the state N accordingly.
 	}
-	version { $Id$ }
+	version { @(#)SDFMaxMin.pl	1.7	06 Oct 1996 }
 	author { Brian L. Evans }
 	acknowledge { Chih-Tsung Huang }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

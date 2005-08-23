@@ -2,11 +2,11 @@ defstar {
     name { SSIMono }
     domain { CG56 }
     desc { A generic input/output star the DSP56001 SSI port. }
-    version { $Id$ }
+    version { @(#)CG56SSIMono.pl	1.6 03/29/97 }
     author { Jose Luis Pino }
     derivedFrom { SSI }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

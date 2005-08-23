@@ -2,11 +2,11 @@ defstar {
 	name { Tone }
 	domain { C50 }
 	desc { Sine or cosine function using second order oscillator } 
-	version { $Id$ }
+	version { @(#)C50Tone.pl	1.4	8/13/96 }
 	author { A. Baensch, Luis Gutierrez, ported from Gabriel }
 	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

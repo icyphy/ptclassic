@@ -1,7 +1,7 @@
 # Configuration makefile to make on an IBM RS/6000
 # or PowerPC machine under AIX3.2.5 using GNU gcc and g++
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# $Id$
+# @(#)config-aix.mk	1.17 12/15/97
 
 #	Programmer: Xavier Warzee (Thomson CSF)
 #	            Alexander Kurpiers (a.kurpiers@uet.th-darmstadt.de)

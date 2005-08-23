@@ -1,7 +1,7 @@
 defstar {
 	name { Distributor }
 	domain { SDF }
-	version {$Id$}
+	version {@(#)SDFDistributor.pl	2.10	3/2/95}
 	desc {
 Takes one input stream and synchronously splits it into N output streams,
 where N is the number of outputs.  It consumes N*B input particles,
@@ -10,7 +10,7 @@ the next B particles to the next output, etc.
 	}
 	author { J. T. Buck and E. A. Lee}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

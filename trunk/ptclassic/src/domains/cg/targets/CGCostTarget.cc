@@ -1,6 +1,6 @@
 static const char file_id[] = "CGCostTarget.cc";
 /**********************************************************************
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Programmer:  Raza Ahmed and Brian L. Evans
 Created:     07/09/96
-Version:     $Id$
+Version:     @(#)CGCostTarget.cc	1.16 04/07/97
 
 Target to generate the cost to implement individual stars in the
 galaxy.  The run method constructs a standalone universe for each

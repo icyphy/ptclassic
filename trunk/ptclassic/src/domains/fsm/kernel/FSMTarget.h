@@ -1,8 +1,8 @@
 /**********************************************************************
 Version identification:
-$Id$
+@(#)FSMTarget.h	1.7 10/08/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,11 +40,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Block.h"
-#include "FloatState.h"
-#include "Scheduler.h"
 #include "StringArrayState.h"
 #include "StringState.h"
+#include "FloatState.h"
+#include "Block.h"
 #include "Target.h"
 
 class FSMTarget : public Target {
@@ -58,19 +57,6 @@ public:
 
 	void setup();
 	void begin();
-
-        // Let outside domain know whether to refire.
-	/*virtual*/ int selfFiringRequested() {
-            // Invoke scheduler to decide.
-            return scheduler()->selfFiringRequested();
-        }
-	
-	// If selfFiringRequested returns TRUE, return the time at which
-	// this firing is requested.
-	/*virtual*/ double nextFiringTime () {
-            // Invoke scheduler to decide.
-            return scheduler()->nextFiringTime();
-        }
 
 	// return a copy of itself
 	Block* makeNew() const;

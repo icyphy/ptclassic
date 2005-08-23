@@ -9,7 +9,7 @@ That is, at any time step, the neuron either fires, or does not fires.
         author {Biao Lu}
         acknowledge { Brian L. Evans }
         location { CGC contrib library }
-        version { $Id$ }
+        version { @(#)CGCMPNeuron.pl	1.1	03/24/98 }
         copyright {
 Copyright (c) 1997-1998 The University of Texas.
 All rights reserved.

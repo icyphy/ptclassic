@@ -1,9 +1,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5x
 # with egcs using static libraries and no optimization
 
-# $Id$
+# @(#)config-sol2.5.static.mk	1.6 10/05/99
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

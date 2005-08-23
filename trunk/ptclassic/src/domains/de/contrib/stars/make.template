@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy DE stars contributed by users
-# $Id$ 
+# @(#)make.template	1.11	08/25/98 
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do

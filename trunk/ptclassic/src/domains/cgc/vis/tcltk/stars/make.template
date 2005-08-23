@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy CGC stars
-# $Id$
+# @(#)make.template	1.4 02/17/99
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do

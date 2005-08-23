@@ -1,9 +1,9 @@
 /* am.h:  Header for Active Message 2.0 API */
 /******************************************************************
 Version identification:
-$Id$
+@(#)am.h	1.8 7/23/96
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without

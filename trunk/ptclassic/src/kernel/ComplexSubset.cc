@@ -1,9 +1,9 @@
 static const char file_id[] = "ComplexSubset.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ComplexSubset.cc	1.7 3/2/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,8 +35,8 @@ but written from scratch.
 #pragma implementation
 #endif
 
-#include <stream.h>             // gcc-3.0: This include should be first
 #include "ComplexSubset.h"
+#include <stream.h>
 
 Complex& Complex::operator /= (const Complex& arg) {
 	// multiply by the conjugate of arg

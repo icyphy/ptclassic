@@ -2,11 +2,11 @@ defstar {
 	name {BusMerge}
 	domain {HOF}
 	derivedfrom {Base}
-	version { $Id$ }
+	version { @(#)HOFBusMerge.pl	1.10 11/13/97 }
 	author { Edward A. Lee, Tom Lane  }
 	location { HOF main library }
 	copyright {
-Copyright (c) 1994-%Q% The Regents of the University of California.
+Copyright (c) 1994-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

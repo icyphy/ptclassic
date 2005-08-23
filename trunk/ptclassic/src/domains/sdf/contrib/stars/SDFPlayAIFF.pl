@@ -1,7 +1,7 @@
 defstar {
 	name { PlayAIFF }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFPlayAIFF.pl	1.7	04/28/98 }
 	desc {
 Play an AIFF input stream on the workstation speaker.
 	}
@@ -25,7 +25,7 @@ systems try the AudioFile program.
 	}
 	author { Charles B. Owen }
 	copyright {
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy CGC DSP stars
-# $Id$
+# @(#)make.template	1.8 8/24/96
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do

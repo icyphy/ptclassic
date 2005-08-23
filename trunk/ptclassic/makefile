@@ -1,5 +1,5 @@
 # Top-level Ptolemy makefile.
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@
 # Programmers:  J. T. Buck, Christopher Hylands
 #
 # The PTARCH environment variable must be set.
-# $Id$
+# @(#)makefile	1.61 10/21/99
 
 defaultTarget:		install
 	@echo Installation for $(PTARCH) is complete.

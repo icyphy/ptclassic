@@ -12,10 +12,10 @@ If "allow_simultaneous_events" is yes, then buttons pushed are registered
 only when the button labeled "PUSH TO PRODUCE OUTPUTS" is pushed.
 Note that if "synchronous" is NO, this star is nondeterminate.
 	}
-	version { $Id$ }
+	version { @(#)SDFTkButtons.pl	1.6    4/27/96 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

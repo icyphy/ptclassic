@@ -7,10 +7,10 @@ Any number of event sequences can be plotted simultaneously, up
 to the limit determined by the XGraph class.
 By default, a straight line is drawn between each pair of events.
 	}
-	version { $Id$}
+	version { @(#)DEXMgraph.pl	2.12	10/06/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

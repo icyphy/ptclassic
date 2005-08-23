@@ -6,10 +6,10 @@ defstar {
 Display discrete dataflow over time, recording the entire history.
 The values displayed are only 1 and 0.
 	}
-	version { $Id$ }
+	version { @(#)DETkLogicAnalyzer.pl	1.7	07 Oct 1996 }
 	author { Matthew T. Tavis }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

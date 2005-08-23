@@ -1,7 +1,7 @@
 # Makefile for SDF contrib kernel to support SDF contrib stars
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.2	10/24/95
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

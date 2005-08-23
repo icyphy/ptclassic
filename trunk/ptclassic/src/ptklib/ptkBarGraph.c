@@ -2,10 +2,10 @@
  * C interface files for creating a bar graph
  *
  * Author: Edward A. Lee
- * Version: $Id$
+ * Version: @(#)ptkBarGraph.c	1.13	4/24/95
  */
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

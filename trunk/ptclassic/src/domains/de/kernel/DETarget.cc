@@ -1,9 +1,9 @@
 static const char file_id[] = "DETarget.cc";
 /**********************************************************************
 Version identification:
-$Id$
+@(#)DETarget.cc	1.21 04/19/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

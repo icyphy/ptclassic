@@ -2,7 +2,7 @@
 #define  _WFIntArray_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)WFIntArray.h	1.1 10/06/99
  
 Copyright (c) 1999 The Regents of the University of California.
 All rights reserved.

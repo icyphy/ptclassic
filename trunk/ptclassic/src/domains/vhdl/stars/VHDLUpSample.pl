@@ -9,10 +9,10 @@ Although the "fill" parameter is a floating-point number, if the input is of
 some other type, such as complex, the fill particle will be obtained by casting
 "fill" to the appropriate type.
 	}
-	version { $Id$ }
+	version { @(#)VHDLUpSample.pl	1.5 03/07/96 }
 	author { Michael C. Williamson, J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

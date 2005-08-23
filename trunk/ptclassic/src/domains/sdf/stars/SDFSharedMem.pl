@@ -1,10 +1,10 @@
 defstar {
   name { SharedMem }
   domain {SDF}
-  version { $Id$ }
+  version { @(#)SDFSharedMem.pl	1.7 03/27/97 }
   author { Stefan De Troch (IMEC) }
   copyright{ 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

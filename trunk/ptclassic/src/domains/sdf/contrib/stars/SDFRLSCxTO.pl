@@ -11,7 +11,7 @@ The actual (time-dependent) tap weight vector is cyclically output, i.e.
 on each invocation of the star you get one tap weight and after
 length(taps) invocations you have one complete set of weights.
         }
-	version { $Id$ }
+	version { @(#)SDFRLSCxTO.pl	1.4	05/28/98 }
 	author { U. Trautwein and A. Richter }
 	copyright {
 Copyright (c) 1996-1997 Technical University of Ilmenau.

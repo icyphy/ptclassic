@@ -1,7 +1,7 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "PosixThread.cc";
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* Version $Id$
+/* Version @(#)PosixThread.cc	1.11 03/26/98
    Author:	T. M. Parks
    Created:	21 October 1994
 */

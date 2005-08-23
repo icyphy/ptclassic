@@ -2,7 +2,7 @@ defstar {
     name { CxToFix }
     domain { C50 }
     desc { Outputs the magnitude squared of the complex number. }
-    version { $Id$ }
+    version { @(#)C50CxToFix.pl	1.3   7/22/96 }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

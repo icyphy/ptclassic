@@ -5,11 +5,11 @@ defstar {
 This star computes the signum of its input.
 The output is +/- 1.  Note that 0.0 maps to 1.
 	}
-	version { $Id$ }
+	version { @(#)C50Sgn.pl	1.4	01 Oct 1996 }
 	acknowledge { Gabriel version by E. A. Lee }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

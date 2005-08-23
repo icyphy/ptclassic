@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Adaptive Computing Systems Targets
-# $Id$
-# Copyright (c) 1998-%Q% The Regents of the University of California.
+# @(#)make.template	1.5 08/02/01
+# Copyright (c) 1998-2001 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,14 +52,19 @@ SRCS =	\
 	ACSIntArray.cc \
 	DoubleArray.cc \
 	StringArray.cc \
+	CoreList.cc \
+	Connection_List.cc \
+	utilities.cc \
 	Delay.cc \
 	Connectivity.cc \
 	Pin.cc \
 	acs_vhdl_lang.cc \
 	Directory.cc \
+	BindingRule.cc \
 	Arch.cc \
 	Fpga.cc \
-	MemPort.cc \
+	Port.cc \
+	Address.cc \
 	Sg_Constructs.cc \
 	Port_Timing.cc \
 	Pipealign.cc \
@@ -80,11 +85,9 @@ SRCS =	\
 #	ACSSimTarget.cc \
 #	$(PLSRC) 
 
-EXTRA_SRCS = $(PL_SRCS) guide.txt
+EXTRA_SRCS = $(PL_SRCS)
 
-HDRS=$(SRCS:.cc=.h) \
-	acs_starconsts.h \
-	import.h
+HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
@@ -114,200 +117,14 @@ include $(ROOT)/mk/common.mk
 ACSIntArray.o: ACSIntArray.cc ACSIntArray.h
 DoubleArray.o: DoubleArray.cc DoubleArray.h
 StringArray.o: StringArray.cc StringArray.h
-Delay.o: Delay.cc Delay.h ACSIntArray.h
-Connectivity.o: Connectivity.cc Connectivity.h ACSIntArray.h \
- acs_starconsts.h
-Pin.o: Pin.cc Pin.h ACSIntArray.h ../../../../src/kernel/StringList.h \
- ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
- ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
- ../../../../src/kernel/type.h StringArray.h Connectivity.h \
- acs_starconsts.h Delay.h
-acs_vhdl_lang.o: acs_vhdl_lang.cc acs_vhdl_lang.h \
- ../../../../src/kernel/StringList.h \
- ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
- ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
- ../../../../src/kernel/type.h StringArray.h \
+CoreList.o: CoreList.cc CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
- ../../../../src/domains/acs/targets/Pin.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
- ../../../../src/domains/acs/targets/Delay.h \
- ../../../../src/domains/acs/targets/Capability.h \
- ../../../../src/domains/acs/targets/Constants.h \
- ../../../../src/domains/acs/targets/Resource.h \
- ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/kernel/ACSCGCore.h \
- ../../../../src/domains/acs/kernel/ACSCore.h \
- ../../../../src/domains/acs/kernel/ACSStar.h \
- ../../../../src/domains/cg/kernel/CGStar.h \
- ../../../../src/kernel/DynDFStar.h \
- ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
- ../../../../src/kernel/Block.h ../../../../src/kernel/NamedObj.h \
- ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
- ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
- ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
- ../../../../src/kernel/ComplexSubset.h \
- ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
- ../../../../src/kernel/InvokeInterp.h \
- ../../../../src/kernel/Fraction.h \
- ../../../../src/domains/cg/kernel/CGPortHole.h \
- ../../../../src/kernel/DynDFPortHole.h \
- ../../../../src/kernel/DFPortHole.h \
- ../../../../src/domains/cg/kernel/CGTarget.h \
- ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
- ../../../../src/kernel/StringState.h \
- ../../../../src/kernel/KnownState.h \
- ../../../../src/domains/cg/kernel/SymbolList.h \
- ../../../../src/domains/cg/kernel/NamedList.h \
- ../../../../src/kernel/SimControl.h \
- ../../../../src/domains/cg/kernel/CodeStreamList.h \
- ../../../../src/domains/cg/kernel/CodeStream.h \
- ../../../../src/domains/cg/kernel/UniqueStringList.h \
- ../../../../src/domains/cg/kernel/ImplementationCost.h \
- ../../../../src/domains/cg/kernel/ConversionTable.h \
- ../../../../src/domains/cg/kernel/CodeBlock.h \
- ../../../../src/domains/acs/kernel/ACSPortHole.h \
- ../../../../src/domains/acs/kernel/ACSGeodesic.h \
- ../../../../src/domains/cg/kernel/CGGeodesic.h \
- ../../../../src/kernel/Geodesic.h \
- ../../../../src/kernel/ParticleStack.h \
- ../../../../src/kernel/PrecisionState.h \
- ../../../../src/domains/acs/kernel/ACSCorona.h \
- ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
- ../../../../src/domains/acs/kernel/ACSWormhole.h \
- ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
- Pin.h Connectivity.h acs_starconsts.h
-Directory.o: Directory.cc Directory.h
-Arch.o: Arch.cc Arch.h Fpga.h ACSIntArray.h Pin.h \
- ../../../../src/kernel/StringList.h \
- ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
- ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
- ../../../../src/kernel/type.h StringArray.h Connectivity.h \
- acs_starconsts.h Delay.h Sequencer.h \
- ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
- ../../../../src/domains/acs/targets/StringArray.h \
- ../../../../src/domains/acs/targets/Pipealign.h \
- ../../../../src/domains/acs/targets/ACSIntArray.h \
- ../../../../src/domains/acs/targets/acs_starconsts.h \
- ../../../../src/domains/acs/targets/Pin.h \
- ../../../../src/domains/acs/targets/Capability.h \
- ../../../../src/domains/acs/targets/Constants.h \
- ../../../../src/domains/acs/targets/Resource.h \
- ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
- ../../../../src/domains/acs/kernel/ACSCGCore.h \
- ../../../../src/domains/acs/kernel/ACSCore.h \
- ../../../../src/domains/acs/kernel/ACSStar.h \
- ../../../../src/domains/cg/kernel/CGStar.h \
- ../../../../src/kernel/DynDFStar.h \
- ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
- ../../../../src/kernel/Block.h ../../../../src/kernel/NamedObj.h \
- ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
- ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
- ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
- ../../../../src/kernel/ComplexSubset.h \
- ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
- ../../../../src/kernel/InvokeInterp.h \
- ../../../../src/kernel/Fraction.h \
- ../../../../src/domains/cg/kernel/CGPortHole.h \
- ../../../../src/kernel/DynDFPortHole.h \
- ../../../../src/kernel/DFPortHole.h \
- ../../../../src/domains/cg/kernel/CGTarget.h \
- ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
- ../../../../src/kernel/StringState.h \
- ../../../../src/kernel/KnownState.h \
- ../../../../src/domains/cg/kernel/SymbolList.h \
- ../../../../src/domains/cg/kernel/NamedList.h \
- ../../../../src/kernel/SimControl.h \
- ../../../../src/domains/cg/kernel/CodeStreamList.h \
- ../../../../src/domains/cg/kernel/CodeStream.h \
- ../../../../src/domains/cg/kernel/UniqueStringList.h \
- ../../../../src/domains/cg/kernel/ImplementationCost.h \
- ../../../../src/domains/cg/kernel/ConversionTable.h \
- ../../../../src/domains/cg/kernel/CodeBlock.h \
- ../../../../src/domains/acs/kernel/ACSPortHole.h \
- ../../../../src/domains/acs/kernel/ACSGeodesic.h \
- ../../../../src/domains/cg/kernel/CGGeodesic.h \
- ../../../../src/kernel/Geodesic.h \
- ../../../../src/kernel/ParticleStack.h \
- ../../../../src/kernel/PrecisionState.h \
- ../../../../src/domains/acs/kernel/ACSCorona.h \
- ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
- ../../../../src/domains/acs/kernel/ACSWormhole.h \
- ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
- Port_Timing.h Sg_Constructs.h ../../../../src/kernel/KnownBlock.h \
- ../../../../src/kernel/Linker.h acs_vhdl_lang.h MemPort.h
-Fpga.o: Fpga.cc Fpga.h ACSIntArray.h Pin.h \
- ../../../../src/kernel/StringList.h \
- ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
- ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
- ../../../../src/kernel/type.h StringArray.h Connectivity.h \
- acs_starconsts.h Delay.h Sequencer.h \
- ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
- ../../../../src/domains/acs/targets/StringArray.h \
- ../../../../src/domains/acs/targets/Pipealign.h \
- ../../../../src/domains/acs/targets/ACSIntArray.h \
- ../../../../src/domains/acs/targets/acs_starconsts.h \
- ../../../../src/domains/acs/targets/Pin.h \
- ../../../../src/domains/acs/targets/Capability.h \
- ../../../../src/domains/acs/targets/Constants.h \
- ../../../../src/domains/acs/targets/Resource.h \
- ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
- ../../../../src/domains/acs/kernel/ACSCGCore.h \
- ../../../../src/domains/acs/kernel/ACSCore.h \
- ../../../../src/domains/acs/kernel/ACSStar.h \
- ../../../../src/domains/cg/kernel/CGStar.h \
- ../../../../src/kernel/DynDFStar.h \
- ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
- ../../../../src/kernel/Block.h ../../../../src/kernel/NamedObj.h \
- ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
- ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
- ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
- ../../../../src/kernel/ComplexSubset.h \
- ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
- ../../../../src/kernel/InvokeInterp.h \
- ../../../../src/kernel/Fraction.h \
- ../../../../src/domains/cg/kernel/CGPortHole.h \
- ../../../../src/kernel/DynDFPortHole.h \
- ../../../../src/kernel/DFPortHole.h \
- ../../../../src/domains/cg/kernel/CGTarget.h \
- ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
- ../../../../src/kernel/StringState.h \
- ../../../../src/kernel/KnownState.h \
- ../../../../src/domains/cg/kernel/SymbolList.h \
- ../../../../src/domains/cg/kernel/NamedList.h \
- ../../../../src/kernel/SimControl.h \
- ../../../../src/domains/cg/kernel/CodeStreamList.h \
- ../../../../src/domains/cg/kernel/CodeStream.h \
- ../../../../src/domains/cg/kernel/UniqueStringList.h \
- ../../../../src/domains/cg/kernel/ImplementationCost.h \
- ../../../../src/domains/cg/kernel/ConversionTable.h \
- ../../../../src/domains/cg/kernel/CodeBlock.h \
- ../../../../src/domains/acs/kernel/ACSPortHole.h \
- ../../../../src/domains/acs/kernel/ACSGeodesic.h \
- ../../../../src/domains/cg/kernel/CGGeodesic.h \
- ../../../../src/kernel/Geodesic.h \
- ../../../../src/kernel/ParticleStack.h \
- ../../../../src/kernel/PrecisionState.h \
- ../../../../src/domains/acs/kernel/ACSCorona.h \
- ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
- ../../../../src/domains/acs/kernel/ACSWormhole.h \
- ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
- Port_Timing.h Sg_Constructs.h ../../../../src/kernel/KnownBlock.h \
- ../../../../src/kernel/Linker.h acs_vhdl_lang.h
-MemPort.o: MemPort.cc MemPort.h \
- ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
- ../../../../src/domains/acs/targets/StringArray.h \
- ../../../../src/domains/acs/targets/Pipealign.h \
- ../../../../src/domains/acs/targets/ACSIntArray.h \
- ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
  ../../../../src/kernel/StringList.h \
  ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
@@ -318,6 +135,17 @@ MemPort.o: MemPort.cc MemPort.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSCore.h \
@@ -325,13 +153,80 @@ MemPort.o: MemPort.cc MemPort.h \
  ../../../../src/domains/cg/kernel/CGStar.h \
  ../../../../src/kernel/DynDFStar.h \
  ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
- ../../../../src/kernel/Block.h ../../../../src/kernel/NamedObj.h \
- ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
- ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
- ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
- ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h
+Connection_List.o: Connection_List.cc Connection_List.h ACSIntArray.h
+utilities.o: utilities.cc utilities.h
+Delay.o: Delay.cc Delay.h ACSIntArray.h
+Connectivity.o: Connectivity.cc Connectivity.h ACSIntArray.h \
+ acs_starconsts.h
+Pin.o: Pin.cc Pin.h ACSIntArray.h ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h StringArray.h Connectivity.h \
+ acs_starconsts.h Delay.h
+acs_vhdl_lang.o: acs_vhdl_lang.cc acs_vhdl_lang.h CoreList.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
  ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
- ../../../../src/kernel/InvokeInterp.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
  ../../../../src/kernel/Fraction.h \
  ../../../../src/domains/cg/kernel/CGPortHole.h \
  ../../../../src/kernel/DynDFPortHole.h \
@@ -360,7 +255,270 @@ MemPort.o: MemPort.cc MemPort.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
  ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
- ACSIntArray.h Port_Timing.h acs_starconsts.h
+ ACSIntArray.h StringArray.h Pin.h Connectivity.h acs_starconsts.h
+Directory.o: Directory.cc Directory.h
+BindingRule.o: BindingRule.cc BindingRule.h ACSIntArray.h
+Arch.o: Arch.cc Arch.h CoreList.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
+ Fpga.h Port.h Sg_Constructs.h ACSIntArray.h Port_Timing.h Address.h \
+ Pin.h utilities.h StringArray.h
+Fpga.o: Fpga.cc Fpga.h ACSIntArray.h CoreList.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
+ Pin.h Sequencer.h Port_Timing.h acs_starconsts.h Sg_Constructs.h \
+ acs_vhdl_lang.h
+Port.o: Port.cc Port.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
+ Sg_Constructs.h CoreList.h ACSIntArray.h Fpga.h Port_Timing.h \
+ Address.h Pin.h utilities.h
+Address.o: Address.cc Address.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
+ CoreList.h ACSIntArray.h Pin.h Sg_Constructs.h utilities.h
 Sg_Constructs.o: Sg_Constructs.cc Sg_Constructs.h \
  ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
  ../../../../src/kernel/NamedObj.h ../../../../src/kernel/StringList.h \
@@ -372,19 +530,20 @@ Sg_Constructs.o: Sg_Constructs.cc Sg_Constructs.h \
  ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
  ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
  ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
- ../../../../src/domains/cg/kernel/SymbolList.h \
- ../../../../src/domains/cg/kernel/NamedList.h \
- ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ CoreList.h ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
  ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSCore.h \
@@ -400,6 +559,8 @@ Sg_Constructs.o: Sg_Constructs.cc Sg_Constructs.h \
  ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
  ../../../../src/kernel/StringState.h \
  ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
  ../../../../src/kernel/SimControl.h \
  ../../../../src/domains/cg/kernel/CodeStreamList.h \
  ../../../../src/domains/cg/kernel/CodeStream.h \
@@ -423,29 +584,35 @@ Sg_Constructs.o: Sg_Constructs.cc Sg_Constructs.h \
 Port_Timing.o: Port_Timing.cc Port_Timing.h ACSIntArray.h \
  acs_starconsts.h
 Pipealign.o: Pipealign.cc Pipealign.h ACSIntArray.h acs_starconsts.h
-Capability.o: Capability.cc Capability.h \
- ../../../../src/kernel/StringList.h \
- ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
- ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
- ../../../../src/kernel/type.h acs_starconsts.h
-Resource.o: Resource.cc Resource.h
-Constants.o: Constants.cc Constants.h ACSIntArray.h acs_starconsts.h
-Sequencer.o: Sequencer.cc Sequencer.h \
+Capability.o: Capability.cc Capability.h StringArray.h CoreList.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
  ../../../../src/kernel/StringList.h \
  ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
  ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
  ../../../../src/kernel/type.h \
- ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
- ../../../../src/domains/acs/targets/StringArray.h \
- ../../../../src/domains/acs/targets/Pipealign.h \
- ../../../../src/domains/acs/targets/ACSIntArray.h \
- ../../../../src/domains/acs/targets/acs_starconsts.h \
- ../../../../src/domains/acs/targets/Pin.h \
  ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSCore.h \
@@ -453,13 +620,73 @@ Sequencer.o: Sequencer.cc Sequencer.h \
  ../../../../src/domains/cg/kernel/CGStar.h \
  ../../../../src/kernel/DynDFStar.h \
  ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
- ../../../../src/kernel/Block.h ../../../../src/kernel/NamedObj.h \
- ../../../../src/kernel/isa.h ../../../../src/kernel/FlagArray.h \
- ../../../../src/kernel/PortHole.h ../../../../src/kernel/dataType.h \
- ../../../../src/kernel/Particle.h ../../../../src/kernel/Fix.h \
- ../../../../src/kernel/ComplexSubset.h \
+ ../../../../src/kernel/Fraction.h \
+ ../../../../src/domains/cg/kernel/CGPortHole.h \
+ ../../../../src/kernel/DynDFPortHole.h \
+ ../../../../src/kernel/DFPortHole.h \
+ ../../../../src/domains/cg/kernel/CGTarget.h \
+ ../../../../src/kernel/Target.h ../../../../src/kernel/IntState.h \
+ ../../../../src/kernel/StringState.h \
+ ../../../../src/kernel/KnownState.h \
+ ../../../../src/domains/cg/kernel/SymbolList.h \
+ ../../../../src/domains/cg/kernel/NamedList.h \
+ ../../../../src/kernel/SimControl.h \
+ ../../../../src/domains/cg/kernel/CodeStreamList.h \
+ ../../../../src/domains/cg/kernel/CodeStream.h \
+ ../../../../src/domains/cg/kernel/UniqueStringList.h \
+ ../../../../src/domains/cg/kernel/ImplementationCost.h \
+ ../../../../src/domains/cg/kernel/ConversionTable.h \
+ ../../../../src/domains/cg/kernel/CodeBlock.h \
+ ../../../../src/domains/acs/kernel/ACSPortHole.h \
+ ../../../../src/domains/acs/kernel/ACSGeodesic.h \
+ ../../../../src/domains/cg/kernel/CGGeodesic.h \
+ ../../../../src/kernel/Geodesic.h \
+ ../../../../src/kernel/ParticleStack.h \
+ ../../../../src/kernel/PrecisionState.h \
+ ../../../../src/domains/acs/kernel/ACSCorona.h \
+ ../../../../src/domains/acs/kernel/ACSKnownCategory.h \
+ ../../../../src/domains/acs/kernel/ACSWormhole.h \
+ ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
+ ../../../../src/kernel/Galaxy.h ../../../../src/kernel/EventHorizon.h \
+ acs_starconsts.h
+Resource.o: Resource.cc Resource.h
+Constants.o: Constants.cc Constants.h ACSIntArray.h acs_starconsts.h
+Sequencer.o: Sequencer.cc Sequencer.h CoreList.h \
+ ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
+ ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
+ ../../../../src/domains/acs/targets/Pipealign.h \
+ ../../../../src/domains/acs/targets/ACSIntArray.h \
+ ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
+ ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/kernel/StringList.h \
+ ../../../../src/kernel/miscFuncs.h ../../../../src/kernel/logNew.h \
+ ../../../../src/kernel/Error.h ../../../../src/kernel/DataStruct.h \
+ ../../../../src/kernel/type.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
+ ../../../../src/domains/acs/targets/Capability.h \
+ ../../../../src/domains/acs/targets/Constants.h \
+ ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Block.h \
+ ../../../../src/kernel/NamedObj.h ../../../../src/kernel/isa.h \
+ ../../../../src/kernel/FlagArray.h ../../../../src/kernel/PortHole.h \
+ ../../../../src/kernel/dataType.h ../../../../src/kernel/Particle.h \
+ ../../../../src/kernel/Fix.h ../../../../src/kernel/ComplexSubset.h \
  ../../../../src/kernel/Attribute.h ../../../../src/kernel/State.h \
- ../../../../src/kernel/InvokeInterp.h \
+ ../../../../src/kernel/InvokeInterp.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
+ ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
+ ../../../../src/domains/acs/kernel/ACSCGCore.h \
+ ../../../../src/domains/acs/kernel/ACSCore.h \
+ ../../../../src/domains/acs/kernel/ACSStar.h \
+ ../../../../src/domains/cg/kernel/CGStar.h \
+ ../../../../src/kernel/DynDFStar.h \
+ ../../../../src/kernel/DataFlowStar.h ../../../../src/kernel/Star.h \
  ../../../../src/kernel/Fraction.h \
  ../../../../src/domains/cg/kernel/CGPortHole.h \
  ../../../../src/kernel/DynDFPortHole.h \
@@ -534,25 +761,32 @@ HWio_add.o: HWio_add.cc HWio_add.h ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/kernel/ParticleStack.h \
  ../../../../src/kernel/PrecisionState.h \
  ../../../../src/domains/acs/kernel/ACSCorona.h acs_starconsts.h \
- ACSIntArray.h DoubleArray.h StringArray.h Arch.h Fpga.h Pin.h \
- Connectivity.h Delay.h Sequencer.h \
+ ACSIntArray.h DoubleArray.h StringArray.h CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/EventHorizon.h Port_Timing.h Sg_Constructs.h \
- ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
- acs_vhdl_lang.h MemPort.h Directory.h
+ ../../../../src/kernel/EventHorizon.h Connection_List.h Arch.h Fpga.h \
+ Port.h Sg_Constructs.h Port_Timing.h Address.h Pin.h utilities.h \
+ acs_vhdl_lang.h BindingRule.h Directory.h
 HWutils.o: HWutils.cc HWutils.h ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/domains/acs/kernel/ACSTarget.h \
  ../../../../src/domains/cg/kernel/HLLTarget.h \
@@ -599,25 +833,32 @@ HWutils.o: HWutils.cc HWutils.h ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/kernel/ParticleStack.h \
  ../../../../src/kernel/PrecisionState.h \
  ../../../../src/domains/acs/kernel/ACSCorona.h acs_starconsts.h \
- ACSIntArray.h DoubleArray.h StringArray.h Arch.h Fpga.h Pin.h \
- Connectivity.h Delay.h Sequencer.h \
+ ACSIntArray.h DoubleArray.h StringArray.h CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/EventHorizon.h Port_Timing.h Sg_Constructs.h \
- ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
- acs_vhdl_lang.h MemPort.h Directory.h
+ ../../../../src/kernel/EventHorizon.h Connection_List.h Arch.h Fpga.h \
+ Port.h Sg_Constructs.h Port_Timing.h Address.h Pin.h utilities.h \
+ acs_vhdl_lang.h BindingRule.h Directory.h
 HWio_matlab.o: HWio_matlab.cc HWio_matlab.h ACSCGFPGATarget.h \
  ACSCGTarget.h ../../../../src/domains/acs/kernel/ACSTarget.h \
  ../../../../src/domains/cg/kernel/HLLTarget.h \
@@ -664,25 +905,32 @@ HWio_matlab.o: HWio_matlab.cc HWio_matlab.h ACSCGFPGATarget.h \
  ../../../../src/kernel/ParticleStack.h \
  ../../../../src/kernel/PrecisionState.h \
  ../../../../src/domains/acs/kernel/ACSCorona.h acs_starconsts.h \
- ACSIntArray.h DoubleArray.h StringArray.h Arch.h Fpga.h Pin.h \
- Connectivity.h Delay.h Sequencer.h \
+ ACSIntArray.h DoubleArray.h StringArray.h CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/EventHorizon.h Port_Timing.h Sg_Constructs.h \
- ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
- acs_vhdl_lang.h MemPort.h Directory.h
+ ../../../../src/kernel/EventHorizon.h Connection_List.h Arch.h Fpga.h \
+ Port.h Sg_Constructs.h Port_Timing.h Address.h Pin.h utilities.h \
+ acs_vhdl_lang.h BindingRule.h Directory.h
 HWTarget.o: HWTarget.cc HWTarget.h ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/domains/acs/kernel/ACSTarget.h \
  ../../../../src/domains/cg/kernel/HLLTarget.h \
@@ -729,25 +977,32 @@ HWTarget.o: HWTarget.cc HWTarget.h ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/kernel/ParticleStack.h \
  ../../../../src/kernel/PrecisionState.h \
  ../../../../src/domains/acs/kernel/ACSCorona.h acs_starconsts.h \
- ACSIntArray.h DoubleArray.h StringArray.h Arch.h Fpga.h Pin.h \
- Connectivity.h Delay.h Sequencer.h \
+ ACSIntArray.h DoubleArray.h StringArray.h CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/EventHorizon.h Port_Timing.h Sg_Constructs.h \
- ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
- acs_vhdl_lang.h MemPort.h Directory.h
+ ../../../../src/kernel/EventHorizon.h Connection_List.h Arch.h Fpga.h \
+ Port.h Sg_Constructs.h Port_Timing.h Address.h Pin.h utilities.h \
+ acs_vhdl_lang.h BindingRule.h Directory.h
 ACSCGFPGATarget.o: ACSCGFPGATarget.cc ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/domains/acs/kernel/ACSTarget.h \
  ../../../../src/domains/cg/kernel/HLLTarget.h \
@@ -794,25 +1049,32 @@ ACSCGFPGATarget.o: ACSCGFPGATarget.cc ACSCGFPGATarget.h ACSCGTarget.h \
  ../../../../src/kernel/ParticleStack.h \
  ../../../../src/kernel/PrecisionState.h \
  ../../../../src/domains/acs/kernel/ACSCorona.h acs_starconsts.h \
- ACSIntArray.h DoubleArray.h StringArray.h Arch.h Fpga.h Pin.h \
- Connectivity.h Delay.h Sequencer.h \
+ ACSIntArray.h DoubleArray.h StringArray.h CoreList.h \
  ../../../../src/domains/acs/kernel/ACSCGFPGACore.h \
  ../../../../src/domains/acs/targets/StringArray.h \
+ ../../../../src/domains/acs/targets/CoreList.h \
  ../../../../src/domains/acs/targets/Pipealign.h \
  ../../../../src/domains/acs/targets/ACSIntArray.h \
  ../../../../src/domains/acs/targets/acs_starconsts.h \
+ ../../../../src/domains/acs/targets/Connection_List.h \
  ../../../../src/domains/acs/targets/Pin.h \
+ ../../../../src/domains/acs/targets/Connectivity.h \
+ ../../../../src/domains/acs/targets/Delay.h \
  ../../../../src/domains/acs/targets/Capability.h \
  ../../../../src/domains/acs/targets/Constants.h \
  ../../../../src/domains/acs/targets/Resource.h \
+ ../../../../src/domains/acs/targets/Sg_Constructs.h \
+ ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
+ ../../../../src/domains/acs/targets/Fpga.h \
+ ../../../../src/domains/acs/targets/Sequencer.h \
+ ../../../../src/domains/acs/targets/Port_Timing.h \
  ../../../../src/domains/acs/targets/acs_vhdl_lang.h \
- ../../../../src/domains/acs/targets/Connectivity.h \
  ../../../../src/domains/acs/kernel/ACSCGCore.h \
  ../../../../src/domains/acs/kernel/ACSWormhole.h \
  ../../../../src/kernel/Wormhole.h ../../../../src/kernel/Universe.h \
- ../../../../src/kernel/EventHorizon.h Port_Timing.h Sg_Constructs.h \
- ../../../../src/kernel/KnownBlock.h ../../../../src/kernel/Linker.h \
- acs_vhdl_lang.h MemPort.h Directory.h \
+ ../../../../src/kernel/EventHorizon.h Connection_List.h Arch.h Fpga.h \
+ Port.h Sg_Constructs.h Port_Timing.h Address.h Pin.h utilities.h \
+ acs_vhdl_lang.h BindingRule.h Directory.h \
  ../../../../src/domains/cg/kernel/CGUtilities.h \
  ../../../../src/compat/ptolemy/compat.h \
  ../../../../src/kernel/InfString.h \

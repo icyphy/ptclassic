@@ -2,7 +2,7 @@
 #define _LOCAL_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* local.h  edg
 Version identification:
-$Id$
+@(#)local.h	1.29	01/28/99
 This is a local include file for useful macros and definitions.
 */
 

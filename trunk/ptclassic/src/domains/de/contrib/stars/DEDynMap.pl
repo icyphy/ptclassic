@@ -3,7 +3,7 @@ defstar{
     domain { DE }
     derivedfrom { DEDynMapBase }
     author { J. Voigt }
-    version { $Id$ }
+    version { @(#)DEDynMap.pl	1.7	03/27/98 }
     copyright { copyright (c) 1997 Dresden University of Technology
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,

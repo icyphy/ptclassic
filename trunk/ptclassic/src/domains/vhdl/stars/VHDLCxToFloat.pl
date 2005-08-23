@@ -2,10 +2,10 @@ defstar {
 	name { CxToFloat }
 	domain { VHDL }
 	desc { type conversion from complex to float/int }
-	version { $Id$ }
+	version { @(#)VHDLCxToFloat.pl	1.4 03/07/96 }
 	author { Michael C. Williamson, S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

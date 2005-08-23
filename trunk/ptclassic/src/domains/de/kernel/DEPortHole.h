@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)DEPortHole.h	2.28 12/15/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

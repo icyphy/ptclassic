@@ -2,7 +2,7 @@
 #define _OPTIONS_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* options.h  edg
 Version identification:
-$Id$
+@(#)options.h	1.5	10/30/95
 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included

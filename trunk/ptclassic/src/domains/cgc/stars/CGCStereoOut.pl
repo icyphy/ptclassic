@@ -11,7 +11,7 @@ The data written is linear 16 bit encoded and stereo(2 channel) format.
 This code is based on the description of the audio driver which can
 be obtained by looking at the man page for audio.
   }
-  version { $Id$ }
+  version { @(#)CGCStereoOut.pl	1.23 04/07/97 }
   author { Sunil Bhave }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

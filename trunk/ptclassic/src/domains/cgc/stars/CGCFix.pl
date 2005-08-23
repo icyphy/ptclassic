@@ -4,10 +4,10 @@ defstar {
 	desc {
 Based star for the fixed-point stars in the CGC domain.
 	}
-	version { $Id$ }
+	version { @(#)CGCFix.pl	1.8	05/07/97 }
         author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

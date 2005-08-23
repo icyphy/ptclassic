@@ -2,7 +2,7 @@ defstar {
 	name { AddInt }
 	domain { C50 }
 	desc { Add any number of integer inputs, producing an integer output. }
-	version { $Id$ }
+	version { @(#)C50AddInt.pl	1.7	01 Oct 1996 }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

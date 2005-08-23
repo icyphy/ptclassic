@@ -5,10 +5,10 @@ defstar {
 The output is set to the input multiplied by a gain term.
 The gain must be in interval [-1,1].
 	}
-	version { $Id$ }
+	version { @(#)C50Gain.pl	1.4	01 Oct 1996 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

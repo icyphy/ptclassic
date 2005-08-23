@@ -1,9 +1,9 @@
 static const char file_id[] = "SynthTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SynthTarget.cc	1.13 09/10/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

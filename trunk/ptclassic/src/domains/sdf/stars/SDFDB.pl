@@ -7,10 +7,10 @@ Zero and negative values are assigned the value "min" (default -100).
 The "inputIsPower" parameter should be set to YES if the input signal
 is a power measurement (vs. an amplitude measurement).
 	}
-	version {$Id$}
+	version {@(#)SDFDB.pl	1.19 10/07/96}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

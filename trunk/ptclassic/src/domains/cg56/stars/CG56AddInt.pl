@@ -2,7 +2,7 @@ defstar {
 	name { AddInt }
 	domain { CG56 }
 	desc { Add any number of integer inputs, producing an integer output. }
-	version { $Id$ }
+	version { @(#)CG56AddInt.pl	1.4	01 Oct 1996 }
 	author { Joseph T. Buck and Brian L. Evans }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

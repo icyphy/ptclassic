@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testCGCDefs.tcl	1.1 12/09/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -33,11 +33,6 @@
 # Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
 
 set TYCHO [file join $env(PTOLEMY) tycho]
-set env(TYCHO) $TYCHO
-
-lappend auto_path $TYCHO
-package require tycho.kernel.basic
-package require tycho.util.tytest
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
@@ -46,6 +41,20 @@ if {[string compare test [info procs test]] == 1} then {
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
+
+# If a file contains non-graphical tests, then it should be named .tcl
+# If a file contains graphical tests, then it should be called .itcl
+# 
+# It would be nice if the tests would work in a vanilla itkwish binary.
+# Check for necessary classes and adjust the auto_path accordingly.
+#
+
+
+if {[info command ::tycho::tmpFileName] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+    }
+}
 
 # Define a few helper functions
 

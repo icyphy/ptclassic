@@ -6,10 +6,10 @@ This is an amplifier.  The integer output is the integer input
 divided by the integer "divisor" (default 1).  Truncated integer
 division is used.
 	}
-	version { $Id$ }
+	version { @(#)CGCDivByInt.pl	1.2	4/26/96 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

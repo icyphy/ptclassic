@@ -6,10 +6,10 @@ Prints out one sample from each input port per line
 If "fileName" is not equal to "cout" (the default) or "stdout", it
 specifies the filename to write to.
 	}
-	version { $Id$ }
+	version { @(#)CGCPrinter.pl	1.18	01/27/97 }
 	author { E. A. Lee, Kennard }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

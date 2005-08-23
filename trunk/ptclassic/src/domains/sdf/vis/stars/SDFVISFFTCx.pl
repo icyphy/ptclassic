@@ -1,7 +1,7 @@
 defstar {
 	name { VISFFTCx }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFVISFFTCx.pl	1.6	7/10/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

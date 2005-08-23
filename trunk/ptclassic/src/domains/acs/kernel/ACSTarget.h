@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSTarget.h	1.13 09/08/99
 
  Basic target for Adaptive Computing Systems.
  This target provides a common base class for all the ACS targets 

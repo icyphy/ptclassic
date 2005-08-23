@@ -25,7 +25,7 @@ value, the step size is output on the <i>outStep</i> port as a floating-point
 value, and the index of the quantization level on the <i>stepLevel</i> port
 as a non-negative integer between 0 and 2^<i>bits</i> - 1, inclusive.
 	}
-	version { $Id$ }
+	version { @(#)CGCAdaptLinQuant.pl	1.5 05/07/97 }
 	input {
 		name {input}
 		type {float}

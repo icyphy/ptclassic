@@ -2,9 +2,9 @@
 #define _Resource_h 1
 
 /**************************************************************************
-Version identification:	$Id$
+Version identification:	@(#)Resource.h	1.11 08/27/99
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

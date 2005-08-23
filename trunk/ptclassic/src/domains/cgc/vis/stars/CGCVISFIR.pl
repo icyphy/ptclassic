@@ -1,10 +1,10 @@
 defstar {
 	name { VISFIR }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCVISFIR.pl	1.15	04/07/97 }
 	author { William Chen, John Reekie, and Edward Lee}
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

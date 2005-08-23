@@ -6,10 +6,10 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
-	version { $Id$ }
+	version { @(#)CGCUpSample.pl	1.12	7/11/96 }
 	author { E. A. Lee and S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

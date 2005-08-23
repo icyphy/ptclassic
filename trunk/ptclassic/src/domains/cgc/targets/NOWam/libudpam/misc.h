@@ -1,9 +1,9 @@
 /* misc.h:  Header for misc UDPAM stuff  */
 /******************************************************************
 Version identification:
-$Id$
+@(#)misc.h	1.6 7/23/96
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -7,7 +7,7 @@ The star quantizes the input to one of N+1 possible output levels
 using N thresholds.  It also outputs the index of the quantization
 level used.  See the Quant star for more information.
 	} 
-	version { $Id$ }
+	version { @(#)C50QuantIdx.pl	1.5 	7/10/96 }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

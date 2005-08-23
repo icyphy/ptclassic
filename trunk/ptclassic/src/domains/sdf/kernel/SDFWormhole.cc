@@ -1,9 +1,9 @@
 static const char file_id[] = "SDFWormhole.cc";
 /******************************************************************
 Version identification:
- $Id$
+ @(#)SDFWormhole.cc	2.20	02/20/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

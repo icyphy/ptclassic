@@ -2,10 +2,10 @@ defstar {
 name { XCAsynchComm }
 domain { CG56 }
 desc { S56X to CGC asynchronous IPC base star }
-version { $Id$ }
+version { @(#)CG56XCAsynchComm.pl	1.8	01 Oct 1996 }
 author { Jose Luis Pino }
 copyright { 
-Copyright (c) 1994-%Q% The Regents of the University of California.
+Copyright (c) 1994-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

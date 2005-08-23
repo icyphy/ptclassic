@@ -8,10 +8,10 @@ the special names &lt;stdout&gt; and &lt;out&gt; (specifying the
 standard output stream), and &lt;stderr&gt; and &lt;cerr&gt;
 specifying the standard error stream, are also supported.
 	}
-	version { $Id$}
+	version { @(#)DEPrinter.pl	2.17	10/07/96}
 	author { Soonhoi Ha and J. Buck}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

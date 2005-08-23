@@ -1,7 +1,7 @@
 defstar {
 	name {FlipFlopD}
 	domain {DE}
-	version { $Id$ }
+	version { @(#)DEFlipFlopD.pl	1.2 02/27/97 }
 	author { John S. Davis, II }
 	copyright {
 Copyright (c) 1997 The Regents of the University of California.

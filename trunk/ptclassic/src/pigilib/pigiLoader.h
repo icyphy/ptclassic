@@ -2,7 +2,7 @@
 #define _PIGILOADER_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /*
-   $Id$
+   @(#)pigiLoader.h	1.4 3/10/96
 
    This is a C include file, and NOT a C++ include file.
 */

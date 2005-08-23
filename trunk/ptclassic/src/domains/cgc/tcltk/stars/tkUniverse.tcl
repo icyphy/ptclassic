@@ -2,9 +2,9 @@
 # Demonstration for use with a N-input, zero-output TclScript star.
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkUniverse.tcl	1.3  3/3/95
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

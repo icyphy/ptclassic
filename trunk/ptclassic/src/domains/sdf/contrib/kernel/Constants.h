@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-// $Id$
+// @(#)Constants.h	1.2	3/7/96
 // Programmer: Neal Becker
 // This may look like C code, but it is really -*- C++ -*-
 

@@ -2,10 +2,10 @@ defstar {
   name { Conjugate_M }
   domain { SDF }
   desc { Conjugate a matrix. }
-  version { $Id$ }
+  version { @(#)SDFConjugate_M.pl	1.8 3/7/96 }
   author { Mike J. Chen }
   copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,6 +1,6 @@
 #! /bin/sh
 # usage: pigiRpcDebug.dbx <vem-args>
-# $Id$
+# @(#)pigiRpcDebug.dbx	1.5 3/21/96
 
 # Use dbx as a debugger instead of gdb.
 # sol2.cfront requires this

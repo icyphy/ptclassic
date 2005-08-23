@@ -2,7 +2,7 @@ defstar {
   name { TWTA }
   domain { SDF }
   desc { Model of a TWTA amplifier }
-  version { $Id$ }
+  version { @(#)SDFTWTA.pl	1.6	12/08/97 }
   location { SDF user contribution library }
   author { N. Becker }
 	htmldoc {
@@ -14,7 +14,7 @@ and linear interpolation/extrapolation is used to find the phase and
 output amplitude, which is converted back to a complex output sample.
 }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

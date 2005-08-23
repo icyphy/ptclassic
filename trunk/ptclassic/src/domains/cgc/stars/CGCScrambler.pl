@@ -105,10 +105,10 @@ Thus, if "int" is a 32 bit word, then the highest order polynomial allowed is
 Since many machines today have 32-bit integers, we give the primitive polynomials
 above only up to order 30.
 	}
-        version { $Id$ }
+        version { @(#)CGCScrambler.pl	1.7   06 Oct 1996 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

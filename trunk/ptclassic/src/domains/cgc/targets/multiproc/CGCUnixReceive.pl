@@ -4,10 +4,10 @@ defstar {
 	desc {
 Receive star between Unix processors.
 	}
-	version { $Id$ }
+	version { @(#)CGCUnixReceive.pl	1.8	04/07/97 }
 	author { Soonhoi Ha }
         copyright {
-Copyright (c) 1991-%Q% The Regents of the University of California.
+Copyright (c) 1991-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

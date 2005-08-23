@@ -5,10 +5,10 @@ defstar {
 Converts input to dB.  Zero and negative values are
 converted to "min" (default -100).
 	}
-	version { $Id$ }
+	version { @(#)CGCDB.pl	1.13	10/08/96 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,9 +1,9 @@
 # Makefile for Ptolemy demo/whats_new0.7.1 directory
 #
-# $Id$
+# @(#)makefile	1.2 10/26/99
 # Author: Christopher Hylands
 #
-# Copyright (c) 1998-%Q% The Regents of the University of California.
+# Copyright (c) 1998- The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

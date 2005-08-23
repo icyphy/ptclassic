@@ -1,9 +1,9 @@
 # Tcl/Tk source for a bar meter display
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkMeter.tcl	1.14	3/3/95
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

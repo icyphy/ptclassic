@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-2000 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #
 #
 # stars.mk :: Common definitions of star and target subsets.
-# Version: $Id$
+# Version: @(#)stars.mk	1.252c	09/21/00
 #
 # Eventually this file will be automatically generated.
 # But for now, we do it by hand.
@@ -486,8 +486,8 @@ endif
 ifdef DEFULL
 	DE = 1
 	DECONTRIB = 1
-	DEJAVA = 1
-	DESIP = 1
+	#DEJAVA = 1
+	#DESIP = 1
 endif
 ifdef DE
 	# star icons
@@ -544,7 +544,7 @@ ifdef DE
 		# CQScheduler includes a call to wraupUpPML() which
 		# is part of SiP.  If SiP is not present, then link
 		# with sipdummy.o. 
-		LIBS += $(OBJDIR)/domains/de/kernel/sipdummy.o
+		#LIBS += $(OBJDIR)/domains/de/kernel/sipdummy.o
 	endif	
 	# dependencies
 	SDFLIB = 1

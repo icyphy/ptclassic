@@ -6,10 +6,10 @@ Dynamically display the value of any number of input signals in bar-chart form.
 The first 12 input signals will be assigned distinct colors. After that,
 the colors are repeated. The colors can be controlled using X resources.
 	}
-	version { $Id$ }
+	version { @(#)SDFTkBarGraph.pl	1.12	10/25/95 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

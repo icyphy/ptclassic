@@ -2,10 +2,10 @@ defstar {
   name { VSynchComm }
   domain { CGC }
   desc { Base class for CGC-VHDL synchronous communication }
-  version { $Id$ }
+  version { @(#)CGCVSynchComm.pl	1.14 04/08/97 }
   author { Michael C. Williamson and Jose Luis Pino }
   copyright { 
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

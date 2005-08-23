@@ -2,10 +2,10 @@ defstar {
 	name {Repeat}
 	domain {CGC}
 	desc {  Repeats each input sample the specified number of times. }
-	version {$Id$}
+	version {@(#)CGCRepeat.pl	1.6	06 Oct 1996}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

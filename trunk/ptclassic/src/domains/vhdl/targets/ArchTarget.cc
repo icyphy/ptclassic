@@ -1,9 +1,9 @@
 static const char file_id[] = "ArchTarget.cc";
 /******************************************************************
   Version identification:
-  $Id$
+  @(#)ArchTarget.cc	1.31 06/08/98
 
-  Copyright (c) 1990-%Q% The Regents of the University of California.
+  Copyright (c) 1990-1997 The Regents of the University of California.
   All rights reserved.
 
   Permission is hereby granted, without written agreement and without

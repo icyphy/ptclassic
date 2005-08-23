@@ -6,10 +6,10 @@ defstar {
 Generates an X-Y plot with the pxgraph program.
 The X data is on "xInput" and the Y data is on "input".
 	}
-	version {$Id$}
+	version {@(#)CGCXYgraph.pl	1.11	06 Oct 1996}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

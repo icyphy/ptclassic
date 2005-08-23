@@ -6,10 +6,10 @@ defstar {
 Generates standard window functions:
 Rectangle, Bartlett, Hanning, Hamming, Kaiser, Blackman, and SteepBlackman.
 }
-	version { $Id$ }
+	version { @(#)CG56Window.pl	1.16	06 Oct 1996 }
 	author { Jose Luis Pino, based on CG56WaveForm by Kennard White}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

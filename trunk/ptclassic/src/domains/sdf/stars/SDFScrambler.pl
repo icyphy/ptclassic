@@ -119,10 +119,10 @@ polynomials above only up to order 30.
 Edward Lee and David Messerschmitt, <i>Digital Communication</i>,
 Second Edition, Kluwer Academic Publishers, 1994, pp. 595-603.
 	}
-	version { $Id$ }
+	version { @(#)SDFScrambler.pl	1.9	10/08/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -5,10 +5,10 @@ defstar {
 The output is equal to the remainder after dividing the
 integer input by the integer "modulo" parameter.
 	}
-	version { $Id$ }
+	version { @(#)CG56ModuloInt.pl	1.5	12/08/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

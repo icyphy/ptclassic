@@ -1,10 +1,10 @@
 defstar {
 	name { PCMReadInt }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFPCMReadInt.pl	1.19	06/19/98 }
 	author { Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

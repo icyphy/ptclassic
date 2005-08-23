@@ -2,9 +2,9 @@
 #			   the user settable condition
 #
 # Author: Alan Kamas
-# Version: $Date$ $Id$
+# Version: 3/3/95 @(#)tkBreakPt.tcl	1.5
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

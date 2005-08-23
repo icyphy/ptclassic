@@ -19,7 +19,7 @@
 #	safe-get -anarg -G filename SCCS/s.filename
 # 
 #
-# $Id$
+# @(#)safe-get	1.5	5/28/94
 
 # If the first arg is -G then skip the first and second args
 if ( $1 == "-G" ) then

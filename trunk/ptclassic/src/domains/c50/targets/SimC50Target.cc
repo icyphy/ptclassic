@@ -1,7 +1,7 @@
 static const char file_id[] = "SimC50Target.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SimC50Target.cc	1.4	05/28/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

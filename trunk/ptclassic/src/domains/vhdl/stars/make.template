@@ -1,9 +1,9 @@
 # Makefile for Ptolemy VHDL stars
 #
 # Version identification:
-# $Id$
+# @(#)make.template	1.38 02/20/98
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -60,17 +60,9 @@ PTLIB=libvhdlstars.$(LIBSUFFIX)
 # put any derived stars first in the list
 PL_SRCS = \
  VHDLQuant.pl \
- VHDLQuantInt.pl \
- VHDLCommutator.pl \
- VHDLSgn.pl \
- VHDLXgraphInt.pl \
- VHDLXMgraphInt.pl \
- VHDLSwitch.pl \
- VHDLSelect.pl \
  VHDLAdd.pl \
  VHDLAddCx.pl \
  VHDLAddInt.pl \
- VHDLAddFix.pl \
  VHDLAverage.pl \
  VHDLBlackHole.pl \
  VHDLConst.pl \
@@ -84,21 +76,14 @@ PL_SRCS = \
  VHDLExp.pl \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
- VHDLFixToFloat.pl \
- VHDLFixToInt.pl \
  VHDLFloatToCx.pl \
- VHDLFloatToFix.pl \
- VHDLFloatToInt.pl \
  VHDLFork.pl \
  VHDLGain.pl \
  VHDLGainInt.pl \
  VHDLImpulse.pl \
  VHDLInhomogeneous.pl \
  VHDLIntegrator.pl \
- VHDLIntToFix.pl \
- VHDLIntToFloat.pl \
  VHDLLMS.pl \
- VHDLLMSInt.pl \
  VHDLMpy.pl \
  VHDLMpyCx.pl \
  VHDLMpyInt.pl \

@@ -1,8 +1,8 @@
 # Makefile for Ptolemy cfront compat. stuff (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.3 12/05/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -3,10 +3,10 @@ defstar {
 	derivedFrom { RepeatStar }
 	domain {DE}
 	desc { Generate a single event at time zero. }
-	version { $Id$}
+	version { @(#)DEImpulse.pl	1.9	3/2/95}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

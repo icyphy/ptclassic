@@ -15,10 +15,10 @@ order of log N steps to find the right level, whereas the linear
 quantizer star LinQuantIdx takes a constant amount of time.  Therefore,
 if you doing linear quantization, use the LinQuantIdx star.
 	}
-	version { $Id$ }
+	version { @(#)SDFQuant.pl	1.17	07 Oct 1996 }
 	author { E. A. Lee and J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

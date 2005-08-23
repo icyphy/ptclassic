@@ -6,10 +6,10 @@ A value of values is repeated at the output with period period, zero-padding
 or truncating to period if necessary.  Setting period to 0 (default) output
 the value once.  The default value is 0.1 0.2 0.3 0.4.
         }
-	version {$Id$}
+	version {@(#)C50WaveForm.pl	1.11	05/26/98}
 	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

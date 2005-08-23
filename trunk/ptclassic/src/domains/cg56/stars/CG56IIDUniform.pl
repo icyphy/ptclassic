@@ -5,10 +5,10 @@ defstar {
 Generate pseudo-IID-uniform random variables.  The values range from
 -range to range where "range" is a parameter.
 	}
-	version { $Id$ }
+	version { @(#)CG56IIDUniform.pl	1.21 03/29/97 }
 	author { J. Buck, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -4,7 +4,7 @@ static const char file_id[] = "displayFile.c";
 Functions that display a file
 
 Version identification:
-$Id$
+@(#)displayFile.c	1.8 07/15/98
 
 Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.

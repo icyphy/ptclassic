@@ -12,10 +12,10 @@ size should be a multiple of 4.
 This code is based on the description of the audio driver which can be
 obtained by looking at the man page of audio.
     }
-    version { $Id$ }
+    version { @(#)CGCVISStereoOut.pl	1.18 04/07/97 }
     author { Sunil Bhave and Bill Chen}
     copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

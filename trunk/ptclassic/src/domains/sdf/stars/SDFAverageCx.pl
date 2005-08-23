@@ -5,10 +5,10 @@ defstar {
 Average some number of complex input samples or blocks of complex
 input samples. Blocks of successive input samples are treated as vectors.
 	}
-	version {$Id$}
+	version {@(#)SDFAverageCx.pl	1.10	09/01/97}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

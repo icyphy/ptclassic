@@ -2,9 +2,9 @@
 # For use with a two-output, zero-input TclScript star.
 #
 # Authors: Edward A. Lee and Douglas Niehaus
-# Version: $Id$
+# Version: @(#)tkKeypad.tcl	1.5  3/3/95
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

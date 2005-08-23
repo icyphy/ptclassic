@@ -3,7 +3,7 @@
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)SimC50Target.h	1.2	05/26/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

@@ -7,10 +7,10 @@ If N is zero (the default), the number of samples transferred per execution
 equals the number of samples read per execution by the star that reads
 from the output. 
     }
-    version {$Id$}
+    version {@(#)C50LinToCirc.pl	1.7	05/26/98}
     author { Luis Gutierrez, G. Arslan }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

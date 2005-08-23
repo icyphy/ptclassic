@@ -3,12 +3,12 @@ defstar	{
 name { XCSend }
 domain { CG56 }
 desc { S56X to CGC sunchronous send star }
-version	{ $Id$ }
+version	{ @(#)CG56XCSend.pl	1.16	01 Oct 1996 }
 author { Jose Luis Pino }
 derivedFrom { XCSynchComm }
 
 copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright	for copyright notice,
 limitation of liability, and disclaimer	of warranty provisions.

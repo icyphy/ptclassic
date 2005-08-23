@@ -7,10 +7,10 @@ output.  If phase = 0, the most recent sample is the output, while if
 phase = factor-1 the oldest sample is the output.  Phase = 0 is the
 default.
 	}
-	version { $Id$ }
+	version { @(#)CGCDownSample.pl	1.9	01/01/96 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

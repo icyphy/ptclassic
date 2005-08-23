@@ -5,9 +5,9 @@ static const char file_id[] = "Fix.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Fix.cc	1.20 12/14/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -52,13 +52,12 @@ variable.
 
 **********************************************************************/
 
-#include <stream.h>             // gcc-3.0: This include should be first
 #include "Fix.h"
 #include "Error.h"
 #include "type.h"
 #include "PrecisionState.h"
 #include "compat.h"		// PT_NT4VC: pickup strcasecmp
-
+#include <stream.h>
 #include <std.h>
 #include <string.h>
 #include <math.h>

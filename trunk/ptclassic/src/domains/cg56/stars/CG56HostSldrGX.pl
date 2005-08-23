@@ -2,12 +2,12 @@ defstar {
 	name { HostSldrGX }
 	domain { CG56 }
 	desc { Host port Slider }
-	version { $Id$ }
+	version { @(#)CG56HostSldrGX.pl	1.7	03/29/97 }
 	acknowledge { Gabriel version by Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	ccinclude { "StringState.h" "CGTarget.h" "StringList.h"}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*
    Author:	T. M. Parks
    Date:	8 October 1992
-   Version:	$Id$
+   Version:	@(#)CodeStream.cc	1.7	3/2/96
 */
 
 static const char file_id[] = "CodeStream.cc";

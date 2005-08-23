@@ -1,7 +1,7 @@
 #ifndef _ACSPortHole_h
 #define _ACSPortHole_h
 
-/*  Version $Id$
+/*  Version @(#)ACSPortHole.h	1.13 09/08/99
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

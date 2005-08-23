@@ -24,7 +24,7 @@
 #
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-#   Version: $Id$
+#   Version: @(#)makefile	1.1 05/26/98
 #
 #   Authors:  Vincent Legrand, Mathilde Roger, FrÅÈdÅÈric Boulanger
 #   E-mail: Frederic.Boulanger@supelec.fr

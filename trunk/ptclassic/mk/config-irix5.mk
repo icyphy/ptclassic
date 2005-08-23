@@ -1,7 +1,7 @@
 # Configuration makefile to build on SGI Indigo running Irix5.x
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-irix5.mk	1.28 02/04/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

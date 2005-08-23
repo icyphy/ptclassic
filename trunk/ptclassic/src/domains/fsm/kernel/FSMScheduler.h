@@ -1,9 +1,9 @@
 #ifndef _FSMScheduler_h
 #define _FSMScheduler_h
 
-/* $Id$
+/* @(#)FSMScheduler.h	1.9 10/08/98
 
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -38,7 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "FSMStateStar.h"
-#include "Galaxy.h"
 #include "InfString.h"
 #include "PortHole.h"
 #include "Scheduler.h"
@@ -80,22 +79,12 @@ public:
     InfString intlEventNames;          //  |--These will be set by Target.
     InfString intlEventTypes;          //--|
 
-    // The list with slaves shared across states.  
-    BlockList sharedSlaveList;
-
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
 
-    // Setup current state to be the initial state. This needs to be invoked
-    // while hierarchical entry is initial entry, i.e. in FSMTarget::begin.
-    int setupInitState();
-
-    // Let outside domain know whether to refire.
-    /*virtual*/ int selfFiringRequested();
-	
-    // If selfFiringRequested returns TRUE, return the time at which
-    // this firing is requested.
-    /*virtual*/ double nextFiringTime();
+   // Reset current state to be the initial state.
+    // This needs to be invoked while hierarchical entry is initial entry.
+    void resetInitState();
 
 protected:
     // Check all stars.
@@ -115,7 +104,7 @@ protected:
     Tcl_Interp* myInterp;
 
     // Initial state of this FSM.
-    FSMStateStar* initState;
+    FSMStateStar* initialState;
 
     // Current state of this FSM.
     FSMStateStar* curState;
@@ -123,11 +112,8 @@ protected:
     // Keep the entry type of last transition that enters current state.
     int curEntryType;
 
-    // Next state.
+    // Next transition state.
     FSMStateStar* nextState;
-
-    // Previous state.
-    FSMStateStar* preState;
 
     // The domain name outside of this FSM.
     const char* outerDomain;	 

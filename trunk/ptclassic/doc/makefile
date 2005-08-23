@@ -1,6 +1,6 @@
 # Makefile for Ptolemy doc directory
 #
-# $Id$
+# @(#)makefile	1.14 01 Oct 1996
 #
 # Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.

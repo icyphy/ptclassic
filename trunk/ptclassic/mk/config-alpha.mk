@@ -2,8 +2,8 @@
 # 
 # Derived from config file for mips processor (DECstation) running Ultrix 4.x
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-alpha.mk	1.23 05/28/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

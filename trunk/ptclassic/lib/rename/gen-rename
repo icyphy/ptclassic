@@ -6,7 +6,7 @@
 # This script is not robust.  Check the results carefully.
 #
 # Author: Kennard White
-# Version: $Id$
+# Version: @(#)gen-rename	1.1 12/14/92
 #
 
 SELF=`basename $0`

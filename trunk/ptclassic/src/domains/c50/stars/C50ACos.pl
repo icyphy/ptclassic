@@ -2,11 +2,11 @@ defstar {
 	name { ACos  }
 	domain { C50 }
 	desc { Arc Cosine }
-	version { $Id$ }
+	version { @(#)C50ACos.pl	1.4	02/03/99 }
 	author { A. Baensch and G. Arslan }
 	acknowledge { based on the ACos Motorola 56000 star }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

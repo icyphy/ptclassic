@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-// $Id$
+// @(#)isa.h	2.8 01/05/99
 // A macro for generating isA functions in derived classes
 
 #ifndef _isa_h

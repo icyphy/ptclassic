@@ -3,10 +3,10 @@ name { FFTCx }
 domain { C50 }
 desc {
 }
-version {$Id$}
+version {@(#)C50FFTCx.pl	1.6	09/10/99}
 author { Luis Gutierrez, G. Arslan }
 copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

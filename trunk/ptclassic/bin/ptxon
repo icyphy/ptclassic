@@ -1,9 +1,14 @@
-#!/bin/sh -x
-# $Id$
-# Copyright (c) %Q% The Regents of the University of California.
+#!/bin/sh
+
+# @(#)ptxon	1.2 2/10/96
+# Copyright (c) 1996 The Regents of the University of California.
 # 	All Rights Reserved.
 
-# ptxon is based on xon from the X11R5 and X11R6 distribution
+# ptxon is based on xon from the X11R5 distribution
+# The xon in the X11R6 distribution uses rsh -n which means that the following
+# command would fail
+# echo '( mkdir -p /users/cxh/PTOLEMY_SYSTEMS ) < /dev/null > /dev/null 2>&1' | ptxon edison -debug sh
+
 # $XConsortium: xon.sh,v 1.8 92/08/17 13:57:21 rws Exp $
 #
 # start up xterm (or any other X command) on the specified host
@@ -19,15 +24,21 @@ target=$1
 shift
 label=$target
 resource=xterm-$label
-if [ -f /usr/kerberos/bin/rsh ]; then
-    rsh=/usr/kerberos/bin/rsh
-elif [ -f /usr/bin/remsh ]; then
+
+# Don't use /usr/kerberos/bin/rsh, because it will hang if -n is not present
+#if [ -f /usr/kerberos/bin/rsh ]; then
+#    rsh=/usr/kerberos/bin/rsh
+
+if [ -f /usr/bin/remsh ]; then
     rsh=/usr/bin/remsh
 elif [ -f /usr/bin/rcmd ]; then
     rsh=/usr/bin/rcmd
+elif [ -f /usr/ucb/rsh ]; then 
+	rsh=/usr/ucb/rsh
 else
     rsh=rsh
 fi
+
 
 
 rcmd="$rsh $target "

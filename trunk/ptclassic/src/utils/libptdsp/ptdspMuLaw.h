@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: J. T. Buck
-Version: $Id$
+Version: @(#)ptdspMuLaw.h	1.7 04/27/97
 */
 
 #include <stdio.h>

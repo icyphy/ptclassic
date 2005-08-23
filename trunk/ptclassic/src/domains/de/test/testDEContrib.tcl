@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testDEContrib.tcl	1.1 12/09/97
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,7 +34,7 @@
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $env(PTOLEMY) src domains de test testDEDefs.tcl]
+    source [file join $env(PTOLEMY) src domains sdf test testSDFDefs.tcl]
 } {}
 
 
@@ -47,5 +47,4 @@ if {[string compare test [info procs test]] == 1} then {
 #### test DEDynBlock
 #
 test DEDynBlock {DEDynBlock} {
-   # Can't test DEDynBlock from ptcl because decontribstars uses tk
 } {}

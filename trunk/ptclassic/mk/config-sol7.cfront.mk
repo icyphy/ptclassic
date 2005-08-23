@@ -1,7 +1,7 @@
 # Config file to build on SPARC processor running Solaris7 (aka Solaris 2.7)
 # with SunSoft cc and CC 4.2
 
-# $Id$
+# @(#)config-sol7.cfront.mk	1.2 02/06/99
 
 # Copyright (c) 1999 The Regents of the University of California.
 # All rights reserved.

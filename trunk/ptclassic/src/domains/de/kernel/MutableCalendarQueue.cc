@@ -1,10 +1,10 @@
 static const char file_id[] = "MutableCalendarQueue.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MutableCalendarQueue.cc	1.13 05/28/98
 
 WARNING experimental version
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

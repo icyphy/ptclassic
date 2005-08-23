@@ -5,11 +5,11 @@ defstar {
 Sine function calculated by table lookup.  Input range of [-1,1) is scaled
 by pi.  Output is sin(pi*input).
 	}
-	version {$Id$}
+	version {@(#)C50Sin.pl	1.11	05/26/98}
 	acknowledge { Gabriel version by Maureen O'Reilly }
 	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

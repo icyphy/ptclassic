@@ -2,10 +2,10 @@ defstar {
   name      { Kalman_M }
   domain    { SDF }
   desc      { Implements the Kalman filter. }
-  version   { $Id$ }
+  version   { @(#)SDFKalman_M.pl	1.12 04/08/97 }
   author    { Mike J. Chen }
   copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

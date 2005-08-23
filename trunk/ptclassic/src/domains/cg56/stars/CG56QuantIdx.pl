@@ -7,10 +7,10 @@ The star quantizes the input to one of N+1 possible output levels
 using N thresholds.  It also outputs the index of the quantization
 level used.  See the Quant star for more information.
 	}
-	version { $Id$ }
+	version { @(#)CG56QuantIdx.pl	1.3	2/15/96 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

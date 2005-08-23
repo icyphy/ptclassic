@@ -1,8 +1,8 @@
 # Configuration makefile for Sun running Solaris2.3 and Sun CC3.0, CC4.0
 # (Note that CC4.0 is not a cfront style compiler, it is native.)
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-sol2.cfront.mk	1.37 09/04/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -91,7 +91,7 @@ CDEBUGFLAGS =	-g
 # -DPOSTFIX_OP= is needed for cfront 2.1; it is not needed for 3.0.
 
 # Define PTSOL2_4 if you are on Solaris2_4
-#ARCHFLAGS =	-DPTSOL2_4
+ARCHFLAGS =	-DPTSOL2_4
 
 LOCALCCFLAGS =	$(GPPDEBUGFLAGS) -DSYSV -DSOL2 -D_REENTRANT
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \

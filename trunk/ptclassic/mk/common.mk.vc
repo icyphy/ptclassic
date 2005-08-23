@@ -1,9 +1,9 @@
 # MS VC++ common included makefile for all directories in which a makefile is
 # built from a make.template file.
 #
-# Version: $Id$
+# Version: @(#)common.mk.vc	1.4 02/21/99
 # 
-# Copyright (c) 1997-%Q% The Regents of the University of California.
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

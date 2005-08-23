@@ -13,10 +13,10 @@ and decrease in powers of z (increase in powers of 1/z).
 Note that the constant term of D is not omitted, as is common in
 other programs that assume that it has been normalized to unity.
     }
-    version { $Id$ }
+    version { @(#)SDFIIR.pl	1.18	10/06/96 }
     author { Kennard White }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

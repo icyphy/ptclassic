@@ -2,10 +2,10 @@ defstar {
 	name { Limit }
 	domain { C50 }
 	desc { Hard limiter }
-	version { $Id$ }
+	version { @(#)C50Limit.pl	1.5	06 Oct 1996 }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

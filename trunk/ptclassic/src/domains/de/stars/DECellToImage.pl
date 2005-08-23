@@ -1,11 +1,11 @@
 defstar {
 	name		{ CellToImage }
 	domain		{ DE }
-	version		{ $Id$ }
+	version		{ @(#)DECellToImage.pl	1.8 10/28/95 }
 	author		{ Paul Haskell }
 	location	{ DE main library }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

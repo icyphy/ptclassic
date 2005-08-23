@@ -1,5 +1,5 @@
 # Makefile that creates idx files
-# $Id$
+# @(#)domain.mk	1.9 10/04/96
 # Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 

@@ -30,10 +30,10 @@ limited to 20,000 samples.
 <a name="halting a simulation"></a>
 <a name="simulation, halting"></a>
 	}
-	version { $Id$ }
+	version { @(#)DEWaveForm.pl	1.9	10/08/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: $Id$
+ Version: @(#)ACSFixSimCore.h	1.6 09/08/99
 
 ***********************************************************************/
 #ifdef __GNUG__

@@ -2,10 +2,10 @@ defstar {
     name { HostAOut }
     domain { CG56 }
     desc { Asynchronous host output. }
-    version { $Id$ }
+    version { @(#)CG56HostAOut.pl	1.16 03/29/97 }
     author { Kennard White }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

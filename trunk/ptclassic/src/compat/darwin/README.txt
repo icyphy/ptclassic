@@ -1,4 +1,4 @@
-$Id$
+@(#)README.txt	1.1 07/22/02
 src/compat/darwin/README.txt
 
 Darwin is the architecture name for MacOS X

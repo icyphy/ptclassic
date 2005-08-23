@@ -4,10 +4,10 @@ defcore {
     coreCategory { FPCGC }
     corona { Delay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version{ $Id$ }
+    version{ @(#)ACSDelayFPCGC.pl	1.5 08/02/01 }
     author { Eric Pauer }
     copyright {
-Copyright (c) 1999-%Q% The Regents of the University of California
+Copyright (c) 1999-2001 The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,

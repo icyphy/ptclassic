@@ -1,9 +1,9 @@
 static const char file_id[] = "Galaxy.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Galaxy.cc	2.29 04/03/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

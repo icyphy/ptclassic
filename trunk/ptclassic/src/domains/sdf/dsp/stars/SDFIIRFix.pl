@@ -15,10 +15,10 @@ Before the numerator and denominator coefficients are quantized, they
 are rescaled so that the leading denominator coefficient is unity.
 The gain is multiplied through the numerator coefficients as well.
         }
-        version { $Id$ }
+        version { @(#)SDFIIRFix.pl	1.22	12/08/97 }
         author { E. A. Lee, A. Khazeni, K. White }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

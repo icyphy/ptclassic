@@ -1,7 +1,7 @@
 # Makefile for XXX domain support
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.11 04/05/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -43,7 +43,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libxxx.$(LIBSUFFIX)
+PTLIB=libxxx.$(LIBSUFFIX)
 
 # Header files
 HDRS= XXXPortHole.h XXXScheduler.h XXXStar.h XXXWormhole.h # XXXGeodesic.h
@@ -54,10 +54,10 @@ SRCS= $(HDRS:.h=.cc) XXXDomain.cc
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

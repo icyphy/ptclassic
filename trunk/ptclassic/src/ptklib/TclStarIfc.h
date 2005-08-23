@@ -2,14 +2,14 @@
 #define _TclStarIfc_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)TclStarIfc.h	1.17	08/18/97
 
 Author: Edward A. Lee
 
 Defines a simple interface for stars that call Tcl functions.
 Makes the star parameters available to Tcl scripts.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

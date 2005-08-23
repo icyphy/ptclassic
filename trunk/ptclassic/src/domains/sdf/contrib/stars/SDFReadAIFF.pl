@@ -1,7 +1,7 @@
 defstar {
 	name { ReadAIFF }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFReadAIFF.pl	1.3	04/28/98 }
 	desc {
 Read a binary AIFF file.  Return one sample on each firing.  The file 
 format that is read is the same as the one written by the PlayAIFF star.
@@ -10,7 +10,7 @@ periodically repeated, or the file contents can be padded with zeros.
 	}
 	author { Charles B. Owen }
 	copyright {
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

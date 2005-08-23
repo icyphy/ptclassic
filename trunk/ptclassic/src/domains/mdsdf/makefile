@@ -1,5 +1,5 @@
 # Makefile for MDSDF domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  Mike J. Chen
-# $Id$
+# @(#)makefile	1.5 10/01/96
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/mdsdf.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/mdsdf (through the symbolic

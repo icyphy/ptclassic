@@ -1,5 +1,5 @@
 -- Vhdlbxor3.vhdl
--- $Id$
+-- @(#)Vhdlbxor3.vhdl	1.1 6/23/94
 -- Michael C. Williamson
 
 entity VHDLBXor3 is

@@ -1,9 +1,9 @@
 #ifndef _HOFScheduler_h
 #define _HOFScheduler_h
 
-/*  Version $Id$
+/*  Version @(#)HOFScheduler.h	1.4  3/7/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

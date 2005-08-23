@@ -1,5 +1,5 @@
 # Makefile for DE domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# @(#)makefile	1.12 06/26/97
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/de.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/de (through the symbolic
@@ -43,7 +43,7 @@ include $(CONFIG)
 include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
-SUBDOMAINDIRS = tcltk atm contrib java sip
+SUBDOMAINDIRS = tcltk atm contrib #java
 
 DIRS = kernel stars $(SUBDOMAINDIRS)
 

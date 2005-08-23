@@ -6,7 +6,7 @@
 #endif
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 // Programmer:  J. Buck
-// $Id$
+// @(#)pt_fstream.h	1.7 3/2/95
 
 // This defines derived types of ifstream and ofstream that do the following:
 

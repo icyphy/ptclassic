@@ -6,10 +6,10 @@ Generate a plot of a two-dimensional signal with the xprism3 program.  Due
 to a bug in xprism3 reading raw files from the command line, we go through the
 intermediate step of converting the raw file to a Viff file using raw2viff.
 	}
-	version {$Id$}
+	version {@(#)MDSDFXprism3.pl	1.11 05/28/98}
 	author { Mike J. Chen }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

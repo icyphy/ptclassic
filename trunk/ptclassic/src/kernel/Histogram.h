@@ -2,9 +2,9 @@
 #define _Histogram_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Histogram.h	2.10	11/26/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "logNew.h"
 
-#ifdef PTSOL10
+#ifndef PTSOL10
 inline int round(double x) { return x > 0 ? int(x+0.5) : -int(0.5-x); }
 #endif
 

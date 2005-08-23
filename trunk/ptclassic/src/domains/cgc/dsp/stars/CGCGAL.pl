@@ -3,10 +3,10 @@ defstar
     name { GAL }
     domain { CGC } 
     desc { Gradient Adaptive Lattice filter. }
-    version { $Id$ }
+    version { @(#)CGCGAL.pl	1.6 3/7/96 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1992-%Q% The Regents of the University of California.
+Copyright (c) 1992-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

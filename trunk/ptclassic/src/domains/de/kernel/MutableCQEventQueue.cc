@@ -1,7 +1,7 @@
 static const char file_id[] = "MutableCQEventQueue.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MutableCQEventQueue.cc	1.3 12/16/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

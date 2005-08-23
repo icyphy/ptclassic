@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,7 +22,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# $Id$
+# @(#)ptcl_help.tcl	1.20	03/27/97
 # Author: J. Buck
 # Help system for ptcl.
 

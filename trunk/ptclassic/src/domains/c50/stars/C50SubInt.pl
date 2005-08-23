@@ -2,7 +2,7 @@ defstar {
     name {SubInt}
     domain {C50}
     desc { Output the "pos" input minus all "neg" inputs. }
-    version { $Id$ }
+    version { @(#)C50SubInt.pl	1.7	7/22/96 }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

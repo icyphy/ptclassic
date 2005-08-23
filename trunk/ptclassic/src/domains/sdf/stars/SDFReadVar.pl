@@ -1,10 +1,10 @@
 defstar {
   name { ReadVar }
   domain { SDF }
-  version { $Id$ }
+  version { @(#)SDFReadVar.pl	1.7	11/28/95 }
   author { Stefan De Troch (IMEC) }
   copyright{ 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

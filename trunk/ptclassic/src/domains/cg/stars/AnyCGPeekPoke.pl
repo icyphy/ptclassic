@@ -2,10 +2,10 @@ defstar {
 name { PeekPoke }
 domain { AnyCG }
 desc { Nondeterminate communication link, splices in a peek/poke pair }
-version { $Id$ }
+version { @(#)AnyCGPeekPoke.pl	1.9	05/07/97 }
 author { Jose Luis Pino }
 copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testSDFArrayRLS.tcl	1.3 03/28/98
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -37,8 +37,6 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $env(PTOLEMY) src domains sdf test testSDFDefs.tcl]
 } {}
 
-# We don't include testSDFArrayRLS.tcl because the output
-# varies by OS and compiler
 
 # Define the galaxies we will use
 proc defSDFArrayRLSGals {} {

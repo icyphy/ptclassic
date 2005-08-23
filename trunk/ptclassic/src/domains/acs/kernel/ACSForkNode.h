@@ -6,7 +6,7 @@
 #endif
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ACSForkNode.h	1.5 09/08/99
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.

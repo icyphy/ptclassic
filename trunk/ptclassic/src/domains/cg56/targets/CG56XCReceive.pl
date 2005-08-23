@@ -2,11 +2,11 @@ defstar {
 	name { XCReceive }
 	domain { CG56 }
 	desc { CGC to S56X Receive star }
-	version { $Id$ }
+	version { @(#)CG56XCReceive.pl	1.16	01 Oct 1996 }
 	author { Jose L. Pino }
 	derivedFrom {XCSynchComm}
 	copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

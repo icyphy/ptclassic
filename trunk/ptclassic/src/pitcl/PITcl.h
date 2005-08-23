@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PITcl.h	1.43	07/25/97
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.

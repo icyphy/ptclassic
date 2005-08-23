@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Bilung Lee and Brian Evans
-Version: $Id$
+Version: @(#)ptdspNearestNeighbor.h	1.3	7/23/96
 */
 
 #ifdef __cplusplus

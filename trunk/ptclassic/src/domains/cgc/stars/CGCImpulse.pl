@@ -8,11 +8,11 @@ then only a single impulse is generated; otherwise, it specifies the
 period of the impulse train.  The impulse or impulse train is delayed
 by the amount specified by "delay".
 	}
-	version { $Id$ }
+	version { @(#)CGCImpulse.pl	1.4 6/6/96 }
 	author { J. Weiss }
 	acknowledge { SDF version by J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

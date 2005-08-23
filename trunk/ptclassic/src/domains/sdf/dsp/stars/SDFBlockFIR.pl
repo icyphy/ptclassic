@@ -1,7 +1,7 @@
 defstar {
 	name { BlockFIR }
 	domain { SDF }
-	version {$Id$}
+	version {@(#)SDFBlockFIR.pl	1.15 10/06/96}
 	desc {
 This star implements an FIR filter with coefficients that
 are periodically updated from the outside. For each set of
@@ -9,7 +9,7 @@ coefficients, a block of input samples is processed, all in one firing.
 	}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,7 +1,7 @@
 # Makefile to build shared library octtools libraries for SGI Irix5
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)octtools-irix5-shl.mk	1.4 02/17/99
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

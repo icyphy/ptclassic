@@ -8,10 +8,10 @@ adaptive equalizers that require a training sequence at startup, but it can be
 used whenever one sequence is used during a startup phase, and another sequence
 after that. 
 	}
-	version { $Id$ }
+	version { @(#)SDFTrainer.pl	1.8	10/01/96 }
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

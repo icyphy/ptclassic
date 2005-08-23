@@ -2,7 +2,7 @@ defstar {
 	name { IntToFix }
 	domain { CGC }
 	derivedFrom { Fix }
-	version { $Id$ }
+	version { @(#)CGCIntToFix.pl	1.4 01 Oct 1996 }
 	author { J.Weiss }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

@@ -1,8 +1,8 @@
 # Configuration makefile to make on an HP-PA machine (7xx or 8xx) and HPUX9.x
 # using GNU gcc and g++.  For HPUX10, see config-hppa.mk
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-hppa9.mk	1.17 02/04/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

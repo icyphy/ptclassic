@@ -6,10 +6,10 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
-	version {$Id$}
+	version {@(#)C50UpSample.pl	1.8	05/26/98}
 	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

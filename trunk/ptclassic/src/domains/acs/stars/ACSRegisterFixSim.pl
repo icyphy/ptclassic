@@ -4,10 +4,10 @@ defcore {
     coreCategory { FixSim }
     corona { Register } 
     desc { Provides explicit pipeline delay (default 1). }
-    version{ $Id$ }
+    version{ @(#)ACSRegisterFixSim.pl	1.2 08/02/01 }
     author { Eric Pauer }
     copyright {
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999- Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

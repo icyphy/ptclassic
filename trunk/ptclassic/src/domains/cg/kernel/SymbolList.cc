@@ -1,9 +1,9 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "SymbolList.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)SymbolList.cc	1.13	10/6/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

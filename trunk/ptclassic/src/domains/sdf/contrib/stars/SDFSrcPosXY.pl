@@ -1,7 +1,7 @@
 defstar {
 	name {SrcPosXY}
 	domain {SDF}
-	version { $Id$ }
+	version { @(#)SDFSrcPosXY.pl	1.2	02/19/97 }
 	desc {
 This Star produces a vector containing a triangular indicator function for each
 direction of arrival (read from the input) in polar coordinates suitable for

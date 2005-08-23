@@ -2,10 +2,10 @@ defstar {
     name { FixToInt }
     domain { CG56 }
     desc { Convert a fixed-point input to a integer output. }
-    version { $Id$ }
+    version { @(#)CG56FixToInt.pl	1.4 04/13/97 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

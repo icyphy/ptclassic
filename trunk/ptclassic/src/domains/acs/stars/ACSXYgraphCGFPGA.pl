@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Swallows an input sample
 	}
-        version{ $Id$ }
+        version{ @(#)ACSXYgraphCGFPGA.pl	1.9 08/02/01 }
         author { Ken Smith, Eric K. Pauer }
         copyright {
-Copyright (c) 1998-%Q% The Regents of the University of California
+Copyright (c) 1998-2001 The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

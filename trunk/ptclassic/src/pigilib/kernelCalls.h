@@ -2,7 +2,7 @@
 #define _kernelCalls_h 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* kernelCalls.h  edg
 Version identification:
-$Id$
+@(#)kernelCalls.h	2.21	02/05/97
 
 This is a C include file, and NOT a C++ include file.
 */

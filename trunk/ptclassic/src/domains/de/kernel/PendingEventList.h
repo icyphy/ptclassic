@@ -2,7 +2,7 @@
 #define _PendingEventList_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PendingEventList.h	1.8 01/29/98
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.

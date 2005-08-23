@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Bilung Lee 
-Version: $Id$
+Version: @(#)ptdspHistogram.h	1.2 7/23/96
 */
 
 #ifdef __cplusplus

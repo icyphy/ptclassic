@@ -8,10 +8,10 @@ If no input is available at the time of sampling, the latest input
 is used.  If there has been no input, then a "zero" particle is produced.
 The exact meaning of this depends on the particle type.
 	}
-	version { $Id$}
+	version { @(#)DESampler.pl	2.6	3/2/95}
 	author { E. A. Lee and Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

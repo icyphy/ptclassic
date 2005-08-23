@@ -1,7 +1,7 @@
 static const char file_id[] = "Picture.cc";
 /* 
 SCCS Version identification :
-$Id$
+@(#)Picture.cc	1.1   06/25/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

@@ -3,10 +3,10 @@ defstar {
     domain { CG56 }
     derivedFrom { SSI }
     desc { Interface to the 56001 SSI's port with timing-skew capability. }
-    version { $Id$ }
+    version { @(#)CG56SSISkew.pl	1.11 03/29/97 }
     author { Kennard White }
     copyright {
-Copyright (c) 1991-%Q% The Regents of the University of California.
+Copyright (c) 1991-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

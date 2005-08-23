@@ -1,7 +1,7 @@
 # Makefile to build ptcl, tycho and pigiRpc binaries
-# $Id$
+# @(#)ptbin.mk	1.83	02/22/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -2,7 +2,7 @@ defstar {
 	name {MyStar}
 	domain {SDF}
 	desc { This star computes the sine of its input (assumed to be an angle in radians) plus 1.0. }
-	version {$Id$}
+	version {@(#)SDFMyStar.pl	1.1	3/3/94}
 	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.

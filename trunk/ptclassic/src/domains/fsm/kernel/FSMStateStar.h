@@ -1,8 +1,8 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)FSMStateStar.h	1.6 10/08/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -47,8 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "IntState.h"
 #include "StringState.h"
-#include "StringArrayState.h"
-#include "Wormhole.h"
 #include "tcl.h"
 
 class FSMStateStar : public FSMStar {
@@ -63,21 +61,14 @@ public:
     MultiInFSMPort stateIn;
     MultiOutFSMPort stateOut;
 
-    // clear those internal events that are not emitted by the slave
-    // and the triggered action indexed by "actNum".
-    virtual int clearIntlEvent (int actNum);
+    // Return if this state is initial state.
+    int isInit() { return int(isInitState); }
 
-    // Emit an "event" with an "expression" to Tcl interp.
-    virtual int emitEventToInterp(const char* event, const char* expr);
-
-    // Evaluate the guard of initial transition
-    virtual int evalInitGuard();
+    // Return the next state according the conditions.
+    virtual FSMStateStar *nextState(int& condNum, int preemption);
 
     // Execute the action.
     virtual int execAction(int actNum);
-
-    // Execute the action of initial transition.
-    virtual int execInitAction();
 
     // Execute the internal machine.
     virtual int execSlave(int curEntryType);
@@ -85,36 +76,16 @@ public:
     // Get the entry type of a possible transition out of this state.
     int getEntryType(int transNum);
 
-    // Return if this state is initial state.
-    int isInit() { return int(isInitState); }
-
-    // Return the next state according the conditions.
-    virtual FSMStateStar *nextState(int& condNum, int preemption);
-
-    // Return the slave as a Wormhole
-    Wormhole* slaveAsWorm() {
-        if (slave == NULL) return NULL;
-        else return slave->asWormhole();
-        
-    }
-
 protected:
+    IntState isInitState;
     StringState events;
     StringState conditions;
     StringState actEvents;
     StringState actExprs;
     IntArrayState entryType;
     IntArrayState preemptive;
-
     StringState slaveNm;
     StringState where_is_defined;
-    IntState slaveShared;
-
-    IntState isInitState;
-    StringState initEvent;
-    StringState initCondition;
-    StringArrayState initActEvents;
-    StringArrayState initActExprs;
 
     int numTrans;
     char** parsedEvents;
@@ -135,7 +106,6 @@ protected:
     /* virtual */ void wrapup(); // Redefine.
 
     Star * createWormhole (const char *galname, const char* where_defined);
-    Star * createNewWormhole (const char *galname, const char* where_defined);
     const char* ptkCompile(const char *galname, const char* where_defined);
     int setupGeodesic (Star* worm, Block* parent);
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 /* Version Identification:
- * $Id$
+ * @(#)std.h	1.24 02/06/99
  */
 #ifndef _std_h
 #define _std_h

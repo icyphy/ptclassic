@@ -2,9 +2,9 @@
 #define _VHDLPortHole_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLPortHole.h	1.8 05/06/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

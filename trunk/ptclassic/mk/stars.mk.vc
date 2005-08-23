@@ -1,8 +1,8 @@
 # Microsoft VC++ nmake file, based on stars.mk, but modified by hand.
 #
-# Version: $Id$
+# Version: @(#)stars.mk.vc	1.5 01/05/99
 #
-# Copyright (c) 1997-%Q% The Regents of the University of California.
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

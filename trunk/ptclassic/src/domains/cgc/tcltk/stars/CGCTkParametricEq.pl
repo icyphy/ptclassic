@@ -7,11 +7,11 @@ defstar
 Just like ParametricEq, except that a Tk slider is put in the master
 control panel to control the gain.
     }
-    version { $Id$ }
+    version { @(#)CGCTkParametricEq.pl	1.17 04/08/97 }
     author { William Chen and Sunil Bhave }
     location { CGC Tcl/Tk library }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

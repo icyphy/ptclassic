@@ -2,7 +2,7 @@ defstar{
     name { DynMapBase }
     domain { DE }
     author { J. Voigt }
-    version { $Id$ }
+    version { @(#)DEDynMapBase.pl	1.8	03/27/98 }
     copyright {
 copyright (c) 1997 Dresden University of Technology, WiNeS-Project              All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,

@@ -2,7 +2,7 @@
 % PostScript prologue file for oct2ps
 %
 %   Rick L. Spickelmier
-% Version: $Id$
+% Version: @(#)oct2ps.pro	1.2 04/29/98
 
 %
 % tile a box

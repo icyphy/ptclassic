@@ -1,12 +1,12 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:  $Id$
+Version identification:  @(#)DERCScheduler.cc	1.18 09/21/99
  
 Author: Mudit Goel
         Neil Smyth
         Claudio Passerone
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSFixSimCore.cc";
 /**********************************************************************
-Copyright (c) 1998-%Q% The Regents of the University of California.
+Copyright (c) 1998-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: $Id$
+ Version: @(#)ACSFixSimCore.cc	1.7 09/21/99
 
 ***********************************************************************/
 

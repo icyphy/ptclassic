@@ -8,10 +8,10 @@ Generates a voice process for a single caller and recognizes
 prompts to begin and cease packet transmission.
         }
 
-	version {$Id$}
+	version {@(#)DEVoiceSrc.pl	1.10	06 Oct 1996}
 	author { Allen Y. Lao }
 	copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

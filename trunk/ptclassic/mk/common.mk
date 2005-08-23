@@ -2,9 +2,9 @@
 # built from a make.template file.
 #
 # Version identification:
-# $Id$
+# @(#)common.mk	1.74 02/18/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

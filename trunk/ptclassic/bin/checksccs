@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id$
+# @(#)checksccs	1.4 04/05/97
 # Check that all the files listed in stdin are checked in under SCCS.
 # All the files should be on one line in stdin.
 # The following files are ignored:

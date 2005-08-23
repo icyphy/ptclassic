@@ -1,8 +1,8 @@
 #! /bin/sh
 # script to make directories and links for an architecture
-# $Id$
+# @(#)MAKEARCH	1.187 11/24/99
 # Version: 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # 	All Rights Reserved.
 
 if [ -z "$PTARCH" ]; then

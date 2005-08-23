@@ -1,4 +1,4 @@
-c $Id$
+c @(#)wfir.f	1.2	1/11/91
 c main program: window design of linear phase, lowpass, highpass
 c               bandpass, and bandstop fir digital filters
 c author:       lawrence r. rabiner and carol a. mcgonegal

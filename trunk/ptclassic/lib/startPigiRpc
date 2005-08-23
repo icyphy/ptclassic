@@ -1,8 +1,8 @@
 #! /bin/sh
-# $Id$
+# @(#)startPigiRpc	1.5 3/7/96
 # script for starting the pigiRpc process for user shells other than csh/tcsh
 #
-# Copyright (c) 1992-%Q% The Regents of the University of California.
+# Copyright (c) 1992-1996 The Regents of the University of California.
 #			All rights reserved.
 # Programmer: J. Buck
 #

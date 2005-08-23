@@ -3,12 +3,12 @@
 # This shell script invokes a Tcl script to make a personal Ptolemy
 # development tree. See "mkPtolemyTree.tcl" for more information.
 #
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1997 The Regents of the University of California.
 # All Rights Reserved.
 # See $PTOLEMY/copyright for the complete copyright notice.
 #
 # Programmer: Matt Tavis
-# Version: $Id$
+# Version: @(#)mkPtolemyTree	1.7 02/03/99
 #
 # Usage: mkPtolemyTree <override file> <absolute path of tree root>
 #

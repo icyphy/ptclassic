@@ -3,9 +3,9 @@
 # instance of this star.
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkScript.tcl	1.17	02/23/97
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

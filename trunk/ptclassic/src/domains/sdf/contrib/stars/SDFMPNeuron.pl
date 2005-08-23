@@ -9,7 +9,7 @@ or does not fires.
 	author {Biao Lu}
 	acknowledge { Brian L. Evans }
        	location { SDF contrib library }
-	version { $Id$ }
+	version { @(#)SDFMPNeuron.pl	1.1	03/24/98 }
 	copyright {
 Copyright (c) 1998 The University of Texas.
 All rights reserved.

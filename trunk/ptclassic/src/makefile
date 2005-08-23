@@ -1,6 +1,6 @@
 # Makefile for all of Ptolemy source
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# @(#)makefile	1.58 12/04/97
 #
 # Important!  Do not run this makefile while in ~ptolemy/src.  Instead
 # run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that

@@ -1,9 +1,9 @@
 static const char file_id[] = "BarGraph.cc";
 /* 
 SCCS Version identification :
-$Id$
+@(#)BarGraph.cc	1.12	10/25/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

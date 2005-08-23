@@ -4,10 +4,10 @@ defstar {
 	desc {
 The output is set to the input multiplied by a gain term.
 }
-	version { $Id$ }
+	version { @(#)CG56GainInt.pl	1.5	06 Oct 1996 }
 	author { Joseph T. Buck and Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,7 +2,7 @@ defstar {
     name { FixToCx }
     domain { C50 }
     desc { Convert a fixed-point input to a complex output. }
-    version { $Id$ }
+    version { @(#)C50FixToCx.pl	1.4  8/16/96 }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

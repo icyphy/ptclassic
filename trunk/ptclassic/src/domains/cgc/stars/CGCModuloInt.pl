@@ -4,7 +4,7 @@ defstar {
 	desc { The output of this star is the input modulo the 
 		"modulo" parameter. The input, output, and modulo
 		are all integers. }
-	version { $Id$  }
+	version { @(#)CGCModuloInt.pl	1.2	2/13/96  }
 	author { Siamak Modjtahedi }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

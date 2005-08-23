@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id$
+# @(#)ptarch	1.31 05/31/05
 # shell script to figure out architecture, using C preprocessor
 # works on the architectures we support.  This script is based 
 # on the gcc config.guess script.  See $PTOLEMY/src/gnu/src/gcc/config.guess 

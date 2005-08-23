@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Brian Evans
-Version: $Id$
+Version: @(#)ptdspExtendedGCD.h	1.3 7/25/96
 */
 
 #ifdef __cplusplus

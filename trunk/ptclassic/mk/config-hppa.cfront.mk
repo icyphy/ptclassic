@@ -1,8 +1,8 @@
 # Configuration makefile for an HP-PA machine (7xx or 8xx)
 # running HP-UX 10.x with HP's C++ compler
 #
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-hppa.cfront.mk	1.56 09/04/98
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -1,6 +1,6 @@
 # Makefile for sdf/contrib, which contains user contributed stars
 # Top-level Ptolemy makefile.
-# Copyright (c) 1994-%Q% The Regents of the University of California.
+# Copyright (c) 1994-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# $Id$
+# @(#)makefile	1.5 04/07/97
 #
 # Important!  Do not run this makefile while in 
 # ~ptolemy/src/domains/sdf/contrib.  Instead run in from

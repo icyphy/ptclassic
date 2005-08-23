@@ -2,7 +2,7 @@
 #define  _wildforce_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)wildforce.h	1.2 09/09/99
  
 Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.

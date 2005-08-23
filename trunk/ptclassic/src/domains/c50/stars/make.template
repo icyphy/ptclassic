@@ -1,4 +1,4 @@
-# @Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy TI   TMS320C5x CG stars
-# $Id$
+# @(#)make.template	1.17	9/7/96
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do

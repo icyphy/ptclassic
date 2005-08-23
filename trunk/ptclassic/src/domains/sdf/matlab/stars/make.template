@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy SDF matlab/stars
 # Author: Christopher Hylands
-# $Id$
+# @(#)make.template	1.13 20 Sep 1996
 #
 # We build two libraries:  libsdfmatlab and libsdfnomatlab.
 # libsdfmatlab contains unresolved symbols that are resolved by the matlab

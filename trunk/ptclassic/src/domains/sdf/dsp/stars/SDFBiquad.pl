@@ -1,14 +1,14 @@
 defstar {
 	name {Biquad}
 	domain {SDF}
-	version {$Id$}
+	version {@(#)SDFBiquad.pl	2.17 10/06/96}
 	desc {
 A two-pole, two-zero digital IIR filter (a biquad).
 The default is a Butterworth filter with a cutoff 0.1 times sampling frequency.
 	}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

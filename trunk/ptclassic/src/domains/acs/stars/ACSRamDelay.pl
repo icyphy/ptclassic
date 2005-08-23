@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Generates a pipelined delay element using FPGA RAM
 	}
-	version {$Id$}
+	version {@(#)ACSRamDelay.pl	1.4 07/30/01}
 	author { K. Smith }
 	copyright {
 	}

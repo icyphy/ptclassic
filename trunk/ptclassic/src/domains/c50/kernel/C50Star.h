@@ -2,9 +2,9 @@
 #define _C50Star_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)C50Star.h	1.3	05/23/98
 
-@Copyright (c) 1990-%Q% The Regents of the University of California.
+@Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

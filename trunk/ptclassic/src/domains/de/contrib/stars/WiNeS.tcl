@@ -1,6 +1,6 @@
 # WiNeS.tcl
 #
-# $Id$
+# @(#)WiNeS.tcl	1.2 06/24/97
 # author: J.Voigt
 #
 # copyright (c) Dresden University of Technology

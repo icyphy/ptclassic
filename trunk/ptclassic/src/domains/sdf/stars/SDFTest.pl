@@ -1,10 +1,10 @@
 defstar {
 	name { Test }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFTest.pl	1.10	10/07/96 }
 	author { Rolando Diesta and Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -6,7 +6,7 @@ The output is equal to the remainder after dividing the
 integer input by the integer "modulo" parameter.  Currently only
 moduli	which are powers of two are supported.
 	}
-	version { $Id$  }
+	version { @(#)C50ModuloInt.pl	1.2  7/10/96  }
 	author { Luis Gutierrez, based on CG56 version }
 	acknowledge { Brian L. Evans, author of the CG56 version }
 	copyright {

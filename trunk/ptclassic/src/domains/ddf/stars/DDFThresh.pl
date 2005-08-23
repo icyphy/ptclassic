@@ -9,10 +9,10 @@ inputs available on the input arc must equal the threshold.
 THIS STAR IS MEANT FOR TESTING SCHEDULERS ONLY. OTHERWISE,
 IT SERVES NO USEFUL FUNCTION.
 	}
-	version { $Id$ }
+	version { @(#)DDFThresh.pl	1.5	3/6/96 }
 	author { Edward A. Lee, Richard Stevens, and Christopher Scannell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

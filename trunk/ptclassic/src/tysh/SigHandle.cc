@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*****************************************************************************
 Version identification:
-$Id$
+@(#)SigHandle.cc	1.17	10/06/98
 
 Authors: Joel R. King
 

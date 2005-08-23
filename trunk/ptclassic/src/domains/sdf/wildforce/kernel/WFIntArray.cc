@@ -1,7 +1,7 @@
 static const char file_id[] = "WFIntArray.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)WFIntArray.cc	1.1 10/06/99
  
 Copyright (c) 1999 The Regents of the University of California.
 All rights reserved.

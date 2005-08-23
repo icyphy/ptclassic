@@ -13,7 +13,7 @@ const int MAXLEN = 20000;
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)FixArrayState.cc	2.14   02/21/97
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.

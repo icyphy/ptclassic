@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCConstFix.pl	1.2 01 Oct 1996 }
 	location { CGC main library }
 	htmldoc {
 The "OutputPrecision" is specified using an "l.r" format, where

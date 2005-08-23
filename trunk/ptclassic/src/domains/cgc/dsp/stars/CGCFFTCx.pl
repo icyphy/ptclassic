@@ -7,10 +7,10 @@ Parameter "order" (default 8) is the log, base 2, of the transform size.
 Parameter "size" (default 256) is the number of samples read ie. size is less than or equal to 2 ^order.
 Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.]
 	}
-	version { $Id$ }
+	version { @(#)CGCFFTCx.pl	1.14	10/07/96 }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

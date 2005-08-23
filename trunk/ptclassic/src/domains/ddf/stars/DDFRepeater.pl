@@ -6,10 +6,10 @@ Given a control input with integer value N,
 and a single input data particle, produce N
 copies of the data particle on the output.
 	}
-	version { $Id$ }
+	version { @(#)DDFRepeater.pl	2.12	10/29/95 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

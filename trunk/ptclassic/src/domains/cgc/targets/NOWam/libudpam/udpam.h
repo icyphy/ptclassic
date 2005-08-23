@@ -1,9 +1,9 @@
 /* udpam.h:  Header File for Active Messages over UDP (UDPAM) */
 /******************************************************************
 Version identification:
-$Id$
+@(#)udpam.h	1.5 7/23/96
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -10,10 +10,10 @@ by a new event.  A horizontal line then connects the two points.
 If "draw_line_to_base" is YES then a vertical line to the base
 of the bar graph is also drawn for each event occurrence.
 	}
-	version { $Id$ }
+	version { @(#)DEBarGraph.pl	1.10	10/06/96 }
 	author { Brian Evans and Edward Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

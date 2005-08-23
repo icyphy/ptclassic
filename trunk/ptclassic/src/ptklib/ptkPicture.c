@@ -3,7 +3,7 @@
  *
  * Author: Luis Gutierrez (based on ptkPlot )
  *
- * $Id$
+ * @(#)ptkPicture.c	1.3 06/16/98
  */
 /*
 Copyright (c) 1990-1997 The Regents of the University of California.

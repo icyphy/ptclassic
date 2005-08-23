@@ -6,10 +6,10 @@ defstar {
 Evaluate a Matlab function if inputs are given or
 evaluate a Matlab command if no inputs are given.
 	}
-	version { $Id$ }
+	version { @(#)SDFMatlabCx_M.pl	1.7	04/08/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1995-%Q% The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

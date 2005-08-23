@@ -1,6 +1,6 @@
 # Makefile for testing Ptolemy CGC stars 
 #
-# $Id$
+# @(#)makefile	1.1 12/09/97
 # Author: Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.

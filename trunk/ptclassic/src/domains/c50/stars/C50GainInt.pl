@@ -4,7 +4,7 @@ defstar {
 	desc {
 The output is set to the input multiplied by a gain term.
 	}
-	version { $Id$  }
+	version { @(#)C50GainInt.pl	1.8	06 Oct 1996  }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

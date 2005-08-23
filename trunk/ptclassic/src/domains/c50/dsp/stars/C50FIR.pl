@@ -7,10 +7,10 @@ Coefficients are in the "taps" state variable.  Default coefficients
 give an 8th order, linear phase lowpass filter.  To read coefficients
 from a file, replace the default coefficients with "<fileName".
 	}
-	version {$Id$}
+	version {@(#)C50FIR.pl	1.14	05/26/98}
 	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

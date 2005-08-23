@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)DataStruct.h	2.19 12/9/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

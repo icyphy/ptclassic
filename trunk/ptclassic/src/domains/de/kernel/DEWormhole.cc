@@ -1,7 +1,7 @@
 static const char file_id[] = "DEWormhole.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)DEWormhole.cc	2.29 02/22/99
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

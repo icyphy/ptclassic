@@ -2,9 +2,9 @@
 # For use with a three-output, zero-input TclScript star.
 #
 # Authors: Edward A. Lee and Douglas Niehaus
-# Version: $Id$
+# Version: @(#)tkKeyboard.tcl	1.6	11/7/95
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

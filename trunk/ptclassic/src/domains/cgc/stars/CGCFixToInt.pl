@@ -2,7 +2,7 @@ defstar {
 	name { FixToInt }
 	domain { CGC }
 	derivedFrom { Fix }
-	version { $Id$ }
+	version { @(#)CGCFixToInt.pl	1.2 7/10/96 }
 	author { Yu Kee Lim }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

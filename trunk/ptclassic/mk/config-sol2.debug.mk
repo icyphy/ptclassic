@@ -2,9 +2,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.3
 # with gcc and g++
 
-# $Id$
+# @(#)config-sol2.debug.mk	1.15 02/04/99
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

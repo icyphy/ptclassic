@@ -1,9 +1,9 @@
 static const char file_id[] = "GalIter.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)GalIter.cc	2.9	12/1/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,7 +45,7 @@ at every level.
 // This private class is a stack of GalTopBlockIter iterators.
 
 class IterContext {
-	friend class GalAllBlockIter; // gcc-3.0 friend decl requires class-key
+	friend GalAllBlockIter;
 
 	GalTopBlockIter* iter;
 	IterContext* link;
@@ -108,7 +108,7 @@ void GalAllBlockIter::remove() {
 }
 
 class CIterContext {
-	friend class CGalAllBlockIter; //gcc-3.0 friend decl requires class-key
+	friend CGalAllBlockIter;
 
 	CGalTopBlockIter* iter;
 	CIterContext* link;

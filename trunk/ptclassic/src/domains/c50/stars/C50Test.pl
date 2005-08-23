@@ -1,7 +1,7 @@
 defstar {
 	name { Test }
 	domain { C50 }
-	version { $Id$ }
+	version { @(#)C50Test.pl	1.4  01 Oct 1996 }
 	author { Luis Gutierrez }
 	acknowledge { Rolando Diesta, Brian L. Evans, and Edward A. Lee }
 	copyright {

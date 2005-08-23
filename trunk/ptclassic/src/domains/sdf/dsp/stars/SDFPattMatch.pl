@@ -2,9 +2,9 @@ defstar {
 	name { PattMatch }
 	domain { SDF }
 	author { G. S. Walter and E. A. Lee }
-	version { $Id$ }
+	version { @(#)SDFPattMatch.pl	1.12	12/7/95 }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

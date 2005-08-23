@@ -9,10 +9,10 @@ used in digital communications.  By default, the star upsamples
 by a factor of 16, so 16 outputs will be produced for each input
 unless the "interpolation" parameter is changed.
 	}
-	version { $Id$ }
+	version { @(#)SDFRaisedCosine.pl	1.17	10/16/97 }
 	author { J. T. Buck and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,9 +1,9 @@
 #ifndef _MDSDFWormhole_h
 #define _MDSDFWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)MDSDFWormhole.h	1.8 8/31/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

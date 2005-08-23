@@ -2,7 +2,7 @@ defstar {
 	name { RampInt }
 	domain { C50 }
 	desc { Integer Ramp Generator }
-	version {$Id$}
+	version {@(#)C50RampInt.pl	1.5	06 Oct 1996}
 	author { Luis Javier Gutierrez}
 	copyright{
 Copyright (c) 1990-1996 The Regents of the University of California.

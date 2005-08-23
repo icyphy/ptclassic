@@ -2,11 +2,11 @@ defstar {
 	name { LMSGanged }
 	domain { C50 }
 	desc { Ganged least mean square (LMS) adaptive filter. }
-	version {$Id$}
+	version {@(#)C50LMSGanged.pl	1.4	05/26/98}
 	author { Chih-Tsung Huang, ported from Gabriel, G. Arslan }
 	acknowledge { Gabriel version by Martha Fratt }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

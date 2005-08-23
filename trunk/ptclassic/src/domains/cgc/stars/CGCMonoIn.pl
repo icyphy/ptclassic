@@ -13,10 +13,10 @@ be obtained by looking at the man page for audio.
 The ulaw algorithm is based on the description of the T1 system found
 in: Simon Haykin, "Communication Systems," section 8.2 (Wiley 1983).
   }
-  version { $Id$ }
+  version { @(#)CGCMonoIn.pl	1.10 04/07/97 }
   author { T. M. Parks and Sunil Bhave }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty 

@@ -2,11 +2,11 @@ defstar {
 	name { MagnavoxIn }
 	domain { CG56 }
 	desc { A combined input/output star for the Magnavox CD player. }
-	version { $Id$ }
+	version { @(#)CG56MagnavoxIn.pl	1.15	03/29/97 }
 	acknowledge { Gabriel version by Jeff Bier, Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

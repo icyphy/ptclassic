@@ -1,6 +1,6 @@
 --V2Creal.vhdl
 --Real communication from VHDL to C
---Version:  $Id$
+--Version:  @(#)V2Creal.vhdl	1.1 1/30/96
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;

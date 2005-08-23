@@ -1,9 +1,9 @@
 static const char file_id[] = "Fraction.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)Fraction.cc	1.17	3/2/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,8 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include <stream.h>             // gcc-3.0: This include should be first
 #include "Fraction.h"
+#include <stream.h>
 
 // greatest common divisor function.  If 2nd arg is negative, result is
 // negative.  Magnitude of result equals gcd(abs(a),abs(b)).

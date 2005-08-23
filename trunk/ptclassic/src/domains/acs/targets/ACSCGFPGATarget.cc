@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSCGFPGATarget.cc";
 /**********************************************************************
-Copyright (c) 1998-%Q% The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith (Sanders), Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSCGFPGATarget.cc	1.5 08/02/01
 
 ***********************************************************************/
 

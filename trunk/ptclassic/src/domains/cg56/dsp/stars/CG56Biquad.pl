@@ -6,10 +6,10 @@ This star generates code for a second order IIR filter (a "biquad").
 Transfer function: (1 + n1*z^(-1) + n2*z^(-2))/(1 + d1*z^(-1) + d2*z^(-2))
 With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	}
-	version { $Id$}
+	version { @(#)CG56Biquad.pl	1.10 1/1/96}
 	author { J. Buck, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

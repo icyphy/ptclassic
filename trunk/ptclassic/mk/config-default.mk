@@ -11,8 +11,8 @@
 #
 # There are three groups of config variables: paths, options and programs
 
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-default.mk	1.67a 09/20/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -92,7 +92,7 @@ X11_INCSPEC=
 
 # Architectures that build with shared libraries use this to set the 
 # library search path
-X11_LIBDIR=/usr/sww/X11/lib
+X11_LIBDIR=/usr/X11/lib
 
 # The following has two parts.  The first part is optional, and
 # is only required if the X libraries are not on the default search path.

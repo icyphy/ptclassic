@@ -3,7 +3,7 @@ defstar
     name { WF4 }
     domain {SDF}
     desc { Ptolemy Driver for Annapolis Microsystems WILDFORCE(TM) FPGA Board }
-    version {$Id$ }
+    version {@(#)SDFWF4.pl	1.4 10/06/99 }
     author { Seth A. Kintigh }
     copyright {
         Copyright (c) 1998 Sanders, a Lockheed Martian Company

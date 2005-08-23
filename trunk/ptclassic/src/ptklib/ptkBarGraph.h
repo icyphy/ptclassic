@@ -2,7 +2,7 @@
 #define PTKBARGRAPH_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* ptkBarGraph.h  eal
 Version identification:
-$Id$
+@(#)ptkBarGraph.h	1.6	03/08/96
 */
 
 #ifdef __cplusplus

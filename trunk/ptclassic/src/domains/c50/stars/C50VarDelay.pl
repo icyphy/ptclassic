@@ -2,10 +2,10 @@ defstar {
 	name { VarDelay }
 	domain { C50 }
 	desc { A variable delay with linear interpolation. }
-	version {$Id$}
+	version {@(#)C50VarDelay.pl	1.11	05/26/98}
 	author { Luis Gutierrez, based on the CG56 version, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

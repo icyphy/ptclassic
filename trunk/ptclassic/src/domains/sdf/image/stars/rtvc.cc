@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)rtvc.cc	1.5 12/08/97
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.

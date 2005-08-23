@@ -4,10 +4,10 @@ defstar {
 	desc {
 Fork star for assembly-code domains.  No code is generated at runtime.
 	}
-	version {$Id$}
+	version {@(#)AnyAsmFork.pl	1.8 01/01/96}
 	author { J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

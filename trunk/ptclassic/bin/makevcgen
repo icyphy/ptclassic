@@ -2,7 +2,7 @@
 # Generate a MSVC++ nmake file from a Unix makefile
 
 # Author: Christopher Hylands
-# Version: $Id$
+# Version: @(#)makevcgen	1.10 10/29/99
 
 # Copyright (c) 1999 The Regents of the University of California.
 # All rights reserved.

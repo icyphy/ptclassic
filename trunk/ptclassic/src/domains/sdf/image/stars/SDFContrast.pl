@@ -6,11 +6,11 @@ Enhance the contrast in input image by histogram modification.
 Input image should be in an integer matrix.
 The possible contrast type are : Uniform, Hyperbolic.
     }
-    version { $Id$ }
+    version { @(#)SDFContrast.pl	1.5 7/15/96 }
     author { Bilung Lee }
     acknowledge { Brian L. Evans }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

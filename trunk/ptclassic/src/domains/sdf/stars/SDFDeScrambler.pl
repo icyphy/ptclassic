@@ -18,10 +18,10 @@ pp. 595-603.
 <a name="primitive polynomial"></a>
 <a name="maximal length feedback shift register"></a>
 	}
-	version { $Id$ }
+	version { @(#)SDFDeScrambler.pl	1.7	10/07/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

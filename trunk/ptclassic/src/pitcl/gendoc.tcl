@@ -2,7 +2,7 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)gendoc.tcl	1.4	05/18/98
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.

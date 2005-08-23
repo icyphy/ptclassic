@@ -13,7 +13,7 @@ static const char file_id[] = "<T>ArrayState.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ArrayState.ccP	2.21	12/08/97
 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.

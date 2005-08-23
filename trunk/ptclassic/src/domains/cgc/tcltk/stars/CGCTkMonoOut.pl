@@ -7,11 +7,11 @@ defstar
 Just like MonoOut except that a Tk slider is put in the master
 control panel to control the volume.
     }
-    version { $Id$ }
+    version { @(#)CGCTkMonoOut.pl	1.6 04/08/97 }
     author { Sunil Bhave }
     location { CGC Tcl/Tk library }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

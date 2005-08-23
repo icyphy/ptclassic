@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -23,8 +23,8 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for PN domain kernel
-# Version $Id$
-# Copyright 1990-%Q% The Regents of the University of California.
+# Version @(#)make.template	2.5 1/23/96
+# Copyright 1990-1996 The Regents of the University of California.
 # All Rights Reserved.
 # Author:	T. M. Parks
 # Created:	6 February 1992

@@ -5,7 +5,7 @@ defstar {
 The output of this star is the input modulo the "modulo" parameter.
 The input and output are both float
 	}
-	version { $Id$  }
+	version { @(#)CGCModulo.pl	1.3	7/9/96  }
 	author { Siamak Modjtahedi }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

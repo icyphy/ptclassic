@@ -2,11 +2,11 @@ defstar {
     name { Mux }
     domain { CG56 }
     desc { Multiplexes any number of inputs onto one output stream. }
-    version { $Id$ }
+    version { @(#)CG56Mux.pl	1.24 09/10/99 }
     author { Kennard White }
     acknowledge { SDF version by E. A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

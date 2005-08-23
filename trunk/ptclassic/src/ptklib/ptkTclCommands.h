@@ -4,11 +4,11 @@
 /*
  * Commonly Used Ptolemy Tcl/Tk Commands
  * Author: Brian L. Evans
- * Version: $Id$
+ * Version: @(#)ptkTclCommands.h	1.1	10/25/95
  */
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -2,12 +2,12 @@
 #define _DERCScheduler_h 1
 
 /**************************************************************************
-                                                                           Version identification: $Id$
+                                                                           Version identification: @(#)DERCScheduler.h	1.8 05/28/98
 
  
 Author: Mudit Goel, Neil Smyth
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

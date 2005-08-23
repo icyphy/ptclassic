@@ -1,9 +1,9 @@
 #
 # Config file for Unixware1.1
 
-# $Id$
+# @(#)config-unixware.mk	1.8 02/04/99
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@
 #
 # Config file to build on Unixware 1.1
 #
-# %Z% Your SCCS code here!
+# @(#) Your SCCS code here!
 
 # Author: Steven Kimball, skimball@sanders.com
 

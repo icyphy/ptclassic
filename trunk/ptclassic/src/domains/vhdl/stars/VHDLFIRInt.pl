@@ -8,10 +8,10 @@ Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
 coefficients with "<fileName".
 	}
-	version { $Id$ }
+	version { @(#)VHDLFIRInt.pl	1.9 10/06/96 }
 	author { Soonhoi Ha, Mike Williamson }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

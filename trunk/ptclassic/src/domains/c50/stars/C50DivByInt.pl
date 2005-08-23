@@ -6,7 +6,7 @@ This is an amplifier.  The integer output is the integer input
 divided by the integer "divisor" (default 2).  Truncated integer
 division is used.
 	}
-	version { $Id$ }
+	version { @(#)C50DivByInt.pl	1.4	06 Oct 1996 }
 	author { Luis Gutierrez, based on the CG56 version }
 	acknowledge { Brian L. Evans, author of the CG56 version }
 	copyright {

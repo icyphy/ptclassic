@@ -2,10 +2,10 @@
 Define a main window object.  This object has a Tcl interpreter
 with PTcl extensions associated with it, created by the constructor.
 
-$Id$
+@(#)TyConsole.cc	1.19	08/29/99
 Programmer: E. A. Lee
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -8,10 +8,10 @@ This is the base class for stars that check time-out conditions.
 The methods "set", "clear", and "expired" are provided for
 setting and testing the timer.
     }
-    version { $Id$ }
+    version { @(#)DETimeoutStar.pl	1.12	10/06/96 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -7,10 +7,10 @@ of particles, row by row, and written in the same form).
 The number of particles produced and consumed equals the product
 of "samplesInaRow" and "numberOfRows".
 	}
-	version {$Id$}
+	version {@(#)SDFTranspose.pl	1.9	3/7/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

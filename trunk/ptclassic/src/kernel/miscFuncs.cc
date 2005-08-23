@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ static const char file_id[] = "miscImpl.cc";
 // miscellaneous functions.
 // Under g++, inline implementationss for Attribute and the various
 // ConstIters classes go here, using the #pragma mechanism.
-// $Id$
+// @(#)miscFuncs.cc	1.10 02/04/99
 
 #ifdef __GNUG__
 #pragma implementation

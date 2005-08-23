@@ -1,10 +1,10 @@
 defstar {
 	name {Fork}
 	domain {DE}
-	version { $Id$}
+	version { @(#)DEFork.pl	2.7	3/2/95}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

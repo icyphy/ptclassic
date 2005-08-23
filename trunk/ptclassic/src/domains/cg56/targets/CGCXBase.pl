@@ -3,10 +3,10 @@ defstar {
     domain { CGC }
     derivedFrom { Fix }
     desc { Base star from CGC <-> S56X IPC }
-    version { $Id$ }
+    version { @(#)CGCXBase.pl	1.26	10/01/96 }
     author { Jose Luis Pino }
     copyright { 
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # Tcl/Tk source for StripChart for DE domain
 #
 # Author: Eduardo N. Spring and Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkStripChart.tcl	1.5   02/23/97
 # 
 # This script file is a tcl/tk source file for StripChart stars (which are
 # derived from TclScript star). A separate plot is generated for each 

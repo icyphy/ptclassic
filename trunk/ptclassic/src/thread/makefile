@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Authors:	T. M. Parks, Christopher Hylands
-# $Id$
+# @(#)makefile	1.30 04/13/98
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/thread.  Instead
 # run in from ~ptolemy/obj.$PTARCH/thread (through the symbolic link) -- that
@@ -162,9 +162,6 @@ gthreads_sol2.5.cfront: gthreads_sol2.cfront
 
 # sol2.5.egcs same as sol2.5
 gthreads_sol2.5.egcs: gthreads_sol2.5
-
-# sol2.5.static same as sol2.5
-gthreads_sol2.5.static: gthreads_sol2.5
 
 # Build library for sun4 using Gnu compiler.
 gthreads_sun4: $(GT_OBJ)

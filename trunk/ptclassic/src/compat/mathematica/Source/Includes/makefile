@@ -2,7 +2,7 @@
 # (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
+# @(#)makefile	1.2	1/23/96
 # Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 

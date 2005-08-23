@@ -2,10 +2,10 @@ defstar {
 	name { Gain }
 	domain { CGC }
 	desc { Amplifier: output is input times "gain" (default 1.0). }
-	version { $Id$ }
+	version { @(#)CGCGain.pl	1.6	1/1/96 }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

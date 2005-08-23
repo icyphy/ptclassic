@@ -4,10 +4,10 @@ defstar {
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
-	version { $Id$ }
+	version { @(#)C50WrtFile.pl	1.5	02/03/99 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

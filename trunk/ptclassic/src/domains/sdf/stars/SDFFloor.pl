@@ -2,10 +2,10 @@ defstar {
 	name { Floor }
 	domain { SDF } 
 	desc { Output the greatest integer less than or equal to the input. }
-	version {$Id$}
+	version {@(#)SDFFloor.pl	1.9 11/15/95}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

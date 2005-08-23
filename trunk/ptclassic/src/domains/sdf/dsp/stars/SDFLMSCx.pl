@@ -11,10 +11,10 @@ replace the default coefficients with "< fileName",
 preferably specifying a complete path.
 This star supports decimation, but not interpolation.
 	}
-	version { $Id$ }
+	version { @(#)SDFLMSCx.pl	1.16	05/28/98 }
 	author { J. T Buck, E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

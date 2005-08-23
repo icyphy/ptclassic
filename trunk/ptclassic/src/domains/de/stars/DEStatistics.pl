@@ -9,10 +9,10 @@ When a "reset" input arrives, the calculations are restarted.
 When "demand" and "reset" particles arrive at the same time,
 an output is produced before the calculations are restarted.
 	}
-	version { $Id$}
+	version { @(#)DEStatistics.pl	1.12	10/01/96}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

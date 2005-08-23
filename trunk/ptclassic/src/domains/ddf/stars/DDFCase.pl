@@ -7,10 +7,10 @@ control particle.  The control particle should have value between
 zero and N-1, inclusive, where N is the number of outputs.  It
 can be used with EndCase to implement an if ... then construct.
 	}
-	version { $Id$ }
+	version { @(#)DDFCase.pl	1.14	06 Oct 1996 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

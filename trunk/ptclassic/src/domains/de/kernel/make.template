@@ -1,7 +1,7 @@
 # Makefile for DE domain support
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.23 12/14/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -72,7 +72,7 @@ HDRS = \
 	SeqATMCell.h
 
 LIB_SRCS = $(HDRS:.h=.cc) DEDomain.cc
-SRCS = $(LIB_SRCS) sipdummy.cc
+SRCS = $(LIB_SRCS)
 
 #Library name
 PTLIB=libde.$(LIBSUFFIX)
@@ -83,12 +83,10 @@ DLLDEPS =	..\..\..\kernel\libptolemy.lib
 # Objects:
 OBJS = $(LIB_SRCS:.cc=.o)
 
-PT_DEPEND += sipdummy.o
-
-all: 	makefile $(PTLIB) sipdummy.o
+all: 	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(PTLIB) sipdummy.o
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 
 # include common definitions, rules

@@ -4,10 +4,10 @@ defstar {
 	desc {
 Takes multiple inputs and produces one output.
 	}
-	version {$Id$ }
+	version {@(#)CGCCollect.pl	1.10	01 Oct 1996 }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

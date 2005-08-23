@@ -2,9 +2,9 @@
 #define _paths_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)paths.h	1.3	3/2/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

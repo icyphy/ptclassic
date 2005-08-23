@@ -25,7 +25,7 @@
 #
 
 # Config file to build static binaries on Linux
-# $Id$
+# @(#)config-linux.static.mk	1.1 03/25/98
 
 # Programmer:  Wolfgang Reimer
 

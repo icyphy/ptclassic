@@ -1,7 +1,7 @@
 defstar {
 	name {ConstCx1ofN}
 	domain {SDF}
-	version { $Id$ }
+	version { @(#)SDFConstCx1ofN.pl	1.2	02/19/97 }
 	desc {
 Outputs a constant complex value from the array of ComplexValues selected by
 the given ValueIndex.

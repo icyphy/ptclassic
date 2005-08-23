@@ -1,4 +1,4 @@
-! $Id$
+! @(#)pigiXRes8.cp	1.3	11/30/92
 ! VEM options for Pigi for Color Printing:
 
 vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1

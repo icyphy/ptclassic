@@ -1,7 +1,7 @@
 static const char file_id[] = "CGCTychoTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCTychoTarget.cc	1.16 01/20/99
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

@@ -3,10 +3,10 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGDDFCluster.h	1.2	1/1/96
 
 Copyright (c) 1995 Seoul National University
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -1,4 +1,4 @@
-! $Id$
+! @(#)pigiXRes9.bw	1.12	02/23/97
 ! VEM options for Pigi:
 vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1
 vem.deftechname:	ptolemy

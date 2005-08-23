@@ -10,10 +10,10 @@ assumes that the time-value pairs appear in chronological order
 (ascending with respect to time) and that no simultaneous events
 occur (all time values are unique).
 	}
-	version { $Revision$ $Date$ }
+	version { 1.6 06/04/96 }
 	author { Stefan De Troch (of IMEC) }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

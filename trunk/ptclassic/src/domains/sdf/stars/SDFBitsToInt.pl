@@ -12,10 +12,10 @@ received will be lost.
 If "nBits" is smaller than the wordsize minus one, then the
 output integer will always be non-negative.
 	}
-	version { $Id$ }
+	version { @(#)SDFBitsToInt.pl	1.8	3/2/95 }
 	author { J. T Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

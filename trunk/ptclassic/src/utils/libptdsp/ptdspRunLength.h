@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Paul Haskell
-Version: $Id$
+Version: @(#)ptdspRunLength.h	1.5 7/23/96
 */
 
 #ifdef __cplusplus

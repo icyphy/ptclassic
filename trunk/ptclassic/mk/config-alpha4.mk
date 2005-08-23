@@ -1,6 +1,6 @@
 # Config file to build on an Alpha AXP running DEC OSF/1, V4.0
 # 
-# $Id$
+# @(#)config-alpha4.mk	1.3 04/06/98
 # Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 

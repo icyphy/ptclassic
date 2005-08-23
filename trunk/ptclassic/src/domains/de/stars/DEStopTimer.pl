@@ -9,10 +9,10 @@ Within a wormhole, it can used to force actions at the end
 of each invocation of the wormhole.
 An input event is required to enable the star.
 	}
-	version { $Id$}
+	version { @(#)DEStopTimer.pl	1.9	10/01/96}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

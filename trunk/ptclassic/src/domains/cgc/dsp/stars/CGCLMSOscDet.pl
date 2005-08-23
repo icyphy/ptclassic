@@ -10,10 +10,10 @@ Least-Mean Square (LMS) filter whose first and third coefficients are
 fixed at one.  The second coefficient is adapted.  It is a normalized
 version of the Direct Adaptive Frequency Estimation Technique.
 	}
-	version { $Id$ }
+	version { @(#)CGCLMSOscDet.pl	1.11	04/01/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

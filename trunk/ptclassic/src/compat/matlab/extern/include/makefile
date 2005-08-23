@@ -1,8 +1,8 @@
 # Makefile for Ptolemy matlab compat. stuff (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.2 1/23/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

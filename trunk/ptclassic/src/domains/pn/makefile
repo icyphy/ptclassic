@@ -1,5 +1,5 @@
 # Makefile for PN domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Programmer:  T. M. Parks
-# Version: $Id$
+# Version: @(#)makefile	1.4 10/01/96
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/pn.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/pn (through the symbolic

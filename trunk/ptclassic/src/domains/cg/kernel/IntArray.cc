@@ -2,9 +2,9 @@ static const char file_id[] = "IntArray.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)IntArray.cc	1.5	02/05/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

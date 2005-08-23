@@ -5,10 +5,10 @@ defstar {
 This is an amplifier; the complex output is the complex input
 multiplied by the complex "gain" (default 1.0).
 	}
-	version {$Id$}
+	version {@(#)SDFGainCx.pl	1.9	09/01/97}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,10 +2,10 @@ defstar {
 	name { IIDGaussian }
 	domain { CG56 }
 	desc {Gaussian Noise Source}
-	version { $Id$ }
+	version { @(#)CG56IIDGaussian.pl	1.17 03/29/97 }
 	author { Chih-Tsung Huang, Kennard White (ported from Gabriel) }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

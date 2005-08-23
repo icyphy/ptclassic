@@ -3,9 +3,6 @@ static const char file_id[] = "DynDFScheduler.cc";
 #pragma implementation
 #endif
 
-// debug
-#include <iostream.h>           // gcc-3.0: include iostream.h must be early.
-
 #include "DynDFScheduler.h"
 #include "GalIter.h"
 #include "SDFScheduler.h"
@@ -13,9 +10,9 @@ static const char file_id[] = "DynDFScheduler.cc";
 	
 /**************************************************************************
 Version identification:
-$Id$
+@(#)DynDFScheduler.cc	1.21	03/27/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -54,6 +51,9 @@ fails to do so.  Thus, it may be hard to determine, except experimentally,
 how many firings of each star constitute one iteration.
 
 **************************************************************************/
+
+// debug
+#include <iostream.h>
 
 // default max # of tokens on an arc.
 const int DEFAULT_MAX_TOKEN = 100000;

@@ -2,10 +2,10 @@ defstar {
 	name { PolarToRect }
 	domain { CGC }
 	desc { Convert magnitude and phase to rectangular form. }
-	version { $Id$ }
+	version { @(#)CGCPolarToRect.pl	1.7	01/01/96 }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -5,10 +5,10 @@ defstar {
 Suspend execution for an interval (in milliseconds).
 The input is passed to the output when the process resumes.
 	}
-	version { $Id$ }
+	version { @(#)CGCSleep.pl	1.6 1/1/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

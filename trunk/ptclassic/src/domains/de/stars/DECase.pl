@@ -7,10 +7,10 @@ as determined by the last received control input.
 The value of the control input must be between
 0 and N-1, inclusive, or an error is flagged.
 	}
-	version { $Id$ }
+	version { @(#)DECase.pl	1.3	06/04/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

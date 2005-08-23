@@ -4,10 +4,10 @@ defcorona {
 	desc {
 	    Generates a pipelined delay element for multiple lines
 	}
-	version { $Id$}
+	version { @(#)ACSDelay.pl	1.5 08/02/01}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-2001 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -5,10 +5,10 @@ defstar {
 Sinc function using a polynomial approximation.  Input range of [-1,1)
 is scaled by pi.  Output is sin(pi*input)/(pi*input).
 	}
-	version { $Id$ }
+	version { @(#)C50Sinc.pl	1.6	04/08/97 }
 	author { Luis Gutierrez, based on the CG56 version }
 	copyright{
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.

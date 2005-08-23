@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  Steve X. Gu and Brian L. Evans
 Created: 01/13/96
-Version: $Id$
+Version: @(#)MathematicaIfc.cc	1.17	07/09/97
 
 General base class for an interface to Mathematica via MathLink.
 
