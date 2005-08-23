@@ -53,7 +53,7 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES =	tclIndex doc
+MISC_FILES =	tclIndex
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
