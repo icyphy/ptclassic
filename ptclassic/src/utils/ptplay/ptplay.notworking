@@ -1,3 +1,0 @@
-#! /bin/sh
-# $Id$
-echo "ptplay on $PTARCH does not work yet"
