@@ -1,0 +1,121 @@
+merging oscillator1_Mpy_input=21 and Add_input=21
+result is bag1= { oscillator1_Mpy_input=21 Add_input=21 }
+ports:	( bag1.oscillator1_Mpy_input=21_input#1<=oscillator1_Cos1.oscillator1_Cos1_output
+	  bag1.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag1.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag1.Add_input=21_input#2<=oscillator2_Mpy_input=21.oscillator2_Mpy_input=21_output )
+
+merging oscillator1_Integrator1 and oscillator1_Cos1
+result is bag2= { oscillator1_Integrator1 oscillator1_Cos1 }
+ports:	( bag2.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag2.oscillator1_Integrator1_reset<=oscillator1_Const1.oscillator1_Const1_output
+	  bag2.oscillator1_Cos1_output=>bag1.oscillator1_Mpy_input=21_input#1 )
+
+merging bag2 and bag1
+result is bag2= { oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 }
+ports:	( bag2.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag2.oscillator1_Integrator1_reset<=oscillator1_Const1.oscillator1_Const1_output
+	  bag2.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag2.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag2.Add_input=21_input#2<=oscillator2_Mpy_input=21.oscillator2_Mpy_input=21_output )
+
+merging oscillator1_Const1 and bag2
+result is bag2= { oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 }
+ports:	( bag2.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag2.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag2.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag2.Add_input=21_input#2<=oscillator2_Mpy_input=21.oscillator2_Mpy_input=21_output )
+
+merging oscillator2_Mpy_input=21 and bag2
+result is bag2= { oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 oscillator2_Mpy_input=21 }
+ports:	( bag2.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag2.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag2.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag2.oscillator2_Mpy_input=21_input#1<=oscillator2_Cos1.oscillator2_Cos1_output
+	  bag2.oscillator2_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#2 )
+
+merging oscillator2_Integrator1 and oscillator2_Cos1
+result is bag3= { oscillator2_Integrator1 oscillator2_Cos1 }
+ports:	( bag3.oscillator2_Integrator1_data<=Gain1.Gain1_output
+	  bag3.oscillator2_Integrator1_reset<=oscillator2_Const1.oscillator2_Const1_output
+	  bag3.oscillator2_Cos1_output=>bag2.oscillator2_Mpy_input=21_input#1 )
+
+merging bag3 and bag2
+result is bag3= { oscillator2_Integrator1 oscillator2_Cos1 oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 oscillator2_Mpy_input=21 }
+ports:	( bag3.oscillator2_Integrator1_data<=Gain1.Gain1_output
+	  bag3.oscillator2_Integrator1_reset<=oscillator2_Const1.oscillator2_Const1_output
+	  bag3.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag3.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag3.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag3.oscillator2_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#2 )
+
+merging oscillator2_Const1 and bag3
+result is bag3= { oscillator2_Integrator1 oscillator2_Cos1 oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 oscillator2_Mpy_input=21 oscillator2_Const1 }
+ports:	( bag3.oscillator2_Integrator1_data<=Gain1.Gain1_output
+	  bag3.oscillator1_Integrator1_data<=Gain2.Gain2_output
+	  bag3.oscillator1_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#1
+	  bag3.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input
+	  bag3.oscillator2_Mpy_input=21_input#2<=auto-fork-node1.auto-fork-node1_output#2 )
+
+merging Gain1 and TclScript_input=0_output=31
+result is bag4= { Gain1 TclScript_input=0_output=31 }
+ports:	( bag4.Gain1_output=>bag3.oscillator2_Integrator1_data
+	  bag4.TclScript_input=0_output=31_output#1=>auto-fork-node1.auto-fork-node1_input
+	  bag4.TclScript_input=0_output=31_output#2=>Gain2.Gain2_input )
+
+merging Gain2 and bag4
+result is bag4= { Gain1 TclScript_input=0_output=31 Gain2 }
+ports:	( bag4.Gain1_output=>bag3.oscillator2_Integrator1_data
+	  bag4.TclScript_input=0_output=31_output#1=>auto-fork-node1.auto-fork-node1_input
+	  bag4.Gain2_output=>bag3.oscillator1_Integrator1_data )
+
+merging auto-fork-node1 and bag4
+result is bag4= { Gain1 TclScript_input=0_output=31 Gain2 auto-fork-node1 }
+ports:	( bag4.Gain1_output=>bag3.oscillator2_Integrator1_data
+	  bag4.Gain2_output=>bag3.oscillator1_Integrator1_data
+	  bag4.auto-fork-node1_output#1=>bag3.oscillator1_Mpy_input=21_input#2
+	  bag4.auto-fork-node1_output#2=>bag3.oscillator2_Mpy_input=21_input#2 )
+
+merging bag4 and bag3
+result is bag4= { Gain1 TclScript_input=0_output=31 Gain2 auto-fork-node1 oscillator2_Integrator1 oscillator2_Cos1 oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 oscillator2_Mpy_input=21 oscillator2_Const1 }
+ports:	( bag4.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input )
+
+Starting fullSearchMerge
+After merge pass:
+TkMonoOut1
+ports:	( TkMonoOut1.TkMonoOut1_input<=bag4.Add_input=21_output )
+bag4= { Gain1 TclScript_input=0_output=31 Gain2 auto-fork-node1 oscillator2_Integrator1 oscillator2_Cos1 oscillator1_Integrator1 oscillator1_Cos1 oscillator1_Mpy_input=21 Add_input=21 oscillator1_Const1 oscillator2_Mpy_input=21 oscillator2_Const1 }
+ports:	( bag4.Add_input=21_output=>TkMonoOut1.TkMonoOut1_input )
+Starting loop pass
+looping TkMonoOut1 by 1 and bag4 by 250
+Uniform rate achieved: one extra merge pass now
+merging TkMonoOut1 and bag4
+result is bag5= { TkMonoOut1 250*bag4 }
+
+
+Starting fullSearchMerge
+After merge pass:
+bag5= { TkMonoOut1 250*bag4 }
+
+Looking for parallel loops
+Generate subschedules, propagate buffer sizes
+Schedule:
+{
+{ scheduler "Buck and Bhattacharyya's SDF Loop Scheduler" }
+{ repeat 250 {
+  { fire dtmf.TclScript.input=0.output=31 }
+  { fire dtmf.Gain2 }
+  { fire dtmf.auto-fork-node1 }
+  { fire dtmf.oscillator1.Const1 }
+  { fire dtmf.oscillator2.Const1 }
+  { fire dtmf.Gain1 }
+  { fire dtmf.oscillator2.Integrator1 }
+  { fire dtmf.oscillator2.Cos1 }
+  { fire dtmf.oscillator1.Integrator1 }
+  { fire dtmf.oscillator1.Cos1 }
+  { fire dtmf.oscillator1.Mpy.input=21 }
+  { fire dtmf.oscillator2.Mpy.input=21 }
+  { fire dtmf.Add.input=21 }
+} }
+{ fire dtmf.TkMonoOut1 }
+}

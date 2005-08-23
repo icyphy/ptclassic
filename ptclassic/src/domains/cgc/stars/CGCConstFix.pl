@@ -12,9 +12,9 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCConstFix.pl	1.2 01 Oct 1996 }
 	location { CGC main library }
-        explanation {
+	htmldoc {
 The "OutputPrecision" is specified using an "l.r" format, where
 "l" is the number of bits to the left of the decimal place
 (including the sign bit) and "r" is the number of bits to the

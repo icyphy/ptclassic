@@ -64,7 +64,7 @@ CGDIR = $(ROOT)/src/domains/cg/kernel
 INCL = -I$(SRCGCDIR) -I$(KERNDIR) -I$(CGDIR)
 
 # Library name
-LIB=libsrcgcstars.$(LIBSUFFIX)
+PTLIB=libsrcgcstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Sqrt } 
     desc { This star computes the square root of its input. }
-    version { $Id$ }
+    version { @(#)ACSSqrtFPCGC.pl	1.2 09/08/99 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

@@ -32,7 +32,7 @@ mxDestroyArray
 
 void*
 mxCalloc
-(unsigned int /*numelements*/, unsigned int /*size*/);
+(size_t /*numberOfElements*/, size_t /*size*/);
 
 void
 mxFree

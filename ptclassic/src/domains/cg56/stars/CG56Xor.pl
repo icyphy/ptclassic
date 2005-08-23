@@ -2,12 +2,17 @@ defstar {
 	name { Xor }
 	domain { CG56 }
 	desc { Exclusive or -- 2 inputs. }
-	version { $Id$ }
+	version { @(#)CG56Xor.pl	1.9 06 Oct 1996 }
 	author { Chih-Tsung Huang }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-This star outputs the bit-wise exclusive-or of input1 and input2.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+This star outputs the bitwise exclusive-or of <i>input1</i> and <i>input2</i>.
 	}
 	execTime {
 		return 4;
@@ -23,6 +28,9 @@ This star outputs the bit-wise exclusive-or of input1 and input2.
 	output {
 		name {output}
 		type {=input1}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (main) {
 ; read inputs --> x1,a1

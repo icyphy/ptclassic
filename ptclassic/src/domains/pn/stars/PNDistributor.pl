@@ -2,7 +2,7 @@ defstar
 {
     name { Distributor }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNDistributor.pl	1.4 3/2/95 }
     desc
     {
 Takes one input stream and splits it into N output streams, where N is
@@ -11,9 +11,8 @@ blockSize, and sends them to the first output.  It conumes another B
 input particles and sends them to the next output, etc.
     }
     author { T. M. Parks }
-    copyright
-    {
-Copyright (c) 1990-1994 The Regents of the University of California.
+    copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -55,6 +54,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	{
 	    PortHole& port = *nextPort++;
 	    input.receiveData();
+	    port.receiveData();
 	    for (int j = int(blockSize)-1; j >= 0; j--)
 		port%j = input%j;
 	    port.sendData();

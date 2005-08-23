@@ -2,22 +2,24 @@ defstar {
     name      { BanyanStg }
     domain    { SDF }
     desc      { 2 x 2 Banyan switching element with internal queueing }
-    version   {$Id$}
+    version   {@(#)SDFBanyanStg.pl	1.9	06 Oct 1996}
     author    { John Loh }
 
     copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-    location  { ATM demo library }
+    location  { SDF ATM library }
 
-    explanation {  
+	htmldoc {
 Accept two input packets, and route them to the proper
-output based on the information in the header packet. 
+output based on the information in the headers.
 The actual bit of the VPI being used for routing is based
-on the state "stage," set in SDFBanyanGal.  This star maintains
+on the state <i>stage</i> set in 
+<tt>SDFBanyanGal</tt>
+compiled galaxy.  This star maintains
 internal FIFO queues for each of the two input terminals.
 Note the special processing required due to null packets.
     }
@@ -72,22 +74,18 @@ Note the special processing required due to null packets.
     }
 
     constructor {
-      random = NULL;
+      random = 0;
     }
     
-    wrapup {
-      if (random) { LOG_DEL;  delete random; }
-    }
-
     destructor {
-      if (random) { LOG_DEL;  delete random; }
+      LOG_DEL; delete random;
     }
 
     setup {
-      if (random) { LOG_DEL;  delete random; }
-      LOG_NEW; random = new Uniform (0,1,gen);
+      LOG_DEL; delete random;
+      LOG_NEW; random = new Uniform(0,1,gen);
 
-      Envelope  dumEnv(*new VoiceData());
+      Envelope dumEnv(*new VoiceData());
       nEnv = dumEnv;
 
       queue1.initialize(int(capacity));
@@ -237,8 +235,6 @@ Note the special processing required due to null packets.
 
          }
 
-
     } // end go{}
 
 } // end defstar
-

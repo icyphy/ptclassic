@@ -2,21 +2,21 @@
 #define _SynthTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)SynthTarget.h	1.6 09/22/97
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,7 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
@@ -38,21 +40,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StructTarget.h"
-#include "VHDLStar.h"
-#include "VHDLCompDecl.h"
-#include "VHDLCompMap.h"
-#include "VHDLSignal.h"
-#include "VHDLArc.h"
-#include "VHDLState.h"
-#include "VHDLPortVar.h"
-#include "VHDLCluster.h"
-#include "VHDLFiring.h"
-#include "Attribute.h"
-#include "IntState.h"
 
 class SynthTarget : public StructTarget {
 public:
 	SynthTarget(const char* name, const char* starclass, const char* desc);
+
+	/*virtual*/ void setup();
+
 	/*virtual*/ Block* makeNew() const;
 
 	// Class identification.
@@ -69,11 +63,19 @@ public:
 
 protected:
 	// States.
-	IntState analyze;
 	IntState elaborate;
 	IntState compile;
-	IntState report;
-	
+	StringState precision;
+	const char* precSpec;
+
+	// Return the condition indicating if system clock generator is needed.
+	// For synthesis, we don't want a system clock.
+	/*virtual*/ int systemClock() { return FALSE; }
+
+	// Method called by comm stars to place important code into structure.
+        // For synthesis, we define it as null.
+	/*virtual*/ void registerComm(int, int, int, const char*) {};
+
 private:
 
 };

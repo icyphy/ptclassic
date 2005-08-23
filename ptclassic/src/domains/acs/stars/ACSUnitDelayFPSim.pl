@@ -4,10 +4,10 @@ defcore {
     coreCategory { FPSim }
     corona { UnitDelay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version { @(#)ACSUnitDelayFPSim.pl	1.3 09/08/99}
+    version{ @(#)ACSUnitDelayFPSim.pl	1.2 08/02/01 }
     author { Eric Pauer }
     copyright {
-Copyright (c) 1999, Sanders, a Lockheed Martin Company
+Copyright (c) 1999- Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

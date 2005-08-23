@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Fpga.h      1.0     06/16/99
+ Version: @(#)Fpga.h	1.6 08/02/01
 ***********************************************************************/
 #ifndef FPGA_H
 #define FPGA_H
@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>
 #include <stdlib.h>
 #include "ACSIntArray.h"
+#include "CoreList.h"
 #include "Pin.h"
 #include "Sequencer.h"
 #include "Port_Timing.h"
@@ -55,13 +56,24 @@ static const int MEMORY_NOTAVAILABLE=0;
 static const int FPGA_AVAILABLE=1;
 static const int FPGA_NOTAVAILABLE=0;
 
+// Prevent circular declarations
+class Sequencer;
+class CoreList;
+
 class Fpga
 {
  public:
+  static const int DEBUG_SEQUENCER=0;
+  static const int DEBUG_TIMING=0;
+
   static const int MAX_PARTNAME=80;
+
+  // Info
+  int fpga_id;  // It's acs_device designation
 
   // Design info
   char* root_filename;
+  char* io_filename;
 
   // Fpga target-usage
   int usage_state;
@@ -81,10 +93,11 @@ class Fpga
   StringArray* arch_bindlist;
 
   // Assigned components
-  SequentialList* child_cores;
+  CoreList* child_cores;
 
   // Memory interface members
   Sequencer* sequencer;
+  int completion_time;
   int mem_count;
   ACSIntArray* mem_connected;
   ACSIntArray* datain_signal_id;
@@ -103,18 +116,43 @@ class Fpga
   ACSIntArray* ifpga_enable_id;
   Port_Timing* ifpga_timing;
 
+  // Fpga-specific information for the sequencer
+  ACSIntArray* tmp_seqpins;
+
+  // Build information
+  int part_type;
+  StringArray* synthesis_libname;  // i.e., files not used in simulation
+  StringArray* synthesis_files;
+  StringArray* synthesis_path;
+  StringArray* preamble_files;
+  StringArray* preamble_path;
+  ACSIntArray* preamble_origin; // USER=1, DEFAULT_PATH=0
+  StringArray* postamble_files;
+  StringArray* postamble_path;
+  ACSIntArray* postamble_origin; // USER=1, DEFAULT_PATH=0
+
   
  public:
  Fpga::Fpga(void);
  Fpga::~Fpga(void);
+ void Fpga::set_acsdevice(const int);
+ int Fpga::retrieve_acsdevice(void);
  void Fpga::set_rootfilename(char*);
+ void Fpga::set_iofilename(char*);
  char* Fpga::retrieve_rootfilename(void);
  void Fpga::set_part(char*,
 		     char*,
 		     char*,
 		     char*,
 		     int);
- void Fpga::set_control_pins(void);
+ void Fpga::set_control_pins(const char*,
+			    const char*,
+			    const int,
+			    const int,
+                            const int);
+ void Fpga::set_synthesis_file(const char*, const char*, const char*);
+ void Fpga::set_preamble_file(const char*, const char*, const int);
+ void Fpga::set_postamble_file(const char*, const char*, const int);
  void Fpga::add_memory(const int);
  void Fpga::set_memory_pins(const int,
 			    char*, char*, const int,
@@ -129,11 +167,17 @@ class Fpga
 				   const char*, const int, const int, 
 				   const int);
   void Fpga::set_child(ACSCGFPGACore*);
-  SequentialList* Fpga::get_childcores_handle(void);
+  CoreList* Fpga::get_childcores_handle(void);
   int Fpga::test_route(const int);
   int Fpga::add_timing(const int,const int,const int);
   int Fpga::query_mode(const int);
   void Fpga::mode_dump(void);
+  int Fpga::query_memconnect(const int);
+
+  // Sequencing
+  void Fpga::set_completiontime(const int);
+  void Fpga::generate_sequencer(void);
+
   void Fpga::print_children(void);
   void Fpga::print_fpga(void);
 };

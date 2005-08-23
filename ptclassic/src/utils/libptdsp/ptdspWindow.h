@@ -1,5 +1,5 @@
-#ifndef _PTDSPWindow_h
-#define _PTDSPWindow_h 1
+#ifndef _ptdspWindow_h
+#define _ptdspWindow_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -28,24 +28,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Kennard White and Brian Evans
-Version: $Id$
+Version: @(#)ptdspWindow.h	1.4	7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DSP_WINDOW_TYPE_NULL			0
-#define DSP_WINDOW_TYPE_RECTANGLE		1
-#define DSP_WINDOW_TYPE_BARTLETT		2
-#define DSP_WINDOW_TYPE_HANNING			3
-#define DSP_WINDOW_TYPE_HAMMING			4
-#define DSP_WINDOW_TYPE_BLACKMAN		5
-#define DSP_WINDOW_TYPE_STEEPBLACKMAN		6
-#define DSP_WINDOW_TYPE_KAISER			7
+#define PTDSP_WINDOW_TYPE_NULL			0
+#define PTDSP_WINDOW_TYPE_RECTANGLE		1
+#define PTDSP_WINDOW_TYPE_BARTLETT		2
+#define PTDSP_WINDOW_TYPE_HANNING		3
+#define PTDSP_WINDOW_TYPE_HAMMING		4
+#define PTDSP_WINDOW_TYPE_BLACKMAN		5
+#define PTDSP_WINDOW_TYPE_STEEPBLACKMAN		6
+#define PTDSP_WINDOW_TYPE_KAISER		7
 
-extern int PTDSPWindowNumber(const char* windowstr);
-extern int PTDSPWindow(double* windowTaps, int length,
+extern int Ptdsp_WindowNumber(const char* windowstr);
+extern int Ptdsp_Window(double* windowTaps, int length,
 		       int windowNumber, double* parameters);
 
 #ifdef __cplusplus

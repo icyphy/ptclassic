@@ -4,23 +4,23 @@ defstar {
 	derivedFrom { TclScript }
 	desc {
 This star outputs the value 0.0 on all outputs unless the correspoding
-button is pushed.  When the button is pused, the output takes the value
+button is pushed.  When the button is pushed, the output takes the value
 given by the parameter "value".  If "synchronous" is YES, then outputs
-are produced only when some button is pushed.  I.e., the star waits for
-a button to be pushed before its go method returns.
+are produced only when some button is pushed.  That is, the star waits
+for a button to be pushed before its go method returns.
 If "allow_simultaneous_events" is yes, then buttons pushed are registered
 only when the button labeled "PUSH TO PRODUCE OUTPUTS" is pushed.
 Note that if "synchronous" is NO, this star is nondeterminate.
 	}
-	version { $Id$ }
+	version { @(#)SDFTkButtons.pl	1.6    4/27/96 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	hinclude { "ptk.h" }
 	defstate {
 	        name {label}
@@ -67,11 +67,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Need as many identifiers as outputs");
 		return;
 	    }
+	}
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkButtons.tcl";
 
-	    SDFTclScript::setup();
+	    SDFTclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

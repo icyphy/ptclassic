@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testSDFDSP.tcl	1.4 03/28/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -228,23 +228,325 @@ test SDFFIRFix { SDFFIRFix} {
 }}
 
 ######################################################################
-#### test SDFFFTCx
+#### test SDFFFTCx-1
 # 
-test SDFFFTCx { SDFFFTCx} {
+test SDFFFTCx-1 { SDFFFTCx} {
+    set star FFTCx
 
-} {}
+    reset __empty__
+    domain SDF
+    newuniverse ${star}Test SDF
+    target loop-SDF
 
+    sdfTestRampCx RectToCxA
+    set tmpfile [sdfSetupPrinter]
+    star "$star.a" $star
+
+    connect "$star.a" output Printa input
+    connect RectToCxA output "$star.a" input
+    setstate "$star.a" order 2
+    setstate "$star.a" size 4
+    run 16
+    wrapup
+    readTmpFile $tmpfile
+} {{(6.0,3.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(22.0,11.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(38.0,19.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(54.0,27.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(70.0,35.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(86.0,43.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(102.0,51.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(118.0,59.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(134.0,67.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(150.0,75.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(166.0,83.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(182.0,91.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(198.0,99.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(214.0,107.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(230.0,115.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+(246.0,123.0)	
+(-3.0,1.0)	
+(-2.0,-1.0)	
+(-1.0,-3.0)	
+}}
+
+
+######################################################################
+#### test SDFFFTCx-2
+# 
+test SDFFFTCx-2 { SDFFFTCx inverse} {
+    set star FFTCx
+
+    reset __empty__
+    domain SDF
+    newuniverse ${star}Test SDF
+    target loop-SDF
+
+    sdfTestRampCx RectToCxA
+    set tmpfile [sdfSetupPrinter]
+    star "$star.a" $star
+
+    connect "$star.a" output Printa input
+    connect RectToCxA output "$star.a" input
+    setstate "$star.a" order 2
+    setstate "$star.a" size 4
+    setstate "$star.a" direction -1
+    run 16
+    wrapup
+    readTmpFile $tmpfile
+} {{(1.5,0.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(5.5,2.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(9.5,4.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(13.5,6.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(17.5,8.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(21.5,10.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(25.5,12.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(29.5,14.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(33.5,16.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(37.5,18.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(41.5,20.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(45.5,22.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(49.5,24.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(53.5,26.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(57.5,28.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+(61.5,30.75)	
+(-0.25,-0.75)	
+(-0.5,-0.25)	
+(-0.75,0.25)	
+}}
+
+######################################################################
+#### test SDFFFTCx-3
+# 
+test SDFFFTCx-3 { Connect 2 SDFFFTCx together, one forward, on inverse } {
+    set star FFTCx
+
+    reset __empty__
+    domain SDF
+    newuniverse ${star}Test SDF
+    target loop-SDF
+
+    sdfTestRampCx RectToCxA
+    set tmpfile [sdfSetupPrinter]
+
+    star "$star.a" $star
+    star "$star.b" $star
+
+    connect "$star.b" output Printa input
+    connect "$star.a" output "$star.b" input
+    connect RectToCxA output "$star.a" input
+
+    setstate "$star.a" order 2
+    setstate "$star.a" size 4
+    setstate "$star.a" direction 1
+    setstate "$star.b" order 2
+    setstate "$star.b" size 4
+    setstate "$star.b" direction -1
+
+    run 8
+    wrapup
+    readTmpFile $tmpfile
+} {{(0.0,0.0)	
+(1.0,0.5)	
+(2.0,1.0)	
+(3.0,1.5)	
+(4.0,2.0)	
+(5.0,2.5)	
+(6.0,3.0)	
+(7.0,3.5)	
+(8.0,4.0)	
+(9.0,4.5)	
+(10.0,5.0)	
+(11.0,5.5)	
+(12.0,6.0)	
+(13.0,6.5)	
+(14.0,7.0)	
+(15.0,7.5)	
+(16.0,8.0)	
+(17.0,8.5)	
+(18.0,9.0)	
+(19.0,9.5)	
+(20.0,10.0)	
+(21.0,10.5)	
+(22.0,11.0)	
+(23.0,11.5)	
+(24.0,12.0)	
+(25.0,12.5)	
+(26.0,13.0)	
+(27.0,13.5)	
+(28.0,14.0)	
+(29.0,14.5)	
+(30.0,15.0)	
+(31.0,15.5)	
+}}
 
 ######################################################################
 #### test SDFIIRFix
 # 
 test SDFIIRFix { SDFIIRFix} {
+    puts "SDFIIRFix test: expect 4 of 48 fixed-point overflow warnings"
+    set star IIRFix
 
-} {}
+    reset __empty__
+    domain SDF
+    newuniverse ${star}Test SDF
+    target loop-SDF
+
+    star Rampa RampFix
+    setstate Rampa OutputPrecision 5.13
+    set tmpfile [sdfSetupPrinter]
+    star "$star.a" $star
+
+    connect "$star.a" signalOut Printa input
+    connect Rampa output "$star.a" signalIn
+    run 8
+    wrapup
+    readTmpFile $tmpfile
+} {{0.0	
+0.5	
+1.0	
+1.45001220703125	
+1.637451171875	
+1.6949462890625	
+1.699951171875	
+1.699951171875	
+}}
 
 ######################################################################
 #### test SDFLMSCx
 # 
 test SDFLMSCx { SDFLMSCx} {
+    set star LMSCx
 
-} {}
+    reset __empty__
+    domain SDF
+    newuniverse ${star}Test SDF
+    target loop-SDF
+
+    sdfTestRampCx RectToCxA
+    sdfTestRampCx RectToCxB
+    set tapfile [::tycho::tmpFileName LMSCx]
+    set tmpfile [sdfSetupPrinter]
+    star "$star.a" $star
+    connect  "$star.a" signalOut Printa input
+    connect RectToCxA output "$star.a" signalIn
+    connect RectToCxB output "$star.a" error
+    setstate "$star.a" saveTapsFile $tapfile
+    run 16
+    wrapup
+    list [readTmpFile $tmpfile] [readTmpFile $tapfile]
+} {{{(0.0,0.0)	
+(-0.040609,-0.0203045)	
+(-0.032846,-0.016423)	
+(0.428447,0.2142235)	
+(2.07889,1.039445)	
+(5.905983,2.9529915)	
+(13.286606,6.643303)	
+(26.340601,13.1703005)	
+(48.191487,24.0957435)	
+(83.042373,41.5211865)	
+(135.943259,67.9716295)	
+(212.744145,106.3720725)	
+(320.095031,160.0475155)	
+(465.445917,232.7229585)	
+(657.046803,328.5234015)	
+(903.947689,451.9738445)	
+}} {{(13.9594 ,0)
+(12.5109 ,0)
+(11.2285 ,0)
+(10.0016 ,0)
+(8.62665 ,0)
+(7.11603 ,0)
+(5.69837 ,0)
+(4.50939 ,0)
+}}}

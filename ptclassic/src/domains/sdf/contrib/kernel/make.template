@@ -1,7 +1,7 @@
 # Makefile for SDF contrib kernel to support SDF contrib stars
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.2	10/24/95
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,15 +52,15 @@ SRCS = Decoder.cc Encoder.cc Interp.cc Wireless.cc nb_fft.cc
 HDRS = Constants.h $(SRCS:.cc=.h)
 
 #Library name
-LIB=libContrib.$(LIBSUFFIX)
+PTLIB=libsdfcontrib.$(LIBSUFFIX)
 
 # Objects:
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

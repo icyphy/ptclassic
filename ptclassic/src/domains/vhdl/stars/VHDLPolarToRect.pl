@@ -2,10 +2,10 @@ defstar {
 	name { PolarToRect }
 	domain { VHDL }
 	desc { Convert magnitude and phase to rectangular form. }
-	version { $Id$ }
+	version { @(#)VHDLPolarToRect.pl	1.3 05/24/96 }
 	author { Michael C. Williamson }
 	copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,8 +70,8 @@ $temp(sin,float) := $temp(term11,float) - $temp(term12,float) +
   $temp(term13,float) - $temp(term14,float) + $temp(term15,float) -
   $temp(term16,float);
 
-$ref(x) := $ref(magnitude) * $temp(cos,float);
-$ref(y) := $ref(magnitude) * $temp(sin,float);
+$ref(x) $assign(x) $ref(magnitude) * $temp(cos,float);
+$ref(y) $assign(y) $ref(magnitude) * $temp(sin,float);
 	}
 	go {
 	  addCode(std);

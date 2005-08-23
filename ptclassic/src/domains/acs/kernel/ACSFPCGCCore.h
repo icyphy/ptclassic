@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 4/1/98
- Version: $Id$
+ Version: @(#)ACSFPCGCCore.h	1.3 09/08/99
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -51,6 +51,8 @@ public:
 	// ACSCore* makeNew( ACSCorona & ).
 	ACSFPCGCCore(ACSCorona & corona_) : ACSCGCCore(ACSFPCGCCategory) { }
 
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 };
 

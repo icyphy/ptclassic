@@ -1,12 +1,34 @@
 static const char file_id[] = "Sim56Target.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)Sim56Target.cc	1.21	7/30/96
 
- Copyright (c) 1992 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
- Programmer: J. Buck
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: J. Buck, J. Pino
 
  Target for Motorola 56000 assembly code generation that runs its
  output on the simulator.
@@ -18,169 +40,63 @@ $Id$
 #endif
 
 #include "Sim56Target.h"
-#include "UserOutput.h"
-#include "CG56Star.h"
 #include "KnownTarget.h"
-#include <ctype.h>
+#include "MotorolaTarget.h"
 
 Sim56Target :: Sim56Target(const char* nam, const char* desc,
-			 unsigned x_addr, unsigned x_len,
-			 unsigned y_addr, unsigned y_len) :
-	CG56Target(nam,desc,x_addr,x_len,y_addr,y_len), uname(0)
+			   const char* assocDomain) :
+MotorolaTarget(nam, desc, "CG56Star", assocDomain),
+CG56Target(nam, desc, assocDomain),
+MotorolaSimTarget(nam, desc, "CG56Star", assocDomain)
 {
 	initStates();
 }
 
-void Sim56Target :: initStates() {
-	addState(dirName.setState("dirName",this,"~/DSPcode",
-				  "directory for all output files"));
-	addState(plotFile.setState("plotFile",this,"",
-				   "file to plot with xgraph after run"));
-	addState(plotTitle.setState("plotTitle",this,"Simulator output",
-				    "graph title (if any)"));
-	addState(plotOptions.setState("plotOptions",this,"",
-				      "xgraph options"));
-}
-
-Sim56Target :: ~Sim56Target() {
-	LOG_DEL; delete dirFullName; dirFullName = 0;
-	LOG_DEL; delete uname;
-}
-
 Sim56Target::Sim56Target(const Sim56Target& arg) :
-	CG56Target(arg)
+	MotorolaTarget(arg),CG56Target(arg),MotorolaSimTarget(arg)
 {
 	initStates();
 	copyStates(arg);
 }
 
-static char* makeLower(const char* name) {
-	LOG_NEW; char* newp = new char[strlen(name)+1];
-	char *o = newp;
-	while (*name) {
-		char c = *name++;
-		if (isupper(c)) *o++ = tolower(c);
-		else *o++ = c;
-	}
-	*o = 0;
-	return newp;
+void Sim56Target :: initStates() {
+	MotorolaSimTarget::initStates("56000","48","ff0");
 }
 
-int Sim56Target :: setup (Galaxy& g) {
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(dirName);
-	cmds.initialize();
-	if (!CG56Target::setup(g)) return FALSE;
-	StringList lod = "!load ";
-	uname = makeLower(g.readName());
-	lod += uname;
-	lod += "\n";
-	addCode(lod);
-	return TRUE;
+int Sim56Target::compileCode() {
+	return MotorolaSimTarget::compileCode();
+}
+
+int Sim56Target::loadCode() {
+	return MotorolaSimTarget::loadCode();
+}
+
+int Sim56Target::runCode() {
+	return MotorolaSimTarget::runCode();
+}
+
+void Sim56Target::writeCode() {
+	MotorolaSimTarget::writeCode();
 }
 
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
-	const char* path = expandPathName("~ptolemy/lib/cg56");
-	StringList inc = "\tinclude '";
-	inc += path;
-	inc += "/intequlc.asm'\n\tinclude '";
-	inc += path;
-	inc += "/ioequlc.asm'\n";
-	addCode(inc);
-	addCode(
-		"	org	p:$48\n"
-		"START\n"
-		"	movep	#0,x:m_bcr\n\n");
+	MotorolaSimTarget :: headerCode();
+	myCode << "	movep	#$0000,x:m_bcr\n\n";
 };
 
-int Sim56Target :: genFile (StringList& stuff, const char* suffix) {
-	int status;
-	StringList bname = uname;
-	bname += suffix;
-	char* fullName = writeFileName(bname);
-	UserOutput o;
-	if (!o.fileName(fullName)) {
-		Error::abortRun(*this, "can't open file for writing: ",
-				fullName);
-		status = FALSE;
-	}
-	else {
-		o << stuff;
-		o.flush();
-		status = TRUE;
-	}
-	LOG_DEL; delete fullName;
-	return status;
-}
-
-Block* Sim56Target::clone() const {
+Block* Sim56Target::makeNew() const {
 	LOG_NEW; return new Sim56Target(*this);
 }
 
-void Sim56Target :: addCode(const char* code) {
-	if (code[0] == '!')
-		cmds += (code + 1);
-	else CGTarget::addCode(code);
-}
-
-void Sim56Target :: wrapup () {
-	addCode (
-		 "	jmp	$ff0\n"
-		 "ERROR	jmp	$ff0\n"
-		 "	org	p:$ff0\n"
-		 "	nop\n"
-		 "	stop\n");
-	addCode ("!break pc>=$ff0\n"
-		 "go $48\n");
-	inProgSection = TRUE;
-	StringList map = mem->printMemMap(";","");
-	addCode (map);
-	Target::wrapup();
-// put the stuff into the files.
-	if (!genFile(myCode, ".asm")) return;
-	if (!genFile(cmds, ".cmd")) return;
-// directive to change to the working directory
-	StringList cd = "cd "; cd += dirFullName; cd += ";";
-// execute the assembler
-	StringList ass = cd;
-	ass += "asm56000 -A -B -L ";
-	ass += uname;
-	if (system(ass) != 0) {
-		StringList listing = (const char*)dirName;
-		listing += "/";
-		listing += uname;
-		listing += ".list";
-		Error::abortRun(
-		"Errors in assembly: see assembler listing in file ",
-				listing, " for errors");
-		return;
-	}
-// execute the simulator
-	StringList ex = cd;
-	ex += "xterm -e sim56000 ";
-	ex += uname;
-	ex += ".cmd";
-	system (ex);
-// now plot the result if requested
-	const char* file = plotFile;
-	if (*file == 0) return;
-	StringList plot = cd;
-	plot += "awk '{print ++n, $1}' ";
-	plot += file;
-	plot += " | xgraph -t '";
-	plot += (const char*)plotTitle;
-	plot += "' ";
-	plot += (const char*)plotOptions;
-	plot += "&";
-	system (plot);
+void Sim56Target :: trailerCode () {
+	MotorolaSimTarget :: trailerCode();
+	CG56Target::trailerCode();
 }
 
 ISA_FUNC(Sim56Target,CG56Target);
 
 // make an instance
-static Sim56Target proto("sim-CG56","run code on the 56000 simulator",
-0,4096,0,4096);
+static Sim56Target proto("sim-CG56","run code on the 56000 simulator");
 
 static KnownTarget entry(proto, "sim-CG56");
-

@@ -2,9 +2,14 @@ defstar {
   name { MpyScalarInt_M }
   domain { SDF }
   desc { Multiply a integer input matrix by a scalar input gain value. }
-  version { $Id$ }
+  version { @(#)SDFMpyScalarInt_M.pl	1.3 10/6/95 }
   author { Bilung Lee }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
     name { input }

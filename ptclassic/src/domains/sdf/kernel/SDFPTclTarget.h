@@ -2,9 +2,9 @@
 #define _SDFPTclTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)SDFPTclTarget.h	1.9 9/2/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,18 +39,88 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+// Ptolemy kernel includes
+#include "Galaxy.h"
+#include "GalIter.h"
+#include "StringList.h"
+#include "StringState.h"
+
+// Ptolemy domain includes
 #include "SDFTarget.h"
+
+class StarProfile {
+public:
+    StarProfile() : star(0), time(0), iterations(0) {};
+
+    inline void addTime(double iterationTime) {
+	iterations++;
+	time += iterationTime;
+    }
+    
+    inline double avgTime() { return time*1000.0/double(iterations); }
+    
+    Star* star;
+private:
+    double time;
+    int iterations;
+};
+
+class StarProfiles {
+public:
+    StarProfiles() : starProfiles(0) {};
+
+    void set (Galaxy& gal){
+	delete [] starProfiles;
+	numProfiles = 0;
+	GalStarIter nextStar(gal);
+	Star* star;
+	while ((star = nextStar++) != NULL) numProfiles++;
+	starProfiles = new StarProfile[numProfiles];
+	nextStar.reset();
+	int i = 0;
+	while ((star = nextStar++) != NULL) starProfiles[i++].star = star;
+    }
+    
+    StarProfile* lookup(Star& star) {
+	int i = 0;
+	while (i < numProfiles && &star != starProfiles[i++].star);
+	i--;
+	if (&star == starProfiles[i].star) return &starProfiles[i];
+	return NULL;
+    }
+
+    ~StarProfiles() { delete [] starProfiles; }
+    
+private:
+    StarProfile* starProfiles;
+    int numProfiles;
+};
 
 class SDFPTclTarget : public SDFTarget {
 public:
-	void begin();
-	int run();
-	void wrapup ();
-	SDFPTclTarget(const char*, const char*);
-	Block* makeNew() const;
+    // Constructor
+    /*virtual*/ SDFPTclTarget(const char*, const char*);
+
+    /*virtual*/ int run();
+
+    /*virtual*/ void wrapup();
+
+    // Return a new copy of the target
+    /*virtual*/ Block* makeNew() const;
+
+    /*virtual*/ void writeFiring(Star&,int);
+
+    /*virtual*/ void setStopTime(double);
+
+    // Directory 
+    StringState destDirectory;
 
 protected:
-private:
-};
+    // Generate Ptcl code specifying the execution time estimates
+    StringList ptclExecTimeCode();
 
+private:
+    int numIters;
+    StarProfiles starProfiles;
+};
 #endif

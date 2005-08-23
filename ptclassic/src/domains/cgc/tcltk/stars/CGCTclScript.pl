@@ -5,16 +5,19 @@ defstar {
 Sends input values to a Tcl script.  Gets output values from a Tcl script.
 The star can communicate with Tcl either synchronously or asynchronously.
 	}
-	explanation {
-The star reads a file containing Tcl commands.  This file can bind Tk events
-to Tcl commands that affect the star.  In addition, it may define a procedure
-that will be called by Ptolemy that can execute Tcl code.
+	htmldoc {
+This star reads a file containing Tcl commands and communicates with Tcl
+via procedures defined in that file.  Those procedures can read the inputs
+to the star and set its outputs.
 It can be used in a huge
-variety of ways, all of which use three Tcl procedures to communicate
+variety of ways, including using Tk to animate or control a simulation.
+The Tcl file must define three Tcl procedures to communicate
 between the star and the Tcl code.  One of these reads the values of the
 inputs to the star (if any), another writes new values to the outputs (if
-any), and the third tells Tcl when to perform its functions.
-.pp
+any), and the third is called by Ptolemy either on every firing of
+the star (if <i>synchronous</i> is TRUE) or on starting the simulation
+(if <i>synchronous</i> is FALSE).
+<p>
 The names of the three procedures are different for each instance of this star.
 This allows sharing of Tcl code without name conflicts.
 These unique names are constructed by prepending a unique string to a
@@ -23,11 +26,11 @@ above are "setOutputs", "grabInputs", and "callTcl".
 The first thing the star does is to define the Tcl variable "uniqueSymbol"
 to equal the unique string.  This string specifies the prefix that makes
 the name unique.  Thus the full name for the three procedures
-is "${uniqueName}setOutputs", "${uniqueName}grabInputs", and
-"${uniqueName}callTcl".  The first two of these are defined internally
+is "${uniqueSymbol}setOutputs", "${uniqueSymbol}grabInputs", and
+"${uniqueSymbol}callTcl".  The first two of these are defined internally
 by the star.  The third should be defined by the user in the Tcl file
 that the star reads.
-.pp
+<p>
 Two basic mechanisms can be used to control the behavior of the star.
 In the first, X events are bound to Tcl/Tk commands that read or write
 data to the star.  These Tcl commands use
@@ -38,7 +41,7 @@ The argument list for ${uniqueSymbol}setOutputs should contain a
 floating point value for each output of the star.
 This mechanism is entirely asychronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
-.pp
+<p>
 In addition, the Tcl procedure ${uniqueSymbol}callTcl will be called
 by the star.  If the parameter "synchronous" is TRUE, this procedure
 will be called every time the star fires.
@@ -50,19 +53,28 @@ Tcl script "${uniqueSymbol}callTcl" is called only once during the
 initialization phase.  At that
 time, it can, for example,
 set up periodic calls to poll the inputs and set the outputs.
-.pp
+<p>
 If the procedure "${uniqueSymbol}callTcl" is not defined in the given
 tcl_file, an error message results.
+<p>
+Finally, this star can be used as a based class for other Tcl/Tk CGC
+stars.  In this manner, you can also have tcl/tk code which uses custom
+states.  The states are stored in a array named ${uniqueSymbol}
+indexed by the state name.  For example the tcl command:
+<p>
+set foo [set ${uniqueSymbol}(foo)]
+<p>
+will set the variable "foo" to the value of the state named "foo".
 	}
-	version { $Id$ }
-	author { E. A. Lee and D. Niehaus }
+	version { @(#)CGCTclScript.pl	1.25	12/08/97 }
+	author { E. A. Lee, D. Niehaus and J. L. Pino }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	outmulti {
 		name {output}
 		type {float}
@@ -87,7 +99,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {numOutputs}
 		type {int}
 		default {0}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_GLOBAL }
 	}
 	defstate {
 		name {numInputs}
@@ -102,41 +114,81 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	initCode {
-	    addCode(setup1,"tkSetup");
+	    addCode(setUniqueSymbol,"tkSetup");
+
+            // Export the environment variables
+            BlockStateIter nextState(*this);
+            State* state;
+            while ((state = nextState++) !=NULL ) {
+		// It would be good to be able to use the Tokenizer
+		// class here - but we can because it strips out " characters
+		// FIXME
+
+		// We escape $ with $$ and " with \".
+		// $ is escaped so that the expandMacro
+		// code will ignore embedded $ in state values.
+		// " is escaped so that we can embed the entire string
+	        // in "" in CGCTclScript::exportState
+
+                StringList currentValue;
+		currentValue = state->currentValue();
+		const char* p = currentValue;
+		StringList escapedCurrentValue;
+		while (*p) {
+		    if (*p == '\"') escapedCurrentValue << '\\';
+                    else if (*p == '$') escapedCurrentValue << '$';
+                    escapedCurrentValue << *p;
+                    p++;
+                }
+
+                addCode(exportState(state->name(),escapedCurrentValue),
+                        "tkSetup");
+            }
+
+            // Create setOutputs tcl command
+	    numOutputs = output.numberPorts();
+	    if (numOutputs > 0) {
+		addCode(declareSetOutputs,"tkSetup");
+		addCode(setOutputsDef, "procedure");
+	    }
+
+            // Create setInputs tcl command
+	    numInputs = input.numberPorts();
+	    if (numInputs > 0) {
+		addCode(declareGrabInputs,"tkSetup");
+		addCode(grabInputsDef, "procedure");
+	    }
+
+            // Source the specified shell script
 	    if(((const char*)tcl_file)[0] == '$') {
 	        addCode(sourceTclwEnv, "tkSetup");
 	    } else {
 	        addCode(sourceTclwoEnv, "tkSetup");
 	    }
-	    numOutputs = output.numberPorts();
-	    if (numOutputs > 0) {
-		addCode(setup2,"tkSetup");
-		addCode(setOutputsDef, "procedure");
-	    }
-	    numInputs = input.numberPorts();
-	    if (numInputs > 0) {
-		addCode(setup3,"tkSetup");
-		addCode(grabInputsDef, "procedure");
-	    }
+
 	    StringList out;
 	    if (int(numOutputs) > 0)
-	        out << "\tfloat $starSymbol(outs)[" << int(numOutputs) << "];\n";
+	        out << "\tfloat $starSymbol(outs)[" << int(numOutputs)
+                    << "];\n";
 	    if (int(numInputs) > 0)
 	        out << "\tfloat $starSymbol(ins)[" << int(numInputs) << "];\n";
 	    addGlobal((const char*) out);
 	    if(!int(synchronous)) {
+		addCode(setUniqueSymbol);
 		addCode(callTcl);
 	    }
 	}
 	go {
 	    StringList out;
-	    for (int i = 1; i <= input.numberPorts(); i++) {
+	    int i;
+	    for (i = 1; i <= input.numberPorts(); i++) {
 		temp = i;
 		out << "\t$starSymbol(ins)[" << i-1 << "] = $ref(input#temp);\n";
 	        addCode((const char*) out);
 		out.initialize();
 	    }
 	    if(int(synchronous)) {
+		addCode(setUniqueSymbol);
 		addCode(callTcl);
 	    }
 	    for (i = 1; i <= output.numberPorts(); i++) {
@@ -146,32 +198,36 @@ limitation of liability, and disclaimer of warranty provisions.
 		out.initialize();
 	    }
 	}
-	codeblock (setup1) {
-	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)", 0,
-		(char **) NULL) != TCL_OK)
+	codeblock (setUniqueSymbol) {
+	    if(Tcl_Eval(interp, "global uniqueSymbol; set uniqueSymbol $starSymbol(tkScript)")
+		!= TCL_OK)
 		errorReport("Error accessing tcl");
 	}
-	codeblock (setup2) {
+	codeblock (declareSetOutputs) {
 	    Tcl_CreateCommand(interp, "$starSymbol(tkScript)setOutputs",
 		$starSymbol(setOutputs), (ClientData) 0, NULL);
 	}
-	codeblock (setup3) {
+	codeblock (declareGrabInputs) {
 	    Tcl_CreateCommand(interp, "$starSymbol(tkScript)grabInputs",
 		$starSymbol(grabInputs), (ClientData) 0, NULL);
 	}
+        codeblock (exportState,"const char* name, const char* value") {
+	    if(Tcl_Eval(interp, 
+                "set $starSymbol(tkScript)(@name) {@value}") != TCL_OK)
+		errorReport("Cannot initialize state @name");
+	}
 	codeblock (sourceTclwEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVar \\$val(tcl_file)]", 0,
-		(char **) NULL) != TCL_OK)
-		errorReport("Cannot source tcl script for TkScript star");
+	    if(Tcl_Eval(interp, "source [expandEnvVars \\$val(tcl_file)]")
+		!= TCL_OK)
+		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (sourceTclwoEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVar $val(tcl_file)]", 0,
-		(char **) NULL) != TCL_OK)
-		errorReport("Cannot source tcl script for TkScript star");
+	    if(Tcl_Eval(interp, "source [expandEnvVars $val(tcl_file)]")
+		!= TCL_OK)
+		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (callTcl) {
-	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl",
-		0, (char **) NULL) != TCL_OK)
+	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl") != TCL_OK)
 		errorReport("Error invoking callTcl");
 	}
 
@@ -185,11 +241,10 @@ limitation of liability, and disclaimer of warranty provisions.
                 int argc;                           /* Number of arguments. */
                 char **argv;                        /* Argument strings. */
             {
-		float temp;
 		int i;
 		if(argc != $ref(numOutputs)+1) {
-                    errorReport("Invalid number of arguments");
-                    return TCL_ERROR;
+                    /* Ignore -- probably premature */
+                    return TCL_OK;
 		}
 		for(i=0; i<$ref(numOutputs); i++) {
                     if(sscanf(argv[i+1], "%f", &$starSymbol(outs)[i]) != 1) {
@@ -212,11 +267,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 char **argv;                        /* Argument strings. */
             {
 		/* FIX ME: Is 32 always enough? */
-		static char* temp[32];
+		static char temp[32];
 		int i;
-		for(i=0; i<$ref(numInputs); i++) {
-                    sprintf(temp, "%f", $ref(input)[i]);
-		    Tcl_AppendElement(interp,temp,0);
+		for(i=0; i<$val(numInputs); i++) {
+                    sprintf(temp, "%f", $starSymbol(ins)[i]);
+		    Tcl_AppendElement(interp,temp);
 		}
                 return TCL_OK;
             }

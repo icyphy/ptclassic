@@ -9,9 +9,14 @@ greater than all thresholds, the output is the N+1-th level.  If level is
 specified, there must be one more level than thresholds; the default
 value for level is 0, 1, 2, ... N.
 	}
-	version { $Id$ }
+	version { @(#)CGCQuant.pl	1.7	1/1/96 }
 	author { E. A. Lee and J. Buck }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	input {
 		name {input}
@@ -21,6 +26,7 @@ value for level is 0, 1, 2, ... N.
 		name {output}
 		type {float}
 	}
+	ccinclude { <math.h> }
 	defstate {
 		name { thresholds }
 		type { floatarray }
@@ -33,7 +39,7 @@ value for level is 0, 1, 2, ... N.
 		default {""}
 		desc { Output levels.  If empty, use 0, 1, 2, ...}
 	}
-	start {
+	setup {
 		int n = thresholds.size();
 		if (levels.size() == 0) {
 			// default: 0, 1, 2...
@@ -83,5 +89,9 @@ value for level is 0, 1, 2, ... N.
 	    st << ";\n";
 	    addCode((const char*)st);
 	    addCode (main);
+	}
+	exectime {
+		double x = log(thresholds.size()) / log(2.0);
+		return 8 + 5 * int(x-0.01);
 	}
 }

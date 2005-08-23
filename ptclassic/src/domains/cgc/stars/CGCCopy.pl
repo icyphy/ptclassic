@@ -1,11 +1,17 @@
 defstar {
 	name { Copy }
 	domain { CGC }
-	desc { copy input to output }
-	version { @(#)CGCCopy.pl	1.5	1/29/96 }
-	author { S. Ha }
+	desc {
+This star is required by the default target for the CGC domain which is
+implemented by the CGCTarget class.  The CGCTarget class files say that
+"'Copy' stars are added if an input/output PortHole is a host/embedded
+PortHole and the buffer size is greater than the number of Particles
+transferred."
+	}
+	version { @(#)CGCCopy.pl	1.4 04/05/97}
+	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -44,23 +50,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	}
 	codeblock (complexBody) {
-	int i = 0;
-	for ( ; i < $val(numSample); i++) {
+	int i;
+	for (i = 0; i < $val(numSample); i++) {
 		$ref(output, i).real = $ref(input, i).real;
 		$ref(output, i).imag = $ref(input, i).imag;
 	}
 	}
 	go {
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 			addCode(complexBody);
 		else
 			addCode(floatBody);
 	}
 	exectime {
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 			return 2 * int(numSample);
 		else
 			return int(numSample);
 	}
 }
-

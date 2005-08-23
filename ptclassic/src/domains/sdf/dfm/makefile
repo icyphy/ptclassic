@@ -1,11 +1,11 @@
 # Makefile for sdf/dsp
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.3	2/21/96
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
-# Instead run in from ~ptolemy/obj.$ARCH/domains/cg (through the symbolic
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/cg (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
@@ -13,5 +13,5 @@ include ../../../../mk/subdomain.mk
 
 DIRS = stars
 
-ME = sdf/dmm
+ME = sdf/dfm
 

@@ -1,45 +1,55 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer: S. Ha and E. A. Lee
-Date of creation: 9/29/90
-
- Randomly routes an input event to one of its outputs.
- Probability is equal for each output.
-
-************************************************************************/
-}
 defstar {
 	name {Router}
 	domain {DE}
 	desc {
-	   "Randomly routes an input event to one of its outputs."
-	   "Probability is equal for each output. Delay is zero."
+Randomly route an input event to one of its outputs.
+The probability is equal for each output. The time delay is zero.
 	}
+	version { @(#)DERouter.pl	2.13	6/20/95}
+	author { Soonhoi Ha and E. A. Lee}
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { DE main library }
 	input {
 		name{input}
 		type{ANYTYPE}
 	}
 	outmulti {
 		name{output}
-		type{ANYTYPE}
+		type{=input}
+	}
+	hinclude { <Uniform.h> }
+	ccinclude { <ACG.h> }
+	protected {
+		Uniform *random;
+	}
+// declare the extern random-number generator in the .cc file
+	code {
+		extern ACG* gen;
 	}
 	constructor {
-		input.inheritTypeFrom(output);
+		random = NULL;
 	}
+	destructor {
+		LOG_DEL; delete random;
+	}
+	setup {
+		LOG_DEL; delete random;
+		LOG_NEW; random = new Uniform(0,double(output.numberPorts()),gen);
+	}
+
 	go {
            completionTime = arrivalTime;
 	   // choose a output port randomly
-	   double p = drand48() * double(output.numberPorts()) + 1.0;
-	   output.reset();
-	   OutDEPort* pp;
+	   double p = (*random)();
+	   OutDEMPHIter nextp(output);
+	   OutDEPort* pp = nextp++;
 	   for (int i = int(p); i > 0 ; i--) {
-		pp = (OutDEPort*) &(output());
+		pp = nextp++;
 	   }
 
 	   // route the data to the chosen port

@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Buffer a line
 	}
-	version {@(#)ACSBuffer.pl	1.0	6 November 1998}
+	version{ @(#)ACSBufferCGFPGA.pl	1.12 08/02/01 }
 	author { K. Smith}
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -58,11 +58,18 @@ This star exists only for demoing the generic CG domain.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -80,34 +87,47 @@ This star exists only for demoing the generic CG domain.
 	    // Stitcher assignments
 	    ostrstream output_filename;
 	}
-	method {
-	    name {macro_query}
+ 	method {
+	    name {sg_cost}
 	    access {public}
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
-		return(NORMAL_STAR);
+		cost_file << "cost=0" << endl;
+
+		// numsim_file << "y=x;" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=x{k};" << endl;
+                numsim_file <<  " end " << endl;
+                numsim_file <<  " " << endl;
+
+		rangecalc_file << "orr=inputrange;" << endl;
+
+                // this is ok because buffer latency does not depend on wordlength
+                schedule_file << " vl1=veclengs(1); " << endl;
+                schedule_file << " racts1=[0 1 vl1-1 ; 0 1 vl1-1 ];" << endl;
+                schedule_file << " racts=cell(1,size(outsizes,2));" << endl;
+                schedule_file << " racts(:)=deal({racts1});" << endl;
+                schedule_file << " minlr=vl1*ones(1,size(outsizes,2)); " << endl;
+                schedule_file << " if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << " end " << endl;
+
+
 		// END-USER CODE
+
+		// Return happy condition
+		return(1);
 	    }
 	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
-	    }
-	}
-        method {
-	    name {sg_resources}
+       method {
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-
 		// Calculate BW
 		if (pins->query_preclock(1)==UNLOCKED)
 		    pins->set_precision(1,
@@ -115,12 +135,31 @@ This star exists only for demoing the generic CG domain.
 					pins->query_bitlen(0),
 					UNLOCKED);
 
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 		
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -195,7 +234,7 @@ This star exists only for demoing the generic CG domain.
 
 		ofstream out_fstr(output_filename.str());
 
-		constant_signals->add_pin("GND",0,1,STD_LOGIC);
+//		constant_signals->add_pin("GND",0,1,STD_LOGIC);
 
 		out_fstr << lang->gen_libraries(libs,incs);
 		out_fstr << lang->gen_entity(name(),pins);
@@ -218,33 +257,64 @@ This star exists only for demoing the generic CG domain.
 		if ((src_mbit==snk_mbit) &&
 		    (src_len==snk_len))
 		{
-		    out_fstr << lang->equals(pins->retrieve_pinname(1),
-					     pins->retrieve_pinname(0))
+		    out_fstr << lang->equals(pins->query_pinname(1),
+					     pins->query_pinname(0))
 			     << lang->end_statement << endl;
 		}
 		else
 		{
 		    if (src_len < snk_len)
 		    {
-			out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),
-							     src_len-1,0),
-						 pins->retrieve_pinname(0))
-			         << lang->end_statement << endl;
 			char* extend_name=new char[MAX_STR];
+			
+			if (bitslice_strategy==PRESERVE_LSB)
+			{
+			    ostrstream expression;
+			    if (src_len==1)
+				expression << pins->query_pinname(0) << ends;
+			    else
+				expression << lang->slice(pins->query_pinname(0),src_len-1) << ends;
+			    strcpy(extend_name,expression.str());
+
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
+								 src_len-1,0),
+						     pins->query_pinname(0))
+				     << lang->end_statement << endl;
+			    for (int extend_loop=src_len;extend_loop<=snk_len-1;extend_loop++)
+				out_fstr << lang->equals(lang->slice(pins->query_pinname(1),extend_loop),extend_name)
+				         << lang->end_statement << endl;
+			}
+			else
+			{
+			    strcpy(extend_name,"GND");
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
+								 snk_len-1,snk_len-src_len),
+						     pins->query_pinname(0))
+				     << lang->end_statement << endl;
+			    for (int extend_loop=snk_len-src_len-1;extend_loop>=0;extend_loop--)
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),extend_loop),extend_name)
+				     << lang->end_statement << endl;
+			}
+/*
+			out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
+							     src_len-1,0),
+						 pins->query_pinname(0))
+			         << lang->end_statement << endl;
 			if (sign_convention==UNSIGNED)
 			    strcpy(extend_name,"GND");
 			else
 			{
 			    ostrstream expression;
 			    if (src_len==1)
-				expression << pins->retrieve_pinname(0) << ends;
+				expression << pins->query_pinname(0) << ends;
 			    else
-				expression << lang->slice(pins->retrieve_pinname(0),src_len-1) << ends;
+				expression << lang->slice(pins->query_pinname(0),src_len-1) << ends;
 			    strcpy(extend_name,expression.str());
 			}
 			for (int extend_loop=src_len;extend_loop<=snk_len-1;extend_loop++)
-			    out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),extend_loop),extend_name)
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),extend_loop),extend_name)
 				     << lang->end_statement << endl;
+*/
 							
 			// Cleanup
 			delete []extend_name;
@@ -254,14 +324,14 @@ This star exists only for demoing the generic CG domain.
 			if (bitslice_strategy==PRESERVE_MSB)
 			{
 			    // Preserve MSB
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),src_len-1,src_len-snk_len));
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),src_len-1,src_len-snk_len));
 			}
 			else
 			{
 			    // Preseve LSB
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),snk_len-1,0));
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),snk_len-1,0));
 			}
 			out_fstr << lang->end_statement << endl;
 		    }
@@ -277,29 +347,29 @@ This star exists only for demoing the generic CG domain.
 			if (test_result & SRC_LARGER)
 			{
 			    // FIX:Ok for now, but what about dangles?
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),
 								 snk_mbit,
 								 snk_mbit-snk_len+1))
 				     << lang->end_statement << endl;
 			}
 			else
 			{
-			    out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
 								src_mbit,
 								src_mbit-src_len+1),
-						     pins->retrieve_pinname(0))
+						     pins->query_pinname(0))
 				     << lang->end_statement << endl;
 
 			    // Trailers?
 			    if ((src_mbit-src_len) > (snk_mbit-snk_len))
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 src_mbit-src_len,
 							 snk_mbit-snk_len+1,
 							 "GND");
 
 			    if (sign_convention==UNSIGNED)
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 snk_mbit,
 							 src_mbit+1,
 							 "GND");
@@ -307,11 +377,11 @@ This star exists only for demoing the generic CG domain.
 			    {
 				ostrstream expression;
 				if (src_len==1)
-				    expression << pins->retrieve_pinname(0) << ends;
+				    expression << pins->query_pinname(0) << ends;
 				else
-				    expression << lang->slice(pins->retrieve_pinname(0),src_len-1)
+				    expression << lang->slice(pins->query_pinname(0),src_len-1)
 					<< ends;
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 snk_mbit,
 							 src_mbit+1,
 							 expression.str());
@@ -339,6 +409,7 @@ This star exists only for demoing the generic CG domain.
 		
 		out_fstr << lang->end_scope << lang->end_statement << endl;
 		out_fstr.close();
+		printf("Core %s has been built\n",name());
 
 		// Return happy condition
 		return(1);

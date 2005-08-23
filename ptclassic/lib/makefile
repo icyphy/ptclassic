@@ -1,8 +1,8 @@
 # Makefile for Ptolemy lib dir (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.16 02/01/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,16 +31,38 @@ ROOT = ..
 VPATH = $(ROOT)/lib
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-MISC_FILES = CompileMake.template README gantt.me \
-	interpreter.help oct2ps.pro pigiDebugRpc pigiRpcConsole \
-	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.xdb \
-	pigiRpcShell \
+SCRIPT_SRCS = pigiDebugRpc pigiRpcConsole \
+	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.ddd pigiRpcDebug.xdb \
+	pigiRpcShell
+
+EXTRA_SRCS = $(SCRIPT_SRCS) \
+	CompileMake.template README \
+	oct2ps.pro \
 	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
 	vem.bindings.7-3 vem.bindings.8-0 vem.bindings.8-1
 
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+# Don't include xpole-1.4.6 here, as we don't ship it.
+
+MISC_FILES = 	bw_patterns \
+		cg56 cgc colors defaultContent \
+		mathematica matlab rename tcl tech technology vem
+LIBR = dummy
+
+# Do make sources so that we ensure that the subdirectories are checked out
+all: sources $(EXTRA_SRCS) $(MISC_FILES)
+	-chmod a+x $(SCRIPT_SRCS)
+
+install: all
+
+tech: colors
+	ln -s $^ $@
+
+technology: colors
+	ln -s $^ $@
+
+# We have an all rule, so include tycommon.mk.
+include $(ROOT)/mk/tycommon.mk

@@ -1,7 +1,7 @@
 # Makefile for stubs for Ptolemy interface to Matlab, libptmatlab
 # Version identification:
-# $Id$ 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.6	07/25/97
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -42,16 +42,16 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-# Build a non-shared libptolemy.a for faster startup time
-# It would be nice if we built both
-LIBNONSHARED=libptmatlab.a
+# We only link against libptmatlab if matlab cannot be found at link time.
+# See $PTOLEMY/mk/matlab.mk and $PTOLEMY/bin/matlabRootDir.
+PTLIB =	libptmatlab.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
-INCL=-I$(KERNDIR) $(MATLAB_INCSPEC)
+INCL =	-I$(KERNDIR) $(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) -I$(EXTTOOLSLIB)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
-CCS_WITH_H_FILES = MatlabIfcFuns.cc
+CCS_WITH_H_FILES = MatlabHook.cc
 
 # The complete list of .cc files used in the library
 SRCS = $(CCS_WITH_H_FILES)
@@ -61,12 +61,16 @@ SRCS = $(CCS_WITH_H_FILES)
 HDRS= $(CCS_WITH_H_FILES:.cc=.h)
 
 # Library objects
-OBJS=$(SRCS:.cc=.o)
+OBJS=$(SRCS:.cc=.o) $(MATLABEXT2_LIB)
 
-all:	makefile $(LIBNONSHARED)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIBNONSHARED)
+install:	makefile $(LIBDIR)/$(PTLIB)
+
+# matlab.mk and mathematica.mk check these vars before traversing the path
+NEED_MATLABDIR = 	1
+NEED_MATHEMATICADIR = 	1
 
 # Include common make definitions
 include $(ROOT)/mk/common.mk

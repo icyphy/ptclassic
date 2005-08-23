@@ -1,12 +1,17 @@
 defstar {
-	name { FixSum }
+	name { Add }
 	domain { CG56 }
 	desc { Add any number of inputs, producing an output. }
-	version { $Id$ }
+	version { @(#)CG56Add.pl	1.11  09/10/99 }
 	author { J. Buck }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
 The inputs are added and the result is written on the output.
 	}
 	inmulti {
@@ -22,6 +27,11 @@ The inputs are added and the result is written on the output.
 		type { int }
 		default { "YES" }
 		desc { If true, use saturation arithmetic }
+	}
+        // For sprintf()
+        ccinclude { <stdio.h> }
+	constructor {
+		noInternalState();
 	}
 	codeblock (std) {
 	move	$ref(input#1),x0	; 1st input -> x0
@@ -41,18 +51,18 @@ The inputs are added and the result is written on the output.
 	}
 	go {
 		if (input.numberPorts() == 1) {
-			gencode(one);
+			addCode(one);
 			return;
 		}
-		gencode(std);
+		addCode(std);
 		for (int i = 3; i <= input.numberPorts(); i++) {
 			char buf[80];
 			sprintf (buf, "\tadd\tx0,a\t$ref(input#%d),x0",i);
-			gencode(CodeBlock(buf));
+			addCode(CodeBlock(buf));
 		}
 		if (int(saturation))
-			gencode(sat);
-		else gencode(nosat);
+			addCode(sat);
+		else addCode(nosat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;

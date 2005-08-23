@@ -1,10 +1,21 @@
 defstar {
   name      { PackCx_M }
   domain    { SDF }
-  desc      { Takes complex inputs and produces ComplexMatrix messages. }
-  version   { $Id$ }
+  desc      { 
+Produces a matrix with complex value entries. The entries are
+read in from values in a sequence of complex valued particles
+in rasterized order, e.g. for a MxN matrix, the first row is 
+filled from left to right using the first N values from the 
+first N particles.
+  }
+  version   { @(#)SDFPackCx_M.pl	1.9 10/6/95 }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
 	name { input }
@@ -32,9 +43,8 @@ defstar {
   }
   go {
     // collect inputs and put into the matrix
-    ComplexMatrix *matrix = new ComplexMatrix(int(numRows),int(numCols),input);
-    Envelope pkt(*matrix);
-    output%0 << pkt;
+    ComplexMatrix& matrix = *(new ComplexMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 

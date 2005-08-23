@@ -1,28 +1,24 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  D. G. Messerschmitt
- Date of creation: 1/1/90
- Converted to preprocessor, and common AGC object used, by JTB 10/3/90
-
- Gaussian generates a sequence of IID pseudo-independent Gaussian
- variables represented as type FLOAT
-
- This Star uses the GNU library <Normal.h>
-
-**************************************************************************/
-}
 defstar {
 	name { IIDGaussian }
 	domain { SDF }
 	desc {
-		"Generates a white Gaussian pseudo-random process with mean\n"
-		"'mean' (default 0) and variance 'variance' (default 1)."
+Generate an identically independently distributed white Gaussian
+pseudo-random process with mean "mean" (default 0) and variance
+"variance" (default 1).
+	}
+	version {@(#)SDFIIDGaussian.pl	1.16 10/01/96}
+	author { D. G. Messerschmitt }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+This Star uses the GNU library &lt;Normal.h&gt;
+<a name="Gaussian noise"></a>
+<a name="noise, Gaussian"></a>
 	}
 	output {
 		name { output }
@@ -32,35 +28,35 @@ defstar {
 		name { mean }
 		type { float }
 		default { "0.0" }
-		desc { "mean of distribution" }
+		desc {  Mean of distribution. }
 	}
 	defstate {
 		name { variance }
 		type { float }
 		default { "1.0" }
-		desc { "variance of distribution" }
+		desc { Variance of distribution. }
 	}
-	hinclude { <ACG.h>, <Normal.h> }
+	hinclude { <Normal.h> }
+	ccinclude { <ACG.h> }
 	protected {
-		static ACG gen;
 		Normal *random;
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		ACG SDFIIDGaussian::gen(10,20);
+		extern ACG* gen;
 	}
 	constructor {
-		random = new Normal(mean,variance,&gen);
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		LOG_DEL; delete random;
 	}
-	start {
-		random->mean(double(mean));
-		random->variance(double(variance));
+	setup {
+		LOG_DEL; delete random;
+		LOG_NEW; random = new Normal(double(mean),double(variance),gen);
 	}
         go {
-		output%0 << (float)(*random)();
+		output%0 << (*random)();
 	}
 }
 

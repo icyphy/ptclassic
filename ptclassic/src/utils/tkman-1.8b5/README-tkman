@@ -1,0 +1,97 @@
+If you send me bug reports and/or suggestions for new features,
+include the versions of TkMan, Tcl, Tk, X, and UNIX, your machine and
+X window manager names, the edited Makefile, a copy of your ~/.tkman
+file, and the first few lines of the `tkman' executable.  Otherwise
+don't waste my time.
+
+
+*** INSTALLING ***
+
+TkMan 1.8 is based on Tcl 7.5 and Tk 4.1 and will not work with
+earlier versions.  Tcl and Tk are available for anonymous ftp from
+ftp.smli.com.  TkMan expects a UNIX-like man page directory structure.
+
+Be sure to read through the Makefile as there are pieces throughout
+the top half of it that you may wish or need to customize for your
+site.  Set BINDIR in the Makefile to where you keep your binaries
+(tkman goes here), and MANDIR to the directory where the TkMan's
+manual page should be copied.  After properly editing the Makefile,
+type `make install'.  Thereafter type `tkman' to invoke TkMan (perhaps
+after a `rehash').
+
+
+SUN SOLARIS, SGI IRIX, SCO, IBM AIX
+These systems store manual pages in nonstandard ways.  Each of
+Solaris, SGI IRIX and SCO requires a special bindings file found in
+the contrib directory.  TkMan automatically installs the appropriate
+binding file for new users (those without a ~/.tkman startup file);
+otherwise one can manually integrate the bindings into an existing
+startup file.  Random System V based OS'es should follow the example
+for SGI.  IBM AIX'ers should convert InfoExplorer format man pages to
+the standard /usr/man/cat* format using the procedure described in
+section 7 of the document /usr/lpp/bos/bsdadm.  N.B. TkMan will find
+these new cat directories automatically **so long as there is no man
+directory with the same number***.  For example, if you convert some
+InfoExplorer pages into /usr/man/cat1 and have a directory
+/usr/man/man1 for source for other manual pages, the converted ones in
+/usr/man/cat1 won't be seen.  I recommend comverting all the
+InfoExplorer pages into their own hierarchy that includes only cat*
+directories.
+
+
+THE PROBLEM OF "STRAY CATS"
+
+TkMan steps through the user's MANPATH collecting directories matching
+the patterns man* and cat*.  If there is a cat directory with the same
+number as a man directory, the cat directory is thrown out, with the
+reasoning that the cat directory simply has cached formatted versions
+of pages in the corresponding man directory.  If there is no such man
+directory, the cat version is kept, a feature which supports flavors
+of UNIX that ship only formatted pages in "cat-only" directories.
+Manual pages found in a cat directory but not in the corresponding man
+directory (that is, a corresponding man directory exists but doesn't
+have the man page) are known as "stray cats".  Unless you take action,
+names of stray cats are not included in the database.  If there are
+just a few, you can create source for these pages for RosettaMan.  If
+there are entire directories, you can use tkmandesc commands to
+specifically add these directories.
+
+
+--------------------------------------------------
+
+Be sure to look in the contrib directory for lots of good stuff.
+
+--------------------------------------------------
+
+
+*** TkMan Q&A ***
+
+
+Q: XXX man page doesn't format properly.  
+A: RosettaMan (rman) formats an nroff-formatted man page (always
+parsing the troff version would take much too long), reformatting it
+for Tk as follows:
+
+	strip headers, footers
+	show bullets, italics, boldface
+	parse section and subsection headers
+	parse SEE ALSO for links
+	relocate change bars
+	auto small caps
+        mark references to other man pages
+
+And, on certain systems:
+
+	Ultrix - upper and lower case section headers, odd and even page
+	   variations, interspersed tabs
+	Solaris - bold italics
+
+If the man page isn't formatted properly, then try reformatting it with
+more-standard -man macros.  If you see this problem on an entire class of
+man pages, package up a source version from .../man/manXXX and uuencode a
+formatted version from .../man/catXXX and e-mail them to me.
+
+
+Q: I installed a new version of TkMan, but a feature advertised as fixed
+is still broken.
+A: You may be overwriting fixed code or variables with your ~/.tkman.

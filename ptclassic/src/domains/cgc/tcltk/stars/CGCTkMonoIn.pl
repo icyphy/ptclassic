@@ -7,11 +7,11 @@ defstar
 Just like MonoIn, except that a Tk slider is put in the master
 control panel to control the volume.
     }
-    version { $Id$ }
+    version { @(#)CGCTkMonoIn.pl	1.4 04/08/97 }
     author { Sunil Bhave }
     location { CGC Tcl/Tk library }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -39,11 +39,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".high", "$starSymbol(scale1)",
 			   "$val(volume)");
       }
+    }
 
-      /* Test code for the new custom control panels */
-      connectControl("$val(starName)",
-		     "attenuate",
-		     $starSymbol(setVolume));
+    codeblock (tychoSetup) {
+	/* Call tycho to connect a control to the volume parameter */
+	connectControl(moduleName, "$val(starName)", "volume",
+		$starSymbol(setVolume));
     }
 
     codeblock (setVolumeDef) {
@@ -74,6 +75,7 @@ limitation of liability, and disclaimer of warranty provisions.
     initCode {
 	CGCMonoIn :: initCode();
 	addCode(tkSetup, "tkSetup");
+	addCode(tychoSetup, "tychoSetup");
         addCode(setVolumeDef, "procedure");
     }
 }

@@ -7,9 +7,9 @@
 
 /*******************************************************************
  SCCS Version identification :
- $Id$
+ @(#)HierCluster.h	1.4	11/28/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,25 +43,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class HierCluster : public Cluster {
 public:
-    HierCluster(Star&);
-    HierCluster(Cluster&);
-    HierCluster(Galaxy&);
 
-    /*virtual*/ int absorb(Block&);    
-    /*virtual*/ int merge(Cluster&);
-    /*virtual*/ int flatten();
+    HierCluster():Cluster(), repetitions(0), execTime(0) {};
+
+    /*virtual*/ Block* makeNew() const { return new HierCluster; }
+    
+    /*virtual*/ int absorb(Cluster&, int=TRUE);    
+    /*virtual*/ int merge(Cluster&, int=TRUE);
+    /*virtual*/ int flatten(Galaxy* = NULL, int = TRUE);
+
+    /*virtual*/ int flattenTest(Galaxy&);
+
+    /*virtual*/ Cluster* convertGalaxy(Galaxy&);
+    /*virtual*/ Cluster* convertStar(Star&);
 
     // The number of repetitions of the cluster in a periodic
     // schedule.  Initialized to 0 by the constructors.  Set to correct
     // value by clustering.
     int repetitions;
 
+    int execTime;
 private:
-    void adjustRepetitions(Block& /*blockToMerge*/);
+    void adjustRepetitions(HierCluster& /*clusterToMerge*/);
     int adjustRepetitions(int /*newRepetitionCount*/);
 };
-
-int wellOrderCluster(Galaxy&);
 
 #endif
 

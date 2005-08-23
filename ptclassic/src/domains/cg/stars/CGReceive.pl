@@ -6,21 +6,22 @@ defstar {
 Generates conditional code, depending on the value of
 the Boolean state "control".
 	}
-	version { $Id$ }
+	version { @(#)CGReceive.pl	1.8	01 Oct 1996 }
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG demo library }
-	explanation {
+	htmldoc {
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}
 	private {
 		int orgProc;
 		int destProc;
-	}
-	input {
-		name {input}
-		type {FLOAT}
 	}
 	output {
 		name {output}
@@ -42,7 +43,7 @@ It outputs lines of comments, instead of code.
 // CGReceive Block
 	}
 	go {
-		gencode(block);
+		addCode(block);
 		StringList out;
 		out += "// ";
 		out += "From processor ";

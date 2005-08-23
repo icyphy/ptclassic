@@ -1,28 +1,37 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/8/90
-
- It is a general resettable up/down counter with demand input.
- Since it is most general form of a counter, we may connect a Null star
- to unused ports to get a simplified version of Counter.  
-
-**************************************************************************/
-}
 defstar {
 	name { UDCounter }
 	domain { DE }
-	desc {	"In(De)crease the content on each countUp(Down) input.\n"
-		"When the reset input comes, reset the content.\n"
-		"Output is generated on each demand input.\n"
-		"When demand and reset arrives at the same time,\n"
-		"output first and reset the content.\n"
+	desc {
+This is an up/down counter.  The processing order of the ports is:
+countUp -&gt; countDown -&gt; demand -&gt; reset.  Specifically, all
+simultaneous "countUp" inputs are processed.  Then all simultaneous
+"countDown" inputs are processed.  If there are multiple simultaneous
+"demand" inputs, all but the first are ignored.  Only one output will
+be produced.
+	}
+	version { @(#)DEUDCounter.pl	1.14	10/07/96 }
+	author { Soonhoi Ha }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { DE main library }
+	htmldoc {
+Upon receiving a "countUp" or "countDown" input, an internal counter is
+incremented or decremented.
+When a "reset" input is received, the count is reset to "resetValue".
+A "count" output is generated when a "demand" input is received.
+When "demand" and "reset" particles arrive at the same time,
+the output is generated before the count is reset.
+The "countUp(or Down)" input is processed before the "demand" input,
+so if there are identical time stamps on these inputs, the increment
+and/or decrement will occur before the output is produced.
+If successive inputs arrive with the same time stamp on any input path,
+they are all processed.
+Special cases, such as an up only counter, can be realized by connecting
+a Null star to the unneeded inputs.
 	}
 	input {
 		name { countUp }
@@ -39,6 +48,7 @@ defstar {
 	input {
 		name { demand }
 		type { anytype }
+		desc { Stimulate an output. }
 	}
 	output {
 		name { output }
@@ -48,33 +58,48 @@ defstar {
 		name { resetValue }
 		type { int }
 		default { "0" }
-		desc { "initial value for the content" }
+		desc {  Initial value for the counter. }
 	}
 	private {
 		int content;
 	}
-	start {
+	constructor {
+		countUp.triggers();
+		countDown.triggers();
+		reset.triggers();
+
+		// The following statements hint to the scheduler that
+		// if given a choice, stars feeding data to the countUp,
+		// countDown, and reset inputs should fire before stars
+		// feeding data to the demand input.
+		countUp.before(demand);
+		countDown.before(demand);
+		reset.before(demand);
+	}
+	setup {
 		content = int(resetValue);
 	}
 	go {
 		completionTime = arrivalTime;
 
 		// check the countUp/Down input to change the content.
-		if (countUp.dataNew) {
-			countUp.dataNew = FALSE;
+		while (countUp.dataNew) {
 			content++;
+			countUp.getSimulEvent();
 		}
-		if (countDown.dataNew) {
-			countDown.dataNew = FALSE;
+		while (countDown.dataNew) {
 			content--;
+			countDown.getSimulEvent();
 		}
 		if (demand.dataNew) {
-			demand.dataNew = FALSE;
 			output.put(completionTime) << content;
 		}
-		if (reset.dataNew) {
-			reset.dataNew = FALSE;
+		// swallow all demand inputs
+		while (demand.dataNew) demand.getSimulEvent();
+
+		while (reset.dataNew) {
 			content = int(resetValue);
+			reset.getSimulEvent();
 		}
 	}
 }

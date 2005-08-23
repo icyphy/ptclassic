@@ -1,6 +1,6 @@
 /* 
 Version Identification:
-$Id$
+@(#)MutableCQScheduler.cc	1.4 03/18/98
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
@@ -125,7 +125,7 @@ int MutableCQScheduler :: run () {
 		eventQ.pushBack(f);		// push back
 		// set currentTime = next event time.
 		currentTime = stopTime/relTimeScale;
-		stopBeforeDeadFlag = TRUE;  // there is extra events.
+		stopBeforeDeadFlag = TRUE;  // there are extra events.
 		return TRUE;
 	// If the event time is less than the global clock,
 	// it is an error...
@@ -258,6 +258,51 @@ return TRUE;
 ////////////////////////////
 // Miscellanies
 ////////////////////////////
+
+/* 
+Resort events according to new fine levels. The resorted
+events end up in eventQ (though during this process they will
+temporarily be stored in resortQ.
+ */
+void MutableCQScheduler::resortEvents() {
+	int allowResizing = 0;
+	MutableCQEventQueue resortQ;
+
+	if( eventQ.cq_eventNum == 0 ) {
+	    return;
+	} 
+        if( eventQ.isResizeEnabled() == 1 ) {
+            allowResizing = 1;
+            eventQ.DisableResize();
+        }
+
+	resortQ.initialize();
+        resortQ.LocalInit( 0, eventQ.cq_bucketNum,
+                        eventQ.cq_interval, eventQ.cq_lastTime );
+        resortQ. DisableResize();
+
+        while( eventQ.cq_eventNum > 0 ) {
+            CqLevelLink *cqLevelLink = eventQ.get();
+
+            // If the destination porthole is a DEPortHole, we need
+            // to update the fineLevel of this event.
+            if( ((Event *)(cqLevelLink->e))->dest->isA("DEPortHole") ) {
+                cqLevelLink->fineLevel =
+                    ((DEPortHole *)((Event *)(cqLevelLink->e))->dest)->depth;
+            }
+
+            resortQ.InsertCqLevelLink( cqLevelLink );
+        }
+        while( resortQ.cq_eventNum > 0 ) {
+            CqLevelLink *cqLevelLink = resortQ.get();
+            eventQ.InsertCqLevelLink( cqLevelLink );
+        }
+
+        if( allowResizing == 1 ) {
+            eventQ.EnableResize();
+        }
+}
+
 
 // fetch an event on request.
 int MutableCQScheduler :: fetchEvent(InDEPort* p, double timeVal) 

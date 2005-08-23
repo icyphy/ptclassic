@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -23,49 +23,106 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# This file defines several math and list functions useful in specifying
-# state and parameter values for ptcl, pigi, and tycho.  The functions
-# help avoid the use of global variables.  For example, the Tcl code
-# to compute the filter taps for an FIR filter whose impulse response of
-# a sinusoidal function is
+# This file defines a set of generic math and list functions in Tcl.
+# This file can be used by itself.
+#
+# As a part of ptcl, pigi, and tycho, these routines are useful in
+# specifying state and parameter values.  The functions avoid using
+# global variables.  For example, the Tcl code to compute the filter
+# taps for an FIR filter whose impulse response is a sampled sinusoidal
+# function specified as
 #
 # set taps {}
-# for {set i 1} {$i <= {NumFilterTaps}} {incr i} {
-#   lappend taps [expr cos(2*{PI}*($i-1)/{NumFilterTaps})]
+# for {set i 1} {$i <= 100} {incr i} {
+#   lappend taps [expr cos(2*{PI}*($i-1)/100)]
 # }
 # join $taps
 #
 # becomes
 #
-# rangeapplyexpr {cos(2*{PI}*($i-1)/{NumFilterTaps})} 1 {NumFilterTaps}
+# rangeApplyExpression {cos(2*{PI}*($i-1)/100)} 1 100
+#
+# Here, PI is a parameter of the Ptolemy system which is substituted
+# before the Tcl command is passed to the Tcl interpreter.
 #
 # Author: Brian L. Evans
-# $Id$
+# @(#)mathexpr.tcl	1.13	01/22/97
 
+# If add_to_help has not been defined as a procedure, then define a dummy one
+#
+# FIXME: Need to consolidate ptcl help functionality and Tycho
+# automatic documentation generation.
+#
 if { [info commands add_to_help] == "" } {
   proc add_to_help {cmd argl desc} {}
 }
 
-# Function: listapplyexpr
-
-add_to_help listapplyexpr {<tclexpr> <list>} {
+#######################################################################
+#### listApplyExpression
+#
+add_to_help listApplyExpression {<tclexpr> <list>} {
 Produces a new list by applying each item in list to the tclexpr
-by substituting for the variable i in tclexpr.
+by substituting for the variable i in tclexpr.  The tclexpr should
+be in an unevaluated form, e.g. { cos($i) }.
 }
-
-proc listapplyexpr {tclexpr thelist} {
+#
+proc listApplyExpression {tclexpr thelist} {
   foreach i $thelist {
     lappend newlist [expr $tclexpr]
   }
   return $newlist
 }
 
-# Function: max
+#######################################################################
+#### makeOrderedPairs
+#
+add_to_help makeOrderedPairs {<x-values> ?<y-values>?} {
+Converts two lists, <x-values> and <y-values>, into ordered pairs; e.g.,
+makeOrderedPairs "1 2 3" "3 2 1" returns "(1,3) (2,2) (3,1)".
+If <y-values> is omitted, then <x-values> is returned.  This procedure
+returns a string.
+}
+#
+proc makeOrderedPairs {args} {
+  set numargs [llength $args]
+  if { $numargs == 2 } {
+    set xvector [lindex $args 0]
+    set yvector [lindex $args 1]
+  } elseif { $numargs == 1 } {
+    return [join $args]
+  } else {
+    set usagestr "makeOrderedPairs <x-values> ?y-values?"
+    error "wrong # arguments: should be \"$usagestr\""
+    return -code error
+  }
 
-add_to_help max {<x1> <x2> ...} {
-Computes the maximum of the arguments according to the > operator.
+  # Both x and y values were specified
+  # Convert into ordered pairs: (x1, y1) (x2, y2) ...
+  set numx [llength $xvector]
+  set numy [llength $yvector]
+  if { $numx == $numy } {
+    set orderedpairs ""
+    for {set i 0} {$i < $numx} {incr i} {
+      set xvalue [lindex $xvector $i]
+      set yvalue [lindex $yvector $i]
+      lappend orderedpairs "($xvalue,$yvalue)"
+    }
+    return [join $orderedpairs]
+  } else {
+    set errmsg "# of x-values ($numx) different from # of y-values ($numy)"
+    error "makeOrderedPairs: $errmsg"
+    return -code error
+  }
 }
 
+#######################################################################
+#### max
+#
+add_to_help max {<x1> <x2> ...} {
+Computes the maximum of the arguments according to the > operator,
+which also compares strings.
+}
+#
 proc max {a args} {
   set maxvalue $a
   foreach i $args {
@@ -76,13 +133,15 @@ proc max {a args} {
   return $maxvalue
 }
 
-# Function: min
 
+#######################################################################
+#### min
+#
 add_to_help min {<x1> <x2> ...} {
 Computes the minimum of the arguments according to the < operator,
 which also compares strings.
 }
-
+#
 proc min {a args} {
   set minvalue $a
   foreach i $args {
@@ -93,54 +152,59 @@ proc min {a args} {
   return $minvalue
 }
 
-# Function: range
 
+#######################################################################
+#### range
+#
 add_to_help range {<min> <max> ?<increment>?} {
 Produces an ordered list of numbers running from min to max at increments
 of increment.  If the sequence of numbers will never reach max, then
-the routine will report an error and return an empty list.
+the routine will return an empty list.
 }
-
+#
 proc range {minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
       lappend rangelist $i
     }
   } else {
-    error "improper specification for range: $minindex to $maxindex step $inc"
     set rangelist {}
   }
   return $rangelist
 }
 
-# Function: rangeapplyexpr
 
-add_to_help rangeapplyexpr {<tclexpr> <min> <max> ?<increment>?} {
-Evaluate tclexpr for values of i running from min to max at increments
+#######################################################################
+#### rangeApplyExpression
+#
+add_to_help rangeApplyExpression {<tclexpr> <min> <max> ?<increment>?} {
+Evaluate tclexpr at values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
-reach max, then the routine will report an error and return an empty list.
+reach max, then the routine will return an empty list.  The tclexpr should
+be in an unevaluated form, e.g. { cos($i) }. 
 }
-
-proc rangeapplyexpr {tclexpr minindex maxindex {inc 1}} {
+#
+proc rangeApplyExpression {tclexpr minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
       lappend rangelist [expr $tclexpr]
     }
   } else {
-    error "improper specification for range: $minindex to $maxindex step $inc"
     set rangelist {}
   }
   return $rangelist
 }
 
-# Function: sign
 
+#######################################################################
+#### sign
+#
 add_to_help sign {<x>} {
 Returns 1 if x > 0, -1 if x < 0, and 0 otherwise.
 The comparison is based on the Tcl operators < and >, which also
 compare strings.
 }
-
+#
 proc sign {x} {
   if { $x < 0 } {
     set signum -1

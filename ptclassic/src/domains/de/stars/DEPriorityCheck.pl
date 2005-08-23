@@ -1,7 +1,13 @@
 defstar{
 	name		{ PriorityCheck }
 	domain		{ DE }
-	version		{ $Id$ }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	version		{ @(#)DEPriorityCheck.pl	1.6 3/2/95 }
 	author		{ Paul Haskell }
 	location	{ DE main library }
 	desc {
@@ -9,7 +15,7 @@ This star reads in input "NetworkCell" packets
 from multiple input sources. If the priority of an input NetworkCell
 is less than the most recent "priority" input, then the cell is
 sent to the "discard" output. Otherwise it is sent to the "output"
-output.
+port.
 	}
 
 	input {		name { input }		type { message } }
@@ -20,7 +26,7 @@ output.
 	ccinclude { "NetworkCell.h" }
 
 	constructor {
-		priority.before(input);
+		input.before(priority);
 		priority.triggers();
 		input.triggers(output);
 		input.triggers(discard);

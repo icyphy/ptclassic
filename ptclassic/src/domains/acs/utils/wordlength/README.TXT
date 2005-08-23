@@ -150,7 +150,7 @@
 % Selection: The user enters the design number to select into this edit box.
 %       The selection is hilighted in the cost/variance plot window.
 %       The user may reenter this parameters as many times as desired.
-% $Id$
+% @(#)README.TXT	1.1 09/08/99
 % Generate: The design last selected by the user is generated. 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

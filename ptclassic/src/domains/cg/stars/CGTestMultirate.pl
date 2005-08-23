@@ -7,7 +7,7 @@ This star consumes and produces any fixed number of tokens
 on any number of inputs and outputs.  The output value is always
 zero.  IT IS INTENDED FOR TESTING SCHEDULERS ONLY.
 	}
-	version { $Id$ }
+	version { @(#)CGTestMultirate.pl	1.1	4/19/96 }
 	author { Praveen Murthy, based on SDFTestMultirate.pl}
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

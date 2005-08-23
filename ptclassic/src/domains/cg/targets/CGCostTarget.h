@@ -1,10 +1,5 @@
-#ifndef _CGCostTarget_h
-#define _CGCostTarget_h 1
 /**********************************************************************
-Version identification:
- $Id$
-
-Copyright (c) %Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,60 +21,85 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-                                                PT_COPYRIGHT_VERSION_2
-                                                COPYRIGHTENDKEY
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
- Programmer:  Raza Ahmed
- Date of creation: 07/09/96
-
- Target for the generation of cost of individual stars in the galaxy.
+ Programmer:  Raza Ahmed and Brian L. Evans
+ Created:     07/09/96
+ Version:     @(#)CGCostTarget.h	1.9 04/07/97
 
 ***********************************************************************/
+#ifndef _CGCostTarget_h
+#define _CGCostTarget_h 1
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "StringList.h"
-#include "StringState.h"
-#include "IntState.h"
-#include "GalIter.h"
-#include "SDFScheduler.h"
+#include "StringArrayState.h"
+
+#include "Block.h"
+#include "Galaxy.h"
+
 #include "CGTarget.h"
 
-class CGCostTarget : public CGTarget, public Galaxy {
-public:
-        // constructor
-        CGCostTarget(const char* nam, const char* startypt, const char* desc);
+class SDFPtclTarget;
 
-        /*virtual*/ Block* makeNew() const ;
+class CGCostTarget : public CGTarget {
+public:
+	// constructor
+	CGCostTarget(const char* nam, const char* startype, const char* desc,
+		     const char* assocDomain = CGdomainName);
+
+	// destructor
+	~CGCostTarget();
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
 	/*virtual*/ int run();
 	/*virtual*/ void wrapup();
 
-	// The following switch statement will find the right match in 
-	// the data type for the block in the galaxy
-	// The matched star will be then added to the passed in galaxy 
-	// Then the two ports will be connected within the galaxy
-        void selectConnectStarBlock(Galaxy* , MultiPortHole* , char*);
+	/*virtual*/ int isA(const char* cname) const;
 
-        // The following function will print the information about the
-	// stars found in the galaxy
-        void printGalaxy(Galaxy*);
+	// List of targets to use to generate implementation cost information
+	StringArrayState userTargetList;
 
-        /*virtual*/ int isA(const char*) const;
+protected:
+	// Initialize the input/output portholes of the stars in the galaxy
+	void initializeStarPorts(Galaxy& parent);
+
+	// Disconnect all stars
+	void disconnectAllStars(Galaxy& parent);
+
+	// Generate implementation costs for all stars for one target
+	int costInfoForOneTarget(CGTarget* userTarget, const char* domain);
+
+	// Find the right source or sink star to match the block port
+	int selectConnectStarBlock(Galaxy* localGalaxy, PortHole* localHole);
+
+	// Find the code generation target corresponding to a name
+	CGTarget* findCodeGenTarget(const char* userTargetName);
+
+	// Generate the Tcl code
+	int convertGalaxyToPtcl(Galaxy* localGalaxy);
+
+	// Report the cost estimates for the stars found in the galaxy
+	void reportCosts(CGTarget* userTarget);
+
+	// Add a newly created block
+	inline void addTempBlock(Block* block) { tempBlockList.put(block); };
+
+	// Delete newly allocated blocks
+	void deleteTempBlocks();
+
 private:
-	// some private members to mask the pointer to the constant 
-	// object to a pointer to a non-constant object
-        Block* starPointer;     
+	// Map a data type into a standard abbreviation used in star names
+	const char* dataTypeAbbreviation(const char* datatype);
 
+	// List of dynamically allocated blocks
+	SequentialList tempBlockList;
 };
 
 #endif
-
-
-
-
-
-
-
-
-

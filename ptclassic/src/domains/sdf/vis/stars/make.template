@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy SDF stars
-# $Id$
+# @(#)make.template	1.9	04/07/97
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -46,26 +46,32 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(VSDKHOME)/include
 
 # Library name
-LIB=libsdfvisstars.$(LIBSUFFIX)
+PTLIB=libsdfvisstars.$(LIBSUFFIX)
 
-# Where star doc files go
-STARDOCDIR = ../../doc/stars
+# Turn off generation of symbol table because it conflicts with -O4 option
+GPPDEBUGFLAGS =
+CDEBUGFLAGS =
 
 # To compile the VIS stars we need special flags
 # that will only work under solaris2.5 with the SunSoft CC compiler
-VISINLINE  = $(VSDKHOME)/util/vis.il
-ARCH    = -xchip=ultra -xarch=v8plusa
+# Copied from $(VSDKHOME)/examples/src/Makefile.us
+VISINLINE = $(VSDKHOME)/util/vis.il
+VISARCHINFO = -xchip=ultra -xarch=v8plusa
 VERSION = -V
-OPTFLAGS= -fast -xO4 -xdepend
-LOCALCCFLAGS += $(ARCH) $(VERSION) $(OPTFLAGS) $(VISINLINE)
+OPTFLAGS= -fast -xO4
+LOCALCCFLAGS += $(OPTFLAGS) $(VISARCHINFO) $(VERSION) $(VISINLINE)
 
 # source files for all stars, using preprocessor, putting base stars first
 PL_SRCS= \
- SDFFloatToVis64.pl \
- SDFQuadAdd16.pl \
- SDFQuadMult16x16.pl \
- SDFQuadSub16.pl \
- SDFVis64ToFloat.pl 
+ SDFVISAddSh.pl \
+ SDFVISBiquad.pl \
+ SDFVISFFTCx.pl \
+ SDFVISFIR.pl \
+ SDFVISMpyDblSh.pl \
+ SDFVISMpySh.pl \
+ SDFVISPackSh.pl \
+ SDFVISSubSh.pl \
+ SDFVISUnpackSh.pl
 
 # The .cc files
 SRCS= $(PL_SRCS:.pl=.cc)

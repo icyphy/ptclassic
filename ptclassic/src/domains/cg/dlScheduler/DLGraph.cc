@@ -2,10 +2,32 @@ static const char file_id[] = "DLGraph.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DLGraph.cc	1.13	7/19/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
 Date of last revision: 
@@ -17,59 +39,23 @@ Date of last revision:
 #endif
 
 #include "DLGraph.h"
-#include "EGConnect.h"
-#include "UserOutput.h"
+#include "EGGate.h"
 
 // redefine the virtual methods
-EGNode *DLGraph :: newNode(SDFStar* s, int i)
+EGNode *DLGraph :: newNode(DataFlowStar* s, int i)
 	{ LOG_NEW; return new DLNode(s,i); }
 
-                        /////////////////////////
-                        ///  initializeGraph  ///
-                        /////////////////////////
-
-// This function sets the following properties of the graph:
-// 1) nodeCount : The number of nodes (star invocations) in the graph
-// 2) runnableNodes : A list of the initially runnable DLNodes
-//
-// and the following property for each node in the graph:
-// StaticLevel : The longest path in execution time from the node
-//		to the end of the graph (over all the endnodes). 
-
-int DLGraph::initializeGraph() {
-
-        EGSourceIter nxtSrc(*this);
-        DLNode *src;
-
-	// Remove the arcs with delay from the ancestors and descendants
-	removeArcsWithDelay();
-
-	// initialize members
-	nodeCount = 0;
-	ExecTotal = 0;
-
-        // Set the levels for each node
-        while ((src = (DLNode*)nxtSrc++) != 0) {
-                if (SetNodeSL(src) < 0) return FALSE;
-        }
-	return TRUE;
-}
+                        ////////////////////
+                        ///  resetGraph  ///
+                        ////////////////////
 
 void DLGraph :: resetGraph() {
 
-	// reset the runnable node list.
-	runnableNodes.initialize();
-
-	EGSourceIter nxtSrc(*this);
-	DLNode* src;
-	while ((src = (DLNode*) nxtSrc++) != 0)
-		sortedInsert(runnableNodes,src,1); // sort the runnable nodes.
-
+	findRunnableNodes();
 	resetNodes();
 
 	// reset the appropriate members for schedule.
-	unschedNodes = nodeCount;
-	unschedWork  = ExecTotal;
+	unschedNodes = numNodes();
 }
 
 void DLGraph :: resetNodes() {
@@ -115,53 +101,3 @@ StringList DLGraph::display() {
 	return out;
 }
 
-			/////////////////////
-			///  workAfterMe  ///
-			/////////////////////
-
-// compute the sum of all execution time of the descendents of the node(pd).
-int workAfter(ParNode* pd);
-
-int DLGraph :: workAfterMe(ParNode* pd)
-{
-        // reset the busy flag of the ParNode.
-        EGIter nxtNod(*this);   // Attach an iterator to the DLGraph
-        ParNode *node;
-
-        // Visit each node in the expanded graph
-        while ((node = (ParNode*)nxtNod++) != 0) {
-		node->resetVisit();
-	}
-	
-	return workAfter(pd);
-}
-
-int workAfter(ParNode* pd) {
-
-	EGGateLinkIter desciter(pd->descendants); // iterator for descs
-	EGGate *dflink;
-	ParNode* node;
-	int total = 0;
-
-	if (pd->alreadyVisited())	return 0;
-
-	// iterate for descendents.
-	while ((dflink = desciter++) != 0) {
-		node = (ParNode*)dflink->farEndNode();
-		node->beingVisited();
-	        total += workAfter(node);
-	}
-	total += pd->myExecTime();
-	return total;
-}
-
-// destructor
-DLGraph :: ~DLGraph() {
-
-	ListIter nextPair(nodePairs);
-	NodePair* p;
-
-	while((p = (NodePair*) nextPair++) != 0) {
-		LOG_DEL; delete p;
-	}
-}

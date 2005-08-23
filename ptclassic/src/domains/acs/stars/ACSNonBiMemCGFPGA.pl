@@ -7,10 +7,10 @@ defcore {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {@(#)ACSNonBiMemCGFPGA.pl	1.0	7 November 1998}
+	version{ @(#)ACSNonBiMemCGFPGA.pl	1.10 08/02/01 }
 	author { K. Smith}
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -24,34 +24,12 @@ This star exists only for demoing the generic CG domain.
 	    // Stitcher assignments
 	    ostrstream output_filename;
 	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
-	    }
-	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-
 		// Calculate BW
 		if ((pins->query_preclock(0)==UNLOCKED) && 
 		    (pins->query_preclock(1)==UNLOCKED))
@@ -90,6 +68,28 @@ This star exists only for demoing the generic CG domain.
 		// Return happy condition
 		return(1);
 		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Calculate pipe delay
+		acs_delay=0;
+
+		// Return happy condition
+		return(1);
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -191,23 +191,23 @@ This star exists only for demoing the generic CG domain.
 
 		// BEGIN-USER CODE
 		out_fstr << lang->if_statement 
-		         << lang->test(pins->retrieve_pinname(3),"'1'")
+		         << lang->test(pins->query_pinname(3),"'1'")
 			 << lang->then_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(2),
-					 pins->retrieve_pinname(0))
+			 << lang->equals(pins->query_pinname(2),
+					 pins->query_pinname(0))
 			 << lang->end_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(1),
+			 << lang->equals(pins->query_pinname(1),
 					 "(others=>'Z')")
 			 << lang->end_statement << endl
 			 << lang->else_statement << endl
 			 << "\t"
-			 << lang->equals(pins->retrieve_pinname(2),"(others=>'Z')")
+			 << lang->equals(pins->query_pinname(2),"(others=>'Z')")
 			 << lang->end_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(1),
-					 pins->retrieve_pinname(2))
+			 << lang->equals(pins->query_pinname(1),
+					 pins->query_pinname(2))
 			 << lang->end_statement << endl
 			 << lang->endif_statement 
 			 << lang->end_statement << endl;

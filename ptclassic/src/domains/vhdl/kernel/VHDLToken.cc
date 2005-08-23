@@ -1,9 +1,9 @@
 static const char file_id[] = "VHDLToken.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLToken.cc	1.3 04/08/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,6 +41,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLToken :: VHDLToken() {
+  arc = NULL;
+  tokenNumber = 0;
+  sourceFiring = NULL;
+  destFirings = new VHDLFiringList;
+  clockName = "UNINITIALIZED";
   VHDLTypedObj::initialize();
 }
 
@@ -50,7 +55,7 @@ VHDLToken :: ~VHDLToken() {}
 // Return a pointer to a new copy of the VHDLToken.
 VHDLToken* VHDLToken :: newCopy() {
   VHDLToken* newToken = new VHDLToken(name, type, arc, tokenNumber,
-				      sourceFiring, destFirings);
+				      sourceFiring, destFirings, clockName);
   return newToken;
 }
 

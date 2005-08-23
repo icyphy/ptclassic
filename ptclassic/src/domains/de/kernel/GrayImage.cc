@@ -1,76 +1,122 @@
-// filename:       GrayImage.cc
-// author:         Paul Haskell
-// creation date:  7/1/91
-// SCCS info:      $Id$
+/* 
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+static const char file_id[] = "GrayImage.cc";
+// filename:		GrayImage.cc
+// author:			Paul Haskell
+// creation date:	7/1/91
+// SCCS info:		@(#)GrayImage.cc	1.18 03/02/95
 
 #include "GrayImage.h"
+#include <minmax.h>
+
+const char* GrayImage::dataType() const { return "GrayImage"; }
+Message* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this); }
+Message* GrayImage::clone(int a) const {LOG_NEW; return new GrayImage(*this,a);}
+ISA_FUNC(GrayImage,BaseImage);
 
 void GrayImage::init()
-{ grayData = new unsigned char[fullSize]; }
+{
+	size = fullSize = width*height;
+	LOG_NEW; grayData = new unsigned char[fullSize];
+}
 
 
 GrayImage::GrayImage(int a, int b, int c, int d):
-        BaseImage(a, b, c, d) { init(); }
+		BaseImage(a, b, c, d) { init(); }
 
 
 GrayImage::GrayImage(int a, int b, int c):
-        BaseImage(a, b, c) { init(); }
+		BaseImage(a, b, c) { init(); }
 
 
-GrayImage::GrayImage(BaseImage& bi):
-        BaseImage(bi) { init(); }
+GrayImage::GrayImage(const BaseImage& bi):
+		BaseImage(bi) { init(); }
 
 
-GrayImage::GrayImage(GrayImage& gi):
-        BaseImage(gi)
+GrayImage::GrayImage(const GrayImage& gi, int a):
+		BaseImage(gi)
 {
-    grayData = new unsigned char[size];
-    // the casts in the next line and all other calls to copy shouldn't
-    // be necessary, but the current g++ gives warnings if they are absent.
-    copy(size, (char*) grayData, (char*) gi.grayData);
+	LOG_NEW; grayData = new unsigned char[fullSize];
+	if (!a) { copy(size, grayData, gi.grayData); }
 } // end GrayImage::GrayImage()
 
 
 GrayImage::~GrayImage()
-{ delete grayData; grayData = (unsigned char*) NULL; }
+{ LOG_DEL; delete [] grayData; grayData = (unsigned char*) NULL; }
 
 
-BaseImage* GrayImage::fragment(int cellSz, int Num)
+void GrayImage::setSize(int a)
 {
-    if (Num*cellSz > size) return ((BaseImage*) NULL);
+	if (size != fullSize) return;
+	if (a == fullSize) return;
+	LOG_DEL; delete [] grayData;
+	LOG_NEW; grayData = new unsigned char[a];
+	size = fullSize = a;
+} // GrayImage::setSize()
 
-// The use of "bir" is a hack to get the GrayImage(BaseImage&) c'tor
-// called when "retval" is created, rather than the
-// GrayImage(GrayImage&) c'tor, which spends a lot of time copying
-// memory.
-    BaseImage& bir = *this;
-    GrayImage* retval = new GrayImage(bir);
-    retval->startPos = startPos + Num*cellSz;
-    retval->size = min(startPos+size-retval->startPos, cellSz);
-    delete retval->grayData; // some other way to do this?
-    retval->grayData = new unsigned char[retval->size];
 
-    int offset = retval->startPos - startPos;
-    copy(retval->size, (char*) retval->grayData, (char*) grayData+offset);
-    return(retval);
+unsigned char* GrayImage::retData()
+{ return grayData; }
+
+
+BaseImage* GrayImage::fragment(int cellSz, int Num) const
+{
+	if (Num*cellSz >= size) return ((BaseImage*) NULL);
+
+// We use clone(int) rather than clone() in order to avoid copying
+// image data needlessly.
+	GrayImage* retval = (GrayImage*) clone(1);
+	retval->startPos = startPos + Num*cellSz;
+	retval->size = min(startPos+size-retval->startPos, cellSz);
+	LOG_DEL; delete [] retval->grayData; // some other way to do this?
+	LOG_NEW; retval->grayData = new unsigned char[retval->size];
+
+	int offset = retval->startPos - startPos;
+	copy(retval->size, retval->grayData, grayData+offset);
+	return(retval);
 } // end GrayImage::fragment()
 
 
-void GrayImage::assemble(BaseImage* bi)
+void GrayImage::assemble(const BaseImage* bi)
 {
 // Do we have an acceptable image to merge?
-    if (!StrStr(bi->dataType(), "GrayI") || (*bi != *this) ) return;
+	if (!bi->isA("GrayImage") || (*bi != *this) ) return;
 
 // Are we set up to merge yet?
-    if (size != fullSize) {
-        unsigned char* tmpPtr = new unsigned char[fullSize];
-        copy(size, (char*) tmpPtr+startPos, (char*) grayData);
-        delete grayData;
-        grayData = tmpPtr;
-        size = fullSize;
-    }
+	if (size != fullSize) {
+		LOG_NEW; unsigned char* tmpPtr = new unsigned char[fullSize];
+		for(int t = 0; t < fullSize; t++) {tmpPtr[t]=(unsigned char) 0;}
+		copy(size, tmpPtr+startPos, grayData);
+		LOG_DEL; delete [] grayData;
+		grayData = tmpPtr;
+		size = fullSize;
+	}
 
 // Do the merge
-    GrayImage* gi = (GrayImage*) bi;
-    copy(gi->size, (char*) grayData + gi->startPos, (char*) gi->grayData);
+	const GrayImage* gi = (const GrayImage*) bi;
+	copy(gi->size, grayData + gi->startPos, gi->grayData);
 } // end GrayData::assemble()

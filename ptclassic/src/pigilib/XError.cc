@@ -1,167 +1,165 @@
+static const char file_id[] = "XError.cc";
+
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)XError.cc	1.26	03/30/97
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: J. Buck
  Date of creation: 10/4/90
+ Renamed to XError.cc, 4/15/91
 
  This is a replacement version of the methods for the Error class 
- in Ptolemy (the UserOutput class is the same) -- link this in instead
- of Output.cc to get popup windows for error messages.  The
- routine "open_display" must be called first.
-
- This initial version could use some cleaning up.
+ in Ptolemy -- link this in instead of Error.cc to go through the
+ PrintErr error message handler in pigi.
 
 *******************************************************************/
-extern "C" {
-int open_display(const char *);
-void close_display();
-int accum_string(const char*);
-void pr_accum_string();
-void clr_accum_string();
-void win_msg(const char *);
-void close_msg();
-int noxquery(const char *);
-int query(const char *);
-}
 
+// Do the right thing for sol2 boolean defs.  compat.h must be included
+// first so sys/types.h is included correctly.
+#include "sol2compat.h"
+
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
+#include <stdio.h>
+#include <string.h>
 #include <stream.h>
-#include "Output.h"
-#include "Scheduler.h"
-#include "miscFuncs.h"
-#include "ComplexSubset.h"
-#include "NamedObj.h"
 
-// A global output error handler
-Error errorHandler;
+#include "StringList.h"			/* define StringList */
+#include "Error.h"			/* define Error class */
+#include "Scheduler.h"			/* define Scheduler::requestHalt */
+#include "miscFuncs.h"			/* define savestring */
+#include "NamedObj.h"			/* define NamedObj class */
+#include "PtGate.h"
 
-// Constructor: set the ostream to cerr
-Error :: Error () : UserOutput (cerr) {
-	clr_accum_string();
+#if defined(hppa)
+/* Include math.h outside of extern "C" */
+/* Otherwise, we get errors with pow() g++2.7.0 via vemInterface.h */
+#include <math.h>
+#endif
+
+// Pigilib includes: vemInterface.h includes rpc.h
+extern "C" {
+#define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
+#include "vemInterface.h"		/* define PrintErr, PrintCon, ViXXX */
+#include "exec.h"			/* define PigiErrorMark */
+#include "ganttIfc.h"			/* define FindClear */
+#include "xfunctions.h"			/* define win_msg */
+#undef Pointer
 }
 
-Error :: Error (ostream& foo) : UserOutput (foo) {}
+// the gate object ensures that messages come out in one piece even
+// with multi-threading.
+static KeptGate gate;
 
-void
-Error :: error() {
-	accum_string ("ERROR (no message specified)\n");
-	pr_accum_string ();
+typedef const char cc;
+
+static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
+	CriticalSection region(gate);
+	StringList buf;
+	buf << (warn ? "Warning: " : "Error: ");
+	if ( obj ) buf << obj << ": ";
+	if ( m1 ) buf << m1;
+	if ( m2 ) buf << m2;
+	if ( m3 ) buf << m3;
+	PrintErrNoTag(buf);
 }
 
 void
-Error :: error(const char *s) {
-	accum_string ("ERROR: ");
-	accum_string (s);
-	pr_accum_string ();
+Error :: error(cc* m1, cc* m2, cc* m3) {
+	outMsg(0, 0, m1, m2, m3);
 }
 
 void
-Error :: error(const char *s, const char *c) {
-	accum_string ("ERROR: ");
-	accum_string (s);
-	accum_string (c);
-	pr_accum_string ();
+Error :: warn(cc* m1, cc* m2, cc* m3) {
+	outMsg(0, 1, m1, m2, m3);
 }
 
 void
-Error :: error (const char *s, int errorCode) {
-	char buf[32];
-	sprintf (buf, "Error code: %d", errorCode);
-	error (s, buf);
+Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	outMsg(objname, 0, m1, m2, m3);
+	delete [] objname;
 }
 
-// print error and halt schedule
 void
-Error :: abortRun (const char *s) {
-	errorHandler.error (s);
+Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	outMsg(objname, 1, m1, m2, m3);
+	FindClear();
+	delete [] objname;
+}
+
+void
+Error :: abortRun (cc *m1, cc* m2, cc* m3) {
+	outMsg (0, 0, m1, m2, m3);
 	Scheduler::requestHalt();
 }
 
-// this one gives the name of the object
 void
-Error :: abortRun (NamedObj& n, const char *str) {
-	StringList s = n.readFullName();
-	errorHandler.error (s, str);
+Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	error (o, m1, m2, m3);
 	Scheduler::requestHalt();
 }
 
-// constructor: output to cout
-UserOutput :: UserOutput() : outputStream(&cout), myStream(0) {}
-
-// general constructor
-UserOutput :: UserOutput(ostream& foo) : outputStream(&foo), myStream(0) {}
-
-// destructor
-UserOutput :: ~UserOutput() {
-	// delete the stream only if I created it
-	if (myStream)
-		delete outputStream;
-}
-
-// change the file written to.
-void 
-UserOutput :: fileName(const char *fileName) {
-	if (myStream)
-		delete outputStream;
-	if ( strcmp(fileName,"cout") == 0 ) {
-		outputStream = &cout;
-		myStream = FALSE;
+static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
+	CriticalSection region(gate);
+	StringList buf;
+	if ( obj ) buf << obj << ": ";
+	if ( m1 ) buf << m1;
+	if ( m2 ) buf << m2;
+	if ( m3 ) buf << m3;
+	if (ViGetErrWindows()) {
+	  win_msg(buf);
 	}
 	else {
-		outputStream = new ostream(expandPathName(fileName),
-					   io_writeonly,a_create);
-		myStream = TRUE;
+	  PrintCon(buf);
 	}
 }
 
 void
-UserOutput :: outputString(const char *s) {
-	*outputStream << s;
-}
-
-UserOutput&
-UserOutput :: operator << (int i) {
-	*outputStream << i;
-	return *this;
-}
-
-UserOutput&
-UserOutput :: operator << (const char *s) {
-	*outputStream << s;
-	return *this;
-}
-
-UserOutput&
-UserOutput :: operator << (float f) {
-	*outputStream << f;
-	return *this;
-}
-
-UserOutput&
-UserOutput :: operator << (const Complex& C) {
-        *outputStream << "(" << C.real() << "," << C.imag() << ")";
-        return *this;
+Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	char* objname = savestring(o.fullName());
+	info(objname, m1, m2, m3);
+	delete [] objname;
 }
 
 void
-UserOutput :: flush () {
-	outputStream->flush();
+Error :: message (cc* m1, cc* m2, cc* m3) {
+	info(0, m1, m2, m3);
 }
 
-// While this function does not belong to the UserOutput or Error
-// classes, it's used for stars that do I/O so it is defined here
-// (and its prototype is in Output.h)
+// marking is supported in this implementation
+int Error :: canMark() { return 1;}
 
-// This function returns a new, unique temporary file name.
-// It lives on the heap and may be deleted when no longer needed.
-const char* tempFileName() {
-	int pid = getpid();
-	static int count = 1;
-	char* buf = new char[17];
-	sprintf (buf, "/tmp/pt%04x.%04d", pid, count);
-	count++;
-	return buf;
+void Error :: mark(const NamedObj& o) {
+	char* objname = savestring(o.fullName());
+	PigiErrorMark(objname);
+	delete [] objname;
 }

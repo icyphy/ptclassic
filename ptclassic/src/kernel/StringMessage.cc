@@ -1,9 +1,9 @@
-static const char file_id[] = "FileMessage.cc";
+static const char file_id[] = "StringMessage.cc";
 /**************************************************************************
 Version identification:
-@(#)FileMessage.cc	1.2	2/3/96
+@(#)StringMessage.cc	1.3	2/29/96
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,62 +28,47 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  Edward A. Lee
+ Programmer:  Edward A. Lee, John Reekie
  Date of creation: 1/13/96
 
- This file defines the implementation of the FileMessage class and
+ This file defines the implementation of the StringMessage class.
 
 **************************************************************************/
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "FileMessage.h"
+#include "StringMessage.h"
 #include "Error.h"
 #include "miscFuncs.h"
-#include "InfString.h"
 
 /////////////////////////////////////////////////////////////
-// FileMessage method bodies
+// StringMessage method bodies
 /////////////////////////////////////////////////////////////
 
-// Constructor: make a FileMessage with a unique filename
-FileMessage::FileMessage() {
-    dynamicFilename = tempFileName();
-    filename = dynamicFilename;
-    transientFileFlag = TRUE;
+// Constructor: make a StringMessage with an empty string.
+StringMessage::StringMessage() {
+    value = "";
 }
 
-// Constructor: make a FileMessage with the given filename
-FileMessage::FileMessage(const char* name) {
-    dynamicFilename = 0;
-    filename = name;
-    transientFileFlag = FALSE;
+// Constructor: make a StringMessage with the given string value.
+// The string is copied, so the original may be deleted.
+StringMessage::StringMessage(const char* name) {
+    value = name;
 }
 
 // Copy Constructor
-FileMessage::FileMessage(const FileMessage& src) {
-    dynamicFilename = 0;
-    filename = src.fileName();
-    transientFileFlag = FALSE;
+StringMessage::StringMessage(const StringMessage& src) {
+    value = src.print();
 }
 
 // Destructor
-FileMessage::~FileMessage() {
-    if (filename) {
-	if (transientFileFlag) {
-	    InfString cmd = "rm -f ";
-	    cmd << filename;
-	    system(cmd);
-	}
-	if (dynamicFilename) {
-	    delete [] dynamicFilename;
-	}
-    }
+StringMessage::~StringMessage() {
 }
 
 // Return the filename as a StringList.
-StringList FileMessage::print() const {
-    StringList sl = fileName();
-    return sl;
+StringList StringMessage::print() const {
+    StringList ret;
+    ret = value;
+    return ret;
 }

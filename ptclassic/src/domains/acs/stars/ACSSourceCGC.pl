@@ -1,12 +1,12 @@
 defcore {
-	name { Ramp }
+	name { Source }
 	domain { ACS }
-	coreCategory { CGFPGA }
-	corona { Ramp }
+	coreCategory { CGC }
+	corona { Source }
 	desc {
 	    Generic code generator source star.
 	}
-	version {$Id$}
+	version {@(#)ACSSourceCGC.pl	1.3 10/27/99}
 	author { Eric K. Pauer }
 	copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

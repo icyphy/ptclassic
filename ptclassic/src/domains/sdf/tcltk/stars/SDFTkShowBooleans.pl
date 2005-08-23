@@ -5,15 +5,15 @@ defstar {
     desc {
 Display input Booleans using color to highlight their value.
     }
-    version { $Id$ }
+    version { @(#)SDFTkShowBooleans.pl	1.4   10/23/95 }
     author { Edward A. Lee }
     copyright {
-Copyright (c) 1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF tcltk library }
+    location { SDF Tcl/Tk library }
     hinclude { "ptk.h" }
     defstate {
         name {label}
@@ -48,9 +48,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	  Error::abortRun(*this, "Need as many identifiers as inputs");
 	  return;
 	}
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowBooleans.tcl";
 
-        SDFTclScript::setup();
+        SDFTclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

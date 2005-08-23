@@ -1,9 +1,9 @@
 static const char file_id[] = "InvokeInterp.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)InvokeInterp.cc	1.2	9/27/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,6 +46,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 
 // METHODS
+
+// constructor
+InvokeInterp :: InvokeInterp() {}
+
+// destructor
+InvokeInterp :: ~InvokeInterp() {}
 
 // send a string to an external interpreter for evaluation
 const char*

@@ -1,45 +1,51 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer:  E. A. Lee
-Date of creation: 10/28/90
-
-Repeat repeats each input Particle the specified number of times
-(\fInumTimes\fR) on the output.
-
-************************************************************************/
-}
 defstar {
 	name {Repeat}
 	domain {SDF}
-	desc { "repeats each input sample the specified number of times" }
+	desc {  Repeat each input sample a specified number of times. }
+	version {@(#)SDFRepeat.pl	2.11	10/06/96}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+Repeat repeats each input Particle the specified number of times
+(<i>numTimes</i>) on the output.  Note that this is a sample rate
+change, and hence affects the number of invocations of downstream
+stars.
+	}
 	input {
 		name{input}
 		type{ANYTYPE}
 	}
 	output {
 		name{output}
-		type{ANYTYPE}
+		type{=input}
 	}
 	defstate {
 		name {numTimes}
 		type {int}
 		default {2}
-		desc { "Repetition factor" }
+		desc { Repetition factor. }
 	}
-	constructor {
-		input.inheritTypeFrom(output);
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
 	}
-	start {
-		output.setSDFParams(int(numTimes),int(numTimes)-1);
+	setup {
+		input.setSDFParams(int(blockSize), int(blockSize)-1);
+		output.setSDFParams(int(numTimes)*int(blockSize),
+			int(numTimes)*int(blockSize)-1);
 	}
 	go {
-		for (int i = 0; i < int(numTimes); i++)
-			output%i = input%0;
+	    for (int i = 0; i < int(numTimes); i++) {
+		for (int j = int(blockSize)-1; j >= 0; j--)
+		    output%(j+i*int(blockSize)) = input%j;
+	    }
 	}
 }

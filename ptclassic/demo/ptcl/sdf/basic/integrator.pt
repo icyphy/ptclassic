@@ -1,0 +1,48 @@
+reset
+# Creating universe 'integrator'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Const1 Const
+	setstate Const1 level 2.0
+	star Const2 Const
+	setstate Const2 level 0.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Quant1 Quant
+	setstate Quant1 thresholds 10.0
+	setstate Quant1 levels "0.0 1.0"
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 0.7
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate 0
+	setstate Integrator1 state 0.0
+	star Integrator2 Integrator
+	setstate Integrator2 feedbackGain 1.0
+	setstate Integrator2 top 12.0
+	setstate Integrator2 bottom 0.0
+	setstate Integrator2 saturate 0
+	setstate Integrator2 state 0.0
+	star XMgraph1 XMgraph
+	setstate XMgraph1 title "Integrator Demo"
+	setstate XMgraph1 saveFile ""
+	setstate XMgraph1 options "-P -x n =800x400+0+0 -0 control -1 final"
+	setstate XMgraph1 ignore 0
+	setstate XMgraph1 xUnits 1.0
+	setstate XMgraph1 xInit 0.0
+	star "Fork.output=21" Fork
+	numports "Fork.output=21" output 2
+	connect Ramp1 output Integrator1 data
+	connect Quant1 output Integrator1 reset
+	connect Const1 output Integrator2 data
+	connect Const2 output Integrator2 reset
+	connect Integrator2 output "Fork.output=21" input
+	connect Integrator1 output XMgraph1 input
+	connect "Fork.output=21" "output#2" XMgraph1 input
+	connect "Fork.output=21" "output#1" Quant1 input
+run 20
+wrapup

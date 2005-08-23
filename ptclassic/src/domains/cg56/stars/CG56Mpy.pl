@@ -1,12 +1,18 @@
 defstar {
-	name { FixProduct }
+	name { Mpy }
 	domain { CG56 }
-	desc { Multipy any number of inputs, producing an output. }
-	version { $Id$ }
+	desc { Multiply any number of inputs, producing an output. }
+	version { @(#)CG56Mpy.pl	1.13 01 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="multiplication"></a>
 The inputs are multiplied and the result is written on the output.
 	}
 	inmulti {
@@ -17,44 +23,44 @@ The inputs are multiplied and the result is written on the output.
 		name {output}
 		type {FIX}
 	}
-        state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-	codeblock (std) {
-	move	$ref(input#1),x0	 ; 1st input -> x0
-        move	$ref(input#2),y0         ; 2nd input -> y0
+	constructor {
+		noInternalState();
 	}
-	codeblock (sat) {
-	mpy	x0,y0,a
-	move	a,$ref(output)	
-	}
-	codeblock (one) {
+
+	codeblock (copyInput) {
 	move	$ref(input#1),x0	; just move data from in to out
 	move	x0,$ref(output)
 	}
-        codeblock(loop) {
-        mpy     x0,y0,a     $ref(input#inputNum),x0
-	move    a,y0
+
+	codeblock (multiplyStart) {
+	move	$ref(input#1),x0	 ; 1st input -> x0
+        move	$ref(input#2),y0         ; 2nd input -> y0
+	}
+
+        codeblock(multiply,"int i") {
+        mpy     x0,y0,a     $ref(input#@i),x0	; a = x0 * y0, get next input
+	move    a,y0		; y0 = a
         }
+
+	codeblock (multiplyEnd) {
+	mpy	x0,y0,a		; a = x0 * y0
+	move	a,$ref(output)	
+	}
 
 	go {
 		if (input.numberPorts() == 1) {
-			gencode(one);
+			addCode(copyInput);
 			return;
 		}
-		gencode(std);
+
+		addCode(multiplyStart);
 		for (int i = 3; i <= input.numberPorts(); i++) {
-	                inputNum=i;
-			gencode(loop);
+			addCode(multiply(i));
 		}
-	        gencode(sat);
+	        addCode(multiplyEnd);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;
-		else return input.numberPorts() + 2;
+		return 2 + input.numberPorts();
 	}
 }

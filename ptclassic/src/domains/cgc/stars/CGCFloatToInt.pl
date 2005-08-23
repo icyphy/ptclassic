@@ -2,10 +2,10 @@ defstar {
 	name { FloatToInt }
 	domain { CGC }
 	desc { type conversion from float to int }
-	version { $Id$ }
+	version { @(#)CGCFloatToInt.pl	1.4	03/27/97 }
 	author { Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -35,12 +35,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
 	}
 	initCode {
+		addInclude("<math.h>");
 		numSample = output.numXfer();
 	}
 	codeblock (body) {
-	int i;
-	for (i = 0; i < $val(numSample); i++) {
-		$ref(output, i) = (int) $ref(input, i);
+	int i = 0;
+	for (; i < $val(numSample); i++) {
+		$ref(output, i) = (int) floor($ref(input, i) + 0.5);
 	}
 	}
 	go {

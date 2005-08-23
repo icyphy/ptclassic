@@ -3,21 +3,21 @@
 #ifndef _SRParter_h
 #define _SRParter_h
 
-/* Version $Id$
+/* Version @(#)SRParter.h	1.4 04/07/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -26,6 +26,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
     Author:     S. A. Edwards
     Created:    28 October 1996
@@ -39,10 +42,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class SRDependencyGraph;
 class SRRecursiveSchedule;
 class Set;
+class SetIter;
 
 // The different partitioning routines
 typedef enum SRPartTypeEnum {
-  SRPartOneT, SRPartInOutT, SRPartExactT
+  SRPartOneT, SRPartInOutT, SRPartExactT, SRPartSweepT
 } SRPartType;
 
 /**********************************************************************
@@ -51,6 +55,17 @@ typedef enum SRPartTypeEnum {
 
 **********************************************************************/
 class SRPart {
+protected:
+
+  // The set being partitioned
+  Set * partSet;
+
+  // The associated dependency graph
+  SRDependencyGraph * dgraph;
+
+  // Flag indicating when partitions giving only one SCC should be ignored
+  static int ignoreSimpleFlag;
+
 public:
 
   SRPart( Set & s, SRDependencyGraph & g ) { partSet = &s; dgraph = &g; }
@@ -64,14 +79,8 @@ public:
   // returned set.
   virtual Set * next( int ) = 0;
 
-protected:
-
-  // The set being partitioned
-  Set * partSet;
-
-  // The associated dependency graph
-  SRDependencyGraph * dgraph;
-  
+  // Return whether partitions giving a single SCC should be ignored
+  static int ignoreSimple() { return ignoreSimpleFlag; }
 };
 
 /**********************************************************************
@@ -84,7 +93,10 @@ protected:
 class SRPartOne : public SRPart {
 public:
 
-  SRPartOne( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartOne( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    ignoreSimpleFlag = 0;
+  };
+
   void init();
   Set * next( int );
 
@@ -104,7 +116,10 @@ private:
 **********************************************************************/
 class SRPartInOut : public SRPart {
 public:
-  SRPartInOut( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartInOut( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    minset = 0;
+    ignoreSimpleFlag = 0;
+  };
   ~SRPartInOut();
   void init();
   Set * next( int );
@@ -125,7 +140,10 @@ private:
 **********************************************************************/
 class SRPartExact : public SRPart {
 public:
-  SRPartExact( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartExact( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    vertex = vindex = 0;
+    ignoreSimpleFlag = 1;
+  };
   ~SRPartExact();
   void init();
   Set * next( int );
@@ -145,6 +163,39 @@ private:
 
 };
 
+/**********************************************************************
+
+ Greedily generates all borders starting from each vertex
+
+ @Description Starting from each vertex in the graph, absorb the cheapest
+ vertex and return the border of the set.
+
+ **********************************************************************/
+class SRPartSweep : public SRPart {
+public:
+  SRPartSweep( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    kernel = 0;
+    sgIter = 0;
+    ignoreSimpleFlag = 1;
+  };
+
+  ~SRPartSweep();
+  void init();
+  Set * next( int );
+
+private:
+  // Iterates over the vertices in the subgraph
+  SetIter * sgIter;
+
+  // The kernel, grown from each vertex
+  Set * kernel;
+
+  Set * border();
+
+  // Flag indicating when all vertices have been exhausted
+  int done;
+};
+
 
 /**********************************************************************
 
@@ -157,6 +208,9 @@ private:
 
   // The partitioning iteration routine
   SRPart * mypart;
+
+  // Which part routine to use
+  static SRPartType parter;
 
 public:
 
@@ -175,8 +229,7 @@ public:
     return mypart->next(b);
   }
 
-  // Which part routine to use
-  static SRPartType parter;
+  static void setParter( const char * );
 
 };
 

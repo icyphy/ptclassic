@@ -1,11 +1,33 @@
-static const char file_id[] = "QSGraph.cc";
+static const char file_id[] = "HuGraph.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)HuGraph.cc	1.9	3/2/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
 Date of last revision: 
@@ -16,83 +38,55 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QSGraph.h"
-#include "QSNode.h"
-#include "UserOutput.h"
+#include "HuGraph.h"
+#include "HuNode.h"
 
 // redefine the virtual methods
-EGNode *QSGraph :: newNode(SDFStar* s, int i)
-	{ LOG_NEW; return new QSNode(s,i); }
+EGNode *HuGraph :: newNode(DataFlowStar* s, int i)
+	{ LOG_NEW; return new HuNode(s,i); }
 
-void QSGraph :: resetGraph() {
+                        ////////////////////////
+                        ///  sortedInsert  ///
+                        ////////////////////////
 
-	// reset the runnable node list.
-	runnableNodes.initialize();
-	minWork = 0;
+// Insert a ParNode into the EGNodeList in sorted order.
+// Redefine it to sort by timeTBS first and static Level next.
 
-	EGSourceIter nxtSrc(*this);
-	QSNode* src;
-	while ((src = (QSNode*) nxtSrc++) != 0) {
-		sortedInsert(runnableNodes,src,1);
-		// update the minimum execution time if necessary
-		if (src->myExecTime() < minWork) minWork = src->myExecTime();
-		src->resetAssignedFlag(0);
+void HuGraph::sortedInsert(EGNodeList& nlist, ParNode *node, int) {
+
+	HuNode*  pd = (HuNode*) node;
+
+	// Attach a link iterator to the runnableNodes
+	EGNodeListIter NodeIter(nlist);
+	EGNodeLink* nl;
+	EGNodeLink* tmp = nlist.createLink(node);
+
+	int nodeT = pd->availTime();
+	int nodeSL = node->getLevel();  // The StaticLevel of node
+
+	// Find the correct location for node in the list
+	while ((nl = NodeIter.nextLink()) != 0) {
+		HuNode* pd = (HuNode*) nl->node();
+		// Sort earliest timeTBS first
+		if (pd->availTime() > nodeT) break;
+		else if (pd->availTime() < nodeT) continue;
+		else if (pd->getLevel() <= nodeSL) break;
 	}
 
-	resetNodes();
-
-	// reset the appropriate members for schedule.
-	unschedNodes = nodeCount;
-	unschedWork  = ExecTotal;
+	if (nl) nlist.insertAhead(tmp, nl);
+	else    nlist.appendLink(tmp);
 }
 
-			///////////////////////
-			///  findTinyBlock  ///
-			///////////////////////
+// HuNode specific reset.
+void HuGraph :: resetNodes() {
 
-// find a runnable block whose execution time is closest to the
-// given limit.
+	EGIter nxtNod(*this);
+	HuNode* node;
 
-QSNode* QSGraph :: findTinyBlock(int limit)
-{
-	// If the geven limit is smaller than the minWork, return 0;
-	if (limit < minWork) return (QSNode*) 0;
-
-	// Attach a link iterator to the runnable nodes
-	EGNodeListIter NodeIter(runnableNodes);
-	QSNode* pd;
-	QSNode *obj = 0;
-	int closest = limit;
-
-	// go through the runnable node list
-	while ((pd = (QSNode*) NodeIter++) != 0) {
-                // The QSNode associated with dlnk
-		int temp = limit - pd->myExecTime();
-		if (temp >= 0 && temp < closest) {
-			temp = closest;
-			obj = pd;
-		}
+	while ((node = (HuNode*) nxtNod++) != 0) {
+		node->resetVisit();
+		node->resetWaitNum();
+		node->setAvailTime(0);
+		node->setPreferredProc(0);
 	}
-
-	// fetch the "obj" node from the runnable list.
-	if (obj) runnableNodes.remove(obj);
-
-	return obj;
 }
-
-// Return the smallest execution time among the runnable nodes.
-int QSGraph :: smallestExTime()
-{
-	// Attach a link iterator to the DLNodeList
-	EGNodeListIter NodeIter(runnableNodes);
-	QSNode *pd;
-	int small = unschedWork;
-
-	// Iterate for all runnable nodes.
-	while ((pd = (QSNode*) NodeIter++) != 0) 
-		if (pd->myExecTime() < small) small = pd->myExecTime();
-	
-	minWork = small;
-	return small;
-}
-

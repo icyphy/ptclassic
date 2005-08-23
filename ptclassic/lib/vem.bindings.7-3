@@ -1,4 +1,4 @@
-# $Id$
+# @(#)vem.bindings.7-3	1.1	4/24/90
 REMOTE		finder		localhost	~octtools/bin/rpc/finder
 REMOTE		net-length	localhost	~octtools/bin/rpc/net-length
 REMOTE		vemlisp		localhost	~octtools/bin/rpc/vemlisp

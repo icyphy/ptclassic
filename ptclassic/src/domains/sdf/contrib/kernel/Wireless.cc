@@ -1,10 +1,10 @@
 static const char file_id[] = "Wireless.cc";
 
-/* ********************************************************************** *
+/*
 Version identification:
-$Id$ 
+@(#)Wireless.cc	1.5	9/17/96 
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,17 +31,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Programmer: John S. Davis, II
     
- * ********************************************************************** */
+Bug fixes by Uwe Trautwein (Uwe.Trautwein@E-Technik.TU-Ilmenau.DE)
+and Brian L. Evans.
+ */
 
-#ifdef		__GNUG__
-#pragma 	implementation
+#ifdef __GNUG__
+#pragma implementation
 #endif
 
 #include "Wireless.h"
 
+#include <math.h>		// Define cos and sin
+#include <float.h>		// Define DBL_MIN
+#include <Random.h>		// Define random number generators
+#include <ACG.h>
+
 // Declare Random Number Generator Seed
 extern ACG* gen;
-
 
 // Constructor
 WirelessChannel::WirelessChannel()
@@ -80,7 +86,7 @@ void WirelessChannel::Setup( const ChannelParameters channelparams )
 
 	// Define Pointer To Uniform Distribution
 	delete random;
-	random = new Uniform( -0.5 * PI, 0.5 * PI, gen );
+	random = new Uniform( -0.5 * M_PI, 0.5 * M_PI, gen );
 }
 
 
@@ -101,12 +107,12 @@ Complex WirelessChannel::Input( Complex input )
 {
 	ShiftData( input );
 
-	sample_cnt =+ 1;
-	if( params.channel_type == 'i' | params.channel_type == 'I' )
+	sample_cnt++;
+	if( params.channel_type == 'i' || params.channel_type == 'I' )
 	{
 	     CorruptData();
 	}
-	else if( params.channel_type == 'o' | params.channel_type == 'O' )
+	else if( params.channel_type == 'o' || params.channel_type == 'O' )
 	{
 	     if( sample_cnt * params.Ts > params.wc )
 	     {
@@ -129,7 +135,7 @@ Complex WirelessChannel::Input( Complex input )
 // Corrupt Data
 void WirelessChannel::CorruptData()
 {
-	for( int path = 0; path < no_paths; path++ )
+	for(int path = 0; path < no_paths; path++ )
 	{
 	     // Determine Phase Travelled Through Distance
 	     double new_phase = double( path/no_paths ) * params.Td * params.wc;
@@ -138,30 +144,22 @@ void WirelessChannel::CorruptData()
 	     // Distance Between Tx and Rx Antennas.
 	     new_phase += (*random)();
 
-	     // Is There A Modulo 2*PI Function?
-	     if( new_phase > PI/2.0 )
-	     {
-		  new_phase = ( new_phase/(PI/2.0) - floor(new_phase/(PI/2.0)) ) 
-			* PI - PI/2.0;
-	     }
+	     // Compute the Phase Modulo 2 PI To Keep It In [-PI, PI]
+	     new_phase -= floor((new_phase+M_PI) / (2.0 * M_PI)) * 2.0 * M_PI;
 
-	     corrupt_symbols[ path ] 
-		= PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
+	     // abs Is An Overloaded Operator: see ComplexSubset.h
+	     Complex corruptSymbolPhase =
+	        PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
 
-	     corrupt_symbols[ path ] = SetPathLoss( path, corrupt_symbols[ path ] );
+	     corrupt_symbols[ path ] = SetPathLoss( path, corruptSymbolPhase );
 	}
 }
 
 
-// Convert Phase/Magnitude To Real/Imaginery
+// Convert Phase/Magnitude To Real/Imaginary
 Complex WirelessChannel::PhasorToRectangular( double phase, double mag )
 {
-	double tan_of_phs = tan( phase );
-	double real = sqrt( mag*mag / (tan_of_phs*tan_of_phs + 1.0) );
-	double imag = tan_of_phs*real;
-
-	Complex result( real, imag );
-
+	Complex result( mag * cos(phase), mag * sin(phase) );
 	return result;
 }
 
@@ -169,16 +167,20 @@ Complex WirelessChannel::PhasorToRectangular( double phase, double mag )
 // Set The Magnitude According To Path Loss
 Complex WirelessChannel::SetPathLoss( int path, Complex number )
 {
-	double tx_power_nat = norm( number );
+	// FIXME: Prevent the log10(0) from being taken
+	// On Linux machines, log10(0) yields Inf instead of -Inf,
+	// and power(10,inf) -NaN instead of Inf.  We increment the
+	// value to make sure that it is always positive.
+	// This is being applied to all platforms
+	double tx_power_nat = norm( number ) + DBL_MIN;
 	double tx_power_dB = 10.0*log10( tx_power_nat/0.001 );
-
 	double one_meter_power = tx_power_dB - params.ref_power_loss;
 
-	double distance = params.mean_distance 
-		+ (double(path)/no_paths) * params.Td * LIGHT;
+	double distance = params.mean_distance +
+			  (double(path)/no_paths) * params.Td * LIGHT;
 
-	double rx_power_dB = one_meter_power 
-			- 10.0*params.loss_rate*log10( distance );
+	double rx_power_dB = one_meter_power -
+			     10.0*params.loss_rate*log10( distance );
 	double rx_power_nat = 0.001*power( 10.0, rx_power_dB/10.0 );
 	
 	double mag = sqrt( rx_power_nat );
@@ -196,13 +198,3 @@ WirelessChannel::~WirelessChannel()
 	delete [] corrupt_symbols;
 	delete random;
 }
-
-
-
-
-
-
-
-
-
-

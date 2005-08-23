@@ -1,0 +1,37 @@
+reset
+# Creating universe 'CompareMedian'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star ReadImage1 ReadImage
+	setstate ReadImage1 fileName "~ptolemy/src/domains/sdf/demo/ptimage"
+	setstate ReadImage1 frameId 0
+	star MedianImage1 MedianImage
+	setstate MedianImage1 FilterWidth 3
+	star DisplayImage1 DisplayImage
+	setstate DisplayImage1 command xv
+	setstate DisplayImage1 imageName original
+	setstate DisplayImage1 saveImage n
+	star DisplayImage2 DisplayImage
+	setstate DisplayImage2 command xv
+	setstate DisplayImage2 imageName filtered
+	setstate DisplayImage2 saveImage n
+	star DiffImage1 DiffImage
+	setstate DiffImage1 Scale 1.0
+	star DisplayImage3 DisplayImage
+	setstate DisplayImage3 command xv
+	setstate DisplayImage3 imageName difference
+	setstate DisplayImage3 saveImage n
+	connect DiffImage1 outData DisplayImage3 inData
+	node node1
+	nodeconnect MedianImage1 outData node1
+	nodeconnect DiffImage1 input2 node1
+	nodeconnect DisplayImage2 inData node1
+	node node2
+	nodeconnect ReadImage1 output node2
+	nodeconnect MedianImage1 inData node2
+	nodeconnect DisplayImage1 inData node2
+	nodeconnect DiffImage1 input1 node2
+run 1
+wrapup

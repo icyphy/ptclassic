@@ -2,14 +2,20 @@ defstar {
     name { Skew }
     domain { CG56 }
     desc { Generic skewing star. }
-    version { $Id$ }
+    version { @(#)CG56Skew.pl	1.11 03/29/97 }
     author { Kennard White }
-    copyright { 1991 The Regents of the University of California }
-    location { CG56 library }
-    explanation {
-The \fIerror\fP input is accumulated.  Normally the constant 0.0 is output.
-However, when overflow occurs, \fIoverVal\fP is output, 
-and when underflow occurs, \fIunderVal\fP is output.
+    copyright {
+Copyright (c) 1991-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
+    location { CG56 main library }
+    htmldoc {
+The <i>error</i> input is accumulated.
+Normally the constant 0.0 is output.
+However, when overflow occurs, <i>overVal</i> is output, 
+and when underflow occurs, <i>underVal</i> is output.
     }
     seealso {SSISkew}
     input {

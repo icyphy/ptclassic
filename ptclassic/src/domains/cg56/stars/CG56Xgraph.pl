@@ -4,28 +4,28 @@ defstar {
 	desc {
 Generate a plot of a single signal with the xgraph program.
 	}
-	version {$Id$}
+	version {@(#)CG56Xgraph.pl	1.11 04/07/97}
 	author { Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 Motorola Sim I/O library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+	location { CG56 main library }
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i> program.
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
+The <i>options</i> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
-.Ir "xgraph program, CG56"
-.Id "graph, X window, CG56"
+<a name="xgraph program, CG56"></a>
+<a name="graph, X window, CG56"></a>
 	}
-	derivedFrom { WriteFile }
+	derivedFrom { WrtFile }
 	defstate {
 		name {title}
 		type {string}
@@ -63,30 +63,38 @@ for a complete explanation of the options.
 		desc { For labeling, horizontal value of the first sample. }
 	}
 
-	codeblock(xgraph,"const char* outfile") {
+	codeblock(xgraph, "const char* outfile, const char* iofile, const char* deleteCommand") {
+/bin/rm -f @outfile
 
-	/bin/rm -f @outfile
+tail +$val(ignore) @iofile | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
 
-	tail +$val(ignore) $starSymbol(/tmp/cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
-	
-	/usr/bin/rm -f $starSymbol(/tmp/cgwritefile).io
+/bin/rm -f @iofile
 
-	(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f  $starSymbol(/tmp/cgxgraph)")) &
+(pxgraph -t "$val(title)" $val(options) @outfile; @deleteCommand) &
+	}
+
+constructor {
+	fileName.setAttributes(A_NONSETTABLE);
 }
-
-constructor { fileName.setAttributes(A_NONSETTABLE); }
 
 initCode {
-	StringList outfile;
-	if (saveFile.null())
-		outfile << "$starSymbol(/tmp/cgxgraph)";
-	else
-		outfile << expandPathName(saveFile);
-	addCode(xgraph(outfile),"shellCmds");
-	CG56WriteFile::initCode();
+	StringList iofile = logFileNameString;
+	StringList deleteCommand, outfile;
+	if ( saveFile.null() ) {
+		outfile << "$starSymbol(cgxgraph)" << "_$$$$";
+		deleteCommand = "/bin/rm -f ";
+		deleteCommand << outfile;
+	}
+	else {
+		char *expandedName = expandPathName(saveFile);
+		outfile << expandedName;
+		delete [] expandedName;
+		deleteCommand = "";
+	}
+	iofile << ".io";
+	addCode(xgraph(outfile,iofile,deleteCommand), "shellCmds");
+	CG56WrtFile::initCode();
 }
 
 
 }
-
-

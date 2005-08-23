@@ -2,7 +2,7 @@ defcorona {
     name { Sqrt }
     domain { ACS }
     desc { his star computes the square root of its input. }
-    version { $Id$ }
+    version { @(#)ACSSqrt.pl	1.2 09/08/99 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

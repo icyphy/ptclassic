@@ -6,10 +6,10 @@ defcore {
 	desc {
 Produces the square root of the input.
 	}
-	version {@(#)ACSSqrtCGFPGA.pl	1.0	6 June 1999}
+	version{ @(#)ACSSqrtCGFPGA.pl	1.11 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -19,7 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}
-        ccinclude { <sys/ddi.h> }
         ccinclude { <sys/wait.h> }
 	ccinclude { "acs_vhdl_lang.h" }
 	ccinclude { "acs_starconsts.h" }
@@ -58,22 +57,23 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -95,53 +95,68 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
 	    }
 	}
 	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
 		cost_file << "cost=zeros(1,size(insizes,2));" << endl
 		    << "t=find(insizes/2==outsizes);" << endl
                     << "cost(t)=(insizes(t)/2+1).^2;" << endl
-                    << "t=find(insizes/2 < outsizes);" << endl
+		    << "t=find(insizes/2 < outsizes);" << endl
                     << "term1=outsizes-insizes/2;" << endl
-                    << "term2=(term1+1)/2;" << endl
+		    << "term2=(term1+1)/2;" << endl
                     << "term3=(insizes/2+1).*(outsizes+1);" << endl
 	            << "term=term3+term2.*term1;" << endl
 		    << "cost(t)=term(t);" << endl;
-		numsim_file << "y=sqrt(x);" << endl;
+                cost_file << " if sum(numforms)>0 " << endl;
+                cost_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                cost_file << " end " << endl;
+
+		// numsim_file << "y=sqrt(x);" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=sqrt(x{k}); " << endl;
+                numsim_file <<  " end " << endl;
+                numsim_file <<  " " << endl;
+
                 rangecalc_file << "bads=find(inputrange<0);" << endl
 		    << "inputrange(bads)=0;" << endl
 		    << "if ~isempty(bads)" << endl
 		    << "disp('Warning:Negative input to sqrt, fix range');" << endl
                     << "end" << endl
 		    << "orr=sqrt(inputrange);" << endl;
+
                 natcon_file << "%Assuming fractional input" << endl
-		            << "yesno=(insizes>=4 & insizes<=60 & outsizes>=4 & outsizes<=60);" << endl;
+		            << "yesno=(insizes>=4 & insizes<=64 & outsizes>=4 & outsizes<=64);" << endl;
+
+		schedule_file << "outdel= 1+outsizes; " << endl;
+                schedule_file << "vl1=veclengs(1); " << endl;
+		schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+		schedule_file << "for k=1:size(insizes,2)" << endl;
+                schedule_file << "  racts1=[0 1 vl1-1 ; outdel(k) 1 vl1-1+outdel(k)];" << endl;
+		schedule_file << "  racts{k}=racts1;" << endl;
+		schedule_file << "end"  << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+                schedule_file << "if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << "end " << endl;
+
+
 		// END-USER CODE
 
 		// Return happy condition
@@ -149,22 +164,40 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
-
-		// Calculate CLB sizes
+		// Output precisions are variable, user must prescribe these
 		    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		int out_bitlen=pins->query_bitlen(1);
 		acs_delay=out_bitlen+1;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -188,14 +221,14 @@ It outputs lines of comments, instead of code.
 
 		// Output port definitions
 		pins->add_pin("dout","output",OUTPUT_PIN);
-		pins->set_min_vlength(1,8);
-		pins->set_max_vlength(1,16);
+		pins->set_min_vlength(1,4);
+		pins->set_max_vlength(1,64);
 
 		// Bidir port definitions
 		
 		// Control port definitions
 		pins->add_pin("c",INPUT_PIN_CLK);
-		pins->add_pin("ce",INPUT_PIN_AH);
+		pins->add_pin("ce",INPUT_PIN_CE,AH);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");

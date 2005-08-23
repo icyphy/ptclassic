@@ -25,11 +25,11 @@
 #
 
 # Config file to build debug binaries on Linux
-# $Id$
+# @(#)config-linux.debug.mk	1.2 08/24/98
 
 # Programmer:  Wolfgang Reimer
 
-BUILD_STATIC_BINARIES = yes
+#BUILD_STATIC_BINARIES = yes
 
 include $(ROOT)/mk/config-linux.mk
 

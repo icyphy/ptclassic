@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,37 +25,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)IntArray.h      1.0     06/16/99
+ Version: @(#)IntArray.h	1.6 08/02/01
 ***********************************************************************/
 #ifndef INTARRAY_H
 #define INTARRAY_H
 
-class IntArray
+class ACSIntArray
 {
  private:
   int total;
   int* ints;
 
  public:
- IntArray::IntArray(void);
- IntArray::IntArray(int);
- IntArray::IntArray(int,int);
- IntArray::~IntArray(void);
-  IntArray& operator=(IntArray&);
-  void IntArray::incr(int);
-  void IntArray::copy(IntArray*);
-  void IntArray::fill(int);
-  IntArray* IntArray::sort_lh(void);
-  IntArray* IntArray::sort_hl(void);
-  void IntArray::reorder(IntArray*);
-  void IntArray::add(void);
-  void IntArray::add(int);
-  void IntArray::remove(int);
-  int IntArray::population(void);
-  int IntArray::query(int);
-  int IntArray::set(int,int);
-  void IntArray::print(const char*);
-  int IntArray::find(int);
+ ACSIntArray::ACSIntArray(void);
+ ACSIntArray::ACSIntArray(int);
+ ACSIntArray::ACSIntArray(int,int);
+ ACSIntArray::~ACSIntArray(void);
+  ACSIntArray& operator=(ACSIntArray&);
+  void ACSIntArray::incr(int);
+  void ACSIntArray::copy(ACSIntArray*);
+  void ACSIntArray::fill(int);
+  ACSIntArray* ACSIntArray::sort_lh(void);
+  ACSIntArray* ACSIntArray::sort_hl(void);
+  void ACSIntArray::reorder(ACSIntArray*);
+  void ACSIntArray::add(void);
+  void ACSIntArray::add(int);
+  void ACSIntArray::remove(int);
+  int ACSIntArray::population(void);
+  int ACSIntArray::query(int);
+  int ACSIntArray::set(int,int);
+  void ACSIntArray::print(const char*);
+  int ACSIntArray::find(int);
 };
 
 #endif

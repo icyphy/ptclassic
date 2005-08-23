@@ -1,0 +1,36 @@
+reset
+# Creating universe 'interp'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star FIR1 FIR
+	setstate FIR1 taps "0.125 0.25 0.375 0.5 0.625 0.75 0.875 1.0 0.875 0.75 0.625 0.5 0.375 0.25 0.125"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 8
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower "-1.0"
+	setstate IIDUniform1 upper 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "original random signal"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x300+0+0 -P -0 input"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "interpolated signal"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "=800x300+0+325 -P -0 input"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits 1.0
+	setstate Xgraph2 xInit 0.0
+	connect FIR1 signalOut Xgraph2 input
+	node node1
+	nodeconnect IIDUniform1 output node1
+	nodeconnect FIR1 signalIn node1
+	nodeconnect Xgraph1 input node1
+run 10
+wrapup

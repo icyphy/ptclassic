@@ -2,7 +2,7 @@ defstar {
 	name { AddInt }
 	domain { C50 }
 	desc { Add any number of integer inputs, producing an integer output. }
-	version { @(#)C50AddInt.pl	1.3	2/10/96 }
+	version { @(#)C50AddInt.pl	1.7	01 Oct 1996 }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 The inputs are added and the result is written on the output.
 The addition wraps up around to mimic the behavior of
 two's complement addition.
@@ -38,23 +38,29 @@ two's complement addition.
 	setc	ovm
 	}
 
+
+	codeblock(clearSaturation){
+	clrc	ovm
+	}
+
 	codeblock(copyInput) {
-	ldp	#00h
 	lmmr	ar0,#$addr(input)
 	smmr	ar0,#$addr(output)
 	}
 
 	codeblock(addStart) {
-	lar	ar0,#$addr(input#1)
-	lar	ar1,#$addr(output)
-	mar	*,ar0
-	lacc	*,16
-	lar	ar0,#$addr(input#2)
+	lar	ar0,#$addr(input#1)	;ar0->first input
+	lar	ar1,#$addr(output)	;ar1->output
+	mar	*,ar0			;arp = 0
+	lacc	*,16			;accH = first input
+	lar	ar0,#$addr(input#2)	;ar0 -> second input
 	}
 
+
+
 	codeblock(add,"int i") {
-	add	*,16
-	lar	ar0,#$addr(input#@i)
+	add	*,16			; add last input pointed to
+	lar	ar0,#$addr(input#@i)	; point to next input
 	}
 
 	codeblock(addEnd) {
@@ -64,7 +70,7 @@ two's complement addition.
 
 	go {
 
-		if (int(saturation)) addCodeblock(saturate);
+		if (int(saturation)) addCode(saturate);
 
 		if (input.numberPorts() == 1) {
 			addCode(copyInput);
@@ -76,13 +82,14 @@ two's complement addition.
 			addCode(add(i));
 		}
 		addCode(addEnd);
+		if (int(saturation)) addCode(clearSaturation);
 	}
 
 	exectime {
 		int time = 0;
-		if ( input.numberPorts() == 1 ) retrun 3;
+		if ( input.numberPorts() == 1 ) return 2;
 		if (int(saturation)){
-			time ++;
+			time += 2;
 		}
 		time += 7;
 		if (input.numberPorts() > 2){

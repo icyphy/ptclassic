@@ -1,75 +1,37 @@
-ident
-{
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Tom Parks
- Date of creation: 1/11/91
-
- This star delays its input by an amount given by either the "delay"
- parameter or the "newDelay" input.
-
-**************************************************************************/
-}
-
 defstar
 {
     name { VarDelay }
     domain { DE }
-    desc
-    {
-Delays its input by an amount given by either the "delay" parameter or
-the "newDelay" input.
+    derivedFrom { Delay }
+    descriptor {
+This star delays its input by a variable amount.
+The "delay" parameter gives the initial delay,
+and the delay is changed using the "newDelay" input.
+    }
+    version { @(#)DEVarDelay.pl	1.9 06/04/96 }
+    author { T. M. Parks }
+    copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
 
-    input
-    {
-	name { input }
-	type { anytype }
-    }
-
-    input
-    {
+    input {
 	name { newDelay }
 	type { float }
     }
 
-    output
-    {
-	name { output }
-	type { = input }
+    constructor {
+	// state is no longer constant
+	delay.clearAttributes(A_CONSTANT);
     }
 
-    defstate
-    {
-	name { delay }
-	type { float }
-	default { 1.0 }
-	desc { Initial time delay. }
-	attributes { A_NONCONSTANT | A_SETTABLE }
-    }
-
-    constructor
-    {
-	delayType = TRUE;
-    }
-
-    go
-    {
+    go {
 	if (newDelay.dataNew)
-	{
-	    delay = float(newDelay.get());
-	}
+	    delay = newDelay.get();
 
 	if (input.dataNew)
-	{
-	    completionTime = arrivalTime + double(delay);
-	    Particle& pp = input.get();
-	    output.put(completionTime) = pp;
-	}
+	    DEDelay::go();
     }
 }

@@ -1,6 +1,6 @@
 /*******************************************************************
 Version identification:
-$Id$ %Q%
+@(#)ptdspSinc.c	1.2 
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptdspSinc.h"
 #include <math.h>
 
-static double DELTA = 1.0e-9;	// Approximately zero
+static double DELTA = 1.0e-9;	/* Approximately zero */
 
 double 
 Ptdsp_Sinc(double input) {

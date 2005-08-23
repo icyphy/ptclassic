@@ -51,13 +51,13 @@ class MemPort
   // Class attributes
   int total_sgs;
   int controller_fpga;
-  SequentialList* source_stars;
-  SequentialList* sink_stars;
+  CoreList* source_cores;
+  CoreList* sink_cores;
   ACSCGFPGACore* dataimux_star;
   ACSCGFPGACore* dataomux_star;
   int data_size;
   ACSCGFPGACore* addrmux_star;
-  SequentialList* const_stars;
+  CoreList* const_stars;
   ACSCGFPGACore* addrgen_star;
   ACSCGFPGACore* addrbuf_star;
   int addr_size;
@@ -82,6 +82,7 @@ public:
   int MemPort::init_pt(int);
   int MemPort::add_pt(int,int);
   int MemPort::fetch_pt(int);
+  int MemPort::reset_cores(void);
   int MemPort::assign_srccore(ACSCGFPGACore*);
   int MemPort::assign_snkcore(ACSCGFPGACore*,int);
   int MemPort::set_controller(const int);

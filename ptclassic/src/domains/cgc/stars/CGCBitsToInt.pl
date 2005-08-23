@@ -10,16 +10,16 @@ The first received bit becomes the most significant bit of the output.
 If "nBits" is smaller than the wordsize minus one, then the
 output integer will always be non-negative.
     }
-    version { $Id$ }
+    version { @(#)CGCBitsToInt.pl	1.6 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1994 The Regents of the University of California.
+	Copyright (c) 1990-1996 The Regents of the University of California.
 	All rights reserved.
 	See the file $PTOLEMY/copyright for copyright notice,
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC demo library }
-    explanation {
+	htmldoc {
     }
     input {
 	name {input}
@@ -39,9 +39,10 @@ output integer will always be non-negative.
 	noInternalState();
     }
     setup {
-	if (int(nBits) > sizeof(int)*8) {
+        /* Need (int) cast on sizeof to eliminate gcc warning */
+	if (int(nBits) > (int)sizeof(int)*8) {
 	    StringList message = "nBits needs to be less than";
-	    message << sizeof(int)*8;
+	    message << (unsigned int)(sizeof(int)*8);
 	    Error::abortRun(*this,message);
 	    return;
 	}

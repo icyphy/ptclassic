@@ -1,90 +1,104 @@
-/*  Version $Id$
+/* 
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+/*  Version @(#)PNPortHole.h	2.2 1/1/96
+    Author:	T.M. Parks
+    Created:	6 February 1992
 
     Definitions of domain-specific PortHole classes.
 */
 
-#ifndef _MTDFConnect_h
-#define _MTDFConnect_h
+#ifndef _PNPortHole_h
+#define _PNPortHole_h
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "Connect.h"
-class MTDFGeodesic;
+#include "SDFPortHole.h"
 
-class MTDFPortHole : public PortHole
+const bitWord PB_DYNAMIC = 0x20;
+extern const Attribute P_DYNAMIC;
+extern const Attribute P_STATIC;
+
+class PNGeodesic;
+
+class PNPortHole : public DFPortHole
 {
 public:
     // Class identification.
-    virtual int isA(const char* className) const;
-
-    // Constructor.
-    MTDFPortHole();
-
-    // An alias for the inherited myGeodesic member.
-    MTDFGeodesic*& myGeodesic;
-
-    // Allocate and return a MTDFGeodesic.
-    virtual Geodesic* allocateGeodesic();
-
-    /* Redefine PortHole methods because Geodesic lacks certain virtual
-       functions.
-    */
-    void MTDFPortHole::getParticle();
-    void MTDFPortHole::putParticle();
+    /*virtual*/ int isA(const char* className) const;
+    /*virtual*/ int isDynamic() const;
 };
 
-class InMTDFPort : public MTDFPortHole
+class InPNPort : public PNPortHole
 {
 public:
     // Input/output identification.
-    virtual int isItInput() const;
+    /*virtual*/ int isItInput() const;
 
     // Get data from the Geodesic.
-    virtual void grabData();
+    /*virtual*/ void receiveData();
 };
 
 
-class OutMTDFPort : public MTDFPortHole
+class OutPNPort : public PNPortHole
 {
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    /*virtual*/ int isItOutput() const;
+
+    // Update buffer pointer (for % operator) and clear old Particles.
+    /*virtual*/ void receiveData();
 
     // Put data into the Geodesic.
-    virtual void sendData();
+    /*virtual*/ void sendData();
 };
 
- 
-class MultiMTDFPort : public MultiPortHole
-{
-};
+// MultiPNPort is identical to MultiDFPort.
+typedef MultiDFPort MultiPNPort;
 
-class MultiInMTDFPort : public MultiMTDFPort
+class MultiInPNPort : public MultiPNPort
 {
 public:
     // Input/output identification.
-    virtual int isItInput() const;
+    /*virtual*/ int isItInput() const;
  
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    /*virtual*/ PortHole& newPort();
 };
  
-class MultiOutMTDFPort : public MultiMTDFPort
+class MultiOutPNPort : public MultiPNPort
 {     
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    /*virtual*/ int isItOutput() const;
 
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    /*virtual*/ PortHole& newPort();
 };
 
 #endif

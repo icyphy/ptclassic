@@ -1,7 +1,7 @@
 # Version identification:
-# $Id$
+# @(#)make.template	1.2 02/17/99
 # 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -63,12 +63,12 @@ HDRS =	TkSchedTarget.h \
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libvhdltcltktargets.$(LIBSUFFIX)
+PTLIB = libvhdltcltktargets.$(LIBSUFFIX)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	all $(LIBDIR)/$(LIB)
+install:	all $(LIBDIR)/$(PTLIB)
 		@echo Installation complete.
 
 # include common definitions, rules

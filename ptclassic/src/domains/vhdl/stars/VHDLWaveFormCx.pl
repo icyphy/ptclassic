@@ -1,42 +1,19 @@
 defstar {
-	name { WaveForm }
+	name { WaveFormCx }
 	domain { VHDL }
 	desc {
-Output a waveform as specified by the array state "value" (default "1 -1").
-You can get periodic signals with any period, and can halt a simulation
-at the end of the given waveform.  The following table summarizes the
-capabilities:
-
- haltAtEnd   periodic   period    operation
- ------------------------------------------------------------------------
- NO          YES        0         The period is the length of the waveform
- NO          YES        N>0       The period is N
- NO          NO         anything  Output the waveform once, then zeros
-
-*** NOTE:
- The following behavior is not implemented in the VHDL version of this star:
- YES         anything   anything  Stop after outputting the waveform once
-
-The first line of the table gives the default settings.
+This star works the same way as the VHDLWaveForm star,
+only using complex types instead of float types.
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
-and its contents stored in an array.  The size of the array is currently
-limited to 20,000 samples.  To read longer files, use the 
-.c ReadFile
-star.  This latter star reads one sample at a time, and hence also
-uses less storage.
-.Id "file read"
-.Id "waveform from file"
-.Id "reading from a file"
-.Ir "halting a simulation"
-.Ir "simulation, halting"
+something of the form "&lt; filename".  The file will be read completely
+and its contents stored in an array.
 	}
-	version { @(#)VHDLWaveForm.pl	1.1 1/26/96 }
+	version { @(#)VHDLWaveFormCx.pl	1.4 10/01/96 }
 	author { Michael C. Williamson, S. Ha }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -44,12 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	output {
 		name { output }
-		type { float }
+		type { complex }
 	}
 	state {
 		name { value }
-		type { floatarray }
-		default { "1 -1" }
+		type { complexarray }
+		default { "(1.0,0.0) (-1.0,0.0)" }
 		desc { One period of the output waveform. }
 	}
 	state {
@@ -89,10 +66,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(body) {
 if ($ref(pos) >= $val(size))
-  $ref(output) $assign(output) 0.0;
+  $refCx(output,real) $assign(output) 0.0;
+  $refCx(output,imag) $assign(output) 0.0;
   $ref(pos) $assign(pos) $ref(pos) + 1;
 else
-  $ref(output) = $ref(value,pos);
+  $refCx(output,real) = $refCx(value,pos,real);
+  $refCx(output,real) = $refCx(value,pos,real);
   $ref(pos) $assign(pos) + 1;
 end if;
 if ($val(periodic) /= 0)

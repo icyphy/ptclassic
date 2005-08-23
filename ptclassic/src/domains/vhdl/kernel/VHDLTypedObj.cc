@@ -1,9 +1,9 @@
 static const char file_id[] = "VHDLTypedObj.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLTypedObj.cc	1.2 07/31/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLTypedObj :: VHDLTypedObj() {
+  type = "";
   VHDLObj::initialize();
 }
 
@@ -49,11 +50,7 @@ VHDLTypedObj :: ~VHDLTypedObj() {}
 
 // Return a pointer to a new copy of the VHDLTypedObj.
 VHDLTypedObj* VHDLTypedObj :: newCopy() {
-  //  VHDLTypedObj* newTypedObj = new VHDLTypedObj;
-  //  newTypedObj->setName(this->name);
-  VHDLTypedObj* newTypedObj = (VHDLTypedObj*) VHDLObj::newCopy();
-  newTypedObj->type = this->type;
-
+  VHDLTypedObj* newTypedObj = new VHDLTypedObj(name, type);
   return newTypedObj;
 }
 
@@ -79,8 +76,6 @@ VHDLTypedObjList* VHDLTypedObjList :: newCopy() {
 
 // Allocate memory for a new VHDLTypedObj and put it in the list.
 void VHDLTypedObjList :: put(StringList name, StringList type) {
-  VHDLTypedObj* newTypedObj = (VHDLTypedObj*) new VHDLObj(name);
-  //  newTypedObj->setName(name);
-  newTypedObj->type = type;
+  VHDLTypedObj* newTypedObj = new VHDLTypedObj(name, type);
   this->put(*newTypedObj);
 }

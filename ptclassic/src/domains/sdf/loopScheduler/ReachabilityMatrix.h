@@ -1,9 +1,31 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)ReachabilityMatrix.h	1.5	3/2/95
 
- Copyright (c) 1991 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  S.  Bhattacharyya
 
@@ -34,30 +56,6 @@ class BooleanMatrix;
 
 class ReachabilityMatrix {
 
-private : 
-
-	// the number of rows and columns in the matrix
-	int dim;
-
-	// the reachability matrix
-	BooleanMatrix *matrix; 
-
-	// the last index allocated to a node 
-	int current_index;
-
-	// connect two nodes, the connection goes from parent to child
-	inline void connect(LSNode *parent, LSNode *child);
-
-	// add the set of nodes reachable by the child to
-	// the set of nodes reachable by the parent
-	void addPaths(int parentindex, int childindex);
-
-	// Set up the reachability matrix for the graph "g".
-	void initialize(LSGraph&);  
-
-	// set up the connections for node "p"
-	void initialize(LSNode*);
-
 public :
 	// Constructor to create the Reachability Matrix for an expanded graph.
 	ReachabilityMatrix(LSGraph&);
@@ -80,6 +78,29 @@ public :
 	// allocate an index into the reachability matrix
 	// Return -1 if we're out of indeces.
 	int allocateIndex();
+
+private : 
+	// the number of rows and columns in the matrix
+	int dim;
+
+	// the reachability matrix
+	BooleanMatrix *matrix; 
+
+	// the last index allocated to a node 
+	int current_index;
+
+	// connect two nodes, the connection goes from parent to child
+	inline void connect(LSNode *parent, LSNode *child);
+
+	// add the set of nodes reachable by the child to
+	// the set of nodes reachable by the parent
+	void addPaths(int parentindex, int childindex);
+
+	// Set up the reachability matrix for the graph "g".
+	void initialize(LSGraph&);  
+
+	// set up the connections for node "p"
+	void initialize(LSNode*);
 };
 
 #endif

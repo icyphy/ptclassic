@@ -6,7 +6,7 @@ This is an amplifier.  The integer output is the integer input
 divided by the integer "divisor" (default 2).  Truncated integer
 division is used.
 	}
-	version { $Id$ }
+	version { @(#)C50DivByInt.pl	1.4	06 Oct 1996 }
 	author { Luis Gutierrez, based on the CG56 version }
 	acknowledge { Brian L. Evans, author of the CG56 version }
 	copyright {
@@ -15,12 +15,12 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-This star computes the inverse of the \fIdivisor\fR state as a fixed-point
+	htmldoc {
+This star computes the inverse of the <i>divisor</i> state as a fixed-point
 number and then generates code that uses integer-fix multiplication
-to compute the dividend.  For values of \fIdivisor\fR greater than 10,
+to compute the dividend.  For values of <i>divisor</i> greater than 10,
 additional code is generated to ensure that the integer division is correct.
-.pp
+<p>
 There is no easy way to implement integer division on the Motorola 56000.
 If we used fixed-point division, then the execution time would explode.
 Even integer division by two cannot be implemented as an arithmetic

@@ -1,9 +1,9 @@
 // This may look like C code, but it is really -*- C++ -*-
-#ifndef _ACSCGTarget_h
-#define _ACSCGTarget_h
+#ifndef _ACSSimTarget_h
+#define _ACSSimTarget_h
 
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,14 +29,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSSimTarget.h	1.6 08/02/01
 
 ***********************************************************************/
 
 #include "ACSTarget.h"
 
-class ACSCGTarget : public ACSTarget {
+class ACSSimTarget : public ACSTarget {
 public:
-}
+};
 
-#endif //_ACSCGTarget_h
+#endif //_ACSSimTarget_h

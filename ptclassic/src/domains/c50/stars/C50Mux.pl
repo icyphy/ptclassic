@@ -2,212 +2,162 @@ defstar {
     name { Mux }
     domain { C50 }
     desc { Multiplexes any number of inputs onto one output stream. }
-    version { $Id$ }
-    author { Luis Gutierrez, based on CG56 version }
+    version {@(#)C50Mux.pl	1.14	05/26/98}
+    author { Luis Gutierrez, based on CG56 version, G. Arslan }
     acknowledge { SDF version by E. A. Lee, CG56 version by Kennard White }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { C50 control library }
-    explanation {
-.Id "multiplex"
-\fIblockSize\fP particles are consumed on each input.
+	htmldoc {
+<a name="multiplex"></a>
+<i>blockSize</i> particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.
-The one copied is determined by the \fIcontrol\fP input.
-Integers from $0$ through $N-1$ are accepted at the \fIcontrol\fP input,
-where $N$ is the number of inputs.
-If the \fIcontrol\fR input is outside this range, random data (possibly
+The one copied is determined by the <i>control</i> input.
+Integers from 0 through <i>N-</i>1 are accepted at the <i>control</i> input,
+where <i>N</i> is the number of inputs.
+If the <i>control</i> input is outside this range, random data (possibly
 memory mapped devices) will be copied.
-.UH IMPLEMENTATION:
-.pp
+<h3>IMPLEMENTATION:</h3>
+<p>
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs. non-looped, circular vs. linear,
-and scalars vs vectors (\fIblockSize\fR > 1), uniform inputs vs. non-uniform
+and scalars vs vectors (<i>blockSize</i> &gt 1), uniform inputs vs. non-uniform
 inputs (port.bufSize()).
 The current implementation handles only some of these cases.
 Use this star at your own risk.
-.pp
+<p>
 At compile time, the star constructs a table of pointers to each of the
 input blocks.
-The \fIcontrol\fP input is used to index this table, yielding a pointer
+The <i>control</i> input is used to index this table, yielding a pointer
 to the appropriate input block for the firing.
-.pp
+<p>
 Currently we advance each of the pointers in the table on every firing.
-With some schedule the advancement is a nop; this case is handled.
+With some schedules the advancement is a nop; this case is handled.
 In other schedules the advancement is periodic over all inputs; in this
 case, we could pre-calculate a set of tables at compile time instead
 of performing runtime advancement.
 This is not currently handled.
     }
-    inmulti {
-        name {input}
-        type {ANYTYPE}
-	attributes {P_CIRC}
-    }
-    input {
-	name {control}
-	type {INT}
-    }
-    output {
-	name {output}
-	type {=input}
-    }
-    state {
-	name {blockSize}
-	type {INT}
-	default {1}
-	desc {Number of particles in a block.}
-    }
-    state {
-	name {useCircular}
-	type {INT}
-	default {1}
-	desc { "Boolean: use circular addressing on inputs." }
-    }
-    state {
-	name {ptrvec}
-	type {INTARRAY}
-	default {""}
-	desc { "Array containing pointers to inputs and their lengths" }
-	attributes {A_NONSETTABLE|A_NOINIT|A_UMEM}
-    }
-    state {
-	name {curinput}
-	type {INT}
-	default {0}
-	desc { "Current input within go() loop." }
-	attributes {A_NONSETTABLE|A_NONCONSTANT}
-    }
-    state {
-	name {useModuloB}
-	type {INT}
-	default {0}
-	desc { "True if any input is not scalar." }
-	attributes {A_NONSETTABLE|A_NONCONSTANT}
-    }
-    setup {
-	output.setSDFParams(int(blockSize),int(blockSize)-1);
-	input.setSDFParams(int(blockSize),int(blockSize)-1);
-	if ( int(useCircular) ) {
-	    input.setAttributes(P_CIRC);
-	} else {
-	    input.setAttributes(P_NONCIRC);
+
+	//FIXME: All inputs buffer are allocated at the same memory location
+	//       Causes dublicated memory allocation error durin compiling
+
+	inmulti {
+		name {input}
+		type {ANYTYPE}
+		attributes {P_CIRC}
+	}
+	input {
+		name {control}
+		type {INT}
+	}
+	output {
+		name {output}
+		type {=input}
+	}
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
+	}
+	state {
+		name {useCircular}
+		type {INT}
+		default {1}
+		desc { "Boolean: use circular addressing on inputs." }
+	}
+	defstate {
+		name {ptrarray }
+		type {INTARRAY }
+		default {""}
+		desc { Array of pointers to outputs }
+		attributes { A_NONSETTABLE|A_BMEM|A_CIRC}
+	}
+	
+	protected{
+		int n;
+		int iter;
 	}
 
-	int np = input.numberPorts();
-	ptrvec.resize(2*np);
-    }
-    initCode {
-	StringList buff;
-	int i, np = input.numberPorts();
+	initCode{
+	  StringList ptrInit;
+	  ptrInit << "\tmar *,ar0\n";
+	  for (int i=1; i<= n; i++){
+	    ptrInit<< "\tlar ar0,#$addr(input#" << i << ")\n"
+	           << "\tsar ar0,($addr(ptrarray)+" << (i-1) << ")\n";
+	  }
+	  addCode(ptrInit);
+	}
 
-	int allScalorB = TRUE;
-	MPHIter portiter(input);
-	for (i=0; i < np; i++) {
-	    AsmPortHole *port = (AsmPortHole*) portiter++;
-	    if ( port->bufSize() != 1 )
-		allScalorB = FALSE;
-	}
-	useModuloB = int(useCircular) && ! allScalorB;
-
-	buff<<"\t.ds	$addr(ptrvec)\n";
-	addCode("\torg	x:$addr(ptrvec)\n");
-	for (i=0; i < np; i++) {
-	    buff<<"\t.word\t$addr(input#";
-	    buff<<i+1;
-	    buff<<")\n";
-	}
-	for ( i=0; i < np; i++) {
-	    // There is a weirdness with scalar inputs: see cbCopy below
-	    buff<<"\t.word\t$size(input#";
-	    buff<<i+1;
-	    buff<<")\n";
-	}
-	buff<<"\t.text\n";
-	addCode(buff);
-    }
-    codeblock(cbCopyScalor) {
-	lar	ar0,#$addr(ptrvec)
+	codeblock(loadAddress,""){
 	lmmr	indx,#$addr(control)
-	mar	*,ar0
+	lar	ar1,#$addr(ptrarray)
+	mar	*,ar1
 	mar	*0+
-	lacl	*
-	samm	ar0
-	bldd	*,#$addr(output)
-    }
-    codeblock(cbCopyBlock,"int offset,int iter") {
-	lar	ar0,#$addr(ptrvec)
-	lmmr	indx,#$addr(control)
-	mar	*,ar0
-	mar	*0+
-	.if	$val(useModuloB)
-	lacl	*,ar1		; acc = address of port
-	samm	cbsr1		; cbsr1 = start address of port
-	samm	ar1		; ar2 = start address of port
-	lamm	ar0		; acc -> address of port
-	add	#@offset,0	; acc -> end address of port
-	samm	cber1		; cbsr1 = end address of port
-	lacl	#09
-	samm	cbcr		; set circ buff cntrl reg
-	.else
-	lacl	*,ar1
-	samm	ar1		; ar2 = start address of port
-	.endif
+	lar	ar2,*,ar2
+	}
+	
+	codeblock(moveInput,""){
 	rpt	#@iter
 	bldd	*+,#$addr(output)
-	.if	$val(useModuloB)
-	zap
-	samm	cbcr
-	.endif
 	}
-
-    // the cbAdvancePtr is only code-gen'd when bufsize > 1.
-    // note that ports are 1-based array, while states are 0-based
-    codeblock(cbAdvancePtr,"int iter, int size") {
-	; advance ptr for input#$val(curinput)
-	lar	ar1,#$addr(ptrvec,curinput)
-	mar	*,ar1
-	.if	$val(useModuloB)
-	ldp	#00h
-	lacc	*
-	lar	ar0,#@size
-	samm	cbsr1
-	add	ar0
-	samm	cber1
-	lacl	#09
-	samm	cbcr
-	.endif
-	rpt	#@iter
-	mar	*+
-	smmr	ar1,#$addr(ptrvec,(curinput)
-	.if	$val(useModuloB)
-	splk	#00,cbcr
-	.endif
-	}
-
-
-    go {
-	if ( int(blockSize) == 1 )	addCode(cbCopyScalor);
-	else				addCode(cbCopyBlock(int(ptrvec.size())/2,int(blockSize)-1));
 	
-	if ( int(useCircular) ) {
-	    int np = input.numberPorts();
-	    MPHIter portiter(input);
-	    int iter, size;
-	    iter = int(blockSize) - 1;
-	    for (int i=0; i < np; i++) {
-		AsmPortHole *port = (AsmPortHole*) portiter++;
-		if ( port->bufSize() != int(blockSize) ) {
-		    // The test above also catchs the bufSize==1 problem
-		    curinput = i;
-		    size = (port->bufSize()) - 1;
-		    addCode(cbAdvancePtr(iter, size));
+	codeblock(moveOne){
+	bldd	*,#$addr(output)
+	}
+	
+	method {
+		name { computeIterations }
+		type { " void " }
+		arglist { "()" }
+		access { protected }
+		code {
+			iter = int(blockSize);
+			if (output.resolvedType() == COMPLEX ){
+				iter = 2*iter;
+			};
+			iter --;
 		}
-	    }
 	}
 
-    }
+	setup {
+		n = input.numberPorts();
+		ptrarray.resize(n);
+		int portsize = int(blockSize);
+		input.setSDFParams(portsize, portsize-1);
+		output.setSDFParams(portsize, portsize-1);
+		computeIterations();
+		if ( int(useCircular) ) {
+			input.setAttributes(P_CIRC);
+		} else {
+			input.setAttributes(P_NONCIRC);
+		}
+	}
+	
+	go {
+		addCode(loadAddress());
+		if (iter) 
+			addCode(moveInput());
+		else 
+			addCode(moveOne);
+	}
+	exectime{
+		int time = 6;
+		if (iter){
+			time += 4 + iter;
+		} else {
+			time += 3;
+		}
+		return time;
+	}
 }
+
+
+
+
+

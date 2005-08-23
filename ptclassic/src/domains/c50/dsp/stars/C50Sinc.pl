@@ -5,23 +5,26 @@ defstar {
 Sinc function using a polynomial approximation.  Input range of [-1,1)
 is scaled by pi.  Output is sin(pi*input)/(pi*input).
 	}
-	version { $Id$ }
+	version { @(#)C50Sinc.pl	1.6	04/08/97 }
 	author { Luis Gutierrez, based on the CG56 version }
 	copyright{
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-	explanation { 
+	htmldoc {
+<a name="sinc"></a>
 This star computes the sinc of the input, which must be in the range
 [-1.0, 1.0).  The output equals
-.EQ
-sin(pi cdot input) over {pi cdot input}
-.EN
-so the input range is effectively $(-pi, pi)$.  The output is in
-the range $(-0.22, 1.0)$.
+<pre>
+sin(<i>pi</i>&#183input)
+-------------
+<i>pi</i>&#183input
+</pre>
+so the input range is effectively [<i>-pi, pi</i>).  The output is in
+the range (<i>-</i>0<i>.</i>22<i>, </i>1<i>.</i>0).
 	}
 	input{
 		name { input }
@@ -58,7 +61,12 @@ the range $(-0.22, 1.0)$.
 	mpy	*,ar1			; p = 0.5*in^2(b+c*in^2)
 	pac				; acc = p
 	add	*,15,ar2		; acc = 0.5(a+in^2(b+c*in^2))
-	sach	*,2			; output = 4*acc
+	setc	ovm			; set overflow mode
+	sfl				; these inst are used
+	sacb				; to handle the case
+	addb				; where input = 0
+	clrc	ovm			; so that output = 0.999..
+	sach	*			; output = 4*acc
 	}
 	go {
 		addCode(sinc);

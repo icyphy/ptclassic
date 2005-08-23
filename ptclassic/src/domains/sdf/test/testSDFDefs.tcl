@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testSDFDefs.tcl	1.6 03/28/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,28 +33,14 @@
 # Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
 
 set TYCHO [file join $env(PTOLEMY) tycho]
+set env(TYCHO) $TYCHO
 
-# Load up the test definitions.
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+lappend auto_path $TYCHO
+package require tycho.kernel.basic
+package require tycho.util.tytest
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
-
-# If a file contains non-graphical tests, then it should be named .tcl
-# If a file contains graphical tests, then it should be called .itcl
-# 
-# It would be nice if the tests would work in a vanilla itkwish binary.
-# Check for necessary classes and adjust the auto_path accordingly.
-#
-
-
-if {[info command ::tycho::tmpFileName] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-    }
-}
 
 # Define a few helper functions
 
@@ -83,10 +69,71 @@ proc readTmpFile {tmpfile} {
 }
 
 ######################################################################
+#### sdfInitUniverse
+# Initialize a universe by resetting, setting the name and the target.
+# This would be a good place to test schedulers.
+#
+proc sdfInitUniverse {{name {SDF_Init_Universe}} {target default-SDF}} {
+    reset __empty__
+    domain SDF
+    newuniverse ${name}Test SDF
+    seed 100
+    target $target
+    #target loop-SDF
+    #targetparam loopScheduler "DEF #choices: DEF, CLUST,ACYLOOP"
+}
+
+######################################################################
 #### sdfTest1In1Out
 # Test out one input one output star
 #
 proc sdfTest1In1Out {star {rampStep 1.0} {rampType "Float"} } {
+    sdfInitUniverse $star
+    star "$star.a" $star
+    if [regexp {Fix$} $star] {
+	catch {
+	    setstate "$star.a" ArrivingPrecision NO
+	    setstate "$star.a" InputPrecision 15.1
+	}
+	setstate "$star.a" OutputPrecision 15.1
+    }
+    switch $rampType {
+	Float {
+	    star Rampa Ramp
+	    setstate Rampa step $rampStep
+    	}
+	Fix {
+	    star Rampa RampFix
+	    setstate Rampa step $rampStep
+	}
+	Int {
+	    star Rampa RampFloat
+	    setstate Rampa step $rampStep
+	}
+	Complex {
+	    sdfTestRampCx Rampa $rampStep
+	}
+
+	default {
+	    error "rampType `$rampType' not supported"
+	}
+    }
+
+    set tmpfile [sdfSetupPrinter]
+    
+    connect "$star.a" output Printa input
+    connect Rampa output "$star.a" input
+    run 10 
+    wrapup
+
+    return [readTmpFile $tmpfile]
+}
+
+######################################################################
+#### sdfTest1In1OutFork
+# Test out one input one output star connected to a Fork.
+# This is useful for testing Particle operator =.
+proc sdfTest1In1OutFork {star {rampStep 1.0} {rampType "Float"} } {
 	reset __empty__
 	domain SDF
     newuniverse ${star}Test SDF
@@ -117,26 +164,53 @@ proc sdfTest1In1Out {star {rampStep 1.0} {rampType "Float"} } {
 	setstate Rampa step $rampStep
 
 	set tmpfile [sdfSetupPrinter]
+	set tmpfile2 [sdfSetupPrinter Printb]
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
 
-	connect "$star.a" output Printa input
 	connect Rampa output "$star.a" input
-	run 10 
+	connect Fork.output=21 input "$star.a" output
+	connect Fork.output=21 output#1 Printa input
+	connect Fork.output=21 output#2 Printb input
+
+	run 5
 	wrapup
 
-	return [readTmpFile $tmpfile]
+	list [readTmpFile $tmpfile] [readTmpFile $tmpfile2]
 }
 
 ######################################################################
-#### sdfTestArithmetic2input
+#### sdfTestAr
 # Test out two input arithmetic stars
 #
-proc sdfTestArithmetic2input {star} {
+proc sdfTestArithmetic2input {star {rampType Float}} {
     reset __empty__
     domain SDF
     newuniverse ${star}Test SDF
     target loop-SDF
-    star Rampa Ramp
-    star Rampb Ramp
+    switch $rampType {
+	Float {
+	    star Rampa Ramp
+	    star Rampb Ramp
+	}
+	Fix {
+	    star Rampa RampFix
+	    star Rampb RampFix
+	    setstate Rampa step 0.0625
+	    setstate Rampb step -0.125
+	}
+	Int {
+	    star Rampa RampInt
+	    star Rampb RampInt 
+	    setstate Rampb step 2.1
+	}
+
+	Complex {
+	    sdfTestRampCx Rampa
+	    sdfTestRampCx Rampb 2 0.25
+	}
+    }
+
     set tmpfile [sdfSetupPrinter]
 
     if [regexp {^Sub} $star] {

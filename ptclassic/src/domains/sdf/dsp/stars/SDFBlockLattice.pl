@@ -2,18 +2,24 @@ defstar {
 	name {BlockLattice}
 	domain {SDF}
 	desc {
-A Block Forward Lattice filter.
-The reflection coefficients are updated each time the star fires
+A block forward lattice filter.
+It is identical to the Lattice star except that
+the reflection coefficients are updated each time the star fires
 by reading the "coefs" input.
 The "order" parameter indicates how many coefficient
 should be read.  The "blockSize" parameter specifies how many
-signalIn samples should be processed for each set of coefficients.
+data samples should be processed for each set of coefficients.
 	}
-	version {$Id$}
+	version {@(#)SDFBlockLattice.pl	1.12 12/08/97}
 	author { Alan Kamas and Edward Lee }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
-	seealso { Lattice, RLattice, BlockRLattice, FIR, ComplexFIR, BiQuad}
+	seealso { Lattice, RLattice, BlockRLattice, FIR, FIRCx, Biquad}
 	input {
 		name {signalIn}
 		type {float}
@@ -49,20 +55,20 @@ signalIn samples should be processed for each set of coefficients.
 		reflectionCoefs = 0;
 	}
 	destructor {
-		LOG_DEL; delete b;
-		LOG_DEL; delete f;
-		LOG_DEL; delete reflectionCoefs;
+		LOG_DEL; delete [] b;
+		LOG_DEL; delete [] f;
+		LOG_DEL; delete [] reflectionCoefs;
 	}
-	start {
+	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (lastM != int(order)) {
 			lastM = int(order);
-			LOG_DEL; delete b;
+			LOG_DEL; delete [] b;
 			LOG_NEW; b = new double[lastM];
-			LOG_DEL; delete f;
-			LOG_NEW; f = new double[lastM];
-			LOG_DEL; delete reflectionCoefs;
+			LOG_DEL; delete [] f;
+			LOG_NEW; f = new double[lastM+1];
+			LOG_DEL; delete [] reflectionCoefs;
 			LOG_NEW; reflectionCoefs = new double[lastM];
 		}
 		for (int i=0; i < lastM; i++)  b[i]=0.0 ;
@@ -80,18 +86,19 @@ signalIn samples should be processed for each set of coefficients.
 	    // Iterate for each block
 	    for (int j = int(blockSize)-1; j >= 0; j--) {
 		double k;
-		
+		int i; 
+
 		// Forward prediction error
 		f[0] = double (signalIn%j);   // f(0)=x(n)
-		for (int i=1; i <= lastM; i++) {
-			k = reflectionCoefs[i-1];
+		for (i = 1; i <= lastM; i++) {
+			k = - reflectionCoefs[i-1];
 			f[i] = k * b[i-1] + f[i-1];
 		}
 		signalOut%j << f[lastM];
 
 		// Backward:  Compute the w's for the next round
 		for (i = lastM-1; i >0 ; i--) {
-			k = reflectionCoefs[i-1];
+			k = - reflectionCoefs[i-1];
 			b[i] = k * f[i-1] + b[i-1];	
 		}
 		b[0] = double (signalIn%j);   // b[0]=x[n] 

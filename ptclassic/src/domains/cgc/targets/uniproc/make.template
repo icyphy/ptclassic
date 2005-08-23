@@ -1,6 +1,6 @@
 # Makefile for Ptolemy C Code Generation uniprocessor targets
-# $Id$
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# @(#)make.template	1.3	10/01/96
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,24 +28,24 @@
 # Code generation targets
 
 # Root of Ptolemy directory
-ROOT=../../../../..
+ROOT =		../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cgc/targets/uniprocessor
+VPATH = 	$(ROOT)/src/domains/cgc/targets/uniproc
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-BDFKERNEL = $(ROOT)/src/domains/bdf/kernel
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
-CGCSTARS = $(ROOT)/src/domains/cgc/stars
-PARDIR = $(ROOT)/src/domains/cg/parScheduler
-CGTARDIR = $(ROOT)/src/domains/cg/targets
-DLDIR = $(ROOT)/src/domains/cg/dlScheduler
-MACRODIR = $(ROOT)/src/domains/cg/macroScheduler
-CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
+SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
+BDFKERNEL = 	$(ROOT)/src/domains/bdf/kernel
+CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+CGCKERNEL = 	$(ROOT)/src/domains/cgc/kernel
+CGCSTARS = 	$(ROOT)/src/domains/cgc/stars
+PARDIR = 	$(ROOT)/src/domains/cg/parScheduler
+CGTARDIR =	$(ROOT)/src/domains/cg/targets
+DLDIR =		$(ROOT)/src/domains/cg/dlScheduler
+MACRODIR =	$(ROOT)/src/domains/cg/macroScheduler
+CGDDFDIR =	$(ROOT)/src/domains/cg/ddfScheduler
 
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
@@ -75,12 +75,12 @@ ifeq ($(USE_SHARED_LIBS),yes)
 
 # If we are building shared libraries, then we can put all the targets in
 # a shared library.
-LIB = 		libcgctargets.$(LIBSUFFIX)
-all:		$(SRCS) makefile $(OBJS) $(LIB)
-install:	all $(LIBDIR)/$(LIB)
+PTLIB = 		libcgctargets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
 
 else
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all

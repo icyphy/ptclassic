@@ -1,9 +1,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5x
 # with egcs using static libraries and no optimization
 
-# $Id$
+# @(#)config-sol2.5.static.mk	1.6 10/05/99
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,6 @@
 #		       
 # Programmer:  Christopher Hylands
 
-# This file is set up for egcs-1.0.  gcc-2.8.0 has problems
-# compiling certain c++ files with -O -fPIC
-
 ARCHFLAGS =	-DPTSOL2_5
 
 # --------------------------------------------------------------------
@@ -41,7 +38,7 @@ ARCHFLAGS =	-DPTSOL2_5
 include $(ROOT)/mk/config-default.mk
 
 # Get the egcs definitions; we override some below.
-include $(ROOT)/mk/config-egcs.mk
+include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
@@ -70,7 +67,7 @@ CC =		gcc
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	#-O2
-# -Wsynth is new in g++-2.6.x
+# -Wsynth is a g++ flag first introduced in g++-2.6.x.
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
@@ -87,7 +84,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 #
 # system libraries (libraries from the environment) for c++ files
 # No need to include -lg++ under egcs
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lstdc++ -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lm
@@ -116,7 +113,10 @@ CC_STATIC =
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/openwin/include
+# -isystem is necessary for gcc-2.95.1 and Openwindows, otherwise we get:
+# /usr/openwin/include/X11/Xlib.h:1894: ANSI C++ forbids declaration
+#       `XSetTransientForHint' with no type
+X11_INCSPEC =	-isystem /usr/openwin/include
 X11_LIBDIR =	/usr/openwin/lib
 X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 
@@ -129,6 +129,24 @@ QUANTIFY =	quantify
 
 
 PURECOV = 	purecov
+
+# Wildforce Directory
+# Annapolis Micro Systems (http://www.annapmicro.com) uses 
+# WF4_BASE as the root of their installation for 
+# the Wildforce board software.  $(PTOLEMY)/vendors/annapolis/wf4 is
+# a good place to install it.
+WILDFORCE_DIR 	= $(WF4_BASE)
+
+WILDFORCE_INCL	= $(WILDFORCE_DIR)/include
+WILDFORCE_LIBSPEC = -L$(WILDFORCE_DIR)/lib -lWF4
+# g++-2.95.1 needs these
+WILDFORCEDEFINES=-Duint32_t="unsigned int" -Dint32_t=int
+
+# Uncomment the three lines below if you have the Annapolis 
+# Micro Systems Wildforce board and software
+WILDFORCECFLAGS = $(WILDFORCEDEFINES) -DPT_WILDFORCE -I$(WILDFORCE_INCL)
+SDFWILDFORCE =	1
+WILDFORCE = wildforce	
 
 #
 # Variables for miscellaneous programs
@@ -167,14 +185,14 @@ INCLUDE_GTHREADS =	yes
 # Include the PN domain.
 INCLUDE_PN_DOMAIN =	yes
 
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
+#CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
 
 # We must pase -DPT_EGCS so that make depend works properly.  Otherwise
 # we get messages like:
 # ../../src/compat/cfront/std.h:65: warning: No include path in which
 #	 to find sysent.h 
-CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
+#CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
 
 # system libraries (libraries from the environment)
 # No need to include -lg++ under egcs
-SYSLIBS=$(CSYSLIBS)
+#SYSLIBS=$(CSYSLIBS)

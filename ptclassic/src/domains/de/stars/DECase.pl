@@ -7,10 +7,10 @@ as determined by the last received control input.
 The value of the control input must be between
 0 and N-1, inclusive, or an error is flagged.
 	}
-	version { $Id$ }
+	version { @(#)DECase.pl	1.3	06/04/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -33,24 +33,27 @@ limitation of liability, and disclaimer of warranty provisions.
 		control.before(input);
 	}
 	go {
-	  if (input.dataNew) {
-	    if (int(control%0) < 0) {
-	      Error::abortRun(*this,"negative control value received");
-	      return;
-	    }
-	    MPHIter nexto(output);
-	    OutDEPort* p = 0;
-	    for (int i = int(control%0); i >=0; i--) {
-	      // Apologies for this cast.
-	      p = (OutDEPort*)nexto++;
-	      if (!p) {
-	        Error::abortRun(*this,"control value out of range");
-	        return;
-	      }
-	    }
-	    completionTime = arrivalTime;
-	    Particle& pp = input.get();
-            p->put(completionTime) = pp;
-	  }
+		if (input.dataNew) {
+		    OutDEMPHIter nexto(output);
+		    OutDEPort* oportp = 0;
+		    // the control value could be positive or negative
+		    for (int i = int(control%0); i >= 0; i--) {
+			oportp = nexto++;
+			if (!oportp) break;
+		    }
+		    // oportp will be zero if the control value is out of range
+		    if (!oportp) {
+			int maxControl = output.numberPorts() - 1;
+			StringList msg = "The control value ";
+			msg << int(control%0)
+			    << " is not in the range [0,"
+			    << maxControl << "]";
+			Error::abortRun(*this, msg);
+			return;
+		    }
+		    completionTime = arrivalTime;
+		    Particle& pp = input.get();
+		    oportp->put(completionTime) = pp;
+		}
 	}
 }

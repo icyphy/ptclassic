@@ -5,20 +5,22 @@ defstar {
 Reads in voice packet and sends out its destination VCI number
         }
 
-	version {$Id$}
+	version {@(#)DEVoiceFl.pl	1.6	01 Oct 1996}
 	author { Allen Y. Lao }
 	copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-	location { ATM demo library }
+	location { DE ATM library }
 
-        explanation {
-Star is to be placed at switch output and feeds into graph,
-to plot destination VCI field of incoming VoiceData packets
+	htmldoc {
+Star is to be placed at switch output and feeds into "graphing" star,
+to plot destination VCI field of incoming
+<tt>VoiceData </tt>
+packets
         }
 
         input {
@@ -35,7 +37,10 @@ to plot destination VCI field of incoming VoiceData packets
                 name {field}
                 type {int}
                 default {"2"}
-                desc { Field of VoiceData packets to output }
+                desc {
+Field of
+.c VoiceData
+packets to output }
         }
 
 	ccinclude { "VoiceData.h" }
@@ -48,7 +53,7 @@ to plot destination VCI field of incoming VoiceData packets
                 Envelope  inEnv;
                 input.get().getMessage(inEnv);
                 if (!voiceCheck (inEnv, *this)) return;
-                VoiceData*  v = (VoiceData*) inEnv.myData();
+                const VoiceData*  v = (const VoiceData*) inEnv.myData();
                 completionTime = arrivalTime;
 
 		// Send out data if not start-of-transmission nor end-of-

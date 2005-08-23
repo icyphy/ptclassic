@@ -1,9 +1,9 @@
 static const char file_id[] = "ptclDescription.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)ptclDescription.cc	1.3 02/11/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -87,12 +87,19 @@ static StringList ptclGalaxyCode(Galaxy* localGalaxy) {
 	BlockPortIter nextPort(*star);
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
-	    if (port->isItOutput())
-		ptclCode << "\tconnect" << starName
-			 << " \"output#" << portNumber[port->index()]
-			 << "\" \"" << port->far()->parent()->fullName()
-			 << "\" \"input#" << portNumber[port->far()->index()]
-			 << "\"\n";
+	    if (port->isItOutput()) {
+	        if (port->far() == NULL) {
+	           ptclCode << "\t# Warning " << starName
+		            << " \"output#" << portNumber[port->index()]
+		            << "\" is disconnected\n";
+                } else {
+		   ptclCode << "\tconnect" << starName
+			    << " \"output#" << portNumber[port->index()]
+			    << "\" \"" << port->far()->parent()->fullName()
+			    << "\" \"input#" << portNumber[port->far()->index()]
+			    << "\"\n";
+		}
+	    }
 	}
     }
 

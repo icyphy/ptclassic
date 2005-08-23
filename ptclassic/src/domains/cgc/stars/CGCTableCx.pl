@@ -6,17 +6,17 @@ Implements a complex-valued lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out-of-bounds value is received.
 	}
-	version { $Id$ }
+	version { @(#)CGCTableCx.pl	1.3	05/07/97 }
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
 	}
 	input {
 		name { input }
@@ -37,6 +37,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { int }
 		default { YES }
 		desc { "If YES, check range of index at runtime, else omit"}
+	}
+	initCode {
+		addInclude("<stdio.h>");
 	}
 	go {
 		addCode(readIdx);

@@ -3,86 +3,100 @@
 # instance of this star.
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkScript.tcl	1.17	02/23/97
 #
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# The TclScript star guarantees that prior to reading this it will have
-# set the tcl variable named "uniqueSymbol" to some unique string.
-# If this file is used more than once by more than one instance of the
-# TkScript star, then each instance will use a different string for
-# uniqueSymbol.  So this symbol can be used to create unique names
-# for windows.
-#
-# The following functions are defined by the star and registered as
-# Tcl procedures before this script is executed:
-# 	${uniqueSymbol}setOutputs
-# 	${uniqueSymbol}grabInputs
-# The first is used by the script to define the value of the outputs
-# of the star.  The second is used to read the values of the inputs.
-# The script must also define a procedure:
-#	${uniqueSymbol}callTcl
-# If the star is set for synchronous operation with Tcl, this procedure
-# would normally read the inputs (if any) using ${uniqueSymbol}grab_inputs
-# and set the outputs (if any) using ${uniqueSymbol}setOutputs.
-# It will be called each time the star fires.
-# If the star is set for asynchronous operation, then the procedure
-# will be called only once before the main loop begins.
-# This default script can be used either way, but it creates much
-# less of a drain on the computation time if the star is set to
-# operate asynchronously.
+# It is assumed that the global symbol ptkControlPanel is the name
+# of the control panel used to control the operation of the system.
 
-set s .${uniqueSymbol}field
-catch {destroy $s}
-toplevel $s
-wm title $s "Playing Field"
-wm iconname $s "Playing Field"
+# The run control window will be the parent window with the following
+# choice of name.  The effect of this is that when the control window
+# is deleted, so are all the children windows.
 
-frame $s.f -bd 10
-canvas $s.f.pad -relief sunken -bg AntiqueWhite3 -height 5c -width 10c
-scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
-	-sliderforeground bisque1 -fg bisque1 -length 10c \
-        -command ${uniqueSymbol}setOut -showvalue 0
-button $s.f.ok -text "DISMISS" -command "destroy $s"
-pack append $s.f $s.f.pad top $s.f.slider {top} $s.f.ok {top fillx}
-pack append $s $s.f top
+set s $ptkControlPanel.field_$starID
 
-proc ${uniqueSymbol}setOut {value} {
-	global uniqueSymbol
-	${uniqueSymbol}setOutputs [expr $value/20]
-}
+# If the window doesn't already exist, create it.
+# If the window does exist, assume it was created by a previous run
+# of this same star, and hence is configured properly to work as is.
+# To check whether it was created by a previous run, we check the
+# existence of the variable ballId_$starID.
 
-# Initialize the output
-${uniqueSymbol}setOut 0
+if {![winfo exists $s] || ![info exists ballId_$starID]} {
+    catch {destroy $s}
+    toplevel $s
+    wm title $s "Playing Field"
+    wm iconname $s "Playing Field"
 
-set c $s.f.pad
-set ballRadius 0.5
-set x1 [expr 5.0-$ballRadius]
-set y1 [expr 2.5-$ballRadius]
-set x2 [expr 5.0+$ballRadius]
-set y2 [expr 2.5+$ballRadius]
+    frame $s.f -bd 10
+    canvas $s.f.pad -relief sunken -height 5c -width 10c
+    scale $s.f.slider -orient horizontal -from 0 -to 100 \
+	-length 10c -command setOut_$starID -showvalue 0
+    button $s.f.ok -text "DISMISS" -command "ptkStop [curuniverse]; destroy $s"
+    pack append $s.f $s.f.pad top $s.f.slider {top} $s.f.ok {top fillx}
+    pack append $s $s.f top
 
-# FIX ME: The following name should be somehow unique
-set ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-        -outline white -fill firebrick4 ]
+    set c $s.f.pad
+    set ballRadius 0.5
+    set x1 [expr 5.0-$ballRadius]
+    set y1 [expr 2.5-$ballRadius]
+    set x2 [expr 5.0+$ballRadius]
+    set y2 [expr 2.5+$ballRadius]
 
-proc ${uniqueSymbol}callTcl {} {
-        global uniqueSymbol
-        global ballId
-        set s .${uniqueSymbol}field
+    set ballId_$starID [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
+        -outline [ptkColor black] -fill [ptkColor azure1] ]
+
+    # Conditionally define procedures, only if they haven't been defined before
+    proc setOut_$starID {value} "
+	setOutputs_$starID \[expr {\$value/20.0}]
+    "
+
+    proc goTcl_$starID {starID} {
+        global ballId_$starID
+	global ptkControlPanel
+        set s $ptkControlPanel.field_$starID
         set c $s.f.pad
         set ballRadius 0.5
-        set inputVals [${uniqueSymbol}grabInputs]
-        set xin [lindex $inputVals 0]
+        set inputVals [grabInputs_$starID]
+    	set xin [lindex $inputVals 0]
         set yin [lindex $inputVals 1]
         set x1 [expr {$xin-$ballRadius}]
         set y1 [expr {$yin-$ballRadius}]
         set x2 [expr $x1+2*$ballRadius]
         set y2 [expr $y1+2*$ballRadius]
         after 15
-        update
-        $c coords $ballId ${x1}c ${y1}c ${x2}c ${y2}c
+        $c coords [set ballId_$starID] ${x1}c ${y1}c ${x2}c ${y2}c
+    }
+
+    # Initialize the output
+    setOut_$starID 0
+} {
+    # If the window previously existed, use the current value of the slider
+    setOut_$starID [$s.f.slider get]
 }
+unset s

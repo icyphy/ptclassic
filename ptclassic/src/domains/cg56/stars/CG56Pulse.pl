@@ -2,15 +2,21 @@ defstar {
 	name { Pulse }
 	domain { CG56 }
 	desc { Pulse generator }
-	version { $Id$ }
+	version { @(#)CG56Pulse.pl	1.13 03 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-DSP56000 - A variable length pulse generator.
-           A pulse begins when a non-zero trigger is received.
-           The pulse duration varies between 1 and max_delay
-           as the control varies between -1.0 and 1.0.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="pulse generator"></a>
+A variable length pulse generator.
+A pulse begins when a non-zero trigger is received.
+The pulse duration varies between 1 and <i>maxDuration</i>
+as the control varies between -1.0 and 1.0.
 	}
 
         input  {
@@ -36,7 +42,7 @@ DSP56000 - A variable length pulse generator.
                 name { onVal }
 		type { fix }
 		desc { maximum val }
-		default { 1.0 }
+		default { ONE }
         }
         state  {
                 name { offVal }
@@ -69,7 +75,7 @@ $label(cont)
         move    x0,$ref(output)
         }
         go {
-                gencode(std);
+                addCode(std);
         }		
 
 	execTime { 

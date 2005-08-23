@@ -6,9 +6,9 @@
 #endif
 /**************************************************************************
 Version identification:
-$Id$
+@(#)FileMessage.h	1.3	2/3/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -42,6 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 #include "Message.h"
+
+extern const DataType FILEMSG;
 
 // FIXME: Want to be able to specify filename extensions so that tycho
 // editors will understand.
@@ -82,7 +84,7 @@ class FileMessage : public Message {
     /* virtual */ StringList print() const;
 
     // With non-zero argument, remove the file when the message is deleted.
-    void setTransient(int transient) { transientFile = transient; }
+    void setTransient(int transient) { transientFileFlag = transient; }
 
     /////////////////////////////////////////////////////////////////////
     //                        protected variables                      //
@@ -94,8 +96,8 @@ class FileMessage : public Message {
     //                        protected variables                      //
 
  private:
-    int dynamicFilename;
-    int transientFile;
+    char* dynamicFilename;
+    int transientFileFlag;
 };
 
 #endif

@@ -1,15 +1,15 @@
 /******************************************************************
 Version identification:
-$Id$
-
-Copyright (c) 1991-%Q%  The Regents of the University of California.
-All Rights Reserved.
+@(#)CGCNOWamTarget.h	1.8 04/07/97
+ 
+@Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,10 +23,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+ 
  Programmer: Patrick Warner
-
+ 
 *******************************************************************/
 
 #ifndef _CGCNOWamTarget_h
@@ -41,41 +43,56 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "IntState.h"
 
-class EventHorizon;
-class CGCTarget;
+// class EventHorizon;
+// class CGCTarget;
+
+// Defined in CGCDomain.cc
+extern const char CGCdomainName[];
 
 class VirtualInfo {
 friend class CGCNOWamTarget;
-	int virtNode;	// active message virtual node
-	const char* nm;		// machine name
+	unsigned long inetAddr;		// internet address
+	int virtNode;			// active message virtual node
+	const char* nm;			// machine name
 public:
 	VirtualInfo(): virtNode(0), nm(0) {}
 };
 
 class CGCNOWamTarget : public CGMultiTarget {
 public:
-	CGCNOWamTarget(const char* name, const char* starclass, const char* desc);
+	// Constructor
+	CGCNOWamTarget(const char* name, const char* starclass,
+		       const char* desc,
+		       const char* assocDomain = CGCdomainName);
+
+	// Destructor
 	~CGCNOWamTarget();
 
-	Block* makeNew() const;
+	// Return a new copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// Type hierarchy checker
 	int isA(const char*) const;
 
-	// redefine IPC funcs
+	// Redefine send interprocessor communication function
 	DataFlowStar* createSend(int from, int to, int num);
+
+	// Redefine receive interprocessor communication function
 	DataFlowStar* createReceive(int from, int to, int num);
 
-	// spread and collect
+	// Spread and collect
 	DataFlowStar* createSpread();
 	DataFlowStar* createCollect();
 
-	// redefine
+	// Redefine
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
-	// get VirtualInfo
+	// Get VirtualInfo
 	VirtualInfo* getVirtualInfo() { return machineInfo; }
+
 	void setMachineAddr(CGStar*, CGStar*);
 	
-	// signal TRUE when replication begins, or FALSE when ends
+	// Signal TRUE when replication begins, or FALSE when ends
 	void signalCopy(int flag) { replicateFlag = flag; }
 
 protected:
@@ -98,6 +115,9 @@ private:
 
 	// information on the machines
 	VirtualInfo* machineInfo;
+
+	// number of send/receive pairs
+	int pairs;	
 
 	// identify machines
 	int identifyMachines();

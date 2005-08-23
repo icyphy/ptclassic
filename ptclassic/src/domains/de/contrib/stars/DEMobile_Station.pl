@@ -3,7 +3,7 @@ defstar {
     domain { DE }
     derivedfrom { DEcell_list }
     author { A. Wernicke, J. Voigt }
-    version { 1.1 6/20/1997 }
+    version { @(#)DEMobile_Station.pl	1.3 12/08/97 }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }
@@ -108,7 +108,7 @@ defstar {
 	arglist { "(int Lv)" }
 	type { int }
 	code {
-		int n, a_flag, im_Bereich[6];
+		int n, a_flag = 0, im_Bereich[6];
 		double Z, N;
 		const double Faktor= 57.29577951;     
 
@@ -149,7 +149,7 @@ defstar {
         go {
             if (start.dataNew) {
                 restart.put(arrivalTime) << 1;
-                Rec= Complex (R_Pos.get());
+		Rec= R_Pos.get();
                 Rx= real (Rec);
                 Ry= imag (Rec);
                 cell_verif ();

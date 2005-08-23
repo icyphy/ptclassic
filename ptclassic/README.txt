@@ -1,4 +1,5 @@
-Version control: $Id$
+Version control:
+@(#)README	1.5 05/07/97
 
 README file for Ptolemy
 -----------------------

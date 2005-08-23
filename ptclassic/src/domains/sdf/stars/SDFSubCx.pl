@@ -1,10 +1,15 @@
 defstar {
-	name { CxDiff }
+	name { SubCx }
 	domain { SDF }
 	desc { Output the "pos" input minus the "neg" input, a complex value. }
-	version {$Id$}
+	version {@(#)SDFSubCx.pl	1.8	10/21/97}
 	author { J. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF main library }
 	input {
 		name { pos }
@@ -19,7 +24,10 @@ defstar {
 		type { complex }
 	}
 	go {
-		output%0 << Complex(pos%0) - Complex(neg%0);
+		// We use temporary variables to avoid gcc2.7.2/2.8 problems
+		Complex tmppos = (pos%0);
+		Complex tmpneg = (neg%0);
+		output%0 << tmppos - tmpneg;
 	}
 }
 

@@ -1,0 +1,25 @@
+reset
+# Creating universe 'shotNoise'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Poisson1 Poisson
+	setstate Poisson1 meanTime 10.0
+	setstate Poisson1 magnitude 1.0
+	star Filter1 Filter
+	setstate Filter1 decay 0.9
+	setstate Filter1 tau 0.0
+	setstate Filter1 state 0.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Shot noise"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -0 y =800x400+0+0"
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 1.0
+	connect Poisson1 output Filter1 data
+	connect Filter1 output Xgraph1 input
+	connect Clock1 output Filter1 clock
+run 100
+wrapup

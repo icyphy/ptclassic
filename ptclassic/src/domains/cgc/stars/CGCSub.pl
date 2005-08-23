@@ -1,10 +1,15 @@
 defstar {
-	name { FloatDiff }
+	name { Sub }
 	domain { CGC }
 	desc { Output the "pos" input minus all "neg" inputs. }
-	version {$Id$}
+	version {@(#)CGCSub.pl	1.11	1/1/96}
 	author { E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	input {
 		name { pos }
@@ -24,14 +29,20 @@ defstar {
 		default { 1 }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
+	constructor {
+		noInternalState();
+	}
 	go { 
-	   gencode(init); 
+	   addCode(init); 
 	   for (int i = 1; i <= neg.numberPorts(); i++) {
 		index = i;
-		gencode(CodeBlock("\t\t$ref(output) -= $ref(neg#index);\n"));
+		addCode("\t$ref(output) -= $ref(neg#index);\n");
 	   }
 	}
 	codeblock (init) {
-		$ref(output) = $ref(pos);
+	$ref(output) = $ref(pos);
+	}
+	exectime {
+		return 1 + neg.numberPorts();
 	}
 }

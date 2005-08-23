@@ -2,35 +2,38 @@ defstar {
 	name { WaveForm }
 	domain { DE }
 	desc {
-Output a waveform as specified by the array state "value" (default "1 -1").
-You can get periodic signals with any period, and can halt a simulation
-at the end of the given waveform.  The following table summarizes the
-capabilities:
-.nf
-haltAtEnd   periodic   period    operation
+Upon receiving an input event, output the next value specified by the
+array parameter "value" (default "1 -1"). This array can periodically
+repeat with any period, and you can halt a simulation when the end of
+the array is reached. The following table summarizes the capabilities:
+<pre>
+haltAtEnd    periodic    period      operation
 -----------------------------------------------------------------------
-NO          YES        0         The period is the length of the waveform
-NO          YES        N>0       The period is N
-NO          NO         anything  Output the waveform once, then zeros
-YES         anything   anything  Stop after outputting the waveform once
-.fi
+    NO          YES        0         The period is the length of the array 
+    NO          YES        N>0       The period is N 
+    NO          NO         anything  Output the array once, then zeros 
+    YES         anything   anything  Stop after outputting the array once 
+</pre>
+<p>
 The first line of the table gives the default settings.
+The array may be read from a file by simply setting value to something
+of the form "&lt;filename".
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
+something of the form "&lt;filename".  The file will be read completely
 and its contents stored in an array.  The size of the array is currently
 limited to 20,000 samples.
-.Id "file read"
-.Id "waveform from file"
-.Id "reading from a file"
-.Ir "halting a simulation"
-.Ir "simulation, halting"
+<a name="file read"></a>
+<a name="waveform from file"></a>
+<a name="reading from a file"></a>
+<a name="halting a simulation"></a>
+<a name="simulation, halting"></a>
 	}
-	version { $Id$ }
+	version { @(#)DEWaveForm.pl	1.9	10/08/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

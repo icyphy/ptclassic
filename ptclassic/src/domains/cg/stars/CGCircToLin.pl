@@ -10,7 +10,7 @@ from the output.
 The CG version does not do anything though; it is there because
 AsmTarget needs it and we use AsmTarget sometimes to test schedulers.
     }
-    version { $Id$ }
+    version { @(#)CGCircToLin.pl	1.2	01 Oct 1996 }
     author { Praveen K. Murthy }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -19,12 +19,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG demo library }
-    explanation {
-.Id "circular to linear buffer copy"
-.Ir "buffer, circular"
-.Ir "buffer, linear"
-.Ir "linear buffer"
-.Ir "circular buffer"
+	htmldoc {
+<a name="circular to linear buffer copy"></a>
+<a name="buffer, circular"></a>
+<a name="buffer, linear"></a>
+<a name="linear buffer"></a>
+<a name="circular buffer"></a>
 This star is normally inserted automatically, as needed.
 Data movement is repeated inline so may not be efficient for large N.
     }

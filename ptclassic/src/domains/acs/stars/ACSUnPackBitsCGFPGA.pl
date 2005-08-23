@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Given one input stream, splice and produce two streams
 	}
-	version {@(#)ACSPackBitsCGFPGA.pl	1.0 03/03/00}
+	version{ @(#)ACSUnPackBitsCGFPGA.pl	1.2 08/02/01 }
 	author { K. Smith}
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}

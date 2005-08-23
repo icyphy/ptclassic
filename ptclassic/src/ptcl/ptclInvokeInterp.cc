@@ -1,9 +1,9 @@
 static const char file_id[] = "ptclInvokeInterp.cc";
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)ptclInvokeInterp.cc	1.3	11/11/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,6 +40,15 @@ Implementation of the InvokeInterp class that calls the Tcl interpreter.
 #include "InvokeInterp.h"
 #include "StringList.h"
 
+// METHODS
+
+// constructor
+InvokeInterp :: InvokeInterp() {}
+
+// destructor
+InvokeInterp :: ~InvokeInterp() {}
+
+// interpreter
 const char*
 InvokeInterp :: interpreter (const char* expression) {
   const char* result = 0;
@@ -48,7 +57,7 @@ InvokeInterp :: interpreter (const char* expression) {
     Error::error("The Tcl interpreter is not initialized");
   }
   else {
-    if ( Tcl_Eval(PTcl::activeInterp, expression) == TCL_OK ) {
+    if ( Tcl_Eval(PTcl::activeInterp, (char *) expression) == TCL_OK ) {
       result = PTcl::activeInterp->result;
     }
     else {

@@ -1,9 +1,9 @@
-static const char file_id[] = "DataStruct.cc";
+static const char file_id[] = "LinkedList.cc";
 /**************************************************************************
 Version identification:
-@(#)DataStruct.cc	2.21	02/12/97
+@(#)LinkedList.cc	1.10 04/29/98
 
-Copyright (c) 1990-1997 The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,14 +35,21 @@ These are methods used by classes defined in DataStruct.h that
 are too large to efficiently inline (formerly they were declared
 inline anyway).
 
+ Modified: John Davis, 5/18/97
+        LinkedList class has been rewrittent to be more
+        general. In particular, an arbitrary member can be
+        removed (regardless of the position in the list) and
+        the Links can be directly accessed in an efficient
+        manner. 
+
 **************************************************************************/
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "DataStruct.h"
+#include "LinkedList.h"
 
-SingleLink::SingleLink(Pointer a,SingleLink* p) {
+Link::Link(Pointer a,Link* p) {
     e=a;
     if (p) {
 	next = p;
@@ -56,13 +63,13 @@ SingleLink::SingleLink(Pointer a,SingleLink* p) {
     }
 }
 
-void SingleLink::remove() {
+void Link::remove() {
     next->previous = previous;
     previous->next = next;
 }
 
-SingleLink* SequentialList::removeLink(SingleLink& a) {
-    SingleLink* previous = a.previous;
+Link* LinkedList::removeLink(Link& a) {
+    Link* previous = a.previous;
     if (lastNode == &a) lastNode = a.previous;
     a.remove();
     delete &a;
@@ -74,42 +81,64 @@ SingleLink* SequentialList::removeLink(SingleLink& a) {
     return previous;
 }
 
+// Erase a link from the list. Note: This method returns
+// the element to which this Link points.
+Pointer LinkedList::eraseLinkNotElement(Link& a) {
+    Pointer element = a.e; 
+    removeLink(a);
+    return element;
+}
+
 // constructor with argument
-SequentialList :: SequentialList(Pointer a) : dimen(1)
+LinkedList :: LinkedList(Pointer a) : dimen(1)
 {
-	LOG_NEW; lastNode= new SingleLink(a,0);
+	LOG_NEW; lastNode= new Link(a,0);
 }
 
 // add at head of list
-void SequentialList :: prepend(Pointer a)
+void LinkedList :: prepend(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
-	    LOG_NEW; new SingleLink(a,lastNode->next);
+	    LOG_NEW; new Link(a,lastNode->next);
 	}
 	else {	               // List empty
-	    LOG_NEW; lastNode = new SingleLink(a,0);
+	    LOG_NEW; lastNode = new Link(a,0);
 	}
 	dimen++;
 }
 
 // add at tail of list
-void SequentialList :: append(Pointer a)
+void LinkedList :: append(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
-	    LOG_NEW; lastNode = new SingleLink(a,lastNode->next);
-	}
-	else {		        // List empty
-	    LOG_NEW; lastNode = new SingleLink(a,0);
+	    LOG_NEW; lastNode = new Link(a,lastNode->next);
+	} else {	        // List empty
+	    LOG_NEW; lastNode = new Link(a,0);
 	}
 	dimen++;
 }
 
+Link * LinkedList :: appendGet(Pointer a)
+{
+        if (dimen > 0) {        // List not empty
+            LOG_NEW;
+            lastNode = new Link(a,lastNode->next);
+        }
+        else {                  // List empty
+            LOG_NEW;
+            lastNode = new Link(a,0);
+        }
+        dimen++;
+
+        return lastNode;
+}
+
 // return and remove head of list
-Pointer SequentialList :: getAndRemove()
+Pointer LinkedList :: getHeadAndRemove()
 {
 	if (dimen == 0) return 0;
 
-	SingleLink *f = lastNode->next;	// Head of list
+	Link *f = lastNode->next;	// Head of list
 	Pointer r = f->e;
 
 	removeLink(*f);
@@ -118,7 +147,7 @@ Pointer SequentialList :: getAndRemove()
 }
 
 // return and remove tail of list
-Pointer SequentialList :: getTailAndRemove()
+Pointer LinkedList :: getTailAndRemove()
 {
 	if (dimen == 0) return 0;
 
@@ -130,25 +159,25 @@ Pointer SequentialList :: getTailAndRemove()
 }
 
 // return i-th element of list, null if fewer than i elements.
-Pointer SequentialList :: elem(int i) const
+Pointer LinkedList :: elem(int i) const
 {
 	if (i > dimen) return 0;
-	SingleLink *f = lastNode->next;	// Head of list
+	Link *f = lastNode->next;	// Head of list
 	for( int t = i; t > 0; t-- )
 		f = f->next;
 	return f->e;
 }
 
-void SequentialList :: initialize()
+void LinkedList :: initialize()
 {
 	if (empty()) return;	// List already empty
 
 	// Point to the first element in the list
-	SingleLink *l = lastNode->next;
+	Link *l = lastNode->next;
 
 	// As long as the first element is not also the last, delete it
 	while (l != lastNode ) {
-		SingleLink *ll=l;
+		Link *ll=l;
 		l = l->next;
 		LOG_DEL; delete ll;
 	}
@@ -161,9 +190,9 @@ void SequentialList :: initialize()
 	dimen = 0;
 }
 
-// This function searches for an element in a SequentialList matching
+// This function searches for an element in a LinkedList matching
 // the argument, removing it if found.
-int SequentialList::remove (Pointer x) {
+int LinkedList::searchAndRemove (Pointer x) {
 	// case of empty list
 	if (dimen == 0) return 0;
 	// case of 1-element list
@@ -176,7 +205,7 @@ int SequentialList::remove (Pointer x) {
 		return 1;
 	}
 	// general case
-	SingleLink* f = lastNode->next;
+	Link* f = lastNode->next;
 	do {
 		if (f->e == x) {
 		    removeLink(*f);
@@ -188,9 +217,9 @@ int SequentialList::remove (Pointer x) {
 }
 
 // This function returns true if the argument is found in the list.
-int SequentialList::member (Pointer x) const {
+int LinkedList::member (Pointer x) const {
 	if (dimen == 0) return 0;
-	SingleLink* f = lastNode;
+	Link* f = lastNode;
 	do {
 		if (f->e == x) return TRUE;
 		f = f->next;
@@ -198,21 +227,22 @@ int SequentialList::member (Pointer x) const {
 	return FALSE;
 }
 
-void ListIter::reset() {
+void LinkedListIter::reset() {
     startAtHead = TRUE;
     ref = 0;
 }
 
-void ListIter::reconnect(const SequentialList& l) {
+void LinkedListIter::reconnect(const LinkedList& l) {
     list = &l;
     reset();
 }
 
-void ListIter::remove() {
+void LinkedListIter::remove() {
     if (ref) {
-	ref = ((SequentialList*)list)->removeLink(*ref);
-	if (ref == list->lastNode) startAtHead = TRUE;
+        ref = ((LinkedList*)list)->removeLink(*ref);
+        if (ref == list->lastNode) startAtHead = TRUE;
     }
     else if (list->lastNode)
-	((SequentialList*)list)->removeLink(*list->lastNode);
+        ((LinkedList*)list)->removeLink(*list->lastNode);
 }
+

@@ -2,9 +2,9 @@
 #define _VHDLReg_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLReg.h	1.4 05/29/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -53,6 +53,8 @@ class VHDLReg : public VHDLFiring
  public:
   // Constructors.
   VHDLReg();
+  VHDLReg(const char* n, const char* t)
+    : input(NULL), output(NULL), clock(NULL), type(t) { setName(n); }
 
   // Destructor.
   ~VHDLReg();

@@ -1,0 +1,12 @@
+#User:      jbuck
+#Date:      Wed Dec  2 13:38:28 1992
+#Target:    default-CG
+#Universe:  mainGalaxy
+REPEAT 2 TIMES { /* depth 0*/
+// Line 1 from Source star
+// Line 2 from Source star
+// Line 1 from CGThrough if control == TRUE
+// Line 2 from CGThrough if control == TRUE
+// Line 1 code from CGSink
+// Line 2 code from CGSink
+} /* end repeat, depth 0*/

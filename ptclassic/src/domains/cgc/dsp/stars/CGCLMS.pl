@@ -7,30 +7,35 @@ Adaptive filter using LMS adaptation algorithm.
 Initial coefficients are in the "taps" state variable.
 Default initial coefficients give an 8th order, linear phase
 lowpass filter.  To read default coefficients from a file,
-replace the default coefficients with "<fileName".
+replace the default coefficients with "fileName".
 Supports decimation, but not interpolation.
 	}
-	version {$Id$}
+	version {@(#)CGCLMS.pl	1.15	10/08/96}
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { cgc main library }
-	explanation {
+	htmldoc {
 When correctly used, this filter will adapt to try to minimize
-the mean-squared error of the signal at its \fIerror\fR input.
+the mean-squared error of the signal at its <i>error</i> input.
 In order for this to be possible, the output of the filter should
 be compared (subtracted from) some reference signal to produce
 an error signal.
-That error signal should be fed back to the \fIerror\fR input.
-The \fIdelay\fR parameter must equal the total number of delays
+That error signal should be fed back to the <i>error</i> input.
+The <i>delay</i> parameter must equal the total number of delays
 in the path from the output of the filter back to the error input.
 This ensures correct alignment of the adaptation algorithm.
 The number of delays must be greater than zero or the dataflow
 graph will deadlock.
 The adaptation algorithm used is the well-known LMS, or stochastic-gradient
 algorithm.
-.IE "stochastic gradient algorithm"
-.lp
-If the \fIsaveTapsFile\fR string is non-null, a file will
+<a name="stochastic gradient algorithm"></a>
+<p>
+If the <i>saveTapsFile</i> string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}
@@ -63,12 +68,12 @@ will be stored there after the run has completed.
 		// taps are no longer constant
 		taps.clearAttributes(A_CONSTANT);
 	}
-	start {
+	setup {
 	// First check to be sure that interpolation is 1.
 		interpolation = 1;
 
-		// Next run the FIR start routine
-		CGCFIR :: start();
+		// Next run the FIR setup routine
+		CGCFIR :: setup();
 
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.
@@ -80,46 +85,43 @@ will be stored there after the run has completed.
 		addInclude("<stdio.h>");
 	}
 	go {
-		gencode(bodyDecl);
-		gencode(update1);
-		gencode(CodeBlock("\t{\n"));
-		gencode(update2);
-		gencode(CodeBlock("\t}\n"));
-		filterBody();		// from FIR
+		addCode(bodyDecl);	// from FIR
+		addCode(update);
+		addCode(body);		// from FIR
 	}
 
-   codeblock(update1) {
+   codeblock(update) {
 	int ix;
 	/* First update the taps */
 	double e = $ref(error);
 	int index = $val(errorDelay)*$val(decimation) + $val(decimationPhase);
 
-	for (ix = 0; ix < $val(tapSize); ix++) 
-   }
-   codeblock(update2) {
+	for (ix = 0; ix < $val(tapSize); ix++) {
 		$ref2(taps,ix) = $ref2(taps,ix) +
-			e * $ref2(signalIn,index) * $val(stepSize);
+			e * $ref2(signalIn,index) * $ref(stepSize);
 		index++;
+	}
    }
 
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			gencode(CodeBlock("    {\n"));
-			gencode(save);
-			gencode(CodeBlock("    }\n"));
+			addCode("    {\n");
+			addCode(save);
+			addCode("    }\n");
 		}
 	}
 
    codeblock(save) {
     FILE* fp;
     int i;
-    if (!(fp = fopen(saveFileName,"w"))) 
+    if (!(fp = fopen(saveFileName,"w"))) {
 	/* File cannot be opened */
 	fprintf(stderr,"ERROR: Cannot open saveTapsFile for writing:\n");
-    if (!fp) exit(1);
+    	exit(1);
+    }
     for (i = 0; i < $val(tapSize); i++)
 	fprintf(fp, "%d %g\n", i, $ref2(taps,i));
     fclose(fp);
-    }
+   }
 }

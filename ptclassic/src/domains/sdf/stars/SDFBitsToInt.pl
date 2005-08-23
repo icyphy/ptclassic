@@ -2,12 +2,24 @@ defstar {
 	name { BitsToInt }
 	domain { SDF }
 	desc {
-Reads "nBits" bits from the input, packs them into an integer, and outputs
-it.  The first received bit becomes the most significant bit of the output.
+The integer input sequence is interpreted as a bit stream in which any nonzero
+value is interpreted as to mean a "one" bit.
+This star consumes "nBits" successive bits from the input,
+packs them into an integer, and outputs the resulting integer.
+The first received bit becomes the most significant bit of the output.
+If "nBits" is larger than the integer word size, then the first bits
+received will be lost.
+If "nBits" is smaller than the wordsize minus one, then the
+output integer will always be non-negative.
 	}
-	version { $Id$ }
+	version { @(#)SDFBitsToInt.pl	1.8	3/2/95 }
 	author { J. T Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF main library }
 	input {
 		name { input }
@@ -23,7 +35,7 @@ it.  The first received bit becomes the most significant bit of the output.
 		default { 4 }
 		desc { number of bits read per execution }
 	}
-	start {
+	setup {
 		if (int(nBits) < 0) {
 			Error::abortRun(*this, "nBits must be positive");
 			return;

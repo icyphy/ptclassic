@@ -12,25 +12,26 @@ static const char file_id[] = "CGForScheduler.cc";
 #include "Geodesic.h"
 #include "CGDDFCluster.h"
 #include "dataType.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGForScheduler.cc	1.5	1/24/96
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -39,7 +40,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
 
@@ -385,7 +388,7 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 			cs = (CGStar*) s->clone();
 			d1 = (CGStar*)KnownBlock :: clone("BlackHole",inDom);
 			if ((!cs) || (!d1)) return FALSE;
-			cs->setNameParent(s->name(), s->parent());
+			cs->setNameParent(s->name(), 0);
 			DFPortHole* srcP = (DFPortHole*) 
 						cs->portWithName("output");
 			srcP->setSDFParams(1, 0);
@@ -405,7 +408,7 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 			ds = (CGStar*) s->clone();
 			d2 = (CGStar*) KnownBlock :: clone("Const",inDom);
 			if ((!cs) || (!d2)) return FALSE;
-			ds->setNameParent(s->name(), s->parent());
+			ds->setNameParent(s->name(), 0);
 			StringList temp = "Const";
 			temp << "_auto" << localId++;
 			d2->setNameParent(hashstring((const char*) temp), 0);
@@ -518,7 +521,8 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 
 	CGPortHole* inp = 0;
 	CGPortHole* outp = 0;
-	Geodesic* saveInG, *saveOutG;
+	Geodesic* saveInG = 0;
+	Geodesic* saveOutG = 0;
 	if (realPix == 0) {
 		inp = boundaryPort(cbag, 0);
 		if (inp) {

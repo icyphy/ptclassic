@@ -2,10 +2,10 @@
 Define a console window object.  This object has a Tcl interpreter
 associated with it, created by the constructor.
 
-$Id$
+@(#)TyConsole.h	1.6     8/31/96
 Programmer: E. A. Lee
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,6 +43,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PTcl.h"
 #include "TyTcl.h"
 #include "SimAction.h"
+#ifdef PTUSE_EXPECT
+#include "expect_tcl.h"
+#endif
+
+// This is used by SetVersionInfo
+extern char *gVersion;
 
 class TyConsole {
 
@@ -66,9 +72,9 @@ class TyConsole {
   // It should never return.
   void tyExit(int code);
 
-protected:
+private:
   // the Tcl interpreter for this console
-  Tcl_Interp *interp;
+  Tcl_Interp *tyInterp;
 
   // the Ptolemy interpreter for this console
   PTcl *ptcl;
@@ -81,7 +87,7 @@ protected:
 
   // Initialize Tcl and Tk and register the locally defined Tcl commands
   // with the Tcl interpreter. Returns TCL_ERROR or TCL_OK.
-  int appInit(Tcl_Interp *ip, Tk_Window win);
+  int appInit(Tcl_Interp *ip);
 };
 
 #endif

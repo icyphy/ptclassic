@@ -1,15 +1,16 @@
 defstar {
 	name { FixToCx }
 	domain { CGC }
-	version { $Id$ }
-	author { J.Weiss }
+	derivedFrom { Fix }
+	version { @(#)CGCFixToCx.pl	1.6 7/10/96 }
+	author { J. Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC conversion palette }
+	location { CGC main library }
 	desc { Convert a fixed-point input to a complex output. }
 	input {
 		name { input }
@@ -29,26 +30,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	setup {
-		if (int(numSample) > 1) {
-			input.setSDFParams(int(numSample));
-			output.setSDFParams(int(numSample));
+		if (int(numSample) <= 0) {
+			Error::abortRun(*this, "numSample must be positive");
+			return;
+		}
+		input.setSDFParams(int(numSample));
+		output.setSDFParams(int(numSample));
+	}
+
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
+	codeblock (body) {
+		int i = 0;
+		for (; i < $val(numSample); i++) {
+			$ref(output,i).real = FIX_Fix2Double($ref(input,i));
+			$ref(output,i).imag = 0;
 		}
 	}
 
-	initCode {
-		numSample = output.numXfer();
-		addInclude("<math.h>");
-	}
-
-   codeblock (body) {
-	int i;
-	double p,q;
-	for (i = 0; i < $val(numSample); i++) {
-		$ref(output, i).real = FIX_Fix2Double($ref(input, i));
-		$ref(output, i).imag = 0;
-	}
-   }
 	go {
 		addCode(body);
 	}
+
+	// a wrap-up method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

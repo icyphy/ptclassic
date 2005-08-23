@@ -1,39 +1,35 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/31/90
-
- Implements an FIR filter whose coefficients are periodically updated
- from the outside.  The \fIblockSize\fR parameter tells how often
- the updates occur.  It is an integer specifying how may input samples
- should be processed using each set of coefficients.  The \fIorder\fR
- parameter tells how many coefficients there are.
- The same interpolation and decimation of the FIR star is supported.
-
- Unfortunately, it proves not too convenient to derive this star from FIR
- because of the changes in the way the inputs and outputs are handled.
- Hence, much of the code here is quite similar to that in the FIR star.
- The maximum filter order (currently 1024) is defined in the source code,
- and can be changed, at the expense of recompiling.
-
-SEE ALSO:
-FIR
-**************************************************************************/
-
-#define MAXORDER 1024
-
-}
-
 defstar {
 	name { BlockFIR }
 	domain { SDF }
-	desc { "an FIR filter whose coefficients are externally updated" }
+	version {@(#)SDFBlockFIR.pl	1.15 10/06/96}
+	desc {
+This star implements an FIR filter with coefficients that
+are periodically updated from the outside. For each set of
+coefficients, a block of input samples is processed, all in one firing.
+	}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF dsp library }
+	htmldoc {
+<p>
+<a name="filter, FIR, block"></a>
+<a name="FIR filter, block"></a>
+The <i>blockSize</i> parameter tells how often
+the updates occur.  It is an integer specifying how may input samples
+should be processed using each set of coefficients.  The <i>order</i>
+parameter tells how many coefficients there are.
+The same interpolation and decimation of the FIR star is supported.
+<p>
+Unfortunately, it proves not too convenient to derive this star from FIR
+because of the changes in the way the inputs and outputs are handled.
+Hence, much of the code here is quite similar to that in the FIR star.
+	}
+	seealso { FIR }
 	input {
 		name {signalIn}
 		type {float}
@@ -50,40 +46,54 @@ defstar {
 		name { blockSize }
 		type { int }
 		default { "128" }
-		desc { "Number of inputs that use each each coefficient set" }
+		desc { Number of inputs that use each each coefficient set. }
 	}
 	defstate {
 		name { order }
 		type { int }
 		default { "16" }
-		desc { "Number of new coefficients to read each time" }
+		desc { Number of new coefficients to read each time. }
 	}
 	defstate {
 		name {decimation}
 		type {int}
 		default {1}
-		desc {"decimation ratio"}
+		desc { Decimation ratio.}
 	}
 	defstate {
 		name {decimationPhase}
 		type {int}
 		default {0}
-		desc {"downsampler phase"}
+		desc {Downsampler phase.}
 	}
 	defstate {
 		name {interpolation}
 		type {int}
 		default {1}
-		desc {"interpolation ratio"}
+		desc {Interpolation ratio.}
 	}
 	protected {
 		int phaseLength;
-		double taps[MAXORDER];
+		double *taps;
+		int lastM;
 	}
-	start {
+	constructor {
+		lastM = 0;
+		taps = 0;
+	}
+	destructor {
+		LOG_DEL; delete [] taps;
+	}
+	setup {
 	    int d = decimation;
 	    int i = interpolation;
 	    int dP = decimationPhase;
+
+	    if (lastM != int(order)) {
+		LOG_DEL; delete [] taps;
+		lastM = int(order);
+		LOG_NEW; taps = new double[lastM];
+	    }
 
 	    // Then set the SDF Params to account for the block processing
 	    signalIn.setSDFParams(d*int(blockSize),
@@ -107,7 +117,7 @@ defstar {
 	    // first read in new tap values
 	    int index = 0;
 	    for (int cCount = int(order)-1; cCount >=0; cCount--)
-		taps[index++] = float(coefs%cCount);
+		taps[index++] = coefs%cCount;
 	
 	    // Iterate for each block
 	    for (int j = int(blockSize)-1; j >= 0; j--) {
@@ -132,7 +142,7 @@ defstar {
 			else
 			    tap = taps[tapsIndex];
 			out += tap
-			    * float(signalIn%(int(decimation) - inC + i
+			    * double(signalIn%(int(decimation) - inC + i
 				+ int(decimation)*j));
 		   }
 		   // note: output%0 is the last output chronologically

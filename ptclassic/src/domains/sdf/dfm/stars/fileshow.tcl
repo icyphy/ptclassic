@@ -1,9 +1,9 @@
 # Display input files using Tycho.
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)fileshow.tcl	1.3	2/16/96
 #
-# Copyright (c) 1990-%D% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,12 +32,7 @@
 #
 
 proc goTcl_$starID {starID} {
-    if {![info exists TYCHO]} {
-	uplevel #0 {
-	    set tychoConsoleWindow 0
-	    source $PTOLEMY/tycho/kernel/Tycho.tcl
-	}
-    }
+    ptkStartTycho
     foreach file [grabInputs_$starID] {
 	::tycho::File::openContext $file
     }

@@ -2,22 +2,28 @@ defstar {
   name { FIR }
   domain { MDSDF }
   desc {
-2 Dimensional FIR filter.
-Taps should be specified by five parameters:
- 1) firstRowIndex: the index of the first row, negative for past rows
- 2) lastRowIndex: the index of the last row, 0 for the current, positive for
-                  future rows
- 3) firstColIndex: the index of the first column, negative for past columns
- 4) lastColIndex: the index of the last column, 0 for the current, positive for
-                  future columns
- 5) an array of the tap values themselves, starting with the earliest
-    tap spcified by (firstRowIndex,firstColIndex) and ending with the
-    last tap spcified by (lastRowIndex, lastColIndex)
-The default parameters specifiy a 9 tap low pass filter.
+Two-dimensional finite impulse response (FIR) filter.  Taps should be
+specified by the following five parameters:
+1) firstRowIndex: index of the first row, negative for past rows;
+2) lastRowIndex: index of the last row, 0 for the current, positive for
+future rows;
+3) firstColIndex: the index of the first column, negative for past columns;
+4) lastColIndex: the index of the last column, 0 for the current, positive for
+future columns; and
+5) taps: an array of the tap values themselves, starting with the earliest
+tap specified by (firstRowIndex,firstColIndex) and ending with the last tap
+spcified by (lastRowIndex, lastColIndex).
+
+The default parameters specify a normalized 3 x 3 lowpass filter.
   }
-  version { $Id$ }
+  version { @(#)MDSDFFIR.pl	1.4 12/1/95 }
   author { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { MDSDF library }
   input {
     name { input }
@@ -66,14 +72,16 @@ The default parameters specifiy a 9 tap low pass filter.
     // get a SubMatrix from the buffer
     double& out = output.getFloatOutput();
 
-    out = 0;
+    out = 0.0;
     int tap = 0;
 
-    for(int row = int(firstRowIndex); row <= int(lastRowIndex); row++) {
-      for(int col = int(firstColIndex); col <= int(lastColIndex); col++) {
+    int lastrow = int(lastRowIndex);
+    int lastcol = int(lastColIndex);
+
+    for(int row = int(firstRowIndex); row <= lastrow; row++) {
+      for(int col = int(firstColIndex); col <= lastcol; col++) {
 	 out += input.getFloatInput(row,col) * taps[tap++];
       }
     }
   }
 }
-

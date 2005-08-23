@@ -1,18 +1,18 @@
 defstar {
 	name { CxToFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
-	version { $Id$ }
-	author { J.Weiss }
+	derivedFrom { Fix }
+	version { @(#)CGCCxToFix.pl	1.8	01 Oct 1996 }
+	author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC conversion palette }
+	location { CGC main library }
 	desc { Convert a complex input to a fixed-point output. }
-	explanation {
+	htmldoc {
 This star converts a complex value to a fix value with the specified precision
 by computing the absolute value.
 If the output precision is not specified, the precision is determined at
@@ -55,8 +55,12 @@ minimum for negative magnitudes).
 			input.setSDFParams(int(numSample));
 			output.setSDFParams(int(numSample));
 		}
+
 		output.setPrecision(OutputPrecision);
 	}
+
+        // an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
 
 	begin {
 		// if the precision for the output port is not defined
@@ -68,6 +72,7 @@ minimum for negative magnitudes).
 	}
 
 	initCode {
+		CGCFix::initCode();
 		numSample = output.numXfer();
 		addInclude("<math.h>");
 	}
@@ -76,9 +81,9 @@ minimum for negative magnitudes).
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
 
-@     {	int i;
-@	double p,q;
-@	for (i = 0; i < $val(numSample); i++) {
+@     {	int i = 0;
+@	double p, q;
+@	for (; i < $val(numSample); i++) {
 @		p = $ref(input, i).real;
 @		q = $ref(input, i).imag;
 @		p = sqrt(p*p+q*q);
@@ -93,6 +98,6 @@ minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

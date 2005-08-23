@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Exp } 
     desc { Compute the exponential function of the input. }
-    version { $Id$ }
+    version { @(#)ACSExpFixSim.pl	1.4 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -24,6 +24,14 @@ When the value of the product extends outside of the precision,
 the OverflowHandler will be called.
 		}
         }
+	defstate {
+	    name { LockOutput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified output precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
         defstate {
                 name { ArrivingPrecision }
                 type {int}
@@ -41,6 +49,14 @@ precision specified by the parameter "InputPrecision". }
 Precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
+	defstate {
+	    name { LockInput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified input precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
         protected {
 		Fix fixIn, out;
 	}

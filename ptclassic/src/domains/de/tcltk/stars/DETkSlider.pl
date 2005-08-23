@@ -3,15 +3,15 @@ defstar {
 	domain {DE}
 	derivedFrom { TclScript }
 	desc { Output a value determined by an interactive on-screen scale slider. }
-	version { $Id$ }
+	version { @(#)DETkSlider.pl	1.5	10/23/95 }
 	author { Brian Evans and Edward Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	hinclude { "ptk.h" }
 	defstate {
 		name {low}
@@ -52,11 +52,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Only a single output is supported");
 		return;
 	    }
+	}
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkSlider.tcl";
 
-	    DETclScript::setup();
+	    DETclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

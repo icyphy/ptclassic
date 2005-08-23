@@ -1,9 +1,14 @@
 defstar {
 	name { PassGate }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DEPassGate.pl	1.5	3/2/95 }
 	author { Soonhoi Ha and Edward Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 	desc {
 If the gate is open, particles pass from "input" to "output".

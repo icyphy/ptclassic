@@ -2,19 +2,21 @@ defstar {
 	name {Sgn}
 	domain {CG56}
 	desc {
-   	Signum.
+This star outputs the signum of its input.  The output is either -1.0
+or +0.99999999, since 1.0 is not a valid fixed point number on the DSP56001.
 	}
-	version {$Id$}
+	version {@(#)CG56Sgn.pl	1.11	01 Oct 1996}
+	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-       	location { CG56 Demo Library }
-	explanation { 
-This star computes the signum of its input.
-The output is +- 1 because 1 is not allowed 
-for fix input, .99999999 is used instead.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	execTime {
-		return 6;
+       	location { CG56 main library }
+	htmldoc {
+<a name="signum"></a>
 	}
 	input {
 		name{input}
@@ -24,6 +26,9 @@ for fix input, .99999999 is used instead.
 		name{output}
 		type{FIX}
 	}
+	constructor {
+		noInternalState();
+	}
 	codeblock (sgnblock) {
         move    $ref(input),a
         move    #.99999999,b
@@ -32,9 +37,11 @@ for fix input, .99999999 is used instead.
         tmi     x0,b
         move    b,$ref(output)
 	}	
-
 	go {
-		gencode(sgnblock);
+		addCode(sgnblock);
  
+	}
+	execTime {
+		return 6;
 	}
 }

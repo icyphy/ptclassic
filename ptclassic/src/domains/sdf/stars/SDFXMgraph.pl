@@ -1,29 +1,35 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 3/19/90
- Revised (from Xgraph) by E. A. Lee to accept multiple inputs, 9/18/90.
- Revised 10/3/90 to work under the preprocessor.
-
- Draws a graph with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
-
- This version is for the SDF domain.
-**************************************************************************/
-
-#define MAXNOINPUTS 10
-}
-
 defstar {
 	name { XMgraph }
 	domain { SDF }
-	desc { "Generate a multi-signal plot with the xgraph program." }
+	desc {
+Generate a multi-signal plot with the pxgraph program.
+This program has many options; see the User's manual
+of The Almagest.
+	}
+	version {@(#)SDFXMgraph.pl	2.18 10/06/96}
+	author { J. T. Buck and E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i> program.
+This program must be in your path, or this star will not work!
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
+storing the data in a syntax acceptable to pxgraph.
+A null string prevents any such storage.
+The <i>options</i> string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
+for a complete explanation of the options.
+<a name="graph, X window, multi-signal"></a>
+<a name="pxgraph program"></a>
+<a name="xgraph program"></a>
+	}
+	seealso { Xgraph $PTOLEMY/src/pxgraph/pxgraph.htm XYgraph Xhistogram }
 	inmulti {
 		name { input }
 		type { float }
@@ -31,159 +37,59 @@ defstar {
 	defstate {
 		name {title}
 		type {string}
-		default {"X graph"}
-		desc {"graph title"}
+		default {"Ptolemy Xgraph"}
+		desc { Title for the plot. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save xgraph input"}
+		desc { File name for saving plottable data. }
 	}
 	defstate {
 		name {options}
 		type {string}
-		default {""}
-		desc {"command line options for xgraph"}
+		default {"-bb -tk =800x400"}
+		desc {Command line options for the xgraph program.}
+	}
+	defstate {
+		name {ignore}
+		type {int}
+		default { 0 }
+		desc { Number of initial values to ignore.}
+	}
+	defstate {
+		name {xUnits}
+		type {float}
+		default { 1.0 }
+		desc { For labeling, horizontal increment between samples. }
+	}
+	defstate {
+		name {xInit}
+		type {float}
+		default { 0.0 }
+		desc { For labeling, horizontal value of the first sample. }
 	}
 	protected {
-		FILE *strm[MAXNOINPUTS];
-		int delFile;
-		const char* fileName[MAXNOINPUTS];
-		int index;
+		XGraph graph;
+		double index;
 	}
-	ccinclude { "miscFuncs.h" }
-// constructor initializes streams and filenames
-	constructor {
-		for (int i = 0; i < MAXNOINPUTS; i++) {
-			strm[i] = NULL;
-			fileName[i] = NULL;
-		}
-		delFile = FALSE;
+	hinclude { "Display.h" }
+
+	setup {
+		graph.initialize(this, input.numberPorts(),
+			options, title, saveFile, ignore);
+		index = xInit;
 	}
-// start function: open temp files for each input stream
-	start {
-		StringList msg;
-		int noIns;
-		if((noIns = input.numberPorts()) > MAXNOINPUTS) {
-			Error::abortRun (*this, ": too many inputs");
-			return;
-		}
-		for (int i = noIns; i>0; i--) {
-			fileName[i] = tempFileName();
-			// open and make sure the file is writable
-			if ((strm[i] = fopen (fileName[i], "w")) == NULL) {
-				msg = readFullName();
-				msg += ": Can't open temporary file for writing: ";
-				msg += fileName[i];
-				Error::abortRun (msg);
-			}
-		}
-		index = 0;
-		input.reset();
-	}
-// go.  Does nothing if open failed.
-// Otherwise write to temporary files.
+
 	go {
-		for (int i = input.numberPorts(); i>0; i--) {
-			if (strm[i])
-				fprintf (strm[i], "%d %g\n",
-					 index, double(input()%0));
+		MPHIter nexti(input);
+		for (int i = 1; i <= input.numberPorts(); i++) {
+			graph.addPoint(i, index, float((*nexti++)%0));
 		}
-		index++;
+		index += double(xUnits);
 	}
-// wrapup.  Does nothing if open failed, or 2nd wrapup call.
-// closes files and execs the program.
 	wrapup {
-		for (int i = input.numberPorts(); i>0; i--) {
-			if (strm[i]) {
-				fclose (strm[i]);
-				strm[i] = NULL;
-			}
-		}
-		exec("");
+		graph.terminate();
 	}
-// destructor: close and delete file if open
-	destructor {
-		for (int i = input.numberPorts(); i>0; i--) {
-			if (strm[i]) fclose (strm[i]);
-			if (delFile) unlink (fileName[i]);
-			delete fileName[i];
-		}
-	}
-// execute the program
-// extraOpts is mainly for derived stars.
-	method {
-            name { exec }
-            access { protected }
-            arglist { "(const char* extraOpts)" }
-            type { void }
-            code {
-                StringList cmd;
-    
-                if (delFile) cmd += "( ";
-                cmd += "xgraph ";
-    
-                const char* t = title;
-                if (t && *t) {
-                    cmd += "-t '";
-                    cmd += t;
-                    cmd += "' ";
-                }
-                const char* o = options;
-                if (o && *o) {
-                    cmd += o;
-                    cmd += " ";
-                }
-                if (extraOpts && *extraOpts) {
-                    cmd += extraOpts;
-                    cmd += " ";
-                }
-                for (int i = input.numberPorts(); i>0; i--) {
-                    cmd += fileName[i];
-                    cmd += " ";
-                }
-    
-                char* sf = saveFile;
-                if (sf != NULL && *sf != 0) {
-                    const char* saveFileName = savestring (expandPathName(sf));
-    
-                    // Easiest way to check to see whether the file can be
-                    // written is to call creat and then close the file.
-                    // This has the side benefit of zeroing out the file if it exists.
-                    int tempFileDesc;
-                    if ((tempFileDesc = creat(saveFileName,0644)) == -1) {
-                        // File is not writable
-			StringList msg;
-                        msg = readFullName();
-                        msg += ": No write permission on file: ";
-                        msg += saveFileName;
-                        msg += ". Data not saved.";
-                        errorHandler.error (msg);
-                    } else {
-                        // File is OK.  Close it, then write to it.
-                        close(tempFileDesc);
-                        for (i = input.numberPorts(); i>0; i--) {
-                            cmd += "; /bin/cat ";
-                            cmd += fileName[i];
-                            cmd += " >> ";
-                            cmd += saveFileName;
-                            cmd += "; /bin/echo \"\" >> ";
-                            cmd += saveFileName;
-                        }
-                    }
-                }
-    
-                // remove temporary files
-                for (i = input.numberPorts(); i>0; i--) {
-                    cmd += "; /bin/rm -f ";
-                    cmd += fileName[i];
-                }
-                cmd += ")";
-                cmd += "&";
-                system (cmd);
-                // no longer need to clean up
-                delFile = FALSE;
-	}
-    }
 }

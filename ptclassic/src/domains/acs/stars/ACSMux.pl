@@ -10,7 +10,7 @@ Integers from 0 through N-1 are accepted at the "control" input,
 where N is the number of inputs.  If the control input is outside
 this range, an error is signaled.
 	}
-	version { $Id$ }
+	version { @(#)ACSMux.pl	1.2 09/08/99 }
 	author { J. A. Lundblad }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.

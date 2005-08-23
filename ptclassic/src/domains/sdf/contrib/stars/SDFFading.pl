@@ -7,7 +7,7 @@ This function simulates multipath effects on a Rayleigh fading channel.
 	author { Srikanth Gummadi }
 	acknowledge { Biao Lu and Brian L. Evans }
 	location { SDF DSP library }
-	version { $Id$ }
+	version { @(#)SDFFading.pl	1.1	03/17/98 }
 	copyright {
 Copyright (c) 1997-1998 Regents of The University of Texas.
 All rights reserved.

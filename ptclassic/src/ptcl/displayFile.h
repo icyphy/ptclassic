@@ -2,7 +2,7 @@
 Functions that Display a file
 
 Version identification:
-$Id$
+@(#)displayFile.h	1.2 9/4/96
 
 Copyright (c) 1996 The Regents of the University of California.
 All rights reserved.
@@ -31,15 +31,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Author: Christopher Hylands 9/3/96
 */
 
-
-/*
- * If the PT_DISPLAY environment variable is not set, then set
- * buf to the empty string.
- * If the PT_DISPLAY environment variable is set, then use print
- * the value of $PT_DISPLAY into buf.  PT_DISPLAY should 
- * be printf format string, like "xedit -name ptolemy_code %s".
+/* Please keep this file free of an include <tcl.h> so that we
+ * call it from anywhere
  */
-static void genDispCommand(char *buf, const char *fileName, int background);
 
 /* Start tycho if it is not already running.
  */
@@ -55,6 +49,17 @@ void startTycho();
  *  
  * Currently, this function is called from pigilib/icon.c and from
  * cg/kernel/CGUtilties.cc
+ *
+ * fileName	- The name of the file to open
+ * debugFuncPtr - A function that takes a const char * that will print
+ *		  out status information about what is going on.  This
+ *		  is useful if there is a slight delay in getting things
+ *		  started
+ * errFuncPtr	- A functino that takes a const char * that will print
+ *		  an error message if something goes wrong.
+ * If debugFuncPtr or errFuncPtr are NULL, then they are not called.
  */
-int DisplayFile( const char *fileName, void (*errFuncPtr)(char *));
+int displayFile(const char *fileName,
+		void (*debugFuncPtr)(const char *),
+		void (*errFuncPtr)(const char *));
 

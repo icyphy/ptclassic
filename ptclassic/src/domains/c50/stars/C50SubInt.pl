@@ -2,7 +2,7 @@ defstar {
     name {SubInt}
     domain {C50}
     desc { Output the "pos" input minus all "neg" inputs. }
-    version { @(#)C50SubInt.pl	1.2	3/10/96 }
+    version { @(#)C50SubInt.pl	1.7	7/22/96 }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -38,11 +38,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	setc	ovm
 	}
 
+
+	codeblock(clearSaturation){
+	clrc	ovm
+	}
+
 	codeblock(subStart) {
-	lar	ar0,#$addr(pos)
-	lar	ar1,#$addr(output)
-	mar	*,ar0
-	lacc	*,16			; acc = positive
+	lar	ar0,#$addr(pos)		; ar0-> pos. input
+	lar	ar1,#$addr(output)	; ar1-> output
+	mar	*,ar0			; arp = 0
+	lacc	*,16			; acc = pos. input
 	lar	ar0,#$addr(neg#1)	; ar0 -> first negative
 	}
 
@@ -65,14 +70,16 @@ limitation of liability, and disclaimer of warranty provisions.
 			addCode(sub(i));
 		}
 		addCode(subEnd);
+		if (int(saturation)) addCode(clearSaturation);
+	
 	}
 
 	exectime {
 		int time = 0;
 		if ( int(saturation)) time++;
 		time += 7;
-		if ( int(neg.numberPorts() > 2)
-			time += 2*(int(neg.numberPorts) - 2);
+		if ( int(neg.numberPorts() > 2))
+			time += (2*(int(neg.numberPorts()) - 2));
 		return time;
 	}
 }

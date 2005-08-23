@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,248 +27,225 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*****************************************************************************
 Version identification:
-@(#)SigHandle.cc	
+@(#)SigHandle.cc	1.17	10/06/98
 
-Author: Joel R. King
+Authors: Joel R. King
 
 Defines the signal handlers for Tycho.
+Some refinement by Brian Evans.
 
 *****************************************************************************/
 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>		
-#include <tcl.h>
-#include <ptsignals.h>
+#include "compat.h"
+#include "tcl.h"
+#include "SigHandle.h"
+#include "InfString.h"
 
-/****************************************************************************/
+// Define the name of the [incr tk] program: either itcl_wish or itkwish
+#define SH_ITCLTK_PROG "itkwish"
 
+// Sub-directory of $PTOLEMY that contains itcl files to source 
+// plus file names
+#define SH_ITCLTK_SCRIPT "/tycho/kernel/CoreError.itcl"
 
-extern Tcl_Interp *ptkInterp; /* Used so we can call emergencySave. */
-extern "C" char **environ;/* An array of pointers to strings containing the */
-                       /* environmental variables. This is needed by the    */
-                       /* execle() function, as an argument to setup the    */
-                       /* environment for the process that its launching.   */
+// Used so we can call the Tcl procedure emergencySave
+extern Tcl_Interp *ptkInterp;
 
-/****************************************************************************/
+// An array of pointers to strings containing the environment variables
+// Needed by the execle() function to setup the process it is launching
+extern "C" char **environ;
 
-int setHandlers(SIG_PF sigHandler);
-void signalHandlerRelease(int);
-void signalHandlerDebug(int);
-void abortHandling(int at);
-static void DoTychoSave(void);
+// Use execle to execute the Unix command "$signalPath $signalScript 
+// where, 
+//   signalPath = $PTOLEMY/bin.$PTARCH/itkwish
+//   signalScript = $PTOLEMY/tycho/kernel/TyCoreError.itcl
+// signalMsg is used by abortHandling() to inform user of the error.
+// Cannot use dynamic memory since malloc and new are not reentrant.
+static char *signalPath = NULL, *signalScript = NULL, *signalMsg = NULL;
 
-/****************************************************************************/
+// Store size of signalMsg for use by abortHandling. We do this here 
+// since strlen may not be reentrant depending on vendor implementation.
+int signalMsgSize;
 
-/***** This function sets the signal handler function for each of the   *****/
-/***** signals that we want to intercept to the signalHandlerRelease    *****/
-/***** function.                                                        *****/
-
-int 
-setHandlers(SIG_PF sigHandler)
-{
-/***** The following function calls to ptsignal relate a certain signal  *****/
-/***** to a function, called sigHandler.                                 *****/
-
-    if (sigaction(SIGBUS, sigHandler) != 0) {
-        return 1;
-    }
-    if (sigaction(SIGEMT, sigHandler) != 0) {
-        return 2;
-    }
-    if (sigaction(SIGFPE, sigHandler) != 0) {
-        return 3;
-    }
-    if (sigaction(SIGILL, sigHandler) != 0) {
-        return 4;
-    }
-    if (sigaction(SIGIOT, sigHandler) != 0) {
-        return 5;
-    }
-    if (sigaction(SIGQUIT, sigHandler) != 0) {
-        return 6;
-    }
-    if (sigaction(SIGSEGV, sigHandler) != 0) {
-        return 7;
-    }
-    if (sigaction(SIGSYS, sigHandler) != 0) {
-        return 8;
-    }
-    if (sigaction(SIGTRAP, sigHandler) != 0) {
-        return 9;
-    }
-    if (sigaction(SIGXCPU, sigHandler) != 0) {
-        return 10;
-    }
-    if (sigaction(SIGXFSZ, sigHandler) != 0) {
-        return 11;
-    }
-
-    return 0;
-
-}
-
-/****************************************************************************/
-
-/***** This function defines the way that a signal that is received     *****/
-/***** will be handled when PT_DEVELOP is not defined, or 0. The action *****/
-/***** of this function is to issue an error message letting the user   *****/
-/***** know that a fatal error occured, then exit.                      *****/
-
-void 
-signalHandlerRelease(int signo)
-{
-
-    struct sigaction newSignal, oldSignal;
-    sigset_t sigmask;
-    /*** FIX ME - Should not guess at size of path. ***/
-    char *ptolemy, *arch, path[200], file[200];
-    static int times = 0;
-
-    if (times == 0) /* We check this in case the call to DoTychoSave bombs */
-    { /* out and generates another signal. */
-        times++;
-	DoTychoSave();
-    }
-
-    arch = getenv("ARCH");
-    ptolemy = getenv("PTOLEMY");
-    path[0] = '\0';
-    file[0] = '\0';
-    strcat(path, ptolemy);
-    strcat(path, "/bin.");
-    strcat(path, arch);
-    strcat(path, "/itcl_wish");
-    strcat(file, ptolemy);
-    strcat(file, "/tycho/kernel/TyCoreRelease.itcl");
-
-    switch(fork()) 
-    {
-        case -1: /* fork() return value for error. */
-	    abortHandling(1);
-      
-	case 0: /* fork() return value for child. */
-	    sleep(1); /* Allow core file to be generated. */   
-	    execle(path, "itcl_wish", file, "-name Tycho", (char *)0, environ);
-	    abortHandling(2); /*If you make it this far something went wrong.*/
-    }
-    /*************************** In parent ******************************/
-
-    newSignal.sa_handler = SIG_DFL; /* Sets signal handler to default. */
-    sigfillset(&sigmask);
-    sigdelset(&sigmask, signo); /* So the process will receive kill      */
-                                /* signal that it sends to itself.       */
-    newSignal.sa_mask = sigmask;
-
-    if (sigaction(signo, &newSignal, &oldSignal) != 0) 
-        abortHandling(3); /* Could not set signal handler back to default. */
-
-    if (kill(getpid(), signo) != 0)  /* Commit suicide in manner that       */
-        abortHandling(4);             /* generates core file for child, if   */
-                                     /* suicide fails abort.                */
-
-    /* Program should never get to this point. */
-
-}
-
-/****************************************************************************/
-
-/***** This function defines the way that a signal that is received     *****/
-/***** will be handled when PT_DEVELOP is defined to be non-zero. The   *****/
-/***** action of this function is to inform the user that a fatal error *****/
-/***** occured, then call the debugger, if requested, to view the core  *****/
-/***** file.                                                            *****/
-
-void
-signalHandlerDebug(int signo)
-{
-
-    struct sigaction newSignal, oldSignal;
-    sigset_t sigmask;
-    /*** FIX ME - Should not guess at size of path. ***/
-    char *ptolemy, *arch, path[200], file[200];
-    static int times = 0;
-
-    if (times == 0) /* We check this in case the call to DoTychoSave bombs */
-    { /* out and generates another signal. */
-        times++;
-	DoTychoSave();
-    }
-
-    ptolemy = getenv("PTOLEMY");
-    arch = getenv("ARCH");
-    path[0] = '\0';
-    file[0] = '\0';
-    strcat(path, ptolemy);
-    strcat(path, "/bin.");
-    strcat(path, arch);
-    strcat(path, "/itcl_wish");
-    strcat(file, ptolemy);
-    strcat(file, "/tycho/kernel/TyCoreDebug.itcl");
-
-    switch(fork()) 
-    {
-        case -1: /* fork() return value for error. */
-	    abortHandling(1);
-      
-	case 0: /* fork() return value for child. */
-	    sleep(1); /* Allow core file to be generated. */    
-	    execle(path, "itcl_wish", file, "-name Tycho", (char *)0, environ);
-	    abortHandling(2); /*If you make it this far something went wrong.*/
-    }
-
-    /************************ In parent **********************************/
-
-    newSignal.sa_handler = SIG_DFL; /* Sets signal handler to default. */
-    sigfillset(&sigmask);
-    sigdelset(&sigmask, signo); /* So the process will receive kill      */
-                                /* signal that it sends to itself.       */
-    newSignal.sa_mask = sigmask;
-
-    if (sigaction(signo, &newSignal, &oldSignal) != 0) 
-        abortHandling(3); /* Could not set signal handler back to default. */
-
-    if (kill(getpid(), signo) != 0)  /* Commit suicide in manner that       */
-        abortHandling(4);            /* generates core file for child, if   */
-                                     /* suicide fails abort.                */
-
-    /* Program should never get to this point. */
-
-}
-
-/****************************************************************************/
-
-/**** This function is called when everything else goes wrong and the    ****/
-/**** program has no choice but to bomb out in an ungraceful manner.     ****/
-
-void
-abortHandling(int at) 
-{
-
-    static char msg[400]="\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
-    write(1, msg, sizeof(msg));  /* Used instead of printf,      */
-                                 /* because it is reentrant.     */
-    exit(1);
-
-}
-
-/****************************************************************************/
-
-/**** This function calls the method emergencySave, which attempts to do ****/
-/**** an emergency save of all active files with names. It is a method   ****/
-/**** of the class TyConsole and we invoke it for the object             ****/
-/**** .mainConsole because we know this object is alive as long as the   ****/
-/**** program is.                                                        ****/
+// DoTychoSave
+//
+// This function calls the Tcl method emergencySave, which attempts to do 
+// an emergency save of all active files with names. It is a method of the
+// class TyConsole and we invoke it for the object .mainConsole because we
+// know this object is alive as long as the program is.
 
 static void DoTychoSave(void)
 {
-    Tcl_VarEval(ptkInterp, ".mainConsole emergencySave", NULL);
+    Tcl_VarEval(ptkInterp, "::tycho::File::emergencySave", NULL);
 }    
 
-/****************************************************************************/
+
+// setHandlers
+//
+// This function sets the signal handler function for each of the
+// signals that we want to intercept.
+
+int setHandlers(SIG_PT sigHandler)
+{
+    if (ptSignal(SIGBUS, sigHandler) != 0) {
+        return 1;
+    }
+    if (ptSignal(SIGEMT, sigHandler) != 0) {
+        return 2;
+    }
+    if (ptSignal(SIGFPE, sigHandler) != 0) {
+        return 3;
+    }
+    if (ptSignal(SIGILL, sigHandler) != 0) {
+        return 4;
+    }
+    // Under Cygwin32, SIGIOT is not defined
+#ifdef SIGIOT
+    if (ptSignal(SIGIOT, sigHandler) != 0) {
+        return 5;
+    }
+#else
+    if (ptSignal(SIGABRT, sigHandler) != 0) {
+        return 5;
+    }
+#endif
+
+    if (ptSignal(SIGQUIT, sigHandler) != 0) {
+        return 6;
+    }
+    if (ptSignal(SIGSEGV, sigHandler) != 0) {
+        return 7;
+    }
+    if (ptSignal(SIGSYS, sigHandler) != 0) {
+        return 8;
+    }
+    if (ptSignal(SIGTRAP, sigHandler) != 0) {
+        return 9;
+    }
+#ifndef PTHPPA
+    if (ptSignal(SIGXCPU, sigHandler) != 0) {
+        return 10;
+    }
+    if (ptSignal(SIGXFSZ, sigHandler) != 0) {
+        return 11;
+    }
+#endif // PTHPPA
+    return 0;
+}
+
+// setStrings
+//
+// This function sets the value of path and script for release mode, 
+// since this cannot be done dynamically in the signal handler because 
+// new and malloc are not reentrant.
+
+void setStrings(void) 
+{
+
+    // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
+    // file name, e.g., "/bin.sol2/itkwish"
+    InfString itcl_path = "/bin.";
+    const char* ptarch = getenv("PTARCH");
+    if (ptarch == 0) {
+        fprintf(stderr, "The PTARCH environment variable is not set, exiting");
+	exit(1);
+    } else {
+        itcl_path << ptarch;
+    }  
+    itcl_path << "/";
+    itcl_path << SH_ITCLTK_PROG;
+
+    // 1. Find the value of the PTOLEMY environment variable
+    const char* ptolemy = getenv("PTOLEMY");
+    if (ptolemy == 0) {
+        ptolemy = "~ptolemy";
+    }
+
+    // 2. Define the path of itcl_wish and itcl file name to source
+    InfString tempPath = ptolemy;
+    tempPath << itcl_path;
+
+    InfString tempScript = ptolemy;
+    tempScript << SH_ITCLTK_SCRIPT;
+
+    InfString tempMsg = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
+
+    // These values don't change for the life of the program. So if the 
+    // environment changes during execution those changes will not be 
+    // reflected until program in launched again.
+    signalPath = tempPath.newCopy();
+    signalScript = tempScript.newCopy();
+    signalMsg = tempMsg.newCopy();
+    signalMsgSize = strlen(signalMsg);
+
+}
+
+// signalHandler
+//
+// This function defines the way that a fatal signal that is received
+// will be handled. The action of this function is to inform the user
+// that a fatal error occured, then give the user the option of running
+// GDB on the core file, starting another Tycho session, or exiting.
+
+void signalHandler(int signo)
+{
+    // We check this in case the call to DoTychoSave bombs 
+    // out and generates another signal. 
+    static int times = 0;
+    if (times == 0) {
+        times++;
+	DoTychoSave();
+    }
+
+    if (signalPath == NULL || signalScript == NULL) {
+        abortHandling();
+    }
+
+    switch(fork()) 
+    {
+        case -1:		// fork() return value for error. 
+	    abortHandling();
+      
+	case 0:			// fork() return value for child. 
+	    sleep(1);		// Allow core file to be generated.  
+	    execle(signalPath, SH_ITCLTK_PROG, signalScript, \
+		   (char *)0, environ);
+	    abortHandling();	// If you make it this far something went wrong
+    }
+
+    // We are now in the parent process
+    // Set the handler for the current signal to the default, so that  
+    // the kernel will generate a core file.
+    ptSignal(signo, (SIG_PT) SIG_DFL);
+
+    // Commit suicide in manner that generates core file for child,
+    // if suicide fails abort.               
+    if (kill(getpid(), signo) != 0)
+        abortHandling();
+
+    // Program should never get to this point. 
+}
+
+
+// abortHandling
+//
+// This function is called when everything else goes wrong and the
+// program has no choice but to bomb out in an ungraceful manner.
+
+void abortHandling() 
+{
+    if (signalMsg == NULL) {
+        exit(1);
+    }
+    // Use write instead of printf because it is reentrant.
+    // Send message to the standard output
+    write(1, signalMsg, signalMsgSize);
+    exit(1);
+}

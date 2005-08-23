@@ -1,8 +1,5 @@
 /*
-Version identification:
-$Id$
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,8 +21,12 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-  Programmer: Steve X. Gu and Brian L. Evans
-  Date of creation: 01/13/96
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+  Author:  Steve X. Gu and Brian L. Evans
+  Created: 01/13/96
+  Version: @(#)MathematicaTcl.cc	1.13	03/08/97
 
   This file implements a class that adds Mathematica-specific Tcl commands
   to a Tcl interpreter.
@@ -33,21 +34,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 static const char file_id[] = "MathematicaTcl.cc";
 
-#ifndef __GNUG__
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include <string.h>
-#include "tcl.h"
+#include <tcl.h>
+#include "miscFuncs.h"
 #include "StringList.h"
+#include "InfString.h"
 #include "Error.h"
 #include "MathematicaIfc.h"
 #include "MathematicaTcl.h"
 
-#define MATHEMATICATCL_CHECK_MATHEMATICA() \
-        if (! init()) return error("Could not start Mathematica")
+#define MATHEMATICATCL_NOT_START "Could not start Mathematica"
 
-// Consturctor
+#define MATHEMATICATCL_CHECK_MATHEMATICA() \
+        if (! init()) return error(MATHEMATICATCL_NOT_START)
+
+// Constructor
 MathematicaTcl::MathematicaTcl() {
     tclinterp = 0;
     mathematicaInterface = 0;
@@ -81,10 +86,33 @@ int MathematicaTcl::error(const char* msg) {
     return TCL_ERROR;
 }
 
+// Create a new instance of an interface to Mathematica
+void MathematicaTcl::newMathematicaInterface() {
+    // 1. put the directory $PTOLEMY/lib/mathematica on Mathematica's path
+    StringList initCommand = "PrependTo[$Path, \"";
+    char* libMmaName = expandPathName("$PTOLEMY/lib/mathematica");
+    initCommand << libMmaName << "\"]; ";
+
+    // 2. declare packages that we need
+    initCommand << "Needs[\"FourierSeriesFormula`\"]; ";
+    initCommand << "Needs[\"Calculus`Master`\"]; ";
+    initCommand << "Needs[\"Algebra`Master`\"]; ";
+
+    // 3. create new instance
+    delete mathematicaInterface;
+    mathematicaInterface =
+    	new MathematicaIfc(initCommand, "MathematicaTcl", TRUE, FALSE, FALSE);
+
+    delete [] libMmaName;
+}
+
 // Start a Mathematica process if one is not running
 int MathematicaTcl::init() {
+    // Start a connection to Mathematica called MathematicaTcl in which
+    // Mathematica starts up in a private namespace (context) "MathematicaTcl`"
+    // We also disable the display of the input and the output number
     if (mathematicaInterface == 0) {
-	mathematicaInterface = new MathematicaIfc;
+	newMathematicaInterface();
     }
 
     if (! mathematicaInterface->MathematicaIsRunning()) {
@@ -98,15 +126,15 @@ int MathematicaTcl::init() {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::evaluate(char* command, int outputBufferFlag) {
-    int merror = mathematicaInterface->EvaluateOneCommand(command);
-    if (outputBufferFlag || merror) {
+    int retval = mathematicaInterface->EvaluateUserCommand(command);
+    if (outputBufferFlag || ! retval) {
 	Tcl_AppendResult(tclinterp, 
 			 mathematicaInterface->GetOutputBuffer(), 
 			 0);
     }
 
-    if (merror) return TCL_ERROR;
-    return TCL_OK;
+    if (retval) return TCL_OK;
+    return TCL_ERROR;
 }
 
 // Evaluate the Tcl command "mathematica"
@@ -133,6 +161,12 @@ int MathematicaTcl::mathematica(int argc, char** argv)
 	}
 	break;
 	
+      case 'g':
+	if ( strcmp(argv[1], "get") == 0 ) {
+	    return MathematicaTcl::get(argc, argv);
+	}
+	break;
+
       case 's':
 	if ( strcmp(argv[1], "send") == 0 ) {
 	    return MathematicaTcl::send(argc, argv);
@@ -157,35 +191,75 @@ int MathematicaTcl::mathematica(int argc, char** argv)
 }
 
 // Close a Mathematica connection
-int MathematicaTcl::end(int argc, char** /*argv*/) {
-    if (argc != 2) return usage("mathematica end");
+int MathematicaTcl::end(int argc, char** argv) {
+    if (argc < 2 || argc > 3) return usage("mathematica end ?<identifier>?");
     if (mathematicaInterface == 0) {
 	return error("the Tcl/Mathematica interface has not been initialized");
     }
-    delete mathematicaInterface;
-    mathematicaInterface = 0;
+    char* id = (argc == 3) ? argv[2] : 0;
+    Pointer key = manager.makeInstanceName(tclinterp, id);
+    if (! manager.exists(key) ) {
+        StringList msg = "the Tcl/Mathematica interface has not been started";
+        msg << " for " << (id ? id : "that instance");
+        return error(msg);
+    }
+    manager.remove(key);
+    if ( manager.noMoreInstances() ) {
+	mathematicaInterface->CloseMathematicaFigures();
+        delete mathematicaInterface;
+        mathematicaInterface = 0;
+    }
     return TCL_OK;
 }
 
 // Evaluate a Mathematica command
 int MathematicaTcl::eval(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica eval <mathematica_commad>");
+    if (argc != 3) return usage("mathematica eval <script>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], TRUE);
 }
 
+// Evaluate a Mathematica command, and get a variable
+int MathematicaTcl::get(int argc, char** argv) {
+    if (argc != 3 && argc != 4) {
+	return usage("mathematica get <name> ?<script>?");
+    }
+    MATHEMATICATCL_CHECK_MATHEMATICA();
+
+    // Evaluate the script given by argv[3]
+    int retval = TCL_OK;
+    if (argc == 4) {
+	retval = evaluate(argv[3], FALSE);
+    }
+
+    // Get the value of the Mathematica variable name given by argv[2]
+    if (retval == TCL_OK) {
+	InfString getTclForm = "InputForm[N[";
+	getTclForm << argv[2] << "]]";
+	int retval2 =
+	    mathematicaInterface->EvaluateUnrecordedUserCommand(getTclForm);
+        Tcl_AppendResult(tclinterp,
+	    mathematicaInterface->GetPrivateOutputBuffer(),
+	    0);
+	retval = retval2 ? TCL_OK : TCL_ERROR;
+    }
+    return retval;
+}
+
 // Evaluate a Mathematica command
 int MathematicaTcl::send(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica send <mathematica_commad>");
+    if (argc != 3) return usage("mathematica send <script>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], FALSE);
 }
 
 // Start a Mathematica process if one is not running already
-int MathematicaTcl::start(int argc, char** /*argv*/){
-    if (argc != 2) return usage("mathematica start");
-    if (init()) return TCL_OK;
-    return error("Could not start mathematica");
+int MathematicaTcl::start(int argc, char** argv){
+    if (argc < 2 || argc > 3) return usage("mathematica start ?<identifier>?");
+    if (! init()) error(mathematicaInterface->GetErrorString());
+    char* id = (argc == 3) ? argv[2] : 0;
+    manager.add(tclinterp, id);
+    return TCL_OK;
 }
 
 // Return the status of the Tcl/Mathematica interface

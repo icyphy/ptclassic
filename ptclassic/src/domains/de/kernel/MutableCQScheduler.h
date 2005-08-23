@@ -3,7 +3,7 @@
 
 /*
 Version Identification:
-$Id$
+@(#)MutableCQScheduler.h	1.4 03/18/98
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
@@ -39,8 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Galaxy.h"
 #include "DEStar.h"
 #include "DEScheduler.h"
-#include "CQEventQueue.h"
+#include "MutableCQEventQueue.h"
 #include "CalendarQueue.h"
+#include "MutableCalendarQueue.h"
 
 
 	////////////////////////////
@@ -59,7 +60,10 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	CQEventQueue eventQ;
+	MutableCQEventQueue eventQ;
+
+        // Resort events according to new fine levels. 
+        void resortEvents();
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
@@ -93,6 +97,9 @@ public:
 	double whenStop() { return stopTime ;}
 
 	// fetch an event on request.
+	// FIXME: This method is dangerous. It is public but can
+	// lead to an aborted run if it is called with timeVal
+	// set to a time in the past. - John Davis, 1/21/98
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
 
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }

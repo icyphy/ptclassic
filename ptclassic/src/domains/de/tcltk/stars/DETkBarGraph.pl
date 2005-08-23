@@ -4,16 +4,21 @@ defstar {
 	desc {
 Takes any number of inputs and dynamically
 displays their values in bar-chart form.
+The time stamp is ignored, so the bar chart
+only indicates the order of occurrence of events.
+If there is more than one input port, then
+bars for the two inputs will be plotted together
+only if the events are simultaneous.
 	}
-	version { $Id$ }
-	author { B. L. Evans }
+	version { @(#)DETkBarGraph.pl	1.11   10/23/95 }
+	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	hinclude { "ptk.h" }
 	hinclude { "BarGraph.h" }
 	inmulti {
@@ -68,28 +73,38 @@ limitation of liability, and disclaimer of warranty provisions.
 		int count;
 	}
 	setup {
-	    if(float(top) <= float(bottom)) {
+	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
+	}
+	begin {
+	    // Make non-const copies of label and position
+	    InfString labCopy((const char*)label);
+	    InfString posCopy((const char*)position);
 	    bar.setup(this,
-		(char*)label,
+		(char*) labCopy,
 		input.numberPorts(),
-		(int)number_of_bars,
-		(float)top,
-		(float)bottom,
-		(char*)position,
-		(float)bar_graph_width,
-		(float)bar_graph_height);
+		(int) number_of_bars,
+		(double) top,
+		(double) bottom,
+		(char*) posCopy,
+		(double) bar_graph_width,
+		(double) bar_graph_height);
 	    count = 0;
 	}
 	go {
 	    InDEMPHIter nextp(input);
 	    InDEPort* p;
 	    int i = 0;
-	    while ((p = nexti++) != 0) {
+	    while ((p = nextp++) != 0) {
 		if ( p->dataNew ) {
 		  if ( bar.update(i, count, p->get()) == FALSE ) {
 		    Error::abortRun(*this, "failed to update bar chart");
+		    return;
+		  }
+		} else {
+		  if ( bar.update(i, count, 0.0) == FALSE ) {
+		    Error::abortRun(*this, "failed to clear bar");
 		    return;
 		  }
 		}

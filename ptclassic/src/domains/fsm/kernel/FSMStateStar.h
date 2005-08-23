@@ -1,8 +1,8 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)FSMStateStar.h	1.6 10/08/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,12 +43,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "FSMStar.h"
 #include "Geodesic.h"
+#include "InfString.h"
+#include "IntArrayState.h"
 #include "IntState.h"
 #include "StringState.h"
 #include "tcl.h"
 
-class FSMStateStar : public FSMStar
-{
+class FSMStateStar : public FSMStar {
 public:
     // constructor & destructor
     FSMStateStar();
@@ -64,31 +65,52 @@ public:
     int isInit() { return int(isInitState); }
 
     // Return the next state according the conditions.
-    FSMStateStar *nextState(int& condNum);
+    virtual FSMStateStar *nextState(int& condNum, int preemption);
 
-    // Do the action.
-    virtual int doAction(int = 0);
+    // Execute the action.
+    virtual int execAction(int actNum);
 
-// Print out the information of this state
-void printOut();
+    // Execute the internal machine.
+    virtual int execSlave(int curEntryType);
+
+    // Get the entry type of a possible transition out of this state.
+    int getEntryType(int transNum);
 
 protected:
     IntState isInitState;
+    StringState events;
     StringState conditions;
+    StringState actEvents;
+    StringState actExprs;
+    IntArrayState entryType;
+    IntArrayState preemptive;
+    StringState slaveNm;
+    StringState where_is_defined;
 
-    Tcl_Interp *myInterp;
+    int numTrans;
+    char** parsedEvents;
+    char** parsedConditions;
+    InfString* parsedActEvents;
+    InfString* parsedActExprs;
 
-    char** parsedCond;
-    int numConds;
+    Star* slave;
+    const char* slaveInnerDomain;
 
     static int count;
 
-    /* virtual */ void setup();
+    // Following just point to the copies of its master FSM.
+    Tcl_Interp *myInterp;
+
+    /* virtual */ void setup();  // Redefine.
+    /* virtual */ void begin();  // Redefine.
+    /* virtual */ void wrapup(); // Redefine.
 
     Star * createWormhole (const char *galname, const char* where_defined);
     const char* ptkCompile(const char *galname, const char* where_defined);
-    Geodesic** setupGeodesic (Star* worm, MultiPortHole& mph);
-    char** strParser (const char* strings,int& numStr);
-    double* str2values (const char* string,int& numValues);
+    int setupGeodesic (Star* worm, Block* parent);
+
+ private:
+    // Used for debugging.
+    void printInfo();
 };
 #endif

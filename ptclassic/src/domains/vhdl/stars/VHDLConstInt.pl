@@ -4,10 +4,10 @@ defstar {
   desc {
     Output a constant signal with value given by the "level" parameter (default 0) and of type integer.
   }
-  version { $Id$ }
+  version { @(#)VHDLConstInt.pl	1.3 03/07/96 }
     author { Michael C. Williamson, J. T. Buck }
   copyright {
-    Copyright (c) 1990-1995 The Regents of the University of California.
+    Copyright (c) 1990-1997 The Regents of the University of California.
       All rights reserved.
       See the file $PTOLEMY/copyright for copyright notice,
       limitation of liability, and disclaimer of warranty provisions.
@@ -15,7 +15,7 @@ defstar {
   location { VHDL main library }
   output {
     name { output }
-    type { float }
+    type { int }
   }
   defstate {
     name { level }

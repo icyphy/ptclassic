@@ -2,11 +2,9 @@
 #define _Resource_h 1
 
 /**************************************************************************
-Version identification:
-@(#)Resource.h	1.15     12/09/97
+Version identification:	@(#)Resource.h	1.11 08/27/99
 
-
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1997-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -37,8 +35,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* 
  Programmer:  Neil Smyth
+              Claudio Passerone
  Date of creation: 11/11/97
- Revisions:
+ Revisions: 4/15/98 version 2, removed the seperate q for pending events. 
+     Instead store the pending events in the RC star
 */
 
 
@@ -46,36 +46,48 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#ifndef RoundRobin
-#define RoundRobin    0
+#ifndef DE_ROUNDROBIN
+#define DE_ROUNDROBIN    0
 #endif
 
-#ifndef NonPreemptive
-#define NonPreemptive 1
+#ifndef DE_NONPREEMPTIVE
+#define DE_NONPREEMPTIVE 1
 #endif
 
-#ifndef Preemptive
-#define Preemptive  2
+#ifndef DE_PREEMPTIVE
+#define DE_PREEMPTIVE  2
+#endif
+
+#ifndef DE_FIFO
+#define DE_FIFO    3
+#endif
+
+#ifndef DE_FIFONONPREEMPTIVE
+#define DE_FIFONONPREEMPTIVE 4
+#endif
+
+#ifndef DE_FIFOPREEMPTIVE
+#define DE_FIFOPREEMPTIVE  5
 #endif
 
 #include "type.h"
 #include "Galaxy.h"
 #include "DataStruct.h"
-#include "DEPolis.h"
+#include "DERCStar.h"
 #include "CQEventQueue.h"
-#include "PolisEventQ.h"
-#include "PolisScheduler.h"
+#include "DERCScheduler.h"
+#include "HashTable.h"
 
-class PolisEventQ;
-class PolisEvent;
-class PolisScheduler;
+class DERCScheduler;
+class ResLLCell;
+class DERCStar;
 
 ////////////////////////////////////////////////////////////////////////////
-// Resource : to be used in a POLIS simulation.
+// Resource : to be used to simulate resource contention
 //
 // A Resource is used to control access to a simulated resource (eg CPU,
 // data bus etc.) during a POLIS simulation. It is designed to be used in 
-// conjunction with a PolisScheduler. 
+// conjunction with a DERCScheduler. 
 // It looks after keeping track of interrupted processes (more accurately 
 // their output Events), as well as deciding when a Star can access this
 // resource.
@@ -85,28 +97,45 @@ class PolisScheduler;
 
 class Resource {
     public:
-    Resource(const char*, int, PolisScheduler* );
+    Resource(const char*, int, DERCScheduler* );
 
-    
-    void newEventFromEventQ(PolisEvent* , double);
-    void newEventFromInterruptQ(PolisEvent*, double);
-    void intQupdate(PolisEvent*, double, double);
-    int canAccessResource(PolisEvent*);
-    // used to get the destination of the event as a Polis Star
-    DEPolis* getPolisStar(Event*);
-    
+    // Returns scheduling policy code
+    int getSchedPolicy(const char*);
+
+    // returns int so it can pass along value from DEStar.run()
+    int newEventFromEventQ(CqLevelLink* , double); 
+    int canAccessResource(CqLevelLink*);
+    // used to get the destination of the event as a DERC Star
+    DERCStar* getDERCStar(CqLevelLink*);
+
+    void removeFinishedStar(DERCStar*);
+    ResLLCell* getTopCell();
+    double getECT(DERCStar*);
+
+    // Register priority so that lastFired can be updated
+    int * registerPriority(const char *prkey);
+ 
+    // Register clock frequency for resource
+    void registerClock(double clock);
+
     const char* name;
     int schedPolicy;
     double timeWhenFree; // set to ECT of last event in LL, or else -1
-    PolisScheduler* mysched;   // the PolisScheduler which created this object
+    DERCScheduler* mysched;   // the DERCScheduler which created this object
     
-    SequentialList* getOtherEvents(PolisEvent*, double);
+    SequentialList* getOtherLinks(CqLevelLink*, double);
     // used to store information about interrupted processes
-    SequentialList* intEventList; 
+    SequentialList* intStarList; 
     
-    // Pointers to the event queues of the PolisScheduler controlling the simulation
-    PolisEventQ* eventQ;
-    PolisEventQ* interruptQ;
+    // Pointers to the eventQ of the DERCScheduler controlling the simulation
+    CQEventQueue* eventQ;
+
+    // Added by Claudio Passerone 09/24/1998
+    // indexValue of last fired star
+    HashTable lastFired;
+
+    // Clock frequency of the resource
+    double clkfreq;
 };
 
 
@@ -114,21 +143,20 @@ class Resource {
 ////////////////////////////////////////////////////////////////////////////
 // ResLLCell : to be used in Links in the Linked List.
 //
-// It stores information about the interrupted Events, and the output Events
-// of the Star which is using the Resource, but which have not yet been 
-// outputted.
+// It stores information about the Star that is using the resource, and 
+// the stars that are waiting to finish executing on the resource ( ie stars 
+// that were preempted while executing)
 //
 ////////////////////////////////////////////////////////////////////////////
 
 class ResLLCell {
 public: 
-    PolisEvent* event;
+    DERCStar* star;
     double ECT;     // Expected Completion Time
     int priority;
 
-    ResLLCell( PolisEvent* e, double time, int prio) 
-         : event(e), ECT(time), priority(prio) {}
-
+    // For some reason, under Cygwin32, we need to the body in the .cc file
+    ResLLCell( DERCStar* e, double time, int prio); 
 };
 
 #endif

@@ -1,14 +1,14 @@
-! $Id$
+! @(#)pigiXRes8.cp	1.3	11/30/92
 ! VEM options for Pigi for Color Printing:
 
-vem.bindings:	~ptolemy/lib/vem.bindings.8-1
+vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1
 vem*deftechname:	ptolemy
 vem*grid*major*units:	100
 vem*grid*minor*units:	10
 vem*lambda:	1
 vem*logfile:	/dev/null
 vem*snap:	25
-vem.technology:       ~ptolemy/lib/tech4colorPrint
+vem.technology:       $PTOLEMY/lib/tech4colorPrint
 
 ! The following are optional.  They can be overriden by the user.
 vem*font: 9x15
@@ -43,20 +43,7 @@ xgraph.Background: white
 xgraph.ZeroColor: navy
 xgraph.Markers: off
 xgraph.Foreground: black
-! The following are ignored, contrary to xgraph documentation.
-xgraph.0.Color: black
-xgraph.1.Color: black
-xgraph.2.Color: black
-xgraph.3.Color: black
-xgraph.4.Color: black
-xgraph.5.Color: black
-xgraph.6.Color: black
-xgraph.7.Color: black
-xgraph.0.Style: 0
-xgraph.1.Style: 1
-xgraph.2.Style: 2
-xgraph.3.Style: 3
-xgraph.4.Style: 4
-xgraph.5.Style: 5
-xgraph.6.Style: 6
-xgraph.7.Style: 7
+binxgraph.Background: white
+binxgraph.ZeroColor: navy
+binxgraph.Markers: off
+binxgraph.Foreground: black

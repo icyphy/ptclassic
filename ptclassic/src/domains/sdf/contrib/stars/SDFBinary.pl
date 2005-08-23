@@ -8,7 +8,7 @@ is False or -1 otherwise.
 	}
 	author { Biao Lu }
 	acknowledge { Brian L. Evans }
-	version { $Id$ }
+	version { @(#)SDFBinary.pl	1.1	03/24/98 }
 	location { SDF contrib library }
 	copyright {
 Copyright (c) 1997-1998 The University of Texas.

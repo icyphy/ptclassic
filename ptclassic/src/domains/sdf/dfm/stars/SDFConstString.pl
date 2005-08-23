@@ -2,10 +2,10 @@ defstar
 {
     name { ConstString }
     domain { SDF }
-    version { $Id$ }
+    version { @(#)SDFConstString.pl	1.1	2/29/96 }
     author { E. A. Lee and John Reekie }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liabi

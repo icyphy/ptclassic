@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FixSim }
 	corona { Nop }
 	desc { Does nothing }
-	version {@(#)ACSNopFixSim.pl	1.0 8/4/99}
+	version {@(#)ACSNopFixSim.pl	1.3 09/08/99}
         author { Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

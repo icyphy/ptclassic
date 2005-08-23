@@ -1,11 +1,11 @@
 # Config file to build under NT 4 with cygnus gcc and g++
-# NOTE: PTOLEMY WILL NOT COMPILE UNDER NT
+# NOTE: this is only a partial port of Ptolemy
 # This file is present only as a starting point for others.
-# See http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html
+# $PTOLEMY/doc/html/nt/index.html for more information.
 
-# $Id$
+# @(#)config-nt4.mk	1.28 09/21/00
 
-# Copyright (c) 1997 The Regents of the University of California.
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,6 +32,9 @@
 #		       
 # Programmer:  Christopher Hylands
 
+# This port uses Cygnus GNU-win32 b19, available from
+# www.cygnus.com
+
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
@@ -40,8 +43,6 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
-# Under NT, build a static ptcl first
-
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
 #include $(ROOT)/mk/config-g++.shared.mk
@@ -49,9 +50,12 @@ include $(ROOT)/mk/config-g++.mk
 #
 # Programs to use
 #
-RANLIB = true
+#SHELL=/Cygnus/B19/H-i386-cygwin32/bin/bash.exe
+RANLIB = touch
+YACC= byacc
 # Use gcc everywhere including in octtools
-CC =		gcc
+CC =		gcc -I$(ROOT)/src/compat/nt
+CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS -fpermissive
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
@@ -68,10 +72,19 @@ CC =		gcc
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	#-O2
-# -Wsynth is new in g++-2.6.x
+# -Wsynth is a g++ flag first introduced in g++-2.6.x.
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER $(GCC_270_OPTIONS)
+WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
+
+# PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
+# PT_ERRNO_IS_A_FUNCTION: Used by src/octtools/internal.h
+# USE_SIGACTION: Used by src/octtools/Xpackages/iv/timer.c
+# HAS_TERMIOS: Used by src/octtools/Packages/iv/ivGetLine.c
+
+# If we compile with -g, then the link can take a long time
+#DEBUGCFLAG = -g 
+LOCALCCFLAGS =	$(DEBUGCFLAGS) -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
+		-DNO_SYS_SIGLIST -DPT_ERRNO_IS_A_FUNCTION $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
@@ -79,29 +92,11 @@ LOCALCFLAGS =	$(LOCALCCFLAGS)
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-TCL_VERSION_NUM=76i
-TK_VERSION_NUM=42i
-ITCL_VERSION_NUM=22
-
-# Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC= c:/Itcl2.2/tcl7.6/win/Tcl76i.lib
-#TCL_LIBSPEC=-L$(TCL_ROOT)/Bin -ltcl$(TCL_VERSION_NUM)
-
-# Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/itk/include
-
-# Combined -L and -l options to link with tk library.  Can add
-# addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
-
-# Directory containing itcl include files
-ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC= c:/Itcl2.2/itcl/win/Itcl22.lib 
 #
 # Variables for the linker
 #
 # system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lg++ $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS) -lstdc++ -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm
@@ -116,65 +111,41 @@ LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
-# These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy.  -shared is necessary
-# with gcc-2.7.0
-INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-
-
-# Flag that gcc expects to create statically linked binaries.
-# Binaries that are shipped should be statically linked.
-# Note that cc uses -Bstatic
-CC_STATIC =
+# Binaries end with this extension
+BINARY_EXT = .exe
 
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/openwin/include
-X11_LIBDIR =	/usr/openwin/lib
-X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
+X11_DIR =	/usr/X11R6.4
+X11_INCSPEC =	-I$(X11_DIR)/include
+X11_LIBDIR =	$(X11_DIR)/lib
+X11EXT_LIBSPEC=	-lXpm -lXext -lSM -lICE
+X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
 
-# Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR =
+# XMKMF and MKDIRHIER are used when building xv
+XMKMF =		$(X11_DIR)/bin/xmkmf
+MKDIRHIER =	$(X11_DIR)/bin/mkdirhier
 
-PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	#purify -automount-prefix=/tmp_mnt:/vol -best-effort
-QUANTIFY =	#quantify
+# OCTTOOLS_ATTACHE_DIR is usually set to attache in
+# $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile attache because of curses issues
+OCTTOOLS_ATTACHE_DIR = attache
 
+# OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile iv because of signal issues.
+OCTTOOLS_IV_DIR =
 
-PURECOV = 	#purecov
+# Don't include Mathematica
+INCLUDE_MATHEMATICA = no
 
-#
-# Variables for miscellaneous programs
-#
-# Used by xv
-#XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-XV_INSTALL =
+# Don't includ Matlab
+INCLUDE_MATLAB = no
 
-# -DATT is needed so we don't try and include sys/dir.h
-# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
-#	otherwise, we will need to set LD_LIBRARY_PATH
-XV_CC =		gcc -traditional $(X11_INCSPEC) \
-		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
-		$(X11_LIBSPEC) -R$(X11_LIBDIR)
+# Don't include gthreads
+INCLUDE_GTHREADS =	no
 
-XV_RAND = 	-DNO_RANDOM
-
-# Under sol2, xmkmf is not compatible with gcc, so we don't use it
-XMKMF =		rm -f Makefile; cp Makefile.std Makefile
-
-# Used by tcltk to build the X pixmap extension
-XPM_DEFINES =	#-DZPIPE $(X11_INCSPEC)
-
-# Matlab architecture
-MATARCH = unknown
-
-# Mathematica MathLink library
-MATHLINKLIBNAME = MLelf
-
-# Build gthreads
-INCLUDE_GTHREADS =	yes
-
-# Include the PN domain.
-INCLUDE_PN_DOMAIN =	yes
-
+# Don't include the PN domain
+INCLUDE_PN_DOMAIN =	no

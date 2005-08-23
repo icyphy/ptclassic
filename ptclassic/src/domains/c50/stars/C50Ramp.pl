@@ -1,17 +1,20 @@
 defstar {
 	name { Ramp }
 	domain { C50 }
-	desc {Ramp generator}
-	version { $Id$ }
+	desc {
+Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
+	}
+	version { @(#)C50Ramp.pl	1.4	01 Oct 1996 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
-	explanation {
+	location { C50 main library }
+	htmldoc {
 Generates a ramp signal, starting at "value" (default 0.0)
 with step size "step" (default 0.001).
 	}
@@ -51,7 +54,7 @@ with step size "step" (default 0.001).
 	add	*,15,AR5			;Accu = sum + step
         sach    *,1				;Accu => sum
 	}
-	
+
 	setup {
 		sum=value;
 	}
@@ -62,6 +65,3 @@ with step size "step" (default 0.001).
 		return 8;
 	}
 }
-
-
-

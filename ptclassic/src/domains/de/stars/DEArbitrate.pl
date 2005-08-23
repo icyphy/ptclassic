@@ -2,138 +2,121 @@ defstar
 {
     name { Arbitrate }
     domain { DE }
-    descriptor
-    {
+    descriptor {
 This star acts as a non-preemptive arbitrator, granting requests for
-exclusive control.  If simultaneous "requests" arrive, priority is
-given to port A.  When control is released, any pending "requests" on
+exclusive control.  If simultaneous requests arrive, priority is
+given to port A.  When control is released, any pending requests on
 the other port will be serviced.  The "requestOut" and "grantIn"
 connections allow interconnection of multiple arbitration stars for
 more intricate control structures.
     }
-    version { $Id$ }
-    author { T.M. Parks }
-    copyright { 1991 The Regents of the University of California }
+    version { @(#)DEArbitrate.pl	1.9 06/04/96 }
+    author { T. M. Parks }
+    copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { DE main library }
 
-    input
-    {
+    input {
 	name { requestA }
 	type { int }
     }
 
-    input
-    {
+    input {
 	name { requestB }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { requestOut }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { grantA }
 	type { int }
     }
 
-    output
-    {
+    output {
 	name { grantB }
 	type { int }
     }
 
-    input
-    {
+    input {
 	name { grantIn }
 	type { int }
     }
 
-    private
-    {
-	enum STATE { idle, request, grant, release };
-	enum PORT { a, b };
+    protected {
+	InDEPort *request;	// request for current port
+	OutDEPort *grant;	// grant for current port
 
-	STATE state;
-	PORT port;
+	int idle : 1;	// arbitrator is idle
+	int req : 1;	// request is pending
+	int rel : 1;	// release is pending
     }
 
-    start
-    {
-	state = idle;
-	port = b;
+    constructor {
+	requestA.triggers(requestOut);
+	requestB.triggers(requestOut);
+	grantIn.triggers(grantA);
+	grantIn.triggers(grantB);
+	grantIn.before(requestA);
     }
 
+    setup {
+	idle = TRUE;
+	req = rel = FALSE;
+    }
 
-    go
-    {
-	switch(state)
+    go {
+	if (grantIn.dataNew)	// response to earlier "requestOut" output
 	{
-	case idle:
-	    if ( (requestA.dataNew && int(requestA.get()))
-		|| (requestB.dataNew && int(requestB.get())) )
+	    if (req && int(grantIn.get()))	// grant request
 	    {
-		port = (int(requestA.get())) ? a : b;
-		state = request;
+		req = FALSE;
+		grant->put(arrivalTime) << TRUE;
+	    }
+	    if (rel && !int(grantIn.get()))	// grant release
+	    {
+		rel = FALSE;
+		idle = TRUE;
+		grant->put(arrivalTime) << FALSE;
+		request->dataNew = FALSE;	// give other port a chance
+	    }
+	}
+
+	if ((requestA.dataNew || requestB.dataNew) && idle)	// new request
+	{
+	    if (requestA.dataNew)	// assign port A
+	    {
+		request = &requestA;
+		grant = &grantA;
+	    }
+	    else			// assign port B
+	    {
+		request = &requestB;
+		grant = &grantB;
+	    }
+
+	    if (int(request->get()))	// generate request
+	    {
+		idle = FALSE;
+		req = TRUE;
 		requestOut.put(arrivalTime) << TRUE;
 	    }
-	    break;
+	}
 
-	case request:
-	    if (grantIn.dataNew && int(grantIn.get()))
+	if (request->dataNew && !idle && !req && !rel)	// new release
+	{
+	    if (!int(request->get()))	// generate release
 	    {
-		state = grant;
-		switch(port)
-		{
-		case a:
-		    grantA.put(arrivalTime) << TRUE;
-		    break;
-		case b:
-		    grantB.put(arrivalTime) << TRUE;
-		    break;
-		}
-	    }
-	    break;
-
-	case grant:
-	    if ( ((port == a) && requestA.dataNew && !int(requestA.get()))
-		|| ((port == b) && requestB.dataNew && !int(requestB.get())) )
-	    {
-		state = release;
+		rel = TRUE;
 		requestOut.put(arrivalTime) << FALSE;
 	    }
-	    break;
-
-	case release:
-	    if (grantIn.dataNew && !int(grantIn.get()))
-	    {
-		state = idle;
-		switch(port)
-		{
-		case a:
-		    grantA.put(arrivalTime) << FALSE;
-		    if (requestB.dataNew && int(requestB.get()))
-		    {
-			port = b;
-			state = request;
-			requestOut.put(arrivalTime) << TRUE;
-		    }
-		    break;
-		case b:
-		    grantB.put(arrivalTime) << FALSE;
-		    if (requestA.dataNew && int(requestA.get()))
-		    {
-			port = a;
-			state = request;
-			requestOut.put(arrivalTime) << TRUE;
-		    }
-		    break;
-		}
-	    }
-	    break;
 	}
     }
 }

@@ -1,6 +1,6 @@
-# $Id$
+# @(#)standalone.mk	1.8 07/19/96
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,32 +27,74 @@
 #		       
 # Programmer:  Jose Luis Pino
 #
-# This makefile is to be used to create small, stand-alone testing programs
-# for the Ptolemy kernel.
+# This makefile is to be used to create small, stand-alone programs
+# that use parts of Ptolemy kernel or just the pure mk rule definitions
 #
-# To use this, you need to construct a <filename>.cc file that has a main 
-# function and accomplishes the test.  This file should be located in the 
-# src directory of the library to test.  Then, just cd into the obj directory 
-# and execute the make command:
+# To use this, you need to construct a single <filename>.cc file 
+# that defines a main function. The usage of this mk file is:
+#
 # make -f $(ROOT)/mk/standalone.mk <stars.mk variable defs> <filename>.<suffix>
 #
 # where the suffix is one of: .bin, .debug, .purify, .quantify, .purecov
 #
-include makefile
+# matlab.mk and mathematica.mk check these vars before traversing the path
+# 
 
-include $(ROOT)/mk/stars.mk
+NEED_MATLABDIR =        1
+NEED_MATHEMATICADIR =   1
 
-%.bin: %.o $(PT_DEPEND)
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+ROOT=$(PTOLEMY)
+OBJDIR=$(ROOT)/obj.$(PTARCH)
 
-%.debug: %.o 
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(LIBS) -o $(@F)
+include $(ROOT)/mk/config-$(PTARCH).mk
 
-%.purify: %.o
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $< $(LIBS) -o $(@F)
+ifndef NOPTOLEMY
+	include $(ROOT)/mk/stars.mk
+	INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
+	# unfortunately, if we are building a stand-alone program and
+	# link in libPar we must also get gantt function definitions
+	ifdef CGPAR
+		VERSION=version.o
+	endif
+endif
 
-%.quantify: %.o
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+#if we define NOPTOLEMY variable, we just want to use the pure make commands &
+#none of the PTOLEMY libs
+ifdef NOPTOLEMY
+	#Remove rpath which may have been defined
+	SHARED_LIBRARY_R_LIST=
+endif
 
-$.purecov: %.o
-	$(PURECOV) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+VPATH=.
+
+ifndef LIB
+	#This definition is needed so that make won't complain w/ common.mk
+	LIB=dummy
+endif
+
+include $(ROOT)/mk/common.mk
+
+version.o:
+	echo "char DEFAULT_DOMAIN[] = \"SDF\";" >> version.c
+	$(CC) -c version.c
+
+%.bin: %.o $(PT_DEPEND) $(VERSION)
+	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(STARS) $(TARGETS) $(LIBS) -o $(@F)
+
+%.debug: %.o  $(PT_DEPEND) $(VERSION)
+	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(STARS) $(TARGETS) $(LIBS) -o $(@F)
+
+%.purify: %.o $(PT_DEPEND) $(VERSION)
+	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
+
+%.quantify: %.o $(PT_DEPEND) $(VERSION)
+	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
+
+$.purecov: %.o $(PT_DEPEND) $(VERSION)
+	$(PURECOV) $(LINKER) $(LINKFLAGS) $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
+
+
+
+
+
+

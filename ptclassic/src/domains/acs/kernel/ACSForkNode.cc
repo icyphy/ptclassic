@@ -1,7 +1,7 @@
 static const char file_id[] = "ACSForkNode.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ACSForkNode.cc	1.3 09/08/99
 
 Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.

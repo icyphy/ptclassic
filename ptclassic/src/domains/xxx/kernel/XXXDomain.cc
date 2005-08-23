@@ -1,9 +1,6 @@
 static const char file_id[] = "XXXDomain.cc";
 /**********************************************************************
-Version identification:
-@(#)XDomain.ccP	1.12	6/27/95 (XXXDomain.cc)
-
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
+ Version: @(#)XDomain.ccP	1.15	7/30/96
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,
@@ -41,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Domain.h"
 #include "Target.h"
+#include "Galaxy.h"
 #include "KnownTarget.h"
 #include "XXXScheduler.h"
 #include "XXXWormhole.h"
@@ -49,19 +48,19 @@ extern const char XXXdomainName[] = "XXX";
 
 class XXXDomain : public Domain {
 public:
+	// constructor
+	XXXDomain() : Domain(XXXdomainName) {}
+
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new XXXWormhole(innerGal,innerTarget);
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new XXXfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new XXXfromUniversal; }
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new XXXtoUniversal;}
-
-	// constructor
-	XXXDomain() : Domain("XXX") {}
+	EventHorizon& newTo() { LOG_NEW; return *new XXXtoUniversal; }
 };
 
 // declare a prototype
@@ -71,17 +70,24 @@ static XXXDomain proto;
 
 class XXXTarget : public Target {
 public:
-	XXXTarget() : Target("default-XXX","XXXStar","default XXX target"){}
-	Block* makeNew() const { LOG_NEW; return new XXXTarget;}
-	~XXXTarget() { delSched();}
+	// Constructor
+	XXXTarget() : Target("default-XXX", "XXXStar",
+			     "default XXX target", XXXdomainName) {}
+
+	// Destructor
+	~XXXTarget() { delSched(); }
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const {
+		LOG_NEW; return new XXXTarget;
+	}
 
 protected:
-	void setup()
-	{
+	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new XXXScheduler); }
 		Target::setup();
 	}
 };
 
 static XXXTarget defaultXXXtarget;
-static KnownTarget entry(defaultXXXtarget,"default-XXX");
+static KnownTarget entry(defaultXXXtarget, "default-XXX");

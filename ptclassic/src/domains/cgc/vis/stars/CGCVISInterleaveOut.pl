@@ -8,18 +8,16 @@ can be the audio port /dev/audio, if supported by the workstation.  The
 star reads "blockSize" 16-bit samples at each invocation.  The block
 size should be a multiple of 4.
     }
-    explanation {
+	htmldoc {
 This code is based on the description of the audio driver which can
 be obtained by looking at the man page for audio.
     }
-    version { $Id$ }
+    version { @(#)CGCVISInterleaveOut.pl	1.6 04/07/97 }
     author { Sunil Bhave and Bill Chen}
     copyright {
-Copyright (c) 1990-1996 The Regents of the University 
-of California. All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty 
-provisions.
+Copyright (c) 1996-1997 The Regents of the University of California.
+All rights reserved. See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC vis library }
 
@@ -49,6 +47,8 @@ provisions.
 
     codeblock(mainDecl){
       union $sharedSymbol(CGCVISInterleaveOut,regoverlay) $starSymbol(unpackit);
+      int $starSymbol(numwrites),$starSymbol(numbytes);
+      vis_s16 *$starSymbol(dataptr);
     }
 
     initCode {
@@ -73,10 +73,14 @@ provisions.
 			<<  balance << ", "
 			<< "0);\n";
       addCode(controlParameters);
+      addCode("$starSymbol(numbytes) = 0;"); 
+      addCode("$starSymbol(numwrites) = 1;"); 
+      addCode(setbufptr);
     }
 
     codeblock (setbufptr) {
       $starSymbol(bufferptr) = $starSymbol(buffer);
+      $starSymbol(dataptr) = $starSymbol(bufferptr);
     }
 
     codeblock(updatebufptr){
@@ -86,25 +90,27 @@ provisions.
     codeblock (convert_interleave) {
       /* Convert data in buffer to Output format */
       {
-	int i, j;
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 4*i;
-	  $starSymbol(unpackit).regvaluedbl = $ref(stereoIn,$val(blockSize)/4-1-i);
+	$starSymbol(unpackit).regvaluedbl = $ref(stereoIn);
 
-	  $starSymbol(buffer)[j]   = $starSymbol(unpackit).regvaluesh[0];
-	  $starSymbol(buffer)[j+1] = $starSymbol(unpackit).regvaluesh[1];
-	  $starSymbol(buffer)[j+2] = $starSymbol(unpackit).regvaluesh[2];
-	  $starSymbol(buffer)[j+3] = $starSymbol(unpackit).regvaluesh[3];
-	}
-      }
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[0];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[1];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[2];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[3];
+ 	$starSymbol(numbytes) += 8;
+     }
     }
 
     go {
       addCode(convert_interleave);
+      addCode("if ($starSymbol(numbytes) >= 8180){");
+      addCode(write);
+      addCode("$starSymbol(numbytes) -= 8180;");
+      addCode("if ($starSymbol(numwrites) > 1) {");
       addCode(setbufptr);
-      addCode(write);
+      addCode("$starSymbol(numwrites) = 1;");
+      addCode("}else {");
       addCode(updatebufptr);
-      addCode(write);
+      addCode("$starSymbol(numwrites)++;}}");   
     }
 
     wrapup {

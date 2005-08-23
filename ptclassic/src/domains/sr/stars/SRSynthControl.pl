@@ -4,7 +4,7 @@ defstar {
   desc {
 A polyphonic synthesizer control
   }
-  version { $Id$ }
+  version { @(#)SRSynthControl.pl	1.5 02/21/97 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -34,6 +34,12 @@ limitation of liability, and disclaimer of warranty provisions.
   }
 
   input {
+    name { pitchBend }
+    type { int }
+    desc { Pitch bend for the channel.  8192 is neutral. }
+  }
+
+  input {
     name { reset }
     type { int }
     desc { Present to reset the system }
@@ -47,7 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
   outmulti {
     name { velocity }
-    type { float }
+    type { int }
     desc { Velocity values for each voice }
   }
 
@@ -56,11 +62,19 @@ limitation of liability, and disclaimer of warranty provisions.
     type { int }
     desc { Done flag for each voice }
   }
+
   defstate {
     name { AFreq }
     type { float }
     default { "440.0" }
     desc { Frequency output for the A below Middle C }    
+  }
+
+  defstate {
+    name { debug }
+    type { string }
+    default { "NO" }
+    desc { Print real-time event messages }
   }
 
   ccinclude { <math.h>, <stream.h> }
@@ -91,6 +105,12 @@ limitation of liability, and disclaimer of warranty provisions.
 
     // Array translating pitches to frequencies
     double frequencyOfPitch[128];
+
+    // Current pitch translation value.  Value multiplies all frequencies.
+    double frequencyScale;
+
+    // Flag indicating whether debugging messages should be printed
+    int printDebugging;
   }
 
   constructor {
@@ -100,11 +120,17 @@ limitation of liability, and disclaimer of warranty provisions.
     voicePitch = NULL;
     voiceVelocity = NULL;
     numVoices = 0;
+    printDebugging = 0;
 
   }
 
   begin {
     resetVoices();
+    if ( strcmp((const char *) debug, "YES" ) == 0 ) {
+      printDebugging = 1;
+    } else {
+      printDebugging = 0;
+    }
   }
 
   setup {
@@ -118,8 +144,9 @@ limitation of liability, and disclaimer of warranty provisions.
     // Fill the pitch array with equal-tempered pitch values
 
     for ( int pi = 128 ; --pi >= 0 ; ) {
-      frequencyOfPitch[pi] = double(AFreq) * pow( double(pi-56) / 12.0, 2.0 );
-      cout << "Pitch " << pi << " frequency " << frequencyOfPitch[pi] << '\n';
+	frequencyOfPitch[pi] = double(AFreq) * exp((pi-56.0)*log(2.0)/12.0);
+	/*	cout << "Pitch " << pi << " frequency "
+	     << frequencyOfPitch[pi] << '\n'; */
     }
 
     // Verify the number of ports
@@ -181,6 +208,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  voicePitch[i] = voiceVelocity[i] = 0;
 	}
       }
+      frequencyScale = 1.0;
     }
 
   }
@@ -217,6 +245,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  if ( voicePitch[i] == 0 ) {
 	    voicePitch[i] = int(onPitch.get());
 	    voiceVelocity[i] = int(onVelocity.get());
+	    if ( printDebugging ) {
+	      cout << "Note on: pitch " << voicePitch[i] << " velocity "
+		   << voiceVelocity[i] << " voice " << i << '\n';
+	    }
 	    break;
 	  }
 	}
@@ -233,15 +265,31 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  if ( voicePitch[i] == p ) {
 	    voiceVelocity[i] = 0;
+	    if ( printDebugging ) {
+	      cout << "Note off: pitch " << voicePitch[i] << " voice "
+		   << i << '\n';
+	    }
 	  }
+	}
+      }
+
+      if ( pitchBend.present() ) {
+	int pb = int(pitchBend.get());
+	frequencyScale = exp( (pb - 8192) * log(2.0)/(8192 * 6) );
+	if ( printDebugging ) {
+	  cout << "Pitch Bend: " << pb << " (" << frequencyScale << ")\n";
 	}
       }
 
       // Emit the frequencies and velocities for the voices
 
       for ( i = numVoices ; --i >= 0 ; ) {
-	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]];
-	velocityPort[i]->emit() << double(voiceVelocity[i]);
+	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]] * frequencyScale;
+	if ( voiceVelocity[i] != 0 ) {
+	  velocityPort[i]->emit() << int(voiceVelocity[i]);
+	} else {
+	  velocityPort[i]->makeAbsent();
+	}
       }
 
     }
@@ -255,15 +303,22 @@ limitation of liability, and disclaimer of warranty provisions.
     // any that are non-zero
 
     for ( int i = numVoices ; --i >= 0 ; ) {
-      if ( donePort[i]->present() && int(donePort[i]->get()) != 0 ) {
+      if ( donePort[i]->present() && int(donePort[i]->get()) != 0 &&
+	  voicePitch[i] != 0 ) {
 	voicePitch[i] = voiceVelocity[i] = 0;
+	if ( printDebugging ) {
+	  cout << "Done: voice " << i << '\n';
+	}
       }
     }
 
+    /* 
     for ( i = 0 ; i < numVoices ; i++ ) {
       cout << voicePitch[i] << ' ' << voiceVelocity[i] << ' ';
     }
     cout << '\n';
+    */
+
   }
 
 }

@@ -14,13 +14,13 @@ The normalized Dirichlet kernel is periodic in x with a period of either
         }
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The Dirichlet kernel is the discrete-time Fourier transform (DTFT) of a
 sampled pulse function.  The "N" parameter is the length of the pulse.
 

@@ -4,21 +4,21 @@
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCMakefileTarget.h	1.5 04/07/97
 
-Copyright (c) %Q% The Regents of the University of California.
+@Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -27,12 +27,14 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Christopher Hylands
- Based on the MultiTarget by Soonhoi Ha
 
- This is a Makefile target class for CGCdomain.
+ This is a Makefile target class for CGCdomain.  Multiprocessor targets
+ can use this as a child target.
 
 *******************************************************************/
 
@@ -43,9 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "CGCTarget.h"
 
-class EventHorizon;
 class CGCTarget;
-
 
 class CGCMakefileTarget : public CGCTarget {
 public:
@@ -60,10 +60,11 @@ public:
 
 	int isA(const char*) const;
 
-private:
-
+protected:
 	StringState skeletonMakefile;
 	IntState appendToMakefile;
+private:
+        char *expandMakefileVariables(const char *);
 };
 
 #endif

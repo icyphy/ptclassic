@@ -2,14 +2,14 @@ defstar
 {
     name { IncrementInt }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNIncrementInt.pl	1.1 2/9/96 }
     desc
     {
     Increment the input by a constant.
     }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,9 +1,31 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)DecomScheduler.h	1.8	3/2/95
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
  date: 5/92
@@ -30,6 +52,21 @@ class ostream;
 /////////////////////////
 
 class DecomScheduler : public SDFBagScheduler {
+public:
+	DecomScheduler(ostream* log = 0): logstrm(log) {}
+
+	// generate schedule
+	int genSched(DecomGal*);
+
+	// Display the schedule
+	StringList displaySchedule(int depth);
+
+	// default (for SDFScheduler::displaySchedule override)
+	StringList displaySchedule() { return displaySchedule(0);}
+
+	// Generate code using the Target to produce the right language.
+	void genCode(Target&, int depth);
+
 private:
 	// Attempt to form a cluster with base node "p" in graph "g".
 	// This involves examining each node adjacent to "p" and
@@ -56,19 +93,6 @@ private:
 
 	// do nothing in the following method
 	int computeSchedule(Galaxy&) { return TRUE; }
-
-public:
-	// constructor
-	DecomScheduler(ostream* log = 0): logstrm(log) {}
-
-	// generate schedule
-	int genSched(DecomGal*);
-
-	// Display the schedule
-	StringList displaySchedule(int depth);
-
-	// Generate code using the Target to produce the right language.
-	StringList genCode(Target&, int depth);
 };
 
 #endif

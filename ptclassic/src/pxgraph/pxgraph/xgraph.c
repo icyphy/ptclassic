@@ -1,15 +1,45 @@
-/*
- * xgraph - A Simple Plotter for X
+/*******************************************************************
+SCCS version identification
+@(#)xgraph.c	1.19 04/29/99
+
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+/* xgraph - A Simple Plotter for X
  *
- * David Harrison
- * University of California,  Berkeley
- * 1986, 1987, 1988, 1989
+ * David Harrison University of California,  Berkeley
  *
- * Please see copyright.h concerning the formal reproduction rights
- * of this software.
+ * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
+ * on input, and support a special binary format, 1992.
+ *
+ * Modified by Christopher Hylands to be more ANSI C like 12/94
+ *
+ * Fixed bug with empty input files, tgl, 2/14/95.
+ *
  */
 
-#include "copyright.h"
 #include <stdio.h>
 #include <math.h>
 #include <pwd.h>
@@ -19,7 +49,9 @@
 #include "xtb.h"
 #include "hard_devices.h"
 #include "params.h"
-
+#include "dialog.h"
+
+
 #define ZOOM
 #define TOOLBOX
 #define NEW_READER
@@ -31,7 +63,7 @@
 #endif  /* CRAY */
 
 #ifndef MAXFLOAT
-#define MAXFLOAT	HUGE
+#define MAXFLOAT	HUGE_VAL
 #endif
 
 #define BIGINT		0xfffffff
@@ -54,7 +86,7 @@
 /* To get around an inaccurate log */
 #define nlog10(x)	(x == 0.0 ? 0.0 : log10(x) + 1e-15)
 
-#define ISCOLOR		(wi->dev_info.dev_flags & D_COLOR)
+#define ISCOLOR		((wi->dev_info.dev_flags & D_COLOR) != 0 && getenv("PIGIBW") == 0)
 
 #define PIXVALUE(set) 	((set) % MAXATTR)
 
@@ -80,7 +112,7 @@
 
 #define DEF_BORDER_WIDTH	"2"
 #define DEF_BORDER_COLOR	"Black"
-#define DEF_TITLE_TEXT		"X Graph"
+#define DEF_TITLE_TEXT		"Ptolemy Xgraph"
 #define DEF_XUNIT_TEXT		"X"
 #define DEF_YUNIT_TEXT		"Y"
 #define DEF_TICK_FLAG		"off"
@@ -95,7 +127,7 @@
 #define DEF_BAR_FLAG		"off"
 #define DEF_BAR_BASE		"0.0"
 #define DEF_BAR_WIDTH		"-1.0"
-#define DEF_LINE_WIDTH		"0"
+#define DEF_LINE_WIDTH		"2"
 #define DEF_GRID_SIZE		"0"
 #define DEF_GRID_STYLE		"10"
 #define DEF_LABEL_FONT		"helvetica-12"
@@ -103,7 +135,7 @@
 #define DEF_GEOMETRY		""
 #define DEF_REVERSE		"off"
 #define DEF_DEVICE		""
-#define DEF_DISPOSITION		"To Device"
+#define DEF_DISPOSITION		"To File"
 #define DEF_FILEORDEV		""
 
 #define DEF_MARKER_FLAG		"off"
@@ -132,6 +164,14 @@
 #define DEF_COL_FOREGROUND	"black"
 #define DEF_COL_FIRSTSTYLE	"1"
 
+#if defined(MSDOS) || defined(OS2) || defined(__CYGWIN32__)
+#define PT_FOPEN_WRITE_BINARY "wb"
+#define PT_FOPEN_READ_BINARY "rb"
+#else
+#define PT_FOPEN_WRITE_BINARY "w"
+#define PT_FOPEN_READ_BINARY "r"
+#endif    
+
 /* Default line styles */
 static char *defStyle[MAXATTR] = {
     "1", "10", "11110000", "010111", "1110",
@@ -140,13 +180,14 @@ static char *defStyle[MAXATTR] = {
 
 /* Default color names */
 static char *defColors[MAXATTR] = {
-    "red", "SpringGreen", "blue", "yellow",
+    "red", "#a4ffa4", "blue", "yellow",
     "cyan", "sienna", "orange", "coral"
 };
 
 
 extern void init_X();
 extern void do_error();
+extern char* getenv();
 
 static char *tildeExpand();
 static void ReverseIt();
@@ -189,6 +230,45 @@ typedef struct local_win {
     int flags;			/* Window flags                         */
 } LocalWin;
 
+/* Forward references */
+void ReadDefaults	();
+void InitSets		();
+void ParseArgs		ARGS((int argc, char *argv[], int do_it));
+int ReadData		ARGS((FILE *stream, char *filename));
+
+void DrawWindow		ARGS((LocalWin *win_info));
+void DelWindow		ARGS((Window win, LocalWin *win_info));
+void PrintWindow	ARGS((Window win, LocalWin *win_info));
+Window NewWindow	ARGS((char *progname, double lowX,
+			       double lowY, double upX, double upY,
+			       double asp));
+
+int HandleZoom		ARGS((char *progname, XButtonPressedEvent *evt,
+			      LocalWin *wi, Cursor cur));
+int ReadAsciiData	ARGS((FILE *stream, char *filename));
+int ReadBinaryData	ARGS((FILE *stream, char *filename));
+
+void DrawTitle		ARGS((LocalWin *wi));
+int TransformCompute	ARGS((LocalWin *wi));
+void DrawGridAndAxis	ARGS((LocalWin *wi));
+
+void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
+void DrawData		ARGS((LocalWin *wi));
+void DrawLegend		ARGS((LocalWin *wi));
+static void set_mark_flags	ARGS((int *markFlag, int *pixelMarks,
+				      int *bigPixel, int *colorMark));
+void do_hardcopy	ARGS((char *prog, char *info, int
+			      (*init_fun)(), char *dev_spec,
+			      char *file_or_dev, double maxdim,
+			      char *ti_fam, double ti_size,
+			      char *ax_fam, double ax_size,
+			      int doc_p));
+
+void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
+static char *tildeExpand	ARGS((char *out, char *in));
+
+static int XErrHandler	ARGS((Display *disp_ptr, XErrorEvent *evt));
+
 #define SCREENX(ws, userX) \
 	(((int) (((userX) - ws->UsrOrgX)/ws->XUnitsPerPixel + 0.5)) + ws->XOrgX)
 #define SCREENY(ws, userY) \
@@ -210,11 +290,9 @@ static char *inFileNames[MAXSETS]; 	/* File names              */
 /* Total number of active windows */
 static int Num_Windows = 0;
 static char *Prog_Name;
+static int binaryInputFormat = 0;
 
-
-
-static int XErrHandler();	/* Handles error messages */
-
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -230,11 +308,15 @@ char *argv[];
     FILE *strm;
     XColor fg_color, bg_color;
     char keys[MAXKEYS], *disp_name;
-    int nbytes, idx, maxitems, flags;
+    int nbytes, idx, maxitems = 0, flags;
     int errs = 0;
 
     /* Open up new display */
     Prog_Name = argv[0];
+    /* "binxgraph" means input is in binary format */
+    if (strcmp (Prog_Name, "binxgraph") == 0)
+	binaryInputFormat = 1;
+
     disp_name = "";
     for (idx = 1;  idx < argc-1;  idx++) {
 	if (strcmp(argv[idx], "-display") == 0) {
@@ -245,7 +327,7 @@ char *argv[];
     disp = XOpenDisplay(disp_name);
     if (!disp) {
 	(void) fprintf(stderr, "%s: cannot open display `%s'\n", argv[0], disp_name);
-	abort();
+	return 3;
     }
     XSetErrorHandler(XErrHandler);
 
@@ -262,7 +344,7 @@ char *argv[];
     llx = lly = MAXFLOAT;
     urx = ury = -MAXFLOAT;
     for (idx = 0;  idx < numFiles;  idx++) {
-	strm = fopen(inFileNames[idx], "r");
+	strm = fopen(inFileNames[idx], PT_FOPEN_READ_BINARY);
 	if (!strm) {
 	    (void) fprintf(stderr, "Warning:  cannot open file `%s'\n",
 			   inFileNames[idx]);
@@ -281,6 +363,10 @@ char *argv[];
     if (errs) {
 	(void) fprintf(stderr, "Problems found with input data.\n");
 	exit(1);
+    }
+    if (maxitems <= 0) {
+        (void) fprintf(stderr, "No data to plot.\n");
+        exit(1);
     }
 
     /* Parse the argument list to set options */
@@ -356,7 +442,8 @@ char *argv[];
 	    nbytes = XLookupString(&theEvent.xkey, keys, MAXKEYS,
 				   (KeySym *) 0, (XComposeStatus *) 0);
 	    for (idx = 0;  idx < nbytes;  idx++) {
-		if (keys[idx] == CONTROL_D) {
+		if (keys[idx] == CONTROL_D || keys[idx] == 'q' ||
+		    keys[idx] == 'Q') {
 		    /* Delete this window */
 		    DelWindow(theEvent.xkey.window, win_info);
 		} else if (keys[idx] == CONTROL_C) {
@@ -484,7 +571,7 @@ when the logarithmic option is selected.\n");
 xtb_hret del_func(win, bval, info)
 Window win;			/* Button window    */
 int bval;			/* Button value     */
-char *info;			/* User information */
+void *info;			/* User information */
 /*
  * This routine is called when the `Close' button is pressed in
  * an xgraph window.  It causes the window to go away.
@@ -509,7 +596,7 @@ char *info;			/* User information */
 xtb_hret hcpy_func(win, bval, info)
 Window win;			/* Button Window    */
 int bval;			/* Button value     */
-char *info;			/* User Information */
+void *info;			/* User Information */
 /*
  * This routine is called when the hardcopy button is pressed
  * in an xgraph window.  It causes the output dialog to be
@@ -530,20 +617,21 @@ char *info;			/* User Information */
 }
 
 static 
-
 /*ARGSUSED*/
 xtb_hret abt_func(win, bval, info)
 Window win;			/* Button window    */
 int bval;			/* Button value     */
-char *info;			/* User information */
+void *info;			/* User information */
 {
     static char *msg_fmt =
 "Version %s\n\
-David Harrison\n\
-University of California, Berkeley\n\
-Send comments or suggestions to:\n\
-(davidh@ic.Berkeley.EDU or \n\
-...!ucbvax!ucbic!davidh)";
+David Harrison created the original xgraph.\n\
+Joe Buck extended xgraph with binary capabilities.\n\
+Christopher Hylands ANSI-fied and packaged the code.\n\
+All of this work was done at the\n\
+University of California, Berkeley.\n\
+For updates, including a Java version, see\n\
+http://ptolemy.eecs.berkeley.edu/other/pxgraph.htm";
     static int active = 0;
     char msg_buf[1024];
 
@@ -643,6 +731,10 @@ double asp;			/* Aspect ratio       */
     sizehints.width = width;
     sizehints.height = height;
 
+    geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
+				  (unsigned int *) &sizehints.width,
+				  (unsigned int *) &sizehints.height);
+
     new_window = XCreateWindow(disp, RootWindow(disp, screen),
 			       sizehints.x, sizehints.y,
 			       (unsigned int) sizehints.width,
@@ -663,9 +755,6 @@ double asp;			/* Aspect ratio       */
 	wmhints.initial_state = NormalState;
 	XSetWMHints(disp, new_window, &wmhints);
 
-	geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
-				  (unsigned int *) &sizehints.width,
-				  (unsigned int *) &sizehints.height);
 	if (geo_mask & (XValue | YValue)) {
 	    sizehints.flags = (sizehints.flags & ~PPosition) | USPosition;
 	}
@@ -717,7 +806,7 @@ double asp;			/* Aspect ratio       */
 }
 
 
-DelWindow(win, win_info)
+void DelWindow(win, win_info)
 Window win;			/* Window     */
 LocalWin *win_info;		/* Local Info */
 /*
@@ -736,7 +825,7 @@ LocalWin *win_info;		/* Local Info */
     Num_Windows -= 1;
 }
 
-PrintWindow(win, win_info)
+void PrintWindow(win, win_info)
 Window win;			/* Window       */
 LocalWin *win_info;		/* Local Info   */
 /*
@@ -785,7 +874,7 @@ Cursor cur;
     Window win, new_win;
     Window root_rtn, child_rtn;
     XEvent theEvent;
-    int startX, startY, curX, curY, newX, newY, stopFlag, numwin;
+    int startX, startY, curX, curY, newX, newY, stopFlag, numwin = 0;
     int root_x, root_y;
     unsigned int mask_rtn;
     double loX, loY, hiX, hiY, asp;
@@ -869,7 +958,7 @@ Cursor cur;
 }
 
 
-int InitSets()
+void InitSets()
 /*
  * Initializes the data sets with default information.  Sets up
  * original values for parameters in parameters package.
@@ -926,7 +1015,7 @@ int InitSets()
     param_set("YHighLimit", DBL, DEF_HIGH_LIMIT);
 
     /* Depends critically on whether the display has color */
-    if (depth < 4) {
+    if (depth < 4 || getenv("PIGIBW") != 0) {
 	/* Its black and white */
 	param_set("Background", PIXEL, DEF_BW_BACKGROUND);
 	param_set("Border", PIXEL, DEF_BW_BORDER);
@@ -974,11 +1063,11 @@ int InitSets()
 static char *def_str;
 
 #define DEF(name, type) \
-if (def_str = XGetDefault(disp, Prog_Name, name)) { \
+if ( (def_str = XGetDefault(disp, Prog_Name, name)) ) { \
     param_set(name, type, def_str); \
 }
 
-int ReadDefaults()
+void ReadDefaults()
 /*
  * Reads X default values which override the hard-coded defaults
  * set up by InitSets.
@@ -1083,7 +1172,7 @@ if (strcmp(argv[idx], opt) == 0) { \
 
 #define MAXLO	30
 
-int ParseArgs(argc, argv, do_it)
+void ParseArgs(argc, argv, do_it)
 int argc;
 char *argv[];
 int do_it;
@@ -1102,6 +1191,12 @@ int do_it;
     idx = 1;
     while (idx < argc) {
 	if (argv[idx][0] == '-') {
+	    /* Flag to say whether input is in binary format */
+	    if (strcmp(argv[idx], "-binary") == 0) {
+		binaryInputFormat = 1;
+		idx++;
+		continue;
+	    }
 	    /* Check to see if its a data set name */
 	    if (sscanf(argv[idx], "-%d", &set) == 1) {
 		/* The next string is a set name */
@@ -1130,7 +1225,7 @@ int do_it;
 		    /* Limit the X coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						argv[idx]);
-		    if (hi = index(argv[idx+1], ',')) {
+		    if ( (hi = strchr(argv[idx+1], ',')) ) {
 			char low[MAXLO];
 		    
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1151,7 +1246,7 @@ int do_it;
 		    /* Limit the Y coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						  argv[idx]);
-		    if (hi = index(argv[idx+1], ',')) {
+		    if ( (hi = strchr(argv[idx+1], ',')) ) {
 			char low[MAXLO];
 
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1195,7 +1290,7 @@ int do_it;
 	    idx++;
 	} else {
 	    /* It might be the host:display string */
-	    if (rindex(argv[idx], ':') == (char *) 0) {
+	    if (strrchr(argv[idx], ':') == (char *) 0) {
 		/* Should be an input file */
 		inFileNames[numFiles] = argv[idx];
 		numFiles++;
@@ -1226,9 +1321,12 @@ char *fn;			/* Reading from file `fn' */
     if (!redundant_set) {
 	if (setNumber < MAXSETS) {
 	    (void) sprintf(setname, "Set %d", setNumber);
+            /*************
+		 Remove this feature make the set name equal to the filename:
 	    if ((strcmp(PlotData[setNumber].setName, setname) == 0) && fn) {
 		PlotData[setNumber].setName = fn;
 	    }
+            *************/
 	    curSpot = &(PlotData[setNumber].list);
 	    PlotData[setNumber].list = (PointList *) 0;
 	    newGroup = 1;
@@ -1303,7 +1401,7 @@ static int rdFindMax()
 {
     int i;
     PointList *list;
-    int max = -1;
+    int max = 0;
 
     for (i = 0;  i < setNumber;  i++) {
 	for (list = PlotData[i].list;  list;  list = list->next) {
@@ -1356,7 +1454,7 @@ LineInfo *result;		/* Returned result */
     char *first;
 
     /* Find first non-space character */
-    while (*line && isspace(*line)) line++;
+    while (*line && isspace((int)*line)) line++;
     if (*line) {
 	if (*line == '#') {
 	    /* comment */
@@ -1370,7 +1468,7 @@ LineInfo *result;		/* Returned result */
 	    if (*line) *line = '\0';
 	} else {
 	    first = line;
-	    while (*line && !isspace(*line)) line++;
+	    while (*line && !isspace((int)*line)) line++;
 	    if (*line) {
 		*line = '\0';
 		if (stricmp(first, "move") == 0) {
@@ -1398,7 +1496,7 @@ LineInfo *result;		/* Returned result */
 		    first[strlen(first)-1] = '\0';
 		    result->val.parm.name = first;
 		    line++;
-		    while (*line && isspace(*line)) line++;
+		    while (*line && isspace((int)*line)) line++;
 		    /* may be a \n at end of it */
 		    if (line[strlen(line)-1] == '\n') {
 			line[strlen(line)-1] = '\0';
@@ -1407,7 +1505,18 @@ LineInfo *result;		/* Returned result */
 		    result->type = SETPARAM;
 		} else if (sscanf(first, "%lf", &result->val.pnt.xval) == 1) {
 		    /* DRAWPNT */
-		    if (sscanf(line+1, "%lf", &result->val.pnt.yval) == 1) {
+		    if ((line[1] == 'I' || line[1] == '-') &&
+			(strncmp(line+1, "Inf", sizeof ("Inf")-1) == 0 ||
+			 strncmp(line+1, "-Inf", sizeof ("-Inf")-1) == 0)) {
+				result->type = ERROR;
+				result->val.str = "Inf/-Inf in input data";
+		    } else if ((line[1] == 'N' || line[1] == '-') &&
+			(strncmp(line+1, "NaN", sizeof ("NaN")-1) == 0 ||
+			 strncmp(line+1, "-NaN", sizeof ("-NaN")-1) == 0)) {
+				result->type = ERROR;
+				result->val.str = "NaN/-NaN in input data";
+		    } else if (sscanf(line+1, "%lf", &result->val.pnt.yval)
+				== 1) {
 			result->type = DRAWPNT;
 		    } else {
 			result->type = ERROR;
@@ -1430,9 +1539,17 @@ LineInfo *result;		/* Returned result */
     }
     return result->type;
 }
-
 
 int ReadData(stream, filename)
+FILE *stream;
+char *filename;
+{
+	/* we support two data formats */
+    return binaryInputFormat  ? ReadBinaryData(stream, filename)
+			      : ReadAsciiData(stream, filename);
+}
+
+int ReadAsciiData(stream, filename)
 FILE *stream;
 char *filename;
 /*
@@ -1452,7 +1569,7 @@ char *filename;
 		       "Too many data sets - extra data ignored");
 	return -1;
     }
-    while (fgets(buffer, MAXBUFSIZE, stream)) {
+    while (!errors && fgets(buffer, MAXBUFSIZE, stream)) {
 	line_count++;
 	switch (parse_line(buffer, &info)) {
 	case EMPTY:
@@ -1490,11 +1607,69 @@ char *filename;
     }
     if (errors) return -1; else return rdFindMax();
 }
+
+int ReadBinaryData(stream, filename)
+FILE *stream;
+char *filename;
+/*
+ * Reads in the data sets in binary form from the supplied stream.
+ * If the format
+ * is correct,  it returns the current maximum number of points across
+ * all data sets.  If there is an error,  it returns -1.
+ */
+{
+    char buffer[MAXBUFSIZE];
+    float pointPair[2];
+    int line_count = 0;
+    int errors = 0;
+    int cmd;
+    
+    if (!rdSet(filename)) {
+	(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
+		       filename, line_count,
+		       "Too many data sets - extra data ignored");
+	return -1;
+    }
+    while (!errors && (cmd = getc(stream)) != EOF) {
+	line_count++;
+	switch (cmd) {
+	case 'e':		/* end of set, start new one */
+	    if (!rdSet(filename)) {
+		(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
+			       filename, line_count,
+			       "Too many data sets - extra data ignored");
+		return -1;
+	    }
+	    break;
+	case 'n':		/* new set name: ends in \n */
+	    fgets (buffer, MAXBUFSIZE, stream);
+	    rdSetName(buffer);
+	    break;
+	case 'm':		/* move to point */
+	    rdGroup();
+	    getc(stream);	/* skip next character */
+	    /* the actual text is "md x y" */
+	    /* fall through */
+	case 'd':		/* draw point */
+	    fread((char*)pointPair,sizeof (float), 2, stream);
+	    rdPoint(pointPair[0],pointPair[1]);
+	    break;
+	default:
+	    if (filename) {
+		(void) fprintf(stderr, "Error in file `%s' at line %d: '%c'\n",
+			       filename, line_count, cmd);
+		errors++;
+	    }
+	    break;
+	}
+    }
+    if (errors) return -1; else return rdFindMax();
+}
 
 
 
 
-int DrawWindow(win_info)
+void DrawWindow(win_info)
 LocalWin *win_info;		/* Window information */
 /*
  * Draws the data in the window.  Does not clear the window.
@@ -1524,7 +1699,7 @@ LocalWin *win_info;		/* Window information */
 
 
 
-DrawTitle(wi)
+void DrawTitle(wi)
 LocalWin *wi;		/* Window information    */
 /*
  * This routine draws the title of the graph centered in
@@ -1629,7 +1804,7 @@ LocalWin *wi;			/* Window information          */
     return 1;
 }
 
-int DrawGridAndAxis(wi)
+void DrawGridAndAxis(wi)
 LocalWin *wi;			/* Window information         */
 /*
  * This routine draws grid line labels in engineering notation,
@@ -1931,7 +2106,7 @@ double val;			/* Value */
     return val;
 }
 
-int WriteValue(str, val, expv, logFlag)
+void WriteValue(str, val, expv, logFlag)
 char *str;			/* String to write into */
 double val;			/* Value to print       */
 int expv;			/* Exponent             */
@@ -1978,14 +2153,14 @@ else if ((xval) > wi->UsrOppX) rtn = RIGHT_CODE; \
 if ((yval) < wi->UsrOrgY) rtn |= BOTTOM_CODE; \
 else if ((yval) > wi->UsrOppY) rtn |= TOP_CODE
 
-int DrawData(wi)
+void DrawData(wi)
 LocalWin *wi;
 /*
  * This routine draws the data sets themselves using the macros
  * for translating coordinates.
  */
 {
-    double sx1, sy1, sx2, sy2, tx, ty;
+    double sx1, sy1, sx2, sy2, tx = 0.0, ty = 0.0;
     int idx, subindex;
     int code1, code2, cd, mark_inside;
     int X_idx;
@@ -1994,18 +2169,26 @@ LocalWin *wi;
     int markFlag, pixelMarks, bigPixel, colorMark;
     int noLines = PM_BOOL("NoLines");
     int lineWidth = PM_INT("LineWidth");
+    int barGraph = PM_BOOL("BarGraph");
+    double halfBarWidth = PM_DBL("BarWidth") * 0.5;
+    double barBase = PM_DBL("BarBase");
 
     set_mark_flags(&markFlag, &pixelMarks, &bigPixel, &colorMark);
     for (idx = 0;  idx < MAXSETS;  idx++) {
 	thisList = PlotData[idx].list;
 	while (thisList) {
 	    X_idx = 0;
-	    for (subindex = 0;  subindex < thisList->numPoints-1;  subindex++) {
-		/* Put segment in (sx1,sy1) (sx2,sy2) */
+	    for (subindex = 0;  subindex < thisList->numPoints;  subindex++) {
+		/* Put segment in (sx1,sy1) (sx2,sy2), with a degenerate dot for the last/only point */
 		sx1 = thisList->xvec[subindex];
 		sy1 = thisList->yvec[subindex];
-		sx2 = thisList->xvec[subindex+1];
-		sy2 = thisList->yvec[subindex+1];
+		if (subindex < thisList->numPoints-1) {
+		    sx2 = thisList->xvec[subindex+1];
+		    sy2 = thisList->yvec[subindex+1];
+		} else {
+		    sx2 = sx1;
+		    sy2 = sy1;
+		}
 		/* Now clip to current window boundary */
 		C_CODE(sx1, sy1, code1);
 		C_CODE(sx2, sy2, code2);
@@ -2034,89 +2217,78 @@ LocalWin *wi;
 			C_CODE(sx2, sy2, code2);
 		    }
 		}
-		if (!code1 && !code2) {
-		    /* Add segment to list */
+		if (!code1 && !code2 && ((subindex < thisList->numPoints-1) || (thisList->numPoints == 1))) {
+		    /* Add segment or solitary dot to list */
 		    Xsegs[X_idx].x1 = SCREENX(wi, sx1);
 		    Xsegs[X_idx].y1 = SCREENY(wi, sy1);
 		    Xsegs[X_idx].x2 = SCREENX(wi, sx2);
 		    Xsegs[X_idx].y2 = SCREENY(wi, sy2);
+		    if (thisList->numPoints == 1) {
+			/* Make solitary dot just visible */
+			Xsegs[X_idx].x2++;
+			Xsegs[X_idx].y2++;
+		    }
 		    X_idx++;
 		}
 
 		/* Draw markers if requested and they are in drawing region */
 		if (markFlag && mark_inside) {
+		    int mx1 = SCREENX(wi, sx1);
+		    int my1 = SCREENY(wi, sy1);
 		    if (pixelMarks) {
 			if (bigPixel) {
 			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+						mx1, my1,
 						P_DOT, 0, idx % MAXATTR);
 			} else {
 			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+						mx1, my1,
 						P_PIXEL, 0, PIXVALUE(idx));
 			}
 		    } else {
 			/* Distinctive markers */
 			wi->dev_info.xg_dot(wi->dev_info.user_state,
-					    Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+					    mx1, my1,
 					    P_MARK, MARKSTYLE(idx),
 					    PIXVALUE(idx));
 		    }
 		}
 
 		/* Draw bar elements if requested */
-		if (PM_BOOL("BarGraph")) {
-		    int barPixels, baseSpot;
-		    XSegment line;
-
-		    barPixels = (int) ((PM_DBL("BarWidth")/wi->XUnitsPerPixel) + 0.5);
-		    if (barPixels <= 0) barPixels = 1;
-		    baseSpot = SCREENY(wi, PM_DBL("BarBase"));
-		    line.x1 = line.x2 = Xsegs[X_idx-1].x1;
-		    line.y1 = baseSpot;  line.y2 = Xsegs[X_idx-1].y1;
-		    wi->dev_info.xg_seg(wi->dev_info.user_state,
+		if (barGraph) {
+		    /* Put segment in (sx1,sy1) (sx2,sy2) */
+		    sx1 = thisList->xvec[subindex] - halfBarWidth;
+		    sy1 = thisList->yvec[subindex];
+		    sx2 = thisList->xvec[subindex] + halfBarWidth;
+		    sy2 = barBase;
+		    /* Now clip to current window boundary */
+		    C_CODE(sx1, sy1, code1);
+		    C_CODE(sx2, sy2, code2);
+		    if (!(code1 & code2)) {
+			int barPixels;
+			XSegment line;
+			if (code1) {
+			    if (code1 & LEFT_CODE) sx1 = wi->UsrOrgX; /* Crosses left edge */
+			    else if (code1 & RIGHT_CODE) sx1 = wi->UsrOppX; /* Crosses right edge */
+			    if (code1 & BOTTOM_CODE) sy1 = wi->UsrOrgY; /* Crosses bottom edge */
+			    else if (code1 & TOP_CODE) sy1 = wi->UsrOppY; /* Crosses top edge */
+			}
+			if (code2) {
+			    if (code2 & LEFT_CODE) sx2 = wi->UsrOrgX; /* Crosses left edge */
+			    else if (code2 & RIGHT_CODE) sx2 = wi->UsrOppX; /* Crosses right edge */
+			    if (code2 & BOTTOM_CODE) sy2 = wi->UsrOrgY; /* Crosses bottom edge */
+			    else if (code2 & TOP_CODE) sy2 = wi->UsrOppY; /* Crosses top edge */
+			}
+			barPixels = (int) (((sx2 - sx1)/wi->XUnitsPerPixel) + 0.5);
+			if (barPixels <= 0) barPixels = 1;
+			line.x1 = line.x2 = SCREENX(wi, 0.5 * (sx1 + sx2));
+			line.y1 = SCREENY(wi, sy1);
+			line.y2 = SCREENY(wi, sy2);
+			wi->dev_info.xg_seg(wi->dev_info.user_state,
 					1, &line, barPixels, L_VAR,
 					LINESTYLE(idx), PIXVALUE(idx));
-		}
-	    }
-	    /* Handle last marker */
-	    if (markFlag && (thisList->numPoints > 0)) {
-		C_CODE(thisList->xvec[thisList->numPoints-1],
-		       thisList->yvec[thisList->numPoints-1],
-		       mark_inside);
-		if (mark_inside == 0) {
-		    if (pixelMarks) {
-			if (bigPixel) {
-			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-						P_DOT, 0, idx % MAXATTR);
-			} else {
-			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-						P_PIXEL, 0, PIXVALUE(idx));
-			}
-		    } else {
-			/* Distinctive markers */
-			wi->dev_info.xg_dot(wi->dev_info.user_state,
-					    Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-					    P_MARK, MARKSTYLE(idx),
-					    PIXVALUE(idx));
 		    }
 		}
-	    }
-	    /* Handle last bar */
-	    if ((thisList->numPoints > 0) && PM_BOOL("BarGraph")) {
-		int barPixels, baseSpot;
-		XSegment line;
-
-		barPixels = (int) ((PM_DBL("BarWidth")/wi->XUnitsPerPixel) + 0.5);
-		if (barPixels <= 0) barPixels = 1;
-		baseSpot = SCREENY(wi, PM_DBL("BarBase"));
-		line.x1 = line.x2 = Xsegs[X_idx-1].x2;
-		line.y1 = baseSpot;  line.y2 = Xsegs[X_idx-1].y2;
-		wi->dev_info.xg_seg(wi->dev_info.user_state,
-				    1, &line, barPixels, L_VAR,
-				    LINESTYLE(idx), PIXVALUE(idx));
 	    }
 
 	    /* Draw segments */
@@ -2143,7 +2315,7 @@ LocalWin *wi;
 
 
 
-int DrawLegend(wi)
+void DrawLegend(wi)
 LocalWin *wi;
 /*
  * This draws a legend of the data sets displayed.  Only those that

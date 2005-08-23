@@ -1,0 +1,60 @@
+To: Mike Williamson <cameron@eecs.berkeley.edu>
+cc: ptdesign
+Fcc: +drafts
+Subject: Re: ptdesign recompile at 3? 
+In-reply-to: Your message of Mon, 01 Sep 1997 17:03:28 -0700.
+             <199709020003.RAA23994@edison.eecs.berkeley.edu> 
+--------
+Mike Williamson writes:
+--------
+    [Christopher writes]
+    >        New directory containing rudimentary recursion tests for the
+    >        SDF stars that I modified.  I hacked these tests up using
+    >        ptcl commands rather than pitcl commmands because I don't
+    >        have Itcl compiled under NT yet.  I wrote the tests with
+    >        an eye towards easily updating them from ptcl commands.
+
+    Are these "recursion" tests or "regression" tests?  I had always
+    thought it was the latter.  Are both valid names for tests, or is
+    it one or the other?
+    
+    What do you need in order to have such a test, and in order to use
+    it properly?
+--------
+Currently the tests in src/domains/sdf/test use obj.$PTARCH/ptcl/ptcl.ptiny
+
+Here's how to run them:
+ptuser@carson 10% cd ~ptdesign/src/domains/sdf/test
+ptuser@carson 11% make
+echo "set TYCHO /users/ptdesign/tycho; foreach i [list testSDFStars.tcl testSDFArith.tcl testSDFConv.tcl testSDFDSP.tcl] {puts \$i; source \$i};     puts \"Total: [expr \$PASSED + \$FAILED] (Passed: \$PASSED Failed: \$FAILED)\"" | \
+	../../../../obj.sol2.5/ptcl/ptcl.ptiny
+testSDFStars.tcl
+testSDFArith.tcl
+testSDFConv.tcl
+SDFFixToCx test: Expect 3 out of 10 overflow messages
+Warning: FixToCxTest.Rampa:  experienced overflow in 3 out of 10 fixed-point calculations checked (30.0%)  
+SDFFixToFloat test: Expect 1 out of 10 overflow messages
+Warning: FixToIntTest.Rampa:  experienced overflow in 1 out of 10 fixed-point calculations checked (10.0%)  
+SDFIntToCx test: Expect 8 out of 10 overflow messages
+Warning: IntToFixTest.IntToFix.a:  experienced overflow in 8 out of 10 fixed-point calculations checked (80.0%)  
+testSDFDSP.tcl
+SDFIIRFix test: expect 4 of 48 fixed-point overflow warnings
+Warning: IIRFixTest.IIRFix.a:  experienced overflow in 4 out of 48 fixed-point calculations checked (8.3%)  
+Total: 50 (Passed: 50 Failed: 0)
+ptuser@carson 12% 
+
+
+You can use any ptcl binary by setting the PTCL variable.  For
+example, to run the tests under the 0.7 ptcl, do:
+
+make PTCL=/usr/eesww/share/ptolemy/bin.sol2.5/ptcl
+
+Unfortunately, the test suite will not work with Ptolemy0.6, since we
+use 'file join' in a few places.
+
+You can manually run the tests by sourcing 
+/users/ptdesign/src/domains/sdf/test/testSDFDefs.tcl
+and then what ever test file in that directory you are interested in
+running.
+
+-Christopher

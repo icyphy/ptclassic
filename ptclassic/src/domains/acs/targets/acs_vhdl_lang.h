@@ -43,7 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <fstream.h>
 #include <time.h>
 
-#include "StringList.h"
+//#include "StringList.h"
+#include "CoreList.h"
+#include "ACSIntArray.h"
 #include "StringArray.h"
 #include "ACSCGFPGACore.h"
 #include "Pin.h"
@@ -51,6 +53,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "acs_starconsts.h"
 
 class ACSCGFPGACore;
+class CoreList;
 
 // Debug flags
 static const int DEBUG_LIB=0;
@@ -89,6 +92,8 @@ public:
   static const char initial_value_assignment[]=":=";
   static const char vector_line[]=" downto 0";
 
+  ACSIntArray* nc_sizes;
+
   VHDL_LANG::VHDL_LANG();
   VHDL_LANG::~VHDL_LANG();
 
@@ -97,20 +102,21 @@ public:
 				 StringArray*);
   char* VHDL_LANG::gen_entity(const char*,Pin*);
   char* VHDL_LANG::gen_architecture(const char*,
-				    const SequentialList*,
+				    CoreList*,
 				    const int,
 				    Pin*, 
 				    Pin*,
 				    Pin*,
 				    Pin*);
-  char* VHDL_LANG::gen_components(const char*,const SequentialList*);
-  char* VHDL_LANG::gen_configurations(const SequentialList*);
+  char* VHDL_LANG::gen_components(const char*,CoreList*);
+  char* VHDL_LANG::gen_configurations(CoreList*);
   char* VHDL_LANG::gen_instantiations(const int,
-				      const SequentialList*,
+				      CoreList*,
 				      Pin*,
 				      Pin*,
 				      Pin*,
 				      Pin*);
+  char* VHDL_LANG::const_definitions(Pin*);
   int VHDL_LANG::bind_ports(ACSCGFPGACore*,
 			    StringArray*,
 			    StringArray*,
@@ -118,6 +124,7 @@ public:
 			    Pin*,
 			    Pin*,
 			    Pin*);
+  char* VHDL_LANG::set_nc(const int,Pin*);
 
   // Intermediate level VHDL (single line command) functions
   char* VHDL_LANG::set_entity(const char*);
@@ -161,10 +168,15 @@ public:
   char* VHDL_LANG::val(const char*);
 
   // Low level VHDL (glue) functions
+  char* VHDL_LANG::equals(void);
   char* VHDL_LANG::equals(const char*,const char*);
   char* VHDL_LANG::equals(const strstreambuf*,const char*);
   char* VHDL_LANG::equals(const char*,const strstreambuf*);
   char* VHDL_LANG::equals(const strstreambuf*,const strstreambuf*);
+  char* VHDL_LANG::expr(const char*,const char*);
+  char* VHDL_LANG::expr(const strstreambuf*,const char*);
+  char* VHDL_LANG::expr(const char*,const strstreambuf*);
+  char* VHDL_LANG::expr(const strstreambuf*,const strstreambuf*);
   char* VHDL_LANG::test(const char*,const char*);
   char* VHDL_LANG::test(const strstreambuf*,const char*);
   char* VHDL_LANG::test(const strstreambuf*,const strstreambuf*);
@@ -186,17 +198,24 @@ public:
   char* VHDL_LANG::l_case(const char*,
 			  StringArray*,
 			  StringArray*);
+  char* VHDL_LANG::and(void);
   char* VHDL_LANG::and(const char*);
   char* VHDL_LANG::and(const strstreambuf*);
+  char* VHDL_LANG::not(void);
   char* VHDL_LANG::not(const char*);
   char* VHDL_LANG::not(const strstreambuf*);
+  char* VHDL_LANG::or(void);
   char* VHDL_LANG::or(const char*);
   char* VHDL_LANG::or(const strstreambuf*);
-  char* VHDL_LANG::slice(const char*,int,int);
-  char* VHDL_LANG::slice(const strstreambuf*,int,int);
-  char* VHDL_LANG::slice(const char*,int);
-  char* VHDL_LANG::slice(const strstreambuf*,int);
-  char* VHDL_LANG::tie_it(const char*,int,int,const char*);
+  char* VHDL_LANG::xor(const char*);
+  char* VHDL_LANG::xor(const strstreambuf*);
+  char* VHDL_LANG::xnor(const char*);
+  char* VHDL_LANG::xnor(const strstreambuf*);
+  char* VHDL_LANG::slice(const char*,const int,const int);
+  char* VHDL_LANG::slice(const strstreambuf*,const int,const int);
+  char* VHDL_LANG::slice(const char*,const int);
+  char* VHDL_LANG::slice(const strstreambuf*,const int);
+  char* VHDL_LANG::tie_it(const char*,const int,const int,const char*);
 
 //  ostrstream VHDL_LANG::xor(const char*);
 //  ostrstream VHDL_LANG::nand(const char*);

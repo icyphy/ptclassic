@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# $Id$
+# @(#)ptplay.irix5	1.1	03/29/97
 
 OUT=/tmp/ptlay.out.$$
 # Is this the right format?

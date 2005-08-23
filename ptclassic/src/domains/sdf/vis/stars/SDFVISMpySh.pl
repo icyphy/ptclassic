@@ -1,7 +1,7 @@
 defstar {
-	name { VISMpyDblSh }
+	name { VISMpySh }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFVISMpySh.pl	1.2	7/9/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -38,25 +38,12 @@ results in a 32 bit result, which is then rounded to 16bits.
 	  vis_write_gsr(8);
 
 	  // setup the data
-	  vis_f32 dataAhi = vis_read_hi(double(inA%0));
-	  vis_f32 dataAlo = vis_read_lo(double(inA%0));
-	  vis_f32 dataBhi = vis_read_hi(double(inB%0));
-	  vis_f32 dataBlo = vis_read_lo(double(inB%0));
+	  vis_d64 dataA = double(inA%0);
+	  vis_d64 dataB = double(inB%0);
 	  
 	  // calculate the partial products
-	  vis_d64 resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
-	  vis_d64 resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
-	  vis_d64 resulthi   = vis_fpadd32(resulthihi,resulthilo);
-	  
-	  vis_d64 resultlohi = vis_fmuld8sux16(dataAlo,dataBlo);
-	  vis_d64 resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
-	  vis_d64 resultlo   = vis_fpadd32(resultlohi,resultlolo);
-
-	  // pack and concat the final product*/
-	  vis_f32 resultu = vis_fpackfix(resulthi);
-	  vis_f32 resultl = vis_fpackfix(resultlo);
-	  vis_d64 result = vis_freg_pair(resultu,resultl);
-	  
-          out%0 << result;
+	  vis_d64 resulthi = vis_fmul8sux16(dataA,dataB);
+	  vis_d64 resultlo = vis_fmul8ulx16(dataA,dataB);
+	  out%0 << vis_fpadd16(resulthi,resultlo);
       	}
 }

@@ -22,6 +22,140 @@
       (fillPattern 1 1 "1")
   )
 
+  (comment "Color layers, priority 2, added to get color ps")
+
+  (figureGroupDefault yellowSolid2
+      (userData priority 2)
+      (width -2)
+      (color 1000 838 0)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault yellowOutline2
+      (userData priority 2)
+      (width -2)
+      (color 1000 838 0)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault blueSolid2
+      (userData priority 2)
+      (width -2)
+      (color 0 0 1000)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault blueOutline2
+      (userData priority 2)
+      (width -2)
+      (color 0 0 1000)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+
+  (figureGroupDefault redSolid2
+      (userData priority 2)
+      (width -2)
+      (color 1000 0 0)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault redOutline2
+      (userData priority 2)
+      (width -2)
+      (color 1000 0 0)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault violetSolid2
+      (userData priority 2)
+      (width -2)
+      (color 909 0 919)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault violetOutline2
+      (userData priority 2)
+      (width -2)
+      (color 909 0 909)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault greenOutline2
+      (userData priority 2)
+      (width -2)
+      (color 136 656 136)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault greenSolid2
+      (userData priority 2)
+      (width -2)
+      (color 136 656 136)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault orangeOutline2
+      (userData priority 2)
+      (width -2)
+      (color 1000 585 0)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault orangeSolid2
+      (userData priority 2)
+      (width -2)
+      (color 1000 595 0)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault brownOutline2
+      (userData priority 2)
+      (width -2)
+      (color 767 505 0)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault brownSolid2
+      (userData priority 2)
+      (width -2)
+      (color 787 464 0)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault tanOutline2
+      (userData priority 2)
+      (width -2)
+      (color 1000 767 515)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault tanSolid2
+      (userData priority 2)
+      (width -2)
+      (color 1000 767 505)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault whiteOutline2
+      (userData priority 2)
+      (width -2)
+      (color 1000 1000 1000)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault whiteSolid2
+      (userData priority 2)
+      (width -2)
+      (color 1000 1000 1000)
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault blackOutline2
+      (userData priority 2)
+      (width -2)
+      (color 0 0 0)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault blackSolid2
+      (userData priority 2)
+      (width -2)
+      (color 0 0 0)
+      (fillPattern 1 1 "1")
+  )
+
   (comment "Color layers, priority 5, from original ptolemy technology")
 
   (figureGroupDefault yellowSolid
@@ -60,7 +194,28 @@
   (figureGroupDefault delayOutline
       (userData priority 12)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault idelay
+      (userData priority 11)
+      (width -2)
+      (color 136 656 136)
+      (fillPattern 1 1 "1")
+      (borderPattern 1 "0")
+  )
+  (figureGroupDefault idelayI
+      (userData priority 12)
+      (width -2)
+      (color 1000 1000 1000)
+      (fillPattern 1 1 "1")
+      (borderPattern 1 "0")
+  )
+  (figureGroupDefault idelayOutline
+      (userData priority 12)
+      (width -2)
+      (color 1000 1000 1000)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
@@ -99,14 +254,14 @@
   (figureGroupDefault greenOutline
       (userData priority 5)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid
       (userData priority 5)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline
@@ -183,7 +338,7 @@
   (figureGroupDefault intColor
       (userData priority 5)
       (width -2)
-      (color 1000 838 0)    (comment "yellow")
+      (color 1000 595 0)    (comment "orange")
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault floatColor
@@ -207,7 +362,25 @@
   (figureGroupDefault packetColor
       (userData priority 5)
       (width -2)
-      (color 0 900 0)    (comment "green")
+      (color 136 656 136)    (comment "green")
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault fixColor
+      (userData priority 5)
+      (width -2)
+      (color 1000 0 1000)	(comment "violet")
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault fileColor
+      (userData priority 5)
+      (width -2)
+      (color 1000 838 0)	(comment "yellow")
+      (fillPattern 1 1 "1")
+  )
+  (figureGroupDefault stringColor
+      (userData priority 5)
+      (width -2)
+      (color 0 0 0)		(comment "black")
       (fillPattern 1 1 "1")
   )
 
@@ -287,14 +460,14 @@
   (figureGroupDefault greenOutline7
       (userData priority 7)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid7
       (userData priority 7)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline7
@@ -420,14 +593,14 @@
   (figureGroupDefault greenOutline6
       (userData priority 6)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid6
       (userData priority 6)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline6
@@ -553,14 +726,14 @@
   (figureGroupDefault greenOutline4
       (userData priority 4)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid4
       (userData priority 4)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline4
@@ -686,14 +859,14 @@
   (figureGroupDefault greenOutline3
       (userData priority 3)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid3
       (userData priority 3)
       (width -2)
-      (color 0 900 0)
+      (color 136 656 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline3

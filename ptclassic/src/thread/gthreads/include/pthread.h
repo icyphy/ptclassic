@@ -33,9 +33,11 @@ Report problems and direct all questions to:
  * Pthreads interface definition
  */
 
-#ifndef _POSIX_THREADS
-
 #include <pthread/config.h>
+
+/* Solaris 2.5 pretends to have posix threads. */
+#if !defined(_POSIX_THREADS) || defined(SOLARIS_NP)
+
 #include <pthread/unistd.h>
 #include <pthread/signal.h>
 #include <stdio.h>
@@ -537,9 +539,21 @@ extern void pthread_testintr   _C_PROTOTYPE((void));
 extern int sigaction           _C_PROTOTYPE((int __sig,
                                              SIGACTION_CONST struct sigaction *__act,
                                              struct sigaction *__oact));
+/* Under SunOS4.1, don't define pthread_sighandler_t */
+/* The error occurs while compiling PN domain:
+ ../../../../thread/include.sun4/pthread.h:543: declaration of C
+ function `void (* signal(int, void (*)(int)))(int)' conflicts with
+ /users/ptdesign/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.7.2.2/include/sys/signal.h:313:
+ previous declaration `void (* signal(...))(...)' here
+*/
+
+#if defined(__sun) && ! defined(__svr4__) && ! defined(SYSV)
+/* Sun4 */
+#else
 extern pthread_sighandler_t signal
 			        _C_PROTOTYPE((int __sig,
                                              pthread_sighandler_t handler));
+#endif
 /* yet to come...
 extern unsigned int alarm      _C_PROTOTYPE((unsigned int __seconds));
 */

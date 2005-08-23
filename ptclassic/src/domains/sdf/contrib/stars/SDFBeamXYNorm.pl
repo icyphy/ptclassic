@@ -1,18 +1,20 @@
 defstar {
 	name {BeamXYNorm}
 	domain {SDF}
-	version {@(#)SDFBeamXYNorm.pl	1.0 9/1/96}
+	version { @(#)SDFBeamXYNorm.pl	1.3	12/08/97 }
 	desc {
 Outputs the magnitude of the antenna array beam pattern with respect to the
 antenna positions and the actual steering vector. The output is in polar
 coordinates suitable for display with the TkXYPlot Star.
 	}
-	author { A. Richter, U. Trautwein }
+	author { A. Richter and U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	explanation {
 	}
 	ccinclude { "ComplexSubset.h" }
@@ -114,10 +116,16 @@ All rights reserved.
 	    int i;
 	    
 	    Wscale = 0.0;
-	    for( i = 0; i < NumberElements; i++)
-	       Wscale+= abs(Complex(steering%(i)));
-	    for( i = 0; i < NumberElements; i++)
-	       ScaledSteering[i]=Complex(steering%(NumberElements-i-1))/Complex(Wscale,0.0);
+	    for( i = 0; i < NumberElements; i++) {
+	       // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	       Complex tmp = steering%(i);	
+	       Wscale+= abs(tmp);
+	    }
+	    for( i = 0; i < NumberElements; i++) {
+	       // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	       Complex tmp = steering%(NumberElements-i-1);
+	       ScaledSteering[i]=tmp/Complex(Wscale,0.0);
+            }
 
 	    p=dirvectors;
 	    for (int w = 0; w < AngRes ; w++)

@@ -2,32 +2,32 @@ defstar {
 	name { Sub }
 	domain { VHDL }
 	desc { Output the "pos" input minus all "neg" inputs }
-	version { $Id$ }
-	author { A. P. Kalavade, M. C. Williamson }
+	version { @(#)VHDLSub.pl	1.4 03/07/96 }
+	author { Michael C. Williamson, A. P. Kalavade }
 	copyright { 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { Silage main library }
+	location { VHDL main library }
 	input {
 		name{ pos }
-		type{ int }
+		type{ float }
 	}
-	input {
+	inmulti {
 		name{ neg }
-		type{ int }
+		type{ float }
 	}
 	output {
 		name{ output }
-		type{ int }
+		type{ float }
 	}
         constructor {
                 noInternalState();
         }
 	codeblock (std) {
-$ref(output) $assign(output) $ref(pos) - $ref(neg);
+$ref(output) $assign(output) $ref(pos) - ($interOp(+, neg));
 	}
         go {
 	  addCode(std);

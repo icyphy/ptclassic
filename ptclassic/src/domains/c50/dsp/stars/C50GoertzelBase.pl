@@ -1,13 +1,13 @@
 defstar {
 	name { GoertzelBase }
 	domain { C50 }
-	version { $Id$}
+	version {@(#)C50GoertzelBase.pl	1.9	05/26/98}
 	desc {
 Base class for Goertzel algorithm stars
 	}
-	author { Luis Gutierrez, based on CG56 Implementation}
+	author { Luis Gutierrez, based on CG56 Implementation, G. Arslan}
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -16,6 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name{input}
 		type{fix}
+		attributes { P_NOINIT }
 	}
 	defstate {
 		name { k }
@@ -35,39 +36,48 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 32 }
 		desc { amount of data to read (N <= size) }
 	}
-	defstate {
+	state {
 		name { delays }
 		type { fixarray }
 		default { 0.0 }
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE|A_CONSEC }
+		attributes { A_BMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
-	defstate {
-		name { WnReal }
+	state {
+		name { wnReal }
 		type { fix }
 		default { "0.0" }
-		desc { 
-internal state for the storage of the real part of the twiddle factor, 
+		desc {
+internal state for the storage of the real part of the twiddle factor,
 which is a function of k and N
 		}
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE|A_CONSEC }
+		attributes {A_UMEM|A_NONSETTABLE|A_CONSTANT|A_CONSEC }
 	}
-	defstate {
-		name { WnImag }
+	state {
+		name { wnImag }
 		type { fix }
 		default { "0.0" }
 		desc {
 internal state for the storage of the imaginary part of the twiddle factor,
 which is a function of k and N
 		}
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE|A_CONSEC }
+		attributes { A_UMEM|A_NONSETTABLE|A_CONSTANT}
 	}
+
+	state {
+		name { cf }
+		type { fixarray }
+		default { "0 0" }
+		desc {
+ceofficients 
+		}
+		attributes { A_BMEM|A_NONSETTABLE|A_NONCONSTANT}
+	}
+
 	protected {
 		double theta;
-		double temp;
 		StringList coeffs;
 	}
 	constructor {
-		noInternalState();
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
@@ -116,49 +126,50 @@ which is a function of k and N
 		double Nd = double(int(N) ? int(N) : 1);
 		double kd = double(int(k));
 		theta = 2.0 * M_PI * kd / Nd;
-		temp = double(cos(theta)/2);
-		WnReal = temp;
-		WnImag  = double(-sin(theta));
-		delays.resize(2);
+		wnReal = double(-0.5*cos(theta));
+		wnImag  = double(-sin(theta));
+		delays.resize(3);
 		input.setSDFParams(int(size), int(size)-1);
 	}
 
 	initCode{
-		coeffs<<"$starSymbol(cf):\n\t.q15\t";
-		coeffs<<temp;
-		coeffs<<"\n\t.q15\t-0.5\n$starSymbol(cfe)\n";
+		coeffs.initialize();
+		coeffs << "-0.5 ";
+		coeffs << double(cos(theta));
+		cf.setInitValue(coeffs);
 	}
 		
-	codeblock(initialize,"int iter") {
+	codeblock(init,"int iter") {
 	lacc	#@iter,0
 	samm	brcr			; load block repeat counter with iter
 	lar	ar0,#$addr(input) 	; ar0 -> input
-	lar	ar1,#$addr(delays)	; ar1 -> old samples	
-	lar	ar2,#$addr(WnReal)	; ar2 -> twiddle factors(real,imag)
+	lar	ar1,#$addr(delays)	; ar1 -> old samples[1]	
+	lar	ar2,#$addr(wnReal)	; ar2 -> twiddle factors(real,imag)
 	mar	*,ar1			; make arp -> ar1
-	mar	*+			; ar1-> last of old samples
+	sach	*+			; reset IIR states
+	sach	*			
 	rptb	$starSymbol(gl)		; block repeat inst.
 	zap				; zero prod reg & acc
 	rpt	#1			; repeat twice
-	macd	cf,*-			; implements part of filter
+	macd	$addr(cf),*-	        ; implements part of filter
 	lta	*+,ar0			; add previous prod. and set ar0 active
 	add	*+,14,ar1		; add input to acc and inc input pointer
+$starSymbol(gl):			; next inst is end of repeat block
 	sach	*+,2			; store acc. and make ar1-> last of old samples
-$starSymbol(gl):			; end of repeat block; time = 9 cycles
 	lt	*,ar2			; treg0 is loaded with w[1]; ar2->twiddleReal/2
 	mpy	*+			; P = w[1]*twiddleReal/4; ar2->twiddleImag
-	lts	*,ar1			; acc = w[0]/4 + w[1]*twiddleReal/4; treg0=twdlIm
+	lta	*,ar1			; acc = w[0]/4 + w[1]*twiddleReal/4; treg0=twdlIm
 	mpy	*,ar3			; P = w[1]*twiddleIm/2
 	}
 
 	go {
-		int dftLength = int(N);
+		int dftLength = int(N)-1;
 
 		// See the FIXME statement above
 		CheckParameterValues();
 
   		// Initialize registers
-		addCode(initialize(dftLength));
+		addCode(init(dftLength));
 	
 	}
 
@@ -166,3 +177,7 @@ $starSymbol(gl):			; end of repeat block; time = 9 cycles
 		return (4 + 3 + 4*(int(N)));
 	}
 }
+
+
+
+

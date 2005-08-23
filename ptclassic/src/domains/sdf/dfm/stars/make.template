@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,8 +22,8 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Makefile for Ptolemy DMM stars (SDF stars operating on files)
-# $Id$
+# Makefile for Ptolemy DFM stars (SDF stars operating on files)
+# @(#)make.template	1.6 	08/18/97
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -33,7 +33,7 @@
 # This will add the dependencies to the makefile.
 
 ROOT = ../../../../..
-VPATH = $(ROOT)/src/domains/sdf/dmm/stars
+VPATH = $(ROOT)/src/domains/sdf/dfm/stars
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
@@ -43,19 +43,21 @@ include $(CONFIG)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 SDFTCLTKDIR = $(ROOT)/src/domains/sdf/tcltk/stars
 TCLDIR = $(ROOT)/tcl/include
-TYCHODIR = $(ROOT)/src/tycho/tysh
+TYCHODIR = $(ROOT)/src/tysh
 PTKLIB = $(ROOT)/src/ptklib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(SDFTCLTKDIR) -I$(TYCHODIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libsdfdmmstars.$(LIBSUFFIX)
+PTLIB=libsdfdfmstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
+ SDFConstString.pl \
  SDFFileEval.pl \
  SDFFileEvalControl.pl \
+ SDFFileEvalString.pl \
  SDFFileSource.pl \
  SDFFileShow.pl
 
@@ -74,7 +76,7 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-STAR_MK=sdfdmmstars
+STAR_MK=sdfdfmstars
 DOMAIN=SDF
 EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(TCL_SRCS)
 

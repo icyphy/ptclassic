@@ -4,13 +4,13 @@ defstar {
 	desc { Discards all inputs }
         author { Wei-Lun Tsai }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
         location { New_Stars directory }
-        explanation {
+	htmldoc {
 Simply ignores all incoming data (integers) from the multi-port.
         }
 	hinclude { "ConstIters.h" }

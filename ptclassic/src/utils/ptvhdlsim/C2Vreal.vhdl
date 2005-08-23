@@ -1,6 +1,6 @@
 --C2Vreal.vhdl
 --Real communication from C to VHDL
---Version:  $Id$
+--Version:  @(#)C2Vreal.vhdl	1.2 6/27/96
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
@@ -24,8 +24,6 @@ architecture CLI of C2VREAL is
 	attribute CLI_CLOSE	of CLI	: architecture is "c2vreal_close";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 
 begin
 end;

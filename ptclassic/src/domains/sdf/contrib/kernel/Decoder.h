@@ -1,13 +1,35 @@
-// $Id$
+/*
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+// @(#)Decoder.h	1.4	3/7/96
 // Programmer: Neal Becker
 // This may look like C code, but it is really -*- C++ -*-
 
 #ifndef Decoder_h
 #define Decoder_h
-
-inline float sqr( float x ) {
-  return x * x;
-}
 
 inline int Bit( int x, int b ) {
   return ( x >> b ) & 1 ;
@@ -17,7 +39,7 @@ class Decoder {
 
 private:
 
-  float Gain;
+  double Gain;
 
   // Xsymbol gives the xmit symbols for each branch
   // into each state.  The first index is the branch
@@ -27,7 +49,7 @@ private:
   // Predecessor state table
   int PrevState[ 2 ][ 64 ];
 
-  float BM (int xsym, int I, int Q);
+  double BM (int xsym, int I, int Q);
 
   // This is the path memory
   int Path[ 64 ][ 64 ];
@@ -36,17 +58,17 @@ private:
   int PathIndex;
 
   // This is the state metric memory.  We ping-pong between 2
-  float StateMetric[ 2 ][ 64 ];
+  double StateMetric[ 2 ][ 64 ];
 
   // This index is the current write position for the state metrics
   int StateMetricIndex;
 
   // That's right folks.  *Squared* distance.  RTFM.
-  float sqdist( float xmit, float rcv ) {
-    return sqr( xmit - rcv );
+  double sqdist( double xmit, double rcv ) {
+    return ( (xmit - rcv) * (xmit - rcv) );
   }
 
-  float XmitMap( int val ) {
+  double XmitMap( int val ) {
     return ( val == 0 ) ? 1 : -1;
   }
 
@@ -68,11 +90,11 @@ private:
 
 public:
 
-  Decoder (float g) : Gain (g) { Reset(); }
+  Decoder (double g) : Gain (g) { Reset(); }
 
   int operator() ( int I, int Q );
 
-  void SetGain (float g) { Gain = g; }
+  void SetGain (double g) { Gain = g; }
 
   void Reset();
   

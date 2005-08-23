@@ -12,17 +12,17 @@ major ordering.
 The first matrix in the table is indexed by a zero-valued input.
 An error occurs if the input value is out of bounds.
   }
-  version { $Id$ }
+  version { @(#)SDFTable_M.pl	1.4 01 Oct 1996 }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location { SDF matrix library }
-  explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
   }
   input {
     name { input }
@@ -67,7 +67,7 @@ The table containing matrices. Each matrix with dimension numRows*numCols is giv
 //  check if table doesn't have enough elements.
     if ( size != size/dimension*dimension ) {
       Error::abortRun(*this,"The number of elements in state parameter ",
-                            "'floatTable' does't match the specified ",
+                            "'floatTable' doesn't match the specified ",
                             "dimension.");
       return;
     }

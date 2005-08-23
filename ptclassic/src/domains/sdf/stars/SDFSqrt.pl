@@ -1,25 +1,18 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: J. T. Buck
-Date of creation: 7/19/90
-Converted to use preprocessor, 10/3/90
-
-This star computes the square root of its input.
-
-************************************************************************/
-}
-
 defstar {
 	name {Sqrt}
 	domain {SDF}
-	desc {
-		"This star computes the square root of its input."
+	desc { This star computes the square root of its input.  }
+	version {@(#)SDFSqrt.pl	1.10 10/01/96}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+<a name="square root"></a>
 	}
 	input {
 		name{input}
@@ -31,8 +24,6 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		output%0 << sqrt (input%0);
+		output%0 << sqrt (double(input%0));
 	}
 }
-
-		

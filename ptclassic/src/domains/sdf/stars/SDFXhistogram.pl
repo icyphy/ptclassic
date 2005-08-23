@@ -1,137 +1,78 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/20/90
-
- Creates a histogram with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
-
-**************************************************************************/
-}
-
 defstar {
 	name { Xhistogram }
 	domain { SDF }
-	desc { "Generate a histogram with the xgraph program." }
+	desc {
+Generate a histogram with the xgraph program.  The parameter
+"binWidth" determines the bin width.
+	}
+	version {@(#)SDFXhistogram.pl	2.16 11/26/97}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+Creates a histogram with the xgraph program.  It is assumed that "xgraph"
+is on your path, or this will not work!
+The <i>binWidth</i> parameter specifies how wide histogram
+bin will be.  The number of bins is determined automatically from
+the input data.
+<p>
+By default, the xgraph program gets the options ``-bar -nl -brw <i>halfw</i>''
+where <i>halfw</i> is half the bin width.
+<a name="xgraph program"></a>
+<a name="histogram, X window"></a>
+	}
 	input {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
 		type {string}
 		default {"Xhistogram"}
-		desc {"graph title"}
+		desc { Title for the plot. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save Xhistogram input"}
+		desc {File to save input.}
 	}
 	defstate {
 		name {binWidth}
 		type {float}
 		default {"1.0"}
-		desc {"Width of bins for histogram."}
+		desc {Width of bins for histogram.}
+	}
+	defstate {
+		name {showPercent}
+		type {int}
+		default {FALSE}
+		desc {Show Y-axis as percentages rather than counts.}
 	}
 	defstate {
 		name {options}
 		type {string}
-		default {"-bar -nl"}
-		desc {"command line options for xgraph"}
+		default {"-bb =800x400"}
+		desc {Extra Command line options for xgraph.}
 	}
 	protected {
-		SequentialList bins;
-		float lowValue, highValue;	// current range of bins
+		// The XHistogram class does all the work.
+		XHistogram his;
 	}
-	ccinclude { "miscFuncs.h" <math.h> }
-	hinclude {"DataStruct.h" "Display.h", "StringList.h" }
+	hinclude { "Histogram.h" }
+	setup {
+		his.initialize(this,binWidth,options,title,saveFile);
+		his.setPercentageDisplay(int(showPercent));
+	}
 	go {
-	    float data = input%0;
-	    int i, numToAdd;
-	    int* count;
-	    if (bins.size() == 0) {
-		// first element
-		count = new int;
-		*count = 1;
-		bins.put(count);
-		lowValue = int(data/double(binWidth))*double(binWidth);
-		highValue = lowValue + double(binWidth);
-		return;
-	    }
-	    if (data < lowValue) {
-		// add elements to the beginning of the list until
-		// the data value has a bin.
-		// Figure out how many that is
-		numToAdd = int(ceil((lowValue-data)/double(binWidth)));
-		// Add the zero-valued elements
-		for ( i = numToAdd-1; i > 0; i--) {
-		    count = new int;
-		    *count = 0;
-		    bins.tup(count);
-		}
-		// Add the one-valued element
-		count = new int;
-		*count = 1;
-		bins.tup(count);
-		lowValue = int(data/double(binWidth))*double(binWidth);
-		return;
-	    }
-	    if (data >= highValue) {
-		// add elements to the end of the list until
-		// the data value has a bin.
-		// Figure out how many that is (minus one)
-		numToAdd = int((data-highValue)/double(binWidth));
-		// Add the zero-valued elements
-		for ( i = numToAdd; i > 0; i--) {
-		    count = new int;
-		    *count = 0;
-		    bins.put(count);
-		}
-		// Add the one-valued element
-		count = new int;
-		*count = 1;
-		bins.put(count);
-		highValue = int(data/double(binWidth))*double(binWidth)
-			+ double(binWidth);
-		return;
-	    }
-	    // If we get to this point, the data value fits within the range
-	    // Compute the index
-	    int index = int((data - lowValue)/double(binWidth));
-	    bins.reset();
-	    for (int t = index; t>=0; t--)
-	    	count = (int*)bins.next();
-	    *count = *count + 1;
+		his.addPoint(double(input%0));
 	}
 	wrapup {
-		// Begin by constructing the options string
-		StringList exOptions;
-		char barWidth[128];
-		sprintf(barWidth, " -brw %g", double(binWidth)/2);
-		exOptions += (char *) options;
-		exOptions += barWidth;
-
-		XGraph graph;
-		graph.initialize(1, (const char*) exOptions,
-				    (const char*) title,
-				    (const char*) saveFile);
-
-		// Write data from bin structure into file
-		bins.reset();
-		int size = bins.size();
-		float x = lowValue + double(binWidth)/2;
-		for (int i = 1; i <= size; i++ ) {
-		   graph.addPoint(x, double(*(int*)bins.next()));
-		   x += double(binWidth);
-		}
-		graph.terminate();
+		his.terminate();
 	}
 }

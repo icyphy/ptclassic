@@ -1,0 +1,100 @@
+domain SDF
+defgalaxy 4level {
+	domain SDF
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper 4.0
+	star Floor1 Floor
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain 2.0
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level "-3.0"
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	connect IIDUniform1 output Floor1 input
+	connect Floor1 output FloatGain1 input
+	connect FloatGain1 output FloatSum.input=21 input#1
+	connect FloatDC1 output FloatSum.input=21 input#2
+	alias out FloatSum.input=21 output
+}
+reset
+# Creating universe 'qam'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star Cos1 Cos
+	star Sin1 Sin
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step "PI/4"
+	setstate FloatRamp1 value 0.0
+	star FloatSum.input=22 FloatSum
+	numports FloatSum.input=22 input 2
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "16-QAM signal"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 'x(t)' =800x300+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title constellation
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "-P -nl =500x500+500+325 -0 symbols"
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	star 4level1 4level
+	star 4level2 4level
+	star Xscope1 Xscope
+	setstate Xscope1 title "eye diagram of in-phase part"
+	setstate Xscope1 saveFile ""
+	setstate Xscope1 options "-0 x =500x500+0+325"
+	setstate Xscope1 ignore 32
+	setstate Xscope1 xUnits 1.0
+	setstate Xscope1 xInit 0.0
+	setstate Xscope1 traceLength 32
+	star RaisedCos1 RaisedCos
+	setstate RaisedCos1 taps "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
+	setstate RaisedCos1 decimation 1
+	setstate RaisedCos1 decimationPhase 0
+	setstate RaisedCos1 interpolation 16
+	setstate RaisedCos1 N 64
+	setstate RaisedCos1 P 16
+	setstate RaisedCos1 excessBW 0
+	star RaisedCos2 RaisedCos
+	setstate RaisedCos2 taps "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
+	setstate RaisedCos2 decimation 1
+	setstate RaisedCos2 decimationPhase 0
+	setstate RaisedCos2 interpolation 16
+	setstate RaisedCos2 N "64 "
+	setstate RaisedCos2 P 16
+	setstate RaisedCos2 excessBW 0
+	node node1
+	nodeconnect 4level2 out node1
+	nodeconnect XYgraph1 xInput node1
+	nodeconnect RaisedCos1 signalIn node1
+	node node2
+	nodeconnect 4level1 out node2
+	nodeconnect XYgraph1 input node2
+	nodeconnect RaisedCos2 signalIn node2
+	node node3
+	nodeconnect RaisedCos1 signalOut node3
+	nodeconnect FloatProduct.input=21 input#1 node3
+	nodeconnect Xscope1 input node3
+	connect Cos1 output FloatProduct.input=21 input#2
+	connect Sin1 output FloatProduct.input=22 input#2
+	node node4
+	nodeconnect FloatRamp1 output node4
+	nodeconnect Cos1 input node4
+	nodeconnect Sin1 input node4
+	connect FloatProduct.input=21 output FloatSum.input=22 input#1
+	connect FloatProduct.input=22 output FloatSum.input=22 input#2
+	connect FloatSum.input=22 output Xgraph1 input
+	connect RaisedCos2 signalOut FloatProduct.input=22 input#1
+run 160
+wrapup

@@ -1,8 +1,8 @@
 # Makefile for Ptolemy compatibility includes
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.12 08/16/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,25 +27,36 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-# Important!  Do not run this makefile while in ~ptolemy/src/utils.  Instead
-# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# Important!  Do not run this makefile while in ~ptolemy/src/compat.  Instead
+# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
 
-DIRS = X11R4 X11R5 cfront freebsd matlab/extern/include ptolemy
+DIRS = X11R4 X11R5 cfront ptolemy nt nt.vc
+DEEPDIRS = matlab/extern/include mathematica/Source/Includes \
+	nt.vc/sys
+
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
 
 MAKEVARS =	\
-		"ARCH=$(ARCH)" 
+		"PTARCH=$(PTARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		cd $$x ; \
-		echo making $@ in utils/$$x ; \
+		echo making $@ in compat/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 	 	cd .. ; \
+	    fi ; \
+	done
+	@for x in $(DEEPDIRS); do \
+	    if [ -w $$x ] ; then \
+		cd $$x ; \
+		echo making $@ in utils/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../../src/utils/$$x $@ ;\
+	 	cd ../../.. ; \
 	    fi ; \
 	done

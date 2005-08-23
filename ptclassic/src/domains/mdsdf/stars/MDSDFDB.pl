@@ -8,22 +8,25 @@ are assigned the value "min" (default -100). The "inputIsPower"
 parameter should be set to ÒYESÓ if the input signal is a power
 measurement (vs. an amplitude measurement).
 	}
-	version { $Id$ }
+	version { @(#)MDSDFDB.pl	1.7 10/07/96 }
 	author { J. T. Buck, modified for MDSDF by Mike J. Chen }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
-	explanation {
+	htmldoc {
 For inputs that are greater than zero, the output is either
-$N log sub 10 (input)$ or \fImin\fR, whichever is larger, where
-$N ~=~ 10$ if \fIinputIsPower\fR is TRUE, and $N ~=~ 20$ otherwise.
-.Id "decibel"
-The default is $N ~=~ 20$.
-For inputs that are zero or negative, the output is \fImin\fR.
+
+<i>N</i>log<sub>10</sub> (<i>input</i>) or <i>min</i>, whichever is
+larger, where
+
+<i>N</i>=10 if <i>inputIsPower</i> is TRUE, and <i>N</i>=20 otherwise.
+<a name="decibel"></a>
+The default is <i>N</i>=20.
+For inputs that are zero or negative, the output is <i>min</i>.
 	}
 	input {
 		name{input}

@@ -3,10 +3,10 @@ defstar
     name { Expr }
     domain { C50 } 
     desc { General expression evaluation. }
-    version { $Id$ }
+    version { @(#)C50Expr.pl	1.1  7/22/96 }
     author {  Luis Gutierrez }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

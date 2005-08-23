@@ -6,13 +6,13 @@ Compares two inputs and generates an 1-bit output.  hi = equal, lo = unequal.
         }
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 This star simply compares the two floating point numbers at the input.  If the
 two numbers are equal then a logical high (1) is passed to the output.  Other-
 wise a logical low (0) is passed to the output.  The output is changed when-

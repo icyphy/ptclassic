@@ -1,7 +1,7 @@
 # Ptolemy Makefile for tkman
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.13 04/15/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,26 +25,33 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-TKMAN_VERSION = 1.7.3
+TKMAN_VERSION = 1.8b5
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/tkman-$(TKMAN_VERSION)
-BINDIR = $(ROOT)/bin.$(ARCH)
+BINDIR = $(ROOT)/bin.$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SRCS =
 
-KRUFT =
+KRUFT = 
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+MISC_FILES = 	Copyright MANIFEST Makefile.dist README-tkman contrib \
+		searchbox.tcl taputils.tcl tkman-help.html tkman-help.tcl \
+		tkman.1 tkman.tcl \
+		ANNOUNCE-tkman CHANGES backslash face.xbm
+
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 
+# We don't include common.mk since we don't use the compiler here
 # include common definitions, rules
 #include $(ROOT)/mk/common.mk
-WISH=$(PTOLEMY)/bin.$(PTARCH)/wish4.0
+
+WISH=$(PTOLEMY)/bin.$(PTARCH)/iwish
 
 all:	makefile  tkman
 tkman:
@@ -55,13 +62,19 @@ tkman:
 		MANDIR=$(ROOT)/man/man1 \
 		all
 
-install:	#tkman $(BINDIR)/tkman $(ROOT)/man/man1/tkman.1
+install:	$(ROOT)/man/man1 #tkman $(BINDIR)/tkman
+	rm -f $(ROOT)/man/man1/tkman.1 $(BINDIR)/tkman
 	$(MAKE) -f $(VPATH)/Makefile.dist \
 		VPATH=$(VPATH) \
 		WISH=$(WISH) \
 		BINDIR=$(BINDIR) \
 		MANDIR=$(ROOT)/man/man1 \
 		install
+
+# Can't use mkdir -p here, because not all machines have it
+$(ROOT)/man/man1:
+	if [ ! -d $(ROOT)/man ]; then mkdir $(ROOT)/man; fi
+	if [ ! -d $(ROOT)/man/man1 ]; then mkdir $(ROOT)/man/man1; fi
 
 $(BINDIR)/tkman:	tkman
 	@echo Installing $<
@@ -72,6 +85,16 @@ $(ROOT)/man/man1/tkman.1: tkman.1
 	@echo Installing $<
 	rm -f $@
 	ln $< $@
+sources:	$(EXTRA_SRCS) $(SRCS) makefile
+
+depend:
+	@echo "no dependencies in tkman directory (contributed code)"
+
+sccsinfo:
+	sccs info
+checkjunk:
+	@checkextra -v $(SRCS) $(OBJS) $(MISC_FILES) makefile SCCS
+
 clean:
 	rm -f tkman *~
 # Don't add anything after the next line; makedepend will zap it.

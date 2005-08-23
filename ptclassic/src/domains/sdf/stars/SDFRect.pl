@@ -1,21 +1,20 @@
-ident {
-// $Id$
-// This star produces an impulse or impulse train.
-// From the gabriel "impulse" star.
-// Programmer: J. Buck
-// Date of creation: 5/31/90
-// Converted to use preprocessor: 10/3/90
-
-// Copyright (c) 1990 The Regents of the University of California.
-//			All Rights Reserved.
-}
 defstar {
-	name { FloatRect }
+	name { Rect }
 	domain { SDF }
 	desc {
-	   "Generates an rectangular pulse of height 'height' (default 1.0).\n"
-	   "with width 'width' (default 8)."
+Generate a rectangular pulse of height "height" (default 1.0).
+and width "width" (default 8).  If "period" is greater than zero,
+then the pulse is repeated with the given period.
 	}
+	version {@(#)SDFRect.pl	2.10 06/25/96}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
 	output {
 		name { output }
 		type { float }
@@ -24,25 +23,35 @@ defstar {
 		name { height }
 		type { float }
 		default { 1.0 }
-		desc { "height of rectangular pulse" }
+		desc { Height of the rectangular pulse. }
 	}
 	defstate {
 		name { width }
 		type { int }
 		default { 8 }
-		desc { "width of rectangular pulse" }
+		desc { Width of the rectangular pulse. }
+	}
+	defstate {
+		name { period }
+		type { int }
+		default { 0 }
+		desc { If greater than zero, the period of the pulse stream. }
 	}
 	defstate {
 		name { count }
 		type { int }
 		default { 0 }
-		desc { "internal counting state" }
+		desc { Internal counting state. }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
+	setup {
+		count = 0;
 	}
 	go {
 		double t = 0.0;
 		if (int(count) < int(width)) t = height;
-		count = int(count) + 1;
 		output%0 << t;
+		count = int(count) + 1;
+		if (int(period) > 0 && int(count) >= int(period)) count = 0;
 	}
 }
-

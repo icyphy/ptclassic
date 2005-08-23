@@ -1,20 +1,20 @@
 static const char file_id[] = "SRParter.cc";
 
-/* Version $Id$
+/* Version @(#)SRParter.cc	1.4 04/07/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -23,6 +23,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
     Author:     S. A. Edwards
     Created:    28 October 1996
@@ -43,7 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 //SRPartType SRParter::parter = SRPartInOutT;
 //SRPartType SRParter::parter = SRPartOneT;
-SRPartType SRParter::parter = SRPartExactT;
+//SRPartType SRParter::parter = SRPartExactT;
+SRPartType SRParter::parter = SRPartSweepT;
+
+int SRPart::ignoreSimpleFlag = 0;
 
 // Empty virtual destructor
 SRPart::~SRPart() {}
@@ -62,6 +68,9 @@ SRParter::SRParter( Set & s, SRDependencyGraph & g )
   case SRPartExactT:
     mypart = new SRPartExact( s, g );
     break;
+  case SRPartSweepT:
+    mypart = new SRPartSweep( s, g );
+    break;
   default:
     mypart = new SRPartOne( s, g );
     break;
@@ -69,6 +78,22 @@ SRParter::SRParter( Set & s, SRDependencyGraph & g )
 
   mypart->init();
 
+}
+
+// Select the partitioning scheme by name
+void SRParter::setParter( const char * p )
+{
+  if ( strcmp( p, "sweep" ) == 0 ) {
+    parter = SRPartSweepT;
+  } else if ( strcmp( p, "one" ) == 0 ) {
+    parter = SRPartOneT;
+  } else if ( strcmp( p, "exact" ) == 0 ) {
+    parter = SRPartExactT;
+  } else if ( strcmp( p, "inout" ) == 0 ) {
+    parter = SRPartInOutT;
+  } else {
+    parter = SRPartSweepT;
+  }
 }
 
 void SRPartOne::init()
@@ -244,7 +269,7 @@ SRPartExact::next( int bound )
     (*s) |= vertex[vindex[i]];
   }
 
-  // cout << "Generated Partition " << s->print() << "\n";
+  // cout << "Part: " << s->print() << "\n";
 
   int current = partsize - 1;
 
@@ -256,7 +281,9 @@ SRPartExact::next( int bound )
     for ( i = current+1 ; i < partsize ; i++) {
       vindex[i] = vindex[i-1]+1;
     }
-    current--;
+    if ( vindex[partsize-1] >= maxpart ) {
+      current--;
+    }
 
   } while ( vindex[partsize-1] >= maxpart && current >= 0 );
 
@@ -286,3 +313,121 @@ SRPartExact::next( int bound )
   return s;
 
 }
+
+void SRPartSweep::init()
+{
+  sgIter = new SetIter( *partSet );
+  kernel = new Set( partSet->size() );
+
+  // Start growing the kernel from the first vertex in the partSet
+
+  (*kernel) |= (*sgIter)++;
+
+  done = 0;
+}
+
+SRPartSweep::~SRPartSweep()
+{
+  delete sgIter;
+  delete kernel;
+
+}
+
+Set * SRPartSweep::next( int bound )
+{
+  if ( !done ) {
+
+    Set * theBorder = NULL;
+
+    int borderSize;
+
+    do {
+
+      // cout << "With kernel " << kernel->print() << ",\n";
+      delete theBorder;
+      theBorder = border();
+      borderSize = theBorder->cardinality();
+
+      // cout << " the border is " << theBorder->print() << "\n";
+
+      int bestVertex = -1;
+      int bestCost = INT_MAX;
+
+      // Compute the cost of adding each border vertex.
+      // This is the number of distinct vertices leading out of the
+      // vertex that are in the subgraph but not in the kernel.
+
+      int borderv;
+      SetIter nextBorder( *theBorder );
+      while ( (borderv = nextBorder++) >= 0 ) {
+	Set outgoingVertices( partSet->size() );
+	for ( int e = dgraph->forwardEdges(borderv) ; --e >= 0 ; ) {	 
+	  outgoingVertices |= dgraph->destination(borderv,e);
+	}
+	outgoingVertices &= *partSet;
+	outgoingVertices &= *theBorder;
+
+	int c = outgoingVertices.cardinality();
+	if ( c < bestCost ) {
+	  bestCost = c;
+	  bestVertex = borderv;
+	}
+      }
+
+      if ( bestVertex == -1 ) {
+
+	// Clear the kernel set and add the next vertex, if there is one
+
+	(*kernel) -= *kernel;
+
+	int v;
+        v = (*sgIter)++;
+	// cout << "Starting new kernel with " << v << "\n";
+	if ( v >= 0 ) {
+	  (*kernel) |= v;
+	} else {
+	  done = 1;
+	}
+
+      } else {
+
+	(*kernel) |= bestVertex;
+
+      }
+      
+    } while ( !done && borderSize > bound );
+    
+    if ( borderSize > 0 && borderSize <= bound ) {
+      return theBorder;
+    } else {
+      delete theBorder;
+    }
+
+  }
+
+  return NULL;
+
+}
+
+// Return the border of the kernel
+//
+// @Description This is the set of vertices with incoming edges from the
+// kernel that are in the subgraph but not in the kernel.
+Set * SRPartSweep::border()
+{
+  Set * border = new Set( partSet->size() );
+
+  SetIter next(*kernel);
+  int kv;
+  while ( (kv = next++) >= 0 ) {
+    for (int e = dgraph->forwardEdges(kv) ; --e >= 0 ; ) {
+      *border |= dgraph->destination(kv,e);
+    }
+  }
+  *border &= *partSet;
+  *border -= *kernel;
+
+  return border;
+}
+
+

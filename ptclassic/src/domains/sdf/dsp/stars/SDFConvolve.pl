@@ -5,18 +5,23 @@ defstar {
 Convolve two causal finite sequences.
 Set truncationDepth larger than the number of output samples of interest.
 	}
-	version {$Id$}
+	version {@(#)SDFConvolve.pl	1.9	10/01/96}
 	author { E. A. Lee and K. White}
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 This star convolves two causal finite input sequences.
 In the current implementation, you should set the truncation
 depth larger than the number of output samples of interest.
 If it is smaller, you will get unexpected results after truncationDepth
 samples.
 	}
-	seealso { FIR, ComplexFIR, blockFIR, firDemo }
+	seealso { FIR, FIRCx, blockFIR, firDemo }
 	input {
 		name {inA}
 		type {float}
@@ -42,7 +47,7 @@ samples.
 		desc {Count current iteration. }
 		attributes { A_NONCONSTANT | A_NONSETTABLE }
 	}
-	start {
+	setup {
 		inA.setSDFParams(1, int(truncationDepth));
 		inB.setSDFParams(1, int(truncationDepth));
 	}
@@ -52,7 +57,7 @@ samples.
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
 		if (index < 0) index += int(truncationDepth);
-		sum += float(inA%(index))*float(inB%(k));
+		sum += double(inA%(index))*double(inB%(k));
 	    }
 	    out%(0) << sum;
 	    if (c >= int(truncationDepth) - 1) iterationCount = 0;

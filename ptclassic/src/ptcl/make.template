@@ -1,10 +1,32 @@
 # Makefile for Ptolemy/Tcl interpreter
 # Version identification:
-# $Id$
-# Copyright (c) 1992 The Regents of the University of California.
-#                       All Rights Reserved.
+# @(#)make.template	1.66 02/20/99
+# Copyright (c) 1990-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # Date of creation: 3/4/92
-# Written by: J. Buck
+# Authors: J. Buck, Christopher Hylands, Jose Luis Pino
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -13,136 +35,87 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT=../..
+ROOT =		../..
 # Path (absolute or relative) to the object directory root
-OBJDIR=..
+OBJDIR =	..
 # True source directory
-VPATH = $(ROOT)/src/ptcl
+VPATH =		$(ROOT)/src/ptcl
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# The following variables will eventually be in the config file
-# Directory containing Tcl/Tk include files
-TCL_H_DIR=/usr/tools/tcl/tcl/lib
+# if you want to create a custom pigiRpc, define a override.mk
+# file that defines the necessary variables to pull in the domains
+# you want.  See $(ROOT)/mk/ptbin.mk.  This files must at least 
+# define the variable PTCL which defines the name of the ptcl executable.
 
-# Directory containing Tcl/Tk libraries
-TCL_LIBDIR=/usr/tools/tcl/tcl/lib
+-include override.mk
 
-INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
-# Rule for compiling C++ programs
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c $<
+ifndef BASENAME
+ifndef PIGI
+	ALLBINARIES = 1
+	BASENAME = ptcl
+	PIGI = ptcl
+endif
+endif
 
-SDF=$(OBJDIR)/domains/sdf/stars
-DDF=$(OBJDIR)/domains/ddf/stars
-DE =$(OBJDIR)/domains/de/stars
-Thor=$(OBJDIR)/domains/thor/stars
-CG=$(OBJDIR)/domains/cg/stars
-CGDDF=$(OBJDIR)/domains/cg-ddf/stars
+# $PTOLEMY/mk/ptbin.mk checks $(PTCL)
+PTCL = 1
 
-# object files for targets of dynamic constructs
-CGCON=$(OBJDIR)/domains/cg-ddf/constructs
+INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
+		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
+		$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC)
 
-SDFSRC=$(ROOT)/src/domains/sdf/stars
-DDFSRC=$(ROOT)/src/domains/ddf/stars
-DESRC =$(ROOT)/src/domains/de/stars
-ThorSRC=$(ROOT)/src/domains/thor/stars
-CGSRC=$(ROOT)/src/domains/cg/stars
-CGDDFSRC=$(ROOT)/src/domains/cg-ddf/stars
+C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 
-# source files for targets of dynamic constructs
-CGCONTARGET=$(ROOT)/src/domains/cg-ddf/constructs
-
-# libraries
-LIBS=-lcgcon -lcgddf -lddf -ldycon -lPG -lQS -lDL -lLS -lEG -lcg -lsdf \
-	-lde -lthor -lptolemy -lImage -ltcl $(SYSLIBS)
-
-LIBFILES=\
- $(LIBDIR)/libcgddf.a $(LIBDIR)/libcgcon.a \
- $(LIBDIR)/libDL.a $(LIBDIR)/libQS.a \
- $(LIBDIR)/libcg.a $(LIBDIR)/libPG.a \
- $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
- $(LIBDIR)/libImage.a \
- $(LIBDIR)/libdycon.a $(LIBDIR)/libddf.a \
- $(LIBDIR)/libde.a \
- $(LIBDIR)/libthor.a \
- $(LIBDIR)/libptolemy.a
-
-# kernel objects
-MAIN=$(LIBDIR)/interpmain.o
-KERNOBJS=$(MAIN) $(LIBFILES)
-
-# include files for star names.  These define the symbols SDFSTARS, DESTARS,
-# DDFSTARS, ThorSTARS, and CGSTARS.
-
-include $(SDFSRC)/sdfstars.mk
-include $(DESRC)/destars.mk
-include $(DDFSRC)/ddfstars.mk
-include $(ThorSRC)/thorstars.mk
-include $(CGSRC)/cgstars.mk
-include $(CGDDFSRC)/cgddfstars.mk
-
-include $(CGCONTARGET)/cgcontargets.mk
-
-# Extra targets
-CGT = $(OBJDIR)/domains/cg/targets
-SDFT = $(OBJDIR)/domains/sdf/targets
-
-TARGETS = $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
-	$(CGT)/CGMultiTarget.o $(CGT)/SharedBus.o $(SDFT)/CompileTarget.o \
-	$(CGCONTARGETS) $(CGT)/CGQuasiTarget.o $(CGT)/QS_SharedBus.o
-
-# Sources
-SRCS= PTcl.cc ptclMain.cc
+# Sources: LIB_SRCS contains the files that make up libptcl.so.
+# NON_LIB_SRCS contains the files that do not go into libptcl.so.
+LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PTcl.cc ptclInit.cc \
+		ptclError.cc ptclGantt.cc \
+		ptclDescription.cc
+LIB_CSRCS = 	displayFile.c
+NON_LIB_SRCS =	ptclAppInit.cc
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) ptclInvokeInterp.cc
 
 # Header files
-HDRS= PTcl.h
+HDRS =		displayFile.h \
+		MatlabTcl.h MathematicaTcl.h PTcl.h ganttChart.h \
+		ptclDescription.h
 
-# Objects
-OBJS= $(SRCS:.cc=.o)
+# Objects that make up the library
+OBJS =		$(LIB_SRCS:.cc=.o) $(LIB_CSRCS:.c=.o)
 
-all:	makefile ptcl
+# Used to create .dlls under nt4.vc
+DLLDEPS = ..\utils\libexttools\libexttools.lib \
+	..\kernel\libptolemy.lib \
+	$(TCL_LIBDEP)
 
-# note that the LAST star linked in determines the default domain
-ALLSTARS=$(CGDDFSTARS) $(CGSTARS) $(ThorSTARS) $(DESTARS) $(DDFSTARS) $(SDFSTARS)
+# HPUX has a hard time handling symbols that are defined both in a static
+# library and in a shared library, so, since we have different Error::
+# functions for pigiRpc, ptcl and tycho, we need to be sure that
+# libpigi, libptcl and libtycho are all static on the hppa.
+ifdef USE_CORE_STATIC_LIBS
+LIBNONSHARED =	libptcl.a
+INSTALL =	$(LIBDIR)/$(LIBNONSHARED)
+else
+PTLIB =		libptcl.$(LIBSUFFIX)
+INSTALL =	$(LIBDIR)/$(PTLIB)
+endif
 
-ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
-		$(LINKER) $(LINKFLAGS) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(TARGETS) $(LIBS) -o ptcl
+PT_DEPEND += $(NON_LIB_SRCS:.cc=.o) ptclInvokeInterp.o
 
-ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
-		$(LINKER) $(LINKFLAGS_D) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(TARGETS) $(LIBS) -o ptcl.debug
+PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
 
+# ptbin.mk has the default rule that creates a binary and the all: rule
+include $(ROOT)/mk/ptbin.mk
 
-# "make install" puts things in the official place
-install:	$(BINDIR)/ptcl
+all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
-$(BINDIR)/ptcl:	ptcl
-		cp ptcl $(BINDIR)
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
 
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *# ptcl
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
-
-depend:
-		cd $(VPATH); \
-		g++ -MM $(INCL) $(SRCS)|cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-

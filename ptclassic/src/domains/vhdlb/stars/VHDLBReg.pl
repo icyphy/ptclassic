@@ -4,13 +4,13 @@ defstar {
 	desc { A simple multiple-bit rising-edge triggered register. }
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 This star latches and stores a bus value at every rising edge of
 the synchronization clock.  If the input and output bus widths don't match,
 an error message is printed.

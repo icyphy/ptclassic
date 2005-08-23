@@ -6,10 +6,32 @@
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DCParProcs.h	1.9	7/19/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's code.
 
@@ -17,12 +39,10 @@ These schedule classes are used by the parallel scheduler
 
 *****************************************************************/
 
-#include "DCUniProc.h"
 #include "DCNode.h"
 #include "ParProcessors.h"
 
 class DCGraph;
-class BaseMultiTarget;
 
 			//////////////////////////
 			///  class DCParProcs  ///
@@ -30,36 +50,10 @@ class BaseMultiTarget;
 // Schedule for multiple processors.
 class DCParProcs : public ParProcessors {
 
-private:
-	// A list of communication DCNodes
-	DCNodeList SCommNodes;
-
-	// The number of interprocessor communications in the schedule
-	int commCount;
-
-	// account for communication cost in list scheduling.
-	void findCommNodes(DCGraph*);
-
-	// schedules
-	DCUniProc* schedules;
-
 public:
 	// Constructor takes number of processors as an argument
-	DCParProcs(int procs, BaseMultiTarget* mtarget);
-
-	// Destructor
-	~DCParProcs();
-
-	// Returns a pointer to the proper UniProc
-	DCUniProc *getSchedule(int num) { return &(schedules[pId[num]]); }
-	UniProcessor* getProc(int num);
-
-	// Clear the schedule
-	void initialize();
-
-	// list scheduling, after identifying the IPC requirements.
-	// return the makespan.
-	int listSchedule(DCGraph* graph);
+	DCParProcs(int n, MultiTarget* t) : ParProcessors(n,t) {}
+	~DCParProcs() {}
 
 	// return the amount of the IPC.
 	int commAmount() { return commCount; }
@@ -71,6 +65,10 @@ public:
 	// save best schedule results for nodes
 	void saveBestResult(DCGraph*);
 
+	// After the best schedule is obtained, we make a final version
+	// of expanded graph including comm. nodes
+	void finalizeGalaxy(DCGraph*);
+
 	// Categorizes each processor as being heavily or lightly loaded.
 	// It sets an integer array: 1 for heavy and -1 for light processors.
 	// Initial threshold is 50% of the maxload.
@@ -79,6 +77,9 @@ public:
 	// We regard at most one idle processor as lightly loaded. Leave other
 	// idle processors untouched.
 	void categorizeLoads(int* procs);
+
+protected:
+	ParNode* createCommNode(int i);
 };
 
 #endif

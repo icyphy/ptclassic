@@ -1,16 +1,16 @@
 defstar {
 	name { FixToFloat }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFFixToFloat.pl	1.6 2/12/96 }
 	author { Mike J. Chen }
 	copyright {
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF conversion palette }
-	desc { Converts a fix type input to a float type output. }
+	location { SDF main library }
+	desc { Convert a fixed-point input to a floating-point output. }
 	input {
 		name { input }
 		type { fix }
@@ -22,6 +22,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output float type }
 	}
 	go {
-	    output%0 << (double)(input%0);
+	    output%0 << double(input%0);
 	}
 }

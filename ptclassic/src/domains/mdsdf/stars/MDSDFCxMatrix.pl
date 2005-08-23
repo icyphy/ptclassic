@@ -2,9 +2,14 @@ defstar {
   name      { CxMatrix }
   domain    { MDSDF }
   desc      { Produces ComplexMatrix data from state information. }
-  version   { $Id$ }
+  version   { @(#)MDSDFCxMatrix.pl	1.4 12/1/95 }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { MDSDF library }
   output {
 	name { output }
@@ -25,7 +30,7 @@ defstar {
   defstate {
 	name { ComplexMatrixContents }
 	type { complexarray }
-	default { "(1.0,-2.0) (-2.0, 0.5) (2.0, 0.0) (-2.0,-0.1)" }
+	default { "(1.0,-2.0) (-2.0,0.5) (2.0,0.0) (-2.0,-0.1)" }
 	desc { The complex contents of the matrix. }
   }
   ccinclude { "SubMatrix.h" } 

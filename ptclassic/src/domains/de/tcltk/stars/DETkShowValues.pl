@@ -8,16 +8,16 @@ The print method of the input particles is used,
 so any data type can be handled, although the space
 allocated on the screen may need to be adjusted.
     }
-    version { $Id$ }
+    version { @(#)DETkShowValues.pl	1.6	01 Oct 1996 }
     author { Brian Evans and Edward Lee }
     copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { DE tcltk library }
-    explanation {
+    location { DE Tcl/Tk library }
+	htmldoc {
 This star uses the "print()" method of the input particles to create
 the display.
 The width of the display window is appropriate for integer, float, and
@@ -48,9 +48,11 @@ Particles that require more space to display may create problems.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowValues.tcl";
 
-        DETclScript::setup();
+        DETclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

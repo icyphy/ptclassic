@@ -3,10 +3,33 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGMacroCluster.h	1.3	1/25/96
 
 Copyright (c) 1995 Seoul National University
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  S. Ha
 
@@ -31,7 +54,7 @@ boundaries.
 
 The virtual baseclass CGMacroCluster refers to either type of cluster.
 
-The remaining class defined here is CGClustPort, a porthole for use
+The remaining class defined here is CGMacroClustPort, a porthole for use
 in CGMacroCluster objects.
 
 **************************************************************************/
@@ -419,19 +442,19 @@ private:
 	int idFlag;
 };
 
-class CGClustPort : public CGPortHole {
+class CGMacroClustPort : public CGPortHole {
 	friend class CGMacroCluster;
 public:
-	CGClustPort(DFPortHole& p,CGMacroCluster* parent = 0,int bagp = 0);
-	~CGClustPort() {}
+	CGMacroClustPort(DFPortHole& p,CGMacroCluster* parent = 0,int bagp = 0);
+	~CGMacroClustPort() {}
 	DFPortHole& real() { return pPort;}
 	int isItInput() const { return pPort.isItInput();}
 	int isItOutput() const { return pPort.isItOutput();}
 	void initGeo();
 	CGMacroCluster* parentClust() { return (CGMacroCluster*)parent();}
-	CGClustPort* far() { return (CGClustPort*)PortHole::far();}
+	CGMacroClustPort* far() { return (CGMacroClustPort*)PortHole::far();}
 	int numIO() const { return numberTokens;}
-	CGClustPort* outPtr() {
+	CGMacroClustPort* outPtr() {
 		return far() ? 0 : pOutPtr;
 	}
 	int feedForward() const { return feedForwardFlag;}
@@ -443,12 +466,12 @@ public:
 
 	// return the real far port alised to bagPorts.
 	// If the bagPort is a port of the outsideCluster, return zero.
-	CGClustPort* realFarPort(CGMacroCluster* outsideCluster);
+	CGMacroClustPort* realFarPort(CGMacroCluster* outsideCluster);
 
-	void makeExternLink(CGClustPort* val);
+	void makeExternLink(CGMacroClustPort* val);
 
-	CGClustPort* inPtr() {
-		return bagPortFlag ? (CGClustPort*)&pPort : 0;
+	CGMacroClustPort* inPtr() {
+		return bagPortFlag ? (CGMacroClustPort*)&pPort : 0;
 	}
 	// set arc count ... go inside until one with a geo is found
 	void setMaxArcCount(int n);
@@ -461,16 +484,16 @@ public:
 	void setNumXfer(int v) { numberTokens = v;}
 private:
 	DFPortHole& pPort;
-	CGClustPort* pOutPtr;
+	CGMacroClustPort* pOutPtr;
 	unsigned char bagPortFlag;
 	unsigned char feedForwardFlag;
 };
 
-class CGClustPortIter : public BlockPortIter {
+class CGMacroClustPortIter : public BlockPortIter {
 public:
-	CGClustPortIter(CGMacroCluster& s) : BlockPortIter(s) {}
-	CGClustPort* next() { return (CGClustPort*)BlockPortIter::next();}
-	CGClustPort* operator++(POSTFIX_OP) { return next();}
+	CGMacroClustPortIter(CGMacroCluster& s) : BlockPortIter(s) {}
+	CGMacroClustPort* next() { return (CGMacroClustPort*)BlockPortIter::next();}
+	CGMacroClustPort* operator++(POSTFIX_OP) { return next();}
 };
 
 class CGMacroClusterGalIter : public GalTopBlockIter {

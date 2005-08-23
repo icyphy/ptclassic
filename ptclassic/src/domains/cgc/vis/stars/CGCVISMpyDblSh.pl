@@ -1,22 +1,25 @@
 defstar {
-	name { QuadMult16x16 }
-	domain { SDF }
-	version { @(#)SDFQuadMult16x16.pl	1.2 3/14/96 }
+	name { VISMpyDblSh }
+	domain { CGC }
+	version { @(#)CGCVISMpyDblSh.pl	1.10	04/07/97 }
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  Multiplies the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  Each multiplication
-	  results in a 32 bit result, which is then rounded to 16bits.
-	    }
+Multiply the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are multiplied to
+those of another 64-bit float particle.  Each multiplication produces 
+a 32-bit result.  Each 32-bit result is then left-shifted to fit
+within a certain dynamic range and truncated to 16 bits.  The final 
+result is four 16-bit fixed point numbers that are returned 
+as a single float particle.
+	}
 	input {
 	  name { inA }
 	  type { float }
@@ -32,25 +35,36 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
-	go {
+	defstate {
+	  name {leftshift}
+	  type {int}
+	  default {"1"}
+	  desc { Left shift each product so that it falls within the
+		 dynamic of the output. }
+	}
+	constructor {
+	  noInternalState();
+	}
+	initCode{
+	  addInclude("<vis_proto.h>");
+	  addInclude("<vis_types.h>");
+	}
+	codeblock(localDecl){
+	  vis_d64  resulthihi,resulthilo,resulthi;
+	  vis_d64  resultlohi,resultlolo,resultlo,result;
+	  vis_f32  dataAlo,dataAhi,dataBlo,dataBhi,resultu,resultl;
+	}
+	codeblock(multfour){
+	  vis_write_gsr($val(leftshift)<<3);
 	  
-	  double resulthihi, resulthilo, resulthi;
-	  double resultlohi, resultlolo, resultlo;
-	  double result;
-	  float  dataAlo, dataAhi, dataBlo, dataBhi;
-	  float  resultu, resultl;
+	  /* setup the data */
+	  dataAhi=vis_read_hi((double) $ref(inA));
+	  dataAlo=vis_read_lo((double) $ref(inA));
+	  dataBhi=vis_read_hi((double) $ref(inB));
+	  dataBlo=vis_read_lo((double) $ref(inB));
 	  
-	  vis_write_gsr(8);
-	  
-	  // setup the data
-	       dataAhi=vis_read_hi(double(inA%0));
-	  dataAlo=vis_read_lo(double(inA%0));
-	  dataBhi=vis_read_hi(double(inB%0));
-	  dataBlo=vis_read_lo(double(inB%0));
-	  
-	  //calculate the partial products
-	      resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
+	  /* calculate the partial products */
+	  resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
 	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
 	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
 	  
@@ -58,11 +72,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
 	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
 	  
-	  //pack and concat the final product*/
-	      resultu = vis_fpackfix(resulthi);
+	  /*pack and concat the final product*/
+	  resultu = vis_fpackfix(resulthi);
 	  resultl = vis_fpackfix(resultlo);
 	  result = vis_freg_pair(resultu,resultl);
 	  
-          out%0 << result;
+          $ref(out) = result;
+	}
+	go {	  
+	  addCode(localDecl);
+	  addCode(multfour);
       	}
 }

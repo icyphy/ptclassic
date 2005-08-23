@@ -1,19 +1,19 @@
 /******************************************************************
-  Version $Id$
+  Version @(#)MDSDFStar.h	1.3 3/7/96
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -22,6 +22,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
     Programmer:		Mike J. Chen
     Date of creation:   13 August 1993
@@ -64,13 +67,14 @@ class MDSDFStar : public SDFStar {
     // Domain-specific function to test if a star is runnable
     /* virtual */ int notRunnable();
 
-    // Domain-specific function to fire a star
-//    /* virtual */ int run();
-//  DataFlowStar::run;
-
     // inherited from DataFlowStar
     // Fraction repetitions;
     // unsigned noTimes;  // number of times star has fired
+
+    // Resolve ANYSIZE rows and columns for inputs and outputs, 
+    // called during scheduling
+    int resolveANYSIZErows();
+    int resolveANYSIZEcols();
 
     // During scheduling, the scheduler must keep track of how many times
     // it has scheduled a star in each dimension.  This is a convenient
@@ -80,9 +84,6 @@ class MDSDFStar : public SDFStar {
 
     Fraction rowRepetitions;  // the number of row and column firings for
     Fraction colRepetitions;  // this star per iteration
-
-//    Fraction initRowRepetitions;  // the number of row and column firings for
-//    Fraction initColRepetitions;  // for this star on its initial iteration
 
     int startRowIndex;  // the current row and column firing index for this
     int startColIndex;  // star

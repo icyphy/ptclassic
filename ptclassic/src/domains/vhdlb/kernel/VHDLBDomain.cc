@@ -1,10 +1,32 @@
 static const char file_id[] = "VHDLBDomain.cc";
 /**********************************************************************
 Version identification:
-$Id$
+@(#)VHDLBDomain.cc	1.6 3/2/95
 
- Copyright (c) 1992 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  J. T. Buck
  Date of creation: 1/2/92
@@ -34,9 +56,10 @@ public:
 	// new wormhole
 	Star& newWorm(Galaxy& ,Target* )  {
 		// return *new VHDLBWormhole(innerGal,innerTarget);
-		Error::abortRun("No VHDLB wormhole implemented yet");
+	        // Error::abortRun("No VHDLB wormhole implemented yet");
 		// Following is a hack
-		LOG_NEW; return *(new SDFStar);
+		LOG_NEW;
+		return *new VHDLBStar;
 	}
 */
 	// new input porthole
@@ -57,8 +80,11 @@ public:
 		return *new VHDLBToUniversal;
 	}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new VHDLBForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new VHDLBForkNode;}
+		else { LOG_NEW; return *new VHDLBGeodesic;}
+	}
 
 	// constructor
 	VHDLBDomain() : Domain("VHDLB") {}
@@ -70,7 +96,7 @@ static VHDLBDomain proto;
 // declare the default Target object
 
 static VHDLBTarget defaultVHDLBtarget("default-VHDLB","VHDLBStar",
-"Generate stand-alone VHDLB programs and compile them.  The program\n"
-"and associated makefile is written to a directory given as a Target param.\n");
+"Generate stand-alone VHDLB programs.  The program\n"
+"is written to a directory given as a Target param.\n");
 
 static KnownTarget entry(defaultVHDLBtarget,"default-VHDLB");

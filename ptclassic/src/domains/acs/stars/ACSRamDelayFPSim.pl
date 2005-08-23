@@ -4,10 +4,10 @@ defcore {
     coreCategory { FPSim }
     corona { RamDelay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version { @(#)ACSDelayFPSim.pl	1.1 07/16/99 }
+    version{ @(#)ACSRamDelayFPSim.pl	1.5 08/02/01 }
     author { Eric Pauer }
     copyright {
-Copyright (c) 1999, Sanders, a Lockheed Martin Company
+Copyright (c) 1999- Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

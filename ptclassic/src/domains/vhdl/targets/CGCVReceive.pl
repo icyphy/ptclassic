@@ -1,120 +1,71 @@
 defstar {
-    name { VReceive }
-    domain { CGC }
-    desc { Receive data synchronously from VHDL to CGC }
-//    derivedFrom { VSynchComm }
-    version { $Id$ }
-    author { Michael C. Williamson, Jose Luis Pino }
-    copyright { 
-Copyright (c) 1994,1993 The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+  name { VReceive }
+  domain { CGC }
+  desc { Receive data synchronously from VHDL to CGC }
+  derivedFrom { VSynchComm }
+  version { @(#)CGCVReceive.pl	1.10 10/01/96 }
+  author { Michael C. Williamson, Jose Luis Pino }
+  copyright { 
+    Copyright (c) 1993-1997 The Regents of the University of California.
+      All rights reserved.
+      See the file $PTOLEMY/copyright for copyright notice,
+      limitation of liability, and disclaimer of warranty provisions.
     }
 
-    location { VHDL Target Directory }
-    explanation { }
-  public {
-    int numXfer;
+  location { VHDL Target Directory }
+  explanation { }
+  output {
+    name {output}
+    type {ANYTYPE}
   }
-  protected {
-  }
-    output {
-	name {output}
-	type {ANYTYPE}
-      }
-  defstate {
-    name {pairNumber}
-    type {int}
-    default {21}
-  }
-setup {
-  numXfer = output.numXfer();
-//  CGCVSynchComm::setup();
-}
+  setup {
+    classname = "CGCVReceive";
+    sndrcv = "rcv";
 
-initCode {
-        CodeStream *compileOptions, *linkOptions;
-        if ((compileOptions = getStream("compileOptions")) == FALSE)
-            return;
-        if ((linkOptions = getStream("linkOptions")) == FALSE)
-            return;
-//        compileOptions->put("-I$S56DSP/include ","S56X Include");
-        linkOptions->put("-lsocket -lnsl","socket Link");
-  addInclude("<stdio.h>");
-  addInclude("<string.h>");
-  addInclude("<unistd.h>");
-  addInclude("<sys/types.h>");
-  addInclude("<sys/socket.h>");
-  addInclude("<sys/un.h>");
-  addGlobal("#define BUFFSIZE 32", "buffer");
-  addDeclaration("
-  /* Decls */
-  int $starSymbol(count) = 0;
-  int $starSymbol(intptr) = 0;
-  int $starSymbol(nbytes) = 12;
-  int $starSymbol(recvsock), $starSymbol(xmitsock), $starSymbol(readstat);
-  char $starSymbol(buffer)[BUFFSIZE];
-  char *$starSymbol(dummy) = \"  csink Error\";
-  char *$starSymbol(recvstring) = \"/tmp/rcv$val(pairNumber)\\0\";
-  struct sockaddr $starSymbol(recvaddr), $starSymbol(xmitaddr);
-  int $starSymbol(recvnamelen) = strlen($starSymbol(recvstring));
-  int $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
-  int $starSymbol(recvaddrlen) = sizeof($starSymbol(recvaddr));
-  int $starSymbol(i);
-");
-  addCode("
-  /* Init */
-  for ($starSymbol(i)=0 ; $starSymbol(i) < BUFFSIZE ; $starSymbol(i)++) {
-    $starSymbol(buffer)[$starSymbol(i)] = (char) 0;
-  }
-  $starSymbol(recvsock) = socket(AF_UNIX, SOCK_STREAM, 0);
-  if ($starSymbol(recvsock) == -1) {
-    perror($starSymbol(dummy));
-  }
-  $starSymbol(recvaddr).sa_family = AF_UNIX;
-  (void) strncpy($starSymbol(recvaddr).sa_data, $starSymbol(recvstring), $starSymbol(recvnamelen)+1);
-  (void) unlink($starSymbol(recvaddr).sa_data);
-  if(bind($starSymbol(recvsock), &$starSymbol(recvaddr), $starSymbol(recvaddrlen)) == -1) {
-    perror($starSymbol(dummy));
-  }
-  if(listen($starSymbol(recvsock), 5) == -1) {
-    perror($starSymbol(dummy));
-  }
-  $starSymbol(xmitsock) = accept($starSymbol(recvsock), &$starSymbol(xmitaddr), &$starSymbol(xmitaddrlen));
-  if($starSymbol(xmitsock) < 0) {
-    perror($starSymbol(dummy));
-  }
-");
-}
+    if (strcmp(output.resolvedType(), "INT") == 0) 
+      format = "%d";
+    else if (strcmp(output.resolvedType(), "FLOAT") == 0) 
+/*
+  Note: using %f in sscanf() seems to mess up.
+      format = "%f";
+*/
+      format = "%lf";
+    else
+      Error::abortRun(*this, output.resolvedType(), ": type not supported");
 
-go {
-  addCode("
-  /* Go */
-  $starSymbol(intptr) = 0;
-  $starSymbol(readstat) = 0;
-  if($starSymbol(readstat) >= 0) {
-    $starSymbol(readstat) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    while($starSymbol(readstat) == 0) {
-      $starSymbol(readstat) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    }
-    if($starSymbol(readstat) < 0) {
-      perror($starSymbol(dummy));
-    }
-    else {
-      (void) sscanf($starSymbol(buffer), \"%d\", &$ref(output));
-    }
+    numXfer = output.numXfer();
+    CGCVSynchComm::setup();
   }
-");
-}
 
-wrapup {
-  addCode("
-  /* Wrapup */
-  (void) shutdown($starSymbol(recvsock),2);
-  (void) close($starSymbol(recvsock));
-  (void) unlink($starSymbol(recvaddr).sa_data);
-");
-}
+  go {
+    StringList transfer;
+    for (int i = numXfer-1 ; i >= 0 ; i--) {
+      if (i > 0) transfer << "\n";
+      transfer << "\n";
+      transfer << "  /* Go */\n";
+      transfer << "  $starSymbol(intptr) = 0;\n";
+      transfer << "  $starSymbol(status) = 0;\n";
+      transfer << "  if($starSymbol(status) >= 0) {\n";
+      transfer << "    $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));\n";
+      transfer << "    while($starSymbol(status) == 0) {\n";
+      transfer << "      $starSymbol(status) = read($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));\n";
+      transfer << "    }\n";
+      transfer << "    if($starSymbol(status) < 0) {\n";
+      transfer << "      perror($starSymbol(dummy));\n";
+      transfer << "    }\n";
+      transfer << "    else {\n";
+      
+      StringList oneline = "      (void) sscanf($starSymbol(buffer), \"";
+      oneline << format;
+      oneline << "\", &$ref(output,";
+      oneline << i;
+      oneline << "));";
+      transfer << oneline;
+
+      transfer << "    }\n";
+      transfer << "  }\n";
+    }
+    addCode(transfer);
+  }
 
 }

@@ -1,9 +1,9 @@
 static const char file_id[] = "ParticleVector.cc";
 /**************************************************************************
 Version identification:
-@(#)ParticleVector.cc	1.3	03/19/97
+@(#)ParticleVector.cc	1.6 12/08/97
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -52,7 +52,7 @@ void ParticleVector::init(int l, Particle **srcData, const char** fields) {
 // constructor: makes an uninitialized array
 ParticleVector::ParticleVector(int l) : len(l) {
         data = new ParticlePointer[l];
-	fieldName = new (const char *)[l];
+	fieldName = new const char *[l];
 }
 
 // constructor: makes an initialized array from a ParticleVector array
@@ -104,8 +104,9 @@ ParticleVector::~ParticleVector() {
 }
 
 StringList ParticleVector::print() const {
+        int i;
 	StringList out = "{";
-	for (int i = 0; i < len-1; i++) {
+	for (i = 0; i < len-1; i++) {
 		out += data[i]->print();
 		out += ", ";
 	}

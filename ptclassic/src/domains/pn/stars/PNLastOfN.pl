@@ -8,11 +8,10 @@ Given a control input with integer value N,
 consume N particles from the data input and
 produce only the last of these at the output.
     }
-    version { $Id$ }
+    version { @(#)PNLastOfN.pl	1.3 3/2/95 }
     author { T. M. Parks }
-    copyright
-    {
-Copyright (c) 1990-1994 The Regents of the University of California.
+    copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

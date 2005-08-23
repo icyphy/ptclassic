@@ -23,7 +23,7 @@
 #                                               PT_COPYRIGHT_VERSION_2
 #                                               COPYRIGHTENDKEY
 # Makefile for Ptolemy SDF Wildforce kernel
-# @(#)make.template     1.1 06/10/99
+# @(#)make.template	1.5 10/06/99
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -49,9 +49,17 @@ INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 #Library name
 PTLIB = libsdfwildforce.$(LIBSUFFIX)
 
-HDRS= IntArray.h
+HDRS= WFIntArray.h
 
 SRCS= $(HDRS:.h=.cc)
+
+EXTRA_SRCS = \
+	wf4.h \
+	wf4api.h \
+	wf4errs.h \
+	wf4ulib.h \
+	wfoss.h \
+	wildforce.h
 
 OBJS= $(SRCS:.cc=.o)
 

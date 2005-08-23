@@ -1,16 +1,47 @@
 defstar {
 	name { MagnavoxIn }
 	domain { CG56 }
-	desc { 
-DSP56000 -  A combined input/output star for the Magnavox CD player.
-	}
-	version { $Id$ }
+	desc { A combined input/output star for the Magnavox CD player. }
+	version { @(#)CG56MagnavoxIn.pl	1.15	03/29/97 }
+	acknowledge { Gabriel version by Jeff Bier, Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-DSP56000 -  A combined input/output star for the Magnavox CD player.
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { CG56 main library }
+	htmldoc {
+<p>
+This star is an input interface to a modified Magnavox CD player.
+The left and right channel samples from the CD player are available
+on the star's two outputs.
+<p>
+If the star is repeated in a schedule (for example, if it is
+connected to a star that consumes more than one sample each time
+it fires), interrupt-based code will be generated.
+If the star is not repeated, it will generate code
+that polls the Magnavox and busy waits if samples are not available.
+Interrupt-based code can be forced by setting the string
+parameter <i>forceInterrupts</i> to "yes".
+The interrupt buffer will be the minimum required size if the
+parameter <i>interruptBufferSize</i> is "default=4".
+If this parameter is a number, it will be used for the length
+(in words) of the interrupt buffer.
+<p>
+If a real-time violation occurs and the parameter
+<i>abortOnRealtimeError</i> is set to "yes", the star
+will abort execution
+with one of the following hexadecimal error codes in register y0:
+<p><b>123050  
+An interrupt occurred and the receive buffer was full.
+<h3>BUGS:</h3>
+<p>
+The <i>abortOnRealtimeError</i> parameter is ignored when
+interrupt-based code is generated.
+	}
+        seealso { Magnavox, MagnavoxOut }
 	output {
 		name {output1}
 		type {FIX}
@@ -201,7 +232,7 @@ $label(used)
         move    x:$starSymbol(mag)_savereg+2,m0
         rti
         }        
-        start {
+        setup {
         bufLen=interruptBufferSize;
         saveReg.resize(3);
 	inIntBuffer.resize(bufLen);
@@ -209,11 +240,11 @@ $label(used)
         initCode {
         const char* f = forceInterrupts;
 	     if (f[0]=='n' || f[0]=='N')
-	          gencode(pollingInit);
+	          addCode(pollingInit);
              else {
-	          gencode(interruptInit);
+	          addCode(interruptInit);
 		  genInterruptCode(interrupt);
-		  gencode(interruptCont);
+		  addCode(interruptCont);
              }
 	}	   
 
@@ -223,11 +254,11 @@ $label(used)
     	      if (p[0]=='n' || p[0]=='N') {
                   // polling
                   if (q[0]=='y' || q[0]=='Y') 
-	               gencode(abortyes);
-                  gencode(polling);
+	               addCode(abortyes);
+                  addCode(polling);
 	      }
               else {
-	          gencode(interruptIn);
+	          addCode(interruptIn);
               }
         }
 	execTime {
@@ -240,7 +271,7 @@ $label(used)
         wrapup {
         const char* i = forceInterrupts;               
     	      if (i[0]=='y' || i[0]=='Y') {
-	          gencode(interruptTerminate);
+	          addCode(interruptTerminate);
               }
         }
 }    

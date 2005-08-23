@@ -1,7 +1,7 @@
 /*
  * Header file for C++ Tk canvas-based picture display facility
  * Author: Luis Gutierrez (based on ptkPlot )
- * $Id$
+ * @(#)ptkPicture.h	1.1  06/25/97
  */
 #ifndef _ptkPicture_h
 #define _ptkPicture_h 1

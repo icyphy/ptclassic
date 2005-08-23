@@ -12,17 +12,17 @@ Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
 outside this range, all outputs get zero.
 	}
-	version { $Id$ }
+	version { @(#)CG56DeMux.pl	1.4	04/08/97 }
 	author { Luis Gutierrez }
 	copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location {  CG56 control library }
-	explanation {
-.Id "demultiplex"
+	location { CG56 main library }
+	htmldoc {
+<a name="demultiplex"></a>
 	}
 	input {
 		name {input}

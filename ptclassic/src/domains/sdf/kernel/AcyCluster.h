@@ -1,7 +1,7 @@
 #ifndef _AcyCluster_h
 #define _AcyCluster_h 1
 #ifdef __GNUG__
-#pragma implementation
+#pragma interface
 #endif
 
 #include "SynDFCluster.h"
@@ -9,9 +9,9 @@
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)AcyCluster.h	1.5	07/25/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -56,14 +56,33 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 // AcyLoopScheduler.
 
 class SequentialList;
+/****
+AcyCluster is a class that implements the graph cuttting heuristic required
+by <code>AcyLoopScheduler::RPMC</code>
+<a name="ClassAcyCluster">
 
+@Description Implements the graph cutting heuristic described in Chapter 6 of
+<a href="http://ptolemy.eecs.berkeley.edu/~murthy/book.html">
+<em>"Software Synthesis from Dataflow Graphs",</em></a> by
+<p> 
+Shuvra S. Bhattacharyya, Praveen K. Murthy, and Edward A. Lee,
+Kluwer Academic Publishers, Norwood, MA, 1996.
+</a>
+
+@Author Praveen K. Murthy
+****/
 class AcyCluster: public SynDFCluster {
 public:
-	AcyCluster() {};
+	AcyCluster() : SynDFCluster() {};
 
 	/* virtual */ Block* makeNew() const { return new AcyCluster; }
+
+	// The main graph cutting heuristic
 	int legalCutIntoBddSets(int K);
+
+	// Checks answer given by legalCutIntoBddSets
 	int checkLegalCut(int cutValue, int bdd);
+
 protected:
 	void weightArcs();
 	void tagDelayArcs();
@@ -72,10 +91,15 @@ protected:
 	int computeCutCost(int flag_loc, int leftFlagValue);
 	void findIndepBndryNodes(int type, Cluster* c, SequentialList& indepBndryNodes);
 	int costOfMovingAcross(Cluster* bndryNode, int direction);
-	void updateBestCut(int numOnLeftSide);
+	void updateBestCut();
 
 };
 
+/****
+Iterator class for AcyClusters to avoid using casts everywhere
+
+@Author Praveen K. Murthy
+****/
 class AcyClusterIter : private SynDFClusterIter {
 public:
 	inline AcyClusterIter(Galaxy& g):SynDFClusterIter(g) {};
@@ -84,8 +108,8 @@ public:
 	AcyCluster* next(int flagValue, int index) {
 	    return (AcyCluster*)(SynDFClusterIter::next(flagValue, index));
 	}
-	ClusterIter::reset;
-	ClusterIter::remove;
+	SynDFClusterIter::reset;
+	SynDFClusterIter::remove;
 };
 
 

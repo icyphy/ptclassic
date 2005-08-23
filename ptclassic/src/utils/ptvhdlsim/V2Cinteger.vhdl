@@ -1,6 +1,6 @@
 --V2Cinteger.vhdl
 --Integer communication from VHDL to C
---Version:  $Id$
+--Version:  @(#)V2Cinteger.vhdl	1.2 6/27/96
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
@@ -24,7 +24,6 @@ architecture CLI of V2CINTEGER is
 	attribute CLI_CLOSE	of CLI	: architecture is "v2cinteger_close";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
 
 begin

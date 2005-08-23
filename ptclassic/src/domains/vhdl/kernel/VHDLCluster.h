@@ -2,21 +2,21 @@
 #define _VHDLCluster_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLCluster.h	1.5 07/31/96
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,7 +25,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Michael C. Williamson
 
@@ -37,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLObjList.h"
 #include "VHDLFiring.h"
 
 class VHDLCluster : public VHDLObj
@@ -45,13 +46,10 @@ class VHDLCluster : public VHDLObj
  public:
   // Constructors.
   VHDLCluster();
-  VHDLCluster(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLCluster();
 
-  // Name.
-//  StringList name;
   // Firing list.
   VHDLFiringList* firingList;
 
@@ -60,6 +58,11 @@ class VHDLCluster : public VHDLObj
   /* virtual */ const char* className() const;
 
   VHDLCluster* newCopy();
+
+  // Return a generic list built from all the firings in the cluster.
+  VHDLGenericList* genericList();
+  // Return a port list built from all the firings in the cluster.
+  VHDLPortList* portList();
 
  protected:
  private:

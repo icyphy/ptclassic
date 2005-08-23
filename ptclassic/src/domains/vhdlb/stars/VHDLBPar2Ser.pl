@@ -6,12 +6,12 @@ Output the eight bits of input in parallel on the serial output.
 Latch in a new input byte every eight clock cycles.
 Shift the bits out (starting with the lowest) one per clock cycle.
 	}
-        version { $Id$ }
-	author { E. A. Lee }
+        version { @(#)VHDLBPar2Ser.pl	1.5 3/2/95 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDLB main library }
@@ -55,6 +55,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { serOut }
 		type { int }
 	}
+        defstate {
+                name { delay }
+                type { int }
+                default { 1 }
+                desc { The propagation delay, in nsec }
+        }
 	go {
 	}
 }

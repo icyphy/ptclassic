@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Add } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { @(#)ACSAddFPSim.pl	1.1 03/09/98 }
+    version { @(#)ACSAddFixSim.pl	1.6 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -25,6 +25,14 @@ When the value of the product extends outside of the precision,
 the OverflowHandler will be called.
 		}
         }
+	defstate {
+	    name { LockOutput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified output precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
         defstate {
                 name { ArrivingPrecision }
                 type {int}
@@ -44,6 +52,14 @@ The input particles are only cast to this precision if the
 parameter "ArrivingPrecision" is set to NO.
 		}
         }
+	defstate {
+	    name { LockInput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified input precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
         protected {
 		Fix fixIn, sum;
         }

@@ -2,7 +2,7 @@
 #define _LinkedList_h 1
 /**************************************************************************
 Version identification:
-@(#)LinkedList.h	2.17	02/12/97
+@(#)LinkedList.h	1.11 1.11
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
@@ -40,12 +40,12 @@ the type of interest to and from the void*, allocating and
 deallocating memory for the objects, etc.
 
  Modified: John Davis, 5/18/97
-        LinkedList class has been rewrittent to be more
-        general. In particular, an arbitrary member can be
-        removed (regardless of the position in the list) and
-        the Links can be directly accessed in an efficient
-        manner. The LinkedList class does not have an
-        associated iterator.
+        LinkedList is a base class. It is a modified version
+	of SequentialList found in the kernel. It has been 
+	rewritten to be more general. In particular, an arbitrary 
+	member can be removed (regardless of the position in 
+	the list) and the Links can be directly accessed in an 
+	efficient manner. 
 
 **************************************************************************/
 
@@ -56,75 +56,175 @@ deallocating memory for the objects, etc.
 #include "type.h"
 
 	//////////////////////////////////////
-	// class Link
+	// Class Link
 	//////////////////////////////////////
 
 class Link {
-friend class LinkedList;
-friend class ListIter;
+	friend class LinkedList;
+	friend class LinkedListIter;
 protected:
-    Link *next,*previous;
-    Pointer e;
-    Link(Pointer,Link*);
-    void remove();
+	Link *next,*previous; 
+	Pointer e; 
+	Link(Pointer,Link*); 
+	void remove();
 };
+
+	//////////////////////////////////////
+	// Class Linked List
+	//////////////////////////////////////
 
 class LinkedList
 {
-	friend class ListIter;
+	friend class LinkedListIter;
 public:
-	// destructor
+	// Destructor
+	// FIXME: Change this
 	~LinkedList()  { initialize(); }
 
-	// constructor
+	// Constructor
 	LinkedList() : lastNode(0), dimen(0) {}
 
-	// constructor, with argument
+	// Constructor, with argument
 	LinkedList(Pointer a);
 
+	// Return the size of the list.
 	inline int size() const { return dimen;}
 	
-	void prepend(Pointer a);	// Add at head of list
+	// Add at head of list
+	void prepend(Pointer a);	
 
-	void append(Pointer a);	        // Add at tail of list
+	// Add at tail of list
+	void append(Pointer a);	        
 
-	void put(Pointer a) {append(a);} // synonym
+	// Synonym for append()
+	void put(Pointer a) {append(a);} 
 
-	int remove(Pointer a);	// remove ptr: return TRUE if removed
+	// Add at tail of list and get pointer.
+	Link * appendGet(Pointer a);    
 
-	Pointer getAndRemove();	// Return and remove head of list
+	// Remove a link from the list
+        Link* removeLink(Link&);
 
-        Pointer getTailAndRemove();     // Return and remove tail of list
+	// Erase a link from the list. Note: This method returns
+	// the element to which this Link points.
+        Pointer eraseLinkNotElement(Link&);
 
-	inline Pointer head() const  // Return head, do not remove
+	// Remove pointer by searching; return TRUE if removed
+	int searchAndRemove(Pointer a);  
+
+	// Return and remove head of list
+	Pointer getHeadAndRemove();	
+
+	// Return and remove tail of list
+        Pointer getTailAndRemove();     
+
+	// Return head, do not remove
+	inline Pointer head() const  
 	{
 		return lastNode ? lastNode->next->e : 0;
 	}
 	
-	inline Pointer tail() const {	// return tail, do not remove
+	// Return tail, do not remove
+	inline Pointer tail() const {	
 		return lastNode ? lastNode->e : 0;
 	}
 	
-	Pointer elem(int) const;// Return arbitary node of list
+	// Return arbitary node of list
+	Pointer elem(int) const;
 
-	void initialize();	// Remove all links
+	// Remove all links
+	void initialize();	
 
-	// predicates
-	// is list empty?
+	// Return TRUE if the list empty; return FALSE otherwise.
 	inline int empty() const { return (lastNode == 0);}
 
-	// is arg a member of the list? (returns TRUE/FALSE)
+	// Return TRUE if arg is a member of the list; return FALSE otherwise. 
 	int member(Pointer arg) const;
 
 private:
-	// remove a link from the list
-        Link* removeLink(Link&);
-
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
         Link *lastNode;
 	int dimen;
 };
+
+
+        ///////////////////////////////////
+        // class LinkedListIter
+        ///////////////////////////////////
+
+// LinkedListIter steps sequentially through a LinkedList.  Warning: if
+// the list is modified "out from under" the LinkedListIter, bad things may
+// happen if next() is called, though reset() will be safe.
+
+class LinkedListIter {
+public:
+        // constructor: attach to a LinkedList
+        inline LinkedListIter(const LinkedList& l) : list(&l) { reset(); }
+
+        // reset to the beginning of a list
+        void reset();
+
+        // next and operator++ are synonyms.  Return the next element,
+        // return 0 if there are no more.
+        // This routine has been re-implemented and optimized for speed
+        // because of its heavy usage.  The if-structure is organized
+        // so that necessary ifs are executed, but for cases where only
+        // a few ifs are needed, the minimum number of ifs is done for
+        // the most common cases, with rarer cases taking decreasing
+        // priority in the if-structure.
+        inline Pointer next() {
+          if (startAtHead) {
+            // Starting at the head of the list.  Use list->lastNode to 
+	    // find the head of the list.  If list->lastNode is NULL, 
+	    // the list is empty.
+            startAtHead = FALSE;
+            if (list->lastNode) {
+              ref = list->lastNode->next;
+              return ref->e;
+            }
+            // The list is empty, no entries:  passing the end of the list.
+            else {
+              ref = 0;
+              return ref;
+            }
+          }
+          else {
+            // Check to see if we're not at the end of the list.
+            if (ref != list->lastNode) {
+              // Check to see if ref is not NULL:  end of list not yet passed.
+              if (ref) {
+                ref = ref->next;
+                return ref->e;
+              }
+              // ref is NULL:  end of list was already passed.
+              else {
+                return ref;
+              }
+            }
+            // Passing the end of the list, no more entries.
+            else {
+              ref = 0;
+              return ref;
+            }
+          }
+        }
+
+        inline Pointer operator++ (POSTFIX_OP) { return next();}
+
+        // attach the LinkedListIter to a different object
+        void reconnect(const LinkedList&);
+
+        // remove the currently pointed to ref and update the
+        // the ref pointer - if next hasn't been called, the lastNode
+        // will be removed
+        void remove();
+private:
+        const LinkedList* list;
+        Link *ref;
+        int startAtHead;
+};
+
 
 
 #endif

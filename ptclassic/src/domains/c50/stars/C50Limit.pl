@@ -1,20 +1,20 @@
 defstar {
 	name { Limit }
 	domain { C50 }
-	desc { Hard Limiter }
-	version { $Id$ }
+	desc { Hard limiter }
+	version { @(#)C50Limit.pl	1.5	06 Oct 1996 }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
-	explanation {
-.Id "hard limiter"
-The star hard limits input samples to keep the range of 
-(\fIbottom, top\fR).
+	location { C50 main library }
+	htmldoc {
+<a name="hard limiter"></a>
+The star hard limits the values of input samples to be in the range
+(<i>bottom</i>, <i>top</i>).
 	}
 	input {
 		name {input}
@@ -28,15 +28,14 @@ The star hard limits input samples to keep the range of
 		name {bottom}
 		type {FIX}
 		default {0}
-		desc {Lower limit of the output.}
+		desc {Lower limit of the output}
 	}
 	state {
 		name {top}
 		type {FIX}
 		default {ONE}
-		desc {Upper limit of the output.}
+		desc {Upper limit of the output}
 	}
-
 
 	codeblock(limitblock) {
 	mar	*,AR1				;
@@ -52,15 +51,18 @@ The star hard limits input samples to keep the range of
  	bcnd	$label(end),TC			;if yes fump to label(end)
 	lar	AR1,#$addr(input)		;Address input		=> AR1
 $label(end)
-        mar	*,AR1				;
-	bldd	*,#$addr(output)		;ouput = val at address in AR1
-        }
+	mar	*,AR1				;
+	bldd	*,#$addr(output)		;output = val at address in AR1
+	}
 
+	constructor {
+		noInternalState();
+	}
  	go {
  		addCode(limitblock);
  	}
 
 	exectime {
-		return 10;
+		return 14;
  	}
 }

@@ -5,16 +5,16 @@ defstar {
 Convolve two causal finite sequences.
 Set truncationDepth larger than the number of output samples of interest.
 	}
-	version { $Id$ }
+	version { @(#)SDFConvolCx.pl	1.5	09/01/97 }
 	author { Karim-Patrick Khiar }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 This star convolves two causal finite input sequences.
 In the current implementation, you should set the truncation
 depth larger than the number of output samples of interest.
@@ -52,12 +52,17 @@ samples.
 		inB.setSDFParams(1, int(truncationDepth));
 	}
 	go {
-	    Complex &sum =  Complex(0.0);
+	    Complex sum =  Complex(0.0);
+	    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	    Complex tmpA;
+	    Complex tmpB;
 	    int c = int(iterationCount);
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
 		if (index < 0) index += int(truncationDepth);
-		sum += Complex(inA%(index)) * Complex(conj(inB%(k)));
+		tmpA = (inA%(index));
+		tmpB = (conj(inB%(k)));
+		sum += tmpA * tmpB;
 	    }
 	    out%(0) << sum;
 	    if (c >= int(truncationDepth) - 1) iterationCount = 0;

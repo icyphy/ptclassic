@@ -2,12 +2,12 @@ defcorona {
 	name { Delay }
 	domain { ACS }
 	desc {
-	    Generates a single delay for multiple lines
+	    Generates a pipelined delay element for multiple lines
 	}
-	version {@(#)ACSDelay.pl	1.7	12 August 1998}
-	author { E. A. Lee }
+	version { @(#)ACSDelay.pl	1.5 08/02/01}
+	author { K. Smith }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-2001 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -21,4 +21,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {FLOAT}
 	    }
+	defstate {
+		name { delays }
+		type { int }
+		default { 1 }
+		desc { Pipeline delays. }
+	}
 }  

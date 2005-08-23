@@ -1,8 +1,8 @@
 /*******************************************************************
 SCCS version identification
-$Id$
+@(#)ptplay.sol2.c	1.4 04/08/97
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,10 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#ifdef PTSUN4
-#include <sun/audioio.h>
-#else
+#if defined(PTSOL2)
 #include <sys/audioio.h>
+#else
+#include <sun/audioio.h>
 #endif
 
 int main (int argc, char *argv[])
@@ -75,10 +75,9 @@ int main (int argc, char *argv[])
   }
 
   while( (count = fread(dataBuf, sizeof(char), BUFSIZ, FIn)) != 0) {
-    ioctl(fDevAudio, AUDIO_GETINFO, &info);
+
     /* Wait for some samples to drain */
-    while ((info.play.samples) > 2000)
-      ioctl(fDevAudio, AUDIO_GETINFO, &info);
+    ioctl(fDevAudio, AUDIO_DRAIN, &info);
 
     /* Write data to file. */
     if (write(fDevAudio, dataBuf, count) != count) {

@@ -31,7 +31,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	$Id$
+ *	@(#)a.out.h	1.1 07/22/02
  */
 
 /* Minimal a.out.h for use with the Darwin/MacOSX port by David Evans,

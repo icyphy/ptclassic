@@ -1,23 +1,23 @@
 #!/bin/csh -f
-# Version $Id$
+# Version @(#)vpath	1.3 8/4/95
 # Author:	T. M. Parks
 # Created:	16 November 1993
 # Echo the full relative path to the "src" directory
-# corresponding to the current "obj.$ARCH" directory.
+# corresponding to the current "obj.$PTARCH" directory.
 
-# Check to see if ARCH is set.
-if (! $?ARCH) then
-	echo $RCSfile$: ARCH must be set
+# Check to see if PTARCH is set.
+if (! $?PTARCH) then
+	echo vpath: PTARCH must be set
 endif
 
-# Check to see that obj.$ARCH is part of the current path.
-if ($cwd !~ *obj.$ARCH*) then
-	echo "$RCSfile$: must be run from obj.$ARCH directory"
+# Check to see that obj.$PTARCH is part of the current path.
+if ($cwd !~ *obj.$PTARCH*) then
+	echo "vpath: must be run from obj.$PTARCH directory"
 	exit 1
 endif
 
-# Replace obj.$ARCH with src.
-set dir = `echo $cwd | sed -e s/.\*obj.${ARCH}/src/`
+# Replace obj.$PTARCH with src.
+set dir = `echo $cwd | sed -e s/.\*obj.${PTARCH}/src/`
 set d = $dir
 while ("$d" != "src")
 	set dir = "../$dir"

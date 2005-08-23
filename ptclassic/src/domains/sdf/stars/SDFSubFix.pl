@@ -1,9 +1,18 @@
 defstar {
         name { SubFix }
         domain { SDF }
-        desc { Output the "pos" input minus all "neg" inputs as a fixed-point. }
+	derivedFrom { SDFFix }
+        desc {
+Output as a fixed-point number the "pos" input minus all "neg" inputs.
+	}
         author { A. Khazeni }
-	version { $Id$ }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	version { @(#)SDFSubFix.pl	1.21	10/21/97 }
         location { SDF main library }
         input {
                 name { pos }
@@ -22,69 +31,84 @@ defstar {
                 type {int}
                 default {"YES"}
                 desc {
-Use the arriving particles ("neg" inputs) as they are if YES.  Cast them 
-to the precision specified by the parameter "InputPrecision" otherwise. }
+Flag indicating whether or not to use the precision of the arriving particles
+(the "pos" input and the "neg" inputs) as they are:  YES processes them
+unaltered, and NO casts them to the precision specified by the
+parameter "InputPrecision".
+		}
         }
         defstate {
                 name { InputPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc {
-Precision of the "neg" input in bits.  The input particles are only
-casted to this precision if the parameter "ArrivingPrecision" is set to NO.}
+Precision of the "neg" input in bits.
+The input particles are only cast to this precision if the
+parameter "ArrivingPrecision" is set to NO.
+		}
         }
         defstate {
                 name { OutputPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc {
-Precision of the output in bits.  This is the precision that will hold
-the result of the difference of the inputs.}
-        }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Set the overflow characteristic for the output.  If the result
-of the difference can not be fit into the precision of the output, overflow
-occurs and the overflow is taken care of by the method specified by this
-parameter.  The keywords for overflow handling methods are :
-"saturate"(default), "zero_saturate", "wrapped", "warning". }
+Precision of the output in bits.
+This is the precision that will hold the result of the difference
+of the inputs.
+When the value of the accumulation extends outside of the precision,
+the OverflowHandler will be called.
+		}
         }
         protected {
-                const char* IP;
-                const char* OP;
-                const char* OV;
-                int in_IntBits;
-                int in_len;
-                int out_IntBits;
-                int out_len;
+		Fix fixIn, diff;
         }
         setup {
-                IP = InputPrecision;
-                OP = OutputPrecision;
-                OV = OverflowHandler;
-                in_IntBits = Fix::get_intBits (IP);
-                in_len = Fix::get_length (IP);
-                out_IntBits = Fix::get_intBits (OP);
-                out_len = Fix::get_length (OP);
+		SDFFix::setup();
+
+                if ( ! int(ArrivingPrecision) ) {
+                  fixIn = Fix( ((const char *) InputPrecision) );
+		  if ( fixIn.invalid() )
+		    Error::abortRun( *this, "Invalid InputPrecision" );
+		}
+		fixIn.set_rounding( int(RoundFix) );
+
+                diff = Fix( ((const char *) OutputPrecision) );
+		if ( diff.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
+                diff.set_ovflow( ((const char *) OverflowHandler) );
+		if ( diff.invalid() )
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
+		diff.set_rounding( int(RoundFix) );
         }
         go {
                 MPHIter nexti(neg);
                 PortHole *p;
-                Fix diff(out_len, out_IntBits, Fix(pos%0));
-                diff.set_ovflow(OV);
-                Fix fixIn;
 
-                while ((p = nexti++) != 0) {
-
-                   if(int(ArrivingPrecision))
-                      fixIn = Fix((*p)%0);
-                   else
-                      fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
-
-                   diff -= fixIn; }
+                if ( int(ArrivingPrecision) ) {
+		  diff = (const Fix&)(pos%0);
+                  while ((p = nexti++) != 0) {
+		    // We use temporary variables to avoid
+		    // gcc2.7.2/2.8 problems
+	    	    Fix tmp = (*p)%0;	
+                    diff -= tmp;
+		    checkOverflow(diff);
+		  }
+		}
+		else {
+	          Fix tmp = pos%0;
+		  fixIn = tmp;
+		  diff = tmp;
+                  while ((p = nexti++) != 0) {
+		    // We use temporary variables to avoid
+		    // gcc2.7.2/2.8 problems
+		    Fix tmp = (*p)%0;
+		    fixIn = tmp;
+                    diff -= fixIn;
+		    checkOverflow(diff);
+		  }
+		}
                 output%0 << diff;
         }
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }

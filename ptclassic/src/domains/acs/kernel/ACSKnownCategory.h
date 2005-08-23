@@ -2,9 +2,9 @@
 #define _ACSKnownCategory_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)ACSKnownCategory.h	1.8 09/08/99
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -55,28 +55,30 @@ the Core categories from the list.
 #endif
 
 class StringList;
+class SequentialList;
+class ACSCore;
 
 class ACSKnownCategory {
 public:
 
 	// Constructor used by core base classes to add category to list.
-	ACSKnownCategory( const char* category ) {
+	ACSKnownCategory( ACSCore& category ) {
 		addEntry(category);
 	}
 
 	// Add and entry to the list
-	static void addEntry( const char* category );
+	static void addEntry( ACSCore& );
 
 	// return the entire list
-	static const StringList Categories();
+	static StringList getCategories();
 
 	// find an entry in the list
-	static const char* find( const char* category );
+	static const ACSCore* find( const char* category );
 
 private:
 
 	// pointer to the list of categories
-	static StringList* allCategories;
+	static SequentialList* allCategories;
 
 };
 

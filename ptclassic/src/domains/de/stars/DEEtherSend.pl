@@ -1,47 +1,52 @@
 defstar {
-	name {EtherSend}
-	domain {DE}
-	derivedfrom { DEEther }
-	version { $Id$ }
-	author { E. A. Lee and T. Parks }
+	name { EtherSend }
+	domain { DE }
+	derivedfrom { Ether }
+	version { @(#)DEEtherSend.pl	1.10	04/04/97 }
+	author { Edward A. Lee and Tom M. Parks }
 	copyright {
-Copyright (c) 1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Transmitter for a shared medium.
+This star can transmit particles of any type to any or all receivers
+that have the same value for the "medium" parameter.  The receiver
+address string is given by the "address" input.  If something other than
+a string is passed, Particle::print() is used to convert it to a string.
+If the address string begins with '-', then copies of the data particle
+are sent to all receivers that use the same medium.
+
+The transmitter "occupies" the medium for the specified duration.
+A collision occurs if the medium is occupied when a transmission is
+requested.  In this case,
+the data to be transmitted is sent to the "collision" output.
 	}
-	explanation {
+	htmldoc {
 This star is derived from
-.c Ether.
+<tt>Ether.</tt>
 Please see the manual entry for that star for a basic introduction.
-.pp
+<p>
 This star implements a transmitter for a shared medium.
 Any type of
-.c Particle
+<tt>Particle</tt>
 can be transmitted.
-If the "address" input is a non-negative integer, then the transmitter
+If the "address" string does not start with '-', then the transmitter
 looks for a receiver that shares the medium that has a matching address.
 If it is found, a copy of the Particle is sent to the receiver.
 The receiver is told to output that particle after a certain
 elapsed time, given by the most recent value that arrived on
 the "duration" input.
 If no such particle has arrived, a duration of zero is used.
-If the address is a negative integer, then the data particle
+If the address does start with '-', then the data particle
 is broadcast to all receivers on the medium.
-.pp
-The transmitter "occupies" the medium for the specified duration.
-A collision occurs if the medium is occupied when a transmission is
-requested.  In this case,
-the data to be transmitted is sent to the "collision" output.
 	}
 	input {
 	    name { address }
-	    type { int }
-	    desc { Address of the receiver. Negative for broadcast. }
+	    type { anytype }
+	    desc { Address of the receiver. }
 	}
 	input {
 	    name { sendData }
@@ -68,20 +73,20 @@ the data to be transmitted is sent to the "collision" output.
 	    // flag determining that the next particle(s) should be broadcast
 	    int broadcast;
 	}
-	setup {
-	    DEEther::setup();
-	    broadcast = 0;
+	begin {
+	    DEEther::begin();
 	    latestDuration = 0.0;
+	    latestAddress = "";
+	    broadcast = FALSE;
 	}
 	go {
 	    if (duration.dataNew) {
 		latestDuration = double(duration.get());
 	    }
 	    if (address.dataNew) {
-		Particle& adp = address.get();
-		if (int(adp) < 0) broadcast = 1;
-		else broadcast = 0;
 		latestAddress = (address.get()).print();
+		if (*((const char *) latestAddress) == '-') broadcast = 1;
+		else broadcast = 0;
 	    }
 	    if (sendData.dataNew) {
 		Particle& pp = sendData.get();
@@ -93,7 +98,7 @@ the data to be transmitted is sent to the "collision" output.
 				med->findReceiver(latestAddress);
 			if (receiveStar == 0) {
 			    Error::warn(*this,
-			    "Attempt to transmit to non-existant receiver ",
+			    "Attempt to transmit to non-existent receiver ",
 			    latestAddress);
 			    return;
 			}

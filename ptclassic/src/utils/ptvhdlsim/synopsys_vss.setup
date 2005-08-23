@@ -1,10 +1,10 @@
 -- Version control information:
--- $Id$
+-- @(#)synopsys_vss.setup	1.2 01/30/97
 
 -- This is so communication code can be
 -- compiled into the PTVHDLSIM library.
 
--- Without thiss, gvan will not be able to
+-- Without this, gvan will not be able to
 -- find the working library WORK which
 -- is set to PTVHDLSIM.
 

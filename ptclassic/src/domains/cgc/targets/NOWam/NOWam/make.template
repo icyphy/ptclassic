@@ -1,7 +1,7 @@
 # Makefile for CGC NOW (Networks Of Workstations)
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.5 1/31/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,7 +39,7 @@ ROOT =	../../../../../..
 VPATH = $(ROOT)/src/domains/cgc/targets/NOWam/NOWam
 
 # get configuration info
-CONFIG =$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
@@ -55,7 +55,7 @@ INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 
 PL_SRCS = \
 	CGCNOWamSend.pl \
-	CGCNOWamReceive.pl
+	CGCNOWamRecv.pl
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
@@ -66,13 +66,40 @@ HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile $(OBJS)
+# sol2 and sol2.cfront
+ifneq (,$(filter sol%,$(PTARCH)))
 
+ifeq ($(USE_SHARED_LIBS),yes) 
+
+# If we are building shared libraries, then we can put all the targets in
+# a shared library.
+PTLIB = 		libNOWam.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
+
+else	#USE_SHARED_LIBS
+
+PTLIB=none	# required by common.mk
+all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all
 		@echo Installation complete.
+endif 	#USE_SHARED_LIBS
 
-LIB=none	# required by common.mk
+
+else	#sol2 or sol2.cfront
+
+
+PTLIB=none	# required by common.mk
+# Non solaris platforms
+all: makefile
+	@echo "NOW active message target supported only on Solaris platforms"
+install: makefile
+	@echo "NOW active message target supported only on Solaris platforms"
+
+endif	#sol2 or sol2.cfront
+
+
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

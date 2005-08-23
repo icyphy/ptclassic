@@ -1,0 +1,52 @@
+<!-- documentation file generated from DEDynFork.pl by ptlang -->
+<html>
+<head>
+<title>DE DynFork star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="DynFork star, DE domain">DynFork star in DE domain</a></h1>
+<p>
+This a dynamic Fork function.
+On demand a new porthole is added to or removed from a multiporthole during 
+runtime. All particles to its input are passed to all outputs.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/domain.idx#DynForkBase ">DEDynForkBase</a><br>
+<b>Location:</b> $PTOLEMY/src/domains/de/contrib/stars<br>
+<b>Version:</b> 1.1 "05/13/98"<br>
+<b>Author:</b> Jens Voigt<br>
+<b>Acknowledgements:</b> I use exacly the same go()-method as S. Ha does in DEFork.pl.<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>in</font></b></i></td><td>anytype</td>
+<td>input for all events</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>out</font></b></i> (multiple)</td><td>ANYTYPE</td>
+<td>will get one PortHole for each instance</td>
+</tr>
+</table>
+<h2>Details</h2><p>
+<h3>Creating a porthole dynamically is as follows (<i>createPortHole</i>):</h3>
+<p> 
+This method is called from <tt>DEDynMapBase::createDynBlock</tt> whenever a new 
+block is to put into the system configuration. It just creates a new porthole 
+in the <i>out</i>-multiporthole. A pointer to the porthole is returned. The number of the porthole is not needed here, we just need the same interface as in the <tt>DEDynForkXXX</tt>-stars.
+<p>        
+<h3>Removing a porthole dynamically is as follows (<i>removePortHole</i>):</h3>
+<p> 
+This method is called from <tt>DEDynMapBase::deleteDynBlock</tt> whenever a 
+block is to be taken out of the system configuration. From 
+<tt>DEDynMapBase::deleteDynBlock</tt> we get a pointer to one of the portholes 
+in our<i>out</i>-multiporthole. We delete it from the block's porthole list as well as from the multiporthole's list and delete the porthole itself.
+<p>
+<br><b>See:</b> <a href="DEDynFork.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#DynFork facet, DE user">DynFork users</a>
+<p><hr><p>
+copyright (c) 1998 Dresden University of Technology, WiNeS-Project.
+All rights reserved.
+</body>
+</html>

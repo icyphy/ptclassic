@@ -5,14 +5,16 @@ defstar {
 An adaptive antenna array processor using the LMS algorithm.
 The output signals of the antenna elements are taken
 from a bus connected to the input.
-}
-	version {@(#)SDFLMSArray.pl	1.0 9/19/96}
+	}
+	version { @(#)SDFLMSArray.pl	1.4	05/28/98 }
 	author { U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	inmulti {
 		name {input}
 		type {complex}
@@ -52,12 +54,15 @@ All rights reserved.
 		name {output}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	setup {
 	        // We have to account for errorDelay past input snapshots
 		input.setSDFParams(1, int(errorDelay));
 	}	
 	go {
-		Complex e = Complex(error%0) * double(stepSize);
+	        // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmperror = error%0;
+		Complex e = tmperror * double(stepSize);
 		int index = int(errorDelay);
 
 		MPHIter nexti(input);
@@ -65,14 +70,20 @@ All rights reserved.
 		Complex sum = 0.0;
 		int i = 0;
 		while ((p = nexti++) != 0) {
+
 		    // First update the steering vector
 		    // adjustment is the conjugate of e times the input
 		    // this is consistent with the RLSArray Star
-		    steering[i] = steering[i] + conj(e) * Complex((*p)%index);
+
+		    // We use a temporary variable to 
+		    // avoid gcc2.7.2/2.8 problems
+		    Complex tmp1 = (*p)%index;
+		    steering[i] = steering[i] + conj(e) * tmp1;
 
 		    // with the updated steering we can calculate the
 		    // output simultaneously
-		    sum += (Complex)((*p)%0) * conj(steering[i++]);
+		    Complex tmp2 = (*p)%0;	
+		    sum += tmp2 * conj(steering[i++]);
 		}
 		output%0 << sum;
 	}

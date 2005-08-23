@@ -1,15 +1,34 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)EGNode.h	1.16	3/2/95
 
- Copyright (c) 1991 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
-Now EGNode class is derived from the SDFAtomCluster, which is 
-derived from SDFStar class. 
-
 *******************************************************************/
 #ifndef _EGNode_h
 #define _EGNode_h
@@ -19,10 +38,8 @@ derived from SDFStar class.
 
 #include "SDFStar.h"
 #include "DoubleLink.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "StringList.h"
-
-#define EGNode EGMaster
 
 class EGNodeLink;
 
@@ -35,30 +52,12 @@ class EGNodeLink;
 
 class EGNode
 {
-private:
-
-  	// invocation number is tabulated starting from "1" 
-  	int invocation; 
-
-	// pointer to the original star
-	SDFStar* pStar;
-
-	// link to the next invocation.
-	EGNode* next;
-
-	// flag for graph-traversal algorithms -- this marks whether or
-	// not this node has been visited
-	unsigned visited : 1;
-
 public:
-
   	// constructor with origin and invocation number arguments
-  	EGNode(SDFStar*, int);
+  	EGNode(DataFlowStar*, int n = 1);
+	virtual ~EGNode();
 
-	// destructor
-	virtual ~EGNode() {}
-	void	deleteInvocChain() { if (next) next->deleteInvocChain();
-				    INC_LOG_DEL; delete this; }
+	void	deleteInvocChain();
 
 	// print me
 	StringList printMe();
@@ -79,8 +78,11 @@ public:
 	EGGateList ancestors;
 	EGGateList descendants;
 
+	// hidden Gates
+	EGGateList hiddenGates;
+
 	// return a pointer to the corresponding master
-	SDFStar *myMaster() {return pStar;}
+	DataFlowStar *myMaster() {return pStar;}
 
 	// Member function to determine whether or not
 	// this node is a root(source node) in the expanded graph.
@@ -102,8 +104,27 @@ public:
 	// get the visited flag
 	int alreadyVisited() { return visited; }
 
-	// get the execution time of the invocation
-	int myExecTime() { return myMaster()->myExecTime(); };
+	// set the sticky-ness: interdependency between invocations.
+	void claimSticky() { stickyFlag = 1; }
+	int sticky() { return stickyFlag; }
+
+private:
+
+  	// invocation number is tabulated starting from "1" 
+  	int invocation; 
+
+	// pointer to the original star
+	DataFlowStar* pStar;
+
+	// link to the next invocation.
+	EGNode* next;
+
+	// Flag to set if there is dependency between invocations.
+	unsigned stickyFlag : 1;
+
+	// flag for graph-traversal algorithms -- this marks whether or
+	// not this node has been visited
+	unsigned visited : 1;
 };
 
 ////////////////////////////
@@ -113,7 +134,7 @@ public:
 class EGNodeLink : public DoubleLink
 {
 public:
-	EGNode* myNode()	{ return (EGNode*) e; }
+	EGNode* node()	{ return (EGNode*) e; }
 
 	// constructor
 	EGNodeLink(EGNode* e):DoubleLink(e) {}
@@ -131,7 +152,7 @@ public:
         EGNode* takeFromFront()
                 { return (EGNode*) DoubleLinkList :: takeFromFront(); }
 	
-	EGNode* headNode() { return ((EGNodeLink*) head)->myNode(); }
+	EGNode* headNode() { return ((EGNodeLink*) head())->node(); }
 
 	StringList print();
 };
@@ -143,7 +164,7 @@ public:
 	EGNodeLink* nextLink() 
 		{ return (EGNodeLink*) DoubleLinkIter::nextLink(); }
 	EGNode* next() { return (EGNode*) DoubleLinkIter::next(); }
-	EGNode* operator++() { return next(); }
+	EGNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif

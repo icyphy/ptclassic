@@ -1,0 +1,58 @@
+<!-- documentation file generated from DECIR_uldl.pl by ptlang -->
+<html>
+<head>
+<title>DE CIR_uldl star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="CIR_uldl star, DE domain">CIR_uldl star in DE domain</a></h1>
+<p>
+The interfences are calculated here by calling the appropriate 
+    methods in the propagation-star. This star is called each time a mobile 
+    station appears in the environment or one mobile station vanishes from the 
+    environment. Both events of that kind cause a new interference situation 
+    which is then calculated. Information and data are given out to animation 
+    and data analysis stars.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/domain.idx#cell_list ">DEcell_list</a><br>
+<b>Location:</b> The WiNeS-Library<br>
+<b>Version:</b> 1.6 "01/07/99"<br>
+<b>Author:</b> A. Wernicke, J. Voigt<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>check</font></b></i></td><td>int</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>CIR_value</font></b></i></td><td>float</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>interferenz</font></b></i></td><td>Complex</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>strength</font></b></i></td><td>int</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>interferenz_bs</font></b></i></td><td>Complex</td>
+</tr>
+<tr>
+<td><i><b><font color=firebrick>strength_bs</font></b></i></td><td>int</td>
+</tr>
+</table>
+<h2>States</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=blue>fileName</font></b></i></td><td>StringState</td>
+<td>File describing topology</td>
+<td>"$PTOLEMY/src/domains/de/contrib/stars/topo.dxf"</td>
+</tr>
+</table>
+<br><b>See:</b> <a href="DECIR_uldl.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#CIR_uldl facet, DE user">CIR_uldl users</a>
+<p><hr><p>
+copyright (c) 1996 - 1997 Dresden University of Technology,
+                Mobile Communications Systems
+</body>
+</html>

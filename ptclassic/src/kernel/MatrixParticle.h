@@ -6,16 +6,16 @@
 #endif
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MatrixParticle.h	1.5 03/19/96
 
-Copyright (c) 1991-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -29,7 +29,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -98,17 +100,16 @@ class MatrixParticle : public Particle {
 				int colDelays) = 0;
 
         // Set the data field to the given SubMatrix
-        virtual void initialize(Matrix *m, MatrixParticle *p) = 0;
+        virtual void initialize(PtMatrix *m, MatrixParticle *p) = 0;
+
+        // Reset the data and parent pointers to NULL
+        virtual Particle& initialize() = 0;
 
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
-        virtual Matrix* subMatrix(int startRow, int startCol,
+        virtual PtMatrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols) = 0;
  
-        // Never used but need to be declared
-        /*virtual*/ int initParticleStack(Block* parent,ParticleStack& pstack,
-					  Plasma* myPlasma, 
-					  const char* delay = 0) {}
  protected:
         // some error functions
         virtual void errorAssign(const char*) const = 0;
@@ -132,7 +133,7 @@ public:
 			int colDelays);
 
         // Set the data field to the given SubMatrix
-        virtual void initialize(Matrix *m, MatrixParticle *p);
+        virtual void initialize(PtMatrix *m, MatrixParticle *p);
 
         // Reset the data and parent pointers to NULL
         /* virtual */ Particle& initialize();
@@ -145,6 +146,7 @@ public:
 	void operator << (const FixMatrix& m);
 	void operator << (const FloatMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -154,7 +156,7 @@ public:
 
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
-        virtual Matrix* subMatrix(int startRow, int startCol,
+        virtual PtMatrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols);
 
 	// particle copy
@@ -186,7 +188,7 @@ class FixMatrixParticle : public MatrixParticle {
 			int colDelays);
 
         // Set the data field to the given SubMatrix
-        virtual void initialize(Matrix *m, MatrixParticle *p);
+        virtual void initialize(PtMatrix *m, MatrixParticle *p);
 
         // Reset the data and parent pointers to NULL
         /* virtual */ Particle& initialize();
@@ -199,6 +201,7 @@ class FixMatrixParticle : public MatrixParticle {
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FloatMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -208,7 +211,7 @@ class FixMatrixParticle : public MatrixParticle {
 
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
-        virtual Matrix* subMatrix(int startRow, int startCol,
+        virtual PtMatrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols);
 
 	// particle copy
@@ -239,7 +242,7 @@ public:
 			int colDelays);
 
         // Set the data field to the given SubMatrix
-        virtual void initialize(Matrix *m, MatrixParticle *p);
+        virtual void initialize(PtMatrix *m, MatrixParticle *p);
 
         // Reset the data and parent pointers to NULL
         /* virtual */ Particle& initialize();
@@ -252,6 +255,7 @@ public:
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FixMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -261,7 +265,7 @@ public:
 
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
-        virtual Matrix* subMatrix(int startRow, int startCol,
+        virtual PtMatrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols);
 
 	// particle copy
@@ -294,7 +298,7 @@ class IntMatrixParticle : public MatrixParticle {
 			int colDelays);
 
         // Set the data field to the given SubMatrix
-        virtual void initialize(Matrix *m, MatrixParticle *p);
+        virtual void initialize(PtMatrix *m, MatrixParticle *p);
 
         // Reset the data and parent pointers to NULL
         /* virtual */ Particle& initialize();
@@ -307,6 +311,7 @@ class IntMatrixParticle : public MatrixParticle {
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FixMatrix& m);
 	void operator << (const FloatMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -316,7 +321,7 @@ class IntMatrixParticle : public MatrixParticle {
 
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
-        virtual Matrix* subMatrix(int startRow, int startCol,
+        virtual PtMatrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols);
 
 	// particle copy

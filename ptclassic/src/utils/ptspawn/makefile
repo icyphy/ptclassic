@@ -1,6 +1,6 @@
 # Unix makefile for the Windows ptspawn tool
 # Version identification:
-# $Id$
+# @(#)makefile	1.1 02/08/99
 # Copyright (c) 1999 The Regents of the University of California.
 # All rights reserved.
 # 

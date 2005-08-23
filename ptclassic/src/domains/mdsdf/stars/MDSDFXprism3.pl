@@ -2,32 +2,29 @@ defstar {
 	name { Xprism3 }
 	domain { MDSDF }
 	desc {
-Generate a plot of a 2D signal with the xprism3 program.
-Due to a bug in xprism3 reading raw files from the command line,
-we go throug the intermediary step of converting the raw file
-to a Viff file using raw2viff.
+Generate a plot of a two-dimensional signal with the xprism3 program.  Due
+to a bug in xprism3 reading raw files from the command line, we go through the
+intermediate step of converting the raw file to a Viff file using raw2viff.
 	}
-	version {$Id$}
+	version {@(#)MDSDFXprism3.pl	1.11 05/28/98}
 	author { Mike J. Chen }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
-	explanation {
-The input signal is plotted using the \fIxprism3\fR program which
-is provided with the Ptolemy distribution.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xprism3.
-A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xprism3 program
-as command-line options.  See the manual section describing xprism3
-for a complete explanation of the options.
-.Ir "xprism program"
-.Id "graph, X window"
+	htmldoc {
+The input signal is plotted using the <i>xprism3</i> program which is
+provided with the Ptolemy distribution.  The <i>title</i> parameter specifies
+a title for the plot.  The <i>saveFile</i> parameter optionally specifies a
+file for storing the data in a syntax acceptable to xprism3.  A null string
+prevents any such storage.  The <i>options</i> string is passed directly to
+the xprism3 program as command-line options.  See the manual section
+describing xprism3 for a complete explanation of the options.
+<a name="xprism program"></a>
+<a name="graph, X window"></a>
 	}
 	input {
 		name { input }
@@ -57,45 +54,51 @@ for a complete explanation of the options.
 		default {"tmpFile"}
 		desc {File to save the input to the xgraph program.}
 	}
+	ccinclude { <stdio.h> }
 	setup {
                 input.setMDSDFParams(int(numRows),int(numCols));
 	}
 	go {
           // read data from input
 	  FloatSubMatrix* inputMatrix = (FloatSubMatrix*)(input.getInput());
-	  int del;
+	  int del = FALSE;
 
-	  char fileName[256]; fileName[0] = '\000';
-	  if((const char*)saveFile) {
-	    strcpy(fileName, (const char*)saveFile);
-	    del = 0;
+	  const char* iname = (const char*)saveFile;
+	  char* nm = 0;
+	  if (iname && *iname) {
+	    nm = expandPathName(iname);
+	    del = FALSE;
 	  }
-	  if(fileName[0] == '\000') {
-	    char* nm = tempFileName();
-	    strcpy(fileName, nm);
-	    del = 1;
-	    LOG_DEL; delete nm;
+	  else {
+	    nm = tempFileName();
+	    del = TRUE;
 	  }
-	  
-	  FILE * fptr = fopen(fileName, "w");
-	  if(fptr == (FILE*)NULL) {
-	    Error::abortRun(*this, "can not create: ", fileName);
+	  StringList fileName = nm;
+	  delete [] nm;
+
+	  FILE *fp = fopen(fileName, "w");
+	  if (fp == 0) {
 	    delete inputMatrix;
+	    Error::abortRun(*this, "cannot open '", fileName, "' for writing.");
 	    return;
 	  }
-          int size = int(numRows) * int(numCols);
+
           // write out as float instead of double
+          int size = int(numRows) * int(numCols);
 	  float* buffer = new float[size];
 	  float* p = buffer;
-	  for(int i = 0; i < size; i++)
+	  for(int i = 0; i < size; i++) {
 	    *p++ = (float)inputMatrix->entry(i);
-	  fwrite(buffer,sizeof(float),size,fptr);
-	  fclose(fptr);
-	  
-	  StringList cmd;
-	  StringList tmpFileName;
-	  tmpFileName << fileName << ".viff";
+	  }
+	  fwrite((char *)buffer, sizeof(float), size, fp);
+	  fclose(fp);
+	  delete [] buffer;
+
+	  StringList tmpFileName = fileName;
+	  tmpFileName << ".viff";
+
 	  // first generate the command to run raw2viff
+	  StringList cmd;
           cmd << "( raw2viff -i " << fileName << " -o " << tmpFileName;
 	  cmd << " -t \"float\" -mt \"Local Machine\" -r ";
 	  cmd << int(numRows) << " -c " << int(numCols) << ";";

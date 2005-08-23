@@ -6,23 +6,23 @@ An integrator with leakage and limits.  With the default parameters,
 input samples are simply accumulated, and the running sum is the
 output.  If there is an overflow, the integrator will wrap around.
 	}
-	version { $Id$ }
+	version { @(#)C50Intgrtr.pl	1.4	03 Oct 1996 }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
-	explanation {
-.Id "filter, integrator"
-.pp
-Leakage is controlled by the \fPfeedbackGain\fP state (default 1.0).
+	location { C50 main library }
+	htmldoc {
+<a name="filter, integrator"></a>
+<p>
+Leakage is controlled by the </i>feedbackGain</i> state (default 1.0).
 The output is the data input plus feedbackGain*state, where state is the
 previous output.
-.pp
-Overflow is controlled by the \fIonOverflow\fP state (default wrap around.
+<p>
+Overflow is controlled by the <i>onOverflow</i> state (default wrap around.
 The integrator can either be set to wrap around (default), saturate or
 reset.
 	}

@@ -6,16 +6,16 @@ defstar {
 Displays the values of the inputs in a separate window,
 keeping a specified number of past values in view.
     }
-    version { $Id$ }
+    version { @(#)MDSDFTkText.pl	1.4 01 Oct 1996 }
     author { E. A. Lee, modified for MDSDF by Mike Chen }
     copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { MDSDF tcltk library }
-    explanation {
+	htmldoc {
 This star uses the "print()" method of the input particles to create
 the display.
 The default width of the display window is appropriate for integer, float, and
@@ -34,9 +34,11 @@ complex particles.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkText.tcl";
 
-        MDSDFTclScript::setup();
+        MDSDFTclScript::begin();
     }
     constructor {
 	put_in_control_panel.clearAttributes(A_SETTABLE);

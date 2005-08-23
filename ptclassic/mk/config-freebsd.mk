@@ -1,7 +1,7 @@
 # Makefile for FreeBSD
-# Version: $Id$
+# Version: @(#)config-freebsd.mk	1.12 12/15/97
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,8 +29,41 @@
 #
 # @(#)config-freebsd.mk
 #                      
-# Programmer: John Wehle 
-#             john@feith.com
+# Programmer: 	John Wehle, john@feith.com
+# Modified by: 	Peter Dufault, dufault@hda.com (HD Associates, Inc)  
+
+# Ptolemy 0.7 notes.  All first person presenatations are
+# by dufault@hda.com
+
+# If you're going to use ptolemy during the beta test use FreeBSD 2.2.1.
+# This has the correct versions of the compiler,
+# etc, and you won't have to install the "pgcc" port.  The 3.0 tree
+# may work but of course is under test and active development.
+# The older 2.1 branch will need at least the "pgcc" port of the new compiler.
+
+# I used xv from the ports collection rather than build the one
+# with Ptolemy.
+
+# The basic process is to build the included itcl2.2 and add the shared
+# libraries, build octtools, and then build ptolemy.  I provided a
+# build script that worked for me.
+
+# Note: You need a lot of swap to build Ptolemy.  I expect out of the
+# box installations using the sysinstall default will not have enough.
+# I have about 100MB and it just sneaks by.
+# Use "vnconfig" to swap to a file if you don't have enough.
+
+# Running edit-label may result in the following X server error
+# when OK is pressed:
+#  A Fatal Xt Toolkit Error has occurred:
+#   Attempt to unmanage a child when parent is not Composite
+#   Type 'y' to continue, 'n' to exit, 'a' to abort
+#   (continuing may have unpredictable consequences):
+#
+# This message is known from Linux and XFree86 Version 3.1. It's
+# probably a bug in the X-Release and has gone with the upgrade
+# to XFree86 3.2.
+
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
@@ -39,26 +72,69 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+ifndef BUILD_STATIC_BINARIES
+SHMAJOR =	7
+SHMINOR =	0
+include $(ROOT)/mk/config-g++.shared.mk
+LIBSUFFIX =		so.$(SHMAJOR).$(SHMINOR)
+LINKSHAREDFLAGS =
+endif
+
+# Command to build C++ shared libraries
+SHARED_LIBRARY_COMMAND = ld /usr/lib/c++rt0.o -Bshareable -o 
+ 
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND =ld -Bshareable -o 
+
+# You may want to override the "-g" in LOCALCCFLAGS for a true
+# production environment - the link time and program output are large.
+
+
+# You may want to override the "-g" in LOCALCCFLAGS for a true
+# production environment - the link time and program output are large.
+
 #
 # Programs to use
 #
 RANLIB =	ranlib
 # Use gcc everywhere including in octtools
 CC =		gcc
-CPLUSPLUS =	g++ -I$(ROOT)/src/compat/freebsd
+
+CPLUSPLUS =	g++
 
 OCTTOOLS_MM_LIB=
 OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
 
-SYSTEMDEF=	-Dfreebsd
-OPTIMIZER=	-O2 -m486 -pipe
-#OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
-# Under gcc-2.7.0, you will need to add -fno-for-scope to $WARNINGS
+
+OPTIMIZER =	-O2 -m486 -pipe
+#OPTIMIZER =	-O2 -mpentium -pipe
+#OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
+
 WARNINGS =	-Wall -Wcast-align #-Wcast-qual 
-GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
-CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
-		-fwritable-strings
+ARCHFLAGS =	-Dfreebsd
+LOCALCFLAGS =	-fwritable-strings
+
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 GNULIB =	/usr/lib
 
 #
@@ -69,27 +145,31 @@ GNULIB =	/usr/lib
 # Binaries that are shipped should be statically linked.
 CC_STATIC = 	-static
 
-SYSLIBS=-lg++ -lm -lc -lcompat
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lm -lc -lcompat
+# system libraries (libraries from the environment)
+SYSLIBS =	-lg++ -lstdc++  $(CSYSLIBS)
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
-LINKFLAGS_D=-L$(LIBDIR) -g -static
+LINKSTRIPFLAGS=-Wl,-s
+LINKFLAGS =	-L$(LIBDIR)  $(LINKSTRIPFLAGS) $(LINKSHAREDFLAGS)
+LINKFLAGS_D =	-L$(LIBDIR) -g $(LINKSHAREDFLAGS)
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
 
 # ptcl and pigiRPc use this for cuserid.o when CGTarget is used
 # only defined in this config file
-COMPATLIB = -lcompat
+COMPATLIB = 	-lcompat
 
 #
 # Directories to use
 #
-X11_INCSPEC = -I/usr/X11R6/include
-X11INCL     = -I/usr/X11R6/include
-X11_LIBSPEC = -L/usr/X11R6/lib -lX11
+X11_INCSPEC = 	-I/usr/X11R6/include
+X11INCL     = 	-I/usr/X11R6/include
+X11_LIBSPEC = 	-L/usr/X11R6/lib -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-X11EXT_LIBSPEC=-lXext -lSM -lICE
+X11EXT_LIBSPEC=	-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
@@ -109,6 +189,12 @@ QUANTIFY =
 #S56DIR =	$(ROOT)/vendors/s56dsp
 S56DIR =
 
-# Used to compile xv.  Use -traditional to avoid varargs problems
-XV_CC =		gcc -traditional $(X11_INCSPEC) $(X11_LIBSPEC)
+# XV is not built for Ptolemy 0.7 on FreeBSD.  The version in the ports
+# collection is used.
+XV_CC =		gcc -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 XMKMF =		xmkmf
+
+# Matlab architecture.  Untested by me and taken directly from the
+# Linux configuration - you'll have to have the
+# linux emulator installed with the Linux matlab.
+MATARCH = lnx86 #i486

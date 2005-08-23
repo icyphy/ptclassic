@@ -1,8 +1,8 @@
 # Makefile for Ptolemy cfront compat. stuff (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.3 12/05/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,13 +31,16 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/cfront
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS = 	ACG.h NegExp.h Normal.h Random.h Uniform.h builtin.h minmax.h \
 	std.h
 
 MISC_FILES = README
+
+# Avoid messages from tycommon.mk
+LIBR = dummylib
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

@@ -1,7 +1,7 @@
 defstar {
 	name { Weighted_List }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DEWeighted_List.pl	1.1 06/24/97 }
 	author { J. Voigt }
 	copyright { copyright (c) 1997 Dresden University of Technology,
                     Mobile Communications Systems 

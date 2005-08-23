@@ -1,8 +1,8 @@
 # Makefile for Ptolemy X11R4 compat. stuff (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.5 12/08/97
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,13 +28,16 @@
 # 						COPYRIGHTENDKEY
 
 ROOT = ../../..
-VPATH = $(ROOT)/src/compat/cfront
+VPATH = $(ROOT)/src/compat/X11R4
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-HDRS = 	X.h Xlib.h Xos.h Xutil.h curosrfont.h
+# Dummy variable to avoid make warnings about duplicate commands
+LIBR = dummylib
+
+HDRS = 	X.h Xlib.h Xos.h Xutil.h cursorfont.h
 
 MISC_FILES = README
 

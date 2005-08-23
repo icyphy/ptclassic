@@ -2,15 +2,16 @@ defstar {
   name { Fork }
   domain { MDSDF }
   desc { Copies input particles to each output. }
-  version { $Id$ }
+  version { @(#)MDSDFFork.pl	1.8 01 Oct 1996 }
   author { Mike J. Chen }
   copyright {
-1993  The Regents of the University of California.  All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location { MDSDF main library }
-  explanation {
+	htmldoc {
 This star is generally used to connect a single output port
 to multiple input ports.  It will be automatically inserted
 when multiple inputs are connected to the same output using the graphical
@@ -41,11 +42,9 @@ explicitly.
   go {
     MPHIter nextp(output);
     MDSDFPortHole* p;
-    Matrix* inputData = (Matrix*)(input.getInput());
-    Matrix* outputData;
-
+    PtMatrix* inputData = (PtMatrix*)(input.getInput());
     while ((p = (MDSDFPortHole*)nextp++) != 0) {
-      outputData = p->getOutput();
+      PtMatrix* outputData = p->getOutput();
       *outputData = *inputData;
       delete outputData;
     }

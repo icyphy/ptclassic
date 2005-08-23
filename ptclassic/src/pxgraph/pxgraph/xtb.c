@@ -1,3 +1,33 @@
+/*******************************************************************
+SCCS version identification
+@(#)xtb.c	1.8 03/30/97
+
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+
 /*LINTLIBRARY*/
 /*
  * Mini-Toolbox
@@ -12,14 +42,12 @@
  * want to use any of the standards yet -- they are too unstable).
  */
 
-#include <X11/Xos.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#include "xgraph.h"
 #include "xtb.h"
 
 extern void abort();
 
-#define MAXKEYS		10
+/*#define MAXKEYS		10*/
 
 #ifdef __STDC__
 #define FNPTR(fname, rtn, args)	rtn (*fname)args
@@ -34,7 +62,7 @@ extern void abort();
 typedef struct h_info {
     FNPTR(func, xtb_hret, (XEvent *evt, xtb_data info)); /* Function to call */
     xtb_data info;		/* Additional info  */
-};
+} h_info;
 
 static Display *t_disp;		/* Display          */
 static int t_scrn;		/* Screen           */
@@ -44,11 +72,13 @@ static unsigned long back_pix;	/* Background color */
 
 static XFontStruct *norm_font;	/* Normal font      */
 
-extern char *malloc();
-#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))
-extern char *strcpy();
-extern void free();
 
+/*#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))*/
+extern char *strcpy();
+/* These are now included in xgraph.h which includes malloc.h
+ * extern char *malloc();
+ * extern void free();
+ */
 
 
 void xtb_init(disp, scrn, foreground, background, font)
@@ -71,7 +101,7 @@ XFontStruct *font;		/* Normal font      */
 
 #define gray_width 32
 #define gray_height 32
-static char gray_bits[] = {
+static unsigned char gray_bits[] = {
    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
@@ -88,9 +118,9 @@ static Pixmap make_stipple(disp, able, bits, width, height)
 Display *disp;
 Drawable able;
 char *bits;
-int width, height;
+unsigned int width, height;
 {
-    int w, h;
+    unsigned int w, h;
     Pixmap stipple;
     int bitmap_pad;
     GC image_gc;
@@ -196,7 +226,10 @@ Window win;
 {
     xtb_data data;
 
-    if (!XFindContext(t_disp, win, h_context, &data)) {
+    /* If he 4th arg of XFindContext is Xpointer *, then pxgraph won't
+     * compile under X11R4 or OW3.0
+     */
+    if (!XFindContext(t_disp, win, h_context, (caddr_t *)&data)) {
 	return ((struct h_info *) data)->info;
     } else {
 	return (xtb_data) 0;
@@ -252,7 +285,7 @@ typedef struct b_info {
     int na;			/* Non-zero if not active */
     int line_y, line_w;		/* Entry/Exit line  */
     xtb_data val;		/* User defined info */
-};
+} b_info;
 
 static void bt_draw(win, ri)
 Window win;
@@ -308,7 +341,7 @@ xtb_data info;
 {
     Window win = evt->xany.window;
     struct b_info *ri = (struct b_info *) info;
-    xtb_hret rtn;
+    xtb_hret rtn = (xtb_hret)0;
 
     switch (evt->type) {
     case Expose:
@@ -452,7 +485,7 @@ typedef struct br_info {
     FNPTR( func, xtb_hret, (Window win, int prev, int this, xtb_data val) );
     xtb_data val;		/* User data          */
     Window *btns;		/* Button windows     */
-};
+} br_info;
 
 /*ARGSUSED*/
 static xtb_hret br_h(win, val, info)
@@ -587,7 +620,7 @@ Window win;
 typedef struct to_info {
     char *text;			/* Text to display */
     XFontStruct *ft;		/* Font to use     */
-};
+} to_info;
 
 static void to_draw(win, ri)
 Window win;
@@ -676,7 +709,7 @@ Window win;
 #define TI_CRSP	1
 
 typedef struct ti_info {
-    FNPTR( func, xtb_hret, (Window win, int ch, char *textcopy, xtb_data *val) );
+    FNPTR( func, xtb_hret, (Window win, int ch, char *textcopy, xtb_data val) );
     				/* Function to call   */
     int maxlen;			/* Maximum characters */
     int curidx;			/* Current index pos  */
@@ -685,7 +718,7 @@ typedef struct ti_info {
     int line_y, line_w;		/* Entry/Exit line    */
     int focus_flag;		/* If on, we have focus */
     xtb_data val;		/* User info          */
-};
+} ti_info;
 
 static int text_width(font, str, len)
 XFontStruct *font;		/* What font       */
@@ -765,7 +798,7 @@ unsigned long pix;
 }
 
 /* For debugging */
-focus_evt(evt)
+void focus_evt(evt)
 XEvent *evt;
 {
     switch (evt->xfocus.mode) {
@@ -821,7 +854,7 @@ xtb_data info;
     Window win = evt->xany.window;
     struct ti_info *ri = (struct ti_info *) info;
     char keys[MAXKEYS], textcopy[MAXCHBUF];
-    xtb_hret rtn;
+    xtb_hret rtn = (xtb_hret)0;
     int nbytes, i;
 
     switch (evt->type) {
@@ -878,7 +911,7 @@ void xtb_ti_new(win, text, maxchar, func, val, frame)
 Window win;			/* Parent window      */
 char *text;			/* Initial text       */
 int maxchar;			/* Maximum characters */
-FNPTR( func, xtb_hret, (Window, int, char *, xtb_data *) ); /* Callback */
+FNPTR( func, xtb_hret, (Window, int, char *, xtb_data) ); /* Callback */
 xtb_data val;			/* User data          */
 xtb_frame *frame;		/* Returned size      */
 /*

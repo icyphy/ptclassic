@@ -1,6 +1,6 @@
 # Makefile for Ptolemy demo/whats_new0.7.1 directory
 #
-# $Id$
+# @(#)makefile	1.2 01/16/98
 # Author: Christopher Hylands
 #
 # Copyright (c) 1998 The Regents of the University of California.
@@ -40,7 +40,11 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
+	compatibility.html \
 	index.html \
+	minorchanges.html \
+	newstars.html \
+	newwork.html
 
 MISC_FILES =
 

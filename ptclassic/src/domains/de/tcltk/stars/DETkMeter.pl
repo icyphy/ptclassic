@@ -6,15 +6,15 @@ defstar {
 Dynamically display the value of any number of input signals on a set of
 bar meters.
 	}
-	version { $Id$  }
+	version { @(#)DETkMeter.pl	1.5	10/23/95  }
 	author { Brian Evans and Edward Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	hinclude { "ptk.h" }
 	defstate {
 		name {label}
@@ -47,9 +47,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Outputs not supported");
 		return;
 	    }
+	}
+	begin {
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkMeter.tcl";
-	    DETclScript::setup();
+	    DETclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

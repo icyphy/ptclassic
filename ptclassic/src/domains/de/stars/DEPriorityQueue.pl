@@ -4,85 +4,93 @@ defstar {
 	desc {
 A priority queue.
 Inputs have priorities according to the number of the input, with
-"inData#1" having highest priority, "inData#2" being next, etc.
+"inData#1" having highest priority, "inData#2" having the second
+highest priority, etc.
 When a "demand" is received, outputs are produced by selecting first
-based on priority, and then based on time of arrival, using a FIFO policy.
-A finite total capacity can be specified by setting the "capacity"
-parameter to a positive integer.
-When capacity is reached, further inputs are sent to the "overflow"
-output, and not stored.
-The "numDemandsPending" and "consolidateDemands" states have the same
+based on priority, and then based on the time of arrival, using a
+first-in first-out (FIFO) policy.
+A finite total capacity of the queue can be specified by setting the
+"capacity" parameter to a positive integer.
+When the capacity has been reached, further inputs are sent to the "overflow"
+output and are not stored.
+The "numDemandsPending" and "consolidateDemands" parameters have the same
 meaning as in other Queue stars.
 The size of the queue is sent to the "size" output whenever an "inData"
 or "demand" event is processed.
 	}
-	version { $Id$ }
+	version { @(#)DEPriorityQueue.pl	1.12	10/06/96 }
 	author { Soonhoi Ha and E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
-	explanation {
+	htmldoc {
 This star queues input particles and produces output particles on demand.
 The inputs are assigned priorities so that when an output is demanded,
-if any particle from \fIinData#1\fR is available, it
+if any particle from <i>inData#1</i> is available, it
 will be sent to the output.  If several particles from
-\fIinData#1\fR are available, a FIFO policy is used.
-Only if the queue for \fIinData#1\fR is empty
-will the queue for \fIinData#2\fR be examined.
-This means that later arrivals on \fIinData#1\fR may go to the output before
-earlier arrivals on \fIinData#2\fR.
-.pp
+<i>inData#1</i> are available, a FIFO policy is used.
+Only if the queue for <i>inData#1</i> is empty
+will the queue for <i>inData#2</i> be examined.
+This means that later arrivals on <i>inData#1</i> may go to the output before
+earlier arrivals on <i>inData#2</i>.
+<p>
 The first particle to arrive at an input is always passed directly
-to the output, unless \fInumDemandsPending\fR is initialized to 0.
-If several particles arrive first with the same time stamp, the highest
+to the output, unless <i>numDemandsPending</i> is initialized to 0.
+If several particles arrive first with the same time stamp, then the highest
 priority particle will go to the output.
-.pp
-If \fIconsolidateDemands\fR is set to TRUE (the default),
-then \fInumDemandsPending\fR is not permitted to rise above unity.
+<p>
+If <i>consolidateDemands</i> is set to TRUE (the default),
+then <i>numDemandsPending</i> is not permitted to rise above unity.
 This means that
-if multiple \fIdemand\fR particles with the same time stamp
-are waiting at the \fIdemand\fR input, they are
+if multiple <i>demand</i> particles with the same time stamp
+are waiting at the <i>demand</i> input, then they are
 consolidated into a single demand, and only one output is produced.
-As usual, if a \fIdemand\fR input arrives between the time that the queue
-goes empty and the next arrival of a data input, it enables
-the next \fIinData\fR particle to pass immediately to the output by
-setting the state \fInumDemandsPending\fR to unity.
-But if more than one \fIdemand\fR event arrives in this time period, the
+As usual, if a <i>demand</i> input arrives between the time that the queue
+becomes empty and the next arrival of data input, then the star enables
+the next <i>inData</i> particle to pass immediately to the output by
+setting the state <i>numDemandsPending</i> to unity.
+But if more than one <i>demand</i> event arrives in this time period, then the
 effect is the same as if only one such event had arrived.
-.pp
-If \fIconsolidateDemands\fR is set to FALSE, then every \fIdemand\fR input
+<p>
+If <i>consolidateDemands</i> is set to FALSE, then every <i>demand</i> input
 will eventually stimulate an output, even if successive demands arrive
 when the queue is empty, and even if successive demands arrive with the
 same time stamp.
-.pp
-A total capacity limit is specified.
+<p>
+A total capacity limit can be specified.
 This is the limit on the total number of particles that the star
-may store from one firing to the next, regardless of which input they came from.
+may store from one firing to the next, regardless of which input they came.
 Note that storage is allocated dynamically, so a large capacity
 does not necessarily imply a large storage usage.
-When the capacity is reached, all further inputs will be routed
-to the \fIoverflow\fR output
+When the capacity has been reached, all further inputs will be routed
+to the <i>overflow</i> output
 until a demand input makes space in the star.
-To make the capacity infinite, simply enter a negative number.
-.pp
+To make the capacity infinite, simply enter a negative number for the
+"capacity" parameter.
+<p>
 Like the
-.c FIFOQueue
-star, this star de-queues particles on demand.
+<tt>FIFOQueue</tt>
+star, this star dequeues particles on demand.
 Data outputs are produced when a demand input arrives, if the any of the
 queues has particles in it.
-If all queues are empty, no data output is produced
+If all queues are empty, then no data output is produced
 until the next time a data input arrives.
-That next data input will be directed to the data output immediately.
+The next data input will be directed to the data output immediately.
 Any intervening demand inputs (between the time that the queues
 go empty and the next arrival of a data input) are ignored.
-.pp
-Each time a data or demand input arrives, the size of the queue
-after processing the input is sent to the \fIsize\fR output.
+<p>
+Each time data or demand input arrives, the size of the queue
+after processing the input is sent to the <i>size</i> output.
 	}
 	seealso {FIFOQueue}
 	input {
 		name {demand}
 		type {anytype}
-		desc { Demand an ouput. }
+		desc { Demand an output. }
 	}
 	inmulti {
 		name {inData}
@@ -103,7 +111,7 @@ after processing the input is sent to the \fIsize\fR output.
 		name {overflow}
 		type {=inData}
 		desc {
-Arrival data that can not be queued due to capacity limit.
+Arrival data that cannot be queued due to capacity limit.
 		}
 	}
 
@@ -144,11 +152,13 @@ Maximum total number of particles. If <0, capacity is infinite.
 		// events should be made available.
 		inData.before(demand);
 	}
-	start {
-		queue.initialize();
+	setup {
+		emptyQueue();
 		infinite = (int(capacity) < 0);
 	}
-
+	destructor {
+		emptyQueue();
+	}
 	go {
 	    completionTime = arrivalTime;
 
@@ -163,7 +173,7 @@ Maximum total number of particles. If <0, capacity is infinite.
 
 	    // Iterate over the inputs, collecting new input data
 	    // All input data should be collected before any outputs are
-	    // produced so that priorites of the inputs will be observed.
+	    // produced so that priorities of the inputs will be observed.
 	    // Note that the queue size limitation will not be observed at
 	    // this point.  Only at the end of the firing will the queue
 	    // be truncated to capacity.
@@ -171,7 +181,7 @@ Maximum total number of particles. If <0, capacity is infinite.
 	    for(int i=0;i<inData.numberPorts(); i++) {
 		InDEPort* p = nextp++;
 		while (p->dataNew) {
-		    queue.levelput(p->get().clone(),float(i));
+		    queue.levelput(p->get().clone(),i);
 		    p->getSimulEvent();
 		}
 	    }
@@ -198,5 +208,16 @@ Maximum total number of particles. If <0, capacity is infinite.
 
 	    // output the queue size
 	    size.put(completionTime) << queue.length();
+	}
+	// this method empties the queue, returning any Particles to their
+	// pools.
+	method {
+		name { emptyQueue }
+		code {
+			while (queue.length() > 0) {
+				Particle* p = (Particle*) queue.getFirstElem();
+				p->die();
+			}
+		}
 	}
 }

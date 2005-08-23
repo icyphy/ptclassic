@@ -1,0 +1,61 @@
+#! /bin/sh
+# Command-line program for the tycho.kernel.basic utility \
+    exec itclsh "$0" "$@"
+
+# @(#)basic	1.1 02/24/98
+# Author: John Reekie
+
+# If the BASIC_LIBRARY variable is set, add it to the auto_path
+if [info exists env(BASIC_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(BASIC_LIBRARY)] }  {
+	lappend auto_path $env(BASIC_LIBRARY)
+    }
+}
+
+# Require the tycho.kernel.basic package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.kernel.basic}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.kernel.basic}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.kernel.basic}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.kernel.basic\". You can\n\
+	    1. Install tycho.kernel.basic in a subdirectory of your Tcl library\n\
+	    2. Install tycho.kernel.basic in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the BASIC_LIBRARY variable to point to the \
+	    basic directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.kernel.basic, version 2.0"
+
+# Run the main procedure
+eval basic $argv
+
+# Done
+

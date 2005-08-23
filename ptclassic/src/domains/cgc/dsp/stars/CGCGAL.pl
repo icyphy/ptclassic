@@ -3,9 +3,14 @@ defstar
     name { GAL }
     domain { CGC } 
     desc { Gradient Adaptive Lattice filter. }
-    version { $Id$ }
+    version { @(#)CGCGAL.pl	1.6 3/7/96 }
     author { T. M. Parks }
-    copyright { 1992 The Regents of the University of California }
+    copyright {
+Copyright (c) 1992-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { CGC local library }
 
     input
@@ -93,12 +98,18 @@ defstar
 	       $ref(f,m) = $ref(f,m-1) - $ref(k,m) * $ref(b,m-1);
 	    }
 
+	    /* Update backward errors, reflection coefficients. */
 	    for(m = $val(order); m > 0; m--)
 	    {
 		$ref(b,m) = $ref(b,m-1) - $ref(k,m)*$ref(f,m-1);
 		$ref(e,m) *= 1.0 - $val(alpha);
 		$ref(e,m) += $val(alpha) * ($ref(f,m-1)*$ref(f,m-1) + $ref(b,m-1)*$ref(b,m-1));
-		$ref(k,m) += $val(alpha) * ($ref(f,m)*$ref(b,m-1) + $ref(b,m)*$ref(f,m-1)) / $ref(e,m);
+		if ($ref(e,m) != 0.0)
+		{
+		    $ref(k,m) += $val(alpha) * ($ref(f,m)*$ref(b,m-1) + $ref(b,m)*$ref(f,m-1)) / $ref(e,m);
+		    if ($ref(k,m) > 1.0) $ref(k,m) = 1.0;
+		    if ($ref(k,m) < -1.0) $ref(k,m) = -1.0;
+		}
 	    }
 
 	    $ref(b,0) = $ref(input);

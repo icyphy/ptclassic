@@ -1,262 +1,162 @@
-defstar
-{
-    name { StereoOut }
-    domain { CGC }
-    descriptor {
-
-Writes Compact Disc audio format to a file. The file
-can be the audio port /dev/audio, if supported by the
-workstation.
-    }
-    explanation {
-This code is based on the description of the audio
-driver which can be obtained by looking at the man page
-of audio.
-    }
-    version { $Id$ }
-    author { Sunil Bhave }
-    copyright {
-Copyright (c) 1990-1996 The Regents of the University 
-of California. All rights reserved.
+defstar {
+  name { StereoOut }
+  domain { CGC }
+  derivedFrom { AudioBase }
+  descriptor {
+Writes Compact Disc audio format from a file given by "fileName". The file
+can be the audio port /dev/audio, if supported by the workstation.  
+The data written is linear 16 bit encoded and stereo(2 channel) format.
+  }
+	htmldoc {
+This code is based on the description of the audio driver which can
+be obtained by looking at the man page for audio.
+  }
+  version { @(#)CGCStereoOut.pl	1.23 04/07/97 }
+  author { Sunil Bhave }
+  copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty 
-provisions.
-    }
-    location { CGC main library }
+limitation of liability, and disclaimer of warranty provisions.
+  }
+  location { CGC main library }
+  
+  input {
+    name { left }
+    type { float }
+    desc { Left channel input. Range: -1.0 to 1.0}
+  }
+  
+  input {
+    name { right }
+    type { float }
+    desc { Right channel input Range: -1.0 to 1.0}
+  }
 
-    defstate {
-      name { fileName }
-      type { string }
-      default { "/dev/audio" }
-      desc { Output file for CD quality data. }
-    }
+  defstate {
+    name {aheadLimit}
+    type{int}
+    default {"-1"}
+    desc {If non-negative, the number of samples ahead that can computed.}
+  }
 
-    defstate {
-      name { blockSize }
-      type { int }
-      default { 8180 }
-      desc { Number of samples to write. }
-    }
+  defstate {
+    name { homogeneous }
+    type { int }
+    default { 0 }
+    desc { If set to 1, the star receives 2 samples of data per
+	     firing }
+  }
 
-    defstate {
-      name { encodingType }
-      type { string }
-      default { "linear" }
-      desc { Type of encoding : Linear or U_Law PCM. }
-      attributes { A_GLOBAL }    
-    }
+  constructor {
+    encodingType.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
+    encodingType.setInitValue("linear16");
+    channels.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
+    channels.setInitValue(2);
+    portType.setInitValue("line_out");
 
-    defstate {
-      name { sampleRate }
-      type { int }
-      default { 44100 }
-      desc { Number of samples per second. }
-      attributes { A_GLOBAL }
-    }
+  }
 
-    defstate {
-      name { precision }
-      type { int }
-      default { 16 }
-      desc { Bit-width of each sample. }
-      attributes { A_GLOBAL }    
+  codeblock (homogeneousConvert) {
+    /* Take data from Input and put it in buffer */
+    /* this code writes 2 samples per star firing to the write buffer */
+    {
+      int j;
+      j = 2*$starSymbol(counter);
+      $starSymbol(buffer)[j] = (short)($ref(left)*32767.0);
+      $starSymbol(buffer)[j+1] = (short)($ref(right)*32767.0);
+      $starSymbol(counter)++;
     }
-    
-    defstate {
-      name { volume }
-      type { int }
-      default { 100 }
-      desc { The volume of the audio output. range 0-100 }
-      attributes { A_GLOBAL }
+  }
+  
+  codeblock (convert) {
+    /* Take data from Input and put it in buffer */
+    /* Data in buffer is alternate left and right channels */
+    {
+      int i, j;
+      for (i = 0; i < ($val(blockSize)/4); i ++) {
+	j = i*2;
+	$starSymbol(buffer)[j] = 
+	  (short)($ref(left,($val(blockSize)/4) -1 - i)*32768.0);
+	$starSymbol(buffer)[j+1] = 
+	  (short)($ref(right,($ref(blockSize)/4) - 1 - i)*32768.0);
+      }
     }
+  }
 
-    defstate {
-      name { balance }
-      type { int }
-      default { 50 }
-      desc { Balance of audio output. range 0-100 }
-      attributes { A_GLOBAL }
-    }
+  codeblock (setbufptr) {
+    $starSymbol(bufferptr) = $starSymbol(buffer);
+  }
 
-    defstate {
-      name { outputPort }
-      type { string }
-      default { line_out }
-      desc { Audio input port: line_out or speaker. }
-      attributes { A_GLOBAL }    
+  setup {
+    if(homogeneous == 1) {
+      left.setSDFParams(1);
+      right.setSDFParams(1);
     }
-
-    protected {
-      int standardOutput:1;
+    else {
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
+  }  
 
-    input {
-      name { input }
-      type { float }
-    }
+  initCode {
+    CGCAudioBase::initCode();
 
-    codeblock (declarations) {
-      int $starSymbol(file);
-      int $starSymbol(buffer)[$val(blockSize)*2];
-      int $starSymbol(counter);
-    }
-    
-    codeblock (globals) {
-      int $starSymbol(ctlfile);    
-    }
-
-    codeblock (set_parametersDef) {
-      /* The following function is used to set the */
-      /* audioctl device to the proper recording   */
-      /* format					   */
-
-      static void $starSymbol(set_parameters)()
+    /* variable for the sync codeblock below */
+    if ((int)aheadLimit >= 0 ) {
+    	addDeclaration(syncCounter);
+	addCode("$starSymbol(count) = 0;");
+       }
+    /* Declare "buffer" to be of type short and blockSize/2 bytes */
+    addDeclaration(declarations("short", int(blockSize)/2));
+    /* Open file for writing data */
+    addCode(openFileForWriting);	
+    /* Set the audio driver if file is "/dev/audio" */
+    if(strcasecmp(fileName, "/dev/audio") == 0)
       {
-	 audio_info_t info;
-	 int encoding_val;
-	 int output_val;
-	 AUDIO_INITINFO(&info);
+	/* audio_setup : to set encodingType, sampleRate and channels */
+	StringList setupParameters = "$sharedSymbol(CGCAudioBase,audio_setup)";
+	setupParameters  << "($starSymbol(file), "
+			 << "\"" << encodingType << "\", "
+			 <<  sampleRate << ", " 
+			 <<  channels   << ");\n";
 
-	 if ($ref(encodingType) == "linear")
-	   encoding_val = 3;	// Linear
-	 else
-	   encoding_val = 1;	// U_law
-				
-	 if ($ref(outputPort) == "line_out")
-	   output_val = 0x04; 	// Line_Out
-	 else
-	   output_val = 0x01;	// Speaker
-	 
-//	 info.record.encoding = encoding_val;
-	 info.play.encoding = encoding_val;
-
-	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
-
-//	 info.record.precision = 8;
-	 info.play.precision =8;
-
-	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
-
-//	 info.record.channels = 2;
-//	 info.record.port = AUDIO_LINE_IN;
-//	 info.record.sample_rate = $ref(sampleRate);
-//	 info.record.gain = AUDIO_MAX_GAIN;
-//	 info.record.balance = AUDIO_MID_BALANCE;
-
-	 info.play.balance = AUDIO_MID_BALANCE*$ref(balance)/50;
-	 info.play.channels = 2;
-	 info.play.port = output_val;
-	 info.play.sample_rate = $ref(sampleRate);
-	 info.play.gain = AUDIO_MAX_GAIN*$ref(volume)/100;
-
-	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
-
-//	 info.record.precision = $ref(precision);
-	 info.play.precision =$ref(precision);
-//	 info.record.sample_rate = $ref(sampleRate);
-	 info.play.sample_rate = $ref(sampleRate);
-
-	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
-      
+	addCode(setupParameters);
+	/* audio_control : to set portType, volume and balance */
+	StringList controlParameters = "$sharedSymbol(CGCAudioBase,audio_control)";
+	controlParameters << "($starSymbol(file), "
+			  << "\"" << portType << "\", "
+			  <<  volume << ", " 
+			  <<  balance << ", "
+			  << "0);\n";
+	addCode(controlParameters);
       }
-    }
-
-    codeblock (openFile) {
-      /* Open file for writing */
-      $starSymbol(file) = open("$val(fileName)",O_WRONLY, 0666);
-      if ($starSymbol(file) == -1) {
-	perror("Error: cannot open output file: $val(fileName)");
-	exit(1);	
-      }
-    }
-    
-    codeblock (noOpen) {
-      /* Use standard output for writing */
-      $starSymbol(file) = 0;
-    }
-    
-    codeblock (openCrtlfile) {
-      /* Open control device */
-      $starSymbol(ctlfile) = open("/dev/audioctl",O_RDWR, 0666);
-      if ($starSymbol(ctlfile) == -1) {
-	perror("Error in opening audio control device: /dev/audioctl");
-	exit(1);
-      }
-    }
 
 
-    codeblock (convert) {
-      /* Take data from Input and put it in buffer */
-      for ($starSymbol(counter)=0; $starSymbol(counter) <
-	     ($val(blockSize)*2); $starSymbol(counter)++) {
-	$starSymbol(buffer)[$starSymbol(counter)] = (int)floor($ref(input,$starSymbol(counter))*32768);
-      }
-    }
+  }
 
-    codeblock (write) {
-      /* Write data to a file */
-      write($starSymbol(file), $starSymbol(buffer), $val(blockSize));
+  go {
+    if(homogeneous == 1) {
+      addCode(homogeneousConvert);
+      addCode("if($starSymbol(counter) == ($val(blockSize)/4)) {\n");
+      addCode(setbufptr);
+      addCode(write);
+      addCode("$starSymbol(counter) = 0;\n");
+      addCode("}\n");
     }
-
-
-    codeblock (closeFile) {
-      /* Close file */
-      if (close($starSymbol(file)) != 0)
-        {
-	  perror("Error in closing: $val(fileName)");
-	  exit(1);
-        }	
-    }
-
-    codeblock (closeCrtlfile) {
-      /* Close control device */
-      if (close($starSymbol(ctlfile)) != 0) {
-	perror("Error closing audio control device: /dev/audioctl");
-	exit(1);
-      }
-    }
-      
-
-    setup {
-      fileName.clearAttributes(A_SETTABLE);
-      standardOutput = (strcmp(fileName,"") == 0);
-      input.setSDFParams(2*int(blockSize), 2*int(blockSize)-1);
-    }
-      
-    initCode {
-      addInclude("<stdio.h>");
-      addInclude("<unistd.h>");
-      addInclude("<sys/ioctl.h>");
-      addInclude("<math.h>");
-      addInclude("<sys/audioio.h>");
-      addDeclaration(declarations);
-      addGlobal(globals);
-      
-      if (standardOutput) addCode(noOpen);
-      else
-	{
-	  addInclude("<fcntl.h>");
-	  addCode(openFile);
-	}
-      
-      addCode(openCrtlfile);
-      addProcedure(set_parametersDef);
-      
-      /* Update parameters */
-      addCode("$starSymbol(set_parameters) ();\n");
-    }
-    
-    go {
+    else {
       addCode(convert);
+      if ((int)aheadLimit >= 0 ) addCode(syncLinear16);
+      addCode(setbufptr);
       addCode(write);
     }
-    
-    wrapup {
-      if (!standardOutput) addCode(closeFile);
-      addCode(closeCrtlfile);
-    }
-    
-    exectime {
-      return int(blockSize)*28;
-    }
+  }  
+
+  wrapup {
+    CGCAudioBase::wrapup();
+  }
+  
+  exectime {
+    return int(blockSize)*28;
+  }
 }

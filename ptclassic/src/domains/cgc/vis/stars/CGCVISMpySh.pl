@@ -1,22 +1,24 @@
 defstar {
-	name { VISMpyDblSh }
+	name { VISMpySh }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCVISMpySh.pl	1.7	04/07/97 }
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  Multiplies the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  Each multiplication
-	  results in a 32 bit result, which is then rounded to 16bits.
-	    }
+Multiply the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are multiplied to
+those of another 64-bit float particle.  Each multiplication produces 
+a 32-bit result, which is then truncated to 16 bits.  The final result 
+is four 16-bit fixed point numbers that are returned as a single 
+float particle.
+	}
 	input {
 	  name { inA }
 	  type { float }
@@ -39,38 +41,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	}
-	codeblock(localDecl){
-	  vis_d64  resulthihi,resulthilo,resulthi;
-	  vis_d64  resultlohi,resultlolo,resultlo,result;
-	  vis_f32  dataAlo,dataAhi,dataBlo,dataBhi,resultu,resultl;
-	}
 	codeblock(multfour){
-	  vis_write_gsr(8);
-	  
 	  /* setup the data */
-	  dataAhi=vis_read_hi((double) $ref(inA));
-	  dataAlo=vis_read_lo((double) $ref(inA));
-	  dataBhi=vis_read_hi((double) $ref(inB));
-	  dataBlo=vis_read_lo((double) $ref(inB));
+	  vis_d64 dataA = (double) $ref(inA);
+	  vis_d64 dataB = (double) $ref(inB);
 	  
 	  /* calculate the partial products */
-	  resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
-	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
-	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
-	  
-	  resultlohi = vis_fmuld8sux16(dataAlo,dataBlo);
-	  resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
-	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
-	  
-	  /*pack and concat the final product*/
-	  resultu = vis_fpackfix(resulthi);
-	  resultl = vis_fpackfix(resultlo);
-	  result = vis_freg_pair(resultu,resultl);
-	  
-          $ref(out) = result;
+	  vis_d64 resulthi = vis_fmul8sux16(dataA,dataB);
+	  vis_d64 resultlo = vis_fmul8ulx16(dataA,dataB);
+	  $ref(out) = vis_fpadd16(resulthi, resultlo);
 	}
 	go {	  
-	  addCode(localDecl);
 	  addCode(multfour);
       	}
 }

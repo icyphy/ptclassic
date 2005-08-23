@@ -1,7 +1,7 @@
 static const char file_id[] = "ACSKnownCategory.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)ACSKnownCategory.cc	1.8 09/08/99
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
@@ -53,31 +53,40 @@ the Core categories from the list.
 #pragma implementation
 #endif
 
-#include "StringList.h"
+#include "DataStruct.h"
 #include "ACSKnownCategory.h"
+#include "ACSCore.h"
 
 // The StringList of categorys
-StringList* ACSKnownCategory::allCategories = NULL;
+SequentialList* ACSKnownCategory::allCategories = NULL;
 
 // Add a category to the list.
-void ACSKnownCategory::addEntry( const char* category ) {
-	if ( allCategories == NULL )
-		allCategories = new StringList(category);
-	else if ( find(category) == NULL ) 
-		(*allCategories) << category;
+void ACSKnownCategory::addEntry( ACSCore& core ) {
+	if ( allCategories == NULL ) {
+		allCategories = new SequentialList;
+		allCategories->put(&core);		
+	} else if ( find(core.getCategory()) == NULL ) 
+		allCategories->put(&core);
 }
 
 // Get the whole category list.
-const StringList ACSKnownCategory::Categories() {
-	return *allCategories;
+StringList ACSKnownCategory::getCategories() {
+	static StringList categories;
+	ListIter next(*allCategories);
+	ACSCore* ptr;
+	categories.initialize();
+	while((ptr=(ACSCore*)(next++)) != 0) {
+		categories << ptr->getCategory();
+	}
+	return categories;
 }
 
 // Find a category, return NULL otherwise.
-const char* ACSKnownCategory::find( const char* category ) {
-	StringListIter next(*allCategories);
-	const char* ptr;
-	while((ptr=next++) != 0) {
-		if ( strcmp(ptr,category) == 0 )
+const ACSCore* ACSKnownCategory::find( const char* category ) {
+	ListIter next(*allCategories);
+	ACSCore* ptr;
+	while((ptr=(ACSCore*)(next++)) != 0) {
+		if ( strcmp(ptr->getCategory(),category) == 0 )
 			return ptr;
 	}
 	return NULL;

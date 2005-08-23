@@ -2,36 +2,37 @@ defstar {
 	name { LMS }
 	domain { C50 }
 	desc { Least mean square (LMS) adaptive filter. }
-	version { $Id$ }
+	version {@(#)C50LMS.pl	1.12	09/21/99}
 	acknowledge { Gabriel version by E. A. Lee, Maureen O'Reilly }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
-.pp
+	htmldoc {
+<p>
 This star implements an adaptive filter using the LMS algorithm.
 The initial coefficients determine the order of the filter.
 The default coefficients specify
 an eighth order, equiripple, linear-phase, lowpass filter,
-the same as the default coefficients of the \fIFIR\fP star.
-.PP
-The \fIstepSize\fP parameter specifies the rate of adaptation.
-.PP
-The \fIerrorDelay\fP parameter specifies the relative delay between the output
-samples and the input error samples.  There must be at least
+the same as the default coefficients of the <i>FIR</i> star.
+<p>
+The <i>stepSize</i> parameter specifies the rate of adaptation.
+<p>
+The <i>errorDelay</i> parameter specifies the relative delay between the
+output samples and the input error samples.  There must be at least
 a delay of one (you must add the delay in your system) because
 the path from the output to the error forms a closed feedback loop.
 You can insert more delays if you wish (you may have to decrease
-\fIstepSize\fP to keep the algorithm stable), but be sure to
-adjust the \fIerrorDelay\fP parameter accordingly.
-.PP
+<i>stepSize</i> to keep the algorithm stable), but be sure to
+adjust the <i>errorDelay</i> parameter accordingly.
+<p>
 	}
         
+	// FIXME: Should be derived from the FIR star
         output {
 		name { output }
 		type { fix }
@@ -49,7 +50,7 @@ adjust the \fIerrorDelay\fP parameter accordingly.
                 type { fix }
                 default { 0.01 }
                 desc { specifies the rate of adaptation }
-		attributes { A_NONCONSTANT|A_UMEM }
+		attributes { A_CONSTANT|A_UMEM }
         }
 	state {
 		name { errorDelay }
@@ -60,161 +61,185 @@ error samples.
                 }
 		default { 1 }
 	}
+
+	state {
+		name { decimation }
+		type { int }
+		desc { number of input samples consumed before firing. }
+		default { 1 }
+	}
+
         state {
                 name { coef }
                 type { fixarray }
                 desc { internal }
                 default { "-4.0609e-2 -1.6280e-3 1.7853e-1 3.7665e-1 3.7665e-1 1.7853e-1 -1.6280e-3 -4.0609e-2" }
-                attributes { A_NONCONSTANT|A_UMEM }
+                attributes { A_NONCONSTANT | A_NONSETTABLE | A_BMEM }
         }
-        state {
-                name { coefLen }
-                type { int }
-                desc { number of coef. }
-                default { 8 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT }
-        }        
-
-        state {
-                name { loopVal }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT }
-        }            
 
         state {
                 name { delayLine }
-                type { intarray }
+                type { fixarray }
                 desc { internal }
                 default { 0 }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+	        attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
+
         state {
-                name { delayLineStart }
+                name { delayLinePtr }
 	        type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
-	}
-        state {
-                name { delayLineSize }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }   
-	 state {
-                name { delayLineSpace }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-
-        codeblock(std) {
-	mar	*,AR4
-        lar	AR0,#$addr(error)		;Address error		=> AR0
-	lar	AR1,#$addr(stepSize)		;Address stepSize	=>AR1
-	lar    	AR3,#$addr(coef)		;Address coef		=>AR3
-	lar    	AR4,#$addr(delayLineStart)	;Address Delay Pointer	=>AR4
-	lar	AR5,*,AR0 			;Delay Pointer		=>AR5
-	lar	AR7,#$addr(output)          	;Address output		=>AR7
-	lt	*,AR1				;TREG0 = error
-	mpy    	*,AR3				;error*stepSize
-	sph	TREG0				;TREG0=error*stepSize
-	lacc	*,15,AR5			;Accu = coef(0)
-        }
-
-	codeblock(loop) {
-	splk	#$addr(delayLineStart),CBSR1	;Startadress circ. buf. 1
-	splk	#$addr(delayLineStart)+$val(delayLineSize)-1,CBER1
-	splk	#0dh,CBCR			;enable circ. buf 1 with AR5
-        splk    #$val(loopVal),BRCR		;number of loops => BRCR
-	rptb	$label(end)			;loop to label(end)
-	 mpya	*+,AR3				;error*stepSize*val(k-i)
-	 apac					;Accu=coef(i)+er*stSi*val(k-i)
-	 sach	*+,1				;Accu => new coef(i) incr AR3
-	 lacc	*,15,AR5			;Accu = coef(i+1)
-$label(end)
-        }
-
-        codeblock(noloop) {
-        mpya	*+,AR3				;error*stepSize*val(1) incr AR5
-	apac					;Accu=coef(0)+er*stSi*val(1)
-	sach	*+,1				;Accu => new coef(0)   incr AR3
-	lacc	*,15,AR5			;Accu = coef(1)
-        }
-        codeblock(cont) {
-        mpya	*,AR3				;error*stepSize*val(k)
-	apac					;Accu=coef(i+1)+er*stSi*val(k)
-	sach	*,1,AR5				;Accu => new coef(i+1)
-	lmmr	BMAR,#$addr(input)		;Address input => BMAR
-	lmmr	AR5,#$addr(delayLineStart)	;Address delayLine Pointer AR5
-        bldd	BMAR,*,AR4			;input => newest delay value
-        sar	AR5,*,AR5			;update delayLine pointer.
-	zap					;clear P-Reg. and Accu
-	splk	#$addr(coef),BMAR		;BMAR= address first coef	       }
-
-        codeblock(loop1) {
-        rpt     #$val(loopVal)			;
-         mads	*+				;accu = Sum[coef(i)*u(k-i)]
-        }
-
-        codeblock(noloop1) {
-        mads  	* 				;coef(1)*u(1)
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 
-        codeblock(end) {
-        apac					;last addition
-	mar	*,AR7
-        sach	*,1				;result => output
-        apl	#0fff7h,CBCR			;disable circ. buffer 1
+
+	protected {
+
+		int	numTaps;
+		int	delayMask;
+		int	muAsInt;
+		int	length;
+		StringList cfs;
 	}
-       
-        codeblock(makeblock) {
-        .ds  	$addr(delayLine)		;delayLine memory
-        .space	$val(delayLineSpace)
-        .ds	$addr(delayLineStart)		;pointer to delayLine memory
-        .word	$addr(delayLine)
-        .text
-        }
-        setup {
-                coefLen=coef.size();
-                delayLineSize=coefLen+errorDelay-1;
-		delayLine.resize(delayLineSize);
-                }
-        initCode  {
-		delayLineSpace=int(delayLineSize)*16;
-	        addCode(makeblock);
-        }
-        go { 
-	        addCode(std);
-	
-        	if(coefLen>1) {
-	            loopVal=coefLen-1;    
-	            addCode(loop);
+
+
+        // sprintf()
+        ccinclude { <stdio.h> }
+
+	setup{
+		delayMask = -1;
+		numTaps = coef.size();
+		length = int(errorDelay)*int(decimation);
+		if (length == 1) {
+			length += numTaps;
+		} else {
+			length += numTaps;
+			int bufSize = 1;
+			for (int j = 1; j<16; j++){
+				bufSize = 2*bufSize;
+				if (bufSize >= length) break;
+			}
+			length = bufSize;
+			delayMask = bufSize - 1;
 		}
-		else addCode(noloop);
+		delayLine.resize(length);
 
-	        addCode(cont);
-              
-		if(coefLen>1) { 
-		     loopVal=loopVal-1;	
-        	     addCode(loop1);
-		 }     
-		else
-        	     addCode(noloop1);
-	     
-	        addCode(end);
-        }             
+		double temp; 
+		temp = stepSize.asDouble();
+		if (temp >= 0) {
+			muAsInt = int(temp*double(32768) + 0.5);
+		} else {
+			muAsInt = int((2+temp)*double(32768) + 0.5);
+		}
+		
+		char buf[32];
+		cfs.initialize();
+		int i;
+		for (i = 0; i< numTaps-1; i++){
+			temp = double(coef[i]);
+			sprintf(buf,"%.15f",temp);
+			cfs << buf << " ";
+		}
+		temp = double(coef[i]);
+		sprintf(buf,"%.15f",temp);
+		cfs << buf;
+		
+		
+	}
+
+	initCode{
+		addCode(initDelayLinePtr);
+		coef.setInitValue(cfs);
+	}
+
+	codeblock(initDelayLinePtr){
+        mar *,ar0
+        lar ar0,#$addr(delayLine)
+        sar ar0,$addr(delayLinePtr)
+	}
+
+	codeblock(prepareDelayLine,""){
+*first update delay line
+	lmmr	ar1,#$addr(delayLinePtr)
+	ldp	#0h
+	mar	*,ar1
+	splk	#$addr(delayLine),cbsr1
+	splk	#($addr(delayLine)+@(int(length)-1)),cber1
+	splk	#09h,cbcr
+	.if	@(int(decimation)-1)
+	rpt	#@(int(decimation) -1)
+	.endif
+	bldd	#($addr(input)+@(int(decimation)-1)),*+
+	smmr	ar1,#$addr(delayLinePtr)
+	lmmr	treg0,#$addr(error)
+	splk	#@(int(numTaps)-2),brcr
+	lar	ar3,#$addr(coef)
+	spm	1
+	setc	ovm
+	}
+
+	codeblock(getUpdateAddress,""){
+*figure out what past samples to use to update taps
+*this gets called only if errorDelay*decimation > 1
+*after this, ar2 -> x(n) and  ar1 -> x(n-errorDelay*decimation-numTaps-1)
+	mar	*-
+	lamm	ar1
+	samm	ar2
+	sub	#@(int(errorDelay)*int(decimation)  - int(numTaps) - 1),0
+	and	#@(int(delayMask))
+	or	#$addr(delayLine)
+	samm	ar1
+	}
+
+	codeblock(doUpdate,""){
+	mpy	#@(int(muAsInt))
+	pac	
+	sach	treg0,1	
+	mpy	*+,ar3		
+	.if	@(int(numTaps)-1)
+	rptb	$label(lmsu)
+	zalr	*,ar1
+	mpya	*+,ar3
+$label(lmsu)
+	sach	*-	
+	.endif
+	zalr	*
+	apac
+	sach	*,0,ar1
+	splk	#$addr(delayLine),cber1		
+	splk	#($addr(delayLine)+@(int(length)-1)),cbsr1	
+	zap
+	}
+
+	codeblock(prepareFIR,""){
+	lar	ar1,12h
+	}
+
+	codeblock(doFIR,""){
+	.if	@(int(numTaps)-1)
+	rpt	#@(int(numTaps)-1)
+	.endif
+	mac	$addr(coef),*-
+	apac
+	lar	ar1,#$addr(output)
+	sach	*
+	splk	#0,cbcr
+	spm	0
+	clrc	ovm
+	}
+	
+
+	go{
+		addCode(prepareDelayLine());
+		if (delayMask != -1) addCode(getUpdateAddress());
+		addCode(doUpdate());
+		if (delayMask != -1) addCode(prepareFIR());
+		addCode(doFIR());
+	}		
+
+
 	execTime { 
-              if (int(coefLen)<=1) {
-                  return 32;
-                 }
-              else {
-                  return (29+int(coefLen)*6);
-		 }
-	      return 0;	
+		return 32;
         }
 }

@@ -2,12 +2,11 @@ defstar
 {
     name { Filter }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNFilter.pl	1.4 3/7/96 }
     desc { Filter out multiples of a prime number. }
     author { T. M. Parks }
-    copyright
-    {
-Copyright (c) 1990-1994 The Regents of the University of California.
+    copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

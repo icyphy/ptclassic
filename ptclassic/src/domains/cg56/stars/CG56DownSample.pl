@@ -2,25 +2,33 @@ defstar {
 	name { DownSample }
 	domain { CG56 }
 	desc { 
-A decimator by "factor" (default 2).  The "phase" tells which sample to
-output.  If phase = 0, the most recent sample is the output, while if
-phase = factor-1 the oldest sample is the output.  Phase = 0 is the
-default.
+A decimator by a given "factor" (default 2).
+The "phase" tells which sample to output.
+If phase = 0, the most recent sample is the output,
+while if phase = factor-1 the oldest sample is the output.
+Phase = 0 is the default.  Note that "phase" has the opposite
+sense of the phase parameter in the UpSample star, but the
+same sense as the phase parameter in the FIR star.
 	}
-	version { $Id$ }
+	htmldoc {
+<a name="decimation"></a>
+	}
+	version { @(#)CG56DownSample.pl	1.19	03/29/97 }
 	author { J. Pino, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { CG56 main library }
 	input {
 		name {input}
-		type {FIX}
+		type {ANYTYPE}
 	}
 	output {
 		name {output}
-		type {FIX}
+		type {=input}
 	}
 	state {
 		name {factor}
@@ -30,24 +38,23 @@ default.
 		attributes { A_SETTABLE }
 	}
 	state {
-	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
 		desc { Downsample phase. }
 		attributes { A_SETTABLE }
 	}
- start {
+	setup {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	codeblock (sendsample) {
-	move	$ref(input),x0
-	move	x0,$ref(output)
+	move	$ref2(input,phase),a
+	move	a,$ref(output)
 	}
 	go {
-		gencode(sendsample);
+		addCode(sendsample);
 	}
 	execTime {
 		return 2;

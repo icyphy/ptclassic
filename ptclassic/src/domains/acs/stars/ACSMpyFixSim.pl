@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Mpy } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { @(#)ACSMpyFPSim.pl	1.1 03/09/98 }
+    version { @(#)ACSMpyFixSim.pl	1.5 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -26,6 +26,14 @@ the OverflowHandler will be called.
 		}
         }
 	defstate {
+	    name { LockOutput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified output precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
+	defstate {
 	        name { ArrivingPrecision }
 	        type {int }
 	        default { "YES" }
@@ -44,6 +52,14 @@ Sets the precision of the input in bits.
 The input particles are only cast to this precision if the
 parameter "ArrivingPrecision" is set to NO.
 		}
+	}
+	defstate {
+	    name { LockInput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified input precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
 	}
 	protected {
 		Fix fixIn, product;
@@ -95,5 +111,5 @@ parameter "ArrivingPrecision" is set to NO.
 		  checkOverflow(product);  // representation has 0 integer bits
 		}
 	        corona.output%0 << product;
-	}
+	    }
 }

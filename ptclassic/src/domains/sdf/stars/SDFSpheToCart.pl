@@ -2,19 +2,22 @@ defstar {
 	name { SpheToCart }
 	domain { SDF }
 	desc { Convert magnitude and phase to rectangular form. }
-	version { $Id$ }
+	version { @(#)SDFSpheToCart.pl	1.5	07 Oct 1996 }
 	author { Karim-Patrick Khiar }
 	copyright {
-Copyright (c) 1990-$Id$ The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-Compute the inner product of two vectors; one given by two angles in spherical components, the other in cartesian components.
-        <R,U> = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
-.Id "Compute the inner product of two vectors"
-.Id "format conversion, spherical to cartesian"
+	htmldoc {
+Compute the inner product of two vectors; one given by two angles in
+spherical components, the other in cartesian components.
+<pre>
+&lt;R,U&gt; = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
+</pre>
+<a name="Compute the inner product of two vectors"></a>
+<a name="format conversion, spherical to cartesian"></a>
 	}
 	location { SDF main library }
 	output {
@@ -59,6 +62,20 @@ Compute the inner product of two vectors; one given by two angles in spherical c
 	}
 	ccinclude { <math.h> }
 	go {
-		x%0 << magnitude *(cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
+// Line originally was:
+// x%0 << magnitude * 
+//        (cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
+// But sol2.cfront barfs with:
+// line 63: Error: Overloading ambiguity between
+// operator*(const Complex&, double) and FloatState::operator double().
+//
+// Now, we use casts whenever a state is referenced
+
+	double sited = double(site);
+	double gised = double(gise);
+
+	x%0 << (double(magnitude) * (cos(sited)*sin(gised)*double(Rx) +
+                                     sin(sited)*double(Ry) +
+ 				     cos(sited)*cos(gised)*double(Rz)));
 	}
 }

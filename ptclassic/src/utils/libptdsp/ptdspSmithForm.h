@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Brian Evans
-Version: $Id$
+Version: @(#)ptdspSmithForm.h	1.1 7/25/96
 */
 
 #ifdef __cplusplus

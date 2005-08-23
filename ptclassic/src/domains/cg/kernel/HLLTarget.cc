@@ -1,10 +1,31 @@
-static const char file_id[] = "BaseCTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)HLLTarget.cc	1.17	7/30/96
 
- Copyright (c) 1991 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  E. A. Lee
  Date of creation: 12/8/91
@@ -13,77 +34,40 @@ This Target produces and compiles a standalone C++ program for
 a universe.
 
 *******************************************************************/
+static const char file_id[] = "HLLTarget.cc";
 
-#include "BaseCTarget.h"
-#include "SDFCluster.h"
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "HLLTarget.h"
 #include "KnownTarget.h"
+#include "CGUtilities.h"
+#include "pt_fstream.h"
 #include <ctype.h>
 
 // constructor
-BaseCTarget::BaseCTarget(const char* nam, const char* startype,
-	const char* desc) : CGTarget(nam, startype, desc),
-	schedFileName(0), unique(0)
+HLLTarget::HLLTarget(const char* nam, const char* startype,
+		     const char* desc, const char* assocDomain) :
+CGTarget(nam, startype, desc, assocDomain)
 {
-	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
-			"Directory to write to"));
-	addState(loopScheduler.setState("loopScheduler",this,"NO",
-			"Specify whether to use loop scheduler."));
-}
-
-void BaseCTarget::start() {
-
-    LOG_DEL; delete dirFullName;
-    dirFullName = writeDirectoryName(destDirectory);
-
-    if(int(loopScheduler)) {
-	char* schedFileName = writeFileName("schedule.log");
-	LOG_NEW; setSched(new SDFClustSched(schedFileName));
-    } else {
-	LOG_NEW; setSched(new SDFScheduler);
-    }
-
-    headerCode();
-}
-
-void BaseCTarget::wrapup() {
-    char* codeFileName = writeFileName("code.output");
-    UserOutput codeFile;
-    if(Scheduler::haltRequested()) return;
-    if(!codeFile.fileName(codeFileName)) {
-	Error::abortRun("Can't open code file for writing: ",codeFileName);
-	return;
-    }
-    writeCode(codeFile);
 }
 
 // Routines for writing code: schedulers may call these
-StringList BaseCTarget::beginIteration(int repetitions, int depth) {
-	StringList out;
-	out = indent(depth);
+void HLLTarget::beginIteration(int repetitions, int depth) {
+	myCode << indent(depth);
 	if (repetitions == -1)          // iterate infinitely
-		out += "while(1) {\n";
+		myCode << "while(1) {\n";
 	else {
-		out += "int i";
-		out += unique;
-		out += "; ";
-		out += "for (i";
-		out += unique;
-		out += "=0; i";
-		out += unique;
-		out += " < ";
-		out += repetitions;
-		out += "; i";
-		out += unique++;
-		out += "++) {\n";
+	    myCode << "int " << targetNestedSymbol.push("i") << "; "
+	           << "for (" << targetNestedSymbol.get() << "=0; "
+		   << targetNestedSymbol.get() << " < " << repetitions << "; "
+		   << targetNestedSymbol.pop() << "++) {\n";
 	}
-	return out;
 }
 
-StringList BaseCTarget::endIteration(int, int depth) {
-	StringList out;
-	out = indent(depth);
-	out += "}\n";
-	return out;
+void HLLTarget::endIteration(int, int depth) {
+	myCode << indent(depth) << "}\n";
 }
 
 // This method creates a name derived from the name of the object
@@ -91,34 +75,22 @@ StringList BaseCTarget::endIteration(int, int depth) {
 // changed to '_' so that the resulting name is a legitimate C or C++
 // identifier.  For all names that begin with a numeric character,
 // the character 'x' is prepended.
-StringList BaseCTarget :: sanitizedName (const NamedObj& obj) const {
-        const char *s = obj.readName();
+StringList HLLTarget :: sanitizedName (const NamedObj& obj) const {
+        const char *s = obj.name();
 	return sanitize(s);
 }
 
 
-StringList BaseCTarget :: sanitize(const char* s) const {
-        LOG_NEW; char *snm = new char [strlen(s) + 2];
-        char *n = snm;
-	if(isdigit(*s)) *(n++) = 'x';
-        while (*s != 0) {
-            if(isalnum(*s)) *(n++) = *(s++);
-            else { *(n++) = '_'; s++; }
-        }
-        *n = 0;
+StringList HLLTarget :: sanitize(const char* s) const {
+        const char *snm = ptSanitize(s);
         StringList out(snm);
-        LOG_DEL; delete snm;
         return out;
 }
 
-StringList BaseCTarget :: sanitizedFullName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL) {
-                out = sanitizedFullName(*obj.parent());
-                out += ".";
-                out += sanitizedName(obj);
-        } else {
-                out = sanitizedName(obj);
-        }
+StringList HLLTarget :: sanitizedFullName (const NamedObj& obj) const {
+        const char *snm = ptSanitize(obj.fullName());
+        StringList out(snm);
         return out;
 }
+
+ISA_FUNC(HLLTarget,CGTarget);

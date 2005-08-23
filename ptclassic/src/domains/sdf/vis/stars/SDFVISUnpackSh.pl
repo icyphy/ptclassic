@@ -1,7 +1,7 @@
 defstar {
-	name { Vis64ToFloat }
+	name { VISUnpackSh }
 	domain { SDF }
-	version { @(#)SDFVis64ToFloat.pl	1.1 3/14/96 }
+	version { @(#)SDFVISUnpackSh.pl	1.8	7/9/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,53 +11,67 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  UnPack a single floating point number into four floating 
-	  point numbers.  The input floating point number is first
-	  separated into four shorts and then each short is up cast 
-	  to a floating point number.}
+UnPack a single floating point number into four floating 
+point numbers.  The input floating point number is first
+separated into four shorts and then each short is up cast 
+to a floating point number. Three things to notice:  
+First assume that the input ranges from -1 to 1.
+Second the code is inlined for faster performance.
+Third data memory is prealigned for faster performance.
+        }	
 	input {
-		name { In }
+		name { in }
 		type { float }
 		desc { Input float type }
 	}
 	output {
-		name { Out }
+		name { out }
 		type { float }
        		desc { Output float type }
 	}
+	hinclude {<vis_types.h>}
 	defstate {
-	        name { scale }
+	        name { scaledown }
 		type { float }
-		default { "1.0" }
+		default { "1.0/32767.0" }
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	code {
-                #define NumOut (4)
+	defstate {
+	        name { forward }
+		type { int }
+		default { FALSE }
+		desc { forward = TRUE unpacks with most current sample at
+		       position 0; forward = FALSE unpacks with most
+		       current sample at position 3 }
+		attributes { A_CONSTANT|A_SETTABLE }
 	}
-        setup {
-                Out.setSDFParams(NumOut,NumOut);
-        }
+	code {
+#define NUMOUT (4)
+	}
+	protected{
+	  union inoverlay {
+	    vis_d64 invaluedbl;
+	    vis_s16 invaluesh[4];
+	  } packedin;
+	}
+	setup {
+	  out.setSDFParams(NUMOUT,NUMOUT-1);
+	}
 	go {
+	  packedin.invaluedbl = double(in%0);
 
-	  union vis_dreg {
-	    double dreg64;
-	    short  sreg16[NumOut];
-	  };
-
-	  union vis_dreg packedin; 
-	  double outtmp[4];
-
-	  packedin.dreg64 = In%0;
-
-	  /*scale output*/
-	  for (int i=NumOut;i>0;i--){
-	  outtmp[i-1] = double(scale)*double(packedin.sreg16[i-1]);
+	  if (!forward) {
+	    out%0 << (double) scaledown * packedin.invaluesh[0];
+            out%1 << (double) scaledown * packedin.invaluesh[1];
+	    out%2 << (double) scaledown * packedin.invaluesh[2];
+	    out%3 << (double) scaledown * packedin.invaluesh[3];
 	  }
-	  
-	  /*output unpacked values*/
-	  for (int i=NumOut;i>0;i--){
-	  Out%(i-1) << double(outtmp[i-1]);
+	  else {
+	    out%0 << (double) scaledown * packedin.invaluesh[3];
+            out%1 << (double) scaledown * packedin.invaluesh[2];
+	    out%2 << (double) scaledown * packedin.invaluesh[1];
+	    out%3 << (double) scaledown * packedin.invaluesh[0];
 	  }
-      	}
+	}
 }

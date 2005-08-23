@@ -1,9 +1,9 @@
-/* Header file for Active Messages over UDP */
+/* udpam.h:  Header File for Active Messages over UDP (UDPAM) */
 /******************************************************************
 Version identification:
-$Id$
+@(#)udpam.h	1.5 7/23/96
 
-Copyright (c) 1995-%Q%  The Regents of the University of California.
+Copyright (c) 1995-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,12 +24,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Brent Chun 
  Creation Date: Sat Nov  4 17:25:01 PST 1995
-*******************************************************************/
-
+*/
 #ifndef _UDPAM_H
 #define _UDPAM_H "$Id$";
 
@@ -38,9 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifdef SOLARIS 
 #include <thread.h>
-#endif /* SOLARIS */
 
 /*
  * AM Specified values 
@@ -52,107 +51,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Define some implementation specific values.  UDPAM_MAX_{SHORT,
  * MEDIUM, and LONG} are the minimum values required by AM 2.0.
  */
-#define AM_MAX_SIZE                       8192       
+#define AM_MAX_SIZE                       8192
 #define UDPAM_DEFAULT_TXBUFS              64
 #define UDPAM_DEFAULT_BUFS                8
 #define UDPAM_MAX_NUMBER_OF_TRANSLATIONS  512
 #define UDPAM_MAX_NUMBER_OF_HANDLERS      512
 #define UDPAM_MAX_SEG_LENGTH              (1 << 28)  /* 256 MB */
 #define UDPAM_MAX_SHORT                   8
-#define UDPAM_MAX_MEDIUM                  512
+#define UDPAM_MAX_MEDIUM                  512 
 #define UDPAM_MAX_LONG                    8192
 
 #define UDPAM_DEFAULT_WSIZE    4  /* Default # of Outstanding Requests */
+#define UDPAM_EMPTY_HANDLER   -1  /* Empty AM handler */
 #define SOCKADDR_IN_SIZE       sizeof(struct sockaddr_in)
 
 typedef int  handler_t;         /* Handlers are just indices to tables */
 typedef long int tag_t;         /* Endpoint tags */  
 typedef void (*func)();         /* Pointer to real handler function */
-
-/*
- * Each packet contains at least a type, seq_num (seq_num of request), 
- * buf_id (buf_id of req), tag, handler, and arguments 
- */
-typedef struct {
-  int       type, seq_num, buf_id;                 
-  tag_t     tag;                    
-  handler_t handler;                
-  int       arg0, arg1, arg2, arg3; 
-} UDPAM_Short4_Pkt;
-
-typedef struct {
-  int       type, seq_num, buf_id;
-  tag_t     tag;                   
-  handler_t handler;                
-  int       arg0, arg1, arg2, arg3;
-  int       arg4, arg5, arg6, arg7;
-} UDPAM_Short8_Pkt;
-
-typedef struct {
-  int       type, seq_num, buf_id;
-  tag_t     tag;                   
-  handler_t handler;                
-  int       arg0, arg1, arg2, arg3;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_MEDIUM];
-} UDPAM_Medium4_Pkt;
-
-typedef struct {
-  int       type, seq_num, buf_id;
-  tag_t     tag;                   
-  handler_t handler;                
-  int       arg0, arg1, arg2, arg3;
-  int       arg4, arg5, arg6, arg7;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_MEDIUM];
-} UDPAM_Medium8_Pkt;
-
-typedef struct {
-  int       type, seq_num, buf_id;
-  tag_t     tag;                   
-  handler_t handler;
-  int       arg0, arg1, arg2, arg3;
-  int       dest_offset;
-  int       nbytes;
-  char      data[UDPAM_MAX_LONG];  
-} UDPAM_Long4_Pkt;
-
-typedef struct {
-  int       type, seq_num, buf_id;
-  tag_t     tag;                   
-  handler_t handler;                
-  int       arg0, arg1, arg2, arg3;
-  int       arg4, arg5, arg6, arg7;
-  int       dest_offset;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_LONG];
-} UDPAM_Long8_Pkt;
-
-typedef struct {
-  int  type;
-  int  buf_id;
-  int  seq_num; 
-} UDPAM_ReplyACK_Pkt;
-
-/*
- * Generic UDPAM Buffers for All Tranport Operations
- */
-typedef struct {
-  int   type;     /* Replicate These Three Elements In Pool*/
-  int   buf_id;   /* Buffer ID (fixed) */
-  int   seq_num;  /* Buffer Sequence Number */
-  union {
-    UDPAM_Short4_Pkt    udpam_short4_pkt;
-    UDPAM_Short8_Pkt    udpam_short8_pkt;
-    UDPAM_Medium4_Pkt   udpam_medium4_pkt; 
-    UDPAM_Medium8_Pkt   udpam_medium8_pkt; 
-    UDPAM_Long4_Pkt     udpam_long4_pkt;
-    UDPAM_Long8_Pkt     udpam_long8_pkt;
-    UDPAM_ReplyACK_Pkt  udpam_replyack_pkt;
-  } packet;
-} UDPAM_Buf;
-
-#define MAX_PACKET_SIZE  sizeof(UDPAM_Buf)
 
 /*
  * Source EP is the endpoint the sending endpoint.  dest_ep is the 
@@ -163,7 +78,7 @@ typedef struct {
   u_long       source_ip_addr;  /* Source EP IP Address */
   int          buf_id;          /* Buffer ID for Request Message */
   int          seq_num;         /* Sequence Num for Request Message */
-  tag_t        tag;
+  tag_t        tag;             
   struct _ea_t *dest_ep;        /* Destination EP */
 } Token;
 
@@ -176,38 +91,201 @@ typedef struct {
   int          reply_endpoint;
   Token        token;                   
   handler_t    handler;
-  void         *source_addr;
+  void         *source_addr;       /* For AM_{Request,Reply}XFerM */
+/*  void         *dest_addr; */        /* For AM_GetXferM */ 
   int          nbytes;
-  int          dest_offset;
+  int          dest_offset;        /* For AM_{Request,Reply}XFerM, AM_GetXferM */
+  int          source_offset;      /* For AM_GetXferM */ 
   int          arg0, arg1, arg2, arg3;
   int          arg4, arg5, arg6, arg7;
-  char         *data; 
+  /*
+   * These are needed to pull messages off TxTimeout when the layer detects
+   * that an endpoint is unreachable.
+   */
+  int          buf_id, seq_num;   
 } ArgBlock;
 
 /*
- * Three types of messages for UDPAM protocol 
+ * Each packet contains at least a type, seq_num (sequence number of request), 
+ * buf_id (buffer id of request), tag, handler, and arguments to a handler.
  */
-#define REQUEST  0x100
-#define REPLY    0x200 
-#define REPLYACK 0x400
+typedef struct {
+  int       type, seq_num, buf_id;                 
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3; 
+} UDPAM_Short4_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       arg4, arg5, arg6, arg7;
+} UDPAM_Short8_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       nbytes;
+  double    data[UDPAM_MAX_MEDIUM/sizeof(double)];
+  caddr_t   source_addr;
+} UDPAM_Medium4_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       arg4, arg5, arg6, arg7;
+  int       nbytes;
+  double    data[UDPAM_MAX_MEDIUM/sizeof(double)];
+  caddr_t   source_addr;
+} UDPAM_Medium8_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;
+  int       arg0, arg1, arg2, arg3;
+  int       dest_offset;
+  int       nbytes;
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
+  caddr_t   source_addr;
+} UDPAM_Long4_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       arg4, arg5, arg6, arg7;
+  int       dest_offset;
+  int       nbytes;
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
+  caddr_t   source_addr;
+} UDPAM_Long8_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;
+  int       arg0, arg1, arg2, arg3;
+  int       dest_offset;
+  int       nbytes;
+  int       source_offset;
+} UDPAM_GetXfer4_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       arg4, arg5, arg6, arg7;
+  int       dest_offset;
+  int       nbytes;                 
+  int       source_offset;
+} UDPAM_GetXfer8_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       source_offset;
+  int       nbytes;  
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
+  int       dest_offset;
+} UDPAM_GetXferReply4_Pkt;
+
+typedef struct {
+  int       type, seq_num, buf_id;
+  tag_t     tag, src_tag;
+  handler_t handler;                
+  int       arg0, arg1, arg2, arg3;
+  int       arg4, arg5, arg6, arg7;
+  int       source_offset;
+  int       nbytes;                 
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
+  int       dest_offset;
+} UDPAM_GetXferReply8_Pkt;
+
+typedef struct {
+  int  type;
+  int  buf_id;
+  int  seq_num; 
+} UDPAM_ReplyACK_Pkt;
+
+typedef struct {
+  int      type;         /* UDPAM_ERROR */
+  int      buf_id;       /* Buffer identifier for error request */
+  int      seq_num;      /* Sequence number identifier for error request */
+  tag_t    tag, src_tag;       
+  int      mesg_type;    /* First arg to ErrorHandler() */
+  int      error_type;   /* Second arg to ErrorHandler() */
+  ArgBlock argblock;     /* Third arg to ErrorHandler() */
+} UDPAM_Error_Pkt;
 
 /*
- * UDPAM message types (4, odd, 8, even) 
+ * Generic buffers for all transport operations
  */
-#define UDPAM_REQUEST_4        (0x001 | REQUEST)
-#define UDPAM_REPLY_4          (0x001 | REPLY)
-#define UDPAM_REQUEST_8        (0x002 | REQUEST)
+typedef struct {
+  int   type;     /* Replicate These Three Elements In Pool*/
+  int   buf_id;   /* Buffer ID (fixed) */
+  int   seq_num;  /* Buffer Sequence Number */
+  union {
+    UDPAM_Short4_Pkt        udpam_short4_pkt;
+    UDPAM_Short8_Pkt        udpam_short8_pkt;
+    UDPAM_Medium4_Pkt       udpam_medium4_pkt; 
+    UDPAM_Medium8_Pkt       udpam_medium8_pkt; 
+    UDPAM_Long4_Pkt         udpam_long4_pkt; 
+    UDPAM_Long8_Pkt         udpam_long8_pkt; 
+    UDPAM_GetXfer4_Pkt      udpam_getxfer4_pkt;
+    UDPAM_GetXfer8_Pkt      udpam_getxfer8_pkt;
+    UDPAM_GetXferReply4_Pkt udpam_getxferreply4_pkt;
+    UDPAM_GetXferReply8_Pkt udpam_getxferreply8_pkt;
+    UDPAM_Error_Pkt         udpam_error_pkt;
+  } packet;
+} UDPAM_Buf;
 
-#define UDPAM_REPLY_8          (0x002 | REPLY)
-#define UDPAM_REQUEST_MEDIUM_4 (0x003 | REQUEST)
-#define UDPAM_REPLY_MEDIUM_4   (0x003 | REPLY)
-#define UDPAM_REQUEST_MEDIUM_8 (0x004 | REQUEST) 
-#define UDPAM_REPLY_MEDIUM_8   (0x004 | REPLY)
-#define UDPAM_REQUEST_LONG_4   (0x005 | REQUEST)   
-#define UDPAM_REPLY_LONG_4     (0x005 | REPLY)
-#define UDPAM_REQUEST_LONG_8   (0x006 | REQUEST)
-#define UDPAM_REPLY_LONG_8     (0x006 | REPLY)
+#define MAX_PACKET_SIZE  sizeof(UDPAM_Buf)
+
+
+/*
+ * Three types of messages for UDPAM protocol + errors 
+ */
+#define REQUEST  0x10000000
+#define REPLY    0x20000000
+#define REPLYACK 0x40000000
+
+#define ERROR    0x80000000
+
+/*
+ * UDPAM message types.  Set bits to distingiush requests
+ * from replies so we know if we have to drop.  
+ */
+#define UDPAM_REQUEST_4        (0x00000001 | REQUEST)
+#define UDPAM_REPLY_4          (0x00000001 | REPLY)
+#define UDPAM_REQUEST_8        (0x00000002 | REQUEST)
+#define UDPAM_REPLY_8          (0x00000002 | REPLY)
+#define UDPAM_REQUEST_MEDIUM_4 (0x00000004 | REQUEST)
+#define UDPAM_REPLY_MEDIUM_4   (0x00000004 | REPLY)
+#define UDPAM_REQUEST_MEDIUM_8 (0x00000008 | REQUEST) 
+#define UDPAM_REPLY_MEDIUM_8   (0x00000008 | REPLY)
+#define UDPAM_REQUEST_LONG_4   (0x00000010 | REQUEST)   
+#define UDPAM_REPLY_LONG_4     (0x00000010 | REPLY)
+#define UDPAM_REQUEST_LONG_8   (0x00000020 | REQUEST)
+#define UDPAM_REPLY_LONG_8     (0x00000020 | REPLY)
+
+#define UDPAM_GET_XFER_4       (0x00000040 | REQUEST)
+#define UDPAM_GET_XFER_REPLY_4 (0x00000040 | REPLY)
+#define UDPAM_GET_XFER_8       (0x00000080 | REQUEST)
+#define UDPAM_GET_XFER_REPLY_8 (0x00000080 | REPLY)
+
 #define UDPAM_REPLYACK         REPLYACK
+#define UDPAM_ERROR            ERROR
 
 /*
  * Global Endpoint Names
@@ -264,14 +342,13 @@ typedef struct _ea_t {
     int   wsize;                   /* Number of Outstanding Reqs Allowed */
   } *translation_table;            /* Endpoint Translation Table */
   int       num_translations;      /* Number of translation table entries */
+  int       wsize;                 /* Window Size (n_outstanding_messages) */
   func      *handler_table;        /* Endpoint Handler Table */
   int       num_handlers;          /* Number of handler table entries */
   void      *start_addr;           /* Start address of VM segment */
   int       length;                /* Length of VM segment */ 
   tag_t     tag;                   /* Endpoint tag */
-#ifdef SOLARIS 
   mutex_t   lock;                  /* Mutex lock for locking EP */
-#endif /* SOLARIS */
   int       socket;                /* UDP Socket for Request/Replies */
   struct sockaddr_in sockaddr;     /* Socket Address for EP(i.e. global name) */ 
   struct _eb_t *bundle;            /* Bundle that contains this EP */
@@ -287,10 +364,9 @@ typedef struct _eb_t {
     struct ep_elem  *next;      /* Pointer to next element on the list */    
   } *head;                      /* Head of bundle's list of endpoints */
   int            num_eps;       /* Number of endpoints in this bundle */
-#ifdef SOLARIS
   mutex_t        lock;          /* Mutex lock for locking EP */
   sema_t         synch_var;     /* Synchronization variable */
-#endif /* SOLARIS */
+  cond_t         event_cv;      /* CV to inform tout thread to select() */
   int            mask;          /* Event mask */
   int            type;          /* Shared or local bundle */
   fd_set         fdset;         /* Set of socket descriptors to select() on */

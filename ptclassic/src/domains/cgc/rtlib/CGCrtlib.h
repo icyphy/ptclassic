@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGCrtlib.h	1.7	7/5/96
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,6 +34,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef _CGCrtlib_h
 #define _CGCrtlib_h
 
+/* In case this is included by a C++ file, make sure that all
+   declarations are in C */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Define the prototype for memset */
+#include <string.h>
+
+/* Define the CHAR_BIT constant which is the number of bits per byte */
+#include <limits.h>
+
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* 
  Definition of single (FIX_WORD) and double (FIX_DWORD) unsigned 
  word types.
@@ -47,23 +63,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
  generated code and the library routines.
 
  Further note that a variable of type FIX_DWORD must have at least
- twice the word size of a FIX_WORD veriable.
+ twice the word size of a FIX_WORD variable.
 */
 
 #ifndef FIX_WORD
 #define FIX_WORD  unsigned short
 #endif
+
 #ifndef FIX_DWORD
 #define FIX_DWORD unsigned long
 #endif
 
 #define FIX_MAX_LENGTH 64 
-#define FIX_BITS_PER_WORD  (8*sizeof(FIX_WORD))
-#define FIX_WORDS_PER_FIX  ((FIX_MAX_LENGTH+FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD)
+#define FIX_BITS_PER_WORD (CHAR_BIT * sizeof(FIX_WORD))
+#define FIX_WORDS_PER_FIX (1 + ((FIX_MAX_LENGTH - 1)/FIX_BITS_PER_WORD))
 
 typedef FIX_WORD fix[FIX_WORDS_PER_FIX];
-typedef struct { int len,intb; } fix_prec;
+typedef struct {
+	int len;
+	int intb;
+} fix_prec;
 
+#ifdef __cplusplus
+#define EXIT_CGC(a) \
+	{ if (a) Error::abortRun(a); \
+	  else SimControl::requestHalt(); \
+	  return; }
+#else
+#define EXIT_CGC(a) \
+	{ if (a) fprintf(stderr, "%s\n", a); \
+	  exit(1); }
+#endif
 
 /* Implementation notes for the Fix Library routines:
 
@@ -76,7 +106,7 @@ typedef struct { int len,intb; } fix_prec;
      The CGC macro expansion mechanism for $ref macros is already pre-
      pared to follow this format.
 
-   + Source operands are saved before setting the result. By concequence.
+   + Source operands are saved before setting the result. By consequence.
      source and destination parameters may coincide  so that missing
      C operators like += may be easily implemented as:
 
@@ -108,7 +138,7 @@ typedef struct { int len,intb; } fix_prec;
 	   FIX_Add(...);
 	   FIX_Mul(...);
 
-	   (* now check whether overflow occured *)
+	   (* now check whether overflow occurred *)
 	   if (fix_overflow)
 		... do whatever you want, e.g. print error message ...
 
@@ -118,66 +148,83 @@ typedef struct { int len,intb; } fix_prec;
 
 extern int fix_overflow;
 
-/* prototypes are for commentation purposes only */
-#define FIX_PROTO(list)  ()
+#if defined(__STDC__) || defined(__cplusplus)
+#define FIX_PROTO(list)	list
+#else
+#define FIX_PROTO(list)	()
+#endif
+
+#if defined(__STDC__) || defined(__cplusplus)
+#define CONST const
+#else
+#define CONST
+#endif
 
 /* ASSIGNMENT */
+
 extern int FIX_Assign FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int src_l, int src_i, const FIX_WORD* src_r));
+    int src_l, int src_i, CONST FIX_WORD* src_r));
+
 extern int FIX_DoubleAssign FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r, double value));
 
 /* CONVERSION */
+
 extern double FIX_Fix2Double FIX_PROTO((
-    int src_l, int src_i, const FIX_WORD* src_r));
+    int src_l, int src_i, CONST FIX_WORD* src_r));
+
 extern int FIX_Fix2Int FIX_PROTO((
-    int src_l, int src_i, const FIX_WORD* src_r));
+    int src_l, int src_i, CONST FIX_WORD* src_r));
 
 /* ARITHMETIC OPERATIONS */
 
 /* - compute `dst = op1 + op2' */
 extern int FIX_Add FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 - op2' */
 extern int FIX_Sub FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 * op2' */
 extern int FIX_Mul FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 / op2' */
 extern int FIX_Div FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
 
 /* - compute `dst += op1 * op2' */
 extern int FIX_MulAdd FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
-/* - dito, but weight the product by 2^weight before accumulating */
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
+/* - ditto, but weight the product by 2^weight before accumulating */
 extern int FIX_MulAddWeighted FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r,
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r,
     int weight));
 
 /* - compute `dst = -src' */
 int FIX_Complement FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int src_l, int src_i, const FIX_WORD* src_r));
+    int src_l, int src_i, CONST FIX_WORD* src_r));
 
 /* - shift right by n bits (or left if n < 0) */
 int FIX_ArithmeticShiftRight FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
-    int src_l, int src_i, const FIX_WORD* src_r,
+    int src_l, int src_i, CONST FIX_WORD* src_r,
     int n));
 
 
@@ -186,16 +233,16 @@ int FIX_ArithmeticShiftRight FIX_PROTO((
 /* - return a value less than, equal to, or greater than 0, based upon whether
      the value of op1 is less than, equal to or greater than that of op2 */
 int FIX_Compare FIX_PROTO((
-    int op1_l, int op1_i, const FIX_WORD* op1_r,
-    int op2_l, int op2_i, const FIX_WORD* op2_r));
+    int op1_l, int op1_i, CONST FIX_WORD* op1_r,
+    int op2_l, int op2_i, CONST FIX_WORD* op2_r));
 
 
 /* MISCELLANEOUS */
 
 /* - macro to weight a fix triplet by 2^weight for function arguments
      and 2^-weight for function results */
-#define FIX_Weight(var_l,var_i,var_r, weight) \
-    var_l,(var_i)+(weight),var_r
+#define FIX_Weight(var_l,var_i,var_r,weight) \
+    (var_l),(var_i)+(weight),(var_r)
 
 /* - return the terms of the fix triplet;  note that the precision
      is trimmed according to the implementation limits */
@@ -204,7 +251,7 @@ int FIX_Compare FIX_PROTO((
 #define FIX_GetIntBits(src_l,src_i,src_r) \
     MIN(MIN(FIX_MAX_LENGTH,src_l), src_i)
 #define FIX_GetReference(src_l,src_i,src_r) \
-    src_r
+    (src_r)
 
 /* - set the entries of a fix_prec structure from a double value;
      the intb field will be just large enough to hold the integer
@@ -212,8 +259,8 @@ int FIX_Compare FIX_PROTO((
      word length;
      this macro returns 1 if the integer part would be larger than
      the total word length */
-#define FIX_SetPrecisionFromDouble(precision, double) \
-    pFIX_SetPrecisionFromDouble(&precision.len,&precision.intb, double)
+#define FIX_SetPrecisionFromDouble(precision,doubleValue) \
+    pFIX_SetPrecisionFromDouble(&precision.len, &precision.intb, doubleValue)
 
 /* - assign maximum value that is representable in given format
      [or minimum value if sign != 0] */
@@ -224,24 +271,26 @@ extern void FIX_AssignMaxValue FIX_PROTO((
 /* - return TRUE if src represents the value 0.0 */
 #define FIX_IsZero(src_l,src_i,src_r) \
     pFIX_IsZero(src_r)
+
 /* - set the fix to 0.0 */
 #define FIX_SetToZero(dst_l,dst_i,dst) \
-    memset(dst,0, sizeof(fix))
+    memset(dst, 0, sizeof(fix))
 
 /* - return the sign bit of a fix */
 #define FIX_Sign(ref) \
     ((*(ref) & (1l << (FIX_BITS_PER_WORD-1))) != 0)
 
 /* private functions */
-extern int  pFIX_IsZero FIX_PROTO((FIX_WORD* src_r));
-extern void pFIX_ApplyMask FIX_PROTO((int dst_l,int dst_i,FIX_WORD* dst_r));
-extern int  pFIX_SetPrecisionFromDouble FIX_PROTO((int* len_field,int* intb_field, double d));
-extern double pFIX_TwoRaisedTo();
-extern void pFIX_Complement();
-extern int  pFIX_ArithmeticShiftRight();
+extern int  pFIX_IsZero FIX_PROTO((CONST FIX_WORD* src_r));
+extern void pFIX_ApplyMask FIX_PROTO((int dst_l, int dst_i, FIX_WORD* dst_r));
+extern int  pFIX_SetPrecisionFromDouble FIX_PROTO((
+		int* len_field, int* intb_field, double d));
+extern double pFIX_TwoRaisedTo FIX_PROTO((int n));
+extern void pFIX_Complement FIX_PROTO((
+		FIX_WORD* dst_r, CONST FIX_WORD* src_r));
 
-/* MIN/MAX macro used for combining precisions in additions;
-  (this is needed for the code generated by the + operator of class Precision) */
+/* MIN and MAX macros used for combining precisions in additions;
+   needed for the code generated by the + operator of class Precision */
 #ifndef MIN
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #endif
@@ -249,5 +298,8 @@ extern int  pFIX_ArithmeticShiftRight();
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
-#endif /* _CGCrtlib_h */
+#ifdef __cplusplus
+}
+#endif
 
+#endif /* _CGCrtlib_h */

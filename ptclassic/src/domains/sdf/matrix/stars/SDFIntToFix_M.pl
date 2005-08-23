@@ -2,14 +2,19 @@ defstar {
   name { IntToFix_M }
   domain { SDF }
   desc {
-    Takes an input IntMatrix and converts it to an FixMatrix.  This
-    is done by constructing a new FixMatrix with the given precision.
-    Each entry of the IntMatrix is cast using the given masking function
-    and then copied to the new matrix.
+Take an input IntMatrix and convert it to an FixMatrix.  This
+is done by constructing a new FixMatrix with the given precision.
+Each entry of the IntMatrix is cast using the given masking function
+and then copied to the new matrix.
   }
-  version { $Id$ }
+  version { @(#)SDFIntToFix_M.pl	1.7 10/6/95 }
   author { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF matrix library }
   input {
     name { input }
@@ -56,16 +61,26 @@ number is masked for casting to the fixed-point notation.  The keywords are:
     (input%0).getMessage(inpkt);
     const IntMatrix& matrix = *(const IntMatrix *)inpkt.myData();
 
-    // do conversion using copy constructor
-    if(strcmp(Masking, "truncate") == 0) {
-      FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate));
-      output%0 << result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
     }
-    else if(strcmp(Masking, "round") == 0) {
-      FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate_round));
-      output%0 << result;
+    else {
+      // valid input matrix
+
+      // do conversion using copy constructor
+      if(strcmp(Masking, "truncate") == 0) {
+        FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate));
+        output%0 << result;
+      }
+      else if(strcmp(Masking, "round") == 0) {
+        FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate_round));
+        output%0 << result;
+      }
+      else
+        Error::abortRun(*this, ": not a valid function for masking");
     }
-    Error::abortRun(*this, ": not a valid function for masking");
   }
 }
 

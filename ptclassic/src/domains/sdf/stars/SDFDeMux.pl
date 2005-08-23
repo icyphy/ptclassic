@@ -3,19 +3,30 @@ defstar {
 	domain { SDF }
 	desc {
 Demultiplexes one input onto any number of output streams.
-The particle consumed on the input is copied to exactly one output,
-determined by the "control" input.  The other outputs get a floating
-point 0.0.  Integers from 0 through N-1 are accepted at the "control"
+The star consumes B particles from the input, where B is the blockSize.
+These B particles are copied to exactly one output,
+determined by the "control" input.  The other outputs get a zero of the
+appropriate type.
+
+Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
-outside this range, all outputs get 0.0.
+outside this range, all outputs get zero.
 	}
-	version {$Revision$ $Date$}
+	version {@(#)SDFDeMux.pl	1.14	06/12/97}
 	author { E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF main library }
+	htmldoc {
+<a name="demultiplex"></a>
+	}
 	input {
 		name {input}
-		type {float}
+		type {anytype}
 	}
 	input {
 		name {control}
@@ -23,15 +34,31 @@ outside this range, all outputs get 0.0.
 	}
 	outmulti {
 		name {output}
-		type {float}
+		type {= input}
+	}
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
+	}
+	setup {
+		input.setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 	go {
 	    int n = int(control%0);
 	    MPHIter nexto(output);
-	    for (int i = 0; i < output.numberPorts(); i++)
+	    PortHole* p;
+	    for (int i = 0; i < output.numberPorts(); i++) {
+		p = nexto++;
+		int j;
 		if (i == n)
-		    (*nexto++)%0 = input%0;
+		    for (j = int(blockSize)-1; j >= 0; j--)
+		        (*p)%j = input%j;
 		else
-		    (*nexto++)%0 << 0.0;
+		    for (j = int(blockSize)-1; j >= 0; j--)
+			((*p)%j).initialize();
+	    }
 	}
 }

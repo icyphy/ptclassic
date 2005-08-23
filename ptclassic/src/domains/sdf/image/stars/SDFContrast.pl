@@ -3,13 +3,14 @@ defstar {
     domain {SDF}
     desc {
 Enhance the contrast in input image by histogram modification.
-Input image should be in a int matrix.
+Input image should be in an integer matrix.
 The possible contrast type are : Uniform, Hyperbolic.
     }
-    version { $Id$ }
+    version { @(#)SDFContrast.pl	1.5 7/15/96 }
     author { Bilung Lee }
+    acknowledge { Brian L. Evans }
     copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -39,28 +40,40 @@ limitation of liability, and disclaimer of warranty provisions.
 	name {minInMatrix}
 	type {int}
 	default {"0"}
-	desc {Minimun value in input matrix.}
+	desc {Minimum value in input matrix.}
     }
-    ccinclude {"Matrix.h"}
+    ccinclude { <string.h>, "Matrix.h", "ptdspHistogram.h" }
     protected {
         int max, min;
-
-        int *hist, *cum_hist;
+        int *histBuf, *cumulativeHistBuf;
     }
-    code {
-	extern "C" {
-	    extern int strcasecmp(const char*,const char*);
-	}
+    constructor {
+	histBuf = 0;
+	cumulativeHistBuf= 0;
     }
-    ccinclude {"Matrix.h"}
     setup {
         max = int(maxInMatrix);
         min = int(minInMatrix);
+	if ( min > max ) {
+	   Error::abortRun(*this,
+			   "the minInMatrix parameter must be less than "
+			   "the maxInMatrix parameter");
+	   return;
+	}
+        const char *ct = contrastType;
+        if ( (strcasecmp(ct, "Uniform") != 0) &&
+	     (strcasecmp(ct, "Hyperbolic") != 0) ) {
+	   Error::abortRun(*this,
+			   "Invalid contrastType: must be either Uniform "
+			   "or Hyperbolic.");
+	   return;
+	}
+	delete [] histBuf;
+	histBuf = new int[max - min + 1];
+	delete [] cumulativeHistBuf;
+	cumulativeHistBuf = new int[max - min + 1];
     }
     go {
-        int i, j;
-        double value;
-
         Envelope pkt;
         (input%0).getMessage(pkt);
         const IntMatrix& inMatrix = *(const IntMatrix*)pkt.myData();
@@ -72,79 +85,62 @@ limitation of liability, and disclaimer of warranty provisions.
           // valid input matrix
           int height = inMatrix.numRows();
           int width  = inMatrix.numCols();
-          LOG_NEW; int *matrix = new int[height*width];
 
-          for (i=0; i<height*width; i++) {
-	    matrix[i] = inMatrix.entry(i);
-          }
 
-	  /* Allocate space for histogram and compute it. */
-	  hist = (int *)calloc(max-min+1, sizeof(int));
-	  histogram(hist,matrix,width*height,min,max);
+	  // FIXME
+	  // Sets matrix to the vector representing the FloatMatrix inMatrix 
+	  // This only works because in the underlying implementation of 
+	  // FloatMatrix, inMatrix[0] for example, which returns the 1st row of the 
+	  // matrix, also returns the entire vector representing the matrix. 
+	  // A method should be added to the FloatMatrix class to do this instead
+	  // of relying on this current operation
+	  const int * matrix = inMatrix[0];
 
-	  /* Allocate space for cumulative histogram and compute it. */
-	  cum_hist = (int *)calloc(max-min+1, sizeof(int));
-	  for (i=0; i<(max-min+1); i++) {
-	    cum_hist[i] = 0;
-	    for (j=0; j<=i; j++) {
-	      cum_hist[i] += hist[j];
-	    }
+	  // Compute the histBuf
+	  Ptdsp_Histogram(matrix, width*height, histBuf, min, max);
+
+	  // Compute cumulative histogram
+	  int histlen = max - min + 1;
+	  cumulativeHistBuf[0] = histBuf[0];
+	  for (int k = 1; k < histlen; k++) {
+	    cumulativeHistBuf[k] = cumulativeHistBuf[k-1] + histBuf[k];
 	  }
 
           IntMatrix& result = *(new IntMatrix(inMatrix));
           const char *ct = contrastType;
-          if ( strcasecmp( ct, "Uniform")==0 ) { 
- 	    /* Use uniform histogram modification transfer function. */
-	    for (i=0; i<width*height; i++) {
-	      value = (max-min)*cum_hist[matrix[i]]/(width*height)+min;
-	      result.entry(i) = (int) value;
+          if ( strcasecmp(ct, "Uniform") == 0 ) { 
+ 	    // Use uniform histogram modification transfer function
+	    int wh = width*height;
+	    double scale = double(max - min) / double(wh);
+	    double value = 0.0;
+	    for (int i = 0; i < wh; i++) {
+	      value = scale * cumulativeHistBuf[matrix[i]] + min;
+	      result.entry(i) = int(value);
 	    }    
-          } else if ( strcasecmp( ct, "Hyperbolic")==0 ) {
-	    /* Use Hyperbolic histogram modification transfer function. */
-	    for (i=0; i<width*height; i++) {
-	      value = (pow(max,1/3.0)-pow(min,1/3.0))*cum_hist[matrix[i]];
-              value /= width*height;
-	      value += pow(min,1/3.0);
-	      result.entry(i) = (int) pow(value,3);
+          }
+	  // The setup method flags invalid contrast types, so
+	  // else if ( strcasecmp(ct, "Hyperbolic") == 0 )
+	  // simply becomes as else statement
+	  else {
+	    // Use Hyperbolic histogram modification transfer function
+	    int wh = width*height;
+	    double min1_3 = pow(min, 1/3.0);
+	    double max1_3 = pow(max, 1/3.0);
+	    double scale = (max1_3 - min1_3) / double(wh);
+	    double value = 0.0;
+	    for (int i = 0; i < wh; i++) {
+	      value = scale * cumulativeHistBuf[matrix[i]] + min1_3;
+	      result.entry(i) = int(value * value * value);
 	    }
-          } else {
-	    Error::abortRun(*this, ": Unknown contrast type.");
-	    return;
-	  }
-          
+          }
+
           output%0 << result;
-          LOG_DEL;  delete [] matrix;
-          free((char *)hist);
-          free((char *)cum_hist);
 	}  // end of valid input matrix.
         
     } 
 
-    // Procedure to compute the histogram.
-    method {
-        name {histogram}
-        access { private }
-        arglist {"(int *hist,int *matrix,int size,int min,int max)"}
-        type {void}
-        code {
-          int i;
-          int index;
-
-          /* Initialize to zero. */
-          for (i=0; i<(max-min+1); i++) {
-            hist[i] = 0;
-          }  
-
-          /* Compute the histogram. */
-          for (i=0; i<size; i++) {
-            /* If the value is larger than max, then is counted into max. */
-            index = (matrix[i]>max) ? max : matrix[i]; 
-            /* If the value is smaller than min, then is counted into min. */
-            index = (matrix[i]<min) ? min : matrix[i]; 
-
-            hist[index-min]++;
-          }
-
-        }
-    }  //end of method histogram.
+    destructor {
+	delete [] histBuf;
+	delete [] cumulativeHistBuf;
+    }
 }

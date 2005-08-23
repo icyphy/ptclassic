@@ -28,14 +28,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Bilung Lee 
-Version: $Id$
+Version: @(#)ptdspHistogram.h	1.2 7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Ptdsp_Histogram (const int *matrix, int size, int *hist, 
+extern void Ptdsp_Histogram (const int* matrix, int size, int* hist, 
 			     int min, int max);
 
 #ifdef __cplusplus

@@ -1,35 +1,39 @@
 defstar {
-	name { CxLMSPlot }
+	name { LMSPlotCx }
 	domain { SDF }
-	derivedFrom { CxLMS }
+	derivedFrom { LMSCx }
 	desc {
-Complex adaptive filter using LMS adaptation algorithm.  In addition,
-the tap coefficients are plotted using the xgraph program, with a
-separate plot for the magnitude and phase.  If "trace" is NO, only the
-final tap values are plotted; if it is YES, a trace of each tap is
-plotted as it adapts.
+This star is exactly like the LMSCx star, except that, in addition
+to the functions of LMSCx, it makes a plot of the tap coefficients,
+with a separate plot for the magnitude and phase.
+It can produce two types of plots: a plot of the final tap values
+or a plot that traces the time evolution of each tap value.
+The time evolution is obtained if the value of the parameter "trace" is "YES".
 	}
-	version {$Id$}
+	version {@(#)SDFLMSPlotCx.pl	1.16	10/03/96}
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
-	explanation {
-This star is exactly like the CxLMS star, except that, in addition,
-it makes a plot of the tap coefficients, one plot for the magnitude,
-one for the phase.  It can produce two types of plots: a plot
-of the final tap values or a plot that traces the
-time evolution of each tap value: the time evolution is obtained
-if \fItrace\fP is YES.
-.lp
-\fGraphTitleMag\fP is used for the title of the magnitude plot;
-\fGraphTitlePhase\fP is used for the title of the phase plot;
-\fGraphOptsMag\fP is handed to the xgraph program as option
-values on the command line when the magnitudes are plotted, and
-\fGraphOptsPhase\fP serves the same function for the phase.
-.lp
-If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	seealso {CxLMS, Xgraph, XMgraph}
+	location { SDF dsp library }
+	htmldoc {
+<a name="adaptive filter, complex"></a>
+<a name="filter, adaptive, complex"></a>
+<a name="LMS adaptive filter, complex"></a>
+<a name="filter, LMS adaptive, complex"></a>
+<p>
+<i>GraphTitleMag</i> is used for the title of the magnitude plot;
+<i>GraphTitlePhase</i> is used for the title of the phase plot;
+<i>GraphOptsMag</i> is handed to the xgraph program as option
+values on the command line when the magnitudes are plotted, and
+<i>GraphOptsPhase</i> serves the same function for the phase.
+<p>
+If <i>trace</i> is "YES", there may not be more than 64 taps in the filter.
+	}
+	seealso {LMSCx, XMgraph, LMSPlot, LMSTkPlot, LMSTkPlot }
 	hinclude { "Display.h" }
 	state {
 		name { graphOptsMag }
@@ -73,15 +77,19 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 		saveTapsFile.clearAttributes(A_SETTABLE);
 		prevPhase = outPhase = 0;
 	}
-	start {
-		SDFCxLMS::start();
-		delete prevPhase;
-		delete outPhase;
+	destructor {
+		LOG_DEL; delete [] prevPhase;
+		LOG_DEL; delete [] outPhase;
+	}		
+	setup {
+		SDFLMSCx::setup();
+		LOG_DEL; delete [] prevPhase;
+		LOG_DEL; delete [] outPhase;
 		int nPlots = 1;
 		if (int(trace)) {
 			nPlots = taps.size();
-			prevPhase = new double[nPlots];
-			outPhase = new double[nPlots];
+			LOG_NEW; prevPhase = new double[nPlots];
+			LOG_NEW; outPhase = new double[nPlots];
 			for (int i = 0; i < nPlots; i++)
 				prevPhase[i] = outPhase[i] = 0.0;
 			index = 0;
@@ -99,7 +107,7 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
 
         go {
-		SDFCxLMS::go();
+		SDFLMSCx::go();
 		if (int(trace)) {
 			for (int i = 0; i < taps.size(); i++) {
 				double mag = abs(taps[i]);
@@ -108,8 +116,8 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 				// handle phase wrapping for continuous plot
 
 				double phaseChange = phase - prevPhase[i];
-				if (phaseChange < -PI) phaseChange += 2*PI;
-				if (phaseChange > PI) phaseChange -= 2*PI;
+				if (phaseChange < -M_PI) phaseChange += 2*M_PI;
+				if (phaseChange > M_PI) phaseChange -= 2*M_PI;
 				outPhase[i] += phaseChange;
 				prevPhase[i] = phase;
 				magGraph.addPoint(i+1, index, mag);
@@ -120,7 +128,7 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
 
 	wrapup {
-		// don't call SDFCxLMS::wrapup: no final file to write.
+		// don't call SDFLMSCx::wrapup: no final file to write.
 		if (!int(trace)) {
 			// plot final taps
 			for (int i = 0; i < taps.size(); i++) {

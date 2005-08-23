@@ -1,0 +1,38 @@
+reset
+# Creating universe 'convolve'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRect1 FloatRect
+	setstate FloatRect1 height 1.0
+	setstate FloatRect1 width 3
+	setstate FloatRect1 period 0
+	setstate FloatRect1 count 0
+	star FloatRect2 FloatRect
+	setstate FloatRect2 height 1.0
+	setstate FloatRect2 width 6
+	setstate FloatRect2 period 0
+	setstate FloatRect2 count 0
+	star Convolve1 Convolve
+	setstate Convolve1 truncationDepth 128
+	setstate Convolve1 iterationCount 0
+	star XMgraph.input=31 XMgraph
+	numports XMgraph.input=31 input 3
+	setstate XMgraph.input=31 title "Convolution of two rectangular pulses"
+	setstate XMgraph.input=31 saveFile ""
+	setstate XMgraph.input=31 options "-P =800x300+0+0 -0 output -1 'pulse 1' -2 'pulse 2'"
+	setstate XMgraph.input=31 ignore 0
+	setstate XMgraph.input=31 xUnits 1.0
+	setstate XMgraph.input=31 xInit 0.0
+	node node1
+	nodeconnect FloatRect2 output node1
+	nodeconnect XMgraph.input=31 input#3 node1
+	nodeconnect Convolve1 inB node1
+	node node2
+	nodeconnect FloatRect1 output node2
+	nodeconnect Convolve1 inA node2
+	nodeconnect XMgraph.input=31 input#2 node2
+	connect Convolve1 out XMgraph.input=31 input#1
+run 16
+wrapup

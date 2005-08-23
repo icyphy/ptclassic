@@ -4,7 +4,7 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)testKnown.itcl	1.4   04/04/97
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -47,7 +47,7 @@ set reallyExit 0
 # The returned list depends on the executable we are running, so we
 # just check that there is at least one domain, SDF.
 
-test known.1 {check knownDomains} {
+test known-1 {check knownDomains} {
     namespace ::pitcl {
         if {[lsearch -exact [knownDomains] SDF] >= 0} {
             list OK
@@ -62,7 +62,7 @@ test known.1 {check knownDomains} {
 # The returned list depends on the executable we are running, so we
 # just check that there is at least one star.
 
-test known.1 {check knownBlocks} {
+test known-2 {check knownBlocks} {
     namespace ::pitcl {
         addUniverse .x SDF
         if {[lsearch -exact [knownBlocks] Ramp] >= 0} {
@@ -78,9 +78,24 @@ test known.1 {check knownBlocks} {
 # The returned list depends on what we've done so far, so
 # just check that at least the universe we created above is present.
 
-test known.1 {check knownUniverses} {
+test known-3 {check knownUniverses} {
     namespace ::pitcl {
         if {[lsearch -exact [knownUniverses] .x] >= 0} {
+            list OK
+        } {
+            list NOT_OK
+        }
+    }
+} {OK}
+
+######################################################################
+#### knownTargets
+# The returned list depends on what's linked in, so
+# just check that at least the default SDF target is present.
+
+test known-4 {check knownTargets} {
+    namespace ::pitcl {
+        if {[lsearch -exact [knownTargets] default-SDF] >= 0} {
             list OK
         } {
             list NOT_OK

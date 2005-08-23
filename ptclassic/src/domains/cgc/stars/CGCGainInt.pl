@@ -2,11 +2,11 @@ defstar {
 	name { GainInt }
 	domain { CGC }
 	desc { Amplifier: output is input times "gain" (default 1). }
-	version { $Id$ }
+	version { @(#)CGCGainInt.pl	1.3	2/1/96 }
 	author { Brian L. Evans }
 	acknowledge { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -43,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			reg <<= 1;
 		}
 
-		StringList code = "$ref(output) = ";
+		StringList code = "\t$ref(output) = ";
 		if ( found ) {
 			if ( i == 0 ) code << "$ref(input)";
 			else code << "$ref(input) << " << i;

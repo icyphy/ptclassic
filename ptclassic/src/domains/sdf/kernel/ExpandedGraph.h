@@ -1,9 +1,31 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)ExpandedGraph.h	1.11	3/2/95
 
- Copyright (c) 1991 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
@@ -35,43 +57,33 @@ class ExpandedGraph {
 friend class EGMasterIter;
 friend class EGSourceIter;
 
-private:
+public:
+	ExpandedGraph() : myGal(0), nodecount(0) {}	
+	virtual ~ExpandedGraph();
 
-	// Create the precedence links corresponding to an
-	// arc in the SDF graph. The arguments : source star,
-	// # samples produced by src, dest star, # sampless 
-	// consumed by dest, number of delays on the arc.
-	// Return value is nonzero iff there were no problems.
-	int ExpandArc(SDFStar* src, PortHole* src_port, SDFStar* dest, 
-		      PortHole* dest_port);
+	// return the nodecount
+	int numNodes() { return nodecount; }
 
-	// Check whether a star depends on previous invocations
-	// of itself, and if so, insert the necessary precedence
-	// links.
-	int SelfLoop(SDFStar& s);
+	// Constructor for creating the expanded graph from a galaxy.
+	// The resulting graph will depict the precedence relationships
+	// among the stars in the galaxy.
+	// Return value : nonzero iff a valid expanded graph could be created.
+	// If the selfLoop is TRUE, make an arc between invocations of a
+	// star regardless of the dependency.
+	virtual int createMe (Galaxy& galaxy, int selfLoopFlag = 0);
 
-	// Set up the invocations which are to form the initial graph.
-	void initialize_invocations();
-	void createInvocations(SDFStar*);
+	// Initialize the internal data structure.
+	virtual void initialize();
 
-	// create an arc between two nodes
-	EGGate* makeArc(EGNode *src, EGNode *dest, int samples, int delay)
-		{return src->makeArc(dest,samples,delay);}
+	// insert a new source node into the source list for the graph
+	void insertSource(EGNode *p) { sources.insert(p); }
 
-	// Create an arc between invocation "i" of star "src", and
-	// invocation "j" of "dest". The arc goes from src to dest, and
-	// carries "n_sam" samples, with "n_d" delay.
-	// return 0 if fails. Return the source_gate.
-	EGGate* connect_invocations(SDFStar* src, int i, SDFStar* dest,
-                         int j, int n_sam, int n_d);
+	// method for displaying the graph
+	virtual StringList display();
 
-	// Identify which port and which sample is assign to each gate.
-	// This information is necessary for parallel code generation
-	void setGate(EGGate* src_gate, PortHole* src_port, int src_ix,
-		     PortHole* dest_port, int dest_ix);
-
-	// the node count
-	int nodecount;
+	// this method removes all arcs which have delays on
+	// them
+	virtual void removeArcsWithDelay();
 
 protected:
 	// pointer to the original galaxy
@@ -88,36 +100,50 @@ protected:
 	EGNodeList sources;
 
 	// Create a new star node with given invocation index
-	virtual EGNode *newNode(SDFStar*, int);
+	virtual EGNode *newNode(DataFlowStar*, int);
 
-public:
+	// If any star is enforced "self-loop", set the parallelizable flag
+	// FALSE.
+	int parallelizable;
 
-	// Constructor, Destructor
-	ExpandedGraph() : myGal(0), nodecount(0) {}	
-	virtual ~ExpandedGraph();
+private:
 
-	// return the nodecount
-	int numNodes() { return nodecount; }
+	// Create the precedence links corresponding to an
+	// arc in the SDF graph. The arguments : source star,
+	// # samples produced by src, dest star, # sampless 
+	// consumed by dest, number of delays on the arc.
+	// Return value is nonzero iff there were no problems.
+	int ExpandArc(DataFlowStar* src, PortHole* src_port, DataFlowStar* dest, 
+		      PortHole* dest_port);
 
-	// Constructor for creating the expanded graph from a galaxy.
-	// The resulting graph will depict the precedence relationships
-	// among the stars in the galaxy.
-	// Return value : nonzero iff a valid expanded graph could be created.
-	int createMe (Galaxy& galaxy);
+	// Check whether a star depends on previous invocations
+	// of itself, and if so, insert the necessary precedence
+	// links. If enforcedSelfLoop = TRUE, always makes the links.
+	int enforcedSelfLoop;
+	int SelfLoop(DataFlowStar& s);
 
-	// Initialize the internal data structure.
-	virtual void initialize();
+	// Set up the invocations which are to form the initial graph.
+	void initialize_invocations();
+	void createInvocations(DataFlowStar*);
 
-	// insert a new source node into the source list for the graph
-	void insertSource(EGNode *p) { sources.insert(p); }
+	// create an arc between two nodes
+	EGGate* makeArc(EGNode *src, EGNode *dest, int samples, int delay)
+		{return src->makeArc(dest,samples,delay);}
 
-	// method for displaying the graph
-	virtual StringList display();
+	// Create an arc between invocation "i" of star "src", and
+	// invocation "j" of "dest". The arc goes from src to dest, and
+	// carries "n_sam" samples, with "n_d" delay.
+	// return 0 if fails. Return the source_gate.
+	EGGate* connect_invocations(DataFlowStar* src, int i, DataFlowStar* dest,
+                         int j, int n_sam, int n_d);
 
-	// this method removes all arcs which have delays on
-	// them
-	virtual void removeArcsWithDelay();
+	// Identify which port and which sample is assign to each gate.
+	// This information is necessary for parallel code generation
+	void setGate(EGGate* src_gate, PortHole* src_port, int src_ix,
+		     PortHole* dest_port, int dest_ix);
 
+	// the node count
+	int nodecount;
 };
 
 ///////////////////////////////////
@@ -130,7 +156,7 @@ public:
 
 class EGMasterIter : public EGNodeListIter {
 public:
-	EGMasterIter(ExpandedGraph& eg) : EGNodeListIter(eg.masters) {};
+	EGMasterIter(ExpandedGraph& eg) : EGNodeListIter(eg.masters) {}
 
   	// Return the next cluster in the masters list.
 	void reconnect(ExpandedGraph& eg) 
@@ -173,7 +199,7 @@ public:
 
 	// return the next node
 	EGNode* next();
-	EGNode* operator++() { return next(); }
+	EGNode* operator++(POSTFIX_OP) { return next(); }
 
 	// reconnect this iterator to another graph
 	void reconnect(ExpandedGraph& g) {

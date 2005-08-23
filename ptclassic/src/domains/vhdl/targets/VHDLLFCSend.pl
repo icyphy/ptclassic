@@ -2,11 +2,11 @@ defstar	{
   name { LFCSend }
   domain { VHDL }
   desc { VHDL to CGC synchronous send star }
-  version { $Id$ }
+  version { @(#)VHDLLFCSend.pl	1.1 03/27/97 }
   author { Michael C. Williamson, Jose Luis Pino }
   derivedFrom { CSynchComm }
   copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright	for copyright notice,
 limitation of liability, and disclaimer	of warranty provisions.

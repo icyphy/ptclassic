@@ -1,28 +1,33 @@
 defstar {
 	name { Xgraph }
 	domain { CGC }
-	desc { Generate a plot with the xgraph program. }
-	version {$Id$}
+	desc { Generate a plot with the pxgraph program. }
+	version {@(#)CGCXgraph.pl	1.14	06 Oct 1996}
 	author { S. Ha }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star is actually equivalent to the XMgraph star with only one input.
-The input signal is plotted using the \fIxgraph\fR program.
+The input signal is plotted using the <i>pxgraph</i> program.
 This program must be in your path, or this star will not work!
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xgraph.
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
+storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
-as command-line options.  See the manual section describing xgraph
+The <i>options</i> string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
-.Ir "xgraph program"
-.Id "graph, X window"
+<a name="pxgraph program"></a>
+<a name="graph, X window"></a>
 	}
 	input {
 		name { input }
-		type { anytype }
+		type { float }
 	}
 	defstate {
 		name {title}
@@ -34,13 +39,13 @@ for a complete explanation of the options.
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {File to save the input to the xgraph program.}
+		desc {File to save the input to the pxgraph program.}
 	}
 	defstate {
 		name {options}
 		type {string}
-		default {""}
-		desc { Command line options for xgraph.}
+		default {"-bb -tk =800x400"}
+		desc { Command line options for pxgraph.}
 	}
 	defstate {
 		name {ignore}
@@ -66,20 +71,29 @@ for a complete explanation of the options.
 		default { 0.0 }
 		attributes {A_NONSETTABLE|A_NONCONSTANT}
 	}
+	defstate {
+		name {resources}
+		type {stringarray}
+		default {"STDIO"}
+		desc {Resources required by star.}
+	}
+	defstate {
+		name {count}
+		type {int}
+		default { 0 }
+		desc {Samplecounter}
+		attributes {A_NONSETTABLE|A_NONCONSTANT}
+	}
 	ccinclude { "Target.h" }
 
 	setup {
 		index = xInit;
-		count = 0;
-	}
-	protected {
-		int count;
 	}
 	initCode {
                 addDeclaration("    FILE* $starSymbol(fp);");
                 addInclude("<stdio.h>");
 		StringList w = "    if(!($starSymbol(fp) = fopen(\"";
-		w << targetPtr->name() << "_$starSymbol(temp)";
+		w << target()->name() << "_$starSymbol(temp)";
 		w << "\",\"w\")))";
 		addCode(w);
 		addCode(err);
@@ -92,12 +106,66 @@ codeblock (err) {
     }
 }
 		
+	// escape any double quotes in a string that is to be inserted into
+	// a constant C string in the generated code;
+	// the returned value resides in a static buffer and is whiped out
+	// on each invocation
+	method {
+		// I'd like to declare this as a static function, but there
+		// seems to be no way to achieve this with ptlang.
+		name { sanitizeString }
+		type { "const char*" }
+		arglist { "(StringList s)" }
+		access { protected }
+		code {
+			// quick implementation of a string buffer
+			static class Buffer {
+			   public:
+				Buffer()  { buf = NULL; vsize = psize = 0; }
+			// omitting the destructor since GCC 2.5.8 reports an internal
+			// compiler error
+			//	~Buffer() { if (buf)  free(buf); }
+
+				void initialize() {
+				    if (buf)  free(buf), buf = NULL;
+				    vsize = psize = 0;
+				}
+
+				void append(char c) {
+				    if (vsize >= psize)
+					    buf = (char*) (buf ? realloc(buf, psize += 1024)
+							       : malloc(psize += 1024));
+				    buf[vsize++] = c;
+				}
+
+				operator const char* ()
+				{
+				    if (vsize == 0 || buf[vsize-1])
+					append('\0');
+				    return buf;
+				}
+			   private:
+				// the string buffer
+				char* buf;
+				// virtual/physical buffer size
+				int vsize, psize;
+			} buffer;
+
+			buffer.initialize();
+				
+			for (const char* sp=s; *sp; sp++) {
+			    if (*sp == '\"')
+				    buffer.append('\\');
+			    buffer.append(*sp);
+			}
+			return (const char*) buffer;
+		}
+	}
+
 	go {
-		count++;
-		if (count <= int(ignore)) return;
-		addCode(
-"\tfprintf($starSymbol(fp),\"%g %g\\n\",$ref(index),$ref(input));\n");
-		addCode("\t$ref(index) += $val(xUnits);\n");
+@	if (++$ref(count) >= $val(ignore)) 
+@		fprintf($starSymbol(fp),"%g %g\n",$ref(index),$ref(input));
+@	$ref(index) += $val(xUnits);
 	}
 
 codeblock(closeFile) {
@@ -115,12 +183,12 @@ codeblock(closeFile) {
 		const char* sf = saveFile;
 		if (sf != NULL && *sf != 0) {
 			cmd << "/bin/cat ";
-			cmd << targetPtr->name(); 
+			cmd << target()->name(); 
 			cmd << "_$starSymbol(temp)" << " >> ";
 			cmd << sf << "; /bin/echo \"\" >> " << sf << "; ";
 		}
 
-		cmd << "xgraph ";
+		cmd << "pxgraph ";
 
 		// put title on command line
 
@@ -143,15 +211,18 @@ codeblock(closeFile) {
 		}
 
 		// put file name
-		cmd << targetPtr->name() << "_$starSymbol(temp)";
+		cmd << target()->name() << "_$starSymbol(temp)";
 
 		// remove temporary files
-		cmd << "; /bin/rm -f " << targetPtr->name();
+		cmd << "; /bin/rm -f " << target()->name();
 		cmd << "_$starSymbol(temp)";
 
 		cmd << ") &";
 		StringList out = "    system(\"";
-		out << cmd << "\");\n";
+		out << sanitizeString(cmd) << "\");\n";
 		addCode(out);
+	}
+	exectime {
+		return 7;
 	}
 }

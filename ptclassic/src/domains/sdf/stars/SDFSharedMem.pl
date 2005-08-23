@@ -1,56 +1,65 @@
 defstar {
   name { SharedMem }
   domain {SDF}
-  version { $Revision$ %Z% }
-  author { Stefan De Troch }
-  copyright{ }
-  desc { base class for shared memory }
+  version { @(#)SDFSharedMem.pl	1.7 03/27/97 }
+  author { Stefan De Troch (IMEC) }
+  copyright{ 
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
+  desc { Base class for shared memory }
   header {
 
     class VarReg {
     public:
       VarReg(): contents(0) {}
 
-      float GetContents() { return contents; }
-      void SetContents(float value) { contents= value; }
+      double GetContents() { return contents; }
+      void SetContents(double value) { contents= value; }
 
     private:
-      float contents;
+      double contents;
     };
 
   }
-  hinclude { "HashTable.h" }
-  explanation {}
-  code {
 
+  hinclude { "HashTable.h" }
+
+  htmldoc {
+This base star implements supporting code for the ReadVar and WriteVar
+stars.
+  }
+
+  code {
     // instantiate the static register list
     HashTable SDFSharedMem::regList;
   }
+
   protected {
     static HashTable regList;
   }
-  method
-  {
+
+  method {
     name {ReadVar}
-    arglist { "(const char *name, float& value)" }
+    arglist { "(const char* name, double* value)" }
     type { int }
     code
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
 	reg = (VarReg *) regList.lookup(name);
 
-	value = reg->GetContents();
+	*value = reg->GetContents();
 	return 1;
       }
       else
 	return 0;
     }
   }
-  method
-  {
+  method {
     name { RemoveVar }
     arglist { "(const char *name)" }
     type { void }
@@ -58,8 +67,7 @@ defstar {
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
         reg = (VarReg *) regList.lookup(name);
 	regList.remove(name);
 	LOG_DEL; delete reg;
@@ -69,24 +77,20 @@ defstar {
   method
   {
     name{ WriteVar }
-    arglist { "(const char *name, float value)" }
+    arglist { "(const char *name, double value)" }
     type { void }
     code
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
         reg = (VarReg *) regList.lookup(name);
       }
-      else
-      {
+      else {
 	LOG_NEW; reg = new VarReg;
 	regList.insert(name,reg);
       }
       reg->SetContents(value);
     }
-  }
-  destructor {
   }
 }

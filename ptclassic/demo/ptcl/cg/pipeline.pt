@@ -1,0 +1,37 @@
+reset
+# Creating universe 'pipeline'
+domain CG
+target FullyConnected
+	targetparam destDirectory PTOLEMY_SYSTEMS
+	targetparam nprocs 3
+	targetparam inheritProcessors NO
+	targetparam sendTime 0
+	targetparam childType "default-CG"
+	targetparam filePrefix code.p
+	targetparam ganttChart YES
+	targetparam logFile ""
+	targetparam ignoreIPC YES
+	targetparam overlapComm NO
+	targetparam useCluster YES
+	newstate retime int YES
+	star Source1 Source
+	setstate Source1 runTime 1
+	star Sink1 Sink
+	setstate Sink1 runTime 1
+	star MultiIn.input=21 MultiIn
+	numports MultiIn.input=21 input 2
+	setstate MultiIn.input=21 runTime 1
+	star MultiOut.output=21 MultiOut
+	numports MultiOut.output=21 output 2
+	setstate MultiOut.output=21 runTime 1
+	star RateChange1 RateChange
+	setstate RateChange1 runTime 4
+	setstate RateChange1 consume 3
+	setstate RateChange1 produce 1
+	connect MultiIn.input=21 output MultiOut.output=21 input
+	connect MultiOut.output=21 output#1 RateChange1 input "100*retime"
+	connect RateChange1 output Sink1 input "100*retime"
+	connect MultiOut.output=21 output#2 MultiIn.input=21 input#2 1
+	connect Source1 output MultiIn.input=21 input#1 "100*retime"
+run 1
+wrapup

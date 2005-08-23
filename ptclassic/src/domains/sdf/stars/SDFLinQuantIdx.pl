@@ -1,31 +1,35 @@
 defstar {
-	name { NewQuant }
+	name { LinQuantIdx }
 	domain { SDF }
 	desc {
-Quantizes input to one of N+1 possible output values using N thresholds.
-For an input less than or equal to the n-th threshold, but larger than 
-all previous thresholds, the output will be the n-th level.  
-If the input is greater than all thresholds, the output is the N+1-th level.
-There must be one more level than thresholds.
-It asks for the number f values to be quantized to (255) and also
-the range of values to quantize within. It will compute the step of
-the quantizer.
-Besides the quantized value being output, it will also output the level
-number that it corresponds to for the purpose of converison to an
-integer and then output serially to the Thor domain stars.
+The input is quantized to the number of levels given by the "levels"
+parameter plus 1.  The quantization levels are uniformly spaced between "low"
+and "high" inclusive.  Rounding down is performed, so that output level
+will equal "high" only if the input level equals or exceeds "high".
+If the input is below "low", then the quantized output will equal "low".
+The quantized value is output to the "amplitude" port, while the index
+of the quantization level is output to the "stepNumber" port.  This
+integer output is useful for stars that need an integer input, such as
+Thor stars.
 	}
-	author { Asawaree }
-	copyright { 1991 The Regents of the University of California }
+	author { Asawaree Kalavade }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	version { @(#)SDFLinQuantIdx.pl	1.18 2/25/96 }
 	input {
 		name {input}
 		type {float}
 	}
 	output {
-		name { amplitude }
+		name {amplitude}
 		type {float}
 	}
 	output {
-		name { stepNumber }
+		name {stepNumber}
 		type {int}
 	}
 	defstate {
@@ -46,46 +50,47 @@ integer and then output serially to the Thor domain stars.
 		default {"3.0"}
 		desc {upper limit of signal excursion }
 	}
-	protected {
-		float height;
-		float thresholds[255];
-		float values[255];
-		int number;
+	defstate {
+		name {height}
+		type {float}
+		default {"1.0"}
+		desc {
+height of each quantization step, which is determined by the states
+high, low, and levels.
+		}
+		attributes {A_NONSETTABLE|A_CONSTANT}
 	}
-	start {
-		int i;
-		
-		height= (double(high)-double(low)) /(int(levels)-1);
-		thresholds[0]=double(low)+double(height);
-		values[0]=double(low);
 
-	for(i=1;i<int(levels);i++) {
-	values[i]=values[i-1]+double(height);
-	thresholds[i]=thresholds[i-1]+double(height);
-			      }
-
-	number= int ((-1)*( int(levels))* (0.5));
+	setup {
+		if (int(levels) <= 0 ) {
+		    Error::abortRun(*this, "levels must be positive");
 		}
-	
+		else if (double(high) <= double(low)) {
+		    Error::abortRun(*this,
+				    "quantization range incorrectly ",
+				    "specified: high <= low");
+		}
+		else {
+		    height = (double(high) - double(low))/(int(levels) - 0);
+		}
+	}
 	go {
-		int i;
-		
+	    	double in = double(input%0);
+		double highvalue = double(high);
+		double lowvalue = double(low);
 
-	    number= int ((-1)*( int(levels))* (0.5));
-
-	    float in = float(input%0);
-	    for(i = 0; i < int (levels); i++) {
-		// if( in <= thresholds[i] ) 
-		if( in < thresholds[i] ) {
-		    amplitude%0 << values[i];
-		    // stepNumber%0 << i;
-		    stepNumber%0 << int(number);
-		    return;
+	    	if ( in >= highvalue ) {
+		    amplitude%0 << highvalue;
+                    stepNumber%0 << int(levels) - 1;
 		}
-		number++;
-	//	output%0 << values[levels-1];
-	//	output%0 << values[thresholds.size()];
-        //	output%0 = values[levels-1];
-	    }
+		else if ( in <= lowvalue ) {
+		    amplitude%0 << lowvalue;
+                    stepNumber%0 << 0;
+		}
+		else {
+		    int step = int((in - lowvalue)/double(height));
+		    stepNumber%0 << step;
+        	    amplitude%0 << double(lowvalue + step * double(height));
+		}
 	}
 }

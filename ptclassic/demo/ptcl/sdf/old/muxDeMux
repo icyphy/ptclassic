@@ -1,0 +1,47 @@
+reset
+# Creating universe 'muxDeMux'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star DeMux.output=21 DeMux
+	numports DeMux.output=21 output 2
+	setstate DeMux.output=21 blockSize 1
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 1.0
+	setstate FloatRamp1 value 0.0
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "0 0 0 1 1 1 2 2 2"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	star Mux.input=21 Mux
+	numports Mux.input=21 input 2
+	setstate Mux.input=21 blockSize 1
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "0 0 0 1 1 1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	star XMgraph.input=31 XMgraph
+	numports XMgraph.input=31 input 3
+	setstate XMgraph.input=31 title "Mux and DeMux demo"
+	setstate XMgraph.input=31 saveFile ""
+	setstate XMgraph.input=31 options "-P =800x300+0+0 -0 demux1 -1 demux2 -2 mux"
+	setstate XMgraph.input=31 ignore 0
+	setstate XMgraph.input=31 xUnits 1.0
+	setstate XMgraph.input=31 xInit 0.0
+	connect FloatRamp1 output DeMux.output=21 input
+	connect WaveForm1 output DeMux.output=21 control
+	connect WaveForm2 output Mux.input=21 control
+	node node1
+	nodeconnect DeMux.output=21 output#1 node1
+	nodeconnect XMgraph.input=31 input#1 node1
+	nodeconnect Mux.input=21 input#1 node1
+	node node2
+	nodeconnect DeMux.output=21 output#2 node2
+	nodeconnect Mux.input=21 input#2 node2
+	nodeconnect XMgraph.input=31 input#2 node2
+	connect Mux.input=21 output XMgraph.input=31 input#3
+run 30
+wrapup

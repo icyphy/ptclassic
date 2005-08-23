@@ -1,259 +1,392 @@
 defstar {
 	name { Matlab_M }
 	domain { SDF }
+	derivedFrom { Matlab }
 	desc {
-Evaluate Matlab functions if inputs are given or evaluate
-Matlab commands and scripts if no inputs are given.
+Evaluate a Matlab function if inputs are given or
+evaluate a Matlab command if no inputs are given.
 	}
-	version { $Id$ }
+	version { @(#)SDFMatlab_M.pl	1.52	07/03/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
-	explanation {
-This star passes one or more complex matrix inputs to a Matlab function
-and produces a complex matrix output that is the result.
-The \fIoptions\fR string is passed directly to the Matlab kernel.
-The Matlab kernel is started during the setup phase and exitted during
-the wrapup phase.
-At each firing of the star, the matrices on the input ports are converted
-to Matlab format and passed to the Matlab function \fImatlabFunction\fR
-in the order that the input ports are connected to the star.
-If there are no inputs, then the \fImatlabFunction\fR is evaluated without
-any arguments; e.g., a \fImatlabFunction\fR of "hilb(4)" would return
-a 4 x 4 Hilbert matrix.
-The names of the input and output variables in Matlab are derived from
-\fImatlabInputName\fR and \fImatlabOutputName\fR, respectively.
-If the \fImatlabInputName\fR is the same as the \fImatlabOutputName\fR,
-then some or all of the matrices are reused by Matlab.
-.Ir "Matlab interface"
+	location { SDF Matlab library }
+	htmldoc {
+<a name="Matlab interface"></a>
+This star converts the matrices/scalars on the input ports to Matlab format,
+passes the Matlab matrices to the <i>MatlabFunction</i>, converts the
+resulting Matlab matrices to Ptolemy matrices, and outputs the matrices.
+The <i>MatlabFunction</i> state can either be a Matlab function name,
+a call to a Matlab function, or one Matlab command.
+The star will add the missing pieces to form a complete command.
+<p>
+For example, if <i>MatlabFunction</i> were "eig" and the star had one input
+and two outputs, then the star would build the Matlab command
+"[output#1, output#2] = eig(input#1);".
+If <i>MatlabFunction</i> were "hilb(4)" and the star had no inputs and
+one output, then the star would build the Matlab command
+"[output#1] = hilb(4);".
+If <i>MatlabFunction</i> were
+"[output#1,output#2] = func1(func2(input#2),input#1)", then
+the star would simply add a semicolon at the end.
+Before the command is passed to Matlab, the pound '#' characters are replaced
+with underscore '_' characters.
+The pound characters are used to maintain compatibility with Ptolemy syntax.
+<p>
+When Ptolemy invokes a new instance of Matlab, it will launch
+a remote Matlab process on the machine give by the value of the
+<code>MATLAB_SERVER_HOSTNAME</code> environment variable if it
+is set; otherwise, Ptolemy will launch a Matlab process on the
+local workstation.
 	}
 	inmulti {
 		name { input }
-		type { COMPLEX_MATRIX_ENV }
+		type { anytype }
 	}
 	outmulti {
 		name { output }
-		type { COMPLEX_MATRIX_ENV }
+		type { FLOAT_MATRIX_ENV }
 	}
 	defstate {
-		name { options }
-		type { string }
-		default { "" }
-		desc { Command line options for Matlab. }
-	}
-	defstate {
-		name { matlabFunction }
+		name { MatlabSetUp }
 		type { string }
 		default { "" }
 		desc {
-The Matlab command to execute.
-The values of the input ports will be passed as arguments to this function.
-}
+The Matlab command to execute during the begin method of the Matlab star.
+During the begin procedure, there is no data passing into or out of the star.
+		}
 	}
 	defstate {
-		name { MatlabInputVarName }
+		name { MatlabFunction }
 		type { string }
-		default { "Pmm" }
+		default { "" }
 		desc {
-Base name for Matlab variables to hold the value of the input matrices.
-The variables will be of the form input name + port number, e.g. "Pmm1".
-}
+The Matlab command to execute each time the star fires.
+The values of the input and output ports may be accessed using the
+Ptolemy notation input#i and output#i, where i is the port number,
+as explained above.
+		}
 	}
 	defstate {
-		name { MatlabOutputVarName }
+		name { MatlabWrapUp }
 		type { string }
-		default { "Pmm" }
+		default { "" }
 		desc {
-Base name for Matlab variables to hold the value of the output matrices.
-The variables will be of the form output name + port number, e.g. "Pmm1".
-}
+The Matlab command to execute during the wrapup procedure of the Matlab star.
+During the wrapup procedure, there is no data passing into or out of the star.
+		}
 	}
 
-	// matrix.h and engine.h are provided with Matlab
-	// Matrix.h is from the Ptolemy kernel
-	hinclude { "matrix.h", "engine.h", "Matrix.h" }
+	// Ptolemy kernel includes
+	hinclude { "dataType.h", "Matrix.h", "StringList.h" }
+
+	// Matlab interface includes
+	hinclude { "MatlabPtIfc.h", "MatlabIfcFuns.h" }
+
+	header { typedef mxArray* MatrixPtr; }
 
 	protected {
-		// Matlab structures implemented in C
-		Engine *matlabEnginePtr;
-		Matrix **matlabInputMatrices;
-		Matrix **matlabOutputMatrices;
+		// Matlab (C) structures
+		MatrixPtr* matlabInputMatrices;
+		MatrixPtr* matlabOutputMatrices;
 
-		// Ptolemy structures for Matlab calls
-		StringList *matlabInputNames;	    // array of variable names
-		StringList *matlabOutputNames;	    // array of variable names
-		char *matlabCommand;
+		// Ptolemy (C++) structures for Matlab calls
+		char** matlabInputNames;    // array of Matlab variable names
+		char** matlabOutputNames;   // array of Matlab variable names
 
-		// Ptolemy variables for number of inputs and outputs
+		// Variables for number of inputs and outputs to this star
 		int numInputs;
 		int numOutputs;
 	}
 
 	constructor {
-		matlabEnginePtr = 0;
 		matlabInputMatrices = 0;
 		matlabOutputMatrices = 0;
+
 		matlabInputNames = 0;
 		matlabOutputNames = 0;
+
+		numInputs = 0;
+		numOutputs = 0;
 	}
 
 	setup {
-		char numstr[16];
-		int i;
+		// run the setup method of the base star
+		SDFMatlab::setup();
 
-		// make sure that we can start up Matlab
-		StringList shellCommand = "matlab "; 
-		shellCommand << ((const char *) options);
-		if ( matlabEnginePtr != 0 ) {
-		  engClose( matlabEnginePtr );
-		}
-		matlabEnginePtr = engOpen( ((char *) shellCommand) );
-		if ( matlabEnginePtr == 0 ) {
-		  Error::abortRun( *this, "Could not start Matlab using ",
-				   (const char *) shellCommand );
-		}
-
-		// establish number inputs/outputs & allocate Matlab matrices
+		// set the number of input and output ports
 		numInputs = input.numberPorts();
-		if ( matlabInputMatrices != 0 ) {
-		  free(matlabInputMatrices);
-		}
-		matlabInputMatrices =
-		  (Matrix **) malloc( numInputs * sizeof(Matrix *) );
-
 		numOutputs = output.numberPorts();
-		if ( matlabOutputMatrices != 0 ) {
-		  free(matlabOutputMatrices);
-		}
-		matlabOutputMatrices =
-		  (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
 
-		// generate names for Matlab versions of input matrix names
-		char *inputBaseName = ((char *) MatlabInputVarName);
-		if ( matlabInputNames != 0 ) {
-		  delete [] matlabInputNames;
-		}
-		matlabInputNames = new StringList[numInputs];
-		for ( i = 0; i < numInputs; i++ ) {
-		  sprintf(numstr, "%d", i+1);
-		  matlabInputNames[i] << inputBaseName << numstr;
-		}
-
-		// generate names for Matlab versions of output matrix names
-		char *outputBaseName = ((char *) MatlabOutputVarName);
-		if ( matlabOutputNames != 0 ) {
-		  delete [] matlabOutputNames;
-		}
-		matlabOutputNames = new StringList[numOutputs];
-		for ( i = 0; i < numOutputs; i++ ) {
-		  sprintf(numstr, "%d", i+1);
-		  matlabOutputNames[i] << outputBaseName << numstr;
-		}
-
-		// create the command that will be sent to Matlab
-		StringList matcommand;
+		// check data type of output ports
 		if ( numOutputs > 0 ) {
-		  matcommand << "[" << matlabOutputNames[0];
-		  for ( i = 1; i < numOutputs; i++ ) {
-		    matcommand << ", " << matlabOutputNames[i];
+		  DataType outType = output.type();
+		  if ( outType != FLOAT_MATRIX_ENV &&
+		       outType != COMPLEX_MATRIX_ENV ) {
+		    Error::abortRun(*this,
+				    "The output ports may only support float",
+				    "matrix or complex matrix envelopes, not",
+				    output.type());
 		  }
-		  matcommand << "] = ";
 		}
-		matcommand << ((const char *) matlabFunction);
+	}
+
+	begin {
+		// run the begin method of the base star (start Matlab, etc.)
+		SDFMatlab::begin();
+
+		// free any existing memory
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+						    numInputs);
+		delete [] matlabInputMatrices;
+		matlabInputMatrices = 0;
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+						    numOutputs);
+		delete [] matlabOutputMatrices;
+		matlabOutputMatrices = 0;
+
+		matlabInterface->FreeStringArray(matlabInputNames, numInputs);
+		delete [] matlabInputNames;
+		matlabInputNames = 0;
+		matlabInterface->FreeStringArray(matlabOutputNames, numOutputs);
+		delete [] matlabOutputNames;
+		matlabOutputNames = 0;
+
+		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
-		  matcommand << "(" << matlabInputNames[0];
-		  for ( i = 1; i < numInputs; i++ ) {
-		    matcommand << ", " << matlabInputNames[i];
+		  matlabInputMatrices = new MatrixPtr[numInputs];
+		  for ( int k = 0; k < numInputs; k++ ) {
+		    matlabInputMatrices[k] = 0;
 		  }
-		  matcommand << ")";
+		  matlabInputNames = new char*[numInputs];
+		  matlabInterface->NameMatlabMatrices(matlabInputNames,
+		  				      numInputs, "input");
 		}
-		matlabCommand = (char *) matcommand;
+
+		// allocate Matlab output matrices and generate their names
+		if ( numOutputs > 0 ) {
+		  matlabOutputMatrices = new MatrixPtr[numOutputs];
+		  for ( int k = 0; k < numOutputs; k++ ) {
+		    matlabOutputMatrices[k] = 0;
+		  }
+		  matlabOutputNames = new char*[numOutputs];
+		  matlabInterface->NameMatlabMatrices(matlabOutputNames,
+		  				      numOutputs, "output");
+		}
+
+		// create the command to be sent to the Matlab interpreter
+		matlabInterface->BuildMatlabCommand(
+			matlabInputNames, numInputs,
+			(const char *) MatlabFunction,
+			matlabOutputNames, numOutputs);
+
+		// evaluate the MatlabSetUp if provided
+		const char* setupCommand = (const char*) MatlabSetUp;
+		if ( setupCommand && *setupCommand ) {
+		  InfString matlabCommand = setupCommand;
+		  int err = matlabInterface->EvaluateUserCommand(matlabCommand);
+		  if ( err ) {
+		    Error::abortRun( *this, matlabInterface->GetErrorString() );
+		  }
+		}
 	}
 
 	go {
-		// allocate memory for Matlab matrices
-		MPHIter nexti(input);
-		for ( int i = 0; i < numInputs; i++ ) {
-		  Envelope Apkt;
-		  ((*nexti++)%0).getMessage(Apkt);
-		  const ComplexMatrix& Amatrix =
-			*(const ComplexMatrix *)Apkt.myData();
+		// convert Ptolemy input matrices to Matlab matrices
+		processInputMatrices();
 
-		  // allocate Matlab matrices
-		  int rows = Amatrix.numRows();
-		  int cols = Amatrix.numCols();
-		  matlabInputMatrices[i] = mxCreateFull(rows, cols, COMPLEX);
-		  mxSetName( matlabInputMatrices[i],
-			     (char *) matlabInputNames[i]);
+		// evaluate the Matlab command (non-zero means error)
+		StringList errmsg;
+		int merror = matlabInterface->EvaluateUserCommand();
+		if ( merror ) {
+		  errmsg = matlabInterface->GetErrorString();
+		  Error::abortRun( *this, matlabInterface->GetErrorString() );
+		}
+		else {
+		  // convert Matlab matrices to Ptolemy matrices
+		  merror = processOutputMatrices();
+		  errmsg = "Could not convert the Matlab output matrices to Ptolemy matrices";
+		}
 
-		  // copy values in Ptolemy matrix to Matlab matrix
-		  double *realVector = mxGetPr(matlabInputMatrices[i]);
-		  double *imagVector = mxGetPi(matlabInputMatrices[i]);
-		  double *rp = realVector;
-		  double *ip = imagVector;
-		  Complex temp;
-		  for ( int irow = 0; irow < rows; irow++ ) {
-		    for ( int icol = 0; icol < cols; icol++ ) {
-		      temp = Amatrix[icol][icol];
-		      *rp++ = real(temp);
-		      *ip++ = imag(temp);
-		    }
+		// Free dynamic memory
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+						    numInputs);
+		matlabInterface->UnsetMatlabVariable(matlabInputNames,
+						     numInputs);
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+						    numOutputs);
+		matlabInterface->UnsetMatlabVariable(matlabOutputNames,
+						     numOutputs);
+
+		// Report any errors that occurred
+		if ( merror ) {
+		  Error::abortRun( *this, errmsg );
+		}
+	}
+
+	wrapup {
+		const char* wrapupCommand = (const char*) MatlabWrapUp;
+		if ( wrapupCommand && *wrapupCommand ) {
+		  InfString matlabCommand = wrapupCommand;
+		  int err = matlabInterface->EvaluateUserCommand(matlabCommand);
+		  if ( err ) {
+		    Error::abortRun( *this, matlabInterface->GetErrorString() );
 		  }
-		  mxSetPr(matlabInputMatrices[i], realVector);
-		  mxSetPi(matlabInputMatrices[i], imagVector);
-		}
-
-		// evaluate the Matlab command
-		if ( ! engEvalString( matlabEnginePtr, matlabCommand ) ) {
-		  Error::abortRun( *this, "Error evaluating Matlab command ",
-				   matlabCommand );
-		}
-
-		// copy each Matlab output matrix to a Ptolemy matrix
-		MPHIter nextp(output);
-		for ( int j = 0; j < numOutputs; j++ ) {
-		  matlabOutputMatrices[j] =
-			engGetMatrix( matlabEnginePtr,
-				      (char *) matlabOutputNames[j] );
-
-		  double *rp = mxGetPr(matlabOutputMatrices[j]);
-		  double *ip = mxGetPi(matlabOutputMatrices[j]);
-		  int rows = mxGetM(matlabOutputMatrices[j]);
-		  int cols = mxGetN(matlabOutputMatrices[j]);
-		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
-		  for ( int jrow = 0; jrow < rows; jrow++ ) {
-		    for ( int jcol = 0; jcol < cols; jcol++ ) {
-		      Amatrix[jrow][jcol] = Complex(*rp++, *ip++);
-		    }
-		  }
-		  ((*nextp++)%0) << Amatrix;
-		}
-
-		// free Matlab memory-- assume Matlab is good with memory alloc
-		for ( int k = 0; k < numInputs; k++ ) {
-		  mxFreeMatrix(matlabInputMatrices[k]);
-		}
-		for ( int m = 0; m < numOutputs; m++ ) {
-		  mxFreeMatrix(matlabOutputMatrices[m]);
 		}
 	}
 
 	destructor {
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+						   numInputs);
+		delete [] matlabInputMatrices;
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+						   numOutputs);
+		delete [] matlabOutputMatrices;
+
+		matlabInterface->FreeStringArray(matlabInputNames, numInputs);
 		delete [] matlabInputNames;
+		matlabInterface->FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
 	}
 
-	wrapup {
-		int i, ret;
+	// Returns 1 for Failure and 0 for Success
+	method {
+	  name { processInputMatrices }
+	  access { protected }
+	  type { int }
+	  arglist { "()" }
+	  code {
+		int errorFlag = FALSE;
 
-		ret = engClose(matlabEnginePtr);
+		// allocate memory for Matlab matrices
+		MPHIter nexti(input);
+		for ( int i = 0; i < numInputs; i++ ) {
+		  // read a reference to the matrix on input port i
+		  int errflag = FALSE;
+		  PortHole *iportp = nexti++;
+		  DataType portType = iportp->resolvedType();
+		  mxArray *matlabMatrix =
+		  	matlabInterface->PtolemyToMatlab(
+				(*iportp)%0, portType, &errflag);
 
-		free( matlabInputMatrices );
-		free( matlabOutputMatrices );
+		  // check for error in the call to PtolemyToMatlab
+		  if ( errflag ) {
+		    errorFlag = TRUE;
+		    StringList errstr;
+		    errstr = "Unsupported data type ";
+		    errstr << portType << " on input port " << i+1 << ".";
+		    Error::warn(*this, errstr);
+		  }
+
+		  // Give the current matrix a name
+		  matlabInterface->NameMatlabMatrix(matlabMatrix,
+		  				   matlabInputNames[i]);
+
+		  // let Matlab know about the new Matlab matrix we've defined
+		  // FIXME: Memory Leak
+		  matlabInterface->MatlabEnginePutMatrix(matlabMatrix);
+
+		  // save the pointer to the new Matlab matrix for deallocation
+		  matlabInputMatrices[i] = matlabMatrix;
+		}
+
+		return( errorFlag );
+	  }
+	}
+
+	// Returns 1 for Failure and 0 for Success
+	method {
+	  name { processOutputMatrices }
+	  access { protected }
+	  type { int }
+	  arglist { "()" }
+	  code {
+		// possible error messages and flags
+		int incompatibleOutportPort = FALSE;
+		int matlabFatalError = FALSE;
+		int nullMatlabMatrix = FALSE;
+		StringList merrstr, mverbstr, nerrstr, nverbstr;
+
+		// iterate through the output ports
+		MPHIter nextp(output);
+		for ( int j = 0; j < numOutputs; j++ ) {
+		  // current output porthole & advance nextp to next porthole
+		  PortHole *oportp = nextp++;
+		  DataType portType = oportp->resolvedType();
+
+		  // create a new Matlab matrix for deallocation and save ref.
+		  // FIXME: Memory leak
+		  mxArray *matlabMatrix =
+		  matlabInterface->MatlabEngineGetMatrix(matlabOutputNames[j]);
+
+		  // save the pointer to the new Matlab matrix for deallocation
+		  matlabOutputMatrices[j] = matlabMatrix;
+
+		  // check to make that the Matlab matrix is defined
+		  if ( matlabMatrix == 0 ) {
+		    if ( ! nullMatlabMatrix ) {
+		      nullMatlabMatrix = TRUE;
+		      nerrstr = "For the Matlab command ";
+		      nerrstr << matlabInterface->GetMatlabCommand() << ", ";
+		      nverbstr = " is not defined.";
+		    }
+		    else {
+		      nerrstr << " and ";
+		      nverbstr = " are not defined.";
+		    }
+		    nerrstr << matlabOutputNames[j];
+		    continue;
+		  }
+
+		  StringList matrixId = matlabOutputNames[j];
+		  matrixId << " on output port " << j;
+		  int errflag = FALSE;
+		  int warnflag = FALSE;
+		  int badport = matlabInterface->MatlabToPtolemy(
+		  			(*oportp)%0, portType, matlabMatrix,
+					&warnflag, &errflag);
+		  incompatibleOutportPort = incompatibleOutportPort || badport;
+
+		  if ( warnflag ) {
+		    Error::warn(*this, matlabInterface->GetWarningString() );
+		  }
+
+		  if ( errflag ) {
+		    if ( ! matlabFatalError ) {
+		      matlabFatalError = TRUE;
+		      merrstr = "For the Matlab command ";
+		      merrstr << matlabInterface->GetMatlabCommand() << ", ";
+		      mverbstr = " is not a full matrix.";
+		    }
+		    else {
+		      merrstr << " and ";
+		      mverbstr = " are not full matrices.";
+		    }
+		    merrstr << matlabOutputNames[j];
+		  }
+		}
+
+		// print warning messages and return error status
+		if ( incompatibleOutportPort ) {
+		  Error::warn(*this,
+			"Output port data type is neither a floating-point",
+			"matrix nor a complex-valued matrix: the setup() ",
+			"method should have flagged this error.");
+		}
+		if ( nullMatlabMatrix ) {
+		  Error::warn(*this, nerrstr, nverbstr);
+		}
+		if ( matlabFatalError ) {
+		  Error::warn(*this, merrstr, mverbstr );
+		}
+
+		return( incompatibleOutportPort ||
+			nullMatlabMatrix ||
+			matlabFatalError );
+	  }
 	}
 }

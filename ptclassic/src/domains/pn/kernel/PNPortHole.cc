@@ -1,151 +1,111 @@
-static const char file_id[] = "$RCSfile$";
+/* 
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
-/*  Version $Id$
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
 
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+/*  Version @(#)PNPortHole.cc	2.6 3/19/96
+    Author:	T.M. Parks
+    Created:	6 February 1992
 
     Code for domain-specific PortHole classes.
 */
+
+static const char file_id[] = "PNPortHole.cc";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "MTDFConnect.h"
-#include "MTDFGeodesic.h"
-#include "CircularBuffer.h"
-#include "Plasma.h"
-#include "Error.h"
+#include "PNPortHole.h"
+
+extern const Attribute P_DYNAMIC = {PB_DYNAMIC,0};
+extern const Attribute P_STATIC = {0,PB_DYNAMIC};
 
 // Class identification.
-ISA_FUNC(MTDFPortHole,PortHole);
+ISA_FUNC(PNPortHole,DFPortHole);
 
-// Constructor.
-MTDFPortHole::MTDFPortHole() : myGeodesic(PortHole::myGeodesic)
+int PNPortHole::isDynamic() const
 {
-}
-
-// Allocate and return a MTDFGeodesic.
-Geodesic* MTDFPortHole::allocateGeodesic()
-{
-    LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
-    char name[80];
-    strcpy(name, "Node_");
-    strcat(name, readName());
-    g->setNameParent(hashstring(name),parent());
-    return g;
-}
-
-/* Because MTDFGeodsic::get() may block, care must be taken to keep the buffer
-   and Plasma consistent.
-*/
-void MTDFPortHole::getParticle()
-{
-    Particle **pOld, *pNew;
-
-    // Transfer numberTokens Particles from the Geodesic to the buffer.
-    for(int i = numberTokens; i>0; i--)
-    {
-	// Get a pointer to the next Particle in the buffer.
-	pOld = myBuffer->next();
-
-	// Get a new Particle from the Geodesic. (This may block!)
-	pNew = myGeodesic->get();
-
-	// Recycle the old particle by putting it into the Plasma.
-	myPlasma->put(*pOld);
-
-	// Put the new Particle into the buffer.
-	*pOld = pNew;
-    }
-}
-
-/* Redefining PortHole::putParticle() is necessary only because
-   Geodesic::put() is not virtual.
-*/
-void MTDFPortHole::putParticle()
-{
-    Particle** p;
-
-    // Fast case for one Particle.
-    if (numberTokens == 1)
-    {
-	p = myBuffer->here();
-	myGeodesic->put(*p);
-	*p = myPlasma->get();
-	return;
-    }
-
-    // Slow case for multiple Particles.
-
-    // Back up to the first new Particle in the buffer.
-    myBuffer->backup(numberTokens);
-
-    // Transfer numberTokens Particles from the buffer to the Geodesic.
-    for(int i = numberTokens; i>0; i--)
-    {
-	// Get the next Particle from the buffer.
-	p = myBuffer->next();
-
-	// Transfer the Particle to the Geodesic.
-	myGeodesic->put(*p);
-
-	// Replace the used-up Particle with one recycled from the Plasma.
-	*p = myPlasma->get();
-    }
+    return attributes() & PB_DYNAMIC;
 }
 
 // Input/output identification.
-int InMTDFPort::isItInput() const
+int InPNPort::isItInput() const
 {
     return TRUE;
 }
 
 // Get data from the Geodesic.
-void InMTDFPort::grabData()
+void InPNPort::receiveData()
 {
     getParticle();
 }
 
 // Input/output identification.
-int OutMTDFPort::isItOutput() const
+int OutPNPort::isItOutput() const
 {
     return TRUE;
 }
 
+// Update buffer pointer (for % operator) and clear old Particles.
+void OutPNPort::receiveData()
+{
+    clearParticle();
+}
+
 // Put data into the Geodesic.
-void OutMTDFPort::sendData()
+void OutPNPort::sendData()
 {
     putParticle();
 }
 
-
 // Input/output identification.
-int MultiInMTDFPort::isItInput() const
+int MultiInPNPort::isItInput() const
 {
     return TRUE;
 }
 
 // Add a new physical port to the MultiPortHole list.
-PortHole& MultiInMTDFPort::newPort()
+PortHole& MultiInPNPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new InMTDFPort;
-	return installPort(p);
+    LOG_NEW; InPNPort& p = *new InPNPort;
+    Attribute a = {0, 0}; a.bitsOn = attributes();
+    p.setAttributes(a);
+    return installPort(p);
 }
 
 // Input/output identification.
-int MultiOutMTDFPort::isItOutput() const
+int MultiOutPNPort::isItOutput() const
 {
     return TRUE;
 }
 
 // Add a new physical port to the MultiPortHole list.
-PortHole& MultiOutMTDFPort::newPort()
+PortHole& MultiOutPNPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new OutMTDFPort;
-	return installPort(p);
+    LOG_NEW; OutPNPort& p = *new OutPNPort;
+    Attribute a = {0, 0}; a.bitsOn = attributes();
+    p.setAttributes(a);
+    return installPort(p);
 }

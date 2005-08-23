@@ -2,9 +2,9 @@
 #define _ArchTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)ArchTarget.h	1.14 09/22/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLSignal.h"
 #include "VHDLState.h"
 #include "VHDLFiring.h"
+#include "VHDLFiregroup.h"
 #include "VHDLDependency.h"
 #include "Attribute.h"
 #include "VHDLToken.h"
@@ -62,11 +63,13 @@ public:
 	// Main routine.
 	/*virtual*/ int runIt(VHDLStar*);
 
-	// redefine writeCode: default file is "code.vhd"
-	/*virtual*/ void writeCode();
+	// Generate code.
+        /*virtual*/ void generateCode();
 
-	// Compile, run the code.
-	/*virtual*/ int compileCode();
+	// Write, compile, run the code.
+	/*virtual*/ void writeCode() { SimVSSTarget::writeCode(); }
+	/*virtual*/ int compileCode() { return SimVSSTarget::compileCode(); }
+	/*virtual*/ int runCode() { return SimVSSTarget::runCode(); }
 
 	// Generate a comment.
 	/*virtual*/ StringList comment(const char* text,
@@ -80,17 +83,24 @@ public:
 	// Generate code to end an iterative procedure.
 	/*virtual*/ void endIteration(int, int);
 
-	// Add the clock to the clock list and generate code to toggle it.
-	void toggleClock(const char*);
+	// Pulse the given clock TRUE at the given time.
+	void pulseClock(const char*, int);
 
-	// Add the clock to the clock list and generate code to assert it.
-	void assertClock(const char*);
+//	// Add the clock to the clock list and generate code to toggle it.
+//	void toggleClock(const char*);
 
-	// Run the code.
-	/*virtual*/ int runCode();
+	// Assert the given clock with the given value at the given time.
+	void assertValue(const char*, int, int);
+
+//	// Add the clock to the clock list and generate code
+//	// to assert it with the given value.
+//	void assertClock(const char*, int);
 
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, const char*, int=-1, int=-1);
+
+	// Register temporary variable reference.
+	/*virtual*/ void registerTemp(const char*, const char*);
 
 	// Register PortHole reference.
 	/*virtual*/ void registerPortHole(VHDLPortHole*, const char*, int,
@@ -98,19 +108,26 @@ public:
 
 	// Return the assignment operators for States and PortHoles.
 	/*virtual*/ const char* stateAssign() { return ":=" ; }
-	/*virtual*/ const char* portAssign() { return "<=" ; }
+	/*virtual*/ const char* portAssign() { return ":=" ; }
+//	/*virtual*/ const char* portAssign() { return "<=" ; }
 
 protected:
+        // Command file code to generate report information.
+	CodeStream report_code;
+
 	// Members to support dependency graph construction.
 	VHDLFiringList masterFiringList;
+	VHDLFiringList newFiringList;
+
+	VHDLFiregroupList firegroupList;
 
 	VHDLDependencyList dependencyList;
+	VHDLDependencyList iterDependencyList;
 	VHDLTokenList tokenList;
 	VHDLMuxList muxList;
 	VHDLRegList regList;
 
-	/*virtual*/ void begin();
-
+	/*virtual*/ void begin() { SimVSSTarget::begin(); }
 	/*virtual*/ void setup();
 
 	// code generation init routine; compute offsets, generate initCode
@@ -119,6 +136,20 @@ protected:
 	// Stages of code generation.
 	/*virtual*/ void headerCode();
 	/*virtual*/ void trailerCode();
+
+	// Methods to extract information from dataflow graphs, taking ports, tokens,
+	// states, and arcs and producing regs, muxs, sources, signals, and dependencies.
+	void extract_ports();
+	void extract_tokens();
+	void extract_states();
+	void extract_arcs();
+
+	// Methods to construct regs and muxs from the regList and muxList.
+	void construct_regs();
+	void construct_muxs();
+
+	// Method redefined by derived targets to bring up interactive app.
+	virtual void interact() {}
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
@@ -144,6 +175,10 @@ protected:
 	// Method called by comm stars to place important code into structure.
 	/*virtual*/ void registerComm(int, int, int, const char*);
 
+	// Unpack the firegroups from firegroupList and
+	// generate code for each one.
+	StringList addFiregroupCode(VHDLFiregroupList*, int=0);
+
 private:
 	// Pointer to keep track of current firing.
 	VHDLFiring *currentFiring;
@@ -152,10 +187,12 @@ private:
 	StringList clockList;
 
 	// Relevant code streams.
+	CodeStream firegroup_code;
+	CodeStream mux_declarations;
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
-	CodeStream configuration_declaration;
+	CodeStream configuration_declarations;
 	CodeStream preSynch;
 	CodeStream firingAction;
 	CodeStream postSynch;
@@ -164,12 +201,11 @@ private:
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
 	VHDLCompDeclList mainCompDeclList;
-	VHDLSignalList mainSignalList;
+	VHDLCompDeclList sourceCompDeclList;
+	VHDLCompDeclList muxCompDeclList;
+	VHDLCompDeclList regCompDeclList;
+	VHDLSignalList signalList;
 	VHDLStateList stateList;
-//	VHDLClusterList clusterList;
-
-//	// This is where to store and look for persistent signals.
-//      VHDLSignalList topSignalList;
 
 	// The following are for keeping track of components and
 	// signals within one firing.
@@ -192,7 +228,7 @@ private:
 	void connectSource(StringList, VHDLSignal*);
 
 	// Connect a multiplexor between the given input and output signals.
-	void connectMultiplexor(VHDLSignal*, VHDLSignal*, VHDLSignal*);
+	void connectMultiplexor(StringList, VHDLSignalList*, VHDLSignal*, VHDLSignal*);
 
 	// Connect a register between the given input and output signals.
 	void connectRegister(VHDLSignal*, VHDLSignal*, VHDLSignal*);
@@ -265,6 +301,9 @@ private:
 	// Add in variable to port transfers here from varPortList.
 	StringList addVarPortTransfers(VHDLFiring*, int);
 
+	// Add in null assignments to support case statements.
+	StringList addNullAssignments(VHDLFiring*, int);
+
 	// Register compDecls and merge signals.
 	void registerAndMerge(VHDLFiring*);
 
@@ -274,14 +313,8 @@ private:
 	// Generate the architecture_body_opener.
 	void buildArchitectureBodyOpener(int);
 
-	// Add in component declarations here from mainCompDeclList.
-	void buildComponentDeclarations(int);
-
 	// Generate the architecture_body_closer.
 	void buildArchitectureBodyCloser(int);
-
-	// Add in configuration declaration here from mainCompDeclList.
-	void buildConfigurationDeclaration(int);
 
 	// Generate the clock generator entity and architecture.
 	StringList clockGenCode();
@@ -294,9 +327,6 @@ private:
 
 	// Generate the source entity and architecture.
 	StringList sourceCode(StringList);
-
-//	// Merge all firings into one cluster.
-//	void allFiringsOneCluster();
 
 };
 

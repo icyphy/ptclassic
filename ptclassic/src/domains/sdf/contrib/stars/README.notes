@@ -1,0 +1,52 @@
+Notes on some of the stars in this directory:
+--------------------------------------------
+t: Alan Kamas <aok@cooley.eecs.berkeley.edu>
+f: neal@ctd.comsat.com (Neal Becker)
+References: <199410140358.UAA11614@cooley.eecs.berkeley.edu>
+s: SDFTWTA star compile problem
+d: 14 October 1994   (Friday)    08:10:00 EDT
+-
+>>>>> "Alan" == Alan Kamas <aok@cooley.eecs.berkeley.edu> writes:
+
+    Alan> The SDFTWTA star also seems to be dependent on functions
+    Alan> that we don't normally link in.  Here's the error message I
+    Alan> get when I compile:
+
+    Alan> g++ -g -Wall -Wcast-qual -O2
+    Alan> -I../../../../../src/domains/sdf/contrib/stars
+    Alan> -I../../../../../src/domains/sdf/kernel
+    Alan> -I../../../../../src/kernel
+    Alan> -I../../../../../src/domains/contrib/stars -c
+    Alan> ../../../../../src/domains/sdf/contrib/stars/SDFTWTA.cc
+    Alan> ../../../../../src/domains/sdf/contrib/stars/SDFTWTA.pl: In
+    Alan> method `void SDFTWTA::go()':
+    Alan> ../../../../../src/domains/sdf/contrib/stars/SDFTWTA.pl:74:
+    Alan> warning: implicit declaration of function `int atan2d(...)'
+    Alan> ../../../../../src/domains/sdf/contrib/stars/SDFTWTA.pl:81:
+    Alan> warning: implicit declaration of function `int cosd(...)'
+    Alan> ../../../../../src/domains/sdf/contrib/stars/SDFTWTA.pl:81:
+    Alan> warning: implicit declaration of function `int sind(...)'
+
+
+    Alan> are the sind, cosd, and atan2d part of a math library?
+
+Yes, these are the 'degree' versions of these popular functions.  Hpux
+9.xx has these in <math.h>
+
+
+t: neal@ctd.comsat.com (Neal Becker)
+f: Alan Kamas <aok@cooley.eecs.berkeley.edu>
+s: Re: SDFTWTA star compile problem 
+d: 14 October 1994   (Friday)    11:12:35 PDT
+-
+
+It appears that the xxxd functions aren't part of the Sun
+math library (which explains why I'm not familiar with them).
+Welcome to the wonderful world of portability!
+
+The safest solution would be to rewrite the star's math
+so that it uses the regular math functions and then converts
+to degrees manually as needed.
+
+  - Alan Kamas
+

@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testSDFTargets.tcl	1.4 03/28/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -167,3 +167,82 @@ test UpSample-default-SDF-4 \
 0.0	
 }} \{\n\{\ scheduler\ \"Murthy\ and\ Bhattacharyya's\ SDF\ Loop\ scheduler\"\ \}\n\{\ fire\ Rampa\ \}\n\{\ fire\ UpSample.a\ \}\n\{\ repeat\ 3\ \{\n\ \ \{\ fire\ Printa\ \}\n\}\n\}\n}
 
+
+######################################################################
+#### test default-SDF
+#
+test UpSample-default-SDF-5 \
+	{Run the default-SDF scheduler with SJS loopScheduler} {
+    sdfTestScheduler default-SDF {targetparam loopScheduler SJS}
+} {} {KNOWN_FAILED}
+
+######################################################################
+#### test compile-SDF
+#
+test UpSample-compile-SDF-1 \
+	{Run the compile-SDF scheduler with DEF loopScheduler} {
+    sdfTestScheduler compile-SDF {targetparam "Looping Level" DEF}
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} {{
+  { scheduler "Simple SDF Scheduler" }
+  { fire UpSampleTest.Rampa }
+  { fire UpSampleTest.UpSample.a }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+}
+}}
+
+######################################################################
+#### test default-DDF
+#
+test UpSample-default-DDF-1 {Run the default-DDF Scheduler} {
+    sdfTestScheduler default-DDF
+} {{{0.0	
+0.0	
+0.0	
+}} {{ { scheduler "Dynamic Dataflow Scheduler" } }}}
+
+######################################################################
+#### test default-BDF
+#
+test UpSample-default-BDF-1 {Run the default-BDF Scheduler} {
+    sdfTestScheduler default-BDF
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} {{
+  { scheduler "Buck's Boolean Dataflow Scheduler" }
+    { fire UpSampleTest.Rampa }
+    { fire UpSampleTest.UpSample.a }
+    { repeat 3 {
+    { fire UpSampleTest.Printa }
+  } }
+}
+}}

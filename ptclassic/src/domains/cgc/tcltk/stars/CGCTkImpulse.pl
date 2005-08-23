@@ -1,16 +1,19 @@
 defstar {
 	name {TkImpulse}
 	domain {CGC}
-	desc { Output an impulse when a button is pushed.  }
-	version { $Id$ }
-	author { E. A. Lee }
+	desc {
+Output a specified value when a button is pushed.
+Optionally synchronize by halting until the button is pushed.
+        }
+	version { @(#)CGCTkImpulse.pl	1.9	01/01/96 }
+	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	output {
 		name {output}
 		type {float}
@@ -20,12 +23,19 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		default { 1.0 }
 		desc { The height of the impulse. }
+		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {identifier}
 		type{string}
 		default {"Impulse"}
 		desc {The string to identify the slider in the control panel.}
+	}
+	defstate {
+	        name {synchronize}
+		type {int}
+		default {"NO"}
+		desc {Halt until the user presses the button.}
 	}
 
 	initCode {
@@ -34,16 +44,26 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode("$ref(level) = 0.0;");
 	}
 	go {
-	    addCode(std);
+	  if (int(synchronize)) addCode(sync);
+	  else addCode(nosync);
 	}
-	codeblock (std) {
+	codeblock (nosync) {
 	    $ref(output) = $ref(level);
 	    $ref(level) = 0.0;
         }
+	codeblock (sync) {
+	    while ($ref(level) != $val(level)) {
+	      /* The following will sleep until there is an event to process */
+	      Tk_DoOneEvent(0);
+	    }
+	    $ref(output) = $ref(level);
+	    /* Use level as a flag to */
+	    $ref(level) = $val(level) - 1.0;
+	}
 	// Note that window names cannot start with upper case letters
 	codeblock (tkSetup) {
 	    /* Establish the Tk button */
-	    makeButton("cp_middle",	/* location in the control panel */
+	    makeButton(".middle",	/* location in the control panel */
 		       "$starSymbol(button)",	/* name of the button */
 		       "$val(identifier)",	/* label on the button */
 		       $starSymbol(pulse));	/* callback procedure */

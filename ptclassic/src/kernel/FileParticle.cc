@@ -6,9 +6,9 @@ static const char file_id[] = "Message.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)FileParticle.cc	1.3 3/7/96
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -54,73 +54,7 @@ extern const DataType FILEMSG = "FILEMSG";
 static Envelope dummy;
 
 
-FileParticle::FileParticle(const Envelope& p) : data(p) {}
-
-FileParticle::FileParticle() {}
-
 DataType FileParticle::type() const { return FILEMSG;}
-
-FileParticle::operator int () const {
-	return data.asInt();
-}
-
-FileParticle::operator double () const {
-	return data.asFloat();
-}
-
-FileParticle::operator float () const {
-	return float(data.asFloat());
-}
-
-FileParticle::operator Complex () const {
-	return data.asComplex();
-}
-
-FileParticle::operator Fix () const {
-	return data.asFix();
-}
-
-
-StringList FileParticle::print() const {
-	return data.print();
-}
-
-// get the Message from the FileParticle.
-void FileParticle::accessMessage (Envelope& p) const {
-	p = data;
-}
-
-// get the Message and remove the reference (by setting data to dummy)
-void FileParticle::getMessage (Envelope& p) {
-	p = data;
-	data = dummy;
-}
-
-Particle& FileParticle::initialize() { data = dummy; return *this;}
-
-// Initialize a given ParticleStack with the values in the delay
-// string, obtaining other Particles from the given Plasma.  
-// Returns the number of total Particles initialized, including
-// this one.  This should be redefined by the specific message class.
-// 3/2/94 added
-int FileParticle::initParticleStack(Block* /*parent*/,
-				       ParticleStack& /*pstack*/,
-				       Plasma* /*myPlasma*/, 
-				       const char* /*delay*/) {
-  Error::abortRun("delays with initial values not supported by general Messages");
-  return 0;
-}
-
-// load with data -- function errorAssign prints an
-// error and calls Error::abortRun().
-
-void FileParticle::operator << (int) { errorAssign("int");}
-void FileParticle::operator << (double) { errorAssign("double");}
-void FileParticle::operator << (const Complex&) { errorAssign("complex");}
-void FileParticle::operator << (const Fix&) { errorAssign("fix");}
-
-// only loader that works.
-void FileParticle::operator << (const Envelope& p) { data = p;}
 
 // particle copy
 Particle& FileParticle::operator = (const Particle& p) {
@@ -129,15 +63,6 @@ Particle& FileParticle::operator = (const Particle& p) {
 		data = ps.data;
 	}
 	return *this;
-}
-
-// particle compare: considered equal if Message addresses
-// are the same.
-int FileParticle :: operator == (const Particle& p) {
-	if (!typesEqual(p)) return 0;
-	Envelope pkt;
-	p.accessMessage(pkt);
-	return data.myData() == pkt.myData();
 }
 
 // clone, useNew, die analogous to other particles.
@@ -159,11 +84,3 @@ void FileParticle::die() {
 	data = dummy;
 	fileMessagePlasma.put(this);
 }
-
-void FileParticle::errorAssign(const char* argType) const {
-	StringList msg = "Attempt to assign type ";
-	msg += argType;
-	msg += " to a FileParticle";
-	Error::abortRun(msg);
-}
-

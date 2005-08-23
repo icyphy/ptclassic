@@ -2,16 +2,16 @@ defstar {
     name { AddCx }
     domain { CG56 }
     desc { Add any number of inputs, producing an output. }
-    version { $Id$ }
+    version { @(#)CG56AddCx.pl	1.4 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Y% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 arithmetic library }
-    explanation {
+    location { CG56 main library }
+	htmldoc {
 The inputs are added and the result is written on the output.
     }
     inmulti {
@@ -27,6 +27,9 @@ The inputs are added and the result is written on the output.
 	type { int }
 	default { "YES" }
 	desc { If true, use saturation arithmetic }
+    }
+    constructor {
+	noInternalState();
     }
 
     go {

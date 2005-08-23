@@ -1,0 +1,81 @@
+Biao Lu, March 20, 1998
+
+1. Stars in SDF domain
+
+	1) SDFBinary.pl: this is the binary activation function
+	2) SDFConv2.pl: this is 2-D convolution
+	3) SDFLinear.pl: this is a piece-wise linear function
+	4) SDFMPNeuron.pl: this is a McCulloch and Pitts (MP) neuron
+	5) SDFModCounter.pl: this is a function to counter the iteration
+	6) SDFNeuron.pl: this is a neuron to sum the weighted input(s)
+	7) SDFSigmoid.pl: this is a star of sigmoid function 
+1.1 Stars in CGC domain
+	1) CGCBinary.pl: same as above
+	2) CGCMPNeuron.pl: same as above
+	3) CGCNeuron.pl: same as above
+	4) CGCSigmoid.pl: same as above
+	5) CGCThreshNeuron.pl: a threshold neuron with input as 1
+
+2. Galaxies in SDF domain
+
+	1) MPandBinary: use MP neurons to implement AND function
+	2) MPxorBinary: use MP neurons to implement XOR function
+	3) xorBinary: use binary activation function for XOR
+	4) xorSigmoid: use sigmpoid activation function for XOR
+	5) trainingsdf: includes
+		-- feedforward.pal: calculate the error feedforwardly
+		-- convergence_test: test convergence (SDF part)
+		-- weight_change: calculate the new weights
+
+3. Schematics in SDF domain
+
+	1) Andsgn.pal: use signum function to implement AND function
+	2) MPxorBinary.pal: model XOR function with two MP neurons
+	3) batch_backpropagation.pal: use the interface to Matlab to
+           train the neural network for the curve approximation 
+	   by the batch propagation(useful m-file: pmntanh.m and batchbp1.m)
+	4) cnnedge.pal: Combine the SDF and BDF to implement the
+	   Celluar neural networks for edge detection
+		usefule files:
+		-- diamond.mat: the input diamond image
+	5) hopfield.pal: three nodes Hopfield network (Note: warnign)
+	6) hotcold.pal: use the MP neurons to model the hot and cold
+	   perceptions
+	7) mpandBinary.pal: model AND, OR, and NAND functions with one
+	   MP neuron
+	8) testModCounter.pal: this is a demo to test the ModCounter
+	   star. When running, please use the debug and Graphical
+           Animation to see the results.
+	9) xorBinary.pal: Model XOR by three layers NN with binary
+	   activation functions
+	10) xorQuant.pal: Model XOR function by a three-layer NN with
+	   Quant star as a binary function
+	11) xorSigmoid.pal: Model XOR by three layers NN with sigmoid
+	   activation functions
+	12) cnn_ccd.pal: Combine the SDF and BDF domains to implement the
+	    Cellular neural networks for connected components detection
+		useful files:
+		-- digit5.mat: the input image
+	13) perceptron_learning.pal: Combine BDF and SDF for the perceptron 
+	    learning as a linear classifier for two classes discrimination
+		useful M-files:
+		-- PlotPats.m: to plot the patterns and desired output
+		-- PlotBoundary.m: to plot the classification boundary
+
+	14) tryModCounterBDF.pal: Combine SDF and BDF for testing the 
+	    ModCounter star
+
+3.1 Schematics in CGC domain	
+
+	1) Andsgncgc.pal: the same as Andsgn.pal
+	2) MPandBinarycgc.pal: the same as mpandBinary.pal
+	3) MPxorBinarycgc.pal: the same as  MPxorBinary.pal
+	4) hopfieldcgc.pal: the same as hopfield.pal (note: warning)
+	5) hotcoldcgc.pal: the same as hotcold.pal
+	6) xorBinarycgc.pal: the same as xorBinary.pal
+	7) xorSigmoidcgc.pal: the same as xorSigmoid.pal
+	8) xorsigmoidcgc.pal: use the galaxy to implement Sigmoid function
+
+
+
+

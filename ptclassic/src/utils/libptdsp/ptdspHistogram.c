@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspHistogram.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_Histogram ]
-
-  Author      [ Bilung Lee ]
-
-  Copyright   [ 
+/*******************************************************************
+Version identification:
+@(#)ptdspHistogram.c	1.5 8/6/96
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -34,44 +26,39 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
-]
 
-   Version [ $Id$ ]
+ Programmer: Bilung Lee
 
-******************************************************************************/
+       Function definition for Ptdsp_Histogram
 
+********************************************************************/
+
+#include <string.h>
 #include "ptdspNearestNeighbor.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Generates histogram of an image ]
-  Description [ This function takes a integer array which represents
-                an image and computes the histogram of that
-		image. This is useful for contrast enhancement. ]
-   SideEffects []
-******************************************************************************/
-
+/* Generates histogram of an image.
+   This function takes integer array "matrix" which represents an
+   image and computes the histogram of that image. This is useful for
+   contrast enhancement. 
+   
+   The return histogram is stored in the integer array hist.
+*/
 void
-Ptdsp_Histogram (const int *matrix, int size, int *hist, int min, int max) {
+Ptdsp_Histogram (const int* matrix, int size, int* hist, int min, int max) {
   /* Initialize the histogram buffer to zero */
-  int i, j, index;
+  int i;
   int histlen = max - min + 1;
 
-  for ( j = 0; j < histlen; j++) {
-    hist[j] = 0;
-  } 	 
+  /* Reset the elements of the histogram buffer to zero */
+  memset(hist, 0, histlen*sizeof(int));
 
   /* Compute the histogram */
-  index = 0;
-  for ( i = 0; i < size; i++) {
+  for (i = 0; i < size; i++) {
     /* If the value is larger than max, then is counted into max */
-    index = (matrix[i]>max) ? max : matrix[i]; 
     /* If the value is smaller than min, then is counted into min */
-    index = (matrix[i]<min) ? min : matrix[i]; 
-
+    int index = *matrix++;
+    if (index < min) index = min;
+    else if (index > max) index = max;
     hist[index-min]++;
   }
 }

@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  James A. Lundblad
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)ACSCGCore.cc	1.7 09/10/99
 
 The ACS CG Core class provides a base class for all derived CG Core category classes. Many instance variables and methods are stolen from CGCStar.
 
@@ -34,7 +34,7 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #ifdef __GNUG__
 #pragma implementation
 #endif
-
+#include "Attribute.h"
 #include "ACSCGCore.h"
 #include "ACSPortHole.h"
 #include "FixState.h"
@@ -45,8 +45,22 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #include "PrecisionState.h"
 #include "CGUtilities.h"
 #include <ctype.h>
+#include <stdio.h>              // sprintf(), sscanf()
 
-int isCmdArg (const State*);  // FIXME: should probably be a member function.
+// isA
+ISA_FUNC(ACSCGCore, ACSCore);
+
+
+// int isCmdArg (const State*);  // FIXME: should probably be a member function.
+
+// This must be static because CGCStar.cc includes a similar definition,
+// and statically linked binaries will fail if there are duplicate symbols
+// with the same names
+static inline int operator ==(bitWord b, Attribute a)
+{
+    return b == a.eval(b);
+}
+
 
 void ACSCGCore::addSpliceStar(ACSStar* s, int atEnd) {
     if (spliceClust.member(s)) return;
@@ -564,7 +578,7 @@ StringList ACSCGCore::cmdargStates(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+   if (state->attributes() == a)
 	struct_mem << cmdargState(state);
     }
 
@@ -580,7 +594,7 @@ StringList ACSCGCore::cmdargStatesInits(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+    if (state->attributes() ==  a)
 	struct_init << cmdargStatesInit(state);
     }
 
@@ -597,7 +611,7 @@ StringList ACSCGCore::setargStates(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+     if (state->attributes() == a)
 	setarg_proc << setargState(state);
     }
 
@@ -614,7 +628,7 @@ StringList ACSCGCore::setargStatesHelps(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+     if (state->attributes() == a)
 	arg_help << setargStatesHelp(state);
     }
 
@@ -630,7 +644,7 @@ StringList ACSCGCore::initCodeStates(Attribute a)
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	if (state->attributes() == a.eval(0))
+	if (state->attributes() ==  a)
 	    code << initCodeState(state);
     }
 
@@ -643,10 +657,10 @@ StringList ACSCGCore::declarePortHoles(Attribute a)
     StringList dec;	// declarations
 
     ACSPortHole* port;
-    BlockPortIter portIter(*this);
+    BlockPortIter portIter(getCorona());
     while ((port = (ACSPortHole*)portIter++) != NULL)
     {
-	if (port->attributes() == a.eval(0))
+	if (port->attributes() == a)
 	{
 	    dec << declareBuffer(port);
 	    dec << declareOffset(port);
@@ -662,10 +676,10 @@ StringList ACSCGCore::initCodePortHoles(Attribute a)
     StringList code;	// initialization code
 
     ACSPortHole* port;
-    BlockPortIter portIter(*this);
+    BlockPortIter portIter(getCorona());
     while ((port = (ACSPortHole*)portIter++) != NULL)
     {
-	if (port->attributes() == a.eval(0))
+	if (port->attributes() ==  a)
 	{
 	    code << initCodeBuffer(port);
 	    code << initCodeOffset(port);
@@ -684,7 +698,7 @@ StringList ACSCGCore::declareStates(Attribute a)
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	if (state->attributes() == a.eval(0))
+    if (state->attributes() == a)
 	    dec << declareState(state);
     }
 
@@ -711,7 +725,7 @@ Precision ACSCGCore :: newSymbolicPrecision(int length,int intBits, const char* 
 void ACSCGCore :: moveDataBetweenShared() {
 	StringList code;
 
-	BlockPortIter next(*this);
+	BlockPortIter next(getCorona());
 	ACSPortHole* p;
 	while ((p = (ACSPortHole*) next++) != 0) {
 		// consider output only
@@ -764,3 +778,40 @@ void ACSCGCore :: moveDataBetweenShared() {
 	if (code.length() > 0) addCode(code);
 }
 	
+// This function checks whether "state" is to be set from a command-line
+// argument. If it is, returns the name to be specified on the command-
+// line. The function returns "" otherwise.
+
+StringList ACSCGCore::cmdArg(const State* state) const {
+  StringList temp;
+ // Check whether the block has a NULL parent
+ // This is necessary for CGDDF
+  if (!state->parent()->parent()) return "";
+  StringList mapsList = state->parent()->target()->\
+    pragma(state->parent()->parent()->name(),
+	   state->parent()->name(),
+	   "state_name_mapping");
+  const char* maps = (const char*)mapsList;
+  maps = strstr(maps, state->name());
+
+  if (maps) {
+    while((!isspace(*maps)) && (*maps != '\0'))
+      maps++;
+
+    if (*maps != '\0')
+      while((isspace(*maps)) && (*maps != '\0'))
+	maps++;
+
+    if (*maps != '\0')
+      while ((!isspace(*maps)) && (*maps != '\0')) {
+	temp << *maps++;
+      }
+  }
+  return temp;
+}
+    
+int ACSCGCore::isCmdArg (const State* state) const {
+  StringList pragma;
+  pragma << cmdArg(state);
+  return pragma.length();
+}

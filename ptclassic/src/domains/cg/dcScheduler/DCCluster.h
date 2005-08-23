@@ -1,50 +1,72 @@
-#ifndef _Cluster_h
-#define _Cluster_h
+#ifndef _DCCluster_h
+#define _DCCluster_h
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)DCCluster.h	1.5	3/2/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on Gil Sih's code
 
-Cluster is used by the parallel scheduler
+DCCluster is used by the parallel scheduler
 
 *****************************************************************/
 
-#include "ClustArcList.h"
+#include "DCClustArcList.h"
 #include "DCNode.h"
 
-			/////////////////////
-			//  class Cluster  //
-			/////////////////////
+			///////////////////////
+			//  class DCCluster  //
+			///////////////////////
 // A cluster is a group of nodes.
-class Cluster {
+class DCCluster {
 public:
 
 	// Constructors
-	Cluster(DCNodeList *nds);
-	Cluster(Cluster *clus1, Cluster *clust2);
+	DCCluster(DCNodeList *nds);
+	DCCluster(DCCluster *clus1, DCCluster *clust2);
 
 	// Destructor
 	// we "own" the node list itself but not its contents,
 	// so this will zap only the SingleLink things that make up
 	// the list.
-	~Cluster(); 
+	~DCCluster(); 
 
 	// Return the sum of execution times of all nodes in the cluster
 	int getExecTime() {return ExecTime;}
 
 	// add an clusterArc.
-	void addArc(Cluster*, int);
+	void addArc(DCCluster*, int);
 
 	// Fix the InOutArcs when combining clusters
-	void fixArcs(Cluster *c1, Cluster *c2);
+	void fixArcs(DCCluster *c1, DCCluster *c2);
 
 	// reset members
 	void resetMember() { intact = 1; score = 0; }
@@ -56,19 +78,19 @@ public:
 	const char* readName() { return name; }
 
 	// Assigns every node in the cluster a pointer to the cluster
-	void setCluster(Cluster*);
+	void setDCCluster(DCCluster*);
 
 	// return the cluster between two component clusters to be
 	// pulled out. May check the processor constrains later.
 	// Right now, just return the cluster of smaller execution time.
-	Cluster* pullWhich() { 
+	DCCluster* pullWhich() { 
 		return (component1->getExecTime() < component2->getExecTime())?
 			component1: component2;
 	}
 
 	// Returns the best cluster to
 	//      combine it with, looking at communication cost.
-	Cluster* findCombiner();
+	DCCluster* findCombiner();
 
 	// print
 	StringList print();
@@ -80,7 +102,7 @@ public:
 	int getProc() {return Proc;}
 
 	// switch clusters
-	void switchWith(Cluster* cl) {
+	void switchWith(DCCluster* cl) {
 		int temp = Proc;
 		assignP(cl->getProc());
 		cl->assignP(temp);
@@ -94,8 +116,8 @@ public:
 	int getIntact() { return intact; }
 
 	// Return pointers to the cluster components, 0 if elementary
-	Cluster *getComp1() {return component1;}
-	Cluster *getComp2() {return component2;}
+	DCCluster *getComp1() {return component1;}
+	DCCluster *getComp2() {return component2;}
 
 	// get and set the score.
 	int getScore() {return score;}
@@ -120,11 +142,11 @@ private:
 	int intact;
 
 	// The component clusters if this cluster is not elementary
-	Cluster *component1;
-	Cluster *component2;
+	DCCluster *component1;
+	DCCluster *component2;
 
 	// The arcs coming into and out of the cluster
-	ClustArcList InOutArcs;
+	DCClustArcList InOutArcs;
 };
 
 #endif

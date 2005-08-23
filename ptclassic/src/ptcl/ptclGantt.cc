@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 /* Routines for talking to the Gantt chart display */
-/* $Id$ */
+/* @(#)ptclGantt.cc	1.2	10/27/95 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
@@ -37,31 +37,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* needed to avoid interp calls in cg domain */
 
 void
-GanttChart :: beginGantt(ostream& out, char *argstring) {
+GanttChart :: beginGantt(ostream& /* out */, char * /* argstring */) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttLabel(ostream& out, char *argstring) {
+GanttChart :: writeGanttLabel(ostream& /* out */, char * /* argstring */) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttBindings(ostream& out, char *argstring) {
+GanttChart :: writeGanttBindings(ostream& /* out */, char * /* argstring */) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: endGantt(ostream& out) {
+GanttChart :: endGantt(ostream& /* out */) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttProc(ostream& out, char *argstring) {
+GanttChart :: writeGanttProc(ostream& /* out */, char * /* argstring */) {
   
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }

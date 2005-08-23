@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 2/25/98
- Version: $Id$
+ Version: @(#)ACSFPSimCore.h	1.7 09/08/99
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -49,8 +49,10 @@ public:
 
 	// This is the flavor of constructor used by 
 	// ACSCore* makeNew( ACSCorona & ).
-	ACSFPSimCore(ACSCorona & corona_) : ACSCore(corona_, ACSFPSimCategory) { }
+	ACSFPSimCore(ACSCorona & corona_) : ACSCore(ACSFPSimCategory) { }
 
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 };
 

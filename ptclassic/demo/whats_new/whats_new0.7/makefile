@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Tycho system, kernel/doc/codeDoc directory.
 #
-# $Id$
+# @(#)makefile	1.5 04/18/97
 # Author: Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.
@@ -40,7 +40,18 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	index.html
+	compatibility.html \
+	fsm.html \
+	index.html \
+	leapfrog.html \
+	minorchanges.html \
+	newstars.html \
+	newwork.html \
+	ptrecursion.html \
+	sunaudio.html \
+	tychotarget.html \
+	typesys.html
+
 
 MISC_FILES =
 

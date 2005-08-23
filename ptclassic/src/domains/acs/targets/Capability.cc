@@ -1,7 +1,7 @@
 static const char file_id[] = "Capability.cc";
 
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Capability.cc      1.0     06/16/99
+ Version: @(#)Capability.cc	1.5 08/02/01
 ***********************************************************************/
 #include "Capability.h"
 
@@ -37,12 +37,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Capability::Capability()
 {
-  domains=new StringList;
-  architectures=new StringList;
-  languages=new SequentialList;
-  assert(domains);
-  assert(architectures);
-  assert(languages);
+  domains=new StringArray;
+  architectures=new StringArray;
+  languages=new ACSIntArray;
 }
 
 Capability::~Capability()
@@ -54,74 +51,45 @@ Capability::~Capability()
 
 Capability& Capability::operator=(const Capability& rh_cap)
 {
-  char* tmp_name=new char[MAX_STR];
-  
-  if ((rh_cap.domains)->numPieces()!=0)
-    for (int loop=1;loop<=(rh_cap.domains)->numPieces();loop++)
+  if ((rh_cap.domains)->population()!=0)
+    for (int loop=0;loop<(rh_cap.domains)->population();loop++)
       {
-	strcpy(tmp_name,retrieve_string(rh_cap.domains,loop));
-	*domains << tmp_name;
-	strcpy(tmp_name,retrieve_string(rh_cap.architectures,loop));
-	*architectures << tmp_name;
+	domains->add((rh_cap.domains)->get(loop));
+	architectures->add((rh_cap.architectures)->get(loop));
 	
-	for (int copy_loop=1;copy_loop<languages->size();copy_loop++)
-	  languages->append((rh_cap.languages)->elem(copy_loop));
+	for (int copy_loop=0;copy_loop<languages->population();copy_loop++)
+	  languages->add((rh_cap.languages)->get(copy_loop));
       }
-
-  // Cleanup
-  delete []tmp_name;
-
   return *this;
 }
 
-char* Capability::retrieve_string(StringList* the_list,int index)
+int Capability::add_domain(const char* domain_name)
 {
-  StringListIter stringIter(*the_list);
-  char* entry_name;
-  int count=0;
-
-  while ((entry_name=(char*) stringIter++)!=NULL)
-    {
-      count++;
-      if (count==index)
-	return(entry_name);
-    }
-
-  if (DEBUG_CAPABILITY)
-    printf("Capability::retrieve_string:Warning, unable to find matching string\n");
-  return(NULL);
-}
-
-int Capability::add_domain(char* domain_name)
-{
-  *domains << domain_name;
+  domains->add(domain_name);
 
   // Return happy condition
   return(1);
 }
-int Capability::add_architecture(char* arch_name)
+int Capability::add_architecture(const char* arch_name)
 {
-  *architectures << arch_name;
+  architectures->add(arch_name);
 
   // Return happy condition
   return(1);
 }
-int Capability::add_language(int language)
+int Capability::add_language(const int language)
 {
-  languages->append((Pointer) language);
+  languages->add(language);
 
   // Return happy condition
   return(1);
 }
-int Capability::get_language(int index)
+int Capability::get_language(const int index)
 {
-  if (index < languages->size())
-    return((int) languages->elem(index));
-  else
-    {
-      if (DEBUG_CAPABILITY)
-	printf("Capability::get_language:Error, invalid index provided\n");
-      return(-1);
-    }
+  return(languages->query(index));
 }
+
+
+
+
 

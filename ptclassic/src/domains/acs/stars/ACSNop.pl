@@ -1,8 +1,8 @@
-defstar {
+defcorona {
 	name {Nop}
 	domain {ACS}
 	desc { Does nothing }
-	version {$Id$}
+	version {@(#)ACSNop.pl	1.4 09/08/99}
 	author { E. A. Lee and D. Niehaus }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -18,8 +18,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 	        name {input}
 		type {anytype}
-	}
-	go {
 	}
 }
 

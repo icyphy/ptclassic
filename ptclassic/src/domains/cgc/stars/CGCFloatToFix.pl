@@ -1,18 +1,18 @@
 defstar {
 	name { FloatToFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
-	version { $Id$ }
+	derivedFrom { Fix }
+	version { @(#)CGCFloatToFix.pl	1.7	01 Oct 1996 }
 	author { J.Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC conversion palette }
+	location { CGC main library }
 	desc { Convert a floating-point input to an fixed-point output. }
-	explanation {
+	htmldoc {
 This star converts a float value to a fix value with the specified precision.
 If the output precision is not specified, the precision is determined at
 runtime according to the incoming float value.
@@ -44,6 +44,9 @@ value (or minimum for negative magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	begin {
 		// if the precision for the output port is not defined
 		// - neither by this nor the successor star -, the actual
@@ -67,5 +70,5 @@ value (or minimum for negative magnitudes).
 	}
 
 	// a wrap-up method is inherited from CGCFix
-	// if you defined your own, you should call CGCFix::wrapup()
+	// if you define your own, you should call CGCFix::wrapup()
 }

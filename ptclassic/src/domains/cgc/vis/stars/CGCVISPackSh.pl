@@ -1,20 +1,27 @@
 defstar {
-	name { FloatToVis64 }
-	domain { SDF }
-	version { @(#)SDFFloatToVis64.pl	1.5 04/10/96 }
+	name { VISPackSh }
+	domain { CGC }
+	version { @(#)CGCVISPackSh.pl	1.12	04/07/97 } 
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  Pack four floating point numbers into a single floating
-	  point number.  Each input floating point number is first
-	  down cast into a 16 bit short and then packed into a series of
-	  four shorts.}
+Takes four float particles, casts them into four signed 16-bit
+fixed point numbers, and packs them into a single 64-bit float
+particle.  The input float particles are first down cast 
+into 16-bit fixed point numbers.  The location of the binary point 
+of the fixed point number can be placed anywhere by adjusting 
+the scale parameter.  The fixed point numbers are then concatenated
+to produce a 64-bit result.  The order of the fixed point numbers
+can be reversed so that the most current input either leads or trails the pack,
+ie reverse equals FALSE produces (x[n],x[n-1],x[n-2],x[n-3]) and reverse equals 
+TRUE produces (x[n-3],x[n-2],x[n-1],x[n]).
+        }
 	input {
 		name { in }
 		type { float }
@@ -25,7 +32,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -33,47 +39,70 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Input scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	code {
-                #define NumIn (4)
-                #define UpperBound (32767) 
-                #define LowerBound (-32768)
+	defstate {
+	        name { reverse }
+		type { int }
+		default { FALSE }
+		desc {
+TRUE packs with most current sample at inital position;
+FALSE packs with most current sample at trailing position}
+		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	protected{
-	  short *packedout;
+	code{
+#define PACKIN (4)
 	}
 	constructor{
-	  packedout = 0;
-	}
-	destructor{
-	  free(packedout);
+	  noInternalState();
 	}
         setup {
-	  in.setSDFParams(NumIn,NumIn-1);
+	  in.setSDFParams(PACKIN,PACKIN-1);
 	}
-	begin {
-	  free(packedout);
-	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
-        }
-	go {
-	  
-	  int index;
-	  double invalue;
-	  double *outvalue;
-	  
-	  //scale input, check bounds of the input, 
-	      //  and cast each float to short
-	      for (index=0;index<NumIn;index++){
-		invalue = (double) scale * double(in%(index));
-		if (invalue <= (double) LowerBound)
-		  packedout[index] = (short) LowerBound;
-		else if (invalue >= (double) UpperBound)
-		  packedout[index] = (short) UpperBound;
-		else 
-		  packedout[index] = (short) invalue;
-	      }	
+	codeblock(globalDecl){
+	  union $sharedSymbol(CGCVISPackSh,outoverlay) {
+	    vis_d64 outvaluedbl;
+	    vis_s16 outvaluesh[4];
+	  };
+	}
+	codeblock(mainDecl){
+	  union $sharedSymbol(CGCVISPackSh,outoverlay) $starSymbol(packedout);
+	}
+	initCode{
+	  addGlobal(globalDecl);
+	  addDeclaration(mainDecl);
+	  addInclude("<vis_types.h>");
+	}
+	codeblock(packbackwards){
+          /*scale and cast input*/
+          $starSymbol(packedout).outvaluesh[0] =
+	    (short)($val(scale)*(double)$ref2(in,0));
+          $starSymbol(packedout).outvaluesh[1] =
+	    (short)($val(scale)*(double)$ref2(in,1));
+          $starSymbol(packedout).outvaluesh[2] =
+	    (short)($val(scale)*(double)$ref2(in,2));
+          $starSymbol(packedout).outvaluesh[3] =
+	    (short)($val(scale)*(double)$ref2(in,3));
 
 	  /*output packed double*/	  
-	  outvalue = (double *) packedout;
-	  out%0 << *outvalue;
+	  $ref(out) = $starSymbol(packedout).outvaluedbl;
+	}
+	codeblock(packforwards){
+          /*scale and cast input*/
+          $starSymbol(packedout).outvaluesh[0] =
+	    (short)($val(scale)*(double)$ref2(in,3));
+          $starSymbol(packedout).outvaluesh[1] =
+	    (short)($val(scale)*(double)$ref2(in,2));
+          $starSymbol(packedout).outvaluesh[2] =
+	    (short)($val(scale)*(double)$ref2(in,1));
+          $starSymbol(packedout).outvaluesh[3] =
+	    (short)($val(scale)*(double)$ref2(in,0));
+
+	  /*output packed double*/	  
+	  $ref(out) = $starSymbol(packedout).outvaluedbl;
+	}
+	go {
+	  if (!reverse)
+	    addCode(packbackwards);
+	  else
+	    addCode(packforwards);
 	}
 }

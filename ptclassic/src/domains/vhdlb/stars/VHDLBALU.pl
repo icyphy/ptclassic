@@ -4,13 +4,13 @@ defstar {
 	desc { A simple ALU. }
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-	explanation {
+	htmldoc {
 This is a simple ALU that has several arithmetic (addition, subtraction) and
 bitwise logical (shift, logic) operations.  The 4-bit wide "sel" input deter-
 mines the function performed by the ALU.  Inputs are sampled and outputs are
@@ -23,9 +23,9 @@ The following is a table listing the functions provided by this ALU:
 sel = "0000"  :   Output = A + B
       "0001"  :   Output = A - B
 
-      "0010"  :   Output = A << B,  zeros are used to pad
-      "0011"  :   Output = A >> B,  zeros are used to pad
-      "0100"  :   Output = A >> B,  sign bit is used to pad
+      "0010"  :   Output = A &lt;&lt; B,  zeros are used to pad
+      "0011"  :   Output = A &gt;&gt; B,  zeros are used to pad
+      "0100"  :   Output = A &gt;&gt; B,  sign bit is used to pad
 
       "0101"  :   Output = A and B
       "0110"  :   Output = A nand B

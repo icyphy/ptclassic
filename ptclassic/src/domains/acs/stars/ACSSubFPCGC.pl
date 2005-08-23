@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Sub } 
     desc { Output the "pos" input minus the "neg" input. }
-    version { $Id$ }
+    version { @(#)ACSSubFPCGC.pl	1.2 09/08/99 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

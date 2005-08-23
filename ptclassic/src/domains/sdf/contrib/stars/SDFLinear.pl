@@ -9,7 +9,7 @@ less than -k, the output is -k. k is a non-negative number.
     author { Biao Lu }
     acknowledge { Brian L. Evans }
     location  { SDF contrib library }
-    version { $Id$ }
+    version { @(#)SDFLinear.pl	1.1	03/24/98 }
     copyright {
 Copyright (c) 1997-1998 The University of Texas.
 All rights reserved.

@@ -1,25 +1,24 @@
 defstar {
     name { BitsToInt }
     domain { CG56 }
-    desc {
-The integer input sequence is interpreted as a bit stream in which any nonzero
-value is interpreted as to mean a 'one' bit.
-This star consumes "nBits" successive bits from the input,
-packs them into an integer, and outputs the resulting integer.
-The first received bit becomes the most significant bit of the output.
-If "nBits" is smaller than the wordsize minus one, then the
-output integer will always be non-negative.
-}
-    version { $Id$ }
+    desc { Packs several input bits into an integer. }
+    version { @(#)CG56BitsToInt.pl	1.9 03/29/97 }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1994 The Regents of the University of California.
-	All rights reserved.
-	See the file $PTOLEMY/copyright for copyright notice,
-	limitation of liability, and disclaimer of warranty provisions.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 demo library }
-    explanation {
+    location { CG56 main library }
+    htmldoc {
+The integer input sequence is interpreted as a bit stream in which any nonzero
+value is interpreted as to mean a "one" bit.
+This star consumes <i>nBits</i> successive bits from the input,
+packs them into an integer, and outputs the resulting integer.
+The first received bit becomes the most significant bit of the output.
+If <i>nBits</i> is smaller than the word size minus one, then the
+output integer will always be non-negative.
     }
     input {
 	name {input}
@@ -46,12 +45,11 @@ output integer will always be non-negative.
 	input.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	move    #$addr(input),r0
+	move    #>$addr(input),r0
 	clr     a
         do      #$val(nBits),$label(compress)
         lsl     a
-	btst    #0,x:(r0)+
-	jcc     $label(dontSet)
+	jclr	#0,x:(r0)+,$label(dontSet)
 	bset    #0,a1
 $label(dontSet)
 	nop

@@ -1,13 +1,50 @@
 defstar{
     name { DynForkInt }
     domain { DE }
-    derivedfrom { DEDynFork }
+    derivedfrom { DEDynForkBase }
     author { J. Voigt }
-    version { 1.0 9/5/97 
-    	    }
-    copyright { copyright (c) 1997 Dresden University of Technology
-                WiNeS-Project }
-    desc { This a version of DEDynFork for integer portholes. See the description of DEDynFork.pl, where this star is derived from, for details. It was used for a proof of concept demo for DynBlock and that stuff. It is probably not too useful anywhere else, because the only data I can send to my dynamically created block is here their instancenumber. One should use some kind of derived "message" the have the chance for a real contents.}
+    version { @(#)DEDynForkInt.pl	1.3	01/15/98 }
+    copyright { 
+copyright (c) 1997 Dresden University of Technology, WiNeS-Project.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. 
+    }
+    desc { This a version of <tt>DEDynForkBase</tt> for integer portholes. 
+On demand a new porthole is added to or removed from a MultiPortHole during 
+runtime. All particles to its input are checked for the right receiver and sent only to it. 
+    }
+    htmldoc {
+This star is an implementation of the dynamic fork function for integer 
+portholes. We define the methods declared in <tt>DEDynForkBase</tt> and provide a simple <i>go</i>-method. This star is used for a proof of concept demo for 
+<tt>DynMap</tt> and that stuff and is probably not too usefull anywhere else. 
+<p>
+More useful stars have to have portholes of another datatype than integer and
+to override (at least) the <i>go</i>-method.
+<p>        
+<h3>Creating a porthole dynamically is as follows (<i>createPortHole</i>):</h3>
+<p> 
+This method is called from <tt>DEDynMapBase::createDynBlock</tt> whenever a new 
+block is to put into the system configuration. It just creates a new porthole 
+in the <i>out</i>-multiporthole and puts it into an internal list so that we 
+can find it back lateron. A pointer to the porthole is returned.
+<p>        
+<h3>Removing a porthole dynamically is as follows (<i>removePortHole</i>):</h3>
+<p> 
+This method is called from <tt>DEDynMapBase::deleteDynBlock</tt> whenever a 
+block is to be taken out of the system configuration. From 
+<tt>DEDynMapBase::deleteDynBlock</tt> we get a pointer to one of the portholes 
+in our<i>out</i>-multiporthole and look for it in a list. If we found this 
+porthole, we remove it from the multiporthole's list and delete it.
+<p>
+<h3>The <i>go()</i>-method:</h3>
+This method here is very simple and is just an example on how this kind of 
+stars can be used.
+<p>
+By convention, it has to get an integer, which is the instancenumber of one of the blocks which are connected to one of the portholes in the 
+<i>out</i>-multiporthole. It looks for that porthole in the internal list and 
+sends exactly that instancenumber to the block. If no porthole for a block with the received instancenumber is found then nothing will happen.
+}
     location { $PTOLEMY/src/domains/de/contrib/stars }
     input {
         name { in }

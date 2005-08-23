@@ -1,6 +1,6 @@
 # Makefile for cgc/tcltk/lib
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,11 +25,23 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# $Id$
+# @(#)makefile	1.9	12/08/97
 
-EXTRA_SRCS = tkMain.c
+# Root of Ptolemy directory
+ROOT=../../../../..
 
-MISC_FILES = ptolemy-cgc.tcl
+EXTRA_SRCS = tkMain.c \
+	ptolemy-cgc.tcl \
+	README
 
-include ../../../../../mk/no-compile.mk
+# Dummy value to quiet down make
+LIBR = dummylib
 
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
+MISC_FILES = \
+	compat.h \
+	make.template
+#	init.tcl
+
+include $(ROOT)/mk/no-compile.mk

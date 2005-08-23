@@ -1,0 +1,16 @@
+reset
+# Creating universe 'useless'
+domain CG
+target default-CG
+	targetparam destDirectory PTOLEMY_SYSTEMS
+	star Source1 Source
+	setstate Source1 runTime 1
+	star Sink1 Sink
+	setstate Sink1 runTime 1
+	star Through1 Through
+	setstate Through1 runTime 1
+	setstate Through1 control TRUE
+	connect Source1 output Through1 input
+	connect Through1 output Sink1 input
+run 2
+wrapup

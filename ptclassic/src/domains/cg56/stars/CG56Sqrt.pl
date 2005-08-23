@@ -2,11 +2,16 @@ defstar {
 	name { Sqrt }
 	domain { CG56 }
 	desc { Square Root. }
-	version { $Id$ }
+	version { @(#)CG56Sqrt.pl	1.9 01 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
 Output is the square root of input. 
 Negative values are equated to zero.
 	}
@@ -17,6 +22,9 @@ Negative values are equated to zero.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock(sqrtblock) {
         clr     b               #<$$40,y0
@@ -34,7 +42,7 @@ $label(sqrtend)
         move    b,$ref(output)
   	}
  	go {
- 		gencode(sqrtblock);
+ 		addCode(sqrtblock);
  	}
 
 	exectime {

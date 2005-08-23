@@ -1,14 +1,19 @@
 defstar {
-	name { FixDiff }
+	name { Sub }
 	domain { CG56 }
 	desc { any input subtractor }
-	version { $Id$ }
+	version { @(#)CG56Sub.pl	1.12	06 Oct 1996 }
 	author { Chih-Tsung Huang }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-.PP
-Output the \fIpos\fR minus all \fIneg\fR inputs.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<p>
+Output the <i>pos</i> minus all <i>neg</i> inputs.
         }    
 	input {
 		name { pos }
@@ -18,6 +23,10 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
 		name { neg }
 		type { fix }
  	}
+	output {
+		name { output }
+		type { fix }
+	}
         state  {
                 name { inputNum }
                 type { int }
@@ -25,9 +34,8 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
                 desc { input#() }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
-	output {
-		name { output }
-		type { fix }
+	constructor {
+		noInternalState();
 	}
         codeblock(main) {
         move    $ref(pos),a
@@ -41,14 +49,14 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
         }
 
 	go {
-                gencode(main);
-                for (int i = 1; i <= neg.numberPorts(); i++) {
-                        inputNum=i;
-                        gencode(loop);
-                }
-                gencode(done);
+		addCode(main);
+		for (int i = 1; i <= neg.numberPorts(); i++) {
+			inputNum = i;
+			addCode(loop);
+		}
+		addCode(done);
 	}
 	execTime {
-                return 2*int(neg.numberPorts()) +2;
-       }
+		return 2 * int  (neg.numberPorts()) + 2;
+	}
 }

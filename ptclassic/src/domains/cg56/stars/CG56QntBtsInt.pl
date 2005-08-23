@@ -1,15 +1,20 @@
 defstar {
-	name { QuantBitsInt }
+	name { QntBtsInt }
 	domain { CG56 }
 	desc { Integer quantizer with adjustable offset. }
-	version { $Id$ }
+	version { @(#)CG56QntBtsInt.pl	1.11 06 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-        explanation {
-.Id "quantizer"
-Normally, the output is just the two's complement number
-given by the top noBits of the input (for integer output)
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="quantizer"></a>
+Normally, the <i>output</i> is just the two's complement number
+given by the top <i>noBits</i> of the <i>input</i> (for integer output).
         }
 	input	{
 		name { input }
@@ -31,6 +36,9 @@ given by the top noBits of the input (for integer output)
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	constructor {
+		noInternalState();
 	}
         codeblock(std) {
 	move	$ref(input),x0

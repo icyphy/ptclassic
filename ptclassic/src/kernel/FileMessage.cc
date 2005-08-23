@@ -1,9 +1,9 @@
 static const char file_id[] = "FileMessage.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)FileMessage.cc	1.3	2/29/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Edward A. Lee
  Date of creation: 1/13/96
 
- This file defines the implementation of the FileMessage class and
+ This file defines the implementation of the FileMessage class.
 
 **************************************************************************/
 #ifdef __GNUG__
@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include "miscFuncs.h"
 #include "InfString.h"
+#include <unistd.h>
 
 /////////////////////////////////////////////////////////////
 // FileMessage method bodies
@@ -49,35 +50,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructor: make a FileMessage with a unique filename
 FileMessage::FileMessage() {
-    filename = tempFileName();
-    dynamicFilename = 1;
-    transientFile = 1;
+    dynamicFilename = tempFileName();
+    filename = dynamicFilename;
+    transientFileFlag = TRUE;
 }
 
 // Constructor: make a FileMessage with the given filename
 FileMessage::FileMessage(const char* name) {
-    filename = name;
     dynamicFilename = 0;
-    transientFile = 0;
+    filename = name;
+    transientFileFlag = FALSE;
 }
 
 // Copy Constructor
 FileMessage::FileMessage(const FileMessage& src) {
-    filename = src.fileName();
     dynamicFilename = 0;
-    transientFile = 0;
+    filename = src.fileName();
+    transientFileFlag = FALSE;
 }
 
 // Destructor
 FileMessage::~FileMessage() {
     if (filename) {
-	if (transientFile) {
-	    InfString cmd = "rm -f ";
-	    cmd << filename;
-	    system(cmd);
+	if (transientFileFlag) {
+	    unlink(filename);
 	}
-	if(dynamicFilename) {
-	    delete [] filename;
+	if (dynamicFilename) {
+	    delete [] dynamicFilename;
 	}
     }
 }

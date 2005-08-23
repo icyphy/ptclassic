@@ -9,15 +9,15 @@ particles is used to show the value, so any data type
 can be handled, although the space allocated on the
 screen may need to be adjusted.
     }
-    version { $Id$ }
+    version { @(#)DETkShowEvents.pl	1.4   10/23/95 }
     author { Edward Lee }
     copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { DE tcltk library }
+    location { DE Tcl/Tk library }
     hinclude { "ptk.h" }
     defstate {
         name {label}
@@ -52,9 +52,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	  Error::abortRun(*this, "Need as many identifiers as inputs");
 	  return;
 	}
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkShowEvents.tcl";
 
-        DETclScript::setup();
+        DETclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

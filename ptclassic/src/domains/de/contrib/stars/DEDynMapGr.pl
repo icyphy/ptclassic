@@ -1,47 +1,48 @@
 defstar{
-    name { DynBlockGr }
+    name { DynMapGr }
     domain { DE }
-    derivedfrom { DEDynBlock }
+    derivedfrom { DEDynMap }
     author { J. Voigt }
-    version { 1.1 11/19/97 
-    }
-    copyright { copyright (c) 1997 Dresden University of Technology
-                WiNeS-Project }
-    desc { A graphical version of the DEDynBlock-star.  We now use a 
+    version { @(#)DEDynMapGr.pl	1.5	01/15/98 }
+    copyright { copyright (c) 1997 Dresden University of Technology 
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.  }
+    desc { A graphical Version of the <tt>DEDynMap</tt>-star.  We now use a 
 masterblock which we clone instead of granny's states.
-
-We can clone a block which has inputs and outputs or a block which has just one
-type of portholes. If we have a block without inputs to clone, we can put a 
-DEBlackHole on our dummyOut. If we have a block without outputs to clone, we can put a DENull on our dummyIn. Or we create us icons with the right number of 
-portholes.
-
-The current limitations are:
-
+    }
+    htmldoc { Now we have to put a masterinstance of a block, which we want to multiply dynamically, at our <i>exin</i> and <i>exout</i> portholes instead of declaring it in the states. Otherwise, the same functionality like in <tt>DEDynMap</tt> is implemented. See its description for further explanations.
+<p>
+We can clone a block which has inputs and outputs or a block 
+which has just one type of portholes. If we have a block without inputs to 
+clone, we can put a <tt>DEBlackHole</tt> on our exout. If we have a block 
+without outputs to clone, we can put a <tt>DENull</tt> on our exin. 
+Or we create us icons with the right number of portholes.
+<p>
+See the descriptions of <tt>DEDynMapBase</tt> and <tt>DEDynMap</tt>, where this star is derived from, for further details. 
+<p>
+<h3>The current limitations are:</h3>
+<p>
 The masterblock must not have MultiPortHoles.
 We can't have more then one block to clone on our portholes.
-
-See the descriptions of DEDynBlockBase.pl and DEDynBlock.pl, where this star is
-derived from, for further details. 
-
 }
     location { $PTOLEMY/src/domains/de/contrib/stars }
     inmulti {
-        name { dummyIn }
+        name { exin }
         type { anytype }
-        desc { dummy input, we just need a connection to the prototype-block }
+        desc { dummy input, we just need a connection to the masterblock }
     }
     outmulti {
-        name { dummyOut }
+        name { exout }
         type { =in }
-        desc { dummy output, we just need a connection to the prototype-block }
+        desc { dummy output, we just need a connection to the masterblock }
     }
     private {
         Block *masterBlock_p;
         InfString outputMap, inputMap;
     }
     constructor {
-        DEDynBlock::DEDynBlock();
-        out.inheritTypeFrom(dummyIn);
+        out.inheritTypeFrom(exin);
         input_map.clearAttributes(A_SETTABLE);
         output_map.clearAttributes(A_SETTABLE);
         blockname.clearAttributes(A_SETTABLE);
@@ -50,12 +51,15 @@ derived from, for further details.
         masterBlock_p = NULL;
     }
     destructor {   
-        if (masterBlock_p) delete masterBlock_p;
+        if (masterBlock_p) {
+            delete masterBlock_p;
+            masterBlock_p = NULL;
+        }
     }
     setup {
         // call the method in the grandmother-star, because mom's setup() deals
         // with states which I just cleared in the constructor...
-        DEDynBlockBase::setup();
+        DEDynMapBase::setup();
         
         // set our parent-block
         mom = myParent();
@@ -64,14 +68,14 @@ derived from, for further details.
         nameCounter = 0;
 
         // how many outputs do we have?
-        numberOfInputs = dummyOut.numberPorts();
+        numberOfInputs = exout.numberPorts();
         
         // how many inputs do we have?
-        numberOfOutputs = dummyIn.numberPorts();
+        numberOfOutputs = exin.numberPorts();
 
-        // If we have dummyIns or dummyOuts we have to get a pointer to the 
+        // If we have exins or exouts we have to get a pointer to the 
         // masterblock. I assume that this is the first run. Inside this routine
-        // I delete all the dummyIns and dummyOuts. So, the next run will skip
+        // I delete all the exins and exouts. So, the next run will skip
         // this and use the masterBlock_p from the previous run instead.
         if (numberOfOutputs || numberOfInputs) {
 
@@ -92,15 +96,15 @@ derived from, for further details.
             PortHole *myPortHole_p;
             secondMasterBlock_p = NULL;
             
-            // first we check what lies on our dummyout
+            // first we check what lies on our exout
             if (numberOfInputs) {   
-                // we have at least one dummyout            
+                // we have at least one exout            
 
-                // iterate over all dummyouts
+                // iterate over all exouts
                 // I delete the portholes of the MPH. 
                 // So, I can't use the Iterators.
                 for ( int i = 1; i <= numberOfInputs; i++ ) {
-                    name = "dummyOut#";
+                    name = "exout#";
                     name += i;
                     myPortHole_p = this->portWithName((const char *)name);
                     PortHole* itsFarside_p = myPortHole_p->far();
@@ -131,7 +135,7 @@ derived from, for further details.
                     // first, remove the PortHole from the Block's PortHoleList
                     if (this->removePort(*myPortHole_p)) {
                         // now, remove it from the MultiPortHole's list
-                        if (dummyOut.removePort(myPortHole_p)) {
+                        if (exout.removePort(myPortHole_p)) {
                             // once removed everywhere, we can really delete it
                             delete myPortHole_p;
                         }
@@ -148,15 +152,15 @@ derived from, for further details.
                 }   
             }
 
-            // let's check what's on the dummyIn now
+            // let's check what's on the exin now
             if (numberOfOutputs) {
-                // we have at least one dummyInt 
+                // we have at least one exin
                 
-                // iterate over all dummyints
+                // iterate over all exins
                 // I delete the portholes of the MPH. 
                 // So, I can't use the Iterators.
                 for ( int i = 1; i <= numberOfOutputs; i++ ) {
-                    name = "dummyIn#";
+                    name = "exin#";
                     name += i;
                     myPortHole_p = this->portWithName((const char *)name);
                     PortHole* itsFarside_p = myPortHole_p->far();
@@ -187,7 +191,7 @@ derived from, for further details.
                     // first, remove the PortHole from the Block's PortHoleList
                     if (this->removePort(*myPortHole_p)) {
                         // now, remove it from the MultiPortHole's list
-                        if (dummyIn.removePort(myPortHole_p)) {
+                        if (exin.removePort(myPortHole_p)) {
                             // once removed everywhere, we can really delete it
                             delete myPortHole_p;
                         }
@@ -204,12 +208,12 @@ derived from, for further details.
                     secondMasterBlock_p = NULL;
                     numberOfOutputs = 0;
                 }
-                // if we don't have an dummyOut or there is a DEBlackHole, the
-                // block on our dummyInts is the right one
+                // if we don't have an exout or there is a DEBlackHole, the
+                // block on our exins is the right one
                 if (!numberOfInputs) {
                     masterBlock_p = secondMasterBlock_p;
                 }
-                // if we don't have an dummyInt or there is a DENull, the
+                // if we don't have an exin or there is a DENull, the
                 // block on our dummOuts is the right one
                 if (!numberOfOutputs) {
                     secondMasterBlock_p = masterBlock_p;
@@ -231,7 +235,16 @@ derived from, for further details.
             // very good:
             // we need a pointer to a prototype of that block for further 
             // cloning
-            if (!mom->removeBlock(*masterBlock_p)) {
+            // We have to be careful with the masterblock's parent. It does not
+            // need to be the same galaxy this DynMap-star belongs to. So, we 
+            // have to ask for it separately.
+            Block *itsMom = masterBlock_p->parent();
+            if (!itsMom || itsMom->isItAtomic()) {
+                Error::abortRun(*this, "Masterblock has no parent!");
+                return;
+            }
+            Galaxy * itsGalMom = &(itsMom->asGalaxy());
+            if (!itsGalMom->removeBlock(*masterBlock_p)) {
                 Error::abortRun(*this,
                 "MasterBlock is not removed from mom's list");
                 return;
@@ -255,7 +268,7 @@ derived from, for further details.
         type { "Block *" }
         access { private }
         code {
-            Block *block_p;                
+             Block *block_p;                
             // clone our prototype-block
             block_p = masterBlock_p->clone();
             if (!block_p) {

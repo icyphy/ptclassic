@@ -3,7 +3,7 @@ defstar{
     domain { DE }
     derivedfrom { DEcell_list }
     author { A. Wernicke, J. Voigt }
-    version { 1.1 6/22/1997 }
+    version { @(#)DECIR_uldl.pl	1.6 01/07/99 }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }
@@ -15,7 +15,7 @@ defstar{
     and data analysis stars.
     }
     location { The WiNeS-Library }   
-    hinclude { <iomanip.h>, <fstream.h>, <complex.h>, 
+    hinclude { <iostream.h>, <iomanip.h>, <fstream.h>, <complex.h>, 
     <string.h>, <math.h>, "DErrmanager_uldl.h", "DEpropag_uldl.h" }
     input {
         name { check }
@@ -41,6 +41,12 @@ defstar{
         name{strength_bs}
         type {int }
     }
+    defstate {
+	name { fileName }
+	type { string }
+	default { "$PTOLEMY/src/domains/de/contrib/stars/topo.dxf" }
+	descriptor { File describing topology }
+    }
     header { 
         //declare list_h for that file
         extern Handy *list_h;
@@ -57,11 +63,10 @@ defstar{
     } 
     destructor  {          
         while(list_h) {  
-            mob_count=mobile=interferer=list_h;
+            interferer=list_h;
             list_h=list_h->next;
-            delete mob_count;
-            delete mobile;
             delete interferer;
+ 	    interferer = 0;
         }
     }
     begin { 
@@ -72,11 +77,10 @@ defstar{
     }
     wrapup {
         while(list_h) {  
-            mob_count= mobile= interferer= list_h;
+            interferer= list_h;
             list_h= list_h->next;
-            delete mob_count;
-            delete mobile;
             delete interferer;
+            interferer = 0;
         }
     }
     method {
@@ -106,7 +110,7 @@ defstar{
         arglist { "(int Lv)" }
         type { int }
 	code {
-            int n, a_flag, im_Bereich[6];
+            int n, a_flag = 0, im_Bereich[6];
             double Z, N;
             const double Faktor= 57.29577951;     
 
@@ -150,8 +154,8 @@ defstar{
 	access { private }
 	type { void }
 	code {
-            int b, s, n, i ,bits, knum, angle_flag, interf_flag, intf_flag, Bedingung1, Bedingung2;
-            float t1, t2, tbg, tnd, ta, te, tj, t_value, I, filter, I_Sum, CIR, I_Sum_jens;
+            int b, s, n, knum, angle_flag, interf_flag, intf_flag, Bedingung1, Bedingung2;
+            float t1, t2, tbg, tnd, ta, te, tj, t_value = 0.0, I, I_Sum, CIR, I_Sum_jens;
 		
             for (b=0; b<cells; b++) {
 		if (zellen[b].user==0) continue;
@@ -224,7 +228,8 @@ defstar{
                                 interf_flag=1;
                             }    
                             if (interf_flag) {
-                                I = prop_class.MS_Stoerer(b, interferer->MS_pos); 
+                                I = prop_class.MS_Stoerer(b,
+					 interferer->MS_pos, fileName); 
                                 I_Sum+=t_value * pow(10.0, I/10);         // worst case, I[mW] 
                                 if (t_value>mobile->I_Tab[s].t_value)
                                 mobile->I_Tab[s].t_value=t_value;
@@ -293,7 +298,7 @@ defstar{
                                 intf_flag=1;
                             }
                             if (intf_flag) {
-                                I = prop_class.BS_Stoerer(n, b); 
+                                I = prop_class.BS_Stoerer(n, b, fileName); 
                                 I_Sum+=t_value * pow(10.0, I/10);          // worst case, I[mW] 
                                 if (t_value>mobile->I_Tab[s].t_value)
                                 mobile->I_Tab[s].t_value=t_value;

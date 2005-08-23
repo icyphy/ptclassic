@@ -1,10 +1,13 @@
 # Config to use for egcs.
 # This is not a complete config; it only overrides those options
-# specific to using egcs.  
-#
+# specific to using egcs.  This file is a copy of config-g++.mk 
+# The reason it is a copy instead of including config-g++.mk is
+# to avoid opening yet another file each time we run make.  This
+# might be a little silly :-)
 
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+
+# @(#)config-egcs.mk	1.6 02/04/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -64,7 +67,7 @@ USE_GPLUSPLUS = yes
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 
-# -Wsynth is new in g++-2.6.x
+# -Wsynth is a g++ flag first introduced in g++-2.6.x.
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 LOCALCCFLAGS =	-g

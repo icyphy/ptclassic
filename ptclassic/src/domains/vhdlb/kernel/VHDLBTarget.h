@@ -2,12 +2,34 @@
 #define _VHDLBTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLBTarget.h	1.10 07/30/96
 
- Copyright (c) 1992 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
 
- Programmer: E. A. Lee
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Edward A. Lee
 
  Basic target for VHDLB code generation.
 
@@ -17,6 +39,9 @@ $Id$
 #pragma interface
 #endif
 
+#define  CHAR15  15
+#define  CHAR10  10
+
 #include "HLLTarget.h"
 #include "IntState.h"
 #include "StringState.h"
@@ -25,42 +50,39 @@ $Id$
 #include "DynamicGalaxy.h"
 #include "NamedObj.h"
 
+// Defined in VHDLBDomain.cc
+extern const char VHDLBdomainName[];
+
 class VHDLBPortHole;
 
 class VHDLBTarget : public HLLTarget {
 public:
-	VHDLBTarget(const char* name, const char* starclass, const char* desc);
+	// constructor
+	VHDLBTarget(const char* name, const char* starclass, const char* desc,
+		    const char* assocDomain = VHDLBdomainName);
+
 	// copy constructor
 	VHDLBTarget(const VHDLBTarget&);
-	Block* makeNew() const;
+
+	// return a new copy of itself
+	/*virtual*/ Block* makeNew() const;
+
 	void headerCode();
-	void setup();
-	char* writeFileName(const char* fileName);
+	virtual void setup();
 	int run();
 	void wrapup();
-
-/* marked for del.
-	void beginIteration(int repetitions, int depth);
-
-	// Method available to stars to add to lines that are
-	// put at the beginning of the code file.
-	void addInclude(const char* inc);
-
-	// Method available to stars to add to static declarations.
-	void addGlobal(const char* decl);
-
-	// Method available to stars to add to main initialization.
-	void addMainInit(const char* decl);
-*/
-
-	// name the offset of portholes
-	StringList offsetName(VHDLBPortHole*);
 
 	// make public this method
 	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
 
-// public?
-// 	put this a diff name to generate VHDL compatible code
+	// Return the data type suitable for VHDL from the ptlang
+	// standart data type string.
+	StringList translateType(const char* type);
+
+	// Return the portHole direction.
+	StringList direction(const GenericPort* port);
+
+	// put this a diff name to generate VHDL compatible code
 	StringList vhdlCode;
 	StringList galaxyList;
 	StringList univName;

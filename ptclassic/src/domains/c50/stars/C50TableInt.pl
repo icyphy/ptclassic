@@ -6,7 +6,7 @@ Implements an integer lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
-	version { @(#)C50Table.pl	1.5	2/10/96 }
+	version { @(#)C50TableInt.pl	1.7	01 Oct 1996 }
 	author { Luis Gutierrez, based on CG56 version}
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -15,8 +15,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
 	}
 	input {
 		name { input }
@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { intarray }
 		default { "-1 1" }
 		desc { table of values to output }
-		attributes { A_UMEM|A_CONSEC }
+		attributes { A_UMEM  }
 	}
 	defstate {
 		name { runTimeCheck }
@@ -49,11 +49,10 @@ This is currently not supported in the C50 domain.
 ; There is no check to make sure that the index is in bounds
 	}
 	codeblock(lookup) {
-	lacc	#$addr(values),0
-	lar	ar0,#$addr(input)
-	mar	*,ar0
-	add	*
-	samm	ar0
+	lmmr	indx,#$addr(input)
+	lar	ar1,#$addr(values)
+	mar	*,ar1
+	mar	*0+
 	bldd	*,#$addr(output)
 	}
 	go {
@@ -61,7 +60,7 @@ This is currently not supported in the C50 domain.
 		addCode(lookup);
 	}
 	exectime {
-		return 6;
+		return 5;
 	}
 }
 

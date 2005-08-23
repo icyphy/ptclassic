@@ -1,9 +1,9 @@
 static const char file_id[] = "ptclInit.cc";
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)ptclInit.cc	1.7	10/28/99
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,6 +44,7 @@ to a Tcl interpreter by invoking the Ptcl_Init() function on it.
 
 #ifdef PTLINUX
 #include <fpu_control.h>
+#include <unistd.h>	// pick up isatty()
 #endif
 
 #ifndef PTLINUX
@@ -59,26 +60,22 @@ extern int		isatty _ANSI_ARGS_((int fd));
 // Load in the PTcl startup file ptcl.tcl.
 static int loadStartup(Tcl_Interp* interp) {
     char *pt = getenv("PTOLEMY");
-    int newmemory = FALSE;
-    if (!pt) {
-        pt = expandPathName("~ptolemy");
-	newmemory = TRUE;
-    }
-    StringList startup = pt;
-    if ( newmemory ) {
-	delete [] pt;
-    }
-
+    StringList startup = pt ? pt : "~ptolemy";
     startup << "/lib/tcl/ptcl.tcl";
     if (Tcl_EvalFile(interp, startup.chars()) != TCL_OK) {
-	fprintf(stderr, "ptcl: error in startup file '%s'.\n",
+	fprintf(stderr, "ptcl: error in sourcing startup file '%s'.\n",
                 interp->result);
 	return TCL_ERROR;
     } else
 	return TCL_OK;
 }
 
-static PTcl *ptcl;
+// Delete a PTcl object.
+static void PTclDeleteProc(ClientData clientData, Tcl_Interp */* interp */)
+{
+    PTcl *ptcl = (PTcl *) clientData;
+    delete ptcl;
+}
 
 /*
  *----------------------------------------------------------------------
@@ -105,12 +102,25 @@ static PTcl *ptcl;
 extern "C" int Ptcl_Init(Tcl_Interp *interp)
 {
 
-#ifdef PTLINUX
-    // Fix for DECalendarQueue SIGFPE under linux.
+#if defined(PTLINUX) && defined(__i386__)
+    // Fix for DECalendarQueue SIGFPE under x86 linux.
+    // Note by W. Reimer: Glibc 2.1 does not support __setfpucw() any
+    // longer. Instead there is a macro _FPU_SETCW. Actually, the whole
+    // fix is not required any longer because in the default FPU control
+    // word of libc 5.3.12 and newer (glibc) the interrupt mask bit for
+    // invalid operation (_FPU_MASK_IM) is already set.
+#if (_FPU_DEFAULT & _FPU_MASK_IM) == 0
+#ifdef _FPU_SETCW
+    { fpu_control_t cw = (_FPU_DEFAULT | _FPU_MASK_IM); _FPU_SETCW(cw); }
+#else
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
-#endif
+#endif /* _FPU_SETCW */
+#endif /* (_FPU_DEFAULT & _FPU_MASK_IM) == 0 */
+#endif /* defined(PTLINUX) && defined(__i386__) */
 
-    ptcl = new PTcl(interp);
+    PTcl *ptcl = new PTcl(interp);
+    Tcl_CallWhenDeleted(interp, PTclDeleteProc, (ClientData) ptcl);
+
     if (isatty(0)) {		// set up interrupt handler
 	SimControl::catchInt();
     }

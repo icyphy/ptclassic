@@ -1,8 +1,18 @@
-#/bin/csh -f
+#!/bin/csh -f -v
 #
-# $Id$
+# @(#)mkdom	1.6  04/07/97
 #
-# Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+# Use this script to create a new domain that compiles and can be linked
+# with ptcl or pigi.  To use it, create a directory in which to put
+# the new domain, and run this script in that domain, say
+#	mkdir $PTOLEMY/src/domains/yyy
+#	cd $PTOLEMY/src/domains/yyy
+#	$PTOLEMY/src/domains/xxx/mkdom yyy
+# Note that this script is not sensitive to the case in "yyy".
+# This script does not create any parallel object tree.  You will have
+# to do this manually (or write a script).
+#
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,6 +38,9 @@
 # Date of creation:	5 February 1992
 #
 
+# Temporary file name.
+set temp = tmp$$
+
 # Check for proper usage.
 if ($#argv < 1) then
 	echo Usage: mkdom domain
@@ -38,6 +51,11 @@ if ($#argv < 1) then
 endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
+endif
+
+set XXX = $PTOLEMY/src/domains/xxx
 
 set domain = $1
 set DOM = `echo $domain | tr a-z A-Z`	# upper case domain abbreviation
@@ -51,21 +69,45 @@ if ($DOM == "XXX") then
 endif
 
 # Check that the program is being run from a resonable directory.
-if ($cwd !~ */src/domains/$dom/kernel) then
-	echo Run this program in the .../src/domains/$dom/kernel directory.
+if ($cwd !~ */src/domains/$dom) then
+	echo Run this program in the .../src/domains/$dom directory.
 	exit
 endif
 
-# Process the source files.
-set dir = $PTOLEMY/src/domains/xxx/kernel
-foreach file ( PortHole.h PortHole.cc Geodesic.h \
-		Scheduler.h Scheduler.cc Star.h Star.cc \
-		Wormhole.h Wormhole.cc )
+# Check to see if SCCS is being used for version control
+if (-d $XXX/SCCS) then
+	alias check_out	'sccs get -k \!^'
+	alias check_in	'sccs create \!^ ; rm -f ,\!^'
+else
+	alias check_out	'cp \!^ .'
+	alias check_in	'echo \!^'
+endif
 
-	echo $DOM$file
-	sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $dir/XXX$file > $DOM$file	
+# Process the makefile.
+check_out $XXX/makefile
+sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < makefile > $temp
+mv -f $temp makefile
+check_in makefile
+
+# Process the subdirectories.
+foreach dir ( kernel stars )
+	mkdir $dir
+	pushd $dir
+
+	# Process the makefile.
+	check_out $XXX/$dir/make.template
+	sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < make.template > $temp
+	mv -f $temp make.template
+	check_in make.template
+
+	# Process the source files.
+	foreach file ( $XXX/$dir/XXX* )
+		set destfile=`echo $file:t | sed -e "s/XXX/$DOM/"`
+		check_out $file
+		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file:t > $destfile
+		check_in $destfile
+		rm -f $file:t
+	end
+
+	popd
 end
-
-# Process the make.template file.
-sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $dir/make.template > make.template
-

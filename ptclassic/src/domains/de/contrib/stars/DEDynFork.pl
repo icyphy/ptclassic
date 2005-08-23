@@ -3,7 +3,7 @@ defstar{
     domain { DE }
     derivedfrom { DEDynForkBase }
     author { Jens Voigt }
-    version { $Id$ }
+    version { @(#)DEDynFork.pl	1.1 05/13/98 }
     copyright { 
 copyright (c) 1998 Dresden University of Technology, WiNeS-Project.
 All rights reserved.

@@ -2,12 +2,18 @@ defstar {
 	name { Neg  }
 	domain { CG56 }
 	desc { Negates input }
-	version { $Id$ }
+	version { @(#)CG56Neg.pl	1.11 01 Oct 1996 }
 	author { Chih-Tsung, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-The input is moved into accumlator "a", where the "abs" instruction is applied.
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="negation"></a>
+The input is moved into accumulator "a", where the "neg" instruction is applied.
 	}
 	execTime {
 		return 3;
@@ -20,12 +26,15 @@ The input is moved into accumlator "a", where the "abs" instruction is applied.
 		name {output}
 		type {FIX}
 	}
+	constructor {
+		noInternalState();
+	}
 	codeblock (negblock) {
 	move	$ref(input),a
 	neg	a
 	move	a,$ref(output)
 	}
 	go {
-		gencode(negblock);
+		addCode(negblock);
 	}
 }

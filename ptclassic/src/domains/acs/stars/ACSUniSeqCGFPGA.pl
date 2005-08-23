@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Core for the unirate sequencer
 	}
-	version {@(#)ACSUniSeqCGFPGA.pl	1.0	10/1098}
+	version{ @(#)ACSUniSeqCGFPGA.pl	1.10 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 The Regents of the University of California
+Copyright (c) 1998-2001 The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
@@ -21,6 +21,8 @@ limitation of liability, and disclaimer of warranty provisions.
         protected {
 	    // Stitcher assignments
 	    ostrstream output_filename;
+
+	    static const int DEBUG_SEQUENCER=0;
 	}
 	method {
 	    name {macro_query}
@@ -36,23 +38,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	    name {macro_build}
 	    access {public}
 	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
+	    type {"CoreList*"}
 	    code {
 		return(NULL);
 	    }
 	}
-	method {
-	    name {sg_param_query}
-	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
-	    type {int}
-	    code {
-		// Return happy condition
-		return(1);
-	    }
-	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -61,11 +53,32 @@ limitation of liability, and disclaimer of warranty provisions.
 		return(1);
 		}
 	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
         method {
 	    name {sg_setup}
 	    access {public}
 	    type {int}
 	    code {
+		output_filename << dest_dir << name();
+
 		// General definitions
 		acs_type=BOTH;
 		acs_existence=HARD;
@@ -77,22 +90,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		// Bidir port definitions
 
 		// Control port definitions
-		pins->add_pin("MemBusGrant_n",INPUT_PIN_MEMOK);
-		pins->add_pin("Reset",INPUT_PIN_RESET);
-		pins->add_pin("WC_Carry",INPUT_PIN_WC);
-//		pins->add_pin("XbarData_InReg",INPUT_PIN_EXTCTRL);
-		pins->add_pin("Go",INPUT_PIN_EXTCTRL);
-		pins->add_pin("Clock",INPUT_PIN_CLK);
-		pins->add_pin("MemBusReq_n",OUTPUT_PIN_MEMREQ);
-		pins->add_pin("Done",OUTPUT_PIN_DONE);
-		pins->add_pin("WC_MUX",OUTPUT_PIN_WCMUX);
-		pins->add_pin("WC_CE",OUTPUT_PIN_WCCE);
-		pins->add_pin("ADDR_CE",OUTPUT_PIN_ADDRCE);
-		pins->add_pin("ADDR_CLR",OUTPUT_PIN_ADDRCLR);
-
 
 		if (sg_language==VHDL_BEHAVIORAL)
 		{
+		    output_filename << ".vhd" << ends;
+
 		    // General definitions
 		    libs->add("IEEE");
 		    incs->add(".std_logic_1164.all");
@@ -104,29 +106,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		    // Bidir port definitions
 		    
 		    // Control port_definitions
-		    pins->set_datatype(0,STD_LOGIC);
-		    pins->set_datatype(1,STD_LOGIC);
-		    pins->set_datatype(2,STD_LOGIC);
-		    pins->set_datatype(3,STD_LOGIC);
-		    pins->set_datatype(4,STD_LOGIC);
-		    pins->set_datatype(5,STD_LOGIC);
-		    pins->set_datatype(6,STD_LOGIC);
-		    pins->set_datatype(7,STD_LOGIC);
-		    pins->set_datatype(8,STD_LOGIC);
-		    pins->set_datatype(9,STD_LOGIC);
-		    pins->set_datatype(10,STD_LOGIC);
-
-		    pins->set_precision(0,0,1,LOCKED);
-		    pins->set_precision(1,0,1,LOCKED);
-		    pins->set_precision(2,0,1,UNLOCKED);
-		    pins->set_precision(3,0,1,LOCKED);
-		    pins->set_precision(4,0,1,LOCKED);
-		    pins->set_precision(5,0,1,LOCKED);
-		    pins->set_precision(6,0,1,LOCKED);
-		    pins->set_precision(7,0,1,LOCKED);
-		    pins->set_precision(8,0,1,LOCKED);
-		    pins->set_precision(9,0,1,LOCKED);
-		    pins->set_precision(10,0,1,LOCKED);
 		    
 		}
 		else
@@ -141,8 +120,27 @@ limitation of liability, and disclaimer of warranty provisions.
 	    access {public}
 	    type {int}
 	    code {
-		if (DEBUG_STARS)
-		    printf("ACSUniSeqCGFPGA.acs_build invoked\n");
+		  if (DEBUG_SEQUENCER)
+		      printf("sequencer file=%s\n",output_filename.str());
+		  ofstream fstr(output_filename.str());
+		  
+		  // Generate code
+		  fstr << lang->gen_libraries(libs,incs);
+		  fstr << lang->gen_entity(name(),pins);
+		  fstr << lang->gen_architecture(name(),
+						 NULL,
+						 BEHAVIORAL,
+						 pins,
+						 data_signals,
+						 ctrl_signals,
+						 constant_signals);
+		  fstr << sg_declarative.str() << endl;
+		  fstr << lang->begin_scope << endl;
+		  fstr << sg_body.str() << endl;
+		  fstr << lang->end_scope << lang->end_statement << endl;
+		
+		  fstr.close();
+
 		// Return happy condition
 		return(1);
 	    }

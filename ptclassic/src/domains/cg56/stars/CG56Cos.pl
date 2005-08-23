@@ -2,15 +2,26 @@ defstar {
 	name { Cos }
 	domain { CG56 }
 	desc { 
-DSP56000 - Cosine function.
-Calculation by table lookup.  Input range of (-1,1) scaled by pi.
+Cosine function calculated by table lookup.
+Input range of (-1,1) scaled by pi.
 	}
-	version { $Id$ }
-	author { J. Pino, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-
+	version { @(#)CG56Cos.pl	1.18 06 Oct 1996 }
+	acknowledge { Gabriel version by Maureen O'Reilly }
+	author { J. Pino (ported from Gabriel) }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
+<a name="cosine"></a>
+This star computes the cosine of the input, which must be in the range
+(-1.0, 1.0).
+The output equals cos(<i>pi</i>&#183<i>input</i>), so the input range is 
+effectively (<i>-pi</i>, <i>pi</i>).
+The output is in the range (<i>-</i>1<i>.</i>0<i>, </i>1<i>.</i>0).
 	}
 	input {
 		name {input}
@@ -19,6 +30,9 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
  	codeblock (main) {
 	move    $ref(input),x0
@@ -39,7 +53,7 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
         move    b1,$ref(output)
 	}
 	go {
-		gencode(main);
+		addCode(main);
 	}
 	execTime {
 		return 11;

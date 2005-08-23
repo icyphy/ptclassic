@@ -1,4 +1,4 @@
-$Id$
+@(#)README	1.1 12/04/97
 This directory contains the sources for pxgraph, a X11 plotter based
 on xgraph.
 

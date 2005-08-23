@@ -2,7 +2,7 @@
 # Config file to build on Intel x86 processor (PC) running Solaris2.5
 # with gcc and g++
 
-# $Id$
+# @(#)config-sol2.5pc.mk	1.1 03/12/98
 
 # Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

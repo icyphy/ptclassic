@@ -1,46 +1,34 @@
 defstar {
-	name { RaisedCos }
+	name { RaisedCosine }
 	domain { C50 }
 	derivedFrom { FIR }
 	desc {
-An FIR filter with a magnitude frequency response shaped
-like the standard raised cosine used in digital communications.
-See the SDFRaisdCos star for more information.
+An FIR filter with a magnitude frequency response that is shaped
+like the standard raised cosine or square-root raised cosine
+used in digital communications.
 	}
-	version { $Id$ }
-	author { A.Baensch }
+	version { @(#)C50RaisedCosine.pl	1.7	10/16/97 }
+	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-	explanation {
+	htmldoc {
 See the SDFRaisedCos star.
 	}
-	seealso {FIR}
-	hinclude { <stream.h> }
-	code {
-		static double rcos (int t, int T, double excess) {
-			const double DELTA = 1.0e-7;
-			if (t == 0) return 1.0;
-			double x = (double)t/(double)T;
-			double s = sin (M_PI * x) / (M_PI * x);
-			x *= excess;
-			double den = 1.0 - 4 * x * x;
-			if (den > -DELTA && den < DELTA) return s * M_PI/4.0;
-			return s * cos (M_PI * x) / den;
-		}
-	}
+	seealso { FIR, Window }
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
-		name { N }
+		name { length }
 		type { int }
 		default { 64 }
 		desc { Number of taps }
 	}
 	defstate {
-		name { P }
+		name { symbol_interval }
 		type { int }
 		default { 16 }
 		desc { Distance from center to first zero crossing }
@@ -51,23 +39,32 @@ See the SDFRaisedCos star.
 		default { 1.0 }
 		desc { Excess bandwidth, between 0 and 1 }
 	}
+	defstate {
+		name { square_root }
+		type { int }
+		default { NO }
+		desc { If YES, use square-root raised cosine pulse }
+	}
 	constructor {
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
-		
-		// XXX: DONT do this...not implemented in C50FIR
-		// XXX: decimationPhase.clearAttributes(A_SETTABLE);
+		// fix interpolation default
+		// interpolation.setInitValue("16");
 	}
 	setup {
-		taps.resize (N);
-		int center = int(N)/2;
-		double maxval = C50_ONE;
-		for (int i = 0; i < int(N); i++) {
-			double coef = rcos(i - center, P, excessBW);
-			if ( coef > maxval )	coef = maxval;
-			if ( coef < -1 )	coef = -1;
-			taps[i] = coef;
-			// cerr << "Tap %d" << coef << "\n";
+		if (double(excessBW) < 0.0)
+		    Error::abortRun(*this, "Invalid excess bandwidth");
+		if (int(symbol_interval) <= 0)
+		    Error::abortRun(*this, "Invalid symbol interval");
+		taps.resize (length);
+		int center = int(length)/2;
+		for (int i = 0; i < int(length); i++) {
+		    if (int(square_root))
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
+					int(symbol_interval), excessBW);
+		    else
+			taps[i] = Ptdsp_RaisedCosine(i - center,
+					int(symbol_interval), excessBW);
 		}
 		C50FIR :: setup();
 	}

@@ -1,21 +1,21 @@
 static const char file_id[] = "PtGate.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PtGate.cc	1.9	3/4/96
 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,12 +25,22 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
  Programmer:  J. T. Buck and T. M. Parks
  Date of creation: 6/14/93
 
 This file defines classes that support multi-threading in the kernel.
 
 **************************************************************************/
+
+#ifdef __GNUG__
+#pragma implementation
+#pragma implementation "PtCondition.h"
+#endif
+
+#include "PtCondition.h"
 
 #include "PtGate.h"
 #include "logNew.h"
@@ -46,9 +56,16 @@ GateKeeper* GateKeeper::listHead = 0;
 // reference to a PtGate pointer; this pointer is modified when
 // the GateKeeper "enables" or "disables" the PtGate pointer.
 GateKeeper::GateKeeper(PtGate*& gateToKeep)
-: gate(gateToKeep), next(listHead), valid(GateKeeper_cookie)
+: gate(gateToKeep)
 {
+    // Be sure to add this item to the list only once.
+    // This really should not be necessary.
+    if (valid != GateKeeper_cookie)
+    {
+	next = listHead;
 	listHead = this;
+    }
+    valid = GateKeeper_cookie;
 }
 
 // destructor: delete gate, remove from list.
@@ -74,7 +91,7 @@ GateKeeper::~GateKeeper () {
 void GateKeeper::enableAll(const PtGate& master) {
 	for (GateKeeper *gkp = listHead; gkp; gkp = gkp->next) {
 		LOG_DEL; delete gkp->gate;
-		gkp->gate = master.clone();
+		gkp->gate = master.makeNew();
 	}
 }
 

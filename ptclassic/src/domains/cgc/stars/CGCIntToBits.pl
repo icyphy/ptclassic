@@ -6,16 +6,16 @@ Read the least significant nBits bits from an integer input,
 and output the bits as integers serially on the output,
 most significant bit first.
     }
-    version { $Id$ }
+    version { @(#)CGCIntToBits.pl	1.8 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1994 The Regents of the University of California.
+	Copyright (c) 1990-1996 The Regents of the University of California.
 	All rights reserved.
 	See the file $PTOLEMY/copyright for copyright notice,
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC main library }
-    explanation {
+	htmldoc {
     }
     input {
 	name {input}
@@ -35,10 +35,11 @@ most significant bit first.
 	noInternalState();
     }
     setup {
-	if (int(nBits) > sizeof(int)*8) {
-	    StringList message = "nBits needs to be less than";
-	    message << sizeof(int)*8;
-	    Error::abortRun(*this,message);
+        /* Need (int) cast on sizeof to eliminate gcc warning */
+	if (int(nBits) > int(sizeof(int)*8)) {
+	    StringList message = "nBits needs to be less than ";
+	    message << (unsigned int)(sizeof(int)*8);
+	    Error::abortRun(*this, message);
 	    return;
 	}
 	if (int(nBits) < 0) {
@@ -48,9 +49,10 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	int word = $ref(input);
-	int i;
-	for(i=0 ; i < $val(nBits) ; i++) {
+	int word;
+	int i = 0;
+	word = $ref(input);
+	for(; i < $val(nBits); i++) {
  	    $ref(output,i) = (word & 1);
 	    word >>= 1;
 	}

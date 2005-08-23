@@ -25,7 +25,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# $Id$
+# @(#)makefile	1.1 03/18/98
 #
 # Important!  Do not run this makefile while in 
 # ~ptolemy/src/domains/cgc/contrib.  Instead run in from

@@ -11,7 +11,7 @@ input.  Otherwise, whenever a non-zero is received on this input,
 the accumulated sum is reset to the current input (i.e. no feedback).
 
 Limits are controlled by the "top" and "bottom" parameters.
-If top <= bottom, no limiting is performed (default).  Otherwise,
+If top greater than or equal to bottom, no limiting is performed (default).  Otherwise,
 the output is kept between "bottom" and "top".  If "saturate" = YES,
 saturation is performed.  If "saturate" = NO, wrap-around is performed
 (default).  Limiting is performed before output.
@@ -20,12 +20,17 @@ Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state
 is the previous output.
 	}
-	version { $Id$ }
+	version { @(#)CGCIntegrator.pl	1.9	10/08/96 }
 	author { E. A. Lee }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
-	explanation {
-.Id "filter, integrator"
+	htmldoc {
+<a name="filter, integrator"></a>
 	}
 	input {
 		name { data }
@@ -73,7 +78,7 @@ is the previous output.
 	protected {
 		double spread;
 	}
-	start {
+	setup {
 		spread = double(top) - double(bottom);
 	}
 	codeblock (declarations) {
@@ -120,5 +125,13 @@ is the previous output.
 		else
 		    addCode(limitWithoutSat);
 	    addCode(write);
+	}
+	exectime {
+		int x = 0;
+		if (spread > 0.0) {
+			if (int(saturate)) x = 3;
+			else x = 5;
+		}
+		return 3 + x + 2;
 	}
 }

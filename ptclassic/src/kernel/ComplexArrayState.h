@@ -1,17 +1,40 @@
 #ifndef _ComplexArrayState_h
 #define _ComplexArrayState_h 1
 
-#include "State.h"
-#include "ComplexState.h"
-#include "KnownState.h"
+#ifdef __GNUG__
+#pragma interface
+#endif
 
+#include "State.h"
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)ComplexArrayState.h	2.12	3/2/95
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  I. Kuroda and J. T. Buck
  Date of creation: 6/8/90
@@ -27,71 +50,52 @@ $Id$
 
 class ComplexArrayState : public State
 {
-protected:
-	int	nElements;
-	Complex	*val;
 public:
 	// Constructor
 	ComplexArrayState () {nElements = 0; val = 0;}
 
-	// Constructor
-	ComplexArrayState (int size) { val = new Complex [nElements = size];}
+	// alternate constructor: size
+	ComplexArrayState (int size);
 
-	// Constructor
-	ComplexArrayState (int size, Complex& fill_value) 
-				{ val = new Complex [nElements = size];
-				Complex * top = &(val[nElements]);
-				Complex * t = val;
-				while (t < top) *t++ = fill_value; }
+	// alternate constructor: size and fill value
+	ComplexArrayState (int size, const Complex& fill_value) ;
 
 	// Destructor
-	~ComplexArrayState () {delete[nElements] val;}
-
-	// Assignment operator
-	ComplexArrayState &	operator = (ComplexArrayState & v) {
-				if (this != &v) {
-				delete[nElements] val;
-				val  = new Complex [nElements = v.nElements];
-				Complex* top = &(val[nElements]);
-				Complex* t = val;
-				Complex* u = v.val;
-				while (t < top) *t++ = *u++;
-				}
-				return *this;
-			}
+	~ComplexArrayState ();
 
 	// Size
-	int size() { return nElements;}
+	int size() const;
 
 	// Array element 
 	Complex & operator [] (int n) {
-				return val[n];
-			}
+		return val[n];
+	}
 
 	// The type
-	char* type() { return "ComplexArray";}
+	const char* type() const; // { return "ComplexArray";}
+
+	// class identification
+	int isA(const char*) const;
+	const char* className() const;
+	int isArray() const;
 
         // the value as a string
-        StringList currentValue() { 
-		StringList s; 
-		s =  "\n";
-		for(int i = 0; i<size(); i++) 
-		{s = i; 
-		s = "	("; 
-		s = val[i].real();
-		s = ","; 
-		s = val[i].imag(); 
-		s= ")\n";} 
-		return s;}
+        StringList currentValue() const;
 
 	// Parse initValue to set Value
 	void initialize();
 
+	// Truncate/extend to new size
+	void resize(int);
+
 	// Parse element
-	ParseToken evalExpression(Tokenizer&, Block*);
+	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
-	virtual State* clone() {return new ComplexArrayState;}
+	virtual State* clone() const;
+protected:
+	int	nElements;
+	Complex	*val;
 };
 
 #endif

@@ -6,22 +6,21 @@ defstar {
 Evaluate a Matlab function if inputs are given or
 evaluate a Matlab command if no inputs are given.
 	}
-	version { $Id$ }
+	version { @(#)SDFMatlabCx_M.pl	1.7	04/08/97 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
-	explanation {
-See the explanation for SDFMatlab_M star.
+	location { SDF Matlab library }
+	htmldoc {
+See the explanation for Matlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
-.Ir "Matlab interface"
+<a name="Matlab interface"></a>
 	}
-	outmulti {
-		name { output }
-		type { COMPLEX_MATRIX_ENV }
+	constructor {
+output.setPort("output", this, COMPLEX_MATRIX_ENV);
 	}
 }

@@ -4,11 +4,16 @@ defstar {
 	desc {
 Output parameters are reciprocal of the inputs.
 }
-	version { $Id$ }
+	version { @(#)CG56Reciprocal.pl	1.13	01 Oct 1996 }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { CG56 main library }
+	htmldoc {
 Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	}
 	execTime {
@@ -18,9 +23,13 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 		name {input}
 		type {FIX}
 	}
-	outmulti {
-		name {output}
-		type {FIX}
+	output {
+		name { f }
+		type { fix }
+	}
+	output {
+		name { s }
+		type { int }
 	}
 	state {
 		name {Nf}
@@ -32,14 +41,18 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
                 name {X}
 	        type {int}
 	        default {15}
-	        attributes { A_NONSETTABLE }
+	        attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
 	codeblock (Rblock) {
         move    $ref(input),a
         move    #0,r7
-$label(start)
+	tst	a			; must setup flags before norm
+$label(normalize)
         norm    r7,a
-        jnn     $label(start)                   ;normalize data
+        jnn     $label(normalize)                   ;normalize data
         move    r7,y0
         move    #$$010001,b
         sub     y0,b    a,x0            ;number of left shifts in LSBs of b
@@ -47,13 +60,13 @@ $label(start)
         and     #$$fe,ccr
         rep     #$val(Nf)
         div     x0,a                    ;quotient (f) in Nf LSBs of a
-        asl     a	b,$ref(output#2)
+        asl     a	b,$ref(s)
         rep     #$val(X)
         asl     a
-        move    a0,$ref(output#1)
+        move    a0,$ref(f)
  	}
  	go {
                  X=23-int(Nf);
-	 	 gencode(Rblock);
+	 	 addCode(Rblock);
 	}
 }

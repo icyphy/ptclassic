@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 1995-1996 The Regents of the University of California.
+# Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
@@ -24,26 +24,30 @@
 # 						COPYRIGHTENDKEY
 #
 #
-# mkPtolemyTree: A shell script to build custom Ptolemy trees
+# mkPtolemyTree: A shell script to build custom Ptolemy trees that
+# use parts of a shared master tree.
 #
-# Version: @(#)mkPtolemyTree.tcl	1.26 09/26/96 
+# Version: @(#)mkPtolemyTree.tcl	1.9 05/13/97
 #
 # Author: Jose Luis Pino
 # Date: 10/20/95
 #
 # Port to Tcl by Matt Tavis and Brian L. Evans.
 #
-# We rely on 'mkdir -p' to create all the parent directories for
-# a given path name.  The '-p' option is supported on the platforms
-# we build for Ptolemy 0.6, and we use it in $PTOLEMY/src/kernel/Target.cc 
-# and $PTOLEMY/src/domains/cg/kernel/CGUtilities.cc.  However, the
-# '-p' option is not support on, for example, Ultrix 4.1.  See
-# $PTOLEMY/src/gnu/src/make/make-stds.texi.  -cxh
+# Execessive hacking under duress :-) : Christopher Hylands
+#
 
+# If pathname is a link, then remove it, create a directory by the
+# same name and then link linkspec.  Note that linkspec can be
+# one or more pathnames with a wildcard, such as *.
+# 
 proc replaceLinkWithDir {pathname linkspec} {
     if { [file type $pathname] == "link" } {
 	puts "Creating $pathname"
-	exec sh -c "rm $pathname ; mkdir -p $pathname ; ln -s $linkspec $pathname"
+	file delete $pathname
+	file mkdir $pathname
+	# linkspec is one or more wildcard pathnames, so we use sh -c
+	exec sh -c "ln -s $linkspec $pathname"
     } elseif { [file isdirectory $pathname] } {
 	puts "The directory $pathname already exists"
     } else {
@@ -88,7 +92,11 @@ proc processDirectory {mydir croot root} {
     }
 
     if { "$tarFiles" != "" } {
-	exec sh -c "cd $stddir ; tar cf - $tarFiles | (cd $mydir ; tar xf -)"
+	if [catch { exec sh -c "cd $stddir ; tar cf - $tarFiles | (cd $mydir ; tar xf -)"} errMsg] {
+	    error "processDirectory {$mydir $croot $root}:\
+		    exec failed:\n$errMsg\n\
+		    stddir=$stddir, $tarFiles=$tarFiles, mydir=$mydir"
+	}
     }
 }
 
@@ -103,7 +111,7 @@ proc mkPtolemyTree {override croot root ptarch} {
     puts "The new customized Ptolemy tree will go in $croot"
     puts "Using $override for $ptarch"
 
-    # here are some libraries which are in lib.$PTACH but do not get built
+    # here are some libraries which are in lib.$PTARCH but do not get built
     # often so, we just make a sym link to them
     set LIBDIR "$root/lib.$ptarch"
     set AUX_LIBRARIES "$LIBDIR/libCGCrtlib.* $LIBDIR/libcephes.*"
@@ -119,6 +127,8 @@ OCT=1
 ROOT=$root
 CROOT=$croot
 PTARCH=$ptarch
+# Include config-\$PTARCH.mk so that we get platform/domain inter dependencies
+include $root/mk/config-\$(PTARCH).mk
 include $override
 include $root/mk/stars.mk
 
@@ -143,22 +153,22 @@ TREE:
 
     puts "Creating obj directories"
     foreach mdir $objdirs {
-	if [catch {exec mkdir -p "$mdir"} errMsg] {
-	    puts "mkPtolemyTree Error: mkdir -p $mdir failed: $errMsg"
+	if [catch {file mkdir "$mdir"} errMsg] {
+	    puts "mkPtolemyTree Error: file mkdir $mdir failed: $errMsg"
 	    puts $objdirs
 	    exit
 	}
     }
     puts "Creating src directories"
     foreach mdir $srcdirs {
-	if [catch {exec mkdir -p "$mdir"} errMsg] {
-	    puts "mkPtolemyTree Error: mkdir -p $mdir failed: $errMsg"
+	if [catch {file mkdir "$mdir"} errMsg] {
+	    puts "mkPtolemyTree Error: file mkdir $mdir failed: $errMsg"
 	    puts $objdirs
 	    exit
 	}
     }
 
-    
+    # We need to make sources to build any makefiles that are out of date
     # process each directory, src directories before obj directories so that
     # the make.template and makefile symlinks are done correctly
     foreach dir [exec find $croot -type d -print | sort -r] {
@@ -176,27 +186,51 @@ TREE:
 	processDirectory $dir $croot $root
     }
 
-    exec rm -f $croot/MAKEARCH
-    exec cp $root/MAKEARCH $croot/MAKEARCH
+    # At this point, the basic directory structure has been built, so
+    # now we fine tune it by creating links where appropriate
+
+    # If the .glimpse files exist, then create links for them
+    if [file exists $root/src/.glimpse_exclude] {
+	puts "Creating $croot/src/.glimpse_*"
+	eval file delete -force [glob $croot/src/.glimpse*]
+	eval exec ln -s [glob /users/ptdesign/src/.glimpse*] $croot/src
+    }
+
+
+    file delete -force $croot/obj.$ptarch/makefile
+    exec ln -s $root/src/makefile $croot/obj.$ptarch/makefile
+
+    file delete -force $croot/MAKEARCH
+    file copy $root/MAKEARCH $croot/MAKEARCH
 
     puts "Copying $override to $croot/mk/override.mk"
-    exec cp $override $croot/mk/override.mk
+    file copy $override $croot/mk/override.mk
     
+    set pigimsg "# We set PIGI so that we can build an image with\n# just\
+	    the domains we are interested in.  If PIGI is not set\n# then\
+	    make will fail because a we attempt to full binary with\n# all \
+	    the domains, and not all the domains are present in lib.\$PTARCH"
+
+    # Copy override.mk to the directories that create binaries 
     set over [open "$croot/obj.$ptarch/pigiRpc/override.mk" w]
     puts $over \
-	    "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=pigiRpc\n"
+	    "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pigiRpc\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/ptcl/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=ptcl\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=ptcl\n"
+    close $over
+
+    set over [open "$croot/obj.$ptarch/pitcl/override.mk" w]
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pitcl\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/tysh/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=tysh\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=tysh\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/pigiExample/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=tysh\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pigi\n"
     close $over
 
     # Remove the symbolic links for bin, bin.$ptarch, and lib.$ptarch,
@@ -208,7 +242,7 @@ TREE:
 
     # We need to make sources to build any makefiles that are out of date
     # and to make install to compile any out-of-date object files
-    puts "Building ptcl, pigiRpc, and tycho in your customized Ptolemy tree."
+    puts "Building ptcl, pitcl, pigiRpc, and tycho in your customized Ptolemy tree."
     puts "Please wait for a few minutes ..."
     exec sh -c "cd $croot/obj.$ptarch ; make sources install"
     puts "Before using your new pigiRpc, be sure to set \$PTOLEMY to $croot" 
@@ -218,7 +252,15 @@ TREE:
 
 # Process the args we were called with and then call mkPtolemyTree
 proc processArgs {} {
-    global argc argv env
+    global argc argv env tcl_version tcl_platform
+    if {$tcl_version < 7.6} {
+	error "mkPtolemyTree must be run with a version of tcl\ngreater \
+		than or equal to 7.6, as we use 'file mkdir' etc."
+    }
+    if {$tcl_platform(platform) != "unix"} {
+	error "mkPtolemyTree probably won't work under non-unix platforms"
+    }
+
     set error 0
     if {$argc != 2} {
 	puts "mkPtolemyTree: wrong number of arguments"
@@ -252,6 +294,7 @@ proc processArgs {} {
 	puts " full documentation for mkPtolemyTree"
 	exit
     }
+    
     mkPtolemyTree [lindex $argv 0] [lindex $argv 1] $env(PTOLEMY) $env(PTARCH) 
 }
 

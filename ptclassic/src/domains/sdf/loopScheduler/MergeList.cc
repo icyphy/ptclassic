@@ -1,10 +1,32 @@
 static const char file_id[] = "MergeList.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)MergeList.cc	1.10	3/5/96
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha based on Shuvra Bhattacharyya's work.
  Date of creation: 4/92
@@ -38,41 +60,46 @@ int euclid(int a, int b) {
 	return b;
 }
 
-MergeLink::MergeLink(LSNode *base, LSNode *relative, int d) : DoubleLink(0) {
-        base_node = base;
-        adjacent_node = relative;
-        parRep = base->myMaster()->repetitions;
-        sonRep = relative->myMaster()->repetitions;
-        gcd = euclid(parRep,sonRep);
-        par_inv = parRep / gcd;
-        adj_ix = relative->invocationNumber();
-        direction = d;
+MergeLink::MergeLink(LSNode* base, LSNode* relative, int d) : DoubleLink(0) {
+	base_node = base;
+	adjacent_node = relative;
+	direction = d;
 
-	// ClusterNodeLists 
+	int basereps = base->myMaster()->repetitions;
+	int relreps = relative->myMaster()->repetitions;
+	gcd = euclid(basereps, relreps);
+
+	adj_ix = relative->invocationNumber();
+
 	preClust = 0;
 	mainClust = 0;
 	postClust = 0;
+
+	setUp();
 }
 
-void MergeList::insertMerge(LSNode *base, LSNode *relative, int d) {
+MergeLink::~MergeLink() {
+	delete preClust;
+	delete mainClust;
+	delete postClust;
+}
 
-        MergeListIter nextLink(*this);
-        MergeLink *m;
-        LOG_NEW; MergeLink *newlink = new MergeLink(base, relative, d);
-        int n1 = newlink->par_inv;
-        int n2;
-
-        while ((m=nextLink++)!=0) {
-                n2 = m->par_inv;
-                if (n1 < n2) {
-                        insertAhead(newlink, m);
-                        return;
-                } else if ((n1 == n2) &&
-                        (newlink->adj_ix < m->adj_ix)) {
-                        insertAhead(newlink,m);
-                }
-        }
-        appendLink(newlink);
+void MergeList::insertMerge(LSNode* base, LSNode* relative, int d) {
+	MergeListIter nextLink(*this);
+	MergeLink *m;
+	LOG_NEW; MergeLink* newlink = new MergeLink(base, relative, d);
+	int n1 = newlink->par_inv;
+	while ((m = nextLink++) != 0) {
+		int n2 = m->par_inv;
+		if (n1 < n2) {
+			insertAhead(newlink, m);
+			return;
+		}
+		else if ((n1 == n2) && (newlink->adj_ix < m->adj_ix)) {
+			insertAhead(newlink,m);
+		}
+	}
+	appendLink(newlink);
 }
 
 // set up members
@@ -80,15 +107,22 @@ void MergeLink :: setUp() {
 	if (direction) {
 		par_node = base_node;
 		son_node = adjacent_node;
-	} else {
+	}
+	else {
 		par_node = adjacent_node;
 		son_node = base_node;
-		int temp = sonRep;
-		sonRep = parRep;
-		parRep = temp;
 	}
+	parRep = par_node->myMaster()->repetitions;
+	sonRep = son_node->myMaster()->repetitions;
 	par_inv = parRep / gcd;
 	son_inv = sonRep / gcd;
+
+	delete preClust;
+	delete mainClust;
+	delete postClust;
+	preClust = 0;
+	mainClust = 0;
+	postClust = 0;
 }
 
 //////////////////////////
@@ -100,22 +134,20 @@ int MergeLink::formRepeatedCluster(LSGraph &g)
 	// setup parent-child relationship
 	setUp();
 
+	// check for errors
+	if (par_node == 0 || son_node == 0) return FALSE;
+
 	// invocation index of base and adjacent node
 	int ix = par_node->invocationNumber();
 	int iy = son_node->invocationNumber();
 
-	//  attempt clustering to check whether deadlock occurs.
-	if(!preClustering(g,ix,iy)) return FALSE;
-	if(!mainClustering(g,ix,iy)) {
-		LOG_DEL; delete preClust;
+	// attempt clustering to check whether deadlock occurs.
+	// on error, deallocate all dynamic memory
+	if (!preClustering(g, ix, iy) ||
+	    !mainClustering(g, ix, iy) ||
+	    (son_node && ! postClustering(g))) {
+		setUp();
 		return FALSE;
-	}
-	if(son_node) {
-		if(!postClustering(g)) {
-			LOG_DEL; delete preClust;
-			LOG_DEL; delete mainClust;
-			return FALSE;
-		}
 	}
 
 	// no deadlock occurs. THEN,
@@ -138,6 +170,7 @@ int MergeLink::formRepeatedCluster(LSGraph &g)
 // Make an initial cluster if it is different from the main cluster.
 
 int MergeLink :: preClustering(LSGraph& g, int& ix, int& iy) {
+	if (par_node == 0 || son_node == 0) return FALSE;
 
 	//  set up the limit of indices
 	int parLimit, sonLimit;
@@ -162,14 +195,15 @@ int MergeLink :: preClustering(LSGraph& g, int& ix, int& iy) {
 		nextP = nextS->nextConnection(nextP,0);
 		if (!nextP) return FALSE;
 		parIx = nextP->invocationNumber();
-	} while ((parIx != prevPar) && (sonIx <= sonLimit) && 
-		(parIx <= parLimit));
+	} while ((parIx != prevPar) && (sonIx <= sonLimit) &&
+		 (parIx <= parLimit));
 	
 	// Check whether the initial cluster needs to be made.
 	if ((parIx >= parLimit) && (sonIx >= sonLimit))
 			return TRUE;
 
 	// Form the initial cluster.
+	delete preClust;
 	LOG_NEW; preClust = new ClusterNodeList(0);
 	int tx = par_node->invocationNumber();
 	while (tx <= parIx) {
@@ -196,11 +230,12 @@ int MergeLink :: preClustering(LSGraph& g, int& ix, int& iy) {
 	// introduce a cycle in the graph.
 	if (g.introducesCycle(*preClust)) {
 		LOG_DEL; delete preClust;
+		preClust = 0;
 		return FALSE;
 	}
 
 	// new indices for the next step
-	ix = (par_node)? par_node->invocationNumber() : (parRep + 1);
+	ix = par_node ? par_node->invocationNumber() : (parRep + 1);
 	iy = sonIx + 1;
 
 	return TRUE;
@@ -222,14 +257,16 @@ int MergeLink :: mainClustering(LSGraph& g, int ix, int iy) {
 	// return TRUE if no clustering can be made
 	if ((stopX > parRep) || (stopY > sonRep)) return TRUE;
 
+	// check for errors
+	if (par_node == 0 || son_node == 0) return FALSE;
+
 	// while all invocations are available,
-	ClusterNodeList* clist = NULL;
+	ClusterNodeList* clist = 0;
 	LSNode* x = (LSNode*) par_node->getInvocation(startX);
 	LSNode* y = (LSNode*) son_node->getInvocation(startY);
 	int numClust = 0;
 
 	while ((stopX <= parRep) && (stopY <= sonRep)) {
-
 		LOG_NEW; clist = new ClusterNodeList(clist);
 		numClust++;
 		if (!mainClust) mainClust = clist;
@@ -249,6 +286,7 @@ int MergeLink :: mainClustering(LSGraph& g, int ix, int iy) {
 		// introduce a cycle in the graph.
 		if (g.introducesCycle(*clist)) {
 			LOG_DEL; delete mainClust;
+			mainClust = 0;
 			return FALSE;
 		}
 
@@ -281,14 +319,16 @@ int MergeLink :: mainClustering(LSGraph& g, int ix, int iy) {
 //////////////////////////	
 
 int MergeLink :: postClustering(LSGraph& g) {
+	if (par_node == 0 || son_node == 0) return FALSE;
 
 	LSNode* nextSon = son_node;
 	while ((nextSon->getNextInvoc()) != 0)
 		nextSon = nextSon->getNextInvoc();
 
 	LSNode* nextPar = nextSon->nextConnection(par_node,0);
-	
+
 	// create postClust
+	delete postClust;
 	LOG_NEW; postClust = new ClusterNodeList(0);
 
 	while (par_node != nextPar) {
@@ -301,15 +341,16 @@ int MergeLink :: postClustering(LSGraph& g) {
 	// append isolated par_nodes if any.
 	appendIsolatedPar(postClust);
 
-	while (son_node != 0) {
+	while (son_node) {
 		postClust->append(son_node);
 		son_node = son_node->getNextInvoc();
 	}
-	
+
 	// Check that the formation of this invocation will not
 	// introduce a cycle in the graph.
 	if (g.introducesCycle(*postClust)) {
 		LOG_DEL; delete postClust;
+		postClust = 0;
 		return FALSE;
 	}
 
@@ -323,8 +364,9 @@ int MergeLink :: postClustering(LSGraph& g) {
 // connected to base_node. Then, update the repetition counter of
 // the master of this adjacent_node.
 void MergeLink :: initialPhase() {
+	if (adjacent_node == 0) return;
 
-	SDFStar* org = adjacent_node->myMaster();
+	DataFlowStar* org = adjacent_node->myMaster();
 	org->repetitions = adj_ix - 1;
 
 	// break the invocation links.
@@ -337,18 +379,13 @@ void MergeLink :: initialPhase() {
 
 //////////////////////////
 // Create Clusters
-//////////////////////////	
+//////////////////////////
 // With the ClusterNodeLists registered in the clustering attempts,
 // create real clusters in the APEG graph
 void MergeLink :: createClusters(LSGraph& g) {
-
-	LSCluster* newCluster;
-
 	// If the base_node is the first invocation, that means
 	// there are isolated parent nodes.
-	int isolatedFlag = FALSE;
-	if ((base_node->invocationNumber() > 1) && direction)
-		isolatedFlag = TRUE;
+	int isolatedFlag = ((base_node->invocationNumber() > 1) && direction);
 
 	// For preClust....
 	if (preClust) {
@@ -357,7 +394,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 			isolatedFlag = FALSE;
 		}
 
-		LOG_NEW; newCluster = new LSCluster(g, preClust);
+		LOG_NEW; LSCluster* newCluster = new LSCluster(g, preClust);
 		g.addList(newCluster);
 		newCluster->repetitions = 1;
 
@@ -368,6 +405,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 
 		// delete the ClusterNodeList structure.
 		LOG_DEL; delete preClust;
+		preClust = 0;
 	}
 
 	if (mainClust) {
@@ -383,7 +421,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 		}
 
 		// create the cluster master.
-		LOG_NEW; newCluster = new LSCluster(g, mainClust);
+		LOG_NEW; LSCluster* newCluster = new LSCluster(g, mainClust);
 		g.addList(newCluster);
 
 		int i = 1;			// Cluster invocation number.
@@ -402,11 +440,12 @@ void MergeLink :: createClusters(LSGraph& g) {
 
 		// delete the ClusterNodeList structure.
 		LOG_DEL; delete mainClust;
+		mainClust = 0;
 	}
 
 	// For postClust....
 	if (postClust) {
-		LOG_NEW; newCluster = new LSCluster(g, postClust);
+		LOG_NEW; LSCluster* newCluster = new LSCluster(g, postClust);
 		g.addList(newCluster);
 		newCluster->repetitions = 1;
 
@@ -417,6 +456,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 
 		// delete the ClusterNodeList structure.
 		LOG_DEL; delete postClust;
+		postClust = 0;
 	}
 }
 
@@ -427,8 +467,9 @@ void MergeLink :: createClusters(LSGraph& g) {
 // unconnected to the son_nodes. Then, we update the master setup of
 // the par_node
 void MergeLink :: finalPhase(LSGraph& g) {
+	if (par_node == 0) return;
 
-	SDFStar* master = par_node->myMaster();
+	DataFlowStar* master = par_node->myMaster();
 	master->setMaster(par_node);
 	int total = master->repetitions;
 	master->repetitions = total - par_node->invocationNumber() + 1;
@@ -452,7 +493,6 @@ void MergeLink :: finalPhase(LSGraph& g) {
 
 // append isolated par_nodes if any.
 void MergeLink :: appendIsolatedPar(ClusterNodeList* clist) {
-
 	while (par_node && (par_node->connected() == 0)) {
 		clist->insert(par_node);
 		par_node = (LSNode*) par_node->getNextInvoc();
@@ -483,6 +523,7 @@ void MergeLink :: insertIsolatedSon(ClusterNodeList* clist) {
 				adjacent_node = tmp;
 			}
 			tx--;
-		} else return;
+		}
+		else return;
 	}
 }

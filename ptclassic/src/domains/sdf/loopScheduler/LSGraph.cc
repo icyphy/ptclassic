@@ -1,10 +1,32 @@
 static const char file_id[] = "LSGraph.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)LSGraph.cc	1.12	7/31/95
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Shuvra Bhattacharyya, Soonhoi Ha (4/92)
  Date of creation: 5/9/91
@@ -33,9 +55,9 @@ void LSGraph::resetVisits()
 		n->resetVisit();
 }
 
-int LSGraph::createMe(Galaxy& galaxy) {
+int LSGraph::createMe(Galaxy& galaxy, int) {
 	clusters.initialize();
-	int flag = ExpandedGraph :: createMe(galaxy);
+	int flag = ExpandedGraph :: createMe(galaxy, 0);
 	removeArcsWithDelay();
 	if (flag) flag = makeRM();
 	return flag;
@@ -44,15 +66,14 @@ int LSGraph::createMe(Galaxy& galaxy) {
 // insert a node into "candidates" list sorted by repetition counter.
 void LSGraph::sortedInsert(LSNode *p) {
 	LSNodeListIter nextNode(candidates);
-	LSNode *n;
 	LSNodeLink* nl;
 	LSNodeLink* tmp = candidates.createLink(p);
 
 	int freq = p->myMaster()->repetitions; 
 
 	while ((nl = nextNode.nextLink()) != 0) {
-		LSNode* n = nl->myNode();
-		if (freq >= n->myMaster()->repetitions) {
+		LSNode* n = nl->node();
+		if (freq >= int(n->myMaster()->repetitions)) {
 			candidates.insertAhead(tmp,nl);
 			return;
 		}
@@ -74,7 +95,7 @@ void LSGraph::initializeCandidates()
 		sortedInsert((LSNode*) m);
 }
 
-EGNode *LSGraph::newNode(SDFStar *s, int i) 
+EGNode *LSGraph::newNode(DataFlowStar *s, int i) 
 	{ LOG_NEW; return new LSNode(s,i); }
 
 
@@ -120,7 +141,7 @@ int LSGraph::makeRM() {
 	while ((p = nextNode++) != 0) {
 		if (RM->pathExists(*p,*p)) {
 			StringList msg = "Deadlocked graph -- insufficient delay in loop containing ";
-			msg +=  p->myMaster()->readFullName();
+			msg +=  p->myMaster()->fullName();
 			Error::abortRun(msg);
 			return FALSE;
 		}
@@ -160,6 +181,7 @@ LSGraph :: ~LSGraph() {
 
 	while ((n = (LSCluster*) nextCluster++) != 0) {
 		n->myMaster()->deleteInvocChain();
+		LOG_DEL; delete n->myMaster();
 		LOG_DEL; delete n;
 	}
 }

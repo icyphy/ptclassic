@@ -2,9 +2,9 @@
 #
 # @Author: Christopher
 #
-# @Version: $Id$
+# @Version: @(#)testSDFArith.tcl	1.4 03/28/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,77 +34,8 @@
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
+    source [file join $env(PTOLEMY) src domains sdf test testSDFDefs.tcl]
 } {}
-
-# Uncomment this to get a full report, or set in your Tcl shell window.
-# set VERBOSE 1
-
-# If a file contains non-graphical tests, then it should be named .tcl
-# If a file contains graphical tests, then it should be called .itcl
-# 
-# It would be nice if the tests would work in a vanilla itkwish binary.
-# Check for necessary classes and adjust the auto_path accordingly.
-#
-
-if {[info command ::tycho::tmpFileName] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-    }
-}
-
-# Define a few helper functions
-
-######################################################################
-#### sdfSetupPrinter
-# Create a printer star that will print to a tmp file.
-# Return the name of the tmp file
-#
-proc sdfSetupPrinter { {starName Printa}} {
-    star $starName Printer
-    set tmpfile [::tycho::tmpFileName SDFMpyCx]
-    setstate Printa fileName $tmpfile
-    return $tmpfile
-}
-
-######################################################################
-#### readTmpFile
-# read a file, remove the file, return the value as a list.
-#
-proc readTmpFile {tmpfile} {
-    set fd [open $tmpfile r]
-    set retval [read $fd]
-    close $fd
-    file delete -force $tmpfile
-    list $retval
-}
-
-######################################################################
-#### sdfTestArithmetic
-# Test out one input arithmetic stars
-#
-proc sdfTestArithmetic {star} {
-	reset __empty__
-	domain SDF
-	newuniverse sdfTestArithmetic SDF
-	target loop-SDF
-	star "$star.a" $star
-        if [regexp {Fix$} $star] {
-	    setstate "$star.a" ArrivingPrecision NO
-	    setstate "$star.a" InputPrecision 15.1
-	    setstate "$star.a" OutputPrecision 15.1
-	}
-	star Rampa Ramp
-
-	set tmpfile [sdfSetupPrinter]
-
-	connect "$star.a" output Printa input
-	connect Rampa output "$star.a" input
-	run 10 
-	wrapup
-
-	return [readTmpFile $tmpfile]
-}
 
 
 ######################################################################
@@ -118,7 +49,7 @@ proc sdfTestArithmetic {star} {
 #### test SDFAdd
 # 
 test SDFAdd { SDFAdd} {
-    sdfTestArithmetic Add
+    sdfTest1In1Out Add
 } {{0.0	
 1.0	
 2.0	
@@ -135,7 +66,7 @@ test SDFAdd { SDFAdd} {
 #### test SDFMpy
 # 
 test SDFMpy { SDFMpy} {
-    sdfTestArithmetic Mpy
+    sdfTest1In1Out Mpy
 } {{0.0	
 1.0	
 2.0	
@@ -152,7 +83,7 @@ test SDFMpy { SDFMpy} {
 #### test SDFGain
 # 
 test SDFGain { SDFGain} {
-    sdfTestArithmetic Gain
+    sdfTest1In1Out Gain
 } {{0.0	
 1.0	
 2.0	
@@ -169,7 +100,7 @@ test SDFGain { SDFGain} {
 #### test SDFAverage
 # 
 test SDFMAverage { SDFAverage} {
-    sdfTestArithmetic Average
+    sdfTest1In1Out Average
 } {{3.5	
 11.5	
 19.5	
@@ -188,7 +119,7 @@ test SDFMAverage { SDFAverage} {
 #### test SDFAddCx
 # 
 test SDFAddCx { SDFAddCx} {
-    sdfTestArithmetic AddCx
+    sdfTest1In1Out AddCx
 } {{(0.0,0.0)	
 (1.0,0.0)	
 (2.0,0.0)	
@@ -205,7 +136,7 @@ test SDFAddCx { SDFAddCx} {
 #### test SDFMpyCx
 # 
 test SDFMpyCx { SDFMpyCx} {
-    sdfTestArithmetic MpyCx
+    sdfTest1In1Out MpyCx
 } {{(0.0,0.0)	
 (1.0,0.0)	
 (2.0,0.0)	
@@ -221,8 +152,8 @@ test SDFMpyCx { SDFMpyCx} {
 ######################################################################
 #### test SDFGainCx
 # 
-test SDFMpyCx { SDFGainCx} {
-    sdfTestArithmetic GainCx
+test SDFGainCx { SDFGainCx} {
+    sdfTest1In1Out GainCx
 } {{(0.0,0.0)	
 (1.0,0.0)	
 (2.0,0.0)	
@@ -239,7 +170,7 @@ test SDFMpyCx { SDFGainCx} {
 #### test SDFAverageCx
 # 
 test SDFMAverageCx { SDFAverageCx} {
-    sdfTestArithmetic AverageCx
+    sdfTest1In1Out AverageCx
 } {{(3.5,0.0)	
 (11.5,0.0)	
 (19.5,0.0)	
@@ -252,13 +183,30 @@ test SDFMAverageCx { SDFAverageCx} {
 (75.5,0.0)	
 }}
 
+######################################################################
+#### test SDFAverageCx
+# 
+test SDFMAverageCx { SDFAverageCx, Complex input} {
+    sdfTest1In1Out AverageCx 1.1 Complex
+} {{(3.85,1.75)	
+(12.65,5.75)	
+(21.45,9.75)	
+(30.25,13.75)	
+(39.05,17.75)	
+(47.85,21.75)	
+(56.65,25.75)	
+(65.45,29.75)	
+(74.25,33.75)	
+(83.05,37.75)	
+}}
+
 # Fix one input stars
 
 ######################################################################
 #### test SDFAddFix
 # 
 test SDFAddFix { SDFAddFix} {
-    sdfTestArithmetic AddFix
+    sdfTest1In1Out AddFix
 } {{0.0	
 1.0	
 2.0	
@@ -275,7 +223,7 @@ test SDFAddFix { SDFAddFix} {
 #### test SDFMpyFix
 # 
 test SDFMpyFix { SDFMpyFix} {
-    sdfTestArithmetic MpyFix
+    sdfTest1In1Out MpyFix
 } {{0.0	
 1.0	
 2.0	
@@ -291,8 +239,8 @@ test SDFMpyFix { SDFMpyFix} {
 ######################################################################
 #### test SDFGainFix
 # 
-test SDFMpyFix { SDFGainFix} {
-    sdfTestArithmetic GainFix
+test SDFGainFix { SDFGainFix} {
+    sdfTest1In1Out GainFix
 } {{0.0	
 1.0	
 2.0	
@@ -311,7 +259,7 @@ test SDFMpyFix { SDFGainFix} {
 #### test SDFAddInt
 # 
 test SDFAddInt { SDFAddInt} {
-    sdfTestArithmetic AddInt
+    sdfTest1In1Out AddInt
 } {{0	
 1	
 2	
@@ -328,7 +276,7 @@ test SDFAddInt { SDFAddInt} {
 #### test SDFMpyInt
 # 
 test SDFMpyInt { SDFMpyInt} {
-    sdfTestArithmetic MpyInt
+    sdfTest1In1Out MpyInt
 } {{0	
 1	
 2	
@@ -344,8 +292,8 @@ test SDFMpyInt { SDFMpyInt} {
 ######################################################################
 #### test SDFGainInt
 # 
-test SDFMpyInt { SDFGainInt} {
-    sdfTestArithmetic GainInt
+test SDFGainInt { SDFGainInt} {
+    sdfTest1In1Out GainInt
 } {{0	
 1	
 2	
@@ -362,7 +310,7 @@ test SDFMpyInt { SDFGainInt} {
 #### test SDFDivByInt
 # 
 test SDFDivByInt { SDFDivByInt} {
-    sdfTestArithmetic DivByInt
+    sdfTest1In1Out DivByInt
 } {{0	
 0	
 1	
@@ -375,47 +323,6 @@ test SDFDivByInt { SDFDivByInt} {
 4	
 }}
 
-######################################################################
-#### sdfTestArithmetic2input
-# Test out two input arithmetic stars
-#
-proc sdfTestArithmetic2input {star} {
-    reset __empty__
-    domain SDF
-    newuniverse SDFArithmeticInput=2 SDF
-    target loop-SDF
-    star Rampa Ramp
-    star Rampb Ramp
-    set tmpfile [sdfSetupPrinter]
-
-    if [regexp {^Sub} $star] {
-	star "$star.a" $star
-	connect "$star.a" output Printa input
-	connect Rampa output "$star.a" pos
-	connect Rampb output "$star.a" neg
-        if [regexp {Fix$} $star] {
-	    setstate "$star.a" ArrivingPrecision NO
-	    setstate "$star.a" InputPrecision 15.1
-	    setstate "$star.a" OutputPrecision 15.1
-	}
-
-    } else {
-	star "$star.input=21" $star
-	numports "$star.input=21" input 2
-	connect "$star.input=21" output Printa input
-	connect Rampa output "$star.input=21" "input#1"
-	connect Rampb output "$star.input=21" "input#2"
-        if [regexp {Fix$} $star] {
-	    setstate "$star.input=21" ArrivingPrecision NO
-	    setstate "$star.input=21" InputPrecision 15.1
-	    setstate "$star.input=21" OutputPrecision 15.1
-	}
-    }
-    run 10 
-    wrapup
-    
-    return [readTmpFile $tmpfile]
-}
 
 # Two input float stars
 
@@ -490,6 +397,24 @@ test SDFAddCx2 { SDFAddCx.input=2} {
 }}
 
 ######################################################################
+#### SDFAddCx.input=2
+# 
+test SDFAddCx3 { SDFAddCx.input=2, Complex inputs} {
+    sdfTestArithmetic2input AddCx Complex
+} {{(0.0,0.0)	
+(3.0,0.75)	
+(6.0,1.5)	
+(9.0,2.25)	
+(12.0,3.0)	
+(15.0,3.75)	
+(18.0,4.5)	
+(21.0,5.25)	
+(24.0,6.0)	
+(27.0,6.75)	
+}}
+
+
+######################################################################
 #### SDFSubCx.input=2
 # 
 test SDFSubCx2 { SDFSubCx.input=2} {
@@ -507,6 +432,24 @@ test SDFSubCx2 { SDFSubCx.input=2} {
 }}
 
 ######################################################################
+#### SDFSubCx.input=2
+# 
+test SDFSubCx3 { SDFSubCx.input=2, Complex inputs} {
+    sdfTestArithmetic2input SubCx Complex
+} {{(0.0,0.0)	
+(-1.0,0.25)	
+(-2.0,0.5)	
+(-3.0,0.75)	
+(-4.0,1.0)	
+(-5.0,1.25)	
+(-6.0,1.5)	
+(-7.0,1.75)	
+(-8.0,2.0)	
+(-9.0,2.25)	
+}}
+
+
+######################################################################
 #### SDFMpyCx.input=2
 # 
 test SDFMpyCx2 { SDFMpyCx.input=2} {
@@ -522,6 +465,24 @@ test SDFMpyCx2 { SDFMpyCx.input=2} {
 (64.0,0.0)	
 (81.0,0.0)	
 }}
+
+######################################################################
+#### SDFMpyCx.input=2
+# 
+test SDFMpyCx2 { SDFMpyCx.input=2, Complex input} {
+    sdfTestArithmetic2input MpyCx Complex
+} {{(0.0,0.0)	
+(1.875,1.25)	
+(7.5,5.0)	
+(16.875,11.25)	
+(30.0,20.0)	
+(46.875,31.25)	
+(67.5,45.0)	
+(91.875,61.25)	
+(120.0,80.0)	
+(151.875,101.25)	
+}}
+
 
 # Two input Fix stars
 
@@ -561,6 +522,23 @@ test SDFSubFix2 { SDFSubFix.input=2} {
 }}
 
 ######################################################################
+#### SDFSubFix.input=2
+# 
+test SDFSubFix3 { SDFSubFix.input=2, Fix inputs} {
+    sdfTestArithmetic2input SubFix Fix
+} {{0.0	
+0.0	
+0.0	
+0.5	
+1.0	
+1.0	
+1.0	
+1.5	
+1.5	
+1.5	
+}}
+
+######################################################################
 #### SDFMpyFix.input=2
 # 
 test SDFMpyFix2 { SDFMpyFix.input=2} {
@@ -575,6 +553,23 @@ test SDFMpyFix2 { SDFMpyFix.input=2} {
 49.0	
 64.0	
 81.0	
+}}
+
+######################################################################
+#### SDFMpyFix.input=2
+# 
+test SDFMpyFix3 { SDFMpyFix.input=2, Fix input} {
+    sdfTestArithmetic2input MpyFix Fix
+} {{0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+-0.5	
+-0.5	
+-0.5	
 }}
 
 # Two input Int stars

@@ -4,12 +4,12 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Fork }
 	desc {
-	    Fork for CG dummy domain
+	    Fork for CGFPGA dummy domain
 	}
-	version {@(#)ACSForkCGFPGA.pl	1.4	12 August 1998}
-	author { E. A. Lee }
+	version{ @(#)ACSForkCGFPGA.pl	1.5 08/02/01 }
+	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 The Regents of the University of California
+Copyright (c) 1998-2001 The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -21,27 +21,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Stitcher assignments
 	    ostrstream output_filename;
 	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
-	    }
-	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -50,12 +31,32 @@ limitation of liability, and disclaimer of warranty provisions.
 		pins->set_precision(1,0,pins->query_bitlen(0),lock_mode);
 		pins->set_precision(2,0,pins->query_bitlen(0),lock_mode);
 
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-		
 		// Return happy condition
 		return(1);
 		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Calculate pipe delay
+		// NOTE:It should never come to this point!
+		acs_delay=0;
+
+		// Return happy condition
+		return(1);
+	    }
 	}
         method {
 	    name {sg_setup}

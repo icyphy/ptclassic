@@ -1,56 +1,90 @@
 # Tcl/Tk source for a slider controler
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkSlider.tcl	1.10	3/3/95
 #
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# When this file is sourced, it is assumed that the following global
-# variables have been set:
-#	uniqueSymbol
-#	ptkControlPanel
-#	identifier
-#	low
-#	high
-#	value
-# where the last three are given values corresponding to parameter values.
 
-if {![info exists putInCntrPan]} {set putInCntrPan 1}
-
-if {$putInCntrPan} \
-   { set s $ptkControlPanel.low.${uniqueSymbol}slider } \
-   { set s $ptkControlPanel.${uniqueSymbol}slider }
+set s $ptkControlPanel.slider_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
-# used for this new run.
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-if {![winfo exists $s]} {
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
 
-    if {$putInCntrPan} {
+if {!$window_previously_existed} {
+    if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
-	pack append $ptkControlPanel.low $s top
+	pack after $ptkControlPanel.low $s top
     } {
         toplevel $s
         wm title $s "Sliders"
         wm iconname $s "Sliders"
     }
-
-    proc ${uniqueSymbol}setOut {position} "
-        ${uniqueSymbol}setOutputs \[expr {$low+($high-$low)*\$position/100.0}]
-    "
-
     frame $s.f
-    set position [expr 100*($value-$low)/($high-$low)]
-    ptkMakeScale $s.f m $identifier $position ${uniqueSymbol}setOut
+}
+
+proc setOut_$starID {position} "
+	set val \[expr {[set ${starID}(low)]+([set ${starID}(high)]-\
+	[set ${starID}(low)])*\$position/100.0}]
+        setOutputs_$starID \$val
+        $s.f.m.value configure -text \$val
+"
+
+set position [expr \
+	{round(100*([set ${starID}(value)]-[set ${starID}(low)])/ \
+	([set ${starID}(high)]-[set ${starID}(low)]))}]
+ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
+$s.f.m.value configure -text $position
+
+if {!$window_previously_existed} {
+
     pack append $s $s.f top
 
-    # Most of the work was done on sourcing this file.
-    # Just initialize the output
-    proc ${uniqueSymbol}callTcl {} "
-    	${uniqueSymbol}setOutputs $value
-    "
+    proc destructorTcl_$starID {starID} {
+	global $starID
+	if {[set ${starID}(put_in_control_panel)]} {
+	    # Remove the slider from the control panel, if it still exists
+	    global ptkControlPanel
+	    destroy $ptkControlPanel.slider_$starID
+	}
+    }
+    tkwait visibility $s
 }
+
+# Initialize the output
+setOutputs_$starID [set ${starID}(value)]
+
+unset s

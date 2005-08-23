@@ -1,51 +1,76 @@
-static const char file_id[] = "$RCSfile$";
+/* 
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
 
-/*  Version $Id$
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
 
-    Programmer:		T.M. Parks
-    Date of creation:	2 April 1992
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+/*  Version @(#)PNTarget.cc	2.9 07/30/96
+    Author:	T. M. Parks
+    Created:	2 April 1992
 
 */
+
+static const char file_id[] = "PNTarget.cc";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "MTDFTarget.h"
-#include "MTDFStar.h"
+#include "Galaxy.h"
+#include "PNTarget.h"
+#include "PNScheduler.h"
 
-#include "GalIter.h"
+// Defined in PNDomain.cc
+extern const char PNdomainName[];
 
 // Constructor.
-MTDFTarget::MTDFTarget() : Target("default-MTDF", "MTDFStar",
-	"Schedule MTDF systems using Sun's Lightweight Process library.")
+PNTarget::PNTarget() : Target("default-PN", "DataFlowStar",
+	"Schedule dataflow systems as process networks.",
+	PNdomainName)
 {
 }
 
 // Destructor.
-MTDFTarget::~MTDFTarget()
+PNTarget::~PNTarget()
 {
     delSched();
 }
 
-// Make a new MTDFTarget object.
-Block* MTDFTarget::clone() const
+// Make a new PNTarget object.
+Block* PNTarget::makeNew() const
 {
-    LOG_NEW; return new MTDFTarget;
+    LOG_NEW; return new PNTarget;
 }
 
 // Initialization.
-void MTDFTarget::start()
+void PNTarget::setup()
 {
-    if (!mySched()) { LOG_NEW; setSched(new MTDFScheduler); }
+    LOG_NEW; setSched(new PNScheduler);
+    Target::setup();
 }
 
-// End simulation.
-void MTDFTarget::wrapup()
+void PNTarget::wrapup()
 {
-    ((MTDFScheduler*)mySched())->deleteThreads();
     Target::wrapup();
+    delSched();
 }

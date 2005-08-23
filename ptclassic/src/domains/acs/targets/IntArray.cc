@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,21 +25,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)IntArray.cc      1.0     06/16/99
+ Version: @(#)IntArray.cc	1.10 08/02/01
 ***********************************************************************/
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "IntArray.h"
+#include "ACSIntArray.h"
 
-IntArray::IntArray(void)
+ACSIntArray::ACSIntArray(void)
 {
   total=0;
   ints=NULL;
 }
 
-IntArray::IntArray(int start_count)
+ACSIntArray::ACSIntArray(int start_count)
 {
   total=start_count;
   ints=new int[total];
@@ -47,7 +47,7 @@ IntArray::IntArray(int start_count)
     ints[loop]=666;
 }
 
-IntArray::IntArray(int start_count,int def_val)
+ACSIntArray::ACSIntArray(int start_count,int def_val)
 {
   total=start_count;
   ints=new int[total];
@@ -55,7 +55,7 @@ IntArray::IntArray(int start_count,int def_val)
     ints[loop]=def_val;
 }
 
-IntArray::~IntArray(void)
+ACSIntArray::~ACSIntArray(void)
 {
   if (ints != NULL)
     for (int loop=0;loop<total;loop++)
@@ -64,7 +64,7 @@ IntArray::~IntArray(void)
   total=0;
 }
 
-IntArray& IntArray::operator=(IntArray& rh_array)
+ACSIntArray& ACSIntArray::operator=(ACSIntArray& rh_array)
 {
   total=rh_array.total;
   ints=new int[total];
@@ -73,12 +73,12 @@ IntArray& IntArray::operator=(IntArray& rh_array)
   return *this;
 }
 
-void IntArray::incr(int index)
+void ACSIntArray::incr(int index)
 {
   ints[index]++;
 }
 
-void IntArray::copy(IntArray* rh_array)
+void ACSIntArray::copy(ACSIntArray* rh_array)
 {
   total=rh_array->total;
   ints=new int[total];
@@ -86,37 +86,39 @@ void IntArray::copy(IntArray* rh_array)
     ints[loop]=rh_array->ints[loop];
 }
 
-void IntArray::fill(int default_val)
+void ACSIntArray::fill(int default_val)
 {
   for (int loop=0;loop<total;loop++)
     ints[loop]=default_val;
 }
 
-static int intcompare(int *i, int *j)
+static int intcompare(const void *i, const void *j)
 {
-  if (*i > *j)
+
+  if (*((int *)i) > *((int *)j))
     return(1);
-  if (*i <= *j)
+  if (*((int *)i) <= *((int *)j))
     return(-1);
   return(0);
     
 }
-static int intcompare2(int *i, int *j)
+static int intcompare2(const void *i, const void *j)
 {
-  if (*i < *j)
+  if (*((int *)i) < *((int *)j))
     return(1);
-  if (*i >= *j)
+  if (*((int *)i) >= *((int *)j))
     return(-1);
   return(0);
     
 }
-IntArray* IntArray::sort_lh(void)
+ACSIntArray* ACSIntArray::sort_lh(void)
 {
-  IntArray* results=new IntArray(total);
+  ACSIntArray* results=new ACSIntArray(total);
 
   int *tmp_ints=new int[total];
   int *moved_already=new int[total];
-  for (int loop=0;loop<total;loop++)
+  int loop;
+  for (loop=0;loop<total;loop++)
     {
       tmp_ints[loop]=ints[loop];
       moved_already[loop]=0;
@@ -124,7 +126,7 @@ IntArray* IntArray::sort_lh(void)
 
   qsort(tmp_ints,total,sizeof(int),intcompare);
 
-  for (int loop=0;loop<total;loop++)
+  for (loop=0;loop<total;loop++)
     for (int search_loop=0;search_loop<total;search_loop++)
       if ((moved_already[search_loop]==0) &&
 	  (tmp_ints[loop]==ints[search_loop]))
@@ -135,13 +137,14 @@ IntArray* IntArray::sort_lh(void)
 	}
   return(results);
 }
-IntArray* IntArray::sort_hl(void)
+ACSIntArray* ACSIntArray::sort_hl(void)
 {
-  IntArray* results=new IntArray(total);
+  ACSIntArray* results=new ACSIntArray(total);
 
   int *tmp_ints=new int[total];
   int *moved_already=new int[total];
-  for (int loop=0;loop<total;loop++)
+  int loop;
+  for (loop=0;loop<total;loop++)
     {
       tmp_ints[loop]=ints[loop];
       moved_already[loop]=0;
@@ -149,7 +152,7 @@ IntArray* IntArray::sort_hl(void)
 
   qsort(tmp_ints,total,sizeof(int),intcompare2);
 
-  for (int loop=0;loop<total;loop++)
+  for (loop=0;loop<total;loop++)
     for (int search_loop=0;search_loop<total;search_loop++)
       if ((moved_already[search_loop]==0) &&
 	  (tmp_ints[loop]==ints[search_loop]))
@@ -161,7 +164,7 @@ IntArray* IntArray::sort_hl(void)
   return(results);
 }
 
-void IntArray::reorder(IntArray* new_order)
+void ACSIntArray::reorder(ACSIntArray* new_order)
 {
   int* new_ints=new int[total];
   
@@ -173,7 +176,7 @@ void IntArray::reorder(IntArray* new_order)
 }
 
 
-void IntArray::add(void)
+void ACSIntArray::add(void)
 {
   int* new_ints=new int[total+1];
   for (int loop=0;loop<total;loop++)
@@ -186,7 +189,7 @@ void IntArray::add(void)
   total++;
 }
 
-void IntArray::add(int new_int)
+void ACSIntArray::add(int new_int)
 {
   int* new_ints=new int[total+1];
   for (int loop=0;loop<total;loop++)
@@ -199,7 +202,7 @@ void IntArray::add(int new_int)
   total++;
 }
 
-void IntArray::remove(int index)
+void ACSIntArray::remove(int index)
 {
   int* new_ints=new int[total-1];
   for (int low_loop=0;low_loop<index;low_loop++)
@@ -212,27 +215,27 @@ void IntArray::remove(int index)
   total--;
 }
 
-int IntArray::population(void)
+int ACSIntArray::population(void)
 {
   return(total);
 }
 
-int IntArray::query(int index)
+int ACSIntArray::query(int index)
 {
   if (index >= total)
     {
-      printf("IntArray::query:Error, index exceeds population\n");
+      printf("ACSIntArray::query:Error, index exceeds population\n");
       return(-1);
     }
   else
     return(ints[index]);
 }
 
-int IntArray::set(int index,int val)
+int ACSIntArray::set(int index,int val)
 {
   if (index >= total)
     {
-      printf("IntArray::query:Error, index exceeds population\n");
+      printf("ACSIntArray::query:Error, index exceeds population\n");
       return(-1);
     }
   else
@@ -244,7 +247,7 @@ int IntArray::set(int index,int val)
 
 
      
-void IntArray::print(const char* header)
+void ACSIntArray::print(const char* header)
 {
   printf("%s:\n",header);
   for (int loop=0;loop<total;loop++)
@@ -253,7 +256,7 @@ void IntArray::print(const char* header)
 }
 
 
-int IntArray::find(int look_val)
+int ACSIntArray::find(int look_val)
 {
   for (int loop=0;loop<total;loop++)
     if (ints[loop]==look_val)

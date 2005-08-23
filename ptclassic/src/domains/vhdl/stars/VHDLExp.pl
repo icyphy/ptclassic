@@ -3,10 +3,10 @@ defstar {
 	domain { VHDL }
 	desc {
 	}
-	version { $Id$ }
+	version { @(#)VHDLExp.pl	1.3 05/24/96 }
 	author { Michael C. Williamson }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -54,7 +54,7 @@ $temp(result,float) :=
   $temp(term6,float) + $temp(term7,float) + $temp(term8,float) +
   $temp(term9,float) + $temp(term10,float) + $temp(term11,float);
 
-$ref(output) := $temp(result,float);
+$ref(output) $assign(output) $temp(result,float);
 	}
 	go {
 	  addCode(std);

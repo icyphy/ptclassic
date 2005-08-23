@@ -1,4 +1,34 @@
-/*
+/**************************************************************************
+Version identification:
+@(#)rtvc.cc	1.5 12/08/97
+
+Copyright (c) 1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
+
+/* 
  * Copyright (c) 1994 Regents of the University of California.
  * All rights reserved.
  *
@@ -33,9 +63,9 @@
 static const char rcsid[] =
     "@(#) $Header$ (LBL)";
 
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
+
 #include "rtvc.h"
-
-
 RTVCGrabber::RTVCGrabber(int devno)
 {
 	fid_ = -1;
@@ -81,7 +111,7 @@ RTVCGrabber::RTVCGrabber(int devno)
 		return;
 	}
 	close(cd);
-#ifdef __svr4__
+#if defined(__svr4__) || defined(SYSV)  
 	pagesize_ = sysconf(_SC_PAGESIZE);
 #else
 	pagesize_ = NBPG;
@@ -92,8 +122,8 @@ RTVCGrabber::RTVCGrabber(int devno)
 	      "/opt/SUNWits/Graphics-sw/xil/lib/pipelines/xilSUNWrtvc_ucode.a";
 	else
 		printf("-vic: using rtvc ucode in current directory\n");
-	findFirmware();
-
+	if (findFirmware() != PTRTVC_OK)
+            fprintf(stderr,"rtvc: findFirmware() returned an error");
 	fpb_.firmware_message.image_skip = 1;
 	fpb_.firmware_message.flags = 0;
 	fpb_.max_buffers = 1;
@@ -119,7 +149,7 @@ void RTVCGrabber::returnGeometry(u_int &base, u_int &heigth){
 	heigth = baseheight_;
 }
 
-void RTVCGrabber::findFirmware()
+int RTVCGrabber::findFirmware()
 {
 #ifdef stat
 #undef stat
@@ -129,7 +159,7 @@ void RTVCGrabber::findFirmware()
 	int arfd = open(arpath_, O_RDONLY);
 	if (arfd < 0) {
 		perror(arpath_);
-		exit(1);
+                return PTRTVC_ERROR;
 	}
 	fstat(arfd, &fs);
 	char* bp = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, arfd, 0);
@@ -137,7 +167,7 @@ void RTVCGrabber::findFirmware()
 	if (bp != (char*) -1) {
 		if (memcmp(bp, ARMAG, SARMAG) != 0) {
 			printf("rtvc: bad magic number in %s\n", arpath_);
-			exit(1);
+                        return PTRTVC_ERROR;
 		}
 		char* ep = bp + fs.st_size;
 		for (char* cp = bp + SARMAG; cp < ep; ) {
@@ -160,6 +190,7 @@ void RTVCGrabber::findFirmware()
 		}
 		(void)munmap((caddr_t)bp, fs.st_size);
 	}
+        return PTRTVC_OK;
 }
 
 int RTVCGrabber::firmwareFID() const
@@ -173,12 +204,13 @@ int RTVCGrabber::firmwareFID() const
 	return (CAPTURE_FID);
 }
 
-void RTVCGrabber::sendMessage()
+int RTVCGrabber::sendMessage()
 {
 	if (ioctl(fd_, RTVC_CMD_SEND_MESSAGE, &fpb_) < 0) {
-	        perror("RTVC_CMD_SEND_MESSAGE");
-		exit(1);
+	        perror("rtvc: sendMessage(): RTVC_CMD_SEND_MESSAGE");
+                return PTRTVC_ERROR;
 	}
+        else return PTRTVC_OK;
 }
 
 void RTVCGrabber::halt()
@@ -190,12 +222,13 @@ void RTVCGrabber::halt()
 	fpb_.firmware_message.flags = flags;
 }
 
-void RTVCGrabber::run()
+int RTVCGrabber::run()
 {
 	if (ioctl(fd_, RTVC_CMD_GO, 0) < 0) {
-		perror("RTVC_CMD_GO");
-		exit(1);
+		perror("rtvc: run(): RTVC_CMD_GO");
+                return PTRTVC_ERROR;
 	} else running_ = 1;
+        return PTRTVC_OK;
 }
 
 void RTVCGrabber::updateParameters(int both_fields)
@@ -247,7 +280,7 @@ void RTVCGrabber::updateParameters(int both_fields)
 }
 
 
-void RTVCGrabber::setInputPort(int newport)
+int RTVCGrabber::setInputPort(int newport)
 {
 	if (running_)
 		halt();
@@ -257,8 +290,9 @@ void RTVCGrabber::setInputPort(int newport)
 	param.video_port = newport;
 	if (ioctl(fd_, RTVC_CMD_SET_VIDEO, &param) < 0) {
 		perror("RTVC_CMD_SET_VIDEO");
-		fprintf(stderr, "couldn't set port\n");
-		exit(1);
+		fprintf(stderr, "Couldn't set port for camera.\n");
+		fprintf(stderr, "Perhaps your machine does not have a camera?\n");
+                return PTRTVC_ERROR;
 	}
 	int new_video_format = state_->video_format;
 
@@ -282,22 +316,23 @@ void RTVCGrabber::setInputPort(int newport)
 	int off = (int)capbase_ & (pagesize_ - 1);
 	capbuf_ = capbase_ + (pagesize_ - off);
 	cur_video_format_ = new_video_format;
+        return PTRTVC_OK;
 }
 
-void RTVCGrabber::loadFirmware(int fid)
+int RTVCGrabber::loadFirmware(int fid)
 {
 	rtvc_program_t program;
 	struct stat fs;
 
 	fid_ = -1;
 	if (ioctl(fd_, RTVC_CMD_RESET, 0) < 0) {
-		perror("RTVC_CMD_RESET");
-		exit(1);
+		perror("rtvc: loadFirmware(): RTVC_CMD_RESET");
+                return PTRTVC_ERROR;
 	}
 	int arfd = open(arpath_, O_RDONLY);
 	if (arfd < 0) {
 		perror(arpath_);
-		exit(1);
+                return PTRTVC_ERROR;
 	}
 	fstat(arfd, &fs);
 	char* cp = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, arfd, 0);
@@ -310,11 +345,12 @@ void RTVCGrabber::loadFirmware(int fid)
 		int rc = ioctl(fd_, RTVC_CMD_PROGRAM, &program);
 		if (rc < 0) {
 			perror("RTVC_CMD_PROGRAM");
-			exit(1);
+                        return PTRTVC_ERROR;
 		}
 		(void)munmap((caddr_t)cp, fs.st_size);
 		fid_ = fid;
 	}
+        return PTRTVC_OK;
 }
 
 struct scale_fpb {
@@ -324,12 +360,14 @@ struct scale_fpb {
 	u_int buffer_size;
 };
 
-void RTVCGrabber::set_size_nachos(int w, int h)
+int RTVCGrabber::set_size_nachos(int w, int h)
 {
 	int fid = firmwareFID();
 	if (fid != fid_) {
-		loadFirmware(fid);
-		run();
+            if (loadFirmware(fid) != PTRTVC_OK) {
+                return PTRTVC_ERROR;
+            }
+            run();
 	}
 	updateParameters();
 	u_int bytes_per_image = w * h * 3;
@@ -339,7 +377,9 @@ void RTVCGrabber::set_size_nachos(int w, int h)
 	spb->scanline_dmas = (basewidth_ >> 7) - 1;
 	spb->even_word_stride = (decimate_ >> 1) << 2;
 	spb->buffer_size = bytes_per_image;
-	sendMessage();
+	if (sendMessage() != PTRTVC_OK)
+            return PTRTVC_ERROR;
+        return PTRTVC_OK;
 }
 
 
@@ -354,30 +394,29 @@ int RTVCGrabber::command(char * arg1, void * arg2)
 	                newport = RTVC_PORT_COMPOSITE_VIDEO_2;
 	         else if (strcasecmp((char*)arg2, "s-video") == 0)
 		        newport = RTVC_PORT_S_VIDEO;
-		 else return -1;
-                 setInputPort(newport);
+		 else return PTRTVC_ERROR;
+                 if (setInputPort(newport) != PTRTVC_OK) 
+                     return PTRTVC_ERROR;
                  /* video format may have changed when port changed */
-	        setsize();
-	        return 0;
-	        //return (TCL_OK);
+                 if (setsize() != PTRTVC_OK) 
+                     return PTRTVC_ERROR;
+	        return PTRTVC_OK;
 	} else if (strcmp(arg1, "decimate") == 0) {
 	       int d = *((int*)arg2);
 	       if (d <= 0 ) {
 		    //	Tcl& tcl = Tcl::instance();
 		    //	tcl.resultf("%s: divide by zero", argv[0]);
-		    //	return (TCL_ERROR);
-		    return -1;
+		    return PTRTVC_ERROR;
 		}
 		decimate_ = d;
-	        setsize();
-	        return 0;
-		//return (TCL_OK);
+                if (setsize() != PTRTVC_OK) 
+                    return PTRTVC_ERROR;
+	        return PTRTVC_OK;
 	} 
-	return -1;
-//	return (Grabber::command(argc, argv));
+	return PTRTVC_ERROR;
 }
 
-void RTVCGrabber::fps(int f)
+int RTVCGrabber::fps(int f)
 {
 	if (f <= 0)
 		f = 1;
@@ -386,16 +425,19 @@ void RTVCGrabber::fps(int f)
 	/* convert to skip count then back */
 	int sc = max_fps_ / f;
 	fpb_.firmware_message.image_skip = sc - 1;
-	if (running_)
-		sendMessage();
+	if (running_) {
+            if (sendMessage() != PTRTVC_OK)
+                return PTRTVC_ERROR;
+        }
 	//Grabber::fps(max_fps_ / sc);
+        return PTRTVC_OK;
 }
 
-void RTVCGrabber::setsize(){
+int RTVCGrabber::setsize(){
 
 	int w = basewidth_ / decimate_;
 	int h = baseheight_ / decimate_;
-	set_size_nachos(w, h);
+	return set_size_nachos(w, h);
 }
 
 int RTVCGrabber::capture()
@@ -412,13 +454,15 @@ void RTVCGrabber::stop()
 	unlink(); 
 }
 
-void RTVCGrabber::start()
+int RTVCGrabber::start()
 {
-	setsize();
+        if (setsize() != PTRTVC_OK)
+            return PTRTVC_ERROR;
 	link(fd_, TK_READABLE);
 	double now = gettimeofday();
 	frameclock_ = now;
 	nextframetime_ = now + tick(grab());
+        return PTRTVC_OK;
 }
 
 void RTVCGrabber::dispatch(int)
@@ -465,6 +509,6 @@ u_int32_t RTVCGrabber::ref_ts()
 	return (t + offset_);
 }
 
-#endif
-
+#endif /* NEEDED_FOR_SUNVIDEO_STAR */
+#endif /* sun */
 

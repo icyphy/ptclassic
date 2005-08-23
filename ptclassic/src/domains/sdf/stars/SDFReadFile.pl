@@ -2,87 +2,98 @@ defstar
 {
     name { ReadFile }
     domain { SDF }
-    version { $Id$ }
+    version { @(#)SDFReadFile.pl	1.19 10/30/95 }
     author { T. M. Parks }
-    copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
     location { SDF main library }
-    descriptor { Read ASCII data from a file. }
+    descriptor {
+Read ASCII data from a file.  The simulation can be halted
+on end-of-file, or the file contents can be periodically
+repeated, or the file contents can be padded with zeros.
+	}
+    hinclude { <fstream.h> }
+    ccinclude { "SimControl.h" }
 
-    hinclude { <stream.h> }
-    ccinclude { "Scheduler.h" }
-
-    output
-    {
+    output {
 	name { output }
 	type { float }
     }
 
-    defstate
-    {
+    defstate {
 	name { fileName }
 	type { string }
 	default { "/dev/null" }
 	descriptor { Input file. }
     }
 
-    defstate
-    {
+    defstate {
 	name { haltAtEnd }
 	type { int }
 	default { "NO" }
 	descriptor { Halt the run at the end of the input file. }
     }
 
-    defstate
-    {
+    defstate {
 	name { periodic }
 	type { int }
 	default { "YES" }
 	descriptor { Make output periodic or zero-padded. }
     }
 
-    protected
-    {
+    protected {
 	istream* input;
+	char* expandedFileName;
     }
 
-    start
-    {
+    constructor {
+	input = 0;
+	expandedFileName = 0;
+    }
+
+    setup {
 	// open input file
-	input = new istream(expandPathName(fileName),"r");
-	if (! input->readable() )
-	    Error::abortRun(*this, fileName, " not readable");
+	LOG_DEL; delete input;
+	delete [] expandedFileName;
+	expandedFileName = expandPathName(fileName);
+	LOG_NEW; input = new ifstream(expandedFileName);
+	if (!(*input))
+		Error::abortRun(*this, "can't open file ", fileName);
     }
 
-    go
-    {
-	double x;
-
-	if (input->eof())	// pad output with zeros
-	    x = 0.0;
-	else			// get next value
-	{
-	    (*input) >> x;
-	    eatwhite(*input);
-	}
-	output%0 << x;
+    go {
+	double x = 0.0;
 
 	if (input->eof())
 	{
 	    if (haltAtEnd)		// halt the run
-		Scheduler::requestHalt();
+		SimControl::requestHalt();
 	    else if (periodic)		// close and re-open file
 	    {
-		input->close();
-		delete input;
-		input = new istream(expandPathName(fileName),"r");
+		LOG_DEL; delete input;
+                LOG_NEW; input = new ifstream(expandedFileName);
+         	if (!(*input)) {
+		    Error::abortRun(*this, "cannot re-open file ", fileName);
+		    return;
+		}
+		(*input) >> x;		// get next value
+		ws(*input);
 	    }
 	}
+	else			// get next value
+	{
+	    (*input) >> x;
+	    ws(*input);
+	}
+	output%0 << x;
     }
 
-    wrapup
-    {
-	input->close();
-	delete input;
+    destructor {
+	LOG_DEL; delete input;
+	delete [] expandedFileName;
     }
 }

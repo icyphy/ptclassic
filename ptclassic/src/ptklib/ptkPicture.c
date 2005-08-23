@@ -3,7 +3,7 @@
  *
  * Author: Luis Gutierrez (based on ptkPlot )
  *
- * $Id$
+ * @(#)ptkPicture.c	1.3 06/16/98
  */
 /*
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -203,7 +203,11 @@ int ptkCreatePicture(interp, win, name, geometry, title, height,
 
   /* fill in picture structure */
   sprintf(strTmp,"%s.pic",name);
+#if TCL_MAJOR_VERSION < 8
   picture->photohandle = Tk_FindPhoto(strTmp);
+#else
+  picture->photohandle = Tk_FindPhoto(interp, strTmp);
+#endif
   if (picture->photohandle == NULL) return TCL_ERROR;
   picture->photoblock.width = width;
   picture->photoblock.height = height;

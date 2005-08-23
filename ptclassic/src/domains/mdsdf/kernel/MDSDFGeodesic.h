@@ -2,10 +2,32 @@
 #define _MDSDFGeodesic_h 1
 /*******************************************************************
 Version identification:
- $Id$
+ @(#)MDSDFGeodesic.h	1.6 04/05/97
 
- Copyright (c) 1993 The Regents of the University of California,
-                       All Rights Reserved.
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer: Mike J. Chen
 
@@ -23,42 +45,20 @@ Version identification:
 #include "SubMatrix.h"
 #include "MatrixParticle.h"
 
-// I had it privately derived before, why?
 class MDSDFGeodesic : public Geodesic {
 public:
         // constructor
 	MDSDFGeodesic();
 
-        // destructor
-	~MDSDFGeodesic();
-
         // initializes the delays, and calls initBuffer
         virtual void initialize();
-
-        // initializes the motherMatrix, the Geodesic's buffer, and the
-        // originating port's buffer
-//	void initBuffer();
-
-        // increment the count of the number of input tokens received
-//        void incReceiveCount(int n);
-
-        // functions in Geodesic that are no longer used
-        // void put(Particle* p);
-
-        // functions that replace those from the Geodesic class
-//        virtual void incCount(int);
-
-        // inherited from Geodesic
-        Geodesic::get;
 
 	// Access the valid dimensions of the Geodesic's buffer
         int lastValidRow() { return lastRow; }
         int lastValidCol() { return lastCol; }
 
         // Update the last valid row and column in the Geodesic
-        void setValid(int row, int col) { 
-          lastRow = row + rowDelays;
-          lastCol = col + colDelays; }
+        void setValid(int row, int col);
 
         // Access the location of a single double value stored in the
         // Geodesic's buffer, a quick hack
@@ -75,40 +75,28 @@ public:
 	}  
  
         // Access a submatrix of the mothermatrix stored in the Geodesic
-        Matrix* getInput(int rowFiringIndex, int colFiringIndex,
+        PtMatrix* getInput(int rowFiringIndex, int colFiringIndex,
                          int rowDelay = 0, int colDelay = 0);
-        Matrix* getOutput(int rowFiringIndex, int colFiringIndex);
-
-        // set delays in two dimensions
-        void setDelay(int numPastRowTokens, int numPastColTokens) {
-          maxPastRowTokens = numPastRowTokens;
-          maxPastColTokens = numPastColTokens; }
+        PtMatrix* getOutput(int rowFiringIndex, int colFiringIndex);
 
         MatrixParticle* mainParticle() { return motherParticle; }
+
+	/*virtual*/ void resetBufferValues() {};
 
  protected:
 	int lastRow;     // The index of the last valid row and columns
 	int lastCol;     // in the buffer.
    
-        int maxPastRowTokens;
-        int maxPastColTokens;
-
         MatrixParticle* motherParticle;
 
         int rowDelays;   // The number of delays in each dimension
         int colDelays;
 
-//        int rowInputCount;    // The number of data matrices in each
-//        int colInputCount;    // dimension in the buffer.
-
-//	int rowInputsRequired; // The number of inputs in each dimension
-//	int colInputsRequired; // needed before output data is "valid"
-       
-//	int rowOutputsGenerated; // The number of outputs in each dimension
-//	int colOutputsGenerated; // generated once there are enough inputs
-
 	int mNumRows;  // The dimensions of the motherMatrix
 	int mNumCols;
+
+        int originalNumCols; // The number of cols of the motherMatrix if
+	                     // there are no column delays.
 };
 
 #endif

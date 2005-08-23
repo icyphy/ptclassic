@@ -1,6 +1,36 @@
+/**************************************************************************
+Version identification:
+@(#)rtvc.h	1.4 12/08/97
+
+Copyright (c) 1997 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
 #ifndef RTVC_H_
 #define RTVC_H_
 
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -118,33 +148,37 @@ struct rtvc_program_t {
 #define	RTVC_READ_CAPTURED_OFFSET	((off_t)0x01000000)
 
 
+// These values are returned by some of the methods in RTVCGrabber
+#define PTRTVC_ERROR -1
+#define PTRTVC_OK 0
+
 class RTVCGrabber {
     public:
 	RTVCGrabber(int devno);
 	virtual ~RTVCGrabber();
   	void halt();
-        void run();
+        int run();
   	virtual int command(char * arg1, void* arg2);
-	virtual void fps(int);
+	virtual int fps(int);
 	inline int is_pal() const { return (max_fps_ == 25); }
 	u_char* returnBuffer();
 	void	returnGeometry(u_int &base, u_int &heigth);
 	virtual int capture();
     protected:
-	void set_size_nachos(int w, int h);
-	virtual void setsize();// = 0;
-	void setInputPort(int newport);
+	int set_size_nachos(int w, int h);
+	virtual int setsize();// = 0;
+	int setInputPort(int newport);
 	void updateParameters(int both_fields = 0);
-	void loadFirmware(int fid);
-	void sendMessage();
-	void findFirmware();
+	int loadFirmware(int fid);
+	int sendMessage();
+	int findFirmware();
 	virtual int firmwareFID() const;
 
 #ifdef NEEDED_FOR_SUNVIDEO_STAR
   	u_int32_t media_ts();
   	u_int32_t ref_ts();
         void dispatch(int mask);
-	virtual void start();
+	virtual int start();
 	virtual void stop();
 #endif
 
@@ -183,4 +217,5 @@ class RTVCGrabber {
 #define JPEG_PAL_FID 4
 };
 
+#endif /* sun */
 #endif

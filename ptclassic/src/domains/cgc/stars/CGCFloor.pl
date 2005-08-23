@@ -2,7 +2,7 @@ defstar {
 	name { Floor }
 	domain { CGC } 
 	desc { Output the greatest integer less than or equal to the input. }
-	version { $Id$ }
+	version { @(#)CGCFloor.pl	1.1 4/20/96 }
 	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

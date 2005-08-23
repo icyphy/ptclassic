@@ -1,13 +1,16 @@
 defstar {
 	name { GainInt }
 	domain { SDF }
-	desc { Integer gain: output is input times "gain" (default 1). }
-	version {$Id$}
+	desc {
+This is an amplifier; the integer output is the integer input
+multiplied by the integer "gain" (default 1).
+	}
+	version {@(#)SDFGainInt.pl	1.4	3/2/95}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }

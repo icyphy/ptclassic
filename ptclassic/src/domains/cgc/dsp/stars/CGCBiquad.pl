@@ -1,20 +1,20 @@
 defstar {
 	name {Biquad}
 	domain {CGC}
-	version {@(#)CGCBiquad.pl	1.3 6/29/96}
+	version {@(#)CGCBiquad.pl	1.6 04/08/97}
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
 	author { J. T. Buck and William Chen}
 	copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC dsp library }
-	explanation {
-This two-pole, two-zero IIR filter.
+	htmldoc {
+A two-pole, two-zero IIR filter.
 	}
 	input {
 	  name{input}
@@ -24,39 +24,39 @@ This two-pole, two-zero IIR filter.
 	  name{output}
 	  type{float}
 	}
-        defstate {
+        state {
                 name {d1}
                 type { float }
                 default { "-1.1430" }
         }
-        defstate {
+        state {
                 name {d2}
                 type { float }
                 default { "0.41280" }
         }
-        defstate {
+        state {
                 name {n0}
                 type { float }
                 default { "0.067455" }
         }
-        defstate {
+        state {
                 name {n1}
                 type { float }
                 default { "0.135" }
         }
-        defstate {
+        state {
                 name {n2}
                 type { float }
                 default { "0.067455" }
         }
-	defstate {
+	state {
 	  name {state1}
 	  type { float }
 	  default { "0.0" }
 	  desc { internal state. }
 	  attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	defstate {
+	state {
 	  name {state2}
 	  type { float }
 	  default { "0.0" }
@@ -75,7 +75,7 @@ This two-pole, two-zero IIR filter.
 	}
         initCode{
 	  addInclude("<math.h>");
-          addDeclaration(mainDecl);
+          addGlobal(mainDecl);
 	  addCode(settapDef);
 	}
 	codeblock(localDecl){

@@ -1,22 +1,22 @@
 defstar {
 	name { GainFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc { 
 This is an amplifier; the fixed-point output is the fixed-point input
-multiplied by the "gain" (default 1.0).
-The precision of "gain", the input, and the output can be specified in bits.
+multiplied by the "gain" (default 1.0).  The precision of "gain", the
+input, and the output can be specified in bits.
 	}
-	author { J.Weiss }
+	author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCGainFix.pl	1.6	01 Oct 1996 }
 	location { CGC main library }
-        explanation { 
+	htmldoc {
 The value of the "gain" parameter and its precision in bits can currently 
 be specified using two different notations.
 Specifying only a value by itself in the dialog box would create a
@@ -86,6 +86,9 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+        // an initCode method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::initCode()
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
@@ -96,6 +99,6 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

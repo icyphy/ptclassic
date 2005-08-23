@@ -1,0 +1,2 @@
+puts hello
+flush stdout

@@ -1,9 +1,9 @@
 static const char file_id[] = "TkSchedTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)TkSchedTarget.cc	1.9 12/09/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,8 +46,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
 #
-# Here's all the nonsense I'm adding to see what can be done
-#
+#	The following code is added so that an interactive Tcl/Tk
+#	application can be executed prior to generating the final
+#	VHDL code.
 #
 */
 
@@ -57,16 +58,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define COMMANDSIZE 1024
 
 static VHDLFiringList* ourFiringList;
-
 static char command[COMMANDSIZE];
-
-
 Tk_Window mainWindow;
-//static char *display = NULL;
 static int debug = 0;
-//static char *geometry = NULL;
 static int exitRequest = 0;
-
 const char *graph_file_name;
 StringList theDestDir;
 StringList theFilePrefix;
@@ -88,7 +83,7 @@ static int
 XErrorProc(ClientData data, XErrorEvent* errEventPtr)
 {
   // To avoid a warning
-  if (data)
+  if (data) {}
 
   fprintf(stderr, "X protocol error: ");
   fprintf(stderr, "error=%d request=%d minor=%d\n",
@@ -97,61 +92,53 @@ XErrorProc(ClientData data, XErrorEvent* errEventPtr)
   return 0;
 }
 
+/*
 int RandomCmd(ClientData clientData,
 	      Tcl_Interp *interp,
 	      int argc, char *argv[]);
+	      */
 
 int SetProcCmd(ClientData clientData,
 	       Tcl_Interp *interp,
 	       int argc, char *argv[]);
 
+int SetTimesCmd(ClientData clientData,
+		Tcl_Interp *interp,
+		int argc, char *argv[]);
+
 void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
-  Tcl_Interp *interp;
-  int error; char *trace;
+  Tcl_Interp *interp = Tcl_CreateInterp();
+  int error;
+  char *trace;
 
   ourFiringList = theFiringList;
 
   // To avoid a warning
   if (argc) {}
-  if (interp) {}
 
-  interp = Tcl_CreateInterp();
-
-    if (Tcl_Init(interp) == TCL_ERROR) {
-	fprintf(stderr,
-		"%s: Error while trying to initialize tcl: %s\n",
-		argv[0], interp->result);
-	exit(1);
-      }
-    if (Tk_Init(interp) == TCL_ERROR)  {
-	fprintf(stderr,
-		"%s: Error while trying to get main window: %s\n",
-		argv[0], interp->result);
-	exit(1);
-    }
-
-    Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
-    mainWindow = Tk_MainWindow(interp);
-
-    /*
-  if (Tcl_Init(interp) != TCL_OK) {
-    fprintf(stderr, "Tcl_Init failed: %s\n",
-	    interp->result);
+  if (Tcl_Init(interp) == TCL_ERROR) {
+    fprintf(stderr,
+	    "%s: Error while trying to initialize tcl: %s\n",
+	    argv[0], interp->result);
+    exit(1);
   }
-  if (Tk_Init(interp) != TCL_OK) {
-    fprintf(stderr, "Tk_Init failed: %s\n",
-	    interp->result);
+  if (Tk_Init(interp) == TCL_ERROR)  {
+    fprintf(stderr,
+	    "%s: Error while trying to get main window: %s\n",
+	    argv[0], interp->result);
+    exit(1);
   }
-  */
 
-  //  mainWindow = Tk_CreateWindow(interp, display,
-  //			       "myapp", "MyApp");
-    //  mainWindow = Tk_MainWindow(interp);
+  Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
+  mainWindow = Tk_MainWindow(interp);
 
   if (mainWindow == NULL) {
     fprintf(stderr, "%s\n", interp->result);
     exit(1);
   }
+  fprintf(stderr, "SetAppName: %s\n", Tk_SetAppName(mainWindow,
+						    "TkScheduler"));
+
   Tk_CreateErrorHandler(Tk_Display(mainWindow), -1, -1, -1,
 			XErrorProc, (ClientData)mainWindow);
   if (debug) {
@@ -165,12 +152,17 @@ void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
 		    (ClientData)Tk_MainWindow(interp),
 		    (Tcl_CmdDeleteProc *)NULL);
 
-  //  printf("Adding tcl command:  random\n");
+  /*
   Tcl_CreateCommand(interp, "random", RandomCmd,
 		    (ClientData) 0,
 		    (Tcl_CmdDeleteProc *)NULL);
-  //  printf("Adding tcl command:  setProc\n");
+		    */
+
   Tcl_CreateCommand(interp, "setProc", SetProcCmd,
+		    (ClientData) 0,
+		    (Tcl_CmdDeleteProc *)NULL);
+
+  Tcl_CreateCommand(interp, "setTimes", SetTimesCmd,
 		    (ClientData) 0,
 		    (Tcl_CmdDeleteProc *)NULL);
 
@@ -180,50 +172,41 @@ void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
   filNam << "/" ;
   filNam << theFilePrefix;
   filNam << ".gra";
-  //  cout << "filNam is " << filNam << "\n";
 
   graph_file_name = filNam;
-  //  cout << "1:graph_file_name is " << graph_file_name << "\n";
 
-
-  //  cout << "graph_file_name is " << graph_file_name << "\n";
   sprintf(command, "set GRAPH_FILE {%s}", graph_file_name);
-  //  fprintf("Command is %s\n", command);
-  //  cout << "Command is " << command << "\n";
 
   Tcl_Eval(interp, command);
 
-  //  error = Tcl_EvalFile(interp, "~/.myapp.tcl");
-  const char* tclFile = "$PTOLEMY/src/domains/vhdl/targets/TkSched.tcl";
+  // Path of the Tcl/Tk file is hardwired in here:
+  const char* tclFile = "$PTOLEMY/src/domains/vhdl/tcltk/targets/TkSched.tcl";
   char* tclFileExp = expandPathName(tclFile);
   error = Tcl_EvalFile(interp, tclFileExp);
   if (error != TCL_OK) {
     fprintf(stderr, "%s: %s\n", tclFileExp, interp->result);
-    trace = Tcl_GetVar(interp, "errorInfo",
-		       TCL_GLOBAL_ONLY);
+    trace = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
     if (trace != NULL) {
       fprintf(stderr, "*** TCL TRACE ***\n");
       fprintf(stderr, "%s\n", trace);
     }
   }
 
-
   // Enter the custom event loop.
-  
   exitRequest = 0;
-  fprintf(stderr, "Entering main event loop\n");
+  //  fprintf(stderr, "Entering main event loop\n");
   while (!exitRequest) {
     Tk_DoOneEvent(TK_ALL_EVENTS);
   }
-  fprintf(stderr, "Exiting main event loop\n");
+  //  fprintf(stderr, "Exiting main event loop\n");
+  // Exit the custom event loop.
 
-  //  Tk_Main(argc, argv, Tcl_AppInit);
-  //  exit(0);
-
+  // Close the Tk window.
   Tcl_Eval(interp, "destroy .");
   return;
 }
 
+/*
 int Tcl_AppInit(Tcl_Interp *interp) {
   //  char* tcl_RcFileName;
 
@@ -245,12 +228,14 @@ int Tcl_AppInit(Tcl_Interp *interp) {
 		    (ClientData) 0,
 		    (Tcl_CmdDeleteProc *)NULL);
   Tcl_SetVar(interp, "tcl_rcFileName", "~/.myapp.tcl", TCL_GLOBAL_ONLY);
-  /*
+
   tcl_RcFileName = "~/.myapp.tcl";
-  */
+
   return TCL_OK;
 }
+*/
 
+/*
 int RandomCmd(ClientData clientData,
 	      Tcl_Interp *interp,
 	      int argc, char *argv[])
@@ -277,6 +262,7 @@ int RandomCmd(ClientData clientData,
   sprintf(interp->result, "%d", rand);
   return TCL_OK;
 }
+*/
 
 int SetProcCmd(ClientData clientData,
 	      Tcl_Interp *interp,
@@ -288,20 +274,12 @@ int SetProcCmd(ClientData clientData,
   int error;
   char* firingName;
   int procNum;
-  //  int rand, error;
-  //  int limit = 0;
   if (argc != 3) {
     interp->result =  "Usage: setProc ?firingName? ?procNum?";
     return TCL_ERROR;
   }
   if (argc == 3) {
     firingName = argv[1];
-    /*
-    error = Tcl_GetVar(interp, argv[1], &firingName);
-    if (error != TCL_OK) {
-      return error;
-    }
-    */
     error = Tcl_GetInt(interp, argv[2], &procNum);
     if (error != TCL_OK) {
       return error;
@@ -321,17 +299,66 @@ int SetProcCmd(ClientData clientData,
     printf("\n");
   }
 
-  //  sprintf(interp->result, "%d", rand);
+  return TCL_OK;
+}
+
+int SetTimesCmd(ClientData clientData,
+		Tcl_Interp *interp,
+		int argc, char *argv[])
+{
+  // To avoid a warning
+  if (clientData) {}
+
+  int error;
+  char* firingName;
+  int startTime, endTime, latency;
+  if (argc != 5) {
+    interp->result = 
+      "Usage: setTimes ?firingName? ?startTime? ?endTime? ?latency?";
+    return TCL_ERROR;
+  }
+  if (argc == 5) {
+    firingName = argv[1];
+    error = Tcl_GetInt(interp, argv[2], &startTime);
+    if (error != TCL_OK) {
+      return error;
+    }
+    error = Tcl_GetInt(interp, argv[3], &endTime);
+    if (error != TCL_OK) {
+      return error;
+    }
+    error = Tcl_GetInt(interp, argv[4], &latency);
+    if (error != TCL_OK) {
+      return error;
+    }
+  }
+  /*
+  printf("Setting timing for %s to %d, %d, %d\n",
+	 firingName, startTime, endTime, latency);
+	 */
+
+  VHDLFiring* firing = new VHDLFiring;
+  firing = ourFiringList->vhdlFiringWithName(firingName);
+  if (firing) {
+    firing->startTime = startTime;
+    firing->endTime = endTime;
+    firing->latency = latency;
+  }
+  else {
+    printf("\n");
+    printf("Couldn't find firing with name %s\n", firingName);
+    printf("Size of ourFiringList is %d\n", ourFiringList->size());
+    printf("\n");
+  }
+
   return TCL_OK;
 }
 
 /*
 #
-# End nonsense
+#	End Tcl/Tk support code.
 #
 */
-
-
 
 // Constructor.
 TkSchedTarget :: TkSchedTarget(const char* name,const char* starclass,
@@ -357,6 +384,7 @@ static TkSchedTarget proto("TkSched-VHDL", "VHDLStar",
 			 "VHDL code generation target with structural style");
 static KnownTarget entry(proto,"TkSched-VHDL");
 
+// Begin method.
 void TkSchedTarget :: begin() {
   SynthArchTarget::begin();
 }
@@ -376,30 +404,36 @@ void TkSchedTarget :: setup() {
 void TkSchedTarget :: interact() {
   StringList graph_data;
 
+  //  int lat = 10;
   // Iterate over firing list and print names.
   VHDLFiringListIter fireNext(masterFiringList);
   VHDLFiring* nextFire;
   while ((nextFire = fireNext++) != 0) {
-    graph_data << "Node " << nextFire->name << "\n";
-    //    cout << "Node " << nextFire->name << "\n";
+      // Exclude the controller.
+      StringList ctlName = hashstring(filePrefix);
+      ctlName << "controller";
+      if (strcmp(ctlName, nextFire->getName())) {
+	  graph_data << "Node " << nextFire->name << " latency "
+	      //	       << lat << "\n";
+	      //    lat += 10;
+		     << nextFire->latency
+		     << " procnum "
+		     << nextFire->groupNum << "\n";
+      }
   }
   // Iterate over dependency list and print names.
   VHDLDependencyListIter depNext(dependencyList);
   VHDLDependency* nextDep;
   while ((nextDep = depNext++) != 0) {
     graph_data << "Conn " << nextDep->source->name << " -> "
-	 << nextDep->sink->name << ";" << "\n";
-    //    cout << "Conn " << nextDep->source->name << " -> "
-    //	 << nextDep->sink->name << "\n";
+	       << nextDep->sink->name << ";" << "\n";
   }
   // Iterate over dependency list and print names.
   VHDLDependencyListIter iterDepNext(iterDependencyList);
   VHDLDependency* nextIterDep;
   while ((nextIterDep = iterDepNext++) != 0) {
     graph_data << "IterConn " << nextIterDep->source->name << " -> "
-	 << nextIterDep->sink->name << ";" << "\n";
-    cout << "Conn " << nextIterDep->source->name << " -> "
-	 << nextIterDep->sink->name << "\n";
+	       << nextIterDep->sink->name << ";" << "\n";
   }
   // Iterate over token list and print names of source/dest tokens.
   VHDLTokenListIter tokenNext(tokenList);
@@ -409,7 +443,6 @@ void TkSchedTarget :: interact() {
     // of the iteration cycle.
     if (!token->getSourceFiring()) {
       graph_data << "TopToken " << token->getName() << "\n";
-      cout << "TopToken " << token->getName() << "\n";
       if (token->getDestFirings()->size()) {
 	VHDLFiringListIter nextFiring(*(token->getDestFirings()));
 	VHDLFiring* firing;
@@ -419,16 +452,17 @@ void TkSchedTarget :: interact() {
 	}
       }
     }
+    /*
     // If the token has no dest firings, place it at the bottom
     // of the iteration cycle.
     if (!token->getDestFirings()->size()) {
       graph_data << "BottomToken " << token->getName() << "\n";
-      cout << "BottomToken " << token->getName() << "\n";
       if (token->getSourceFiring()) {
-	graph_data << "Conn " << token->getSourceFiring()->getName() << " -> "
-		   << token->getName() << ";" << "\n";
+	graph_data << "Conn " << token->getSourceFiring()->getName()
+	  << " -> " << token->getName() << ";" << "\n";
       }
     }
+    */
   }
 
   theDestDir = expandPathName(destDirectory);
@@ -439,6 +473,7 @@ void TkSchedTarget :: interact() {
   char* args[1];
   args[0] = "TkSched";
 
+  // Setup and run the Tcl/Tk interactive graph display.
   do_main(1, args, &masterFiringList);
 }
 

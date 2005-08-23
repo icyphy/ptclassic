@@ -1,0 +1,11 @@
+#User:      jbuck
+#Date:      Wed Dec  2 13:38:48 1992
+#Target:    FullyConnected.code.proc1
+#Universe:  code.proc1
+REPEAT 1 TIMES { /* depth 0*/
+// CGReceive Block
+// From processor 0   to processor 1
+// RateChange star
+// Line 1 code from CGSink
+// Line 2 code from CGSink
+} /* end repeat, depth 0*/

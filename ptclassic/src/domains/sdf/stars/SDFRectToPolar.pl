@@ -1,24 +1,27 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/19/90
- Converted to use preprocessor, 10/3/90, JTB
-
-Convert two numbers to magnitude and phase
-
-**************************************************************************/
-}
 defstar {
-	name { RectPolar }
+	name { RectToPolar }
 	domain { SDF }
 	desc {
-		"Convert two numbers to magnitude and phase"
+Converts the complex number x + j y, for inputs "x" and "y",
+into magnitude and phase form.
+The phase output is in the range -PI to PI.
+	}
+	version {@(#)SDFRectToPolar.pl	1.13 10/01/96}
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+<a name="rectangular to polar format conversion"></a>
+<a name="format conversion, rectangular to polar"></a>
+<a name="magnitude"></a>
+<a name="phase"></a>
+<a name="Cartesian coordinates"></a>
+<a name="polar coordinates"></a>
 	}
 	input {
 		name { x }

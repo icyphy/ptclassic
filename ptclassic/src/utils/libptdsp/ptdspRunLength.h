@@ -28,18 +28,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Paul Haskell
-Version: $Id$
+Version: @(#)ptdspRunLength.h	1.5 7/23/96
 */
-
-#include "Ptdsp_FloatMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Ptdsp_RunLengthEncode ( const Ptdsp_FloatMatrix_t inImage, int BlockSize,
-			    int HiPri, float thresh, float **outDc,
-			    float **outAc, int *indxDc, int *indxAc);
+extern void Ptdsp_RunLengthEncode (const double* inImagePtr, int arraySize,
+		int bSize, int HiPri, double thresh, double **outDc,
+		double **outAc, int *indxDc, int *indxAc); 
+extern void Ptdsp_RunLengthInverse (const double * hiImage,
+		const double* loImage, double* outPtr, int origSize,
+		int bSize, int loSize, int HiPri);
 
 #ifdef __cplusplus
 }

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Compare } 
     desc { Output 1 (True) if left input is less than right input }
-    version { @(#)ACSCompareFPSim.pl        1.1 8/5/99 }
+    version { @(#)ACSCompareFPSim.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California

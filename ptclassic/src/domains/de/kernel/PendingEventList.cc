@@ -1,7 +1,7 @@
 static const char file_id[] = "PendingEventList.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PendingEventList.cc	1.12 04/20/98
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.
@@ -42,20 +42,74 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <assert.h>
+#include "Error.h"
 #include "PendingEventList.h"
+#include "MutableCQEventQueue.h"
 
 
-PendingEventList::PendingEventList() {}
+PendingEventList::PendingEventList(MutableCQEventQueue *eventQueue) {
+	if( eventQueue == 0 ) {
+	    Error::abortRun("Null MutableEventQueue pass to PendingEventList.");
+	    return;
+	}
+	myQueue = eventQueue;
+}
+
+PendingEventList::~PendingEventList() {
+	initialize();
+}
 
 Link * PendingEventList::appendGet( CqLevelLink * obj ) 
 {
 	return (Link *)LinkedList::appendGet( obj );
 }
 
-void PendingEventList::remove( Link * obj )
+void PendingEventList::removeHeadAndFree() {
+	CqLevelLink *aboutToDieLevelLink;
+	CqLevelLink *before;
+	CqLevelLink *next;
+        myQueue->decrementEventCount(); 
+	aboutToDieLevelLink = getHeadAndRemove();
+        if( aboutToDieLevelLink ) {
+            aboutToDieLevelLink->destinationRef = 0; 
+	    before = aboutToDieLevelLink->before; 
+	    next = aboutToDieLevelLink->next; 
+	    if( before ) { 
+		before->next = next;
+            }
+            if( next ) {
+                next->before = before;
+            }
+	    myQueue->putFreeLink(aboutToDieLevelLink); 
+	}
+
+}
+
+CqLevelLink * PendingEventList::remove( Link * obj )
 {
-	LinkedList::directRemove( obj );
-	return;
+	return (CqLevelLink *)LinkedList::eraseLinkNotElement( *obj );
+}
+
+
+void PendingEventList::freeEvent( CqLevelLink * aboutToDieLevelLink ) {
+	if( aboutToDieLevelLink->destinationRef != 0 ) {
+	    Error::abortRun("Attempt to free CqLevelLink that has"
+                    "a non-null destinationRef!");
+	}
+	CqLevelLink *before;
+	CqLevelLink *next;
+	before = aboutToDieLevelLink->before; 
+	next = aboutToDieLevelLink->next; 
+	if( before ) { 
+	    before->next = next;
+        }
+        if( next ) {
+            next->before = before;
+        }
+
+        myQueue->decrementEventCount(); 
+	myQueue->putFreeLink(aboutToDieLevelLink); 
 }
 
 

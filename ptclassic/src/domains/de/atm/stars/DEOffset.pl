@@ -4,16 +4,16 @@ defstar {
 	desc {
 Produces output fixed offset from input float value
 	}
-	version {$Id$}
+	version {@(#)DEOffset.pl	1.5	01 Oct 1996}
 	author { Allen Lao }
 	copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-	location { ATM demo library }
-	explanation {
+	location { DE ATM library }
+	htmldoc {
 Merely produces a DC output (default zero offset) when stimulated
 by an input.  The time stamp of the output is the same as
 that of the input.  Output is a constant offset from input.

@@ -1,21 +1,21 @@
 static const char file_id[] = "MDSDFDomain.cc";
 /**********************************************************************
 Version identification:
-$Id$
+@(#)MDSDFDomain.cc	1.3 3/7/96
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,15 +24,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
-
- WARNING -- XDomain.ccP is a template file that is used to generate
- domain description modules.  If the name of this file is not XDomain.ccP,
- DO NOT EDIT IT!!!
 
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the MDSDF domain so the interpreter can generate them dynamically.
@@ -61,8 +59,11 @@ public:
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new MDSDFtoUniversal;}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new MDSDFForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new MDSDFForkNode;}
+		else { LOG_NEW; return *new MDSDFGeodesic;}
+	}
 
 	// constructor
 	MDSDFDomain() : Domain("MDSDF") {}

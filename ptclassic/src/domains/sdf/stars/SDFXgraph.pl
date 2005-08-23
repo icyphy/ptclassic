@@ -1,132 +1,88 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 3/19/90
- Revised 10/3/90 to work under the preprocessor.
-
- Draws a graph with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
-
- This version is for the SDF domain.
-**************************************************************************/
-}
-
 defstar {
 	name { Xgraph }
 	domain { SDF }
-	desc { "Generate a plot with the xgraph program." }
+	desc {
+Generate a plot of a single signal with the xgraph program.
+	}
+	version {@(#)SDFXgraph.pl	1.19 10/06/96}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF main library }
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i> program which
+is provided with the Ptolemy distribution.
+Note that pxgraph is a specially modified version of xgraph.
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
+storing the data in a syntax acceptable to xgraph.
+A null string prevents any such storage.
+The <i>options</i> string is passed directly to the xgraph program
+as command-line options.  See the manual section describing xgraph
+for a complete explanation of the options.
+<a name="xgraph program"></a>
+<a name="graph, X window"></a>
+	}
 	input {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
 		type {string}
-		default {"X graph"}
-		desc {"graph title"}
+		default {"Ptolemy Xgraph"}
+		desc { Title for the plot. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save xgraph input"}
+		desc {File to save the input to the xgraph program.}
 	}
 	defstate {
 		name {options}
 		type {string}
-		default {""}
-		desc {"command line options for xgraph"}
+		default {"-bb -tk =800x400"}
+		desc { Command line options for xgraph.}
 	}
+	defstate {
+		name {ignore}
+		type {int}
+		default { 0 }
+		desc { Number of initial values to ignore.}
+	}
+	defstate {
+		name {xUnits}
+		type {float}
+		default { 1.0 }
+		desc { For labeling, horizontal increment between samples. }
+	}
+	defstate {
+		name {xInit}
+		type {float}
+		default { 0.0 }
+		desc { For labeling, horizontal value of the first sample. }
+	}
+	hinclude { "Display.h" }
 	protected {
-		FILE *strm;
-		int delFile;
-		const char* fileName;
-		int index;
+		XGraph graph;
+		double index;
 	}
-	ccinclude { "miscFuncs.h" }
-	constructor {
-		strm = NULL;
-		delFile = FALSE;
+
+	setup {
+		graph.initialize(this, 1, options, title, saveFile, ignore);
+		index = xInit;
 	}
-	start {
-		fileName = saveFile;
-		index = 0;
-		if (fileName == NULL || *fileName == 0) {
-			fileName = tempFileName();
-			delFile = TRUE;
-		}
-		else fileName = savestring (expandPathName(fileName));
-		// should check if file already exists here
-		if ((strm = fopen (fileName, "w")) == NULL) {
-			StringList msg = readFullName();
-			msg += "Can't open file ";
-			msg += fileName;
-			Error::abortRun (msg);
-		}
-	}
-// go.  Does nothing if open failed.
+
 	go {
-		if (!strm) return;
-		float data = input%0;
-		fprintf (strm, "%d %g\n", index, data);
-		index++;
+		graph.addPoint(1,index,float(input%0));
+		index += double(xUnits);
 	}
-// wrapup.  Does nothing if open failed, or 2nd wrapup call.
 	wrapup {
-		if (!strm) return;
-		fclose (strm);
-		exec("");
-		strm = NULL;
-	}
-	destructor {
-		if (strm) fclose (strm);
-		if (delFile) unlink (fileName);
-		delete fileName;
-	}
-// execute the program
-// extraOpts is mainly for derived stars.
-	method {
-		name { exec }
-		access { protected }
-		arglist { "(const char* extraOpts)" }
-		type { void }
-		code {
-			StringList cmd;
-
-			if (delFile) cmd += "( ";
-			cmd += "xgraph ";
-
-			const char* t = title;
-			if (t && *t) {
-				cmd += "-t '";
-				cmd += t;
-				cmd += "' ";
-			}
-			const char* o = options;
-			if (o && *o) {
-				cmd += o;
-				cmd += " ";
-			}
-			if (extraOpts && *extraOpts) {
-				cmd += extraOpts;
-				cmd += " ";
-			}
-			cmd += fileName;
-			if (delFile) {
-				cmd += "; /bin/rm -f ";
-				cmd += fileName;
-				cmd += ")";
-			}
-			cmd += "&";
-			system (cmd);
-			// no longer need to clean up
-			delFile = FALSE;
-		}
+		graph.terminate();
 	}
 }

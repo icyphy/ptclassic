@@ -3,7 +3,7 @@ defstar {
   domain { SR }
   derivedFrom { SRStar }
   desc { Convert an integer input to a string output }
-  version { $Id$ }
+  version { @(#)SRIntToString.pl	1.4 09/10/99 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -22,6 +22,9 @@ limitation of liability, and disclaimer of warranty provisions.
     type { string }
   }
 
+  // sprintf()
+  ccinclude{ <stdio.h> }
+
   setup {
     noInternalState();
     reactive();
@@ -30,10 +33,10 @@ limitation of liability, and disclaimer of warranty provisions.
   go {
     if ( !output.known() ) {
       if ( input.absent() ) {
-	output.makeabsent();
+	output.makeAbsent();
       } else {
 	char theString[10];
-	sprintf( theString, "%d", input.get() );
+	sprintf( theString, "%d", int(input.get()) );
 	output.emit() << theString;
       }
     }

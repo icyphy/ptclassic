@@ -6,20 +6,25 @@ A Finite Impulse Response (FIR) filter.
 Coefficients are in the "taps" state variable.
 Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
-coefficients with "<fileName".
+coefficients with "fileName".
 	}
-	version {$Id$}
+	version {@(#)CGCFIR.pl	1.14	10/08/96}
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
-	explanation {
-.pp
+	htmldoc {
+<p>
 This star implements a finite-impulse response filter with multirate capability.
 The default coefficients correspond to an eighth order, equiripple,
 linear-phase, lowpass filter.  The 3dB cutoff frequency at about 1/3
 of the Nyquist frequency.  To load filter coefficients from a file,
-simply replace the default coefficients with the string "<filename".
-.pp
+simply replace the default coefficients with the string "&lt;filename".
+<p>
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
@@ -27,8 +32,8 @@ the directory in which the ptolemy process actually runs.
 It is best to use tilde's in the filename to reference them to user's
 home directory.  This way, future filesystem reorganizations
 will have minimal effect.
-.pp
-When the \fIdecimation\fP (\fIinterpolation\fP)
+<p>
+When the <i>decimation</i> (<i>interpolation</i>)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
@@ -37,7 +42,7 @@ a polyphase structure is used internally, avoiding unnecessary use
 of memory and unnecessary multiplication by zero.
 Arbitrary sample-rate conversions by rational factors can
 be accomplished this way.
-.pp
+<p>
 To design a filter for a multirate system, simply assume the
 sample rate is the product of the interpolation parameter and
 the input sample rate, or equivalently, the product of the decimation
@@ -47,8 +52,8 @@ Specifically, if the input sample rate is f,
 then the filter stopband should begin before f/2.
 If the interpolation ratio is i, then f/2 is a fraction 1/2i
 of the sample rate at which you must design your filter.
-.pp
-The \fIdecimationPhase\fP parameter is somewhat subtle.
+<p>
+The <i>decimationPhase</i> parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
@@ -59,10 +64,10 @@ When decimationPhase is zero (the default),
 the latest (most recent) samples are the ones selected.
 The decimationPhase must be strictly less than
 the decimation ratio.
-.pp
+<p>
 For more information about polyphase filters, see F. J. Harris,
 "Multirate FIR Filters for Interpolating and Desampling", in
-\fIHandbook of Digital Signal Processing\fR, Academic Press, 1987.
+<i>Handbook of Digital Signal Processing</i>, Academic Press, 1987.
 	}
 	input {
 		name {signalIn}
@@ -110,7 +115,7 @@ For more information about polyphase filters, see F. J. Harris,
 		default {0}
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	start {
+	setup {
 		int d = decimation;
 		int i = interpolation;
 		int dP = decimationPhase;
@@ -130,69 +135,53 @@ For more information about polyphase filters, see F. J. Harris,
 
    codeblock(bodyDecl) {
 	int phase, tapsIndex, inC, i;
-	int outCount = 0;
+	int outCount = $val(interpolation) - 1;
 	int inPos;
 	double out, tap;
    }
-   codeblock(outForInit) {
+   codeblock(body) {
 	/* phase keeps track of which phase of the filter coefficients is used.
 	   Starting phase depends on the decimationPhase state. */
 	phase = $val(decimation) - $val(decimationPhase) - 1;   
 	
 	/* Iterate once for each input consumed */
-	for (inC = 0; inC < $val(decimation); inC++) 
-   }
-   codeblock(whileInit) {
+	for (inC = 1; inC <= $val(decimation) ; inC++) {
+
 		/* Produce however many outputs are required for each 
 		   input consumed */
-		while (phase < $val(interpolation)) 
-   }
-   codeblock(inForInit) {
+		while (phase < $val(interpolation)) {
 			out = 0.0;
+
 			/* Compute the inner product. */
-			for (i = 0; i < $val(phaseLength); i++) 
-   }
-   codeblock(inForBody) {
+			for (i = 0; i < $val(phaseLength); i++) {
 				tapsIndex = i * $val(interpolation) + phase;
 				if (tapsIndex >= $val(tapSize))
 			    		tap = 0.0;
 				else
 			 		tap = $ref2(taps,tapsIndex);
-				inPos = inC + i;
+				inPos = $val(decimation) - inC + i;
 				out += tap * $ref2(signalIn,inPos);
-   }
-  codeblock(whileBody) {
+			}
 			$ref2(signalOut,outCount) = out;
-			outCount++;;
+			outCount--;;
 			phase += $val(decimation);
-   }
-   codeblock(outForBody) {
+		}
 		phase -= $val(interpolation);
+	}
    }
 	go {
-		gencode(bodyDecl);
-		// hackery since the code block does not allow curse brace.
-		filterBody();
+		addCode(bodyDecl);
+		addCode(body);
 	}
-
-	method {
-		name { filterBody }
-		access { protected }
-		arglist { "()" }
-		type { void }
-		code {
-			gencode(outForInit);
-			gencode(CodeBlock("\t{\n"));
-			gencode(whileInit);
-			gencode(CodeBlock("\t\t{\n"));
-			gencode(inForInit);
-			gencode(CodeBlock("\t\t\t{\n"));
-			gencode(inForBody);
-			gencode(CodeBlock("\t\t\t}\n"));
-			gencode(whileBody);
-			gencode(CodeBlock("\t\t}\n"));
-			gencode(outForBody);
-			gencode(CodeBlock("\t}\n"));
-		}
+	exectime {
+		int x = taps.size();
+		int i = interpolation;
+		int d = decimation;
+		if (x % i != 0) x = x/i + 1;
+		else x = x/i;
+		int y = i/d;
+		if (i % d != 0) y++;
+		/* count of elementary operations */
+		return 1 + y * (6 + x * 6);	
 	}
 }

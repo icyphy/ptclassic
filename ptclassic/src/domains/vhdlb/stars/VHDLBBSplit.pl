@@ -7,13 +7,13 @@ the input width.
 	}
 	author { Wei-Lun Tsai }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow the user to easily "split" a bus (a multi-port),
 this star is written to allow the user to send a portion of a bus into one
 destination while the remaining portion of the same bus to another destination.

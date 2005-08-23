@@ -1,9 +1,32 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGDDFCluster.cc	1.7     12/15/97
  
 Copyright (c) 1995 Seoul National University
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
  
  Programmer:  S. Ha
  
@@ -98,7 +121,7 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 			Error::abortRun(*this, "unknown construct type");
 			return FALSE;
 	}
-	LOG_DEL; delete cType;
+	LOG_DEL; delete [] cType;
 	conSched->setGalaxy(*gal);
 	conSched->setOwner(this);
 	conSched->setRefGal(pGal);
@@ -117,8 +140,8 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 	}
 
 	// adjust sample rates
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0 ) {
 		if (p->numIO() == 0) p->setNumXfer(1);
 	}
@@ -126,7 +149,7 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 }
 
 // make parallel schedule of CGDDF constructs.
-int CGDDFClusterBag::parallelSchedule(MultiTarget* t) {
+int CGDDFClusterBag::parallelSchedule(MultiTarget* /*t*/) {
 	if (!conSched->getStatistics()) return FALSE;
 	
 	// scheduler setup
@@ -157,10 +180,10 @@ int CGDDFClusterBag :: computeProfile(int nP, int rW, IntArray* avail) {
 
 Profile* CGDDFClusterBag :: manualSchedule(int count) {
 	// collect processor Ids of the component stars	
-	int sz = mtarget->nProcs();
+	int i, sz = mtarget->nProcs();
 	IntArray procId;
 	procId.create(sz);
-	for (int i = sz - 1; i >= 0; i--) {
+	for (i = sz - 1; i >= 0; i--) {
 		procId[i] = -1;
 	}
 	int nP = examineProcIds(procId);
@@ -191,7 +214,8 @@ Profile* CGDDFClusterBag :: manualSchedule(int count) {
 			CGMacroCluster* ac;
 			while ((ac = nextC++) != 0) {
 				if (ac->asSpecialBag()) continue;
-				for (int k = 0; k < nP; k++) 
+                                int k;
+				for (k = 0; k < nP; k++) 
 					if (procId[k] == ac->getProcId()) 
 						break;
 				if (k >= nP) k = -1;
@@ -233,11 +257,11 @@ int CGDDFClusterBag :: finalSchedule(int numProcs) {
 		// fill up the processor assignment array for inner
 		// schedule
 		IntArray procMap;
-		int sz = inprof->getEffP();
+		int i, j, sz = inprof->getEffP();
 		procMap.create(sz);
-		for (int i = 0; i < sz; i++) {
+		for (i = 0; i < sz; i++) {
 			int flag = TRUE;
-			for (int j = 0; j < sz; j++)
+			for (j = 0; j < sz; j++)
 				if (inprof->getProcId(j) == i) {
 					flag = FALSE; break;
 				}

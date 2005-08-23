@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testSDFConv.tcl	1.6 03/28/98
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -56,6 +56,23 @@ test SDFCxToFix { SDFCxToFix} {
 }}
 
 ######################################################################
+#### test SDFCxToFix
+#
+test SDFCxToFix-2 { SDFCxToFix: Connect to a fork} {
+    sdfTest1In1OutFork CxToFix
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}
+
+######################################################################
 #### test SDFCxToFloat
 # 
 test SDFCxToFloat { SDFCxToFloat} {
@@ -71,6 +88,23 @@ test SDFCxToFloat { SDFCxToFloat} {
 8.0	
 9.0	
 }}
+
+######################################################################
+#### test SDFCxToFloat
+#
+test SDFCxToFloat-2 { SDFCxToFloat: Connect to a fork} {
+    sdfTest1In1OutFork CxToFloat
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}
 
 ######################################################################
 #### test SDFCxToInt
@@ -90,9 +124,26 @@ test SDFCxToInt { SDFCxToInt } {
 }}
 
 ######################################################################
-#### test SDFCxToRect
+#### test SDFCxToInt
+#
+test SDFCxToInt-2 { SDFCxToInt: Connect to a fork} {
+    sdfTest1In1OutFork CxToInt
+} {{{0	
+1	
+2	
+3	
+4	
+}} {{0	
+1	
+2	
+3	
+4	
+}}}
+
+######################################################################
+#### test SDFCxToRect-1
 # 
-test SDFCxToRect { SDFCxToRect} {
+test SDFCxToRect-1 { SDFCxToRect} {
     set star CxToRect
     reset __empty__
     domain SDF
@@ -134,6 +185,40 @@ test SDFCxToRect { SDFCxToRect} {
 }}}
 
 ######################################################################
+#### test SDFCxToRect-2
+# 
+test SDFCxToRect-2 { SDFCxToRect -> SDFRectToCx} {
+    reset __empty__
+    domain SDF
+    newuniverse SDFCxToRect SDF
+    target loop-SDF
+
+    star Rampa Ramp
+    star CxToRect.a CxToRect
+    star RectToCx.a RectToCx
+    set tmpfile [sdfSetupPrinter]
+    connect RectToCx.a output Printa input
+    connect CxToRect.a imag RectToCx.a imag
+    connect CxToRect.a real RectToCx.a real
+    connect Rampa output CxToRect.a input
+
+    run 10 
+    wrapup
+    
+    list [readTmpFile $tmpfile]
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+(5.0,0.0)	
+(6.0,0.0)	
+(7.0,0.0)	
+(8.0,0.0)	
+(9.0,0.0)	
+}}}
+
+######################################################################
 #### test SDFFixToCx
 # 
 test SDFFixToCx { SDFFixToCx} {
@@ -152,6 +237,23 @@ test SDFFixToCx { SDFFixToCx} {
 }}
 
 ######################################################################
+#### test SDFFixToCx
+#
+test SDFFixToCx-2 { SDFFixToCx: Connect to a fork} {
+    sdfTest1In1OutFork FixToCx
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}} {{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}}}
+
+######################################################################
 #### test SDFFixToFloat
 # 
 test SDFFixToFloat { SDFFixToFloat} {
@@ -168,6 +270,23 @@ test SDFFixToFloat { SDFFixToFloat} {
 0.8798828125	
 0.9898681640625	
 }}
+
+######################################################################
+#### test SDFFixToFloat
+#
+test SDFFixToFloat-2 { SDFFixToFloat: Connect to a fork} {
+    sdfTest1In1OutFork FixToFloat
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}
 
 ######################################################################
 #### test SDFFixToInt
@@ -189,7 +308,7 @@ test SDFFixToInt { SDFFixToInt} {
 ######################################################################
 #### test SDFFloatToCx
 # 
-test SDFFloatToCx { SDFFloatToCx} {
+test SDFFloatToCx-1 { SDFFloatToCx: integer steps} {
     sdfTest1In1Out FloatToCx
 } {{(0.0,0.0)	
 (1.0,0.0)	
@@ -202,6 +321,41 @@ test SDFFloatToCx { SDFFloatToCx} {
 (8.0,0.0)	
 (9.0,0.0)	
 }}
+
+######################################################################
+#### test SDFFloatToCx
+#
+test SDFFloatToCx-2 { SDFFloatToCx: Connect to a fork} {
+    sdfTest1In1OutFork FloatToCx
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}} {{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}}}
+
+######################################################################
+#### test SDFFloatToCx
+# 
+test SDFFloatToCx-3 { SDFFloatToCx: fractional steps} {
+    sdfTest1In1Out FloatToCx  0.015625
+} {{(0.0,0.0)	
+(0.015625,0.0)	
+(0.03125,0.0)	
+(0.046875,0.0)	
+(0.0625,0.0)	
+(0.078125,0.0)	
+(0.09375,0.0)	
+(0.109375,0.0)	
+(0.125,0.0)	
+(0.140625,0.0)	
+}}
+
 
 ######################################################################
 #### Test SDFFloatToFix
@@ -221,6 +375,23 @@ test SDFFloatToFix { SDFFloatToFix} {
 }}
 
 ######################################################################
+#### test SDFFloatToFix
+#
+test SDFFloatToFix-2 { SDFFloatToFix: Connect to a fork} {
+    sdfTest1In1OutFork FloatToFix
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}
+
+######################################################################
 #### test SDFFloatToInt
 # 
 test SDFFloatToInt { SDFFloatToInt} {
@@ -236,6 +407,23 @@ test SDFFloatToInt { SDFFloatToInt} {
 -9	
 -10	
 }}
+
+######################################################################
+#### test SDFFloatToInt
+#
+test SDFFloatToInt-2 { SDFFloatToInt: Connect to a fork} {
+    sdfTest1In1OutFork FloatToInt
+} {{{0	
+1	
+2	
+3	
+4	
+}} {{0	
+1	
+2	
+3	
+4	
+}}}
 
 ######################################################################
 #### test SDFIntToBits
@@ -302,6 +490,22 @@ test SDFIntToCx { SDFIntToCx} {
 (9.0,0.0)	
 }}
 
+######################################################################
+#### test SDFIntToCx
+#
+test SDFIntToCx-2 { SDFIntToCx: Connect to a fork} {
+    sdfTest1In1OutFork IntToCx
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}} {{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+}}}
 
 ######################################################################
 #### test SDFIntToFix
@@ -321,6 +525,23 @@ test SDFIntToFix { SDFIntToFix} {
 }}
 
 ######################################################################
+#### test SDFIntToFix
+#
+test SDFIntToFix-2 { SDFIntToFix: Connect to a fork} {
+    sdfTest1In1OutFork IntToFix
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}
+
+######################################################################
 #### test SDFIntToFloat
 # 
 test SDFIntToFloat { SDFIntToFloat} {
@@ -336,3 +557,20 @@ test SDFIntToFloat { SDFIntToFloat} {
 8.0	
 9.0	
 }}
+
+######################################################################
+#### test SDFIntToFloat
+#
+test SDFIntToFloat-2 { SDFIntToFloat: Connect to a fork} {
+    sdfTest1In1OutFork IntToFloat
+} {{{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}} {{0.0	
+1.0	
+2.0	
+3.0	
+4.0	
+}}}

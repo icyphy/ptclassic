@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-   Version: $Id$
+   Version: @(#)ProfileTimer.h	1.3 08/21/95
    Programmer:  Jose Luis Pino
    Date of creation:  3/27/95
 
@@ -46,8 +46,10 @@ public:
     // Reset startTime.
     void reset();
 
-    // Elapsed time since last reset.
-    TimeVal elapsedTime() const;
+    // Elapsed CPU time in seconds since the last reset.  The time is equal
+    // to the time the Ptolemy process is executing plus the time 
+    // of the UNIX system calls run on behalf of Ptolemy.
+    TimeVal elapsedCPUTime() const;
 
 private:
     // When the ProfileTimer was started.

@@ -1,0 +1,28 @@
+reset
+# Creating universe 'chirpplay'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 0.00005
+	setstate FloatRamp1 value 0.01
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate NO
+	setstate Integrator1 state 0.0
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star Sin1 Sin
+	star Play1 Play
+	setstate Play1 gain 16000
+	setstate Play1 saveFile ""
+	connect FloatRamp1 output Integrator1 data
+	connect FloatDC1 output Integrator1 reset
+	connect Integrator1 output Sin1 input
+	connect Sin1 output Play1 input
+run 40000
+wrapup
+

@@ -1,0 +1,60 @@
+Subject: tkman contribution
+From: Scott Schwartz <schwartz@groucho.cse.psu.edu>
+
+Here's a contribution to tkman.   It lets you select a string, in an xterm
+or wherever, hit the <Help> key, and have your selection looked up by
+tkman.  It uses the "remote.tcl" thing from the current distribution,
+included inline, and the "xselection" program, from ftp.x.org:/contrib
+(since you might want to look in the CLIPBOARD selection rather than
+the primary selection, and tk doesn't do that yet.)
+
+#!/depot/tcl/bin/wish -f
+
+# tkman_selection --
+#  Sweep out a selection with the mouse, hit Help, and the word
+#  will be looked up in the manual.
+#
+# To install
+#  put this file in your bin
+#  put this line in your .twmrc (adapt for other window managers as needed)
+#  "Help"  =  	:all:!"tkman_selection&"
+
+
+# remote.tcl:
+proc tkman {man} {
+
+   if {[set found [lsearch [winfo interps] tkman*]]==-1} {
+      # if TkMan doesn't already exist, start one up
+      if {[catch {exec tkman &}]} {puts stdout "tkman not found"; return}
+
+      # wait for it to be registered
+      for {set found -1} {$found==-1} {after 1} {
+         set found [lsearch [winfo interps] tkman*]
+      }
+
+      # wait for it to initialize
+      for {set ready 0} {!$ready} {after 1} {
+         catch {if {[send tkman set manx(init)]=="1"} {set ready 1}}
+      }
+   }
+   set tkman [lindex [winfo interps] $found]
+
+   # .man is the main window, guaranteed to exist
+   set w .man
+   send $tkman raise $w
+
+   send $tkman manShowMan $man
+
+   return
+}
+
+#
+# main - tkman from selection
+#
+
+wm withdraw .
+set sel [exec xselection PRIMARY]
+# we could check other places too
+catch {tkman $sel}
+destroy .
+

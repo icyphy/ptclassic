@@ -2,13 +2,19 @@ defstar {
     name { MpyShift }
     domain { CG56 }
     desc { Multiply and shift }
-    version { $Id$ }
+    version { @(#)CG56MpyShift.pl	1.12 03 Oct 1996 }
     author { Kennard White (ported from Gabriel) }
-    copyright { 1992 The Regents of the University of California }
-    location { CG56 library }
-    explanation {
-Multiply inputs \fIfactor1\fP and \fIfactor2\fP together, and shift the
-result left by \fIshift\fP bits.  The \fIshift\fP input must be zero
+	copyright {
+Copyright (c) 1990-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+    location { CG56 main library }
+	htmldoc {
+<a name="multiplication with shifting"></a>
+Multiply inputs <i>factor1</i> and <i>factor2</i> together, and shift the
+result left by <i>shift</i> bits.  The <i>shift</i> input must be zero
 or positive; right (negative) shifts are not supported.
     }
     input {
@@ -27,8 +33,11 @@ or positive; right (negative) shifts are not supported.
 	name {output}
 	type {FIX}
     }
+    constructor {
+	noInternalState();
+    }
     go {
-	gencode(cbMulShift);
+	addCode(cbMulShift);
     }
     codeblock (cbMulShift) {
 	move	$ref(factor1),x0

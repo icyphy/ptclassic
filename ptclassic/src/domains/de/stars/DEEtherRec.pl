@@ -1,43 +1,45 @@
 defstar {
-	name {EtherRec}
-	domain {DE}
-	derivedfrom { DEEther }
-	version { $Id$ }
-	author { E. A. Lee  and T. Parks }
+	name { EtherRec }
+	domain { DE }
+	derivedfrom { Ether }
+	version { @(#)DEEtherRec.pl	1.11	01/27/97 }
+	author { Edward A. Lee  and Tom M. Parks }
 	copyright {
-Copyright (c) 1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Receiver for a shared medium when received type is float.
+This star receives floating-point particles transmitted to it by
+an EtherSend star.  The particle is produced at the output after
+some duration of transmission specified at the transmitter.
 	}
-	explanation {
+	htmldoc {
 This star is derived from
-.c Ether.
+<tt>Ether.</tt>
 Please see the manual entry for that star for a basic introduction.
-.pp
+<p>
 This star implements a receiver for a shared medium when the received
 particle is a simple floating point number.
 A similar star could be made for other
-.c Particle
+<tt>Particle</tt>
 types, so this should be viewed as a concept demonstration only.
-.pp
+<p>
 The star will produce an output only if some transmitter
 (which must be also derived from
-.c EtherSend )
+<tt>EtherSend )</tt>
 uses the same medium and transmits to this receivers address.
 The time at which the output is produced is specified by the transmitter
 when it transfers the particle by calling the public
 method
-.c schedReception
+<tt>schedReception</tt>
 defined in this star.
 That method takes two arguments, a
-.c Particle
+<tt>Particle</tt>
 reference, and a
-.c double
+<tt>double</tt>
 giving the time at which the particle should be sent to the output.
 	}
 	output {
@@ -62,6 +64,11 @@ giving the time at which the particle should be sent to the output.
 	    // Flag used to identify the first firing
 	    int firstFiring;
 	}
+	constructor {
+	    recdData = 0;
+	    dataValid = FALSE;
+	    firstFiring = TRUE;
+	}
 	method {
 	    name { schedReception }
 	    access { public }
@@ -72,33 +79,34 @@ giving the time at which the particle should be sent to the output.
 		    Error::warn(*this,"Overwriting previously received data");
 		recdData = data.clone();
 		refireAtTime(firingTime);
-		feedbackOut.sendData();
-		dataValid = 1;
+		// We have to force the refire event out to the global queue
+		// by hand; normally DEStar::run handles this, but we have
+		// not been called from DEStar::run.
+		feedbackOut->sendData();
+		dataValid = TRUE;
 	    }
 	}
-	setup {
-	    DEEther::setup();
+	begin {
+	    DEEther::begin();
 
-	    firstFiring = 1;
+	    if(*((const char *) recName) == '-') {
+		Error::warn(*this,
+			    "Receiver address should not start with '-'");
+	    }
 
-	    if(!registerReceiver(recName, this)) {
+	    if (!registerReceiver(recName, this)) {
 		Error::warn(*this,
 	"Additional receivers with the same name will be ignored. Name is ",
                         recName);
 	    }
 
-	    // Initialize the local flag to indicate that we don't now have
+	    // Initialize dataValid flag to indicate that we don't now have
 	    // valid data pending output.
-	    dataValid = 0;
+	    recdData = 0;
+	    dataValid = FALSE;
+	    firstFiring = TRUE;
 	}
 	go {
-	    // Ignore the time zero event that is automatically scheduled
-	    // by the base class, RepeatStar
-	    if (firstFiring) {
-		firstFiring = 0;
-		return;
-	    }
-
 	    if (dataValid) {
 		// Output the stored data
 		recData.put(arrivalTime) = *recdData;

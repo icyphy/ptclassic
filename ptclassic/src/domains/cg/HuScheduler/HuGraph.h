@@ -1,18 +1,40 @@
-#ifndef _QSGraph_h
-#define _QSGraph_h
+#ifndef _HuGraph_h
+#define _HuGraph_h
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 #include "DLGraph.h"
-#include "QSNode.h"
+#include "HuNode.h"
 
 /****************************************************************
 Version identification:
-$Id$
+@(#)HuGraph.h	1.7	3/2/95
 
-Copyright (c) 1991 The Regents of the University of California.
-			All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
 Date of last revision:
@@ -20,34 +42,26 @@ Date of last revision:
 *****************************************************************/
 
                 //////////////////////
-                //   class QSGraph   //
+                //   class HuGraph   //
                 //////////////////////
 
 // This class stores the precedence graph which is scheduled by
-// Hu's level scheduler.  It consists of QSNodes (derived from ParNodes) 
+// Hu's level scheduler.  It consists of HuNodes (derived from ParNodes) 
 // connected through a subset of the arcs of the ExpandedGraph.
 
-class QSGraph : public DLGraph {
-
+class HuGraph : public DLGraph {
 public:
-	// reset the graph for new schedules.
-	// initialize runnableNodes.
-	void resetGraph();
+	// Put given node in sorted order into the EGNodeList
+	// Sort earliest timeTBS first. Among the same timeTBS fields,
+	// sort highest SL first. Ignore flag argument.
+	/* virtual */ void sortedInsert(EGNodeList&, ParNode *, int flag);
 
-	// find a runnable block whose execution time is closest to
-	// the given limit.
-	QSNode* findTinyBlock(int limit);
+protected:
+	// redefine these virtual allocator to allocate Hu Nodes.
+	/* virtual */ EGNode *newNode(DataFlowStar*, int);
 
-	// return the smallest execution time among the runnable nodes.
-	int smallestExTime();
-	int getMinWork() { return minWork; }
-
-	// redefine these virtual allocator to allocate DL Nodes.
-	EGNode *newNode(SDFStar*, int);
-
-private:
-	// Minimum execution time among all runnable nodes.
-	int minWork;
+	// reset the HuNode specific data members
+	virtual void resetNodes();
 };
 
 #endif

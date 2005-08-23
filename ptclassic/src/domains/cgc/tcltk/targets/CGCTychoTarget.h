@@ -2,9 +2,9 @@
 #define _CGCTychoTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCTychoTarget.h	1.7 04/09/97
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -37,36 +37,41 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "CGCMakefileTarget.h"
+#include "StringList.h"
+#include "StringState.h"
+#include "CGCTarget.h"
 
-class CGCTychoTarget : public CGCMakefileTarget {
+class CGCTychoTarget : public CGCTarget {
 public:
 	CGCTychoTarget(const char* name, const char* starclass,
 		       const char* desc);
 	Block* makeNew() const;
 
-	void beginIteration(int repetitions, int depth);
-
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
  
+  	int compileCode();
+	int runCode();
+
 protected:
+        StringState scriptFile;
 
 	// generate the code for the main loop.
 	/*virtual*/ CodeStream mainLoopBody();
 
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit();
-
-        CodeStream mainLoopInit;
+	
+	// Parse variable declarations to add "static"
+        void addStaticDecls( StringList &, const char * );
+	
         CodeStream mainLoopTerm;
-        CodeStream tkSetup;
+        CodeStream tychoSetup;
+	CodeStream tkSetup;
 
         // virtual function to initialize strings
         /*virtual*/ void initCodeStrings();
 
-	// String state for specifying tcl/tk start command.
-  	StringState startCommand;
 };
 
 #endif

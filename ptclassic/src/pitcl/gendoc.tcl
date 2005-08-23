@@ -2,7 +2,7 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)gendoc.tcl	1.4	05/18/98
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -43,7 +43,8 @@ proc convertline {line} {
         if [string match {Usage:*} $line] {
             regsub -all {<} $line {<i>} line
             regsub -all {([^<][^i])>} $line {\1</i>} line
-            regsub {Usage:} $line {<b>Usage:</b>} line
+            regsub {Usage:} $line {<b>Usage:</b> <code>} line
+	    set line "$line</code>"
         }
         regsub -all {\*([^* ]+)\*} $line {<code>\1</code>} line
         regsub -all {(^| )_([^_ ]+)_( |$)} $line {<i>\2</i>} line
@@ -51,9 +52,17 @@ proc convertline {line} {
     }
 }
 
-cd $PTOLEMY/src/pitcl
+cd [file join $PTOLEMY src pitcl]
 set ifd [open PITcl.cc]
-set ofd [open pitcl.html w]
+
+# Place the output in the doc/codeDoc directory.
+# Create the directory if it does not exist
+if { [file  isdirectory [file join doc codeDoc]] != 1 } {
+    file mkdir [file join doc codeDoc]
+}
+
+set ofd [open [file join doc codeDoc pitcl.html] w]
+
 puts $ofd {<!-- Automatically generated from PITcl.cc -->}
 puts $ofd {<html>}
 puts $ofd {<head>}
@@ -95,7 +104,9 @@ while {[gets $ifd line] >= 0} {
                         if [string match {//// *} $line] {
                             set procname {}
                             scan $line {//// %s} procname
+                            puts $ofd "<a name=\"$procname pitcl command\">"
                             puts $ofd "<h2>$procname</h2>"
+                            puts $ofd "</a>"
                             set mmode procdoc
                         }
                     }

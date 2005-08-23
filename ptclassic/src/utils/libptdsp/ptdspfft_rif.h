@@ -1,5 +1,5 @@
-#ifndef _PTDSPfft_h
-#define _PTDSPfft_h 1
+#ifndef _ptdspfft_h
+#define _ptdspfft_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -28,14 +28,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Joseph Buck
-Version: $Id$
+Version: @(#)ptdspfft_rif.h	1.3	7/23/96
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void PTDSPfft_rif(double *data, int nn, int isign);
+extern void Ptdsp_fft_rif(double *data, int nn, int isign);
 
 #ifdef __cplusplus
 }

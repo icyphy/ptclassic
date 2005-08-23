@@ -19,10 +19,10 @@ Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state
 is the previous output.
 	}
-	version {@(#)ACSIntegratorCGFPGA.pl	1.0	12 Aug 1998}
+	version{ @(#)ACSIntegratorCGFPGA.pl	1.11 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -32,7 +32,6 @@ limitation of liability, and disclaimer of warranty provisions.
 This star exists only for demoing the generic CG domain.
 	}
 
-	ccinclude { <sys/ddi.h> }
         ccinclude { <sys/wait.h> }
 	ccinclude { "acs_vhdl_lang.h" }
 	ccinclude { "acs_starconsts.h" }
@@ -65,12 +64,6 @@ This star exists only for demoing the generic CG domain.
 	    attributes {A_NONCONSTANT|A_SETTABLE}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Accum_Time}
 	    type {int}
 	    desc {
@@ -84,13 +77,20 @@ Load signal needs to be supplied by manually. }
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
-	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
-	}
         defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
+	defstate {
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
+	}
+         defstate {
 	    name {Language}
 	    type {string}
 	    desc {What language should this function be described in (e.g, VHDL, C, XNF)}
@@ -109,16 +109,15 @@ Load signal needs to be supplied by manually. }
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// BEGIN-USER CODE
-		acs_delay=intparam_query("Accum_Time");
 		// END-USER CODE
 		    
 		// Return happy condition
@@ -126,26 +125,38 @@ Load signal needs to be supplied by manually. }
 	    }
 	}
 	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
 		cost_file << "cost=(outsizes/2)+1;" << endl;
-		numsim_file << "y=x*" << acs_delay << ";" << endl
-		            << "%Note: for range and variance calc only!" << endl;
-		rangecalc_file << "orr=inputrange*" << acs_delay << ";" << endl;
+
+		// numsim_file << "y=x*" << acs_delay << ";" << endl  << "%Note: for range and variance calc only!" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=x{k}* " << intparam_query("Accum_Time") << ";" << endl;
+                numsim_file <<  " end " << endl;
+		numsim_file << "%Note: for range and variance calc only!" << endl;
+                numsim_file <<  " " << endl;
+
+		rangecalc_file << "orr=inputrange*" << intparam_query("Accum_Time") << ";" << endl;
+
+                schedule_file << "outdel=" << acs_delay <<  "; " << endl;
+                schedule_file << "vl1=veclengs(1); " << endl;
+                schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+                schedule_file << "for k=1:size(insizes,2)" << endl;
+                schedule_file << "  racts1=[0 1 vl1-1 ; outdel(k) 1 vl1-1+outdel(k)];" << endl;
+                schedule_file << "  racts{k}=racts1;" << endl;
+                schedule_file << "end"  << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+                schedule_file << "if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << "end " << endl;
+
+
+
 		natcon_file << "yesno=(insizes>=2 & insizes<=32 & outsizes>=2 & outsizes<=32);" << endl;
 		// END-USER CODE
 
@@ -154,27 +165,67 @@ Load signal needs to be supplied by manually. }
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		// Calculate BW
-		
+		// Check for bitlength mismatches
+		int input_mbit=pins->query_majorbit(0);
+		int input_blen=pins->query_bitlen(0);
+		int output_mbit=pins->query_majorbit(1);
+		int output_blen=pins->query_bitlen(1);
 
-		// Calculate CLB sizes
-		resources->set_occupancy(1,(pins->query_bitlen(1)/2)+1);
-		
+		// Check to see if the requested output bitlength needs to be padded
+		// for the insignificant bits that will be generated by the integrator
+		int input_lsb=input_mbit-input_blen;
+		int output_lsb=output_mbit-output_blen;
+		if (output_lsb > input_lsb)
+		{
+		    printf("integrator padding, out_lsb=%d, in_lsb=%d\n",output_lsb,input_lsb);
+		    int padding=output_lsb-input_lsb;
+		    output_blen+=padding;
+		    printf("new output precision is (%d,%d)\n",output_mbit,output_blen);
+		    pins->set_precision(1,output_mbit,output_blen,lock_mode);
+		}
+
+
 		// Return happy condition
 		return(1);
 		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Calculate pipe delay
+//		acs_delay=intparam_query("Accum_Time");
+		acs_delay=1;
+
+		// Return happy condition
+		return(1);
+	    }
 	}
         method {
 	    name {sg_setup}
 	    access {public}
 	    type {int}
 	    code {
-		output_filename << name() << ends;
+		output_filename << name();
+
+		phase_dependent=1;
+		acs_state=SAVE_STATE;
 
 		///////////////////////////////////
 		// Language-independent assignments
@@ -194,8 +245,11 @@ Load signal needs to be supplied by manually. }
 		
 		// Control port definitions
 		pins->add_pin("c",INPUT_PIN_CLK);
-		pins->add_pin("ce",INPUT_PIN_AH);
-		pins->add_pin("l",INPUT_PIN);
+		pins->add_pin("ce",INPUT_PIN_CE,AH);
+		pins->add_pin("l",INPUT_PIN_CLR,AL);
+
+		// ASSUMPTION:This sg will have a one clk latency.  
+		pins->set_phasedependency(4,OUTPUT_PIN);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -254,7 +308,14 @@ Load signal needs to be supplied by manually. }
 	        if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
-		    ofstream out_fstr(output_filename.str());
+		    output_filename << ends;
+
+		    ostrstream poutput_filename;
+		    poutput_filename << dest_dir << tolowercase(output_filename.str()) << ends;
+		    ofstream out_fstr(poutput_filename.str());
+
+
+		    black_box=1;
 
 		    out_fstr << "SET SelectedProducts = ImpNetlist VHDLSym VHDLSim" 
 			     << endl;
@@ -264,9 +325,8 @@ Load signal needs to be supplied by manually. }
 			     << endl;
 		    out_fstr << "SET TargetSymbolLibrary = primary" << endl;
 		    out_fstr << "SET OVERWRITEFILES=true" << endl;
-		    out_fstr << "GSET ModuleTaxonomy = CORE Generator Library/LogiCORE/Basic Elements/Register" 
+		    out_fstr << "GSET ModuleTaxonomy = CORE Generator Library/LogiCORE/Math/Integrator" 
 			     << endl;
-		    out_fstr << "GSET Create_RPM = true" << endl;
 		    out_fstr << "GSET Input_Width = " 
 			     << pins->query_bitlen(0) << endl;
 		    out_fstr << "GSET Output_Width = " 

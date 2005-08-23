@@ -1,7 +1,7 @@
 defstar {
-	name { QuadAdd16 }
+	name { VISAddSh }
 	domain { SDF }
-	version { @(#)SDFQuadAdd16.pl	1.6 3/14/96 }
+	version { @(#)SDFVISAddSh.pl	1.6	7/9/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,34 +11,32 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  Add the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  There is no saturation
-	  arithmetic so that overflow results in wraparound.}
-
-	input {
-		name { InA }
-		type { float }
-		desc { Input float type }
+Add the shorts in a 16bit partitioned float to the
+corresponding shorts in a 16bit partitioned float.
+The result is four signed shorts that is returned as
+a single floating point number.  There is no saturation
+arithmetic so that overflow results in wraparound.
 	}
 	input {
-		name { InB }
-		type { float }
-		desc { Input float type }
+	  name { inA }
+	  type { float }
+	  desc { Input float type }
+	}
+	input {
+	  name { inB }
+	  type { float }
+	  desc { Input float type }
 	}
 	output {
-		name { Out }
-		type { float }
-		desc { Output float type }
+	  name { out }
+	  type { float }
+	  desc { Output float type }
 	}
+	hinclude {<vis_types.h>}
+        ccinclude {<vis_proto.h>}
 	go {
-
-	  double sum=0.0;
-
+	  
 	  /*calculate the sum*/
-	  sum = vis_fpadd16(InA,InB);
-
-          Out%0 << sum;
+          out%0 << (vis_d64) vis_fpadd16(double(inA%0),double(inB%0));
       	}
 }

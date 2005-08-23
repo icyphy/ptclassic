@@ -1,227 +1,236 @@
 defstar {
-	name		{ MotionCmp }
-	domain		{ SDF }
-	version		{ $Id$ }
-	author		{ Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
-	location	{ SDF image library }
-	desc {
-For the first input image, copy the image unchanged to the diffOut
-output and send a null field of motion vectors to the mvOut output.
+  name { MotionCmp }
+  domain { SDF }
+  version { @(#)SDFMotionCmp.pl	1.30 09/10/99 }
+  author { Paul Haskell }
+  copyright {
+Copyright (c) 1990-1999 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
+  location { SDF image library }
+  desc {
+If the "past" input is not a Float Matrix (e.g. "dummyMessage"), copy
+the "input" image unchanged to the "diffOut" output and send a null
+field (zero size matrix) of motion vectors to "mvHorzOut" and 
+"mvVertOut" outputs. This should usually happen only on the first
+firing of the star.
 
 For all other inputs, perform motion compensation and write the
 difference frames and motion vector frames to the corresponding outputs.
+
+This star can be used as a base class to implement slightly different
+motion compensation algorithms. For example, synchronization techniques
+can be added or reduced-search motion compensation can be performed.
+  }
+	htmldoc {
+<a name="motion compensation"></a>
+<a name="image, motion compensation"></a>
+  }
+
+  hinclude { "Matrix.h", "Error.h", <stdio.h> }
+
+  //////// I/O AND STATES.
+  input { name { input } type { FLOAT_MATRIX_ENV } }
+  input { name { past } type { FLOAT_MATRIX_ENV } }
+  output { name { diffOut } type { FLOAT_MATRIX_ENV } }
+
+  output { name { mvHorzOut } type { FLOAT_MATRIX_ENV } }
+  output { name { mvVertOut } type { FLOAT_MATRIX_ENV } }
+
+  defstate {
+    name { BlockSize }
+    type { int }
+    default { 8 }
+    desc { Size of blocks on which to do motion comp. }
+  }
+
+  protected { int bs; }
+  setup { bs = int(BlockSize); }
+
+  method {
+    name { doMC }
+    type { "void" }
+    access { private }
+    arglist { "(FloatMatrix& diff, const FloatMatrix& cur, const FloatMatrix&  prev, FloatMatrix& horzImg, FloatMatrix& vertImg, const int width, const int height)" }
+    code {
+      int count = 0;
+      char horz, vert;
+      for(int ii = 0; ii < height; ii += bs) {
+	for(int jj = 0; jj < width; jj += bs) {
+	  int xvec, yvec;
+	  FindMatch(cur, prev, ii, jj, xvec,
+		    yvec, width, height);
+	  DoOneBlock(horz, vert, diff, cur,
+		     prev, ii, jj, xvec, yvec,
+		     width);
+	  horzImg.entry(count) = horz;
+	  vertImg.entry(count) = vert;
+	  count++;
 	}
+      } // end middle rows
+    } // end code{}
+  } // end doMC()
 
-	hinclude { "GrayImage.h", "MVImage.h", "Error.h" }
 
-//////// I/O AND STATES.
-	input {
-		name { input }
-		type { packet }
+  virtual method {
+    name { FindMatch }
+    type { "void" }
+    arglist { "(const FloatMatrix& cur, const FloatMatrix& prev, const int ii, const int jj, int& xvec, int& yvec, const int width, const int height)" }
+    access { protected }
+    code {
+      // If we're near the border, don't do motion comp.
+      if ((ii == 0) || (jj == 0) ||
+	  (ii == height-bs) ||
+	  (jj == width-bs)) {
+	xvec = yvec = 0;
+	return;
+      }
+      
+      int bs2 = 2 * bs;
+      register int tmp1, tmp2, tmp3;
+      LOG_NEW; int *diffArr = new int[bs2*bs2];
+
+      // Set difference values for each offset
+      for(int deli = 0; deli < bs2; deli++) {
+	for(int delj = 0; delj < bs2; delj++) {
+	  tmp3 = deli*bs2 + delj;
+	  diffArr[tmp3] = 0;
+	  for(int i = 0; i < bs; i++) {
+	    tmp1 = (ii+i)*width + jj;
+	    tmp2 = (ii+i+deli-bs)*width +
+	      jj+delj-bs;
+	    for(int j = 0; j < bs; j++) {
+	      diffArr[tmp3]+=abs(int(cur.entry(tmp1+j)-prev.entry(tmp2+j)));
+	    }
+	  }
 	}
-	output {
-		name { diffOut }
-		type { packet }
+      }
+
+      // Find min difference
+      int mini = bs;
+      int minj = bs;
+      for(int i = 0; i < bs2; i++) {
+	for(int j = 0; j < bs2; j++) {
+	  if (diffArr[bs2*i+j] < diffArr[bs2*mini+minj]) {
+	    mini = i; minj = j;
+	  }
 	}
-	output {
-		name { mvOut }
-		type { packet }
+      }
+      yvec = mini - bs; xvec = minj - bs;
+      LOG_DEL; delete [] diffArr;
+    }
+  } // end FindMatch{}
+
+
+  virtual method {
+    name { DoOneBlock }
+    access { protected }
+    type { "void" }
+    arglist { "(char& horz, char& vert, FloatMatrix& diff, const FloatMatrix& cur, const FloatMatrix& prev, const int ii, const int jj, const int xvec, const int yvec, const int width)" }
+    code {
+      // Set diff frame and mvects.
+      int tmp1, tmp2;
+      for(int i = 0; i < bs; i++) {
+	tmp1 = (ii+i+yvec)*width + jj+xvec;
+	tmp2 = (ii+i)*width + jj;
+	for(int j = 0; j < bs; j++) {
+	  diff.entry(tmp2+j) = 
+	          quant(int(cur.entry(tmp2+j)),int(prev.entry(tmp1+j)));
 	}
-	defstate {
-		name	{ blockSize }
-		type	{ int }
-		default { 8 }
-		desc	{ Size of blocks on which to do motion comp. }
-	}
+      }	
+		
+	// NOTE THE -1's!! These are so the motion vector points FROM the past
+	// block TO the current block, rather than the other way around!
+	horz = char(-1*xvec);
+	vert = char(-1*yvec);
+      }
+    } // end DoOneBlock{}
 
-////// CODE.
-	protected {
-		Packet storPkt;
-		int firstTime; // True if we have not received any inputs yet.
-		int width, height, blocksize;
-	}
+    // DIVIDE DIFFERENCE BY 2 TO FIT INTO 8 BITS!!
+    // ADD 128 SO NEGATIVE NUMBERS DON'T HAVE TO WRAP AROUND!!
+    inline virtual method {
+      name { quant }
+      access { protected }
+      type { "unsigned char" }
+      arglist { "(const int i1, const int i2)"}
+      code {
+	int f = (i1 - i2) / 2;
+	return ((unsigned char) (f + 128));
+      }
+    }
 
-	start {
-		firstTime = 1;
-		blocksize = int(blockSize);
-	}
+  method {
+    name { inputsOk }
+    access { private }
+    type { "int" }
+    arglist { "(const FloatMatrix& one, const FloatMatrix& two, char* buf)" }
+    code {
+      if (one.numCols() != two.numCols()) {
+	sprintf(buf, "Widths differ: %d %d", one.numCols(), two.numCols());
+	return FALSE;
+      }
+      if (one.numRows() != two.numRows()) {
+	sprintf(buf, "Heights differ: %d %d",one.numRows(),two.numRows());
+	return FALSE;
+      }
+      if (one.numCols() != (bs * (one.numCols() / bs))) {
+	sprintf(buf,"Blocksize-width prob: %d %d",bs,one.numCols());
+	return FALSE;
+      }
+      if (one.numRows() != (bs * (one.numRows() / bs))) {
+	sprintf(buf,"Blocksize-height prob: %d %d",bs,one.numRows());
+	return FALSE;
+      }
+      return TRUE;
+    }
+  } // end inputsOk()
 
-	method {
-		name { getInput }
-		type { "GrayImage*" }
-		access { protected }
-		arglist { "(Packet& inPkt)" }
-		code {
-			(input%0).getPacket(inPkt);
-			if (!StrStr(inPkt.dataType(), "GrayI")) {
-				Error::abortRun(*this, inPkt.typeError("GrayI"));
-				return((GrayImage*) NULL);
-			}
-			return( (GrayImage*) inPkt.myData());
-		}
-	} // end getInput()
+  go {
+    // Read inputs.
+    Envelope pastEnvp, curEnvp;
+    (past%0).getMessage(pastEnvp);
+    (input%0).getMessage(curEnvp);
+    const FloatMatrix& prvImage = *(const FloatMatrix *)pastEnvp.myData();
+    const FloatMatrix& inImage  = *(const FloatMatrix *)curEnvp.myData();
 
-	method {
-		name	{ doFirstImage }
-		access	{ protected }
-		type	{ "void" }
-		arglist	{ "(GrayImage* inp)" }
-		code {
-			width  = inp->retWidth();
-			height = inp->retHeight();
-			if ( (width  != blocksize * (width / blocksize)) ||
-				 (height != blocksize * (height / blocksize)) ) {
-					Error::abortRun(*this, "Bad block size.");
-			}
+    // Initialize if this is the first input image.
+    if (pastEnvp.empty()) {
+      diffOut%0 << curEnvp;
 
-			MVImage* mv = new MVImage;
-			Packet pkt(*inp), empty(*mv);
-			diffOut%0 << pkt;	// write first input unchanged.
-			mvOut%0 << empty;
-			firstTime = 0;
-		}
-	} // end doFirstImage()
+      LOG_NEW; 
+      FloatMatrix& empty = *(new FloatMatrix);
+      mvHorzOut%0 << empty;
+      mvVertOut%0 << empty;
 
-	method {
-		name { doMC }
-		type { void }
-		access { protected }
-		arglist { "(unsigned char* diff, unsigned char* cur,
-				unsigned char* prev, char* horz, char* vert)" }
-		code {
-		int i, j, ii, jj, index;
+      return;
+    }
 
-		// Do top row.
-		for(jj = 0; jj < width; jj += blocksize) {
-			for(i = 0; i < blocksize; i++) {
-				index = jj + i*width;
-				for(j = 0; j < blocksize; j++) {
-					diff[index+j] = cur[index+j] - prev[index+j];
-				}
-			}
-			*horz = *vert = 0; horz++; vert++;
-		}
+    char buf[512];
+    if (!inputsOk(inImage, prvImage, buf)) {
+      Error::abortRun(*this, buf);
+      return;
+    }
 
-		// Do middle rows.
-		for(ii = blocksize; ii < height-blocksize; ii += blocksize) {
-			// Do leftmost block
-			for(i = 0; i < blocksize; i++) {
-				index = (ii+i)*width;
-				for(j = 0; j < blocksize; j++) {
-					diff[index+j] = cur[index+j] - prev[index+j];
-				}
-			}
-			*horz = *vert = 0; horz++; vert++;
+    // If we reached here, we already have read one image.
+    // Create difference and mvect images.
+    int height = inImage.numRows();
+    int width  = inImage.numCols();
+    LOG_NEW;
+    FloatMatrix& outImage = *(new FloatMatrix(height,width));
 
-			// Do middle blocks
-			for(jj = blocksize; jj < width-blocksize; jj += blocksize) {
-				setMvDiff(horz, vert, diff, cur, prev, ii, jj);
-				horz++; vert++;
-			}
+    LOG_NEW;
+    FloatMatrix& mvHorzImg = *(new FloatMatrix(height/bs,width/bs));
+    LOG_NEW;
+    FloatMatrix& mvVertImg = *(new FloatMatrix(height/bs,width/bs));
 
-			// Do rightmost block
-			for(i = 0; i < blocksize; i++) {
-				index = (ii+i)*width;
-				for(j = width-blocksize; j < width; j++) {
-					diff[index+j] = cur[index+j] - prev[index+j];
-				}
-			}
-			*horz = *vert = 0; horz++; vert++;
-		} // end middle rows
+    ////// Do the motion compensation.
+    doMC(outImage, inImage, prvImage, mvHorzImg, mvVertImg, width, height);
 
-		// Do bottom row.
-		for(jj = 0; jj < width; jj += blocksize) {
-			for(i = height-blocksize; i < height; i++) {
-				index = jj + i*width;
-				for(j = 0; j < blocksize; j++) {
-					diff[index+j] = cur[index+j] - prev[index+j];
-				}
-			}
-			*horz = *vert = 0; horz++; vert++;
-		}
-
-		} // end code{}
-	} // end doMC()
-
-	method {
-		name { setMvDiff }
-		type { "void" }
-		arglist { "(char* horz, char* vert, unsigned char* diff,
-				unsigned char* cur, unsigned char* prev, int ii,
-				int jj)" }
-		access { protected }
-		code {
-			int i, j, deli, delj, *diffArr, bs2 = 2 * blocksize;
-			register int tmp1, tmp2, tmp3;
-			diffArr = new int[bs2*bs2];
-
-		// Set difference values for each offset
-			for(deli = 0; deli < bs2; deli++) {
-				for(delj = 0; delj < bs2; delj++) {
-					tmp3 = deli*bs2 + delj;
-					diffArr[tmp3] = 0;
-					for(i = 0; i < blocksize; i++) {
-						tmp1 = (ii+i)*width + jj;
-						tmp2 = (ii+i+deli-blocksize)*width +
-								jj+delj-blocksize;
-						for(j = 0; j < blocksize; j++) {
-							diffArr[tmp3] += abs(int(cur[tmp1+j]) -
-									int(prev[tmp2+j]));
-			}   }   }   }
-
-		// Find min difference
-			int mini, minj;
-			mini = minj = blocksize;
-			for(i = 0; i < bs2; i++) {
-				for(j = 0; j < bs2; j++) {
-					if (diffArr[bs2*i+j] < diffArr[bs2*mini+minj]) {
-						mini = i; minj = j;
-			}   }   }
-			mini -= blocksize; minj -= blocksize;
-
-		// Set mvects and diff frame
-			*horz = char(minj); *vert = char(mini);
-			for(i = 0; i < blocksize; i++) {
-				tmp1 = (ii+i+mini)*width + jj+minj;
-				tmp2 = (ii+i)*width + jj;
-				for(j = 0; j < blocksize; j++) {
-					diff[tmp2+j] = cur[tmp2+j] - prev[tmp1+j];
-			}   }
-
-			delete diffArr;
-		}
-	} // end setMvDiff{}
-
-	go {
-// Read data from input.
-		Packet prevPkt = storPkt; // Holds data from last iteration.
-		GrayImage* inImage = getInput(storPkt); // New data in storPkt.
-
-// Initialize if this is the first input image.
-		if (firstTime) {
-			doFirstImage(inImage);
-			return;
-		}
-
-// If we reached here, we already have read one image.
-// Create difference and mvect images.
-// clone() is overloaded, so if inImage is of a type DERIVED from
-// GrayImage, outImage will be of the same derived type.
-// Use clone(int) rather than clone() so we don't copy image data.
-		GrayImage* outImage = (GrayImage*) inImage->clone(1);
-		MVImage*   mvImage  = new MVImage(*outImage, blocksize);
-
-////// Do the motion compensation.
-		GrayImage* prevImage = (GrayImage*) prevPkt.myData();
-		doMC(outImage->retData(), inImage->retData(),
-				prevImage->retData(), mvImage->retHorz(),
-				mvImage->retVert());
-
-// Send the outputs on their way.
-		Packet diffPkt(*outImage); diffOut%0 << diffPkt;
-		Packet mvPkt(*mvImage);	mvOut%0 << mvPkt;
-// pastPkt goes out of scope, and its contents' reference count is
-// decremented now.
-	} // end go{}
+    // Send the outputs on their way.
+    diffOut%0 << outImage;
+    mvHorzOut%0 << mvHorzImg;
+    mvVertOut%0 << mvVertImg;
+  } // end go{}
 } // end defstar { MotionCmp }

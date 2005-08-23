@@ -34,22 +34,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "StringList.h"
+//#include "StringList.h"
+#include "CoreList.h"
 #include "ACSCGFPGACore.h"
 
+// Stave off circular references
 class ACSCGFPGACore;
+class CoreList;
 
 class Sequencer
 {
 public:
   ACSCGFPGACore* seq_sg;
-  SequentialList* src_consts;
+  CoreList* src_consts;
   ACSCGFPGACore* src_mux;
   ACSCGFPGACore* src_add;
-  SequentialList* snk_consts;
+  CoreList* snk_consts;
   ACSCGFPGACore* snk_mux;
   ACSCGFPGACore* snk_add;
-  SequentialList* delay_consts;
+  CoreList* delay_consts;
   ACSCGFPGACore* delay_mux;
   ACSCGFPGACore* delay_add;
   

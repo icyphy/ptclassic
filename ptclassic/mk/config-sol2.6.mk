@@ -1,10 +1,9 @@
-#
-# Config file to build on sun4 processor (SparcStation) running Solaris2.6
-# with gcc and g++
+# Config file to build on sun4 processor (SparcStation) running
+# Solaris2.6 Maintenance Release 1 with egcs-1.0x
 
-# $Id$
+# @(#)config-sol2.6.mk	1.4 04/18/98
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,8 +29,13 @@
 # 						COPYRIGHTENDKEY
 #		       
 
-ARCHFLAGS =	-DPTSOL2_6
+ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -D_PTHREAD_1003_1c
 
 include $(ROOT)/mk/config-sol2.mk
 
+# Build gthreads
+INCLUDE_GTHREADS =	no
+
+# Include the PN domain.
 INCLUDE_PN_DOMAIN =	no
+

@@ -1,16 +1,16 @@
 defstar {
 	name { MpyFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc { Output the product of the inputs, as a fixed-point value. }
-	author { J.Weiss }
+	author { Jyergen Weiss }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCMpyFix.pl	1.5	7/10/96 }
 	location { CGC main library }
 	inmulti {
 		name { input }
@@ -72,6 +72,9 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+        // an initCode method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::initCode()
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
@@ -94,6 +97,6 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

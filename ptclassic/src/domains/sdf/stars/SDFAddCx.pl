@@ -1,26 +1,16 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 5/29/90
- Converted to use preprocessor, 9/26/90 
-
- Computes complex sum of n inputs.
-
-**************************************************************************/
-}
-
 defstar {
-	name {ComplexSum}
+	name {AddCx}
 	domain {SDF}
-	desc {
-		"Output the sum of the inputs, as a complex value"
+	desc { Output the sum of the complex inputs as a complex value. }
+	version {@(#)SDFAddCx.pl	2.12 09/01/97}
+	author { J. T. Buck }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
+	location { SDF main library }
 	inmulti {
 		name {input}
 		type {complex}
@@ -29,11 +19,16 @@ defstar {
 		name {output}
 		type {complex}
 	}
-	start { input.reset();}
 	go {
+		MPHIter nexti(input);
+		PortHole *p;
 		Complex sum = 0.0;
-		for(int i=input.numberPorts(); i>0; i--)
-			sum += Complex(input()%0);
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmpsum;
+		while ((p = nexti++) != 0) {
+			tmpsum = (*p)%0;
+			sum += tmpsum;
+		}
 		output%0 << sum;
 	}
 }

@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FPCGC }
 	corona { NL }
 	desc {  }
-	version { $Id$ }
+	version { @(#)ACSNLFPCGC.pl	1.2 09/08/99 }
 	author { James Lundblad }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.

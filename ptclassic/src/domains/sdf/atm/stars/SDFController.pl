@@ -2,21 +2,20 @@ defstar {
     name      { Controller }
     domain    { SDF }
     desc      { Switch routing table }
-
-    version   {$Id$}
+    version   { @(#)SDFController.pl	1.15	12/08/97 }
     author    { John Loh }
-
     copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-}
-    location  { ATM demo library }
-
-    explanation {  
-This star maintains a routing table which is updated by an MQ Control
-star.  For input packets, they have their headers reassigned according
+    }
+    location  { SDF ATM library }
+	htmldoc {
+This star maintains a routing table which is updated by the
+<tt>MQControl</tt>
+star.
+For input packets, they have their headers reassigned according
 to the table's data.
     }
 
@@ -46,7 +45,7 @@ to the table's data.
         name    { numcpes }
         type    { int }
         default { 12 }
-	desc    { Number of CPE's in simulation }
+        desc    { Number of CPE's in simulation }
     }
 
     protected {
@@ -59,48 +58,47 @@ to the table's data.
       extern ACG* gen;
     }
 
+    constructor {
+      srttable = 0;
+    }
+
     setup {
       Envelope dumEnv(*new VoiceData());
       nEnv = dumEnv;
 
-      LOG_NEW; srttable = new int* [int(numcpes)];
+      if ( srttable ) {
+         for (int i = 0; i < int(numcpes); i++) {
+           LOG_DEL; delete [] srttable[i];
+         }
+         LOG_DEL; delete [] srttable;
+      }
 
-      for (int i = 0; i < int(numcpes); i++)
-	  { LOG_NEW; srttable[i] = new int [indata.numberPorts()]; }
+      LOG_NEW; srttable = new int* [int(numcpes)];
+      int i;	
+      for (i = 0; i < int(numcpes); i++) {
+         LOG_NEW; srttable[i] = new int [indata.numberPorts()];
+      }
       
       for (i = 0; i < int(numcpes); i++)
-	  for (int j = 0; j < indata.numberPorts(); j++)
-	      srttable [i][j] = 0;
-    }
-
-    wrapup {
-      for (int i = 0; i < int(numcpes); i++) {
-	  LOG_DEL; delete srttable[i];
-      }
-      LOG_DEL; delete srttable;
+         for (int j = 0; j < indata.numberPorts(); j++)
+            srttable[i][j] = 0;
     }
 
     destructor {
-      for (int i = 0; i < int(numcpes); i++) {
-	  LOG_DEL; delete srttable[i];
+      if ( srttable ) {
+         for (int i = 0; i < int(numcpes); i++) {
+            LOG_DEL; delete [] srttable[i];
+         }
       }
-      LOG_DEL; delete srttable;
+      LOG_DEL; delete [] srttable;
     }
 
     go {
         Envelope inEnv, updateEnv;
-        MessageParticle  alpha, beta, gamma;
-
-        int vci,ivci,ovci,scpe,dcpe;
-
-        vci = 0;
-        ivci = 0;
-        ovci = 0;
-        scpe = 0;
-        dcpe = 0;
+        int vci = 0, ivci = 0, ovci = 0, scpe = 0, dcpe = 0;
        
         (tableupdate%0).getMessage(updateEnv);
-	if (!voiceCheck (updateEnv,*this)) return;
+        if (!voiceCheck (updateEnv,*this)) return;
         const VoiceData * inVoice1 = (const VoiceData*) updateEnv.myData();
         unsigned char *ptr1 = inVoice1->asVoice();
 
@@ -155,7 +153,7 @@ to the table's data.
               // Assign new value
               ptr3[0] = (unsigned char) (srttable[scpe-1][vci] - 1);
 
-	      // Send out the 
+              // Send out the 
               Envelope  dEnv(*inVoice3);
               (*nexto++)%0 << dEnv;
               vci++;
@@ -167,4 +165,3 @@ to the table's data.
     }  // end go
 
 }  // end defstar
-

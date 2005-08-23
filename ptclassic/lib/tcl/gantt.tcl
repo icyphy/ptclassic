@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,7 +22,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Version: $Id$
+# Version: @(#)gantt.tcl	1.4	4/21/96
 # Programmer: Brian Evans
 #
 # This Tcl/Tk script runs the ptkGantt.tcl script as a standalone
@@ -31,7 +31,7 @@
 # Hide the default wish window
 wm withdraw .
 
-# These procedures have no meaning without Ptolemy running
+# These procedures have no meaning without pigi running
 proc ptkClearHighlights {args} {} 
 proc ptkHighlight {args} {} 
 
@@ -43,6 +43,12 @@ source $PTOLEMY/lib/tcl/ptkColor.tcl
 source $PTOLEMY/lib/tcl/ptkOptions.tcl
 source $PTOLEMY/lib/tcl/message.tcl
 source $PTOLEMY/lib/tcl/ptkGantt.tcl
+source $PTOLEMY/lib/tcl/utilities.tcl
+
+# Exit procedure
+proc ptkGanttExit {} {
+  destroy .
+}
 
 # Parse arguments
 if { $argc != 1 } {

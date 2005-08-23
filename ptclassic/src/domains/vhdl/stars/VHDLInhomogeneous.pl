@@ -2,10 +2,10 @@ defstar {
 	name { Inhomogeneous }
 	domain { VHDL }
 	desc { Input and output settable numbers of tokens.  }
-	version { $Id$ }
+	version { @(#)VHDLInhomogeneous.pl	1.4 03/07/96 }
 	author { Michael C. Williamson }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -13,11 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	input {
 		name { input }
-		type { int }
+		type { ANYTYPE }
 	}
 	output {
 		name { output }
-		type { int }
+		type { =input }
 	}
 	defstate {
 	        name { transfer }
@@ -30,11 +30,11 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	go {
 	  StringList out;
-	  for (int i=0; i<int(transfer); i++) {
+	  for (int i = 0; i < int(transfer); i++) {
 	    out << "$ref(output, ";
-	    out << i;
+	    out << -i;
 	    out << ") $assign(output) $ref(input, ";
-	    out << i;
+	    out << -i;
 	    out << ");\n";
 	  }
 	  addCode(out);

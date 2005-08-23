@@ -1,0 +1,28 @@
+reset
+ newuniverse Kahn77fig4
+     domain PN
+     star DelayInt1 DelayInt
+	 setstate DelayInt1 init 1
+     star Merge1 Merge
+     star GainInt1 GainInt
+	 setstate GainInt1 gain 2
+     star Merge2 Merge
+     star GainInt2 GainInt
+	 setstate GainInt2 gain 3
+     star GainInt3 GainInt
+	 setstate GainInt3 gain 5
+     star Print1 Printer
+     connect Merge1 output DelayInt1 input
+     connect Merge2 output Merge1 a
+     connect GainInt2 output Merge2 b
+     connect GainInt3 output Merge2 a
+     connect GainInt1 output Merge1 b
+     node node5
+	 nodeconnect DelayInt1 output node5
+	 nodeconnect GainInt3 input node5
+	 nodeconnect GainInt2 input node5
+	 nodeconnect GainInt1 input node5
+	 nodeconnect Print1 input node5
+
+run 10
+wrapup

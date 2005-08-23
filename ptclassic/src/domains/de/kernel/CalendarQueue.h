@@ -1,20 +1,21 @@
 /**************************************************************************
 Version identification:
-@(#)CalendarQueue.h	1.15	11/25/92
+@(#)CalendarQueue.h	1.24 04/28/98
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -23,7 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
 
 **************************************************************************/
@@ -34,145 +37,167 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include <math.h>
+#ifdef sgi
+#ifndef HUGE_VAL /* WTC: On IRIX 6.2, HUGE_VAL is defined in math.h */
+extern const double __infinity;
+#define HUGE_VAL __infinity	
+#endif /* HUGE_VAL */
+#endif
+
+#ifndef HUGE_VAL
+// Some users report that HUGE_VAL is not defined for them.
+// (sun4, gcc-2.4.5, gcc-2.5.8)  There could be nasty problems here.
+// linux had problems with the statistics demo and a SIGFPE.
+#define HUGE_VAL MAXDOUBLE
+#endif
+
+#include "Block.h"
+#include "LinkedList.h"
 #include "DataStruct.h"
+#include "PriorityQueue.h"
 
-/**************************************************************************
+class Star;
+class DEStar;
+class CQScheduler;
 
- Modifier : Soonhoi Ha
+#define MAX_BUCKET     1024*4
+#define QUEUE_SIZE     (MAX_BUCKET*3)/2
+#define HALF_MAX_DAYS  1024*2  
+#define MINI_CQ_INTERVAL  0.2
 
-Modification - To implement a priority-queue, I add another basic
-container which includes *before* pointer as well as *next*, and *level*
-field for its priority.
 
-**************************************************************************/
+
 
 //
 // The basic container for priority queue...
 //
 	//////////////////////////////////////
-	// class LevelLink
+	// class CqLevelLink
 	//////////////////////////////////////
 
-class LevelLink 
+class CqLevelLink : public LevelLink
 {
 	friend class CalendarQueue;
 public:
-	Pointer e;
-	double	level;		// currently, level is "double" type.
-	double fineLevel;	// If levels are equal, we may need
-				// finerLevel which is optional.
-	LevelLink() {}
+	Star* dest;             // All the destinations are also stored
+				// contiguously to allow sequential
+				// popping off of same Star event;
+				// of an event. Finally, if events have
+	unsigned long absEventNum;   // all of the above the same, we still
+				     // need to have events sorted by the order 
+				     // that they arrived
+	CqLevelLink() { destinationRef = 0; }
 
-private:
-	LevelLink* next;
-	LevelLink* before;
+	Link *destinationRef;   
+				// This pointer allows the CqLevelLink 
+				// to reference the corresponding 
+				// Link within PendingEventList
+
+	CqLevelLink* next;
+	CqLevelLink* before;
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
-	LevelLink* setLink(Pointer a, double v, double fv, LevelLink* n, LevelLink* b);
+	CqLevelLink* setLink(Pointer a, double v, double fv,
+			   Star* d, unsigned long abs, 
+			   CqLevelLink* n, CqLevelLink* b);
 };
+
 
 	//////////////////////////////////////
 	// class CalendarQueue
 	//////////////////////////////////////
 
-class CalendarQueue
+class CalendarQueue : public BasePrioQueue
 {
+	friend CQScheduler;
+
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the tail)
-	LevelLink* levelput(Pointer a, double v, double fv = 1.0);
-
-	// Add element to the head of the queue and sort it by its level (v)
-	// first and its fineLevel (fv) second.
-	// Numerically smaller number represents the higher priority.
-	// (i.e., highest level is at the head)
-	LevelLink* leveltup(Pointer a, double v, double fv = 1.0);
-
-	// append the link to the end of the queue (ignore levels).
-	// Value v is necessary to fill a link (the fineLevel of the link is
-	// set to 1.0 -- default value).
-	void put(Pointer a, double v = 0);
+	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest);
 
 	// Push back the link just gotten.
-	void pushBack(LevelLink*);
+	void pushBack(CqLevelLink*);
 
 	// Remove and return link from the head of the queue...
-	Pointer getFirstElem();
+	Pointer getFirstElem() {
+		CqLevelLink *f = get();
+		putFreeLink(f);
+		return f->e;
+	}
 
 	// Remove and return link from the head of the queue...
 	// WARNING -- Must call putFreeLink() after finishing with it.
 	// Use getFirstElem() to get and free in one step.
-	LevelLink* get();
-
-	// Remove and return link from the tail of the queue...
-	Pointer getLastElem();
-
-	// Remove and return link from the tail of the queue...
-	// WARNING -- Must call putFreeLink() after finishing with it.
-	// Use getLastElem() to get and free in one step.
-	LevelLink* teg();
-
-	// Return the next node on list, relative to the last reference
-	LevelLink* next();
-
-	// Reset the reference pointer
-	void reset() {lastReference = lastNode ;}
-
-	// Extract a link within the queue, which deviates from the
-   	// definition of "queue", but necessary-and-convenient method
-	// for getting all elements of same level and of same property...
-	// The extracted Link is out into the free List.
-	void extract(LevelLink*);
+	CqLevelLink* get() {
+	     CqLevelLink *h = NextEvent(); 
+	     return h;
+	}
 
 	// Return number of elements currently in queue...
-	int length() {return numberNodes;}
+	int length() {return cq_eventNum;}
 
 	// clear the queue...
 	// move all Links into the free List.
 	void initialize();
 
 	// put the link into the pool of free links.
-	virtual void 	   putFreeLink(LevelLink*);
+	virtual void 	   putFreeLink(CqLevelLink*);
+
+	void EnableResize() { cq_resizeEnabled = 1; }
+	void DisableResize() { cq_resizeEnabled = 0; }
+	int isResizeEnabled() { return cq_resizeEnabled; }
 
 	// Constructor
-	CalendarQueue() : freeLinkHead(0), numberNodes(0), 
-			  lastNode(0), numFreeLinks(0) {}
-	CalendarQueue(Pointer a, double v, double fv) ;
+	CalendarQueue() : cq_debug(0), cq_eventNum(0),
+	  		  cq_absEventCounter(0), freeLinkHead(0),
+	                  numFreeLinks(0), cq_resizeEnabled(1)
+        { LocalInit(0, 2, 1.0, HUGE_VAL ); }
 	virtual ~CalendarQueue();
 
 protected:
-	// Store head of the queue, lastNode->next is head of queue
-	LevelLink* lastNode;
 
-	// Store last access to the list for sequential access
-	LevelLink* lastReference;
+	CqLevelLink **cq_bucket;
+
+	int cq_debug;           // Used to turn on debug statements
+	int cq_lastBucket;      // bucket number last event was dequeued 
+	double cq_bucketTop;    // priority at the top of that bucket   
+	double cq_lastTime;     // priority of last dequeued event     
+
+	int cq_bottomThreshold, cq_topThreshold;  
+	int cq_bucketNum;       // number of buckets                  
+	int cq_eventNum;        // number of events in calendar queue 
+	double cq_interval;     // size of intervals of each bucket  
+	unsigned long cq_absEventCounter;  // keep a count of the total events
+				// received in order to sort on
+				// the order events were sent
+	int cq_firstSub;
+	CqLevelLink* CalendarQ[QUEUE_SIZE];
 
 	// To avoid memory (de)allocation overhead at each push/pop, we
 	// store the freeLinks once created.
-	LevelLink* getFreeLink();
+	CqLevelLink* getFreeLink();
 	virtual void 	   clearFreeList();
 
+	void LocalInit(int qbase, int nbuck, double startInterval, double lastTime);
+	void InsertCqLevelLink( CqLevelLink * );
+	void InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *event);
+	CqLevelLink* NextEvent();
+	void Resize(int newSize);
+	double NewInterval();
+
 private:
-	int numberNodes;
 	// These are for memory management scheme to minimize the dynamic
 	// memory (de)allocation. FreeLinks are managed in linked-list
 	// structure.
-	LevelLink* freeLinkHead;
+	CqLevelLink* freeLinkHead;
 	int  	   numFreeLinks;		// mainly for debugging.
+	int cq_resizeEnabled;  
 };
 
 
-
-// If it ends up with the last link of the queue, it rounds up the head of
-// the queue.
-inline LevelLink* CalendarQueue :: next()
-{
-	lastReference = lastReference->next;
-	return lastReference;
-}
-		
-	
 #endif

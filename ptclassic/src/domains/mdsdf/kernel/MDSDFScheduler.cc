@@ -1,21 +1,21 @@
 static const char file_id[] = "MDSDFScheduler.cc";
 
 /*******************************************************************
-  $Id$
+@(#)MDSDFScheduler.cc	1.8 3/7/96
 
-Copyright (c) 1990-1994
-    The Regents of the University of California. All rights reserved.
+Copyright (c) 1993-1996 The Regents of the University of California.
+All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,6 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
     Programmer:		Mike J. Chen
     Date of creation:	8 August, 1993
@@ -50,6 +53,8 @@ const char* MDSDFScheduler::domain() const { return MDSDFdomainName; }
 
 // Derived from SDFScheduler::repetitions()
 int MDSDFScheduler::repetitions()  {
+  if (! galaxy()) return FALSE;
+
   // Initialize the least common multiple for the rows and the columns,
   // which after all the repetitions have been set, will equal the lcm
   // of all the row and all the column denominators respectively.
@@ -151,34 +156,24 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
   Fraction farStarRowShouldBe;
   Fraction farStarColShouldBe;
 
-  // ANYSIZE resolution is based on input ports, which will be guranteed
-  // by the order of descending calls to reptArc starting from a source star
-  // if the numRowsXfer() or numColXfer of the farPort is zero, this implies
-  // that the other port can accept ANYSIZE input in that dimension.  
-  // Therefore, we set those dimensions to match the nearPort's dimensions.
-  // Also, set any output portholes of the farStar that have ANYSIZE
-  // dimensions to match the change.
+  // ANYSIZE resolution is based on input ports, ie. if a star has
+  // ANYSIZE outputs, it MUST have an ANYSIZE input (the reverse is
+  // not necessary).  A cascade of ANYSIZE inputs/ouputs is possible, which
+  // necessitates a recursive search for the first ANYSIZE input connected
+  // to a non-ANYSIZE output.
   // A star should not have two inputs with ANYSIZE dimensions because
   // they will be set to the same dimensions, unless this was intended.
   //
   // One example is for fork stars.
   if(farPort.numRowXfer() == ANYSIZE) {
-    if(farPort.isItOutput()) return FALSE;
-    BlockPortIter nextp(farStar);
-    PortHole* p;
-    while((p = nextp++) != 0) {
-      if(((MDSDFPortHole*)p)->numRowXfer() == ANYSIZE)
-	((MDSDFPortHole*)p)->setRowXfer(nearPort.numRowXfer());
-    }
+    // farStar has ANYSIZE rows, resolve it
+    if(farStar.resolveANYSIZErows() == 0) 
+      return FALSE;               // continue only if resolution successful 
   }
   if(farPort.numColXfer() == ANYSIZE) {
-    if(farPort.isItOutput()) return FALSE;
-    BlockPortIter nextp(farStar);
-    PortHole* p;
-    while((p = nextp++) != 0) {
-      if(((MDSDFPortHole*)p)->numColXfer() == ANYSIZE)
-	((MDSDFPortHole*)p)->setColXfer(nearPort.numColXfer());
-    }
+    // farStar has ANYSIZE columns, resolve it
+    if(farStar.resolveANYSIZEcols() == 0)  
+      return FALSE;               // continue only if resolution successful
   }
 
   // compute what the far star repetitions property should be.
@@ -228,19 +223,16 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
 	////////////////////////////
 
 int MDSDFScheduler::run() {
+  if (SimControl::haltRequested() || invalid || !galaxy()) {
+    invalid = TRUE; 
+    Error::abortRun("MDSDF Scheduler has no galaxy to run");
+    return FALSE;
+  }
+
   MDSDFSchedIter nextEntry(mySchedule);
   MDSDFScheduleEntry* entry;
 
-  if(invalid) {
-    Error::abortRun(*galaxy(), "Error during setup - can't run");
-    return FALSE;
-  }
-  if(haltRequested()) {
-    Error::abortRun(*galaxy(), "Can't continue after run-time error");
-    return FALSE;
-  }
-
-  while(numItersSoFar < numIters && !haltRequested()) {
+  while(numItersSoFar < numIters && !SimControl::haltRequested()) {
     nextEntry.reset();
 
     // assume the schedule has been set by the setup member
@@ -268,14 +260,16 @@ int MDSDFScheduler::run() {
 	////////////////////////////
 
 void MDSDFScheduler :: setup () {
-	if (!galaxy()) {
-		Error::abortRun("MDSDFScheduler: no galaxy!");
-		return;
-	}
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
 	invalid = FALSE;
+
+	if (!galaxy()) {
+		invalid = TRUE;
+		Error::abortRun("MDSDF Scheduler has no galaxy defined");
+		return;
+	}
 
         checkConnectivity();            // from SDFScheduler
         if (invalid) return;
@@ -287,7 +281,7 @@ void MDSDFScheduler :: setup () {
 
 	currentTime = 0;
 
-	if (haltRequested()) {
+	if (SimControl::haltRequested()) {
 		invalid = TRUE;
 		return;
 	}
@@ -314,6 +308,8 @@ void MDSDFScheduler :: setup () {
 }
 
 void MDSDFScheduler::postSchedulingInit() {
+  if (! galaxy()) return;
+
   // Sort of quirky.  The automatic domain generator created a function
   // prepareForScheduling() in the MDSDFStar class, but this function
   // does not exist in Star or DataFlowStar
@@ -352,8 +348,8 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
       MDSDFStar& ms = *((MDSDFStar*)s);
       int startRow = ms.rowIndex;
       int startCol = ms.colIndex;
-      int endRow;
-      int endCol;
+      int endRow = 0;
+      int endCol = 0;
       int numTimesThisStar = 0;
 
       do {
@@ -365,11 +361,12 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
 	  endRow = ms.rowIndex;
 	  endCol = ms.colIndex;
 	  // update the index for the next firing
-	  if(++ms.colIndex >= (int)((double)ms.startColIndex + 
-				    (double)ms.colRepetitions)) {
+          // Need (int) cast on lhs to eliminate gcc warning
+	  if((int)(++ms.colIndex) >= (int)((double)ms.startColIndex + 
+					   (double)ms.colRepetitions)) {
 	    // end of column repetitions, goto next row
-	    if(++ms.rowIndex >= (int)((double)ms.startRowIndex + 
-				      (double)ms.rowRepetitions)) {
+	    if((int)(++ms.rowIndex) >= (int)((double)ms.startRowIndex + 
+					     (double)ms.rowRepetitions)) {
 	      // end of row repetitions, finished all reps for this iteration
 	      ms.startColIndex += (int)((double)ms.colRepetitions);
 	      ms.startRowIndex = 0;  // is this always zero?!
@@ -408,22 +405,21 @@ StringList MDSDFScheduler::displaySchedule() {
 
 // display the schedule
 StringList MDSDFSchedule::printVerbose() const  {
-  ostrstream strm;
-  strm << "MDSDF SCHEDULE:\n";
+  StringList strm;
+  strm << "{\n  { scheduler \"MDSDF Scheduler\" }\n";
   MDSDFSchedIter next(*this);
   MDSDFScheduleEntry* entry;
   for (int i = size(); i > 0; i--) {
     entry = next++;
-    strm << entry->star->fullName();
-    strm << ", firing range: ";
-    strm << "(" << entry->startRowIndex << "," << entry->startColIndex << ")";
-    if(entry->startRowIndex != entry->endRowIndex ||
-       entry->startColIndex != entry->endColIndex)
-      strm << " - (" << entry->endRowIndex << "," << entry->endColIndex << ")";
-    strm << "\n";
+    strm << "  { fire " << entry->star->fullName() << "\n"
+	 << "   { start_row " << entry->startRowIndex
+	 << " } { end_row " << entry->endRowIndex << "}\n"
+	 << "   { start_col " << entry->startColIndex
+	 << " } { end_col " << entry->endColIndex << "}\n"
+	 << "  }\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  strm << "}\n";
+  return strm;
 }
 
 // schedule destructor, free the elements of the list, but not the list itself

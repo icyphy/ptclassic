@@ -2,122 +2,79 @@ defstar {
 	name {BusDeinterleave}
 	domain {HOF}
 	derivedfrom {Base}
-	desc {
-Bridge inputs to outputs and then self-destruct.
-This star deinterleaves a bus, producing two output busses
-of equal width.  The input bus must have even width.
-The even numbered input signals are connected to the
-first output bus, while the odd numbered input signals
-are connected to the second output bus.
-	}
-	version {$Id$}
-	author { E. A. Lee }
+	version { @(#)HOFBusDeinterleave.pl	1.6 11/13/97 }
+	author { Edward A. Lee, Tom Lane }
+	location { HOF main library }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1994-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { HOF main library }
+	desc {
+Bridge inputs to outputs and then self-destruct.
+This star deinterleaves a bus, producing two output busses of equal width.
+The input bus must have even width.
+The even numbered input signals are connected to the
+first output bus, while the odd numbered input signals
+are connected to the second output bus.
+	}
+
 	outmulti {
 		name {top}
-		type {=input}
+		type {anytype}
 	}
 	outmulti {
 		name {bottom}
-		type {=input}
+		type {anytype}
 	}
 	inmulti {
 	        name {input}
 		type {anytype}
 	}
-	ccinclude {"Galaxy.h"}
-	ccinclude {"InterpGalaxy.h"}
-	setup {
 
-	  MPHIter nexttop(top);
-	  MPHIter nextbottom(bottom);
-	  // start with the top inputs
-	  MPHIter *nexto = &nexttop;
-	  MPHIter *prevo = &nextbottom;
-	  MPHIter nexti(input);
-	  PortHole *source, *sink;
-	  const char *sourceDelayVals, *sinkDelayVals;
-	  int numInDelays, numOutDelays;
+	method {
+	  name { doExpansion }
+	  type { int }
+	  code {
+	    // Make sure we know the number of connections on the
+	    // input and output multiPortHoles.
+	    if (! initConnections(top)) return 0;
+	    if (! initConnections(bottom)) return 0;
+	    if (! initConnections(input)) return 0;
 
-	  PortHole *pi, *po;
-	  while ((pi = nexti++) != 0) {
-	    if ((po = (*nexto)++) == 0) {
-	      // Out of outputs, flag error
-	      Error::abortRun(*this,
-                "Not enough outputs for the given number of intpus");
-	      return;
-	    }
-	    if((source = pi->far()) == 0 ||
-	       (sink = po->far()) == 0) {
-	      Error::abortRun(*this,"Star is not fully connected");
-	      return;
-	    }
-	    sourceDelayVals = pi->initDelayValues();
-	    sinkDelayVals = po->initDelayValues();
-	    numInDelays = pi->numInitDelays();
-	    numOutDelays = po->numInitDelays();
+	    MPHIter nexttop(top);
+	    MPHIter nextbottom(bottom);
+	    // start with the top outputs
+	    MPHIter *nexto = &nexttop;
+	    MPHIter *prevo = &nextbottom;
+	    MPHIter nexti(input);
 
-	    // Get alias pointers before disconnecting
-	    GenericPort *gpo = aliasPointingAt(po);
-	    GenericPort *gpi = aliasPointingAt(pi);
-
-	    source->disconnect();
-	    sink->disconnect();
-
-	    int numDelays = 0;
-	    const char* delayVals = 0;
-	    if ((numInDelays > 0) || (sourceDelayVals && *sourceDelayVals)) {
-	      numDelays = numInDelays;
-	      delayVals = sourceDelayVals;
-	      if ((numOutDelays > 0) || (sinkDelayVals && *sinkDelayVals)) {
-		Error::warn(*this,
-			    "Cannot have delays on inputs and outputs."
-			    " Using input value");
+	    PortHole *pi, *po;
+	    while ((pi = nexti++) != 0) {
+	      if ((po = (*nexto)++) == 0) {
+		// Out of outputs, flag error
+		Error::abortRun(*this,
+				"Not enough outputs for the given number of inputs");
+		return 0;
 	      }
-	    } else {
-	      numDelays = numOutDelays;
-	      delayVals = sinkDelayVals;
-	    }
-	    source->connect(*sink,numDelays,delayVals);
-	    // Register the connection with the parent galaxy so that delays get
-	    // initialized when the galaxy is reinitialized.
-	    if(parent()->isA("InterpGalaxy") && 
-	       ((numDelays > 0) || (delayVals && *delayVals))) {
-	      ((InterpGalaxy*)parent())->registerInit("C",
-						      source->parent()->name(),
-						      source->name(),
-						      delayVals,
-						      sink->parent()->name(),
-						      sink->name());
-	    }
-	    fixAliases(gpi,pi,sink);
-	    fixAliases(gpo,po,source);
+	      if (!crossConnect(pi, po))
+		return 0;
+	      // Swap iterators
+	      MPHIter *tmp = prevo;
+	      prevo = nexto;
+	      nexto = tmp;
+	    }                        // while loop
 
-	    source->initialize();
-	    sink->initialize();
+	    // Out of inputs at this point.
+	    // Check to be sure we are also out of outputs.
+	    if ((nextbottom++ != 0) || (nexttop++ != 0)) {
+	      Error::abortRun(*this,
+			      "Not enough inputs for the given number of outputs");
+	      return 0;
+	    }
 
-	    // Swap iterators
-	    MPHIter *tmp = prevo;
-	    prevo = nexto;
-	    nexto = tmp;
-	  }                        // while loop
-	  // Out of inputs at this point.
-	  // Check to be sure we are also out of outputs.
-	  if ((nextbottom++ != 0) || (nexttop++ != 0)) {
-	    Error::abortRun(*this,
-	      "Not enough inputs for the given number of outputs");
-	    return;
+	    return 1;
 	  }
-	  // Now remove ourselves from the parent galaxy and self-destruct
-	  Galaxy* mom = idParent();
-	  if(!mom) return;
-	  mom->deleteBlockAfterInit(*this);
 	}
 }
-

@@ -19,7 +19,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCLinQuantIdx.pl	1.1 6/23/96 }
 	input {
 		name {input}
 		type {float}

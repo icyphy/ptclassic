@@ -1,33 +1,32 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/30/90
-
- It calculates the average and variance of inputs in time from the 
- last reset time.  
- It generates the average and variance outputs on demand input.
- The start time is given by the reset input. If an input event comes
- before the reset input, the start time is the arrival time of the
- first input.  The reset input restarts the statistics.
- demand input before the start time is ignored.
-
-**************************************************************************/
-}
 defstar {
 	name { Statistics }
 	domain { DE }
-	desc {	"Calculate the statistics (average, variance) of the \n"
-		"input values in time since the last reset. \n" 
-		"Output is generated on each demand input.\n"
-		"When the reset input comes, reset the content and restarts.\n"
-		"When demand and reset arrives at the same time,\n"
-		"output first and reset next.\n"
+	desc {
+Calculate the average and variance of the
+input values that have arrived since the last reset.
+An output is generated when a "demand" input is received.
+When a "reset" input arrives, the calculations are restarted.
+When "demand" and "reset" particles arrive at the same time,
+an output is produced before the calculations are restarted.
+	}
+	version { @(#)DEStatistics.pl	1.12	10/01/96}
+	author { Soonhoi Ha }
+	copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { DE main library }
+	htmldoc {
+Calculate the time average and variance of the input values that have
+arrived since the last reset.  The execution order of the inputs is
+demand-&gt;reset-&gt;input.  Multiple simultaneous demand/reset inputs are
+ignore except one.
+<p>
+The computation is performed based on the zero-th order interpolation.
+When an input data enters, we assume that the data value is hold until
+the next input arrives.
 	}
 	input {
 		name { input }
@@ -36,10 +35,12 @@ defstar {
 	input {
 		name { reset }
 		type { anytype }
+		desc { Restart the calculations. }
 	}
 	input {
 		name { demand }
 		type { anytype }
+		desc { Stimulate an output. }
 	}
 	output {
 		name { average }
@@ -50,29 +51,36 @@ defstar {
 		type { float }
 	}
 	private {
-		float sum;
-		float squareSum;
-		float previous;
-		float startTime;
+		double sum;
+		double squareSum;
+		double previous;
+		double startTime;
 	}
-	start {
+	constructor {
+		input.triggers();
+		reset.triggers();
+		setMode(PHASE);
+	}
+	setup {
 		previous = 0;
 		sum = 0;
 		squareSum = 0;
 		startTime = -1.0;
 	}
 	go {
+		int flag = 0;
 		// on demand input
 		if (demand.dataNew) {
 			demand.dataNew = FALSE;
 			if (startTime < 0 ) return;
-			float leng = arrivalTime - startTime;
-			float span = arrivalTime - completionTime;
+			double leng = arrivalTime - startTime;
+			double span = arrivalTime - completionTime;
 			sum += previous * span;
 			squareSum += previous*previous*span;
+			flag = 1;
 			// output
 			if (leng) {
-			   float t1 = sum/leng;
+			   double t1 = sum/leng;
 			   average.put(arrivalTime) << t1;
 			   variance.put(arrivalTime) << squareSum/leng - t1*t1;
 			}
@@ -84,15 +92,17 @@ defstar {
 			sum = 0; squareSum = 0; previous = 0;
 		}
 		// on normal input
-		if (input.dataNew) {
+		while (input.dataNew) {
 			if (startTime < 0) {
 			      startTime = arrivalTime;
-			} else {
-			   	float span = arrivalTime - completionTime;
+			} else if (!flag) {
+			   	double span = arrivalTime - completionTime;
 			 	sum += previous * span;
 			     	squareSum += previous * previous * span;
 			}
-			previous = float(input.get());
+			previous = input.get();
+			// renew the completionTime
+			completionTime = arrivalTime;
 		}
 		// renew the completionTime
 		completionTime = arrivalTime;

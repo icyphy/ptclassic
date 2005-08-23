@@ -1,16 +1,16 @@
 static const char file_id[] = "SubMatrix.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)SubMatrix.cc	1.11 09/10/99
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
+software and its documentation for any purpose, provided that the
+above copyright notice and the following two paragraphs appear in all
+copies of this software.
 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -24,7 +24,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -37,12 +39,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include <strstream.h>
+
 #include "SubMatrix.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <stdio.h>              // sprintf()
 
-#define SMALL_STRING 32   // should be same as for StringList.cc
+// Must be greater than the maximum number of characters in the %22.15g format
+#define SMALL_STRING_SIZE 32
 
 /////////////////////////////////////
 // Helper functions
@@ -53,8 +57,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList ComplexSubMatrix::print() const {
-  ostrstream strm;
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
+  StringList strm;
   strm << "ComplexSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -62,17 +66,16 @@ StringList ComplexSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", real((*this)[row][col]));
+      sprintf(buf, "%22.15g", real((*this)[row][col]));
       strm << buf;
       strm << "+";
-      sprintf(buf,"%22.15g", imag((*this)[row][col]));
+      sprintf(buf, "%22.15g", imag((*this)[row][col]));
       strm << buf;
       strm << "j ";
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -90,7 +93,7 @@ ComplexSubMatrix::ComplexSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src,
+ComplexSubMatrix::ComplexSubMatrix(ComplexSubMatrix& src,
                                    int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -104,7 +107,7 @@ ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src ComplexSubMatrix
@@ -117,17 +120,17 @@ ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src) {
 }
 
 // General operators
-int ComplexSubMatrix::operator == (const Matrix& m) {
+int ComplexSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const ComplexSubMatrix& src = *((const ComplexSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
   return 0;
 }
 
-Matrix& ComplexSubMatrix::operator = (const Matrix& src) {
+PtMatrix& ComplexSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to ComplexSubMatrix");
   else {
@@ -136,6 +139,18 @@ Matrix& ComplexSubMatrix::operator = (const Matrix& src) {
   }
   return *this;
 }
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+ComplexSubMatrix& ComplexSubMatrix::operator = (const ComplexSubMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to ComplexSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const ComplexSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
 
 ComplexSubMatrix& ComplexSubMatrix::operator = (Complex value) {
   for(int i = 0; i < totalDataSize; i++)
@@ -160,8 +175,8 @@ void ComplexSubMatrix::operator << (ComplexArrayState& src) {
 ////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList FixSubMatrix::print() const {
-  ostrstream strm;
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
+  StringList strm;
   strm << "FixSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -169,14 +184,13 @@ StringList FixSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (double)(*this)[row][col]);
+      sprintf(buf, "%22.15g", double((*this)[row][col]));
       strm << buf;
       strm << " ";
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -194,7 +208,7 @@ FixSubMatrix::FixSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-FixSubMatrix::FixSubMatrix(const FixSubMatrix& src,
+FixSubMatrix::FixSubMatrix(FixSubMatrix& src,
                            int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -208,7 +222,7 @@ FixSubMatrix::FixSubMatrix(const FixSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src FixSubMatrix
@@ -221,17 +235,17 @@ FixSubMatrix::FixSubMatrix(const FixSubMatrix& src) {
 }
 
 // General operators
-int FixSubMatrix::operator == (const Matrix& m) {
+int FixSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const FixSubMatrix& src = *((const FixSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
   return 0;
 }
 
-Matrix& FixSubMatrix::operator = (const Matrix& src) {
+PtMatrix& FixSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to FixSubMatrix");
   else {
@@ -240,6 +254,18 @@ Matrix& FixSubMatrix::operator = (const Matrix& src) {
   }
   return *this;
 }
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+FixSubMatrix& FixSubMatrix::operator = (const FixSubMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to FixSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const FixSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
 
 FixSubMatrix& FixSubMatrix::operator = (Fix value) {
   for(int i = 0; i < totalDataSize; i++)
@@ -264,8 +290,8 @@ void FixSubMatrix::operator << (FixArrayState& src) {
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row- column form.
 StringList FloatSubMatrix::print() const {
-  ostrstream strm;
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
+  StringList strm;
   strm << "FloatSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -273,14 +299,13 @@ StringList FloatSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (*this)[row][col]);
+      sprintf(buf, "%22.15g", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -298,7 +323,7 @@ FloatSubMatrix::FloatSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src,
+FloatSubMatrix::FloatSubMatrix(FloatSubMatrix& src,
                                int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -312,7 +337,7 @@ FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src FloatSubMatrix
@@ -325,17 +350,28 @@ FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src) {
 }
 
 // General operators
-int FloatSubMatrix::operator == (const Matrix& m) {
+int FloatSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const FloatSubMatrix& src = *((const FloatSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
   return 0;
 }
 
-Matrix& FloatSubMatrix::operator = (const Matrix& src) {
+PtMatrix& FloatSubMatrix::operator = (const PtMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+      Error::abortRun("improper type in attempt to copy to FloatSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const FloatSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+FloatSubMatrix& FloatSubMatrix::operator = (const FloatSubMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
       Error::abortRun("improper type in attempt to copy to FloatSubMatrix");
   else {
@@ -369,8 +405,8 @@ void FloatSubMatrix::operator << (FloatArrayState& src) {
 /////////////////////////////////////////////////
 // Prints matrices in standard row-column form.
 StringList IntSubMatrix::print() const {
-  ostrstream strm;
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
+  StringList strm;
   strm << "IntSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -378,14 +414,13 @@ StringList IntSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%12d", (*this)[row][col]);
+      sprintf(buf, "%12d", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -403,7 +438,7 @@ IntSubMatrix::IntSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-IntSubMatrix::IntSubMatrix(const IntSubMatrix& src,
+IntSubMatrix::IntSubMatrix(IntSubMatrix& src,
                            int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -417,7 +452,7 @@ IntSubMatrix::IntSubMatrix(const IntSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src IntSubMatrix
@@ -430,17 +465,28 @@ IntSubMatrix::IntSubMatrix(const IntSubMatrix& src) {
 }
 
 // General operators
-int IntSubMatrix::operator == (const Matrix& m) {
+int IntSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const IntSubMatrix& src = *((const IntSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
   return 0;
 }
 
-Matrix& IntSubMatrix::operator = (const Matrix& src) {
+PtMatrix& IntSubMatrix::operator = (const PtMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to IntSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const IntSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+IntSubMatrix& IntSubMatrix::operator = (const IntSubMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to IntSubMatrix");
   else {

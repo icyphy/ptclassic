@@ -2,16 +2,16 @@ defstar {
     name { ConstCx }
     domain { CG56 }
     desc { Constant source }
-    version { $Id$ }
+    version { @(#)CG56ConstCx.pl	1.4 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Y% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 signal sources library }
-    explanation {
+    location { CG56 main library }
+	htmldoc {
 There are no runtime instructions associated with this star.
 The output buffer is initialized with the specified DC value.
     }
@@ -31,6 +31,9 @@ The output buffer is initialized with the specified DC value.
 	type {float}
 	default {0.0}
 	descriptor { Imaginary part of DC value. }
+    }
+    constructor {
+	noInternalState();
     }
     
     method {
