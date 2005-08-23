@@ -66,10 +66,10 @@ set foo [set ${uniqueSymbol}(foo)]
 <p>
 will set the variable "foo" to the value of the state named "foo".
 	}
-	version { $Id$ }
+	version { @(#)CGCTclScript.pl	1.25	12/08/97 }
 	author { E. A. Lee, D. Niehaus and J. L. Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

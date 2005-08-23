@@ -3,7 +3,7 @@
 
 /*
 Version Identification:
-$Id$
+@(#)MutableCQScheduler.h	1.4 03/18/98
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

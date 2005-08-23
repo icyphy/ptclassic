@@ -13,7 +13,7 @@
 
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)DEWormhole.h	2.24 12/15/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

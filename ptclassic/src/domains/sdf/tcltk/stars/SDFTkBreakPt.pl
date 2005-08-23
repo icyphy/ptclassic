@@ -7,10 +7,10 @@ A conditional break point.
 Each time this star executes, it evaluates its conditional expression.  
 If the expression evaluates to true, it causes the run to pause.
 	}
-	version { $Id$ }
+	version { @(#)SDFTkBreakPt.pl	1.9 04 Oct 1996 }
 	author { Alan Kamas }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

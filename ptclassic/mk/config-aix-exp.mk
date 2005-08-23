@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,7 +22,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# $Id$
+# @(#)config-aix-exp.mk	1.11 02/21/99
 
 #	Programmer: Xavier Warzee (Thomson CSF)
 #

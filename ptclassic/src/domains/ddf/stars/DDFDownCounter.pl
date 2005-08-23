@@ -5,10 +5,10 @@ defstar {
 Given an integer input with value N, produce a sequence of output
 integers with values (N-1), (N-2), ... 1, 0.
 	}
-	version { $Id$ }
+	version { @(#)DDFDownCounter.pl	2.11	10/29/95 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

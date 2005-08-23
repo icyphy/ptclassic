@@ -3,10 +3,10 @@ defstar {
 	domain { CG56 }
 	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
 	desc { Sine or cosine function using second order oscillator }
-	version { $Id$ }
+	version { @(#)CG56Tone.pl	1.15 03/29/97 }
 	author { J. Buck, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

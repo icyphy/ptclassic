@@ -1,12 +1,12 @@
 /* mkTerm.c  edg
 Version identification:
-$Id$
+@(#)mkTerm.c	1.23	4/26/96
 Functions that create terminals and thier symbols in a icon facet.
 Functions here use err.c for error handling.
 */
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

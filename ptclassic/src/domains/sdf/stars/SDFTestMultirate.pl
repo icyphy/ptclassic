@@ -6,10 +6,10 @@ This star consumes and produces any fixed number of tokens on any number
 of inputs and outputs.  The output value is always zero.  IT IS INTENDED
 FOR TESTING SCHEDULERS ONLY.
 	}
-	version { $Id$ }
+	version { @(#)SDFTestMultirate.pl	1.7  09/10/99 }
 	author { Edward A. Lee, Richard Stevens, and Christopher Scannell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

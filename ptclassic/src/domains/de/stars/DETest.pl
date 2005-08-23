@@ -1,10 +1,10 @@
 defstar {
 	name { Test }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DETest.pl	1.9	10/07/96 }
 	author { Rolando Diesta, Edward A. Lee, and Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

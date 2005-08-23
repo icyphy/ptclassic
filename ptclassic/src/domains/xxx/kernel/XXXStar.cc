@@ -1,8 +1,8 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "XXXStar.cc";
 
-/*  Version $Id$
+/*  Version @(#)XXXStar.cc	1.5 3/7/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

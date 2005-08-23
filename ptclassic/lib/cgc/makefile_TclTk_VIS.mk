@@ -1,6 +1,6 @@
 # Ptolemy makefile skeleton used by makefile_C CGC target
 # Version:
-# $Id$
+# @(#)makefile_TclTk_VIS.mk	1.2 08/08/96
 # Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 

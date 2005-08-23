@@ -6,10 +6,10 @@ defstar {
 Just like the LMS filter, but with an animated Tk display of
 the taps, plus associated controls.
 	}
-	version { $Id$ }
+	version { @(#)CGCLMSTkPlot.pl	1.13	7/15/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

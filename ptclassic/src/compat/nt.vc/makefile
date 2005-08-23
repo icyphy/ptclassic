@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Microsoft VC++ compatibility. stuff
 
-# Version Identification: $Id$
+# Version Identification: @(#)makefile	1.1 08/16/97
 # Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 

@@ -1,7 +1,7 @@
 defstar {
 	name {Burg}
 	domain {SDF}
-	version {$Id$}
+	version {@(#)SDFBurg.pl	1.24 12/08/97}
 	desc {
 This star uses Burg's algorithm to estimate the linear predictor coefficients
 of an input random process.
@@ -12,7 +12,7 @@ of the predictor order.
 	}
 	author { E. A. Lee and J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

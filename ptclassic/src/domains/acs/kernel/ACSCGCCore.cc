@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/29/98
- Version: $Id$
+ Version: @(#)ACSCGCCore.cc	1.8 09/21/99
 
 ***********************************************************************/
 

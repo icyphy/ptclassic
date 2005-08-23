@@ -2,7 +2,7 @@
 #define _OCTMACROS_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* octMacros.h  edg
 Version identification:
-$Id$
+@(#)octMacros.h	1.9	11/29/95
 Useful OCT macros.  Don't use this any more; use oh.h instead.  oh.h
 is the standard Oct package that does the same thing.  (It was developed
 after this file was written, and its macros are preceded by an "oh" prefix.)

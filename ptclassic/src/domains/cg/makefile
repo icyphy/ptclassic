@@ -1,5 +1,5 @@
 # Makefile for CG domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# Version: $Id$
+# Version: @(#)makefile	1.16	01 Oct 1996
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/cg (through the symbolic

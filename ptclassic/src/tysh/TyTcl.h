@@ -1,13 +1,13 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)TyTcl.h	1.2    9/1/95
 		       
     Programmer:  Edward A. Lee
 
     This file implements in a class C++ extensions to Tcl used
     in the Tycho system.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

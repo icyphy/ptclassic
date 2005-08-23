@@ -4,10 +4,10 @@ defstar {
 	desc {
 Receive star for Fiction target
 	}
-	version { $Id$ }
+	version { @(#)CG56MultiSimReceive.pl	1.3	3/9/96 }
 	author { S. Ha and K. Asawaree }
 	copyright { 
-Copyright (c) 1992-%Q% The Regents of the University of California.
+Copyright (c) 1992-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

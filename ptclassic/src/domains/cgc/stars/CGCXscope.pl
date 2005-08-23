@@ -3,10 +3,10 @@ defstar {
 	domain { CGC }
 	desc { Generate a multi-trace plot with the pxgraph program. }
 	derivedFrom { Xgraph }
-	version {$Id$}
+	version {@(#)CGCXscope.pl	1.11	06 Oct 1996}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

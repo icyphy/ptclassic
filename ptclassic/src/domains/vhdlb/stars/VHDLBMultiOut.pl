@@ -4,10 +4,10 @@ defstar {
 	desc {
 Output multiple copies of the input.
 	}
-        version { $Id$ }
+        version { @(#)VHDLBMultiOut.pl	1.3 3/2/95 }
 	author { Michael C. Williamson }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

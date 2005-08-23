@@ -13,10 +13,10 @@ will reset the plot area to that outlined by the box.
 There are also buttons for zooming in and out, and for
 resizing the box to just fit the data in view.
 	}
-	version { $Id$ }
+	version { @(#)DETkPlot.pl	1.7    06 Oct 1996 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,7 +2,7 @@ defstar{
     name { DynMerge }
     domain { DE }
     author { J. Voigt }
-    version { $Id$ }
+    version { @(#)DEDynMerge.pl	1.3	01/15/98 }
     copyright { 
 copyright (c) 1997 Dresden University of Technology, WiNeS-Project.
 All rights reserved.

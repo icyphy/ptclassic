@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
  
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /*
- * $Id$
+ * @(#)engine.h	1.8	07/03/97
  *
  * Provide a dummy C include header file that mimics "engine.h" that
  * comes with Matlab.

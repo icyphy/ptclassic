@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkTkSetup.c  aok
-    Version: $Id$
+    Version: @(#)ptkTkSetup.c	1.30	09/23/98
 */
 
 
@@ -232,7 +232,6 @@ ptkTkSetup(funcArray, size)
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
     if (Tcl_EvalFile(ptkInterp, buf) != TCL_OK) {
         ErrAdd("Unable to load ptk startup file: ");
-        ErrAdd(buf);
         ErrAdd(ptkInterp->result);
 	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());

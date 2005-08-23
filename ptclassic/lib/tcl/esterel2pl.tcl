@@ -1,9 +1,9 @@
 # Tcl script for generating Ptolemy star definitions from Esterel programs.
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)esterel2pl.tcl	1.3   01/05/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

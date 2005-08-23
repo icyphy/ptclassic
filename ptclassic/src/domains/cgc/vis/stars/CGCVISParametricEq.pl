@@ -2,13 +2,13 @@ defstar {
 	name {VISParametricEq}
 	derivedFrom {VISBiquad}
 	domain {CGC}
-	version { $Id$ }
+	version { @(#)CGCVISParametricEq.pl	1.7 04/07/97 }
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
 	author { William Chen and John Reekie}
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

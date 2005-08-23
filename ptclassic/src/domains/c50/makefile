@@ -1,5 +1,5 @@
 # Makefile for C50 domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@
 #		       
 # Programmer: A. Baensch
 # Created: 14 April 1995
-# Version: $Id$
+# Version: @(#)makefile	1.6	03/29/97
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/c50.
 # Instead run in from $PTOLEMY/obj.$ARCH/domains/c50 (through the symbolic

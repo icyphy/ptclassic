@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a pipelined delay element using FPGA RAM
 	}
-	version {$Id$}
+	version {@(#)ACSRamDelayCGFPGA.pl	1.10 07/30/01}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2000 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}

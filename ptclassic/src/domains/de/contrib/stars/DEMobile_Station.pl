@@ -3,7 +3,7 @@ defstar {
     domain { DE }
     derivedfrom { DEcell_list }
     author { A. Wernicke, J. Voigt }
-    version { $Id$ }
+    version { @(#)DEMobile_Station.pl	1.3 12/08/97 }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }

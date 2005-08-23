@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // filename:		BaseImage.h
 // author:			Paul Haskell
 // creation date:	7/1/91
-// SCCS info:		$Id$
+// SCCS info:		@(#)BaseImage.h	1.19 03/02/95
 
 #ifndef _BaseImage_h
 #define _BaseImage_h

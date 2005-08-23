@@ -9,10 +9,10 @@ FFT of length 2 ^ "order", where "size" &lt;= 2 ^ "order".  (The default
 value of "order" is 8.)  The parameter "direction" (default 1) is 1 for
 the forward and -1 for the inverse FFT.
 	}
-	version {$Id$}
+	version {@(#)SDFFFTCx.pl	1.31 12/08/97}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

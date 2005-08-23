@@ -5,7 +5,7 @@ defstar {
 Output +1 if the input is positive or zero, and 0 if the input is negative.
 This definition of signum is not compatible with the Sgn stars.
 	}
-	version { $Id$}
+	version { @(#)C50SgnInt.pl	1.7	01 Oct 1996}
 	author { Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

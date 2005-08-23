@@ -1,8 +1,8 @@
 # Makefile for Ptolemy tcl/tk library (used primarily for 'make sources')
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)makefile	1.16 02/04/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

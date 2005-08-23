@@ -6,7 +6,7 @@ An adaptive antenna array processor using the LMS algorithm.
 The output signals of the antenna elements are taken
 from a bus connected to the input.
 	}
-	version { $Id$ }
+	version { @(#)SDFLMSArray.pl	1.4	05/28/98 }
 	author { U. Trautwein }
 	copyright {
 Copyright (c) 1996-1997 Technical University of Ilmenau.

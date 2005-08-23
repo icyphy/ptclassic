@@ -2,9 +2,9 @@ static const char file_id[] = "POct.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)POct.cc	1.86	10/04/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

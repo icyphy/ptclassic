@@ -6,10 +6,10 @@ An adaptive antenna array processor using the RLS algorithm.
 The output signals of the antenna elements are taken
 from a bus connected to the input.
         }
-	version { $Id$ }
+	version { @(#)SDFRLSArray.pl	1.4	05/28/98 }
 	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996-%Q% Technical University of Ilmenau.
+Copyright (c) 1996-1998 Technical University of Ilmenau.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

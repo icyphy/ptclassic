@@ -9,10 +9,10 @@ simultaneous "countUp" inputs are processed.  Then all simultaneous
 "demand" inputs, all but the first are ignored.  Only one output will
 be produced.
 	}
-	version { $Id$ }
+	version { @(#)DEUDCounter.pl	1.14	10/07/96 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

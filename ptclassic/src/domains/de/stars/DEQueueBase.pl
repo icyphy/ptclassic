@@ -6,11 +6,11 @@ This is the  base class for FIFO and LIFO queues.
 This star is not intended to be used except to derive useful stars.
 All inputs are simply routed to the "overflow" output.  None are stored.
 	}
-	version { $Id$}
+	version { @(#)DEQueueBase.pl	1.11	3/2/95}
 	author { Soonhoi Ha and E. A. Lee }
 	acknowledge { Incorporates design ideas from Philip Bitar. }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

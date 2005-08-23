@@ -4,10 +4,10 @@ defstar {
 	desc {
 Send star between NOWam processors.
 	}
-	version { $Id$ }
+	version { @(#)CGCNOWamSend.pl	1.25 04/07/97 }
 	author { Patrick O. Warner }
 	copyright {
-Copyright (c) 1995-%Q% The Regents of the University of California
+Copyright (c) 1995-1997 The Regents of the University of California
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

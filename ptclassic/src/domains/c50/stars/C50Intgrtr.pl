@@ -6,10 +6,10 @@ An integrator with leakage and limits.  With the default parameters,
 input samples are simply accumulated, and the running sum is the
 output.  If there is an overflow, the integrator will wrap around.
 	}
-	version { $Id$ }
+	version { @(#)C50Intgrtr.pl	1.4	03 Oct 1996 }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

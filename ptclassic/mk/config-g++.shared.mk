@@ -3,8 +3,8 @@
 # specific to using g++.  See also config-g++.mk
 #
 
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-g++.shared.mk	1.18 09/23/98
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

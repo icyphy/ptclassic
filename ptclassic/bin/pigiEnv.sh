@@ -1,8 +1,8 @@
 #! /bin/sh
 # pigi - Ptolemy Interactive Graphics Interface
 #
-# Version: $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Version: @(#)pigiEnv.sh	1.11 02/10/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # 	All Rights Reserved.
 #
 # This script is what the user calls to start up the vem process and the

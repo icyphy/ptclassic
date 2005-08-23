@@ -1,9 +1,9 @@
 static const char file_id[] = "VHDLBTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLBTarget.cc	1.29 7/31/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

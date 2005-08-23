@@ -1,6 +1,6 @@
 #!/bin/csh -f
 # Convert PostScript to GIF with a transparent background.
-# Version $Id$
+# Version @(#)ps2gif	1.4 4/18/95
 # Author:	T. M. Parks
 # Created:	3 October 1994
 

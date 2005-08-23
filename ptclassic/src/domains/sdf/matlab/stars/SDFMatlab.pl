@@ -4,11 +4,11 @@ defstar {
 	desc {
 Base star for Matlab interface stars in the SDF domain.
 	}
-	version { $Id$ }
+	version { @(#)SDFMatlab.pl	1.37	04/08/97 }
 	author { Brian L. Evans }
 	acknowledge { Steve L. Eddins, The MathWorks Inc., Natick, MA }
 	copyright {
-Copyright (c) 1995-%Q% The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

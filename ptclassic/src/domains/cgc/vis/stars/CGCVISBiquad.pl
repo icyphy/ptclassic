@@ -1,10 +1,10 @@
 defstar {
 	name { VISBiquad }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCVISBiquad.pl	1.16 04/07/97 }
 	author { William Chen and John Reekie}
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

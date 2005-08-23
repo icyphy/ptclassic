@@ -1,7 +1,7 @@
 static const char file_id[] = "pt_fstream.cc";
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 // Programmer:  J. Buck, Kennard White
-// $Id$
+// @(#)pt_fstream.cc	1.19 06/24/97
 
 // This defines derived types of ifstream and ofstream that do the following:
 

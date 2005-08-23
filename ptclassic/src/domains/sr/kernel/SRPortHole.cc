@@ -1,8 +1,8 @@
 static const char file_id[] = "SRPortHole.cc";
 
-/*  $Id$
+/*  @(#)SRPortHole.cc	1.17 03/16/98
 
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

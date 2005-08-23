@@ -1,8 +1,8 @@
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCBDFTarget.cc	1.8	04/07/97
 
-@Copyright (c) 1993-%Q% The Regents of the University of California.
+@Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

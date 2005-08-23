@@ -4,10 +4,10 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { 16FFT }
 	desc { Compute a 16-point complex FFT }
-	version{ $Id$ }
+	version{ @(#)ACS16FFTCGFPGA.pl	1.2 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

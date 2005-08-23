@@ -9,10 +9,10 @@ row-column decomposition with 1D fast Fourier transform (FFT) algorithm.
 "numRows" (default 256) is the number of rows in the input.
 "numCols" (default 256) is the number of columns in the input.
 	}
-	version { $Id$ }
+	version { @(#)MDSDFFFTCx.pl	1.7 10/06/96 }
 	author { J. T. Buck, modified for MDSDF by Mike J. Chen }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

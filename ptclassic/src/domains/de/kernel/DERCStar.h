@@ -1,11 +1,11 @@
 #ifndef _DERCStar_h
 #define _DERCStar_h 1
 /**************************************************************************
-Version identification:	$Id$
+Version identification:	@(#)DERCStar.h	1.11 04/19/99
 
 Author: Mudit Goel, Neil Smyth, Claudio Passerone
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

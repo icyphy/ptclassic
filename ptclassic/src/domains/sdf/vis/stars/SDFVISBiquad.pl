@@ -1,7 +1,7 @@
 defstar {
 	name { VISBiquad }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFVISBiquad.pl	1.15	7/10/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

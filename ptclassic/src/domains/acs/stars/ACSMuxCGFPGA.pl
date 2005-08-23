@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a 2,3, and 4-input MUX 
 	}
-	version{ $Id$ }
+	version{ @(#)ACSMuxCGFPGA.pl	1.11 08/02/01 }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}

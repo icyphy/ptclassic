@@ -2,10 +2,10 @@ defstar {
     name { XCSynchComm }
     domain { CG56 }
     desc { S56X to CGC send/receive base star }
-    version { $Id$ }
+    version { @(#)CG56XCSynchComm.pl	1.7 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

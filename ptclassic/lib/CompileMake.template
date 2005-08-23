@@ -1,5 +1,5 @@
 # Makefile for Ptolemy standalone systems
-# $Id$
+# @(#)CompileMake.template	1.24	10/06/97
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -8,7 +8,7 @@
 #	make depend
 # This will add the dependencies to the makefile.
 #
-# This make template file is $PTOLEMY/lib/$RCSfile$.
+# This make template file is $PTOLEMY/lib/CompileMake.template.
 # It is used by $PTOLEMY/src/domains/sdf/targets/CompileTarget.cc
 # to create a makefile to manage generated C++ code for standalone programs.
 # It requires GNU make.

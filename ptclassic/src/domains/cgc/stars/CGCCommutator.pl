@@ -1,7 +1,7 @@
 defstar {
 	name {Commutator}
 	domain {CGC}
-	version {$Id$ }
+	version {@(#)CGCCommutator.pl	1.6	7/11/96 }
 	desc {
 Takes N input streams (where N is the number of inputs) and
 synchronously combines them into one output stream.
@@ -13,7 +13,7 @@ the next B particles from the next input, etc.
 	}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

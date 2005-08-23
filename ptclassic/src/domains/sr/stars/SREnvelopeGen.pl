@@ -4,7 +4,7 @@ defstar {
   desc {
 An envelope generator for FM sound synthesis
   }
-  version { $Id$ }
+  version { @(#)SREnvelopeGen.pl	1.2 02/23/97 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

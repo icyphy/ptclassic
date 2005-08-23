@@ -2,9 +2,9 @@ static const char file_id[] = "C50Star.cc";
 
 /*
 Version:
-$Id$
+@(#)C50Star.cc	1.4	05/26/98
 
-@Copyright (c) 1994-%Q% The Regents of the University of California.
+@Copyright (c) 1994-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -2,7 +2,7 @@
 #define _ptdspcephes_h
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 /*
- * $Id$
+ * @(#)ptdspcephes.h	1.7	7/23/96
  *
  *	Prototypes for the routines we are using from the Cephes
  *	Math Library.

@@ -2,7 +2,7 @@ defstar {
     name { pos_generator }
     domain { DE }
     author { A. Wernicke }
-    version { $Id$ }	
+    version { @(#)DEpos_generator.pl	1.1 06/24/97 }	
     copyright { copyright (c) 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }

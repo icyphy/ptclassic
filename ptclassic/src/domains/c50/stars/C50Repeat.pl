@@ -2,10 +2,10 @@ defstar {
 	name { Repeat }
 	domain { C50 }
 	desc { Repeats each input sample the specified number of times. }
-	version {$Id$}
+	version {@(#)C50Repeat.pl	1.9	05/26/98}
 	author { Luis Gutierrez, A. Baensch, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

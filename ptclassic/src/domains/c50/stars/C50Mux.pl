@@ -2,11 +2,11 @@ defstar {
     name { Mux }
     domain { C50 }
     desc { Multiplexes any number of inputs onto one output stream. }
-    version {$Id$}
+    version {@(#)C50Mux.pl	1.14	05/26/98}
     author { Luis Gutierrez, based on CG56 version, G. Arslan }
     acknowledge { SDF version by E. A. Lee, CG56 version by Kennard White }
     copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

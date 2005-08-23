@@ -8,10 +8,10 @@ state specifies the file to be written; the special names
 stream, and &lt;stderr&gt; and &lt;cerr&gt;, which specify the
 standard error stream, are also supported.
 	}
-	version {$Id$}
+	version {@(#)SDFPrinter.pl	2.20 10/07/96}
 	author { D. G. Messerschmitt and J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

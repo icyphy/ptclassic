@@ -1,7 +1,7 @@
 defstar {
 	name { Distributor }
 	domain { CGC }
-	version {$Id$ }
+	version {@(#)CGCDistributor.pl	1.7	7/11/96 }
 	desc {
 Takes one input stream and synchronously splits it into N output streams,
 where N is the number of outputs.  It consumes N*B input particles,
@@ -10,7 +10,7 @@ the next B particles to the next output, etc.
 	}
 	author { E. A. Lee}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

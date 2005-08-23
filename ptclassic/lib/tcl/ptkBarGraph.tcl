@@ -1,8 +1,8 @@
 # Definition of a bunch of utility procedures for the tcl/tk Ptolemy interface
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)ptkBarGraph.tcl	1.9	2/29/96
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

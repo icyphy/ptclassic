@@ -1,8 +1,8 @@
 # Makefile for domains/cg56
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.5	04/07/97
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/cg (through the symbolic

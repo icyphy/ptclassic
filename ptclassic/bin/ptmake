@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# Version $Id$
+# Version @(#)ptmake	1.6 2/6/96
 # Author:	T. M. Parks
 # Created:	20 October 1994
 # 

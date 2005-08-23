@@ -8,10 +8,10 @@ distribution, as determined by the "distribution" parameter.  Depending on
 the distribution, parameters also specify either the mean and variance or
 the lower and upper extent of the range.
 	}
-	version { $Id$}
+	version { @(#)DERanGen.pl	1.12	6/20/95}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

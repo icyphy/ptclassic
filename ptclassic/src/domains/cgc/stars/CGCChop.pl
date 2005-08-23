@@ -8,10 +8,10 @@ and writes "nwrite" of these samples (default 64), skipping the first
 If nwrite > nread, then the output consists of overlapping windows,
 and hence "offset" must be negative.
 	}
-	version {$Id$}
+	version {@(#)CGCChop.pl	1.9	04/05/97}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

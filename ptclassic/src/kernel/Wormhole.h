@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*******************************************************************
  SCCS Version identification :
- $Id$
+ @(#)Wormhole.h	2.20		07/17/97
 
  Programmer : Soonhoi Ha
  Date of Creation : 3/19/90

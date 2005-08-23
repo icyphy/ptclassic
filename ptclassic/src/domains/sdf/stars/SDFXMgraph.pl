@@ -6,10 +6,10 @@ Generate a multi-signal plot with the pxgraph program.
 This program has many options; see the User's manual
 of The Almagest.
 	}
-	version {$Id$}
+	version {@(#)SDFXMgraph.pl	2.18 10/06/96}
 	author { J. T. Buck and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

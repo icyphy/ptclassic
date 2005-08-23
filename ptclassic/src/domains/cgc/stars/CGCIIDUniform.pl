@@ -6,10 +6,10 @@ Generate random variables that are approximately independent identically
 distributed uniform random variables.  The values range from "lower"
 to "upper".
 	}
-	version { $Id$ }
+	version { @(#)CGCIIDUniform.pl	1.10	7/12/96 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

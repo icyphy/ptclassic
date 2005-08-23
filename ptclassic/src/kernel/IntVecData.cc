@@ -1,9 +1,9 @@
 static const char file_id[] = "IntVecData.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)IntVecData.cc	2.10	12/08/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

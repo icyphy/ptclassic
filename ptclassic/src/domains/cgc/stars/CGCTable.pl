@@ -6,10 +6,10 @@ Implements a real-valued lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
-	version {$Id$}
+	version {@(#)CGCTable.pl	1.7 05/07/97}
 	author { Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

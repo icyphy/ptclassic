@@ -2,7 +2,7 @@
 #define _EXEC_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* exec.h  edg
 Version identification:
-$Id$
+@(#)exec.h	1.17	1/25/96
 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included

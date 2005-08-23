@@ -2,7 +2,7 @@
 # Copyright (c) 1990-1996 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.1 6/26/96
 # 
 # Important!  Do not run this makefile while in
 # ~ptolemy/src/domains/cgc/dsp.  Instead run in from

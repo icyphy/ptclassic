@@ -11,10 +11,10 @@ To read initial coefficients from a file, replace the default
 coefficients with "&lt; fileName", preferably specifying a complete path.
 This star supports decimation, but not interpolation.
 	}
-	version {$Id$}
+	version {@(#)SDFLMS.pl	2.23 10/07/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

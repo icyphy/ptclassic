@@ -3,7 +3,7 @@ defstar {
   domain { SR }
   derivedFrom { SRStar }
   desc { Convert an integer input to a string output }
-  version { $Id$ }
+  version { @(#)SRIntToString.pl	1.4 09/10/99 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

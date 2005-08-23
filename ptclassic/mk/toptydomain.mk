@@ -1,6 +1,6 @@
 # Makefile included at the root of each domain (eg. SDF, DE, etc) for tycho
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)toptydomain.mk	1.9 05/08/97
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -6,10 +6,10 @@ Given a control input with integer value N,
 consume N particles from the data input and
 produce only the last of these at the output.
 	}
-	version { $Id$ }
+	version { @(#)DDFLastOfN.pl	2.13	10/29/95 }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

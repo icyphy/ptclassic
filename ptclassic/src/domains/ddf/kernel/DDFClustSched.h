@@ -11,9 +11,9 @@
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)DDFClustSched.h	1.5	01/01/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

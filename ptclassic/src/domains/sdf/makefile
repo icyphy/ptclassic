@@ -1,5 +1,5 @@
 # Makefile for SDF domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# @(#)makefile	1.30	09/08/99
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/sdf.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/sdf (through the symbolic

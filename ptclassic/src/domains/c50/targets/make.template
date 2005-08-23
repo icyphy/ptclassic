@@ -1,4 +1,4 @@
-# @Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # Makefile for extra C50 domain targets
 #
 # Version identification:
-# $Id$
+# @(#)make.template	1.4	05/23/98
 # Programmer: Andreas Baensch
 # Date of creation: 19 February 1992
 #

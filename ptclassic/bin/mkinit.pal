@@ -1,6 +1,6 @@
 #! /bin/csh -f
 # Simple script to create a default initial palette.
-# $Id$
+# @(#)mkinit.pal	1.2	12/1/92
 set pname = $1
 
 if ($#argv == 0 ) then

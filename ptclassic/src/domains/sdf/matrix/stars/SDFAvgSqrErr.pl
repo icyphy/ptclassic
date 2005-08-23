@@ -4,10 +4,10 @@ defstar {
   desc { 
 Find the average squared error between two input sequences of matrices. 
   }
-  version { $Id$ }
+  version { @(#)SDFAvgSqrErr.pl	1.6 12/14/97 }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

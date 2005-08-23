@@ -10,12 +10,12 @@ the notation ("initial_value","precision").
 	}
         author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)CGCRampFix.pl	1.9	10/08/96 }
         location { CGC main library }
 	htmldoc {
 The value of the "step" and "value" parameters and their precision 

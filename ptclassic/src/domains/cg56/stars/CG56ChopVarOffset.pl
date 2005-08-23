@@ -6,10 +6,10 @@ defstar {
 This star has the same functionality as the Chop star except now the
 offset parameter is determined at run time through a control input.
 	}
-	version { $Id$ }
+	version { @(#)CG56ChopVarOffset.pl	1.4	3/10/96 }
 	author { Luis Javier Gutierrez }
 	copyright{
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an disclaimer of warranty provisions.

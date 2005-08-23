@@ -1,6 +1,6 @@
 # Makefile for VHDLB domain support
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Version $Id$
+# Version @(#)makefile	1.5 01 Oct 1996
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/vhdl.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/vhdl (through the symbolic

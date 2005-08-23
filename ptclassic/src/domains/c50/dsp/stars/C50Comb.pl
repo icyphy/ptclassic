@@ -2,11 +2,11 @@ defstar {
 	name { Comb }
 	domain { C50 }
 	desc { Comb Filter }
-	version {$Id$}
+	version {@(#)C50Comb.pl	1.5	05/26/98}
 	acknowledge { Gabriel version by A.Baensch }
 	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

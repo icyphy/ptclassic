@@ -1,7 +1,7 @@
 static const char file_id[] = "CodeStreamList.cc";
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*
    Author:	Jose Luis Pino
    Date:	October 15, 1993
-   Version:	$Id$
+   Version:	@(#)CodeStreamList.cc	1.7	3/3/96
 */
 
 #ifdef __GNUG__

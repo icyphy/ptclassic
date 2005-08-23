@@ -2,10 +2,10 @@ defstar {
 	name { FixToCx }
 	domain { CGC }
 	derivedFrom { Fix }
-	version { $Id$ }
+	version { @(#)CGCFixToCx.pl	1.6 7/10/96 }
 	author { J. Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

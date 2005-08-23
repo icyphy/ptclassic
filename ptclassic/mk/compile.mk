@@ -2,9 +2,9 @@
 # in which a makefile is built from a make.template file.
 #
 # Version identification:
-# $Id$
+# @(#)compile.mk	1.22 02/17/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

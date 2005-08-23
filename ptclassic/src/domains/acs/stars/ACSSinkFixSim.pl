@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Discards input samples.
 	}
-	version{ $Id$ }
+	version{ @(#)ACSSinkFixSim.pl	1.9 08/02/01 }
 	author { Eric Pauer }
 	copyright {
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999-2001 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}

@@ -4,10 +4,10 @@ This is a replacement version of the methods for the Error class
 in Ptolemy -- link this in instead of Error.cc to go through the
 error handler in Tycho instead of the default.
 
-$Id$
+@(#)TyError.cc	1.7    03/30/97
 Programmer: J. Buck and E. A. Lee
 
-Copyright (c) 1995-%Q% The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

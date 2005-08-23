@@ -7,7 +7,7 @@ This is linear 2-D convolution.
     author { Biao Lu }
     acknowledge { Brian L. Evans }
     location  { SDF contrib library }
-    version { $Id$ }
+    version { @(#)SDFConv2.pl	1.1	03/24/98 }
     copyright {
 Copyright (c) 1997-1998 The University of Texas.
 All rights reserved.

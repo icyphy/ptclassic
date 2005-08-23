@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <malloc.h>
 
 /* If you change this, then update the version in configure.in */
-#define VERSION_STRING	"11.3.4 (Build: $Id$)"
+#define VERSION_STRING	"11.3.4 (Build: @(#)xgraph.h	1.17 04/29/99)"
 
 #define MAXKEYS		50
 #define MAXATTR 	8

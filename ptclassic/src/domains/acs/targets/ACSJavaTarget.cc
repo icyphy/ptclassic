@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSJavaTarget.cc";
 /**********************************************************************
-Copyright (c) 1998-%Q% The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSJavaTarget.cc	1.6 08/02/01
 
 ***********************************************************************/
 #ifdef __GNUG__

@@ -1,9 +1,9 @@
 static const char file_id[] = "MDSDFStar.cc";
 
 /*******************************************************************
-Version $Id$
+Version @(#)MDSDFStar.cc	1.8 3/7/96
 
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

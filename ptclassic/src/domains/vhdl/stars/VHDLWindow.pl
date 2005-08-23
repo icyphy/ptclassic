@@ -30,11 +30,11 @@ the window length (i.e., <i>period</i> = 0).
 Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,
 Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
 	}
-	version { $Id$ }
+	version { @(#)VHDLWindow.pl	1.10 04/08/97 }
 	author { Michael C. Williamson and Kennard White }
 	acknowledge { William Chen and Brian Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

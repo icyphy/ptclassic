@@ -9,10 +9,10 @@ int of the absolute value of each corresponding entry of the
 ComplexMatrix being converted.  
 I.e. IntMatrix.entry(i) = (int)abs(ComplexMatrix.entry(i))
   }
-  version { $Id$ }
+  version { @(#)SDFCxToInt_M.pl	1.6 10/6/95 }
   author { Mike J. Chen }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

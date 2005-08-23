@@ -1,7 +1,7 @@
 defstar {
 	name {Commutator}
 	domain {SDF}
-	version {$Id$}
+	version {@(#)SDFCommutator.pl	2.11	3/2/95}
 	desc {
 Takes N input streams (where N is the number of inputs) and
 synchronously combines them into one output stream.
@@ -13,7 +13,7 @@ the next B particles from the next input, etc.
 	}
 	author { J. T. Buck and E. A. Lee}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -5,10 +5,10 @@ defstar {
 	desc {
 Output the sum of the fixed-point inputs as a fixed-point value.
 	}
-	version { $Id$ }
+	version { @(#)CGCAddFix.pl	1.5	7/10/96 }
         author { Juergen Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

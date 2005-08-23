@@ -2,10 +2,10 @@ defstar{
     name { DynForkBase }
     domain { DE }
     author { J. Voigt }
-    version { $Id$
+    version { @(#)DEDynForkBase.pl	1.4 04/29/98
    	    }   
     copyright { 
-copyright (c) 1997-%Q% Dresden University of Technology, WiNeS-Project.
+copyright (c) 1997-1998 Dresden University of Technology, WiNeS-Project.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.  

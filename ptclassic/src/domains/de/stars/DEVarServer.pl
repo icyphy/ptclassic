@@ -11,10 +11,10 @@ If input events arrive while another event is being serviced,
 they will be queued.  When the server becomes free, it will
 service any events waiting in its queue.
     }
-    version { $Id$ }
+    version { @(#)DEVarServer.pl	1.10 06/04/96 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

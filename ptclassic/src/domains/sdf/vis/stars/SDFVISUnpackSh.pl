@@ -1,7 +1,7 @@
 defstar {
 	name { VISUnpackSh }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFVISUnpackSh.pl	1.8	7/9/96 }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

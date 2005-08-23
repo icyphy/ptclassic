@@ -6,10 +6,10 @@ Generate a rectangular pulse of height "height" (default 1.0).
 and width "width" (default 8).  If "period" is greater than zero,
 then the pulse is repeated with the given period.
 	}
-	version { $Id$ }
+	version { @(#)C50Rect.pl	1.4	7/29/96 }
 	author { Luis Gutierrez, A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

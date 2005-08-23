@@ -1,12 +1,12 @@
 /* palette.c  edg
 Version identification:
-$Id$
+@(#)palette.c	1.16	02/08/99
 Make palette of icons.
 These routines should be in octIfc.c maybe, since it enforces policy.
 */
 
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

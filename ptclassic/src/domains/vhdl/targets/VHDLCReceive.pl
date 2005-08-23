@@ -2,11 +2,11 @@ defstar {
   name { CReceive }
   domain { VHDL }
   desc { CGC to VHDL Receive star }
-  version { $Id$ }
+  version { @(#)VHDLCReceive.pl	1.18 10/01/96 }
   author { Michael C. Williamson, Jose L. Pino }
   derivedFrom {CSynchComm}
   copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,7 +2,7 @@
 #define _EDIT_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* edit.h  edg
 Version identification:
-$Id$
+@(#)edit.h	1.19	11/23/95
 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included

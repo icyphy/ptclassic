@@ -1,7 +1,7 @@
 defstar {
 	name { BlockAllPole }
 	domain { SDF }
-	version {$Id$}
+	version {@(#)SDFBlockAllPole.pl	2.19 04/01/97}
 	desc {
 This star implements an all pole filter with the denominator
 coefficients of the transfer function externally supplied.
@@ -10,7 +10,7 @@ all in one firing.
 	}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

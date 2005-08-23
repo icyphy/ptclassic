@@ -6,10 +6,10 @@ A sequence of values is repeated at the output with period N, zero-padding
 or truncating to N if necessary.
 A value of 0 for N outputs an aperiodic sequence.
         }
-	version { $Id$ }
+	version { @(#)CG56VarQuasar.pl	1.13 03/29/97 }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

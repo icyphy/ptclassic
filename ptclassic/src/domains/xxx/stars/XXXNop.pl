@@ -2,7 +2,7 @@ defstar {
 	name {Nop}
 	domain {XXX}
 	desc { Does nothing }
-	version {$Id$}
+	version {@(#)XXXNop.pl	1.1 5/25/94}
 	author { E. A. Lee and D. Niehaus }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.

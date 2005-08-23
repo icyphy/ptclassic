@@ -2,7 +2,7 @@ defstar {
     name { Skew }
     domain { C50 }
     desc { Generic skewing star. }
-    version { $Id$ }
+    version { @(#)C50Skew.pl	1.8  10/24/96 }
     author { Luis Gutierrez, based on the CG56 version }
     copyright {
 Copyright (c) 1991-1996 The Regents of the University of California.

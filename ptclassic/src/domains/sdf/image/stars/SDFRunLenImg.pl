@@ -1,10 +1,10 @@
 defstar {
   name { RunLenImg }
   domain { SDF }
-  version { $Id$ }
+  version { @(#)SDFRunLenImg.pl	1.20 01 Oct 1996 }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

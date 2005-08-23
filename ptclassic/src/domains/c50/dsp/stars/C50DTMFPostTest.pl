@@ -1,7 +1,7 @@
 defstar{
 	name { DTMFPostTest }
 	domain { C50 }
-	version { $Id$ }
+	version { @(#)C50DTMFPostTest.pl	1.7	06 Oct 1996 }
 	desc { 
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.

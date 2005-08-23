@@ -1,6 +1,6 @@
 # Makefile for cgc/tcltk/lib
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# $Id$
+# @(#)makefile	1.9	12/08/97
 
 # Root of Ptolemy directory
 ROOT=../../../../..

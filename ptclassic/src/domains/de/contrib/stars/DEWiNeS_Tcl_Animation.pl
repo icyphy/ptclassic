@@ -1,7 +1,7 @@
 defstar {
 	name { WiNeS_Tcl_Animation }
 	domain { DE }
-	version { $Id$ }
+	version { @(#)DEWiNeS_Tcl_Animation.pl	1.3 06/24/97 }
 	author { J. Voigt }
 	copyright {
             Copyright (c) 1997 Dresden University of Technology,

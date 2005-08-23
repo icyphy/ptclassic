@@ -1,5 +1,5 @@
 -- Vhdlbpar2ser.vhdl
--- $Id$
+-- @(#)Vhdlbpar2ser.vhdl	1.1 6/23/94
 -- Michael C. Williamson
 
 entity VHDLBPar2Ser is

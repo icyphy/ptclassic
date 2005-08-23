@@ -1,6 +1,6 @@
 # Config file to build on SPARC processor running Solaris9
 # with gcc-2.95.1
-# $Id$
+# @(#)config-sol9.mk	1.1 05/31/05
 
 # Copyright (c) 2005 The Regents of the University of California.
 # All rights reserved.

@@ -1,7 +1,7 @@
 #ifndef _ACSWormhole_h
 #define _ACSWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)ACSWormhole.h	1.9 08/15/00
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

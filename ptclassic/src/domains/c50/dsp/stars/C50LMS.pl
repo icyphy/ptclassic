@@ -2,11 +2,11 @@ defstar {
 	name { LMS }
 	domain { C50 }
 	desc { Least mean square (LMS) adaptive filter. }
-	version {$Id$}
+	version {@(#)C50LMS.pl	1.12	09/21/99}
 	acknowledge { Gabriel version by E. A. Lee, Maureen O'Reilly }
 	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

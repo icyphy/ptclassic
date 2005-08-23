@@ -1,9 +1,9 @@
 /* 
 Rountines for blocking interrupts caused by the arrival of signals
-   $Id$
+   @(#)ptsignals.cc	1.14 02/04/99
 */
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -105,7 +105,7 @@ extern "C" SIG_PT ptSignal(int sig, SIG_PT handler)
 
     // These casts are UGLY, but what else are you going to do?!
     SIG_PT old = (SIG_PT)action.sa_handler;
-#if defined(PTSOL2_5) && defined(PTSOL2_CFRONT) || defined(PTSOL2_5) && (__GNUC__ >= 3)  
+#if defined(PTSOL2_5) && defined(PTSOL2_CFRONT)   
     // See /usr/include/sys/signal.h under solaris2.5 for a complete discussion
     action.sa_handler = (void (*)(int))handler;
 #else

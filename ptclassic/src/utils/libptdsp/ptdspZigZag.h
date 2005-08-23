@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Paul Haskell
-Version: $Id$
+Version: @(#)ptdspZigZag.h	1.4 7/23/96
 */
 
 #ifdef __cplusplus

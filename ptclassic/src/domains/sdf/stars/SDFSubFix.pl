@@ -7,12 +7,12 @@ Output as a fixed-point number the "pos" input minus all "neg" inputs.
 	}
         author { A. Khazeni }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)SDFSubFix.pl	1.21	10/21/97 }
         location { SDF main library }
         input {
                 name { pos }

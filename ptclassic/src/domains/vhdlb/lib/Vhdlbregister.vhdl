@@ -1,5 +1,5 @@
 -- Vhdlbregister.vhdl
--- $Id$
+-- @(#)Vhdlbregister.vhdl	1.1 6/23/94
 -- Michael C. Williamson
 
 entity VHDLBRegister is

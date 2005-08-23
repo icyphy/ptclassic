@@ -2,10 +2,10 @@ defstar {
 	name { DummySrc }
 	domain { CG }
 	desc { Source star that generates no code.  }
-	version { $Id$ }
+	version { @(#)CGDummySrc.pl	1.3 10/01/96 }
 	author { Raza Ahmed and Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

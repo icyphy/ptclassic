@@ -10,10 +10,10 @@ the value of the control input.  If control is true, the
 value is written to trueOutput; otherwise it is written to
 falseOutput.
 	}
-	version { $Id$ }
+	version { @(#)CGSwitch.pl	1.4 1/1/96 }
 	author { J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

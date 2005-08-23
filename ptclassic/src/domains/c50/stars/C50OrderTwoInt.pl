@@ -4,7 +4,7 @@ defstar {
 	desc {
 Takes two inputs and outputs the greater and lesser of the two integers.
 	}
-	version { $Id$ }
+	version { @(#)C50OrderTwoInt.pl	1.6	7/22/96 }
 	author { Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

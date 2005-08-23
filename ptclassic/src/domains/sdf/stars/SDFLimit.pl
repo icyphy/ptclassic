@@ -5,10 +5,10 @@ defstar {
 The output of this star is the value of the input limited
 to the range between "bottom" and "top" inclusive.
 	}
-	version {$Id$}
+	version {@(#)SDFLimit.pl	1.8 3/2/95}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

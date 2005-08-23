@@ -2,7 +2,7 @@
 #define _UTIL_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* util.h
 Version identification:
-$Id$
+@(#)util.h	1.20    02/05/97
 Header file for util.c
 */
 

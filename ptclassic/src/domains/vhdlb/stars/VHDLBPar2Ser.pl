@@ -6,10 +6,10 @@ Output the eight bits of input in parallel on the serial output.
 Latch in a new input byte every eight clock cycles.
 Shift the bits out (starting with the lowest) one per clock cycle.
 	}
-        version { $Id$ }
+        version { @(#)VHDLBPar2Ser.pl	1.5 3/2/95 }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

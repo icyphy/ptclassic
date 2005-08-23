@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*
    V2Creal.c
    Real communication from VHDL to C
-   Version:  $Id$
+   Version:  @(#)V2Creal.c	1.3 03/15/96
 */
 
 #include "CLISocket.h"

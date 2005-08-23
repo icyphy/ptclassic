@@ -2,7 +2,7 @@ defstar {
 	name { GoertzelPower }
 	domain { CG56 }
 	derived { GoertzelBase }
-	version { $Id$ }
+	version { @(#)CG56GoertzelPower.pl	1.13	06 Oct 1996 }
 	desc {
 First-order recursive computation of the power of the kth coefficient of
 an N-point DFT using Goertzel's algorithm.
@@ -10,7 +10,7 @@ This form is used in touchtone decoding.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

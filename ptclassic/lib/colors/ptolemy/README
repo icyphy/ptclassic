@@ -1,6 +1,6 @@
 #
 # ~ptolemy/lib/colors/ptolemy/README
-# Version $Id$
+# Version @(#)README	1.3	6/5/94
 #
 This directory contains the definitions of colors used by Vem
 when running Ptolemy.  To change these, edit the file colors.pat.

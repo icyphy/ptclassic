@@ -1,6 +1,6 @@
 # Config file to build on SPARC processor running Solaris7 (aka Solaris 2.8)
 # with gcc-2.95.1
-# $Id$
+# @(#)config-sol8.mk	1.2 09/25/00
 
 # Copyright (c) 2000 The Regents of the University of California.
 # All rights reserved.

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Joseph Buck and Brian Evans
-Version: $Id$
+Version: @(#)ptdspRaisedCosine.h	1.3	7/23/96
 */
 
 #ifdef __cplusplus

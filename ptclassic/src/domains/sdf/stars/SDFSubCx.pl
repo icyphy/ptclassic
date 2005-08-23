@@ -2,10 +2,10 @@ defstar {
 	name { SubCx }
 	domain { SDF }
 	desc { Output the "pos" input minus the "neg" input, a complex value. }
-	version {$Id$}
+	version {@(#)SDFSubCx.pl	1.8	10/21/97}
 	author { J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

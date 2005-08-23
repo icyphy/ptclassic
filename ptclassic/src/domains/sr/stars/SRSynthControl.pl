@@ -4,7 +4,7 @@ defstar {
   desc {
 A polyphonic synthesizer control
   }
-  version { $Id$ }
+  version { @(#)SRSynthControl.pl	1.5 02/21/97 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

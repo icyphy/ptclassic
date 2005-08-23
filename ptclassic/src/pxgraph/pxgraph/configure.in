@@ -1,7 +1,7 @@
 dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure" which configures pxgraph for 
 dnl	the local environment.
-dnl     $Id$
+dnl     @(#)configure.in	1.5 01/09/99
 dnl	Author: Christopher Hylands
 dnl	See http://ptolemy.eecs.berkeley.edu/~cxh/sapub/xgraph.html
 dnl
@@ -48,12 +48,11 @@ dnl permission to use and distribute the software in accordance with the
 dnl terms specified in this license.
 dnl 
 AC_INIT(xgraph.c)
-# SCCS: $Id$
+# SCCS: @(#)configure.in	1.5 01/09/99
  
-# If you change this, then update the version in xgraph.h
-PXGRAPH_VERSION=11.3.4
-PXGRAPH_MAJOR_VERSION=11
-PXGRAPH_MINOR_VERSION=3.4
+PXGRAPH_VERSION=2.0
+PXGRAPH_MAJOR_VERSION=2
+PXGRAPH_MINOR_VERSION=0
 PXGRAPH_PATCH_LEVEL="p3"
 VERSION=${PXGRAPH_VERSION}${PXGRAPH_PATCH_LEVEL}
  

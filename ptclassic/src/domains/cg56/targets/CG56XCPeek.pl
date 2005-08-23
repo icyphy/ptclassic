@@ -2,11 +2,11 @@ defstar {
     name { XCPeek }
     domain { CG56 }
     desc { CGC to S56X Asynchronous Receive star }
-    version { $Id$ }
+    version { @(#)CG56XCPeek.pl	1.6	01 Oct 1996 }
     author { Jose Luis Pino }
     derivedFrom {XCAsynchComm}
     copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

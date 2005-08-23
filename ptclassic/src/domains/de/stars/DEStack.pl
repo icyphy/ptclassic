@@ -15,10 +15,10 @@ The size of the stack is sent to the "size" output whenever an "inData"
 or "demand" event is processed.  Input data that doesn't fit on the stack
 is sent to the "overflow" output.
 	}
-	version { $Id$}
+	version { @(#)DEStack.pl	1.10	10/06/96}
 	author { Soonhoi Ha and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

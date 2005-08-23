@@ -15,9 +15,9 @@ complement encoding, and sign extended.  The resulting signed integer is sent
 to the output.
 	}
 	author { Asawaree Kalavade }
-	version { $Id$ }
+	version { @(#)SDFBusToNum.pl	1.18 12/08/97 }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

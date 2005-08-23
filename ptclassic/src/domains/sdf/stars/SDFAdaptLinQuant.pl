@@ -6,7 +6,7 @@ Uniform linear quantizer symmetric about 0 with variable step size.
 }
 	author { William Chen }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -25,7 +25,7 @@ value, the step size is output on the <i>outStep</i> port as a floating-point
 value, and the index of the quantization level on the <i>stepLevel</i> port
 as a non-negative integer between 0 and 2^<i>bits</i> - 1, inclusive.
 	}
-	version { $Id$ }
+	version { @(#)SDFAdaptLinQuant.pl	1.4	06 Oct 1996 }
 	input {
 		name {input}
 		type {float}

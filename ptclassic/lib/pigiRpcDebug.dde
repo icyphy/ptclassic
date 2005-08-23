@@ -1,6 +1,6 @@
 #! /bin/sh -x
 # usage: pigiRpcDebug.dde <vem-args>
-# $Id$
+# @(#)pigiRpcDebug.dde	1.2 3/21/96
 
 # Use dde as a debugger instead of gdb.
 # hppa.cfront requires this

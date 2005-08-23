@@ -7,10 +7,10 @@ where U, D, and V are simpler integer matrices. The Smith form
 decomposition for integer matrices is analogous to singular
 value decomposition for floating-point matrices.
 	}
-	version { $Id$ }
+	version { @(#)SDFSmithForm.pl	1.23	12/08/97 }
 	author { Brian Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

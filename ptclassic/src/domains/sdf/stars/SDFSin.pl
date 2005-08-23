@@ -2,10 +2,10 @@ defstar {
 	name {Sin}
 	domain {SDF}
 	desc { This star computes the sine of its input, which is assumed to be an angle in radians.  }
-	version {$Id$}
+	version {@(#)SDFSin.pl	1.10 3/2/95}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

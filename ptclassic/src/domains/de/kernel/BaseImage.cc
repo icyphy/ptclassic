@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ static const char file_id[] = "BaseImage.cc";
 // filename:		BaseImage.cc
 // author:			Paul Haskell
 // creation date:	7/1/91
-// SCCS info:		$Id$
+// SCCS info:		@(#)BaseImage.cc	1.13 12/08/97
 
 #ifdef __GNUG__
 #pragma implementation

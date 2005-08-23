@@ -15,10 +15,10 @@ coefficients will be scaled by gain/leading denominator coefficient.  An
 error will result if, after scaling, any of the coefficients is greater
 than 1 or less than -1.
     }
-    version { $Id$ }
+    version { @(#)CG56IIR.pl	1.16	10/06/96 }
     author { Kennard White and Luis Gutierrez}
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

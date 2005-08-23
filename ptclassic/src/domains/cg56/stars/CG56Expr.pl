@@ -3,10 +3,10 @@ defstar
     name { Expr }
     domain { CG56 } 
     desc { General expression evaluation. }
-    version { $Id$ }
+    version { @(#)CG56Expr.pl	1.5 1/1/96 }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

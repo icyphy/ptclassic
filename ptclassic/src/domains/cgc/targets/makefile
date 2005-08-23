@@ -1,8 +1,8 @@
 # Makefile for cgc/targets
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.7 8/18/96
 #
 # Important!  Do not run this makefile while in 
 # $PTOLEMY/src/domains/cgc/targets.

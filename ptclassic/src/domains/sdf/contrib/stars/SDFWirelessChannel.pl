@@ -1,12 +1,12 @@
 defstar {
 	name { WirelessChannel }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFWirelessChannel.pl	1.7	12/08/97 }
 	author { John S. Davis, II }
 	acknowledge { Brian L. Evans }
 	location { SDF user contribution library }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

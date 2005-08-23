@@ -1,9 +1,9 @@
 static const char file_id[] = "Error.cc";
 /*******************************************************************
 SCCS Version identification :
-$Id$
+@(#)Error.cc	2.13	02/06/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

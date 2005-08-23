@@ -1,5 +1,5 @@
 /*
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
    CLISocket.c
    Demonstration of using socket routines for communication
    between Synopsys VHDL simulator and C.
-   Version:  $Id$
+   Version:  @(#)CLISocket.c	1.4 04/07/97
 */
 
 #include "CLISocket.h"

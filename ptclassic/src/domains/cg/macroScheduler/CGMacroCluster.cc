@@ -1,9 +1,9 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGMacroCluster.cc	1.8	09/10/99
 
 Copyright (c) 1995 Seoul National University
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

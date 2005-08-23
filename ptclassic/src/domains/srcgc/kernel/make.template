@@ -49,7 +49,7 @@
 #  22/01/98 FBO 1.0 original
 # ###################################################################
 #
-# Version: $Id$
+# Version: @(#)make.template	1.2 05/26/98
 
 # Root of Ptolemy directory
 ROOT=../../../..

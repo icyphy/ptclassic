@@ -8,10 +8,10 @@ This star delays its input by a variable amount.
 The "delay" parameter gives the initial delay,
 and the delay is changed using the "newDelay" input.
     }
-    version { $Id$ }
+    version { @(#)DEVarDelay.pl	1.9 06/04/96 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

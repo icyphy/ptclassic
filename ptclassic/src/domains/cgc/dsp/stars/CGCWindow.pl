@@ -6,11 +6,11 @@ defstar {
 Generates standard window functions:
 Rectangle, Bartlett, Hanning, Hamming, Kaiser, Blackman, and SteepBlackman.
 }
-	version { $Id$ }
+	version { @(#)CGCWindow.pl	1.5	10/06/96 }
 	author { Brian L. Evans }
 	acknowledge { Jose Luis Pino and Kennard White }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

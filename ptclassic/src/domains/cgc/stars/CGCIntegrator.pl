@@ -20,10 +20,10 @@ Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state
 is the previous output.
 	}
-	version { $Id$ }
+	version { @(#)CGCIntegrator.pl	1.9	10/08/96 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

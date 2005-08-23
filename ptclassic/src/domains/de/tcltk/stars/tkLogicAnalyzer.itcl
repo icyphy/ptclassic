@@ -1,6 +1,6 @@
 # Tcl front end for LogicAnalyzer class in the DE domain.
 # Author: Matthew T. Tavis
-# Version: $Id$
+# Version: @(#)tkLogicAnalyzer.itcl	1.2	9/19/95
 
 if {[itcl_info class LogicAnalyzerStar] == ""} {
 itcl_class LogicAnalyzerStar {

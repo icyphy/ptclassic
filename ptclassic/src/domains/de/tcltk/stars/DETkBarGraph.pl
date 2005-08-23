@@ -10,10 +10,10 @@ If there is more than one input port, then
 bars for the two inputs will be plotted together
 only if the events are simultaneous.
 	}
-	version { $Id$ }
+	version { @(#)DETkBarGraph.pl	1.11   10/23/95 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

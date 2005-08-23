@@ -9,10 +9,10 @@ reset the plot area to that outlined by the box.  There are also buttons
 for zooming in and out, and for resizing the box to just fit the data
 in view.  Generate an animated X-Y plot in a Tk window.
 	}
-	version { $Id$ }
+	version { @(#)CGCTkXYPlot.pl	1.12    7/23/96 }
 	author { W.-J. Huang, E. A. Lee, and D. Niehaus }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,4 +1,4 @@
-;$Id$
+;@(#)ioequ.asm	1.1	8/28/92
 ;
 ; This program originally available on the Motorola DSP bulletin board.
 ; It is provided under a DISCLAMER OF WARRANTY available from

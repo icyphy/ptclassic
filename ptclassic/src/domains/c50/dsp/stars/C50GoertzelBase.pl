@@ -1,13 +1,13 @@
 defstar {
 	name { GoertzelBase }
 	domain { C50 }
-	version {$Id$}
+	version {@(#)C50GoertzelBase.pl	1.9	05/26/98}
 	desc {
 Base class for Goertzel algorithm stars
 	}
 	author { Luis Gutierrez, based on CG56 Implementation, G. Arslan}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

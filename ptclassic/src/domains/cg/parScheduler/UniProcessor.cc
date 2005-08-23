@@ -2,9 +2,9 @@ static const char file_id[] = "UniProcessor.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)UniProcessor.cc	1.33	3/19/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

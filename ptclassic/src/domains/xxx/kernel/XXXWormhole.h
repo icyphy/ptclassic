@@ -1,9 +1,9 @@
 #ifndef _XXXWormhole_h
 #define _XXXWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)XXXWormhole.h	1.10 08/31/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

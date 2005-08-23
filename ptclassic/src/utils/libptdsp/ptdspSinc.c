@@ -1,6 +1,6 @@
 /*******************************************************************
 Version identification:
-$Id$ %Q%
+@(#)ptdspSinc.c	1.2 
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.

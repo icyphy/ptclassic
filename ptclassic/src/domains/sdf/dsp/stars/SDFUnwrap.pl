@@ -6,10 +6,10 @@ Unwraps a phase plot, removing discontinuities of magnitude 2*PI.
 The star assumes that the phase never changes by more than PI in one
 sample period. It also assumes that the input is in the [-PI,PI] range.
 	}
-	version {$Id$}
+	version {@(#)SDFUnwrap.pl	2.14 10/01/96}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,7 +2,7 @@
    CLIConstants.h
    Constants used in demonstration of using socket routines for
    communication between Synopsys VHDL simulator and C.
-   Version:  $Id$
+   Version:  @(#)CLIConstants.h	1.1	7/27/96
    Author: Mike Williamson
 */
 

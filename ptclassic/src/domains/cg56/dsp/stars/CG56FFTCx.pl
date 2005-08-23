@@ -3,7 +3,7 @@ name { FFTCx }
 domain { CG56 }
 desc {
 }
-version { $Id$ }
+version { @(#)CG56FFTCx.pl	1.10	01 Oct 1996 }
 author { Jose Luis Pino, ported from Gabriel }
 copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

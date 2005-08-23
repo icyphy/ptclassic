@@ -1,5 +1,5 @@
 # Makefile for XXX domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  E. A. Lee and D. Niehaus
-# $Id$
+# @(#)makefile	1.4  04/07/97
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/xxx.
 # Instead run in from $PTOLEMY/obj.$PTARCH/domains/xxx (through the symbolic

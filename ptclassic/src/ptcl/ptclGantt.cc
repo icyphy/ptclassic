@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 /* Routines for talking to the Gantt chart display */
-/* $Id$ */
+/* @(#)ptclGantt.cc	1.2	10/27/95 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.

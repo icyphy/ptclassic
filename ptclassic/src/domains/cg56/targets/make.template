@@ -1,5 +1,5 @@
 # Makefile for extra CG56 domain targets
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All Rights Reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #                                               COPYRIGHTENDKEY
 #
 # Programmer: Jose Luis Pino and Joe T. Buck
-# $Id$
+# @(#)make.template	1.35	7/10/96
 # Created: 2/19/92
 #
 # If this file's name is "make.template" and there is no makefile in

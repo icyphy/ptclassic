@@ -1,6 +1,6 @@
 # Makefile for testing Ptolemy ACS stars 
 #
-# $Id$
+# @(#)makefile	1.1 03/28/98
 # Author: Christopher Hylands
 #
 # Copyright (c) 1998 The Regents of the University of California.

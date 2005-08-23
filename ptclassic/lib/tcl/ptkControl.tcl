@@ -1,8 +1,8 @@
 # Definition of a bunch of control panels for the tcl/tk Ptolemy interface
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)ptkControl.tcl	1.61 12/10/97
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -1,8 +1,8 @@
 /*******************************************************************
 SCCS version identification
-$Id$
+@(#)ptplay.sol2.c	1.4 04/08/97
 
-Copyright (c) 1995-%Q% The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

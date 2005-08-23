@@ -13,9 +13,9 @@ static const char file_id[] = "DDFSimpleSched.cc";
 	
 /**************************************************************************
 Version identification:
-$Id$
+@(#)DDFSimpleSched.cc	1.8	10/18/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

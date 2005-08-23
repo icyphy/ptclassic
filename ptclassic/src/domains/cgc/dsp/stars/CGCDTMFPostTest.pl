@@ -1,7 +1,7 @@
 defstar {
 	name { DTMFPostTest }
 	domain { CGC }
-	version { $Id$ }
+	version { @(#)CGCDTMFPostTest.pl	1.5	06 Oct 1996 }
 	desc {
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.
@@ -25,7 +25,7 @@ Texas Instruments, 1986.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

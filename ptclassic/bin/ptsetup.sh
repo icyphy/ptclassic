@@ -2,8 +2,8 @@
 # ptsetup.sh
 # Setup common environment variables used by pigi, ptcl and tycho
 # 
-# Version: $Id$
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Version: @(#)ptsetup.sh	1.6 01/05/99
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # 	All Rights Reserved.
 #
 # Author: Christopher Hylands, based on code by Wolfgang Reimer

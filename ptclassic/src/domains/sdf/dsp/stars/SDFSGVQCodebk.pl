@@ -8,10 +8,10 @@ row. Each row of first output matrix represent a codeword of the shape
 codebook. Each element of the second output matrix represent a 
 codeword of the gain codebook.
   }
-  version { $Id$ }
+  version { @(#)SDFSGVQCodebk.pl	1.15 12/15/97 }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

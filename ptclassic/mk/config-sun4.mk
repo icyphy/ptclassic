@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #
 # Config file to build on sun4 processor (SparcStation) running SunOS4.1x
 #
-# $Id$
+# @(#)config-sun4.mk	1.74 02/04/99
 
 
 # --------------------------------------------------------------------

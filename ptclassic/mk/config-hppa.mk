@@ -2,8 +2,8 @@
 # using the gcc-2.95.1 compiler.  This file is setup for HPUX10, and would
 # require some editing for HPUX9
 
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)config-hppa.mk	1.83 10/22/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

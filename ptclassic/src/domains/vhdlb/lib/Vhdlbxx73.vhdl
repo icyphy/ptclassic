@@ -1,5 +1,5 @@
 -- Vhdlbxx73.vhdl
--- $Id$
+-- @(#)Vhdlbxx73.vhdl	1.1 6/23/94
 -- Michael C. Williamson
 
 entity VHDLBxx73 is

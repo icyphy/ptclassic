@@ -2,10 +2,10 @@ defstar {
 	name { ReadFile }
 	domain { C50 }
 	desc { Reads data from file for use with simulator. }
-	version { $Id$ }
+	version { @(#)C50ReadFile.pl	1.6	02/03/99 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

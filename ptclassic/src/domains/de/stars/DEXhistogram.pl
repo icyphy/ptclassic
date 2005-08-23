@@ -8,10 +8,10 @@ values in the events that arrive. The time of arrival of events is ignored.
 This star is identical to the SDF Xhistogram, but is used often enough in the
 DE domain that it is provided here for convenience.
 	}
-	version { $Id$}
+	version { @(#)DEXhistogram.pl	2.12	11/26/97}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

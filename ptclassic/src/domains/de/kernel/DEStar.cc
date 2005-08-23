@@ -1,7 +1,7 @@
 static const char file_id[] = "DEStar.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)DEStar.cc	2.25 03/27/98
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

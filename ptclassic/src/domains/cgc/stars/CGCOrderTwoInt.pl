@@ -4,7 +4,7 @@ defstar {
 	desc {
 Takes two inputs and outputs the greater and lesser of the two integers.
 	}
-	version { $Id$ }
+	version { @(#)CGCOrderTwoInt.pl	1.1 5/1/96 }
 	author { Brian L. Evans }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

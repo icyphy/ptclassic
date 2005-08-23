@@ -1,7 +1,7 @@
 # Ptolemy-style makefile to create a link for the Java pxgraph script
 #
-# $Id$
-# Copyright (c) 1997-%Q% The Regents of the University of California.
+# @(#)makefile	1.10 02/04/99
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

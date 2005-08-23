@@ -8,10 +8,10 @@ The print method of the input particles is used,
 so any data type can be handled, although the space
 allocated on the screen may need to be adjusted.
     }
-    version { $Id$ }
+    version { @(#)DETkShowValues.pl	1.6	01 Oct 1996 }
     author { Brian Evans and Edward Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,9 +1,9 @@
 #!/usr/local/bin/wish
 #
-# Version: $Id$
+# Version: @(#)TkSched.tcl	1.13 02/20/98
 # Written by Michael C. Williamson
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

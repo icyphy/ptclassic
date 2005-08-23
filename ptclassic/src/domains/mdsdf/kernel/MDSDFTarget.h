@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  Mike J. Chen
  Date of creation: 9/1/93
- Version: $Id$
+ Version: @(#)MDSDFTarget.h	1.6	07/30/96
 
  Declaration for MDSDFTarget, the default target to be used in the MDSDF
  domain.

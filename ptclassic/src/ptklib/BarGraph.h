@@ -2,7 +2,7 @@
 #define _BarGraph_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)BarGraph.h	1.9	08/29/99
 
 Author: Edward A. Lee
 
@@ -10,7 +10,7 @@ Defines and maintains a Tcl bar graph.
 It uses the C functions defined in $PTOLEMY/src/ptklib/ptkBarGraph.c,
 but puts an object-oriented wrapper around them.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

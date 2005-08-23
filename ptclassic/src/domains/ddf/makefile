@@ -1,5 +1,5 @@
 # Makefile for DDF domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# Version: $Id$
+# Version: @(#)makefile	1.9	10/01/96
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/ddf.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/ddf (through the symbolic

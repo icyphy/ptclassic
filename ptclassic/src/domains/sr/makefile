@@ -1,6 +1,6 @@
 # Makefile for SR domain support
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Version: $Id$
+# Version: @(#)makefile	1.3 04/07/97
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/sr.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/sr (through the symbolic

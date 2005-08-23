@@ -2,8 +2,8 @@
 #
 # mkexps - make export list for aix running GNU g++
 #
-# Version: $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Version: @(#)mkexps	1.1 04/24/95
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # 	All Rights Reserved.
 #
 #	Author: Xavier Warzee (WARZEE@SCTF.thomson.fr)

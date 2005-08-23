@@ -2,7 +2,7 @@ defstar {
 	name { GoertzelPower }
 	domain { CGC }
 	derived { GoertzelBase }
-	version { $Id$ }
+	version { @(#)CGCGoertzelPower.pl	1.5	10/07/96 }
 	desc {
 Second-order recursive computation of the power of the kth coefficient of
 an N-point DFT using Goertzel's algorithm.
@@ -10,7 +10,7 @@ This form is used in touchtone decoding.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,7 +2,7 @@
 Functions that Display a file
 
 Version identification:
-$Id$
+@(#)displayFile.h	1.2 9/4/96
 
 Copyright (c) 1996 The Regents of the University of California.
 All rights reserved.

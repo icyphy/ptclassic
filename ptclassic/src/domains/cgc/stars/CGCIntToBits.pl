@@ -6,10 +6,10 @@ Read the least significant nBits bits from an integer input,
 and output the bits as integers serially on the output,
 most significant bit first.
     }
-    version { $Id$ }
+    version { @(#)CGCIntToBits.pl	1.8 01 Oct 1996 }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1990-%Q% The Regents of the University of California.
+	Copyright (c) 1990-1996 The Regents of the University of California.
 	All rights reserved.
 	See the file $PTOLEMY/copyright for copyright notice,
 	limitation of liability, and disclaimer of warranty provisions.

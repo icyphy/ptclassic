@@ -6,10 +6,10 @@ Output the reciprocal of the input, with an optional magnitude limit.
 If the magnitude limit is greater than zero, and the input value is zero,
 then the output will equal the magnitude limit.
 	}
-	version {$Id$}
+	version {@(#)SDFReciprocal.pl	1.12 10/07/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

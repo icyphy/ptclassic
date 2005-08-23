@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSTarget.cc	1.11 09/10/99
 
 ***********************************************************************/
 #ifdef __GNUG__

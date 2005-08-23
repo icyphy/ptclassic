@@ -1,7 +1,7 @@
 static const char file_id[] = "CompileTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)CompileTarget.cc	1.71	07/22/98
 
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.

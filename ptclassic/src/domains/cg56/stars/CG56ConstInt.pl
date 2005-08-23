@@ -2,10 +2,10 @@ defstar {
 	name { ConstInt }
 	domain { CG56 }
 	desc { Constant source }
-	version { $Id$ }
+	version { @(#)CG56ConstInt.pl	1.2	01 Oct 1996 }
 	author { Brian L. Evans, Edward A. Lee, Jose Luis Pino, Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

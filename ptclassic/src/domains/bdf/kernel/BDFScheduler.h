@@ -2,9 +2,9 @@
 #define _BDFScheduler_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)BDFScheduler.h	2.10	09/01/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

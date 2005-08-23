@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@
 # Programmer:  Brian L. Evans
 #
 # mathematica.mk: Common definitions for the Ptolemy interface to Mathematica
-# $Id$
+# @(#)mathematica.mk	1.12	03/26/98
 #
 # We have to handle four cases:
 # (1/2) Mathematica is/is not installed at compile time

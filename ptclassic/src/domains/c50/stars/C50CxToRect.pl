@@ -2,10 +2,10 @@ defstar {
 	name {CxToRect}
 	domain {C50}
 	desc { Convert complex data to real and imaginary parts. }
-	version {$Id$}
+	version {@(#)C50CxToRect.pl	1.4	05/26/98}
 	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

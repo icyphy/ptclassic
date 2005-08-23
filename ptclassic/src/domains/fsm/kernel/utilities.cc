@@ -2,9 +2,9 @@ static const char file_id[] = "utilities.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+@(#)utilities.cc	1.8 11/13/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,7 +40,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 *************************************************************************/
 
 #include <string.h>
-#include "Block.h"
 #include "Error.h"
 #include "Geodesic.h"
 #include "InfString.h"
@@ -171,13 +170,7 @@ int interp2port(Tcl_Interp* myInterp,PortHole* port,const char* ghostDomain) {
 	}
 	
       } else {
-	buf = "interp2port: Not supported type ";
-	buf << port->type();
-	buf << " found in port ";
-	buf << port->name();
-	buf << " of ";
-	buf << port->parent()->name();
-	Error::abortRun(buf);
+	Error::abortRun("interp2port: ",port->type()," is not supported yet!");
 	return FALSE;
       }
     }  // end of if (!strcmp(ghostDomain,"SDF"))
@@ -233,13 +226,8 @@ int interp2port(Tcl_Interp* myInterp,PortHole* port,const char* ghostDomain) {
       }
       
     } else {
-      buf = "interp2port: Not supported type ";
-      buf << port->type();
-      buf << " found in port ";
-      buf << port->name();
-      buf << " of ";
-      buf << port->parent()->name();
-      Error::abortRun(buf);
+      Error::abortRun("interp2port: Data type ", port->type(),
+		      " is not supported yet!");
       return FALSE;
     }
     

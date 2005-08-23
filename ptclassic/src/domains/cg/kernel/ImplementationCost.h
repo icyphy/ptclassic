@@ -1,7 +1,7 @@
 #ifndef _ImplementationCost_h
 #define _ImplementationCost_h 1
 /******************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  Brian L. Evans
 Created: July 2, 1996
-Version: $Id$
+Version: @(#)ImplementationCost.h	1.4	07/02/96
 
 This file defines an ImplementationCost class to track software and
 hardware implementation costs.

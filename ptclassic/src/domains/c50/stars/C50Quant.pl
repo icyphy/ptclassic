@@ -5,10 +5,10 @@ defstar {
 The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
-	version {$Id$}
+	version {@(#)C50Quant.pl	1.13	05/26/98}
 	author { Luis Gutierrez, based on CG56 version, G. Arslan }
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

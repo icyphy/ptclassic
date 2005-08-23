@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* compile.c  edg
 
 Version identification:
-$Id$
+@(#)compile.c	1.90	12/10/97
 
 There are two representations of a design: the Oct one and the internal
 kernel one.  The compile routines keep these representations consistent.

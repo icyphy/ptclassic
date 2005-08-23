@@ -3,9 +3,9 @@
 # This file is present only as a starting point for others.
 # $PTOLEMY/doc/html/nt/index.html for more information.
 
-# $Id$
+# @(#)config-nt4.mk	1.28 09/21/00
 
-# Copyright (c) 1997-%Q% The Regents of the University of California.
+# Copyright (c) 1997-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

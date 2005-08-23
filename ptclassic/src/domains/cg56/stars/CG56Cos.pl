@@ -5,11 +5,11 @@ defstar {
 Cosine function calculated by table lookup.
 Input range of (-1,1) scaled by pi.
 	}
-	version { $Id$ }
+	version { @(#)CG56Cos.pl	1.18 06 Oct 1996 }
 	acknowledge { Gabriel version by Maureen O'Reilly }
 	author { J. Pino (ported from Gabriel) }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

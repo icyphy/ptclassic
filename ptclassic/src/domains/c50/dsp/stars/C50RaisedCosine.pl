@@ -7,10 +7,10 @@ An FIR filter with a magnitude frequency response that is shaped
 like the standard raised cosine or square-root raised cosine
 used in digital communications.
 	}
-	version { $Id$ }
+	version { @(#)C50RaisedCosine.pl	1.7	10/16/97 }
 	author { A. Baensch }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -61,12 +61,10 @@ See the SDFRaisedCos star.
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
 			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
-					int(symbol_interval),
-					double(excessBW));
+					int(symbol_interval), excessBW);
 		    else
 			taps[i] = Ptdsp_RaisedCosine(i - center,
-					int(symbol_interval),
-					double(excessBW));
+					int(symbol_interval), excessBW);
 		}
 		C50FIR :: setup();
 	}

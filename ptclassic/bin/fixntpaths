@@ -3,7 +3,7 @@
 # All Rights Reserved.
 # See $PTOLEMY/copyright for the complete copyright notice.
 #
-# Version: $Id$
+# Version: @(#)fixntpaths	1.2 02/05/99
 
 # Script to fix Ptolemy paths so that Ptolemy will work under NT w/ Cygwin
 #

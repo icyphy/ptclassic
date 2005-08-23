@@ -1,9 +1,9 @@
 static const char file_id[] = "KnownBlock.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)KnownBlock.cc	2.25 12/08/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

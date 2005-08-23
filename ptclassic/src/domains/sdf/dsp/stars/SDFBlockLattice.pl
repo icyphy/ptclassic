@@ -10,10 +10,10 @@ The "order" parameter indicates how many coefficient
 should be read.  The "blockSize" parameter specifies how many
 data samples should be processed for each set of coefficients.
 	}
-	version {$Id$}
+	version {@(#)SDFBlockLattice.pl	1.12 12/08/97}
 	author { Alan Kamas and Edward Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

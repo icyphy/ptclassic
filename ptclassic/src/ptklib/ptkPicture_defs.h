@@ -1,7 +1,7 @@
 /*
  * Header file for Tk canvas-based picture display facility
  * Author:Luis Gutierrez (based on ptkPlot )
- * $Id$
+ * @(#)ptkPicture_defs.h	1.1  06/25/97
  */
 #ifndef _ptkPicture_defs_h
 #define _ptkPicture_defs_h 1

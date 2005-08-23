@@ -377,6 +377,12 @@
       (color 1000 838 0)	(comment "yellow")
       (fillPattern 1 1 "1")
   )
+  (figureGroupDefault stringColor
+      (userData priority 5)
+      (width -2)
+      (color 0 0 0)		(comment "black")
+      (fillPattern 1 1 "1")
+  )
 
   (comment "The following section is newer, and adds layers with various")
   (comment "priorities lower and higher than those in the original spec.")

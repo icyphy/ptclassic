@@ -2,7 +2,7 @@ defstar {
 	name { QntBtsLin }
 	domain { C50 }
 	desc { Linear quantizer with adjustable offset. }
-	version { $Id$ }
+	version { @(#)C50QntBtsLin.pl	1.7	01 Oct 1996 }
 	acknowledge { Gabriel version by E. A. Lee }
 	author { Luis Gutierrez, based on the CG56 version }
 	copyright {

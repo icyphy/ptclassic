@@ -2,11 +2,11 @@ defstar {
     name { LMSRx }
     domain { CG56 }
     desc { Complex LMS filter. }
-    version { $Id$ }
+    version { @(#)CG56LMSRx.pl	1.16 09/10/99 }
     author { Kennard White (ported from Gabriel) }
     acknowledge { Gabriel version by Steve How and Maureen O'Reilly }
     copyright {
-Copyright (c) 1991-%Q% The Regents of the University of California.
+Copyright (c) 1991-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

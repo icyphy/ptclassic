@@ -30,11 +30,11 @@ the window length (i.e., <i>period</i> = 0).
 Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,
 Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
 	}
-	version { $Id$ }
+	version { @(#)SDFWindow.pl	1.23	06 Oct 1996 }
 	author { Kennard White }
 	acknowledge { William Chen and Brian L. Evans}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

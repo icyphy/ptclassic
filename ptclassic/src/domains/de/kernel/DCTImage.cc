@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@ static const char file_id[] = "DCTImage.cc";
 // filename:		DCTImage.cc
 // author:			Sun-Inn Shih
 // creation date:	7/11/91
-// SCCS info:		$Id$
+// SCCS info:		@(#)DCTImage.cc	1.19 12/08/97
 
 #include "DCTImage.h"
 #include <minmax.h>

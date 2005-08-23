@@ -2,10 +2,10 @@ defstar {
 	name {Ether}
 	domain {DE}
 	derivedfrom { RepeatStar }
-	version { $Id$ }
+	version { @(#)DEEther.pl	1.12	03/27/97 }
 	author { E. A. Lee  and T. Parks }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

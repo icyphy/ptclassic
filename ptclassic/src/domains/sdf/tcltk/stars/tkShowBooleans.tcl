@@ -1,9 +1,9 @@
 # Tcl/Tk source for a display that shows Booleans
 #
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)tkShowBooleans.tcl	1.3   02/23/97
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

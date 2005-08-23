@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)TyTcl.cc	1.5     08/24/98
 		       
     Programmer:  Edward A. Lee (based on code by Alan Kamas and Joe Buck)
 
@@ -8,7 +8,7 @@ $Id$
     in the Tycho system. The constructor registers these
     commands with the interpreter passed as a argument.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

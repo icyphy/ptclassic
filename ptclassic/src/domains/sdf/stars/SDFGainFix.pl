@@ -9,12 +9,12 @@ The precision of "gain", the input, and the output can be specified in bits.
 	}
 	author { A. Khazeni }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)SDFGainFix.pl	1.22	09/01/97 }
 	location { SDF main library }
 	htmldoc {
 The value of the "gain" parameter and its precision in bits can currently 

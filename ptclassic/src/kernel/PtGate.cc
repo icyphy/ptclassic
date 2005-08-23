@@ -1,9 +1,9 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "PtGate.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PtGate.cc	1.9	3/4/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

@@ -8,10 +8,10 @@ samples, then passes the "decision" input to the output.  Designed
 for use in decision feedback equalizers, but can be used for other
 purposes.
 	}
-	version { $Id$ }
+	version { @(#)CGCTrainer.pl	1.8 01 Oct 1996 }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,7 +1,7 @@
 defstar {
 	name {BeamXYNorm}
 	domain {SDF}
-	version { $Id$ }
+	version { @(#)SDFBeamXYNorm.pl	1.3	12/08/97 }
 	desc {
 Outputs the magnitude of the antenna array beam pattern with respect to the
 antenna positions and the actual steering vector. The output is in polar

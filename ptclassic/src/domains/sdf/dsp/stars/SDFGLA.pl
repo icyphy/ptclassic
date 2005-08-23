@@ -7,10 +7,10 @@ training vectors.  Note that each input matrix will be viewed as a
 row vector in row by row. Each row of output matrix represent a
 codeword of the codebook. 
 	}
-	version { $Id$ }
+	version { @(#)SDFGLA.pl	1.13	7/7/96 }
 	author { Bilung Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -3,10 +3,10 @@
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCDDFCode.h	1.4	04/07/97
 
 Copyright (c) 1995 Seoul National University
-@Copyright (c) 1995-%Q% The Regents of the University of California.
+@Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

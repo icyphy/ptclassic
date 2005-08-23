@@ -10,10 +10,10 @@ Phase = 0 is the default.  Note that "phase" has the opposite
 sense of the phase parameter in the UpSample star, but the
 same sense as the phase parameter in the FIR star.
 	}
-	version { $Id$ }
+	version { @(#)VHDLDownSample.pl	1.6 04/23/97 }
 	author { Michael C. Williamson, J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

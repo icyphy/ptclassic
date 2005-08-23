@@ -1,7 +1,7 @@
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "PosixMonitor.cc";
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* Version $Id$
+/* Version @(#)PosixMonitor.cc	1.4 3/7/96
    Author:	T. M. Parks
    Created:	21 October 1994
 */

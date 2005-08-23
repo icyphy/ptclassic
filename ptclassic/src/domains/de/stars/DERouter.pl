@@ -5,10 +5,10 @@ defstar {
 Randomly route an input event to one of its outputs.
 The probability is equal for each output. The time delay is zero.
 	}
-	version { $Id$}
+	version { @(#)DERouter.pl	2.13	6/20/95}
 	author { Soonhoi Ha and E. A. Lee}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

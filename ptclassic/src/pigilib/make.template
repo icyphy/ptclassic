@@ -1,8 +1,8 @@
 # Makefile for Ptolemy graphical interface library
 # Version identification:
-# $Id$
+# @(#)make.template	2.71   02/16/99
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -145,11 +145,11 @@ PTKDIR = $(ROOT)/src/ptklib
 # Note that some X11 installs have bogus (old versions) of the tcl/tk
 # headers, thus we must search the tcl/tk includes before the X11 includes
 INCL= -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
- -I$(TCL_INCDIR) -I$(TK_INCDIR) -I$(PTCLHDRS) -I$(PTKDIR) $(X11_INCSPEC)
+ -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR)
 
 C_INCL=-I$(OCTTOOLS)/include -I$(PTCL_INCDIR) \
 	-I$(ITCL_INCDIR) -I$(ITK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
-	$(PTCOMPAT_INCSPEC)  -I$(PTKDIR) $(X11_INCSPEC)
+	$(PTCOMPAT_INCSPEC) $(X11_INCSPEC) -I$(PTKDIR)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $^ > lint

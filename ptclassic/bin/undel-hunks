@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version: $Id$
+# Version: @(#)undel-hunks	1.4	2/29/96
 # Usage:   undel-hunks <log_file>
 #
 # This script can be used to track down memory leaks in Ptolemy.  In

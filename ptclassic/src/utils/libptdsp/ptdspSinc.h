@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 					COPYRIGHTENDKEY
 
 Programmer: Brian Evans
-Version: $Id$ %Q%
+Version: @(#)ptdspSinc.h	1.1 
 */
 
 #ifdef __cplusplus

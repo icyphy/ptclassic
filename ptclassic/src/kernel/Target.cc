@@ -1,9 +1,9 @@
 static const char file_id[] = "Target.cc";
 /*******************************************************************
 SCCS version identification
-$Id$
+@(#)Target.cc	2.60     07/21/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

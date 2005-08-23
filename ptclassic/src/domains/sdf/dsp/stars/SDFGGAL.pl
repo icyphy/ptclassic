@@ -9,10 +9,10 @@ This means that there are actually two lattice filters,
 one of which is adapted using the stochastic gradient algorithm,
 and the other which tracks the first.
     }
-    version { $Id$ }
+    version { @(#)SDFGGAL.pl	1.5 04/01/97 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

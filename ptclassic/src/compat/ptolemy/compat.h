@@ -1,8 +1,8 @@
 /*****************************************************************
 Version identification:
-$Id$
+@(#)compat.h	1.65 09/21/00
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -323,11 +323,7 @@ extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
 #if defined(PTHPPA) && !defined(PTHPPA_CFRONT) && defined(PTHPUX10)
 /* Under HPUX-10.20 and gcc-2.7.2, don't define lseek */
 #else
-#if defined(PTSOL2_5) && (__GNUC__ >= 3)
-    /* gcc-3.0, don't declare lseek(), kernel/Display won't compile. */
-#else
 extern long lseek();
-#endif /* PTSOL2 && __GNUC__ == 3 */
 #endif /* PTHPPA && ! PTHPPA_CFRONT */
 #endif /* PTNBSD_386 || PTFREEBSD */
 

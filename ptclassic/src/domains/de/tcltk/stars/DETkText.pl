@@ -8,10 +8,10 @@ keeping a specified number of past values in view.
 The print method of the input particles is used, so any data
 type can be handled.
     }
-    version { $Id$ }
+    version { @(#)DETkText.pl	1.8	01/29/97 }
     author { Brian Evans and Edward Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

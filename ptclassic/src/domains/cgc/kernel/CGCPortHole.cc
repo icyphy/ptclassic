@@ -1,9 +1,9 @@
 static const char file_id[] = "CGCPortHole.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCPortHole.cc	1.41 09/20/99
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

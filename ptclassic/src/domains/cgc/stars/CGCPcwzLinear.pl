@@ -17,10 +17,10 @@ then the appropriate extreme value will be used for the output.
 Thus, for the default map, if the input is -2.0, the output
 will be -1.0.  If the input is +2.0, the output will again be -1.0.
 	}
-	version { $Id$ }
+	version { @(#)CGCPcwzLinear.pl	1.4   01 Oct 1996 }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

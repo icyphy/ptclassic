@@ -10,10 +10,10 @@ lowpass filter.  To read default coefficients from a file,
 replace the default coefficients with "fileName".
 Supports decimation, but not interpolation.
 	}
-	version {$Id$}
+	version {@(#)CGCLMS.pl	1.15	10/08/96}
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

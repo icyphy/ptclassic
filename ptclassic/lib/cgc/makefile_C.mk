@@ -1,7 +1,7 @@
 # Ptolemy makefile skeleton used by makefile_C CGC target
 # Version:
-# $Id$
-# Copyright (c) %Q% The Regents of the University of California.
+# @(#)makefile_C.mk	1.3 07/15/96
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -2,10 +2,10 @@ defstar {
 	name { PnGen }
 	domain { SDF } 
 	desc { PN Generator}
-	version { $Id$ }
+	version { @(#)SDFPnGen.pl	1.5	3/7/96 }
 	author { N. Becker }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

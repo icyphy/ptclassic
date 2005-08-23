@@ -2,10 +2,10 @@ defstar {
 	name { Delay }
 	domain { CG56 }
 	desc { A delay star of an integer number of time units. }
-	version { $Id$ }
+	version { @(#)CG56Delay.pl	1.15 03/29/97 }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

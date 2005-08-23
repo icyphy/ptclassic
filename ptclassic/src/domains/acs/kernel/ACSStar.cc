@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSStar.cc";
 
-/*  Version $Id$
+/*  Version @(#)ACSStar.cc	1.9 09/08/99
 
 Copyright (c) 1998-1999 The Regents of the University of California
 and Sanders, a Lockheed Martin Company

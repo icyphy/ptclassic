@@ -1,6 +1,6 @@
 # Config file to build on SPARC processor running Solaris7 (aka Solaris 2.7)
 # with gcc-2.95.1
-# $Id$
+# @(#)config-sol7.mk	1.7 09/08/99
 
 # Copyright (c) 1999 The Regents of the University of California.
 # All rights reserved.

@@ -1,10 +1,10 @@
 defstar {
 	name {FillNullEvent}
 	domain {DE}
-	version { $Id$ }
+	version { @(#)DEFillNullEvent.pl	1.2	04/07/97 }
 	author { Wan-Teh Chang }
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

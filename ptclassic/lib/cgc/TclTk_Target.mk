@@ -1,7 +1,7 @@
 # Ptolemy makefile skeleton used by TclTk_Target CGC target
 # Version:
-# $Id$
-# Copyright (c) %Q% The Regents of the University of California.
+# @(#)TclTk_Target.mk	1.6 7/18/96
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

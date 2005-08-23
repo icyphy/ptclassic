@@ -2,11 +2,11 @@ defstar {
     name      { BanyanStg }
     domain    { SDF }
     desc      { 2 x 2 Banyan switching element with internal queueing }
-    version   {$Id$}
+    version   {@(#)SDFBanyanStg.pl	1.9	06 Oct 1996}
     author    { John Loh }
 
     copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

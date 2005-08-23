@@ -2,13 +2,13 @@
 #define _SigHandle_h 1
 /****************************************************************************
 Version identification:
-$Id$
+@(#)SigHandle.h	1.13	2/12/96
 
 Author: Joel R. King
 
 Defines the signal handlers for Tycho in both release and debug modes.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

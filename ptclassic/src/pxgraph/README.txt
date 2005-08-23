@@ -1,4 +1,4 @@
-Version: $Id$
+Version: @(#)README.txt	1.3 01/28/99
 $PTOLEMY/src/pxgraph/README.txt
 
 In Ptolemy 0.7.1 and later, the X11 version of pxgraph has been replaced

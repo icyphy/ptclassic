@@ -1,9 +1,9 @@
 # Makefile for all domains subdirectories
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1998 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# @(#)makefile	1.62	05/26/98
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains.  Instead
 # run in from ~ptolemy/obj.$PTARCH/domains (through the symbolic link) -- that
@@ -21,7 +21,6 @@ include $(CONFIG)
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
-#
 EXPDOMAINS = sr srcgc fsm
 
 ifeq ($(INCLUDE_PN_DOMAIN),yes)

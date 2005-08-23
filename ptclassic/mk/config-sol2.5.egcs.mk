@@ -2,7 +2,7 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5.1
 # with the Experimental Gnu Compiler
 
-# $Id$
+# @(#)config-sol2.5.egcs.mk	1.7 12/15/97
 
 # Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.

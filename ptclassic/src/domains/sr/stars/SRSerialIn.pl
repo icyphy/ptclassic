@@ -4,7 +4,7 @@ defstar {
   desc {
 In each instant, a character is read from the serial port.
 }
-  version { $Id$ }
+  version { @(#)SRSerialIn.pl	1.3 12/08/97 }
   author { S. A. Edwards }
   copyright {
 Copyright (c) 1990-1997 The Regents of the University of California.

@@ -1,5 +1,5 @@
 # Author: Olaf Lenzmann
-# Version: $Id$
+# Version: @(#)ptk.rc	1.1 02/04/99
 
 # Ptcl with Tk needs initialization by sourcing this file.
 # Currently this is not automatically sourced at startup,

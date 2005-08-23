@@ -3,7 +3,7 @@
 #define _ACSJavaTarget_h
 
 /**********************************************************************
-Copyright (c) 1998-%Q% The Regents of the University of California.
+Copyright (c) 1998-2001 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders)
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSJavaTarget.h	1.8 08/02/01
 
 ***********************************************************************/
 #ifdef __GNUG__

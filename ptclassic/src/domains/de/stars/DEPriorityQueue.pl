@@ -18,10 +18,10 @@ meaning as in other Queue stars.
 The size of the queue is sent to the "size" output whenever an "inData"
 or "demand" event is processed.
 	}
-	version { $Id$ }
+	version { @(#)DEPriorityQueue.pl	1.12	10/06/96 }
 	author { Soonhoi Ha and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

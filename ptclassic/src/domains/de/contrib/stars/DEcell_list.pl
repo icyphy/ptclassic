@@ -2,7 +2,7 @@ defstar{
     name { cell_list }  
     domain { DE }
     author { A. Wernicke, J. Voigt }
-    version { $Id$ }
+    version { @(#)DEcell_list.pl	1.2 06/24/97 }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }

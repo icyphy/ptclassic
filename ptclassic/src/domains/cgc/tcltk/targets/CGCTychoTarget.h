@@ -2,7 +2,7 @@
 #define _CGCTychoTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGCTychoTarget.h	1.7 04/09/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.

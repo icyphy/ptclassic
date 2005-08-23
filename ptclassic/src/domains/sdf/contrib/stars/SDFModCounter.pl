@@ -8,7 +8,7 @@ Given any input, this star will output the number which tells the
     author { Biao Lu }
     acknowledge { Brian L. Evans }
     location { SDF contrib library }
-    version { $Id$ }
+    version { @(#)SDFModCounter.pl	1.1	03/24/98 }
     copyright {
 Copyright (c) 1998 The University of Texas.
 All rights reserved.

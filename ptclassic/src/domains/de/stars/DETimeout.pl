@@ -10,10 +10,10 @@ on the "Clear" input stop the timer.  If no "Set" or "Clear" events
 arrive within "timeout" time units of the most recent "Set", then that
 "Set" event is sent out the "alarm" output.
     }
-    version { $Id$ }
+    version { @(#)DETimeout.pl	1.11	3/2/95 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

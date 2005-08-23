@@ -2,7 +2,7 @@
 #define _VEMINTERFACE_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* vemInterface.h  edg
 Version identification:
-$Id$
+@(#)vemInterface.h	1.12	12/10/97
 */
 
 #include "pthreadsCompat.h"	/* Must be first for hpux10 */

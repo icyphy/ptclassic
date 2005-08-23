@@ -2,8 +2,8 @@
 # using SGI CC (note that the term 'cfront' is historical, the SGI CC probably
 # is not cfront based)
 #
-# $Id$
-# Copyright (c) %Q% The Regents of the University of California.
+# @(#)config-irix6.32.cfront.mk	1.1 03/05/96
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 #
 #
-# $Id$
+# @(#)config-Darwin.mk	1.1 07/22/02
 
 # Author: David Evans devans@cs.pitt.edu
 

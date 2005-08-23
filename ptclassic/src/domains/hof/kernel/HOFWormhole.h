@@ -1,9 +1,9 @@
 #ifndef _HOFWormhole_h
 #define _HOFWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)HOFWormhole.h	1.10	8/31/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

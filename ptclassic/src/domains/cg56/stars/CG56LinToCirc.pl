@@ -5,10 +5,10 @@ defstar {
 Copy data from a linear buffer to a circular buffer.  If N is zero (default),
 the number transferred per execution equals the number written per execution
 by the star that feeds the input. }
-    version { $Id$ }
+    version { @(#)CG56LinToCirc.pl	1.19 08/29/99 }
     author { J. Buck, Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

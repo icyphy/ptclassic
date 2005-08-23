@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
@@ -27,7 +27,7 @@
 # mkPtolemyTree: A shell script to build custom Ptolemy trees that
 # use parts of a shared master tree.
 #
-# Version: $Id$
+# Version: @(#)mkPtolemyTree.tcl	1.9 05/13/97
 #
 # Author: Jose Luis Pino
 # Date: 10/20/95

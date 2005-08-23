@@ -1,7 +1,7 @@
 defstar {
 	name { Autocor }
 	domain {SDF}
-	version {$Id$}
+	version {@(#)SDFAutocor.pl	2.19 05/04/98}
 	desc { 
 Estimate an autocorrelation function by averaging input samples.
 Both biased and unbiased estimates are supported.  By default,
@@ -10,7 +10,7 @@ so as to make the sequence have an even number of samples.
 	}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -2,10 +2,10 @@ defstar {
 	name { Add }
 	domain { CG56 }
 	desc { Add any number of inputs, producing an output. }
-	version { $Id$ }
+	version { @(#)CG56Add.pl	1.11  09/10/99 }
 	author { J. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

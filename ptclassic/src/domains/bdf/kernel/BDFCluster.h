@@ -2,7 +2,7 @@
 #define _BDFCluster_h 1
 
 /**************************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Author:  J. Buck
 Created: 7/6/92
-Version: $Id$
+Version: @(#)BDFCluster.h	2.35	3/8/96
 
 (for now, this is a modified copy of SDFCluster.h.  We will try
 to merge the two later.)

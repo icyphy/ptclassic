@@ -5,10 +5,10 @@ defstar {
 Generates a ramp signal, starting at "value" (default 0)
 with step size "step" (default 1).
 	}
-	version {$Id$}
+	version {@(#)CGCRamp.pl	1.9	01/01/96}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

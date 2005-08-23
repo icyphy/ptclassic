@@ -2,9 +2,9 @@
 #define _StructTarget_h 1
 /******************************************************************
 Version identification:
-$Id$
+@(#)StructTarget.h	1.45 03/09/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

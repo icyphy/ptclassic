@@ -1,10 +1,10 @@
 /**************************************************************************
 Top-level program for Tycho, a visual interface for Ptolemy.
 
-$Id$
+@(#)TyMain.cc	1.10	2/25/96
 Programmer:  E. A. Lee
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

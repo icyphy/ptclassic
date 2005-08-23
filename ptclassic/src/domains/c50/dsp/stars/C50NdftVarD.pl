@@ -1,7 +1,7 @@
 defstar{
   name { NdftVarD } 
   domain { C50 } 
-  version { $Id$}
+  version { @(#)C50NdftVarD.pl	1.2	05/23/98}
   acknowledge {SDF version by M. Felder and J. Mason}
   author{ G. Arslan }
   location { C50 dsp library }

@@ -2,7 +2,7 @@
 # Copyright (c) 1990-1996 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.4	08/08/96
 # 
 # Important!  Do not run this makefile while in
 # ~ptolemy/src/domains/cgc/vis.  Instead run in from

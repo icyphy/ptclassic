@@ -1,6 +1,6 @@
 static const char file_id[] = "CGCNOWamTarget.cc";
 /******************************************************************
-@Copyright (c) 1990-%Q% The Regents of the University of California.
+@Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
  
 Programmer: Patrick Warner
-Version: $Id$
+Version: @(#)CGCNOWamTarget.cc	1.13	04/07/97
  
 This file is modelled after CGCMultiTarget.cc.
 

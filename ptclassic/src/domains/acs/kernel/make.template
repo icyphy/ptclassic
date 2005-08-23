@@ -1,7 +1,7 @@
 # Makefile for ACS domain support
 # Version identification:
-# $Id$
-# @Copyright (c) 1998-%Q% The Regents of the University of California.
+# @(#)make.template	1.15 08/15/00
+# @Copyright (c) 1998-2000 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

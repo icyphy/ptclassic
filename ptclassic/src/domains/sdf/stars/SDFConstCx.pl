@@ -1,7 +1,7 @@
 defstar {
 	name {ConstCx}
 	domain {SDF}
-	version {$Id$}
+	version {@(#)SDFConstCx.pl	1.9 10/01/96}
 	desc {
 Outputs a constant complex signal with the real part given by the
 "real" parameter (default 0.0) and imaginary part given by "imag"
@@ -9,7 +9,7 @@ Outputs a constant complex signal with the real part given by the
 	}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

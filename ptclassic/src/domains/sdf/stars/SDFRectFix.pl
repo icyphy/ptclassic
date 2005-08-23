@@ -10,12 +10,12 @@ given period.
 	}
         author { A. Khazeni }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)SDFRectFix.pl	1.18	01 Oct 1996 }
 	location { SDF main library }
 	htmldoc {
 The "OutputPrecision" is specified using an l.r format, where

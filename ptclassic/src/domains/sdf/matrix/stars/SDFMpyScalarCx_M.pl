@@ -2,10 +2,10 @@ defstar {
   name { MpyScalarCx_M }
   domain { SDF }
   desc { Multiply a complex input matrix by a scalar input gain value. }
-  version { $Id$ }
+  version { @(#)SDFMpyScalarCx_M.pl	1.4 08/17/97 }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

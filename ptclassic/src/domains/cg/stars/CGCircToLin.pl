@@ -10,7 +10,7 @@ from the output.
 The CG version does not do anything though; it is there because
 AsmTarget needs it and we use AsmTarget sometimes to test schedulers.
     }
-    version { $Id$ }
+    version { @(#)CGCircToLin.pl	1.2	01 Oct 1996 }
     author { Praveen K. Murthy }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

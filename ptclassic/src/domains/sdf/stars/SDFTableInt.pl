@@ -8,10 +8,10 @@ inclusive, where N is the size of the table.  The "values" parameter
 specifies the table.  Its first element is indexed by a zero-valued
 input. An error occurs if the input value is out of bounds.
 	}
-	version {$Id$}
+	version {@(#)SDFTableInt.pl	1.10	01 Oct 1996}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -13,10 +13,10 @@ normalized Dirichlet kernel oscillates between -1 and +1.
 The normalized Dirichlet kernel is periodic in x with a period of either
 2*pi when N is odd or 4*pi when N is even.
 	}
-	version {$Id$}
+	version {@(#)SDFDirichlet.pl	1.13	10/07/96}
 	author { Brian Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

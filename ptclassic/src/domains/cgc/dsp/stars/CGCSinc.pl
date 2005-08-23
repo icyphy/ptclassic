@@ -5,10 +5,10 @@ defstar {
 This star computes the sinc of its input given in radians.
 The sinc function is defined as sin(x)/x, with value 1.0 when x = 0.
 	}
-        version { $Id$ }
+        version { @(#)CGCSinc.pl	1.5	10/06/96 }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

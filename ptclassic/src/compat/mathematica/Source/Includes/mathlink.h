@@ -1,7 +1,7 @@
 /*************************************************************************
 
 Version identification:
-$Id$
+@(#)mathlink.h	1.7	07/08/97
  
 Copyright (c) 1986-1996 Wolfram Research, Inc. All Rights Reserved.
   

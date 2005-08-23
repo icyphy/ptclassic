@@ -11,9 +11,9 @@ Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
 Polyphase multirate filtering is also supported.
 	}
 	location { SDF dsp library }
-	version {$Id$}
+	version {@(#)SDFFIRCx.pl	1.19 09/01/97}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

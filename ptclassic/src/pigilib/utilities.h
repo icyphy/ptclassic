@@ -2,7 +2,7 @@
 #define _UTILITIES_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* utilities.h  eal
 Version identification:
-$Id$
+@(#)utilities.h	1.7	11/3/95
 
 This file is the header file for commands in the "utilities" menu,
 each of which invokes a predefined universe.

@@ -8,10 +8,10 @@ The supported styles are 'hold' for zero-order hold,
 'connect' for connected dots, and 'dot' for unconnected dots.
 An interactive help window describes other options for the plot.
     }
-    version { $Id$ }
+    version { @(#)DETkStripChart.pl	1.7   06 Oct 1996 }
     author { Eduardo N. Spring, Jose Luis Pino, and Edward A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

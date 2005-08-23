@@ -2,10 +2,10 @@ defstar {
 	name { Log }
 	domain { SDF } 
 	desc { Output the natural logarithm of the input value. }
-	version {$Id$}
+	version {@(#)SDFLog.pl	1.11 10/01/96}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

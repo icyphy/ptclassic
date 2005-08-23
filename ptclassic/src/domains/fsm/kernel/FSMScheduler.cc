@@ -1,9 +1,9 @@
 static const char file_id[] = "FSMScheduler.cc";
 
 /*
-$Id$
+Version @(#)FSMScheduler.cc	1.13 10/26/98
 
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,7 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "Error.h"
 #include "InfString.h"
-#include "Wormhole.h"
 #include "utilities.h"
 
 	//////////////////////////////////////////
@@ -50,10 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 FSMScheduler::FSMScheduler() {
     currentTime = 0;
-    
-    curState = NULL;
-    nextState = NULL;
-    preState = NULL;
 }
 
 // Destructor.
@@ -83,7 +78,7 @@ int FSMScheduler::checkStars() {
       if (bl->isA("FSMStateStar")) {
 	  s = (FSMStateStar *)bl;
 	  if (s->isInit()) {
-	    initState = s;
+	    initialState = s;
 	    check++;
 	  }
 
@@ -102,17 +97,6 @@ int FSMScheduler::checkStars() {
     }
 
     return TRUE;
-}
-
-double FSMScheduler::nextFiringTime() {
-    // This is supposed to be invoked after run(),
-    // so let the slave of previous state to decide.
-
-    if (preState == NULL) return FALSE; // preState is NULL in first run.
-
-    Wormhole* slaveWorm = preState->slaveAsWorm();
-    if (slaveWorm == NULL) return FALSE;
-    else return slaveWorm->myTarget()->nextFiringTime();
 }
 
 int FSMScheduler::receiveData() {
@@ -146,6 +130,13 @@ int FSMScheduler::receiveData() {
     return TRUE;
 }
 
+void FSMScheduler::resetInitState() {
+    // Reset current state to be the initial state.
+    // This needs to be invoked while hierarchical entry is initial entry. 
+    curState = initialState;
+    curEntryType = 1; // By "Initial" entry.
+}
+
 // Run (or continue) the simulation.
 int FSMScheduler::run() {
     if (SimControl::haltRequested() || !galaxy()) {
@@ -156,7 +147,7 @@ int FSMScheduler::run() {
     // For highlighting star in graphic debug mode.
     if (!SimControl::doPreActions(curState)) return FALSE;
 
-    // Grab inputs and clear outputs.
+    // Grab input data and get internal events.
     if (!receiveData()) return FALSE;
 
     int transNum;
@@ -172,10 +163,6 @@ int FSMScheduler::run() {
     // Do the action for the next transition corresponding to "transNum".
     if (!curState->execAction(transNum))    return FALSE;
 
-    // clear those internal events that are not emitted by the slave
-    // and the triggered action indexed by "actNum".
-    if (!curState->clearIntlEvent(transNum))    return FALSE;
-
     // Send output data.
     if (!sendData())    return FALSE;
 
@@ -190,9 +177,6 @@ int FSMScheduler::run() {
 	return FALSE;
     }
 
-    // Keep a copy of previous state.
-    preState = curState;
-
     // Set the next state to be current state for next iteration.
     curState = nextState;
 
@@ -202,17 +186,6 @@ int FSMScheduler::run() {
     return !SimControl::haltRequested();
 }
 
-int FSMScheduler::selfFiringRequested() {
-    // This is supposed to be invoked after run(),
-    // so let the slave of previous state to decide.
-
-    if (preState == NULL) return FALSE; // preState is NULL in first run.
-
-    Wormhole* slaveWorm = preState->slaveAsWorm();
-    if (slaveWorm == NULL) return FALSE;
-    else return slaveWorm->myTarget()->selfFiringRequested();
-}
-	
 int FSMScheduler::sendData() {
     PortHole* p;
     BlockPortIter next(*galaxy());
@@ -245,17 +218,14 @@ void FSMScheduler::setup() {
     // before galaxy()->initialize()
     if (!setupTclInterp()) return;
 
-    // "sharedSlaveList" will be used in the states, so it should be created
-    // before galaxy()->initialize()
-    sharedSlaveList.initialize();
-
     galaxy()->initialize();
 
     // After galaxy()->initialize(), check all stars.
     if (!checkStars()) return;
 
-    // After galaxy()->initialize(), set up the initial state.
-    // if (!setupInitState()) return; // Invoked in FSMTarget::begin instead
+    // Set current state to be the initial state.
+    curState = initialState;
+    curEntryType = 1;
 
     // Set the outerDomain.
     // galaxy() points to FSM galaxy;
@@ -264,25 +234,6 @@ void FSMScheduler::setup() {
     outerDomain = galaxy()->parent()->parent()->domain();
     if (!outerDomain) return;
 // printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
-}
-
-int FSMScheduler::setupInitState() {
-    preState = NULL;
-    
-    if (!initState->evalInitGuard()) {
-	Error::abortRun("FSMScheduler: No initial state whose guard of ",
-			"initial transition is satisfied");
-	return FALSE;
-    }
-
-    // Set current state to be the initial state.
-    curState = initState;
-    curEntryType = 1; // By "Initial" entry.
-
-    // Execute the acion of the initial transition in initial state.
-    if (!curState->execInitAction()) return FALSE;
-
-    return TRUE;
 }
 
 // (1) Create a Tcl interpreter 
@@ -329,47 +280,25 @@ int FSMScheduler::setupTclInterp() {
 }
 
 void FSMScheduler::printTclVar() {
-    InfString buf;
-
-  /*
-    // Print inputs/outputs in Tcl
     PortHole* p;
     BlockPortIter next(*galaxy());
     while ((p = next++) != NULL) {
       p = (PortHole *)p->alias();
       if (p->isItInput()) {
-	printf("\ninput port name=%s, ",p->name());
+	printf("input port name = %s\n",p->name());
       } else {
-	printf("\noutput port name=%s, ",p->name());
+	printf("output port name = %s\n",p->name());
       }
 
-      buf = p->name();
+      InfString buf = p->name();
       buf << "(s)";
       InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
       buf = p->name();
       buf << "(v)";
       InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
-      printf("statusStr=%s, valueStr=%s",
+      printf("statusStr = %s, valueStr = %s\n",
 	     (char*)statusStr,(char*)valueStr);
-    
     }
-  */
-
-  // Print internal events in Tcl
-  StringListIter nextEvent(intlEventNames);
-  const char* event;
-  while ((event=nextEvent++) != NULL) {
-      printf ("\nintl event name=%s, ",event);
-      buf = event;
-      buf << "(s)";
-      InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
-      buf = event;
-      buf << "(v)";
-      InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
-      printf("statusStr=%s, valueStr=%s",
-	     (char*)statusStr,(char*)valueStr);
-
-  }
 }
 
 // isA

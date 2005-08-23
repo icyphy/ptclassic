@@ -10,7 +10,7 @@ This particular star accepts a configurable number of samples.  The
 parameter which describes how many times it can fire before resetting the
 state values.
   }
-  version { $Id$ }
+  version { @(#)SDFNdftVarD.pl	1.1	03/18/98 }
   author{ Matt Felder and Jimmy Mason }
   copyright {
 Copyright (c) 1997-1998 The University of Texas.

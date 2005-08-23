@@ -2,10 +2,10 @@ defstar {
 	name { AIn }
 	domain { C50 }
 	desc { An input star for the DSK320 analog input port }
-	version { $Id$ }
+	version { @(#)C50AIn.pl	1.5	10/24/96 }
 	author { A. Baensch , ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -7,7 +7,7 @@
 # See $PTOLEMY/copyright for the complete copyright notice.
 #
 # Programmer: Christopher Hylands
-# Version: $Id$
+# Version: @(#)makevcgen-all	1.5 11/01/99
 #
 
 dirs="$PTOLEMY/src/kernel \

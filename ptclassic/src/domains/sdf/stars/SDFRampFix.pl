@@ -10,12 +10,12 @@ the notation ( &lt;initial_value&gt;, &lt;precision&gt; ).
 	}
         author { A. Khazeni }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version { $Id$ }
+	version { @(#)SDFRampFix.pl	1.20	10/07/96 }
         location { SDF main library }
 	htmldoc {
 The value of the "step" and "value" parameters and their precision 

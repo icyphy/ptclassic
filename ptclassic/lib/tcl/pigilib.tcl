@@ -1,10 +1,10 @@
 # Master initialization file for the tcl/tk Ptolemy interface
 # Author: Edward A. Lee
-# Version: $Id$
+# Version: @(#)pigilib.tcl	1.34	10/06/99
 #
 # This is based on ptkInit.tcl
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

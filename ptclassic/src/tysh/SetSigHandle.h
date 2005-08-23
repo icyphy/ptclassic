@@ -2,13 +2,13 @@
 #define _SetSigHandle_h 1
 /****************************************************************************
 Version identification:
-$Id$
+@(#)SetSigHandle.h	1.7	1/11/96
 
 Author: Joel R. King
 
 Sets up the signal handlers for Tycho.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

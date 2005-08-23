@@ -8,7 +8,7 @@ previous thresholds, the output will be the n-th level.  If the input is
 greater than all thresholds, the output is the N+1-th level.  If level is
 specified, there must be one more level than thresholds.
 	}
-	version { $Id$ }
+	version { @(#)VHDLQuant.pl	1.3 08/27/97 }
 	author { Michael C. Williamson, E. A. Lee and J. Buck }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

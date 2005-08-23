@@ -1,13 +1,13 @@
 defstar {
 	name { GoertzelBase }
 	domain { SDF }
-	version { $Id$ }
+	version { @(#)SDFGoertzelBase.pl	1.6	07/18/96 }
 	desc {
 Base class for Goertzel algorithm stars.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

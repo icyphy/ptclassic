@@ -7,10 +7,10 @@ An FIR filter with a magnitude frequency response shaped
 like the standard raised cosine used in digital communications.
 See the SDFRaisdCos star for more information.
 	}
-	version { $Id$ }
+	version { @(#)CG56RaisedCosine.pl	1.15 10/16/97 }
 	author { J. T. Buck and Kennard White }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

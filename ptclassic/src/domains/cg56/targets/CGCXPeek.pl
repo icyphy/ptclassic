@@ -3,10 +3,10 @@ name { XPeek }
 domain { CGC }
 desc { Receive data asynchronously from S56X to CGC }
 derivedFrom { XAsynchComm }
-version { $Id$ }
+version { @(#)CGCXPeek.pl	1.10 4/2/96 }
 author { Jose Luis Pino }
 copyright { 
-Copyright (c) 1994-%Q% The Regents of the University of California.
+Copyright (c) 1994-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

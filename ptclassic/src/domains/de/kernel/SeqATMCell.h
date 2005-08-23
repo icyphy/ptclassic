@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 // filename: SeqATMCell.h
-// SCCS info: $Id$
+// SCCS info: @(#)SeqATMCell.h	1.8 03/02/95
 //
 // Default values set for SeqATMCell to contain 53 bytes with
 // 8 bits/byte or 424 bits. The variable "cell" will be a pointer

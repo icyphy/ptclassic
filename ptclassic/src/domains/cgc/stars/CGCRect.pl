@@ -6,11 +6,11 @@ Generates a rectangular pulse of height "height" (default 1.0).
 and width "width" (default 8).  If "period" is greater than zero,
 then the pulse is repeated with the given period.
 	}
-	version {$Id$}
+	version {@(#)CGCRect.pl	1.5 1/1/96}
 	author { Kennard White }
 	acknowledge { SDF version by J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

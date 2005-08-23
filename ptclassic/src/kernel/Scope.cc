@@ -5,9 +5,9 @@ static const char file_id[] = "Scope.cc";
 
 /**************************************************************************
 Version identification:
-$Id$	%Q%
+@(#)Scope.cc	1.5	1996
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

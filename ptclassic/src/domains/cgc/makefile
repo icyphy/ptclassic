@@ -1,5 +1,5 @@
 # Makefile for CGC domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  E. A. Lee
-# $Id$
+# @(#)makefile	1.11	03/24/98
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cgc.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/cgc (through the symbolic

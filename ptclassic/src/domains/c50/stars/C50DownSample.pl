@@ -13,10 +13,10 @@ same sense as the phase parameter in the FIR star.
 	htmldoc {
 <a name="decimation"></a>
 	}
-	version {$Id$}
+	version {@(#)C50DownSample.pl	1.8	05/26/98}
 	author { A. Baensch, Luis Gutierrez, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

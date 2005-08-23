@@ -12,10 +12,10 @@ major ordering.
 The first matrix in the table is indexed by a zero-valued input.
 An error occurs if the input value is out of bounds.
   }
-  version { $Id$ }
+  version { @(#)SDFTableInt_M.pl	1.4 01 Oct 1996 }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

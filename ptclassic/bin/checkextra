@@ -1,5 +1,5 @@
 #! /bin/csh -f
-# $Id$
+# @(#)checkextra	1.9 11/12/98
 # * print a list of "extra" files.
 # * print out the names of any files that are not significant in the first
 #   13 characters.  Linux has this problem with GNU ar.

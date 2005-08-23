@@ -6,10 +6,10 @@ defstar {
 Output the (approximate) Hilbert transform of the input signal.
 This star approximates the Hilbert transform by using an FIR filter.
 	}
-	version { $Id$ }
+	version { @(#)SDFHilbert.pl	1.15 10/06/96 }
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

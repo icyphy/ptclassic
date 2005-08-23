@@ -3,10 +3,10 @@ name { XAsynchComm }
 domain { CGC }
 desc { Base star for Asynchronous CGC <-> S56X IPC }
 derivedFrom { XBase }
-version { $Id$ }
+version { @(#)CGCXAsynchComm.pl	1.12 6/7/96 }
 author { Jose Luis Pino }
 copyright { 
-Copyright (c) 1994-%Q% The Regents of the University of California.
+Copyright (c) 1994-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

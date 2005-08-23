@@ -1,9 +1,9 @@
 static const char file_id[] = "MotorolaTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)MotorolaTarget.cc	1.32	05/28/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

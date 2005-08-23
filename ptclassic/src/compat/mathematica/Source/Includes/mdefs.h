@@ -1,6 +1,6 @@
 /*************************************************************************
 Version identification:
-$Id$
+@(#)mdefs.h	1.4	01/24/96
 
 Copyright (c) 1986-1993 Wolfram Research, Inc. All Rights Reserved.
 

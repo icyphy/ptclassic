@@ -31,10 +31,10 @@ named galaxy must be named "input#?" and the outputs must be named
 This allows the inputs and outputs of this star to be matched
 unambiguously with the inputs and outputs of the referenced galaxy.
 	}
-	version { $Id$ }
+	version { @(#)DDFSelf.pl	2.30	12/08/97 }
 	author { Soonhoi Ha and Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

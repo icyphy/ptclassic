@@ -1,12 +1,12 @@
 defstar {
     name { SDFReceive }
     domain { CGC }
-    version { $Id$  }
+    version { @(#)CGCSDFReceive.pl	1.8 01/27/97  }
     derivedfrom {SDFBase}
     desc { CGC input from SDF communication  }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1995-%Q% The Regents of the University of California.
+Copyright (c) 1995-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

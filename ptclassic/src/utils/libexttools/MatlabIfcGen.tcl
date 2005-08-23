@@ -1,6 +1,6 @@
 # -*- tcl -*-
 # 
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -52,7 +52,7 @@
 #
 # Author: Guy Maor <maor@ece.utexas.edu>
 # Date: 7/24/97
-# Version: $Id$
+# Version: @(#)MatlabIfcGen.tcl	1.3	07/26/97
 
 # read the next function, skipping blank lines
 proc nextFunction {datafile ret name parms} {

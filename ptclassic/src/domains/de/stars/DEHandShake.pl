@@ -26,10 +26,10 @@ the <i> grant </i> or <i> ackIn </i> inputs.  Also, only those <i> ackIn </i>
 particles received in response to an <i> output </i> will be sent to <i>
 ackOut.</i>
     }
-    version { $Id$ }
+    version { @(#)DEHandShake.pl	1.12 10/03/96 }
     author { T.M. Parks }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

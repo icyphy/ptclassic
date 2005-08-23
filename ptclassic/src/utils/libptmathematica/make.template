@@ -1,7 +1,7 @@
 # Makefile for stubs for Ptolemy interface to Mathematica, libptmathematica
 #
 # Version identification:
-# $Id$
+# @(#)make.template	1.4	04/28/97
 #
 # Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.

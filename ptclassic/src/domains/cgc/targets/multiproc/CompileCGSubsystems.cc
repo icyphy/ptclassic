@@ -2,9 +2,9 @@ static const char file_id[] = "CompileCGSubsystems.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)CompileCGSubsystems.cc	1.16 01/15/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

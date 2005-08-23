@@ -1,7 +1,7 @@
 # Makefile for ACS documentation
 
 # Version Identification:
-# $Id$
+# @(#)makefile	1.1 01/16/98
 # Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 

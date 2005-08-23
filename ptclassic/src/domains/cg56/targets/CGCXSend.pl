@@ -3,11 +3,11 @@ defstar {
     domain { CGC }
     desc { Send data synchronously from CGC to S56X }
     derivedFrom { XSynchComm }
-    version { $Id$ }
+    version { @(#)CGCXSend.pl	1.18	01 Oct 1996 }
     author { Jose Luis Pino }
 
 copyright { 
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

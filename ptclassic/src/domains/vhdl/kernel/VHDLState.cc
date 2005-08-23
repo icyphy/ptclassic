@@ -1,9 +1,9 @@
 static const char file_id[] = "VHDLState.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)VHDLState.cc	1.7 05/31/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

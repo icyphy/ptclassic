@@ -2,7 +2,7 @@
 #define _XYPlot_h 1
 /**************************************************************************
 Version identification:
-$Id$
+@(#)XYPlot.h	1.6    08/29/99
 
 Author: Edward A. Lee and D. Niehaus
 
@@ -10,7 +10,7 @@ Defines and maintains a TK XY plot.
 It uses the C functions defined in $PTOLEMY/src/ptklib/ptkPlot.c,
 but puts an object-oriented wrapper around them.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1999 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without

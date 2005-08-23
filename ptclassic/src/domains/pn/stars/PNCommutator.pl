@@ -2,7 +2,7 @@ defstar
 {
     name { Commutator }
     domain { PN }
-    version { $Id$ }
+    version { @(#)PNCommutator.pl	1.4 3/2/95 }
     desc
     {
 Takes N input streams (where N is the number of inputs) and
@@ -14,7 +14,7 @@ the next B particles from the next input, etc.
     }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

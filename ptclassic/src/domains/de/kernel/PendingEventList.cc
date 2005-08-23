@@ -1,7 +1,7 @@
 static const char file_id[] = "PendingEventList.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)PendingEventList.cc	1.12 04/20/98
 
 Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.

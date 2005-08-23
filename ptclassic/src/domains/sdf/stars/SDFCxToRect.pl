@@ -2,10 +2,10 @@ defstar {
 	name {CxToRect}
 	domain {SDF}
 	desc { Convert a complex input to real and imaginary parts. }
-	version {$Id$}
+	version {@(#)SDFCxToRect.pl	1.12 09/01/97}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

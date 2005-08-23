@@ -2,7 +2,7 @@
 #define _ERR_H 1
 
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* err.h  edg
 Version identification:
-$Id$
+@(#)err.h	1.11	4/26/96
 Header for error handing routines.
 */
 

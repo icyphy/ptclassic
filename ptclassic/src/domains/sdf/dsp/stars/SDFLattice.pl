@@ -8,10 +8,10 @@ a particular 4th-order AR random process.
 To read other reflection coefficients from a file, replace the default
 coefficients with "&lt; fileName", preferably specifying a complete path.
 	}
-	version {$Id$}
+	version {@(#)SDFLattice.pl	1.16 12/08/97}
 	author { Alan Kamas}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

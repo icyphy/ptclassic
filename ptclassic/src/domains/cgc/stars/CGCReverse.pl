@@ -5,10 +5,10 @@ defstar {
 On each execution, reads a block of "N" samples (default 64)
 and writes them out backwards.
 	}
-	version {$Id$}
+	version {@(#)CGCReverse.pl	1.4	1/1/96}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

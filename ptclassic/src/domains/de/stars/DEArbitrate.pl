@@ -10,10 +10,10 @@ the other port will be serviced.  The "requestOut" and "grantIn"
 connections allow interconnection of multiple arbitration stars for
 more intricate control structures.
     }
-    version { $Id$ }
+    version { @(#)DEArbitrate.pl	1.9 06/04/96 }
     author { T. M. Parks }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

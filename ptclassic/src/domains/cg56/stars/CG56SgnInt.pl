@@ -5,11 +5,11 @@ defstar {
 Output +1 if the input is positive or zero, and 0 if the input is negative.
 This definition of signum is not compatible with the Sgn stars.
 	}
-	version { $Id$ }
+	version { @(#)CG56SgnInt.pl	1.5	01 Oct 1996 }
 	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,9 +1,9 @@
 static const char file_id[] = "Cluster.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)Cluster.cc	1.35	12/10/97
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,11 +39,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include <iostream.h>           // gcc-3.0: This include should be first
 #include "Cluster.h"
 #include "Scheduler.h"
 #include "GraphUtils.h"
 #include "Scope.h"
+#include <iostream.h>
 #include "InfString.h"
 
 /**********************************************************************

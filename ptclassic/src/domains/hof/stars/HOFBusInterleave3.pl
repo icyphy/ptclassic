@@ -9,10 +9,10 @@ The three input busses must have the same width, which must
 be one-third the width of the output bus.
 The input signals are connected to the output in an alternating fashion.
 	}
-	version {$Id$}
+	version {@(#)HOFBusInterleave3.pl	1.1 11/10/97}
 	author { E. A. Lee, Tom Lane }
 	copyright {
-Copyright (c) 1994-%Q% The Regents of the University of California.
+Copyright (c) 1994-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

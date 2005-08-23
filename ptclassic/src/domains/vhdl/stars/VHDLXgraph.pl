@@ -1,13 +1,13 @@
 defstar {
 	name { Xgraph }
 	domain { VHDL }
-	version { $Id$ }
+	version { @(#)VHDLXgraph.pl	1.7 10/01/96 }
 	desc {
 Graph the input data.
 	}
 	author { Michael C. Williamson, J. T. Buck and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

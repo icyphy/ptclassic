@@ -12,10 +12,10 @@ Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
 outside this range, all outputs get zero.
 	}
-	version {$Id$}
+	version {@(#)C50DeMux.pl	1.7	05/26/98}
 	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

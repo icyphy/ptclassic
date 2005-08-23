@@ -11,10 +11,10 @@ a file.  When the wrapup method is called, a file of 8-bit mu-law
 will be played at the fixed sampling rate of 8000 samples/second by 
 the "ptplay" program, which must be in your path.
 	}
-	version {$Id$}
+	version {@(#)SDFPlay.pl	1.36 12/08/97}
 	author { Joseph T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

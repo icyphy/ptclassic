@@ -1,7 +1,7 @@
 /* 
-$Id$
+@(#)UniqueStringList.cc	1.6 3/7/96
   
-Copyright (c) 1992-%Q% The Regents of the University of California.
+Copyright (c) 1992-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
-static const char SccsId [] = "$Id$";
+static const char SccsId [] = "@(#)UniqueStringList.cc	1.6 3/7/96";
 
 #ifdef __GNUG__
 #pragma implementation

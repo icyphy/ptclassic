@@ -10,10 +10,10 @@ To read coefficients from a file, replace the default coefficients
 with "&lt;fileName", preferably specifying a complete path.
 Polyphase multirate filtering is also supported.
         }
-        version { $Id$ }
+        version { @(#)SDFFIRFix.pl	1.25	09/01/97 }
         author { Edward A. Lee, Alireza Khazeni }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

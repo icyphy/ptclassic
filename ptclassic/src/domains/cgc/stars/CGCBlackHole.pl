@@ -1,13 +1,13 @@
 defstar {
 	name {BlackHole}
 	domain {CGC}
-	version {$Id$}
+	version {@(#)CGCBlackHole.pl	1.13	01 Oct 1996}
 	desc {
 Discards all inputs.
 	}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* paramStructs.c  edg
 Version identification:
-$Id$
+@(#)paramStructs.c	1.20	02/23/97
 This file contains functions that manage param data structures.
 ParamList and param string conversion functions.
 Caveats: Need to be able to free allocated memory in ParamListType.

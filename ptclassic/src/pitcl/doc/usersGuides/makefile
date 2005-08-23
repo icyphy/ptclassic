@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Itcl interface (PITcl): doc/usersGuides directory
 #
-# $Id$
+# @(#)makefile	1.1 02/17/97
 # Authors: Edward A. Lee, Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.

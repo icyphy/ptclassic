@@ -1,6 +1,6 @@
 static const char file_id[] = "SRDomain.cc";
 /**********************************************************************
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+@Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Version: $Id$
+ Version: @(#)SRDomain.cc	1.14	04/07/97
 
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the SR domain so the interpreter can generate them dynamically.

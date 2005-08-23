@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  James A. Lundblad
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)ACSCGCore.cc	1.7 09/10/99
 
 The ACS CG Core class provides a base class for all derived CG Core category classes. Many instance variables and methods are stolen from CGCStar.
 

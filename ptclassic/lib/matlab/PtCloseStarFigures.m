@@ -7,11 +7,11 @@ function PtCloseStarFigures(handle)
 %	See also PtSetStarFigures.
 
 %
-%	$Id$
+%	@(#)PtCloseStarFigures.m	1.2	3/7/96
 %
 
 %	Author: B. L. Evans
-%	(c) Copyright 1994-%Q% The Regents of the University of California.
+%	(c) Copyright 1994-1996 The Regents of the University of California.
 %	All rights reserved.
 
 h = get(0, 'children');

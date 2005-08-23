@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,7 +33,7 @@ char* name            the name of the application
 int   numIterations   default number of iterations
 
 Author: Edward A. Lee
-Version: $Id$
+Version: @(#)tkMain.c	1.34	   02/23/97
 */
 
 #include "tk.h"

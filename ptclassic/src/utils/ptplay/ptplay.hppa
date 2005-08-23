@@ -1,6 +1,6 @@
 #! /bin/sh -f
 # ptplay for hppa 
-# $Id$
+# @(#)ptplay.hppa	1.6 06/24/97
 if [ -x /opt/audio/bin/audio_editor ]; then
     # HPUX10 should have /opt/audio
     echo "If the sound is too low in volume, run /opt/audio/bin/AudioCP"

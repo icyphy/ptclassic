@@ -1,7 +1,7 @@
 defstar {
 	name { Logic }
 	domain { C50 }
-	version { $Id$ }
+	version { @(#)C50Logic.pl	1.6  01 Oct 1996 }
 	author { Luis Gutierrez }
 	acknowledge { Brian L. Evans, Edward A. Lee }
 	copyright {
