@@ -1,0 +1,135 @@
+int
+engEvalString
+(Engine* /*ep*/, MXCONST char* /*string*/);
+
+Engine*
+engOpen
+(MXCONST char* /*startcmd*/);
+
+int
+engClose
+(Engine* /*ep*/);
+
+mxArray*
+engGetArray
+(Engine* /*ep*/, MXCONST char* /*name*/);
+
+int
+engPutArray
+(Engine* /*ep*/, MXCONST mxArray* /*ap*/);
+
+int
+engOutputBuffer
+(Engine* /*ep*/, char* /*buffer*/, int /*buflen*/);
+
+mxArray*
+mxCreateDoubleMatrix
+(int /*m*/, int /*n*/, mxComplexity /*flag*/);
+
+void
+mxDestroyArray
+(mxArray* /*pa*/);
+
+void*
+mxCalloc
+(size_t /*numberOfElements*/, size_t /*size*/);
+
+void
+mxFree
+(void* /*memoryPtr*/);
+
+const char*
+mxGetName
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetName
+(mxArray* /*matrixPtr*/, const char* /*name*/);
+
+int
+mxGetM
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetM
+(mxArray* /*matrixPtr*/, int /*numrows*/);
+
+int
+mxGetN
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetN
+(mxArray* /*matrixPtr*/, int /*numcols*/);
+
+double*
+mxGetPr
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetPr
+(mxArray* /*matrixPtr*/, double* /*realMatrixPtr*/);
+
+double*
+mxGetPi
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetPi
+(mxArray* /*matrixPtr*/, double* /*imagMatrixPtr*/);
+
+int
+mxGetNzmax
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetNzmax
+(mxArray* /*matrixPtr*/, int /*numNonZeroElements*/);
+
+int*
+mxGetIr
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetIr
+(mxArray* /*matrixPtr*/, int* /*sparseIndexArray*/);
+
+int*
+mxGetJc
+(const mxArray* /*matrixPtr*/);
+
+void
+mxSetJc
+(mxArray* /*matrixPtr*/, int* /*sparseIndexArray*/);
+
+int
+mxGetString
+(const mxArray* /*matrixPtr*/, char* /*buffer*/, int /*bufferLength*/);
+
+mxArray*
+mxCreateString
+(const char* /*string*/);
+
+double
+mxGetScalar
+(const mxArray* /*matrixPtr*/);
+
+bool
+mxIsSparse
+(const mxArray* /*matrixPtr*/);
+
+bool
+mxIsDouble
+(const mxArray* /*matrixPtr*/);
+
+bool
+mxIsNumeric
+(const mxArray* /*matrixPtr*/);
+
+bool
+mxIsComplex
+(const mxArray* /*matrixPtr*/);
+
+mxArray*
+mxCreateSparse(int /*numrows*/, int /*numcols*/, int /*numNonZeroElements*/, 	mxComplexity /*complexFlag*/);
+

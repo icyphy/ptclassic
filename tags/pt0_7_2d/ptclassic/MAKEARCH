@@ -1,0 +1,382 @@
+#! /bin/sh
+# script to make directories and links for an architecture
+# @(#)MAKEARCH	1.187 11/24/99
+# Version: 
+# Copyright (c) 1990-1998 The Regents of the University of California.
+# 	All Rights Reserved.
+
+if [ -z "$PTARCH" ]; then
+	echo The environment variable PTARCH must be set.
+	exit 1
+fi
+
+# Define a few shell functions.  Note that the leading { must
+# be followed by a space.
+
+# optmkdir -- make a directory if it does not exist
+optmkdir () { 
+	if [ ! -d $1 ]; then
+		echo making directory `pwd`/$1
+		mkdir $1
+	fi 	
+}
+
+# optlink -- make a symbolic link if it does not exist, from a file in a
+# different directory to the same name in this directory.
+# args: dir filename
+optlink () { 
+	if [ ! -r $2 ]; then
+		echo making link $1 $2
+		ln -s $1/$2 .
+	fi
+}
+
+# optdifflink -- make a symbolic link if it does not exist, with a different
+# name
+optdifflink () { 
+	if [ ! -r $2 ]; then
+		echo "`pwd`: making link $1 $2"
+		ln -s $1 $2
+	fi
+}
+
+
+# Make the top-level directories
+optmkdir bin.$PTARCH
+optmkdir lib.$PTARCH
+optmkdir obj.$PTARCH
+optmkdir octtools
+optmkdir octtools/include
+optmkdir octtools/lib.$PTARCH
+optmkdir octtools/bin.$PTARCH
+
+cd bin.$PTARCH
+optdifflink ../octtools/bin.$PTARCH/attache attache
+optdifflink ../octtools/bin.$PTARCH/installColors installColors
+optdifflink ../octtools/bin.$PTARCH/masters masters
+optdifflink ../octtools/bin.$PTARCH/oct2ps oct2ps
+optdifflink ../octtools/bin.$PTARCH/oct2tim oct2tim
+optdifflink ../octtools/bin.$PTARCH/octfix octfix
+optdifflink ../octtools/bin.$PTARCH/octgc octgc
+optdifflink ../octtools/bin.$PTARCH/octls octls
+optdifflink ../octtools/bin.$PTARCH/octredomain octredomain
+optdifflink ../octtools/bin.$PTARCH/vem vem
+cd ..
+
+# Now, make stuff under obj.$PTARCH
+# Don't _ever_ cd .., because if the user has built a tree with mkPtolemyTree
+# then they might be down inside a master tree that they don't have
+# write permission too, and when the cd .., they will be somewhere in the
+# master tree
+cd $PTOLEMY/obj.$PTARCH
+optlink ../src makefile
+
+dirs="domains ptcl pitcl kernel thread \
+	tysh pigiRpc pigilib ptlang ptklib \
+	octtools pigiExample"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../src/$x makefile
+	if [ -r ../../src/$x/make.template ]; then
+		optlink ../../src/$x make.template
+	fi
+	cd $PTOLEMY/obj.$PTARCH
+done
+
+
+dirs="filters pxgraph utils"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../src/$x makefile
+	cd $PTOLEMY/obj.$PTARCH
+done
+
+# Make subdirectories of filters
+cd filters
+dirs="optfir wfir"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/filters/$x make.template
+	optlink ../../../src/filters/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/filters
+done
+cd $PTOLEMY/obj.$PTARCH
+
+cd thread
+dirs="posix"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/thread/$x makefile
+	if [ -r ../../../src/thread/$x/make.template ]; then
+		optlink ../../../src/thread/$x make.template
+	fi
+	cd $PTOLEMY/obj.$PTARCH/thread
+done
+cd $PTOLEMY/obj.$PTARCH
+
+
+cd utils
+dirs="libptdsp libexttools libgslider libptmatlab libptmathematica \
+	ptplay ptvhdlsim rman-2.5a6 tkman-1.8b5"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/utils/$x makefile
+	if [ -r ../../../src/utils/$x/make.template ]; then
+		optlink ../../../src/utils/$x make.template
+	fi
+	cd $PTOLEMY/obj.$PTARCH/utils
+done
+cd $PTOLEMY/obj.$PTARCH
+
+# EXPDOMAINS: experimental domains
+# EXPEXTRAS: non-standard sub-directories of experimental domains
+# EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
+# Experimental domains not included: capsim cgdsp3
+
+EXPDOMAINS="c50 cg56 cgc pn fsm acs vhdlb vhdl mdsdf hof sr srcgc"
+EXPEXTRAS="c50/targets cg56/targets"
+
+ALLDOMAINS="sdf ddf de bdf cg $EXPDOMAINS"
+
+# If the tst directory is present, then populate it
+if [ -d ../src/tst  ]; then
+	optmkdir tst
+	cd tst
+	optlink ../../src/tst makefile
+	optlink ../../src/tst makefile.tst
+	optlink ../../src/tst makefile.tst2
+	dirs="$ALLDOMAINS pn"
+	for x in $dirs 
+	do
+		optmkdir $x
+		cd $x
+		optlink ../../../src/tst/$x makefile
+		if [ -d ../../../src/tst/$x/stars ]; then
+			optmkdir stars
+			cd stars
+			optlink ../../../../src/tst/$x/stars make.template
+			optlink ../../../../src/tst/$x/stars makefile
+			cd ..
+		fi
+		cd $PTOLEMY/obj.$PTARCH/tst
+	done
+
+	# Build any non domain tests
+	NONDOMAINTSTS="incLink"
+	for x in $NONDOMAINTSTS
+	do
+		optmkdir $x
+		cd $x
+		optlink ../../../src/tst/$x make.template
+		optlink ../../../src/tst/$x makefile
+		cd $PTOLEMY/obj.$PTARCH/tst
+	done
+
+	cd $PTOLEMY/obj.$PTARCH
+fi
+
+cd domains
+for x in $ALLDOMAINS
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/domains/$x makefile
+	dirs="kernel stars"
+	for y in $dirs
+	do
+		optmkdir $y
+		cd $y
+		optlink ../../../../src/domains/$x/$y make.template
+		optlink ../../../../src/domains/$x/$y makefile
+		cd $PTOLEMY/obj.$PTARCH/domains/$x
+	done
+	cd $PTOLEMY/obj.$PTARCH/domains
+done
+
+# At this point, we are in $PTOLEMY/obj.$PTARCH/domains.
+
+# create extra directories under domain-specific directories
+# everything must have one slash "be two levels down"
+
+dirs="cg/targets sdf/image sdf/targets \
+	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler \
+	cg/dlScheduler cg/HuScheduler cg/dcScheduler \
+	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk cgc/vis \
+	c50/dsp cg56/dsp \
+	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
+	sdf/matrix sdf/matlab sdf/vis sdf/wildforce \
+	cgc/contrib cgc/dsp cgc/rtlib \
+	acs/targets \
+	vhdl/targets vhdl/tcltk \
+	mdsdf/tcltk de/atm de/contrib de/java de/sip \
+	cg/hierScheduler $EXPEXTRAS "
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/domains/$x make.template
+	optlink ../../../../src/domains/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/domains
+done
+
+cd $PTOLEMY/obj.$PTARCH/domains
+
+# create extra subsub dirs in each domain
+# everything must have two slashes "be three levels down"
+
+dirs="c50/dsp/stars cg56/dsp/stars \
+	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
+	sdf/dsp/stars sdf/image/stars sdf/tcltk/stars \
+	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars sdf/vis/stars \
+	sdf/wildforce/kernel sdf/wildforce/stars \
+	mdsdf/tcltk/stars \
+	de/atm/stars \
+	de/contrib/stars \
+	de/java/stars \
+	de/sip/kernel de/sip/ptsip de/sip/ppl2pl \
+	de/tcltk/stars \
+	vhdl/tcltk/targets \
+	cgc/contrib/stars \
+	cgc/dsp/stars \
+	cgc/targets/uniproc cgc/targets/multiproc cgc/targets/NOWam \
+	cgc/tcltk/stars cgc/tcltk/targets cgc/vis/stars cgc/vis/targets \
+	cgc/vis/tcltk cgc/vis/devel \
+	"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../../src/domains/$x make.template
+	optlink ../../../../../src/domains/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/domains
+done
+
+# directories that are deep
+dirs="cgc/targets/NOWam/NOWam cgc/targets/NOWam/libudpam \
+	cgc/vis/tcltk/stars "
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../../../src/domains/$x make.template
+	optlink ../../../../../../src/domains/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/domains
+done
+
+# Start of octtools section
+cd $PTOLEMY/obj.$PTARCH/octtools
+
+dirs="include vem-bin.mk vem-lib.mk"
+for x in $dirs 
+do
+	optlink ../../src/octtools	$x
+done
+
+dirs="Packages Xpackages attache vem"
+for x in $dirs 
+do
+	optmkdir $x
+	cd $x
+	#optlink ../../../src/octtools/$x make.template
+	optlink ../../../src/octtools/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/octtools
+done
+
+dirs=" installColors masters octfix octgc octls oct2ps oct2tim octredomain"
+for x in $dirs 
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/octtools/$x make.template
+	optlink ../../../src/octtools/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/octtools
+done
+
+# If tkoct directory exists, then make dirs and do links
+if [ -d $PTOLEMY/src/octtools/tkoct  ]; then
+	optmkdir tkoct
+	cd tkoct
+	optlink ../../../src/octtools/tkoct makefile
+	#Don't create links for tkoct and tkgraph, we do not ship those
+	dirs="oct2ptcl top"
+	for x in $dirs
+	do
+		optmkdir $x
+		cd $x
+		optlink ../../../../src/octtools/tkoct/$x make.template
+		optlink ../../../../src/octtools/tkoct/$x makefile
+		cd $PTOLEMY/obj.$PTARCH/octtools/tkoct
+	done
+	cd $PTOLEMY/obj.$PTARCH/octtools
+fi
+
+cd Packages
+
+dirs="avl cp da errtrap fang fc gu harpoon kd lel list nle oct \
+	octmm oh options pep port pq region st symbolic symlib tap th timer \
+	tr uprintf utility vov vulcan"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/octtools/Packages/$x make.template
+	optlink ../../../../src/octtools/Packages/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/octtools/Packages
+done
+
+cd $PTOLEMY/obj.$PTARCH/octtools/Xpackages
+dirs="Maxport Table Tgl dds fb iv rpc ts xg xpa"
+for x in $dirs 
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/octtools/Xpackages/$x make.template
+	optlink ../../../../src/octtools/Xpackages/$x makefile
+	cd ..
+done
+
+cd $PTOLEMY/obj.$PTARCH/octtools/vem
+optlink ../../../src/octtools/vem include
+optlink ../../../src/octtools/vem bitmaps
+dirs="bags buffers dialogs dispatch doc drawing drs lib main \
+	options patterns physical properties rpc schematic select strings \
+	symbolic utility windows"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/octtools/vem/$x make.template
+	optlink ../../../../src/octtools/vem/$x makefile
+	cd $PTOLEMY/obj.$PTARCH/octtools/vem
+done
+
+cd lib
+dirs="Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm \
+	folder.bm hisetDot hisetMark hiunsetDot hiunsetMark \
+	newcell.bm other.bm physical.bm schematic.bm setDot setMark \
+	symbolic.bm unsetDot unsetMark vem.bindings"
+for x in $dirs
+do
+	optlink ../../../../src/octtools/vem/lib $x
+done
+
+cd $PTOLEMY/obj.$PTARCH
+# End of octtools section
+
+# This is for the makefile
+cd $PTOLEMY
+touch $PTOLEMY/obj.$PTARCH
+
+# Call exit 0 so that if the touch fails we don't fail.
+# touch under NT sometimes fails
+exit 0

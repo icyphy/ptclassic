@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Version: @(#)undel-hunks	1.4	2/29/96
+# Usage:   undel-hunks <log_file>
+#
+# This script can be used to track down memory leaks in Ptolemy.  In
+# theory, if MEMORYLOG is a defined symbol during compile time, then the
+# LOG_NEW and LOG_DELETE macrocs will produce code to log memory usage
+# messages to the file given by the _environment_ variable MEMORYLOG.
+# To define MEMORYLOG as a symbol, add -DMEMORYLOG to GPPFLAGS in
+# $PTOLEMY/mk/config-$PTARCH.  Before running the compiled program, make
+# sure that the environment variable MEMORYLOG is set correctly.  If it
+# is not set, then no log file will get created.  The undel-hunks script
+# processes the log file and reports all lines corresponding to memory
+# that is allocated and never freed. -jtb/cxh
+#
+# Note that the LOG_NEW/LOG_DELETE and Purify definitions of a leak differ
+# (Purify is a commercial tool).  Purify says something is a leak if there
+# is no pointer or reference to it.  The older system says something is a
+# leak if was allocated by new but never freed by delete when the program
+# exits (even if it is pointed to by some data structure that is not on
+# the heap). -jtb
+#
+# At UC Berkeley, we use Purify to track down memory leaks and other memory
+# violations, so we have not tested this script in some time.  Note further
+# that this script uses GNU awk, which is not part of the Ptolemy
+# distribution. -cxh
+
+gawk '$1 == "new" {
+	if ($3 == "Top") tag = $2 ":" $4;
+	else tag = $2 ":" $3 ":" $4;
+	where[$6] = tag;
+	blocksiz[$6] = $5;
+	idx[$6] = NR;
+}
+
+$1 == "del" {
+	if ($5 in where) {
+		delete where[$5];
+	}
+	else printf("No new for %s\n", $0);
+}
+END {
+	print "Undeleted blocks:";
+	for (loc in where) {
+		print idx[loc], where[loc], blocksiz[loc], loc;
+	}
+}' $MEMORYLOG | sort -n

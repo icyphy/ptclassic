@@ -1,0 +1,24 @@
+#! /bin/sh
+# created 7/3/97, J. Voigt, Dresden University of Technology, 
+#                           Mobile Communications Systems
+# Version: @(#)pigiRpcDebug.ddd	1.1 07/30/97
+
+# This file is typically invoked from with pigiRpcShell as the $COMMAND.
+# It brings up the ddd-debugger running PIGIRPC.
+# For more information about ddd, see:
+# http://www.cs.tu-bs.de/softech/ddd/
+
+# To use the ddd debugger instead of gdb, do:
+# cp $PTOLEMY/lib/pigiRpcDebug $PTOLEMY/lib/pigiRpcDebug.gdb
+# cp $PTOLEMY/lib/pigiRpcDebug.ddd $PTOLEMY/lib/pigiRpcDebug
+
+dddcmdfile=/tmp/rpc$$
+cat > $dddcmdfile <<EOF
+break main
+run $*
+EOF
+
+DEBUG='ddd'
+
+${PT_DEBUG-$DEBUG} -command=$dddcmdfile $PIGIRPC &
+

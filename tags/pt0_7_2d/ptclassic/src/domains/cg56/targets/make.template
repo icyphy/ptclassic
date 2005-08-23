@@ -1,0 +1,126 @@
+# Makefile for extra CG56 domain targets
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All Rights Reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#
+#                                               PT_COPYRIGHT_VERSION_2
+#                                               COPYRIGHTENDKEY
+#
+# Programmer: Jose Luis Pino and Joe T. Buck
+# @(#)make.template	1.35	7/10/96
+# Created: 2/19/92
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/cg56/targets
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# SDF directory
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
+
+# CG directory
+CGDIR=$(ROOT)/src/domains/cg/kernel
+CGSTARDIR=$(ROOT)/src/domains/cg/stars
+
+
+# CGC directory
+CGCDIR=$(ROOT)/src/domains/cgc/kernel
+CGCTAR=$(ROOT)/src/domains/cgc/targets/main
+CGCSTARDIR=$(ROOT)/src/domains/cgc/stars
+
+# CG56 kernel support
+CG56DIR=$(ROOT)/src/domains/cg56/kernel
+CG56STARDIR=$(ROOT)/src/domains/cg56/stars
+
+PARDIR = $(ROOT)/src/domains/cg/parScheduler
+CGTARDIR = $(ROOT)/src/domains/cg/targets
+
+COMPAT= $(ROOT)/src/compat/ptolemy
+S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
+		CGCXBase.pl CGCXSynchComm.pl CGCXAsynchComm.pl \
+		CG56XCSend.pl CG56XCReceive.pl \
+		CGCXSend.pl CGCXReceive.pl \
+		CG56XCPoke.pl CG56XCPeek.pl \
+		CGCXPoke.pl CGCXPeek.pl
+
+INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
+     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCSTARDIR) \
+     -I$(CGCDIR) $(S56WHI) \
+     -I$(COMPAT) -I$(CGCTAR)
+
+# stars to make
+PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
+EXTRA_SRCS = $(PL_SRCS)
+
+# Used by make checkjunk
+OTHERSRCS = XCPeek XCPoke XPeek XPoke
+
+# objects to make
+OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
+        $(PL_SRCS:.pl=.o)
+
+SRCS=	$(OBJS:.o=.cc)
+
+HDRS=	$(OBJS:.o=.h)
+
+ifeq ($(USE_SHARED_LIBS),yes) 
+
+# If we are building shared libraries, then we can put all the targets in
+# a shared library.
+PTLIB = 		libcg56targets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
+
+else
+
+# We are not building a shared library, so we link in .o files.
+all:	$(SRCS) makefile $(OBJS)
+install:	all
+	@echo Installation complete.
+PTLIB=none	# required by common.mk
+endif
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Workaround bug in gcc-2.7.2 optimizer
+ifeq ($(USE_GPLUSPLUS),yes)
+CG56XCReceive.o: CG56XCReceive.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+CG56XCSend.o: CG56XCSend.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+endif
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

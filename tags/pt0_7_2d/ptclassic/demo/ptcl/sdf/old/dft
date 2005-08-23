@@ -1,0 +1,60 @@
+reset
+# Creating universe 'dft'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate signal floatarray "< ~ptolemy/src/domains/sdf/demo/lpf.taps"
+	newstate MagXgraphOptions string "-0 mag =800x200+0+0"
+	newstate PhaseXgraphOptions string "-0 phase =800x200+0+250"
+	newstate log2order int 8
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value signal
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic NO
+	setstate WaveForm1 period 0
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order log2order
+	setstate ComplexFFT1 size "2^log2order"
+	setstate ComplexFFT1 direction 1
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "1 -1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	star ComplexReal1 ComplexReal
+	star RectPolar1 RectPolar
+	star Unwrap1 Unwrap
+	setstate Unwrap1 outPhase 0.0
+	setstate Unwrap1 prevPhase 0.0
+	star DB1 DB
+	setstate DB1 min "-100"
+	setstate DB1 inputIsPower FALSE
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "magnitude spectrum (in dB) vs. freq (-PI to PI)"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "{MagXgraphOptions}"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits "2*PI/2^log2order"
+	setstate Xgraph1 xInit "-PI"
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "Phase in radians, unwrapped"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options "{PhaseXgraphOptions}"
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits "2*PI/2^log2order"
+	setstate Xgraph2 xInit "-PI"
+	connect FloatProduct.input=21 output ComplexFFT1 input
+	connect ComplexFFT1 output ComplexReal1 input
+	connect ComplexReal1 imag RectPolar1 y
+	connect ComplexReal1 real RectPolar1 x
+	connect RectPolar1 magnitude DB1 input
+	connect WaveForm2 output FloatProduct.input=21 input#2
+	connect RectPolar1 phase Unwrap1 input
+	connect WaveForm1 output FloatProduct.input=21 input#1
+	connect Unwrap1 output Xgraph2 input
+	connect DB1 output Xgraph1 input
+run 1
+wrapup

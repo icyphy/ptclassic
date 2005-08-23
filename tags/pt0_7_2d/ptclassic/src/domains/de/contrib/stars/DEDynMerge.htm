@@ -1,0 +1,50 @@
+<!-- documentation file generated from DEDynMerge.pl by ptlang -->
+<html>
+<head>
+<title>DE DynMerge star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="DynMerge star, DE domain">DynMerge star in DE domain</a></h1>
+<p>
+This star implements a dynamic merge function. On demand a new 
+porthole is added to or removed from an input-multiporthole during runtime. 
+All particles to one of its inputportholes are sent out unchanged through the 
+only output. Because the particles are sent unchanged, I can use 
+anytype-portholes here.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/kernel/DEStar.cc">DEStar</a><br>
+<b>Location:</b> $PTOLEMY/src/domains/de/contrib/stars<br>
+<b>Version:</b> 1.3 "01/15/98"<br>
+<b>Author:</b> J. Voigt<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>in</font></b></i> (multiple)</td><td>anytype</td>
+<td>will get one PortHole for each instance</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>out</font></b></i></td><td>ANYTYPE</td>
+<td>output for all dynamically created blocks</td>
+</tr>
+</table>
+<h2>Details</h2><p>
+This star works (only) in connection with <tt>DEDynMap</tt> and/or 
+<tt>DEDynMapGr</tt>. The <i>createPortHole</i> and <i>removePortHole</i> 
+methods are called from there, whenever a block is dynamically instantiated or 
+deleted.
+<p>
+The first porthole of the input-multiporthole has to be connected to a 
+<tt>DEDynMap</tt> or <tt>DEDynMapGr</tt>-star.
+<p>
+<br><b>See:</b> <a href="DEDynMerge.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#DynMerge facet, DE user">DynMerge users</a>
+<p><hr><p>
+copyright (c) 1997 Dresden University of Technology, WiNeS-Project.
+All rights reserved.
+See the file <a href="$PTOLEMY/copyright">$PTOLEMY/copyright</a> for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+</body>
+</html>

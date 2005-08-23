@@ -1,0 +1,128 @@
+<!-- @(#)newwork.html	1.9 06/14/98 -->
+<html>
+<head>
+<title>New Work in Ptolemy 0.7.1</title>
+</head>
+<body bgcolor=#faf0e6>
+
+<H2>New work in Ptolemy 0.7.1</H2>
+<DL>
+<DT> Further integrations of <A HREF="../../../tycho/doc/index.html">Tycho</A>
+into Ptolemy. -
+Edward A. Lee, John Reekie, Cliff Cordiero, Kevin Chang, Christopher Hylands and many others.
+ <dd>
+The <A HREF="../../../tycho/doc/releasenotes0.2.1.html">Tycho Release</A>
+notes describe the changes to Tycho more completely, below are some
+highlights:
+<MENU>
+	<li> New package system - John Reekie, Christopher Hylands
+	<li> Emacs-style search and file open - Cliff Cordeiro
+	<li> HTTP, FTP, and mailto support - Kevin Chang, John Reekie
+	<li> New documentation viewer (idoc) - Cliff Cordeiro
+</MENU>
+ 
+<DT> The Adaptive Computing Systems (ACS) Domain -
+James Lundblad
+<DD> The ACS domain uses different styles of stars than the rest of
+Ptolemy.  ACS splits a star into a single interface (called a Corona),
+and one or more implementations, called Cores.
+ <br> See the <A HREF="../../../src/domains/acs/doc/index.html">ACS Documentation</A> for more information.
+ <br>
+
+<DT> Mutable Universe Changes for DE -
+Jens Voigt, John Davis, II
+ <p>For a complete description,
+ see <a href="mutablede.html">Dynamic Higher Order Functions for DE</a>
+<DD> There are two demos:
+<menu>
+<li> <a href="../../../src/domains/de/contrib/demo/DynBlockIntTest">NonGraphical Demonstration of Dynamic Map Function</a>
+<li> <a href="../../../src/domains/de/contrib/demo/DynBlockGrTest">Graphical Demonstration of Dynamic Map Function</a>
+</menu>
+
+<dt> HOF fixes - Tom Lane
+<menu>
+<li> HOF stars now manipulate aliases correctly: in particular, when creating
+new connections into or out of a galaxy, individual alias portholes are
+created along with the new real portholes at the endpoint stars.  This
+eliminates many pecularities that formerly occurred with HOF stars just
+inside or just outside a galaxy boundary.  For example, a HOFNop just
+inside a galaxy boundary can now expand the galaxy's multiport to the
+right number of connections without help from a bus icon outside.
+<li> Delays on connections to HOF stars are also much better-behaved than
+before.
+<li> Reorganized HOFBase and HOFBaseHiOrdFn to make the difference in
+functionality more clear: HOFBase supports basic porthole-reconnection,
+HOFBaseHiOrdFn supports instantiation of replacement blocks.
+</menu>
+
+<dt> Ptolemy interfaces to Matlab and Mathematica -
+Brian Evans, Guy Maor,  and Wade Schwartzkopf
+
+
+<dd>      <UL>
+     <LI> upgrade to work with Matlab 5 and Mathematica 3 by default but
+          allow it to be recompiled with Matlab 4 and Mathematica 2.2
+     <LI> dynamically link the interface to Matlab
+     <LI> remove dependence of the PTcl class on the interfaces to
+	  Matlab and Mathematica Tcl commands, and instead, have the
+	  Matlab and Mathematica Tcl commands be registered.
+     </UL>
+	We cannot ship binaries built with the current Matlab 5 interface,
+	since they will not work on machines that do not have Matlab installed.
+
+<dt> Java version of <CODE>pxgraph</CODE>, 
+<a href="../../../tycho/java/ptplot/index.html">Ptplot</a> -
+Edward A. Lee, Christopher Hylands, Bicheng William Wu
+
+<dd> Note that the X11 sources for <CODE>pxgraph </CODE> are also
+included, see
+<a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a> 
+
+
+<dt> C50 domain changes: Professor Brian Evans and his students
+ <dd>
+ <p>  The C50 stars no longer generate assembly code with assembly
+  directives so that different targets that support different
+  assembly directives can be used.  The new stars work for
+  both the C50 DSK target and the new SimC50Target.
+
+ <p>  The new SimC50Target invokes the standard (commercial) C50
+  simulator written by Texas Instruments.  TI will generally
+  donate this simulator to universities.  This new target
+  sets the stage for a C50 Evaluation Module Board target.
+
+
+<dt> Synchronous Reactive C Code Generation Domain -
+Frederic Boulanger, SupÅÈlec 
+<dd> See the
+<a href="../../../src/domains/srcgc/demo/init.pal">SRCGC Demos</a> and
+<a href="../../../src/domains/srcgc/icons/srcgc.pal">SRCGC Stars</a> palettes.
+
+<dt> Support for the <A HREF="http://www.cygnus.com/egcs/">EGCS</A> C++
+Compiler -
+Christopher Hylands
+<dd> See <a href="../../../doc/html/release.html#egcs"><CODE>$PTOLEMY/doc/html/release.html</CODE></a> for more information.
+
+<dt> Preliminary port to Windows NT -
+Christopher Hylands
+<dd> Ptolemy 0.7.1 runs under Windows NT using the
+Cygwin32 compiler and the Cygwin32 X11R6 binaries.  To run
+<CODE>pigi</CODE> under NT, you will need a NT X server.
+For more information, see the
+<a href="../../../doc/html/nt/index.html">Ptolemy under Windows NT</a>
+page.
+</DL>
+
+<p>
+<hr>
+Up to: <A HREF="index.html">What's New in Ptolemy 0.7.1</A> -
+Forward to: <A HREF="newstars.html">New Stars and Demos</A>
+
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated 06/14/98,
+comments to <a href="mailto:ptolemy@ptolemy.eecs.berkeley.edu">ptolemy@ptolemy.eecs.berkeley.edu</a>.
+</body>
+</html>

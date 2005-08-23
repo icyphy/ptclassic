@@ -1,0 +1,54 @@
+#!/bin/sh
+# Copyright (c) 1999 The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
+#
+# Version: @(#)fixntpaths	1.2 02/05/99
+
+# Script to fix Ptolemy paths so that Ptolemy will work under NT w/ Cygwin
+#
+# 1) $PTOLEMY/lib/colors/ptolemy:  rename % directories to percent 
+# 2) $PTOLEMY/lib/colors/ptolemy:  rename con directory to con0
+# 3) $PTOLEMY/lib/bw_patterns/ptolemy: remove links to old files and create 
+#    new ones
+# 4) $PTOLEMY/lib/colors/ptolemy/system: run ptfixtree
+# 5) Run ptfixtree-all
+
+
+# 1) $PTOLEMY/lib/colors/ptolemy:  rename % directories to percent 
+if [ ! -w $PTOLEMY/lib/colors/ptolemy ]; then
+	echo "$0: $PTOLEMY/lib/colors/ptolemy is not writable by you. exiting"
+fi
+
+dirs="$PTOLEMY/lib/colors/ptolemy/%*"
+for dir in $dirs
+do
+	if [ -w $dir ]; then
+		newdir=`echo $dir | sed 's/%/percent/'`
+		echo "Moving $dir to $newdir"
+		mv $dir $newdir
+	fi
+done
+
+# 2) $PTOLEMY/lib/colors/ptolemy:  rename con directory to con0
+if [ -w $PTOLEMY/lib/colors/ptolemy/con ]; then
+	echo "Moving $PTOLEMY/lib/colors/ptolemy/con to $PTOLEMY/lib/colors/ptolemy/con0"
+	mv $PTOLEMY/lib/colors/ptolemy/con $PTOLEMY/lib/colors/ptolemy/con0
+fi
+
+# 3) $PTOLEMY/lib/bw_patterns/ptolemy: remove links to old files and create 
+#    new ones
+if [ -w $PTOLEMY/lib/bw_patterns/ptolemy/con ]; then
+    echo "Fixing links in $PTOLEMY/lib/bw_patterns/ptolemy"
+    rm $PTOLEMY/lib/bw_patterns/ptolemy/*%* con
+    (cd $PTOLEMY/lib/bw_patterns/ptolemy; ln -s ../../colors/ptolemy/* .)
+fi
+
+# 4) $PTOLEMY/lib/colors/ptolemy/system: run ptfixtree
+# Note that ptfixtree.tcl has our conversions preloaded
+$PTOLEMY/bin/ptfixtree $PTOLEMY/lib/colors/ptolemy/system
+
+echo "Don't forget to:"
+echo "Edit pigilib/mkIcon.c, pigilib/octIfc.c and "
+echo " and octtools/tkoct/oct2ptcl/oct2ptcl"
+echo "Then run ptfixtree-all"

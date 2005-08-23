@@ -1,0 +1,20 @@
+h34777
+s 00008/00000/00000
+d D 1.1 99/09/08 11:28:40 cxh 1 0
+c date and time created 99/09/08 11:28:40 by cxh
+e
+u
+U
+f e 1
+t
+T
+I 1
+M 5 M9FEL92 @,2XQ  $A   !*/BI;I)5^[FCG6!>B9S*(Y4=M-Y'US'(X0Y$
+M.U_[.$9K/VJAMQ3UZD,0X48!*;Y';Z:,$T'TPGO BM&V/SR]$@NXZ6[5?E4*
+MHW#!YN]L[4*YXME>AR3%NM.@\=:=EITR:QC)SC<4=>J&?8#^:3SJ0_6]E .4
+ML%?H';6\7EA9"?JLF\:"L.>A>(J>YH$&Q=9BW@^\JB?)Y()Z382[O_(HWPD]
+M^RY8LA7,,S< ]<4,S:*;2#E^V 2EVK8 4;:UO/T23[@I[M&TE<H&#_[9T&QM
+M0CIHF1Z<Y,7Z5*"Q%IQ<7?+MBSW\7CI2JL-08<9JL[(=9,AY?J8$I=K3P-&V
+M.?S]TB['%I&H-!6*8G#!IO(L+0*^*-G>0F0%^J#?#BE@W!VR#%B)CK.4M6I$
+ 
+E 1

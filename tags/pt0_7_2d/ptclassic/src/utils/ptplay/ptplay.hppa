@@ -1,0 +1,26 @@
+#! /bin/sh -f
+# ptplay for hppa 
+# @(#)ptplay.hppa	1.6 06/24/97
+if [ -x /opt/audio/bin/audio_editor ]; then
+    # HPUX10 should have /opt/audio
+    echo "If the sound is too low in volume, run /opt/audio/bin/AudioCP"
+    /opt/audio/bin/audio_editor $1
+elif [ -x /usr/audio/bin/send_sound ]; then
+    # HPUX9 should have /usr/audio
+    echo "If the sound is too low in volume, run /usr/audio/bin/acontrol"
+    /usr/audio/bin/send_sound $1 -u -srate 8000
+else
+    # Original HPUX9 source by Stefan Detroch of Imec.
+    # Requires the player program found in /usr/audio (HPUX9) or 
+    # /opt/audio/src/player (HPUX10) to be compiled
+    # and installed in your path.
+    # The publically avaible program 'sox' is used to normalize the volume.
+    # sox is available via anonymous ftp from
+    # http://www.spies.com/Sox/
+    SCALE=`sox -t ul $1 -e stat |& grep Volume | awk '{print $3;}'`
+    SOUNDFILE=/tmp/mysound$$
+    sox -v $SCALE -t ul $1 -t ul $SOUNDFILE
+    player $SOUNDFILE -u -pri urgent
+    rm -f $SOUNDFILE
+fi
+

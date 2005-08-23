@@ -1,0 +1,96 @@
+# Makefile for Ptolemy C Code Generation main targets
+# @(#)make.template	1.26	8/20/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#
+# Code generation targets
+
+# Root of Ptolemy directory
+ROOT =		../../../../..
+# True source directory
+VPATH = 	$(ROOT)/src/domains/cgc/targets/multiproc
+
+# get configuration info
+CONFIG = 	$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+SDFKERNEL =	$(ROOT)/src/domains/sdf/kernel
+BDFKERNEL =	$(ROOT)/src/domains/bdf/kernel
+CGKERNEL =	$(ROOT)/src/domains/cg/kernel
+CGCKERNEL =	$(ROOT)/src/domains/cgc/kernel
+CGCSTARS =	$(ROOT)/src/domains/cgc/stars
+PARDIR =	$(ROOT)/src/domains/cg/parScheduler
+CGTARDIR =	$(ROOT)/src/domains/cg/targets
+DLDIR =		$(ROOT)/src/domains/cg/dlScheduler
+MACRODIR =	$(ROOT)/src/domains/cg/macroScheduler
+CGDDFDIR =	$(ROOT)/src/domains/cg/ddfScheduler
+CGCT =		$(ROOT)/src/domains/cgc/targets
+
+# Include directories
+INCL= -I$(CGCT)/uniproc -I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) \
+ -I$(SDFKERNEL) -I$(KERNDIR) -I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS) \
+ -I$(DLDIR) -I$(MACRODIR) -I$(CGDDFDIR)
+
+# Ptolemy template files
+PL_SRCS = \
+	CGCUnixSend.pl \
+	CGCUnixReceive.pl
+
+PLSRC = $(PL_SRCS:.pl=.cc)
+
+SRCS =	CompileCGSubsystems.cc \
+	CGCMultiTarget.cc \
+	CGCDDFCode.cc \
+	CGCMacroStar.cc \
+	$(PLSRC) 
+
+EXTRA_SRCS = $(PL_SRCS)
+
+HDRS=$(SRCS:.cc=.h)
+
+OBJS = $(SRCS:.cc=.o)
+
+ifeq ($(USE_SHARED_LIBS),yes) 
+
+# If we are building shared libraries, then we can put all the targets in
+# a shared library.
+PTLIB = 		libcgcmultitargets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
+
+else
+PTLIB=none	# required by common.mk
+all:		makefile $(OBJS)
+# "make install" puts things in the official place
+install:	all
+		@echo Installation complete.
+endif
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

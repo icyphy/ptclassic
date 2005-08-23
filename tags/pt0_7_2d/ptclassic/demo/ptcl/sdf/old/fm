@@ -1,0 +1,98 @@
+domain SDF
+defgalaxy oscillator {
+	domain SDF
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate 0
+	setstate Integrator1 state 0.0
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star Cos1 Cos
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	alias freq Integrator1 data
+	connect FloatDC1 output Integrator1 reset
+	connect Integrator1 output Cos1 input
+	connect Cos1 output FloatProduct.input=21 input#1
+	alias amp FloatProduct.input=21 input#2
+	alias out FloatProduct.input=21 output
+}
+domain SDF
+defgalaxy fmGalaxy {
+	domain SDF
+	newstate Nc FLOAT 1.0
+	newstate Nm FLOAT 1.0
+	newstate Imax FLOAT 1.0
+	star oscillator1 oscillator
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain Imax
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain Nm
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain Nc
+	star FloatSum1 FloatSum
+	star oscillator2 oscillator
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FloatGain4 FloatGain
+	setstate FloatGain4 gain 1.0
+	alias index FloatProduct.input=22 input#2
+	connect FloatProduct.input=22 output FloatGain1 input
+	connect FloatGain1 output oscillator1 amp
+	alias pitch Fork.output=21 input
+	node node1
+	nodeconnect FloatGain2 output node1
+	nodeconnect FloatProduct.input=22 input#1 node1
+	nodeconnect oscillator1 freq node1
+	connect FloatGain3 output FloatSum1 input
+	connect oscillator1 out FloatSum1 input
+	alias amp FloatGain4 input
+	alias out oscillator2 out
+	connect Fork.output=21 output#1 FloatGain2 input
+	connect Fork.output=21 output#2 FloatGain3 input
+	connect FloatSum1 output oscillator2 freq
+	connect FloatGain4 output oscillator2 amp
+}
+reset
+# Creating universe 'fm'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star fmGalaxy1 fmGalaxy
+	setstate fmGalaxy1 Nc 1.0
+	setstate fmGalaxy1 Nm 1.0
+	setstate fmGalaxy1 Imax 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Output of fmGalaxy"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 'x(t)' =900x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star FloatDC2 FloatDC
+	setstate FloatDC2 level 0.03
+	star FloatDC3 FloatDC
+	setstate FloatDC3 level 0.05
+	star FloatDC4 FloatDC
+	setstate FloatDC4 level 1.0
+	star Integrator2 Integrator
+	setstate Integrator2 feedbackGain 1.0
+	setstate Integrator2 top 0.0
+	setstate Integrator2 bottom 0.0
+	setstate Integrator2 saturate 0
+	setstate Integrator2 state 0.0
+	star FloatDC5 FloatDC
+	setstate FloatDC5 level 0.0
+	connect fmGalaxy1 out Xgraph1 input
+	connect FloatDC3 output Integrator2 data
+	connect FloatDC5 output Integrator2 reset
+	connect Integrator2 output fmGalaxy1 index
+	connect FloatDC4 output fmGalaxy1 amp
+	connect FloatDC2 output fmGalaxy1 pitch
+run 400
+wrapup

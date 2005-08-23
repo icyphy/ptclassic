@@ -1,0 +1,24 @@
+reset
+# Creating universe 'tbus'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	newstate busWidth int 4
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star Distributor1 Distributor
+	setstate Distributor1 blockSize 1
+	star XMgraph1 XMgraph
+	setstate XMgraph1 title "Output from {busWidth} buses"
+	setstate XMgraph1 saveFile ""
+	setstate XMgraph1 options "-0 b1 -1 b2 -2 b3 -3 b4 -4 b5 =400x400+0+0"
+	setstate XMgraph1 ignore 0
+	setstate XMgraph1 xUnits 1.0
+	setstate XMgraph1 xInit 0.0
+	connect Ramp1 output Distributor1 input
+	busconnect Distributor1 output XMgraph1 input busWidth
+run 10
+wrapup

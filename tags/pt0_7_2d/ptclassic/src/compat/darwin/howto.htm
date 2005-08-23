@@ -1,0 +1,39 @@
+<HTML>
+ <!--@(#)howto.htm	1.1 07/22/02-->
+<HEAD>
+</HEAD>
+<BODY BGCOLOR="#faf0e6" 
+        text="black" 
+        >
+<center>
+<img src = "ptolemySmall.gif">
+<h1>Ptolemy Classic v0.7.1 on Mac OS X</h1>
+<hr>
+
+</center>
+Below is part of David Evans <devans@cs.pitt.edu> page at
+http://www2.cs.pitt.edu/~devans/
+<blockquote>
+This is my first pass at porting Ptolemy Classic to Darwin. There will be changes made and noted here. The plan is to get it up and running first, and then vector optimize the star/pigiRpc code to enhance performance where possible.
+<br>
+<br>
+Installing Ptolemy requires the following non-standard additions/changes to your system:
+<i>I take no responsibility for your actions...USE AT OWN RISK!</i>
+<DIR>
+<LI CIRCLE>The Ptolemy Classic v0.7.1 source tree available from <a href = "http://ptolemy.eecs.berkeley.edu">Berkeley</a>
+<LI CIRCLE>Modified g++ library (or libnqg++.a for not-quite g++...This
+involves compiling each .cc file separately and removing those that don't
+compile. - hopefully we can change this with ARCH flags.)</LI>
+<LI CIRCLE>libdl or dlcompat from <a href = "http://fink.sourceforge.net/"> the fink project </a> or <a href = "http://macosx.forked.net"> apex's ports</a></LI>
+<LI CIRCLE>Create a minimal minmax.h file ... an example is <a href = "minmax.h">here.</a></LI>
+<LI CIRCLE>Create a minimal a.out.h file ... an example is <a href ="a.out.h">here.</a></LI>
+<LI CIRCLE>This is our config-Darwin.mk, it changes often, and it may
+change again in the near future. This file will take care of MOST of the
+quirks. <a href = "config-Darwin.mk">config-Darwin.mk</a><br> </DIR>
+
+The above are the minimum set of additions for building ptolemy. Of course there are other caveats, but almost all should
+be taken care of by the config-Darwin.mk file.
+
+</blockquote>
+</body>
+</html>

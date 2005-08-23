@@ -1,0 +1,34 @@
+#! /bin/sh -x
+# usage: pigiRpcDebug.dde <vem-args>
+# @(#)pigiRpcDebug.dde	1.2 3/21/96
+
+# Use dde as a debugger instead of gdb.
+# hppa.cfront requires this
+
+dbgcmdfile=$HOME/ptdderc
+
+#if [ -f $dbgcmdfile -a ! -f $dbgcmdfile.bak ]; then
+#	echo "Saving your old $dbgcmdfile to $dbgcmdfile.bak"
+#	cp $dbgcmdfile $dbgcmdfile.bak
+#fi
+
+#apm ../../src/pigilib $PTOLEMY/src/pigilib
+#apm ../../src/pigiRpc $PTOLEMY/src/pigiRpc
+#b main
+#r $*
+
+#cat > $dbgcmdfile <<EOF
+#del intercept signal SIGVTALRM
+#alias \`after_debug [ del int signal SIGCHILD; del int signal SIGSYS;del int signal SIGVTALARM]
+#EOF
+
+#echo "dde command file is:"
+#echo "------start----"
+#cat $dbgcmdfile
+#echo "------end----"
+
+echo "To debug threads, you should see /opt/langtools/dde/contrib/dderc_threads"
+
+dde \
+	-geometry 600x500+0-0 \
+	 $PIGIRPC -- $* &

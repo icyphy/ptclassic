@@ -1,0 +1,222 @@
+dnl	This file is an input file used by the GNU "autoconf" program to
+dnl	generate the file "configure" which configures pxgraph for 
+dnl	the local environment.
+dnl     @(#)configure.in	1.5 01/09/99
+dnl	Author: Christopher Hylands
+dnl	See http://ptolemy.eecs.berkeley.edu/~cxh/sapub/xgraph.html
+dnl
+dnl	This configure.in file is based on the Tk8.0 configure.in, so:
+dnl
+dnl This software is copyrighted by the Regents of the University of
+dnl California, Sun Microsystems, Inc., and other parties.  The following
+dnl terms apply to all files associated with the software unless explicitly
+dnl disclaimed in individual files.
+dnl 
+dnl The authors hereby grant permission to use, copy, modify, distribute,
+dnl and license this software and its documentation for any purpose, provided
+dnl that existing copyright notices are retained in all copies and that this
+dnl notice is included verbatim in any distributions. No written agreement,
+dnl license, or royalty fee is required for any of the authorized uses.
+dnl Modifications to this software may be copyrighted by their authors
+dnl and need not follow the licensing terms described here, provided that
+dnl the new terms are clearly indicated on the first page of each file where
+dnl they apply.
+dnl 
+dnl IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY
+dnl FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+dnl ARISING OUT OF THE USE OF THIS SOFTWARE, ITS DOCUMENTATION, OR ANY
+dnl DERIVATIVES THEREOF, EVEN IF THE AUTHORS HAVE BEEN ADVISED OF THE
+dnl POSSIBILITY OF SUCH DAMAGE.
+dnl 
+dnl THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES,
+dnl INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+dnl FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  THIS SOFTWARE
+dnl IS PROVIDED ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE
+dnl NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR
+dnl MODIFICATIONS.
+dnl 
+dnl GOVERNMENT USE: If you are acquiring this software on behalf of the
+dnl U.S. government, the Government shall have only "Restricted Rights"
+dnl in the software and related documentation as defined in the Federal 
+dnl Acquisition Regulations (FARs) in Clause 52.227.19 (c) (2).  If you
+dnl are acquiring the software on behalf of the Department of Defense, the
+dnl software shall be classified as "Commercial Computer Software" and the
+dnl Government shall have only "Restricted Rights" as defined in Clause
+dnl 252.227-7013 (c) (1) of DFARs.  Notwithstanding the foregoing, the
+dnl authors grant the U.S. Government and others acting in its behalf
+dnl permission to use and distribute the software in accordance with the
+dnl terms specified in this license.
+dnl 
+AC_INIT(xgraph.c)
+# SCCS: @(#)configure.in	1.5 01/09/99
+ 
+PXGRAPH_VERSION=2.0
+PXGRAPH_MAJOR_VERSION=2
+PXGRAPH_MINOR_VERSION=0
+PXGRAPH_PATCH_LEVEL="p3"
+VERSION=${PXGRAPH_VERSION}${PXGRAPH_PATCH_LEVEL}
+ 
+if test "${prefix}" = "NONE"; then
+    prefix=/usr/local
+fi
+if test "${exec_prefix}" = "NONE"; then
+    exec_prefix=$prefix
+fi
+
+AC_PROG_RANLIB
+AC_ARG_ENABLE(gcc, [  --enable-gcc            allow use of gcc if available],
+    [pxgraph_ok=$enableval], [pxgraph_ok=no])
+if test "$pxgraph_ok" = "yes"; then
+    AC_PROG_CC
+else
+    CC=${CC-cc}
+AC_SUBST(CC)
+fi
+AC_C_CROSS
+
+#--------------------------------------------------------------------
+#	Supply a substitute for stdlib.h if it doesn't define strtol,
+#	strtoul, or strtod (which it doesn't in some versions of SunOS).
+#--------------------------------------------------------------------
+
+AC_MSG_CHECKING(stdlib.h)
+AC_HEADER_EGREP(strtol, stdlib.h, pxgraph_ok=yes, pxgraph_ok=no)
+AC_HEADER_EGREP(strtoul, stdlib.h, , pxgraph_ok=no)
+AC_HEADER_EGREP(strtod, stdlib.h, , pxgraph_ok=no)
+if test $pxgraph_ok = no; then
+    AC_DEFINE(NO_STDLIB_H)
+fi
+AC_MSG_RESULT($pxgraph_ok)
+
+#--------------------------------------------------------------------
+#	Locate the X11 header files and the X11 library archive.  Try
+#	the ac_path_x macro first, but if it doesn't find the X stuff
+#	(e.g. because there's no xmkmf program) then check through
+#	a list of possible directories.  Under some conditions the
+#	autoconf macro will return an include directory that contains
+#	no include files, so double-check its result just to be safe.
+#--------------------------------------------------------------------
+
+AC_PATH_X
+not_really_there=""
+if test "$no_x" = ""; then
+    if test "$x_includes" = ""; then
+	AC_TRY_CPP([#include <X11/XIntrinsic.h>], , not_really_there="yes")
+    else
+	if test ! -r $x_includes/X11/Intrinsic.h; then
+	    not_really_there="yes"
+	fi
+    fi
+fi
+if test "$no_x" = "yes" -o "$not_really_there" = "yes"; then
+    AC_MSG_CHECKING(for X11 header files)
+    XINCLUDES="# no special path needed"
+    AC_TRY_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
+    if test "$XINCLUDES" = nope; then
+        dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/X11R6/include /usr/X11R5/include /usr/include/X11R5 /usr/include/X11R4 /usr/openwin/include /usr/X11/include /usr/sww/include /usr/X11R6.3/include /usr/X11R6.4/include"
+        for i in $dirs ; do
+	    if test -r $i/X11/Intrinsic.h; then
+		AC_MSG_RESULT($i)
+	        XINCLUDES=" -I$i"
+		break
+	    fi
+        done
+    fi
+else
+    if test "$x_includes" != ""; then
+	XINCLUDES=-I$x_includes
+    else
+	XINCLUDES="# no special path needed"
+    fi
+fi
+if test "$XINCLUDES" = nope; then
+    AC_MSG_RESULT(couldn't find any!)
+    XINCLUDES="# no include files found"
+fi
+
+if test "$no_x" = yes; then
+    AC_MSG_CHECKING(for X11 libraries)
+    XLIBSW=nope
+    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/X11R6/lib /usr/X11R5/lib /usr/lib/X11R5 /usr/lib/X11R4 /usr/openwin/lib /usr/X11/lib /usr/sww/X11/lib /usr/X11R6.3/lib /usr/X11R6.4/include"
+    for i in $dirs ; do
+	if test -r $i/libX11.a -o -r $i/libX11.so -o -r $i/libX11.sl; then
+	    AC_MSG_RESULT($i)
+	    XLIBSW="-L$i -lX11"
+	    x_libraries="$i"
+	    break
+	fi
+    done
+else
+    if test "$x_libraries" = ""; then
+	XLIBSW=-lX11
+    else
+	XLIBSW="-L$x_libraries -lX11"
+    fi
+fi
+if test "$XLIBSW" = nope ; then
+    AC_CHECK_LIB(Xwindow, XCreateWindow, XLIBSW=-lXwindow)
+fi
+if test "$XLIBSW" = nope ; then
+    AC_MSG_RESULT(couldn't find any!  Using -lX11.)
+    XLIBSW=-lX11
+fi
+
+#--------------------------------------------------------------------
+# One more check related to the X libraries.
+#
+# Note: can't use ac_check_lib macro (at least, not in Autoconf 2.1)
+# because it can't deal with the "-" in the library name.
+#--------------------------------------------------------------------
+
+if test -d /usr/include/mit ; then
+    AC_MSG_CHECKING([MIT X libraries])
+    pxgraph_oldCFlags=$CFLAGS
+    CFLAGS="$CFLAGS -I/usr/include/mit"
+    pxgraph_oldLibs=$LIBS
+    LIBS="$LIBS -lX11-mit"
+    AC_TRY_LINK([
+	#include <X11/Xlib.h>
+    ], [
+	XOpenDisplay(0);
+    ], [
+	AC_MSG_RESULT(yes)
+	XLIBSW="-lX11-mit"
+	XINCLUDES="-I/usr/include/mit"
+    ], AC_MSG_RESULT(no))
+    CFLAGS=$pxgraph_oldCFlags
+    LIBS=$pxgraph_oldLibs
+fi
+
+#--------------------------------------------------------------------
+#	On a few very rare systems, all of the libm.a stuff is
+#	already in libc.a.  Set compiler flags accordingly.
+#	Also, Linux requires the "ieee" library for math to
+#	work right (and it must appear before "-lm").
+#--------------------------------------------------------------------
+
+MATH_LIBS=""
+#--------------------------------------------------------------------
+#	On a few very rare systems, all of the libm.a stuff is
+#	already in libc.a.  Set compiler flags accordingly.
+#	Also, Linux requires the "ieee" library for math to
+#	work right (and it must appear before "-lm").
+#--------------------------------------------------------------------
+
+MATH_LIBS=""
+AC_CHECK_FUNC(log10, , MATH_LIBS="-lm")
+AC_CHECK_LIB(ieee, main, [MATH_LIBS="-lieee $MATH_LIBS"])
+
+#--------------------------------------------------------------------
+#	See if we need stricmp.  If we do, define NEED_STRICMP
+#--------------------------------------------------------------------
+
+AC_CHECK_FUNC(stricmp, , AC_DEFINE(NEED_STRICMP))
+
+# Substitute these values in the makefile
+AC_SUBST(LD_FLAGS)
+AC_SUBST(MATH_LIBS)
+AC_SUBST(PXGRAPH_VERSION)
+AC_SUBST(XINCLUDES)
+AC_SUBST(XLIBSW)
+
+AC_OUTPUT(makefile)

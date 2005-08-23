@@ -1,0 +1,27 @@
+#
+# ~ptolemy/lib/colors/ptolemy/README
+# Version @(#)README	1.3	6/5/94
+#
+This directory contains the definitions of colors used by Vem
+when running Ptolemy.  To change these, edit the file colors.pat.
+Then run "installColors".
+
+The file colors.pat defines the colors used by vem to display ptolemy
+facets.  In Vem terminology, it defines the "colors" portion of the
+'ptolemy technology.' The colors can be changed, and users can define
+their own colors.
+
+See ~ptolemy/src/octtools/installColors/README for information on
+how to modify the colors.
+
+Unfortunately, you have to jump through hoops to get the "P"
+command to open your new palette, if you make a new palette.
+The default palette is stored
+in "~ptolemy/lib/colors/ptolemy/layers:schematic:contents".
+This is accessed by Vem as "($OCTTOOLS)/tech/colors/layers:schematic:contents",
+where OCTTOOLS is an environment variable normally set to "~ptolemy"
+and "tech" is a symbolic link in ~ptolemy.  You have to change
+set OCTTOOLS in your environment to point to some intermediate
+directory, then in that directory, put a symbolic link to the directory
+where you stored your technology.
+

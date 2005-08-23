@@ -1,0 +1,44 @@
+<!-- documentation file generated from CGCMPNeuron.pl by ptlang -->
+<html>
+<head>
+<title>CGC MPNeuron star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="MPNeuron star, CGC domain">MPNeuron star in CGC domain</a></h1>
+<p>
+This is a McCulloch-Pitts neuron. The activation of this neuron is binary.
+That is, at any time step, the neuron either fires, or does not fires.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/cgc/domain.idx#NeuronBase ">CGCNeuronBase</a><br>
+<b>Location:</b> CGC contrib library<br>
+<b>Version:</b> 1.1 "03/24/98"<br>
+<b>Author:</b> Biao Lu<br>
+<b>Acknowledgements:</b> Brian L. Evans<br>
+<h2>States</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=blue>threshold</font></b></i></td><td>FloatState</td>
+<td>This is the threshold for each neuron. If the sum of the weighted signal
+is greater than or equal to this threshold, the neuron will be fired.</td>
+<td>"1.0"</td>
+</tr>
+</table>
+<h2>Details</h2><p>
+This MPNeuron is based on the McCulloch-Pitts model of artificial neurons [1].
+<p> 
+REFERENCES
+<ol>
+<li>W. S. McCulloch and W. Pitts, <em>"A logical calculus of the ideas immanent
+in nervous activity"</em>, Bulletin of Mathematical Biophysics, Vol. 5,
+pp. 115-133, 1943
+</ol>
+<p>
+<br><b>See:</b> <a href="CGCMPNeuron.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/cgc/domain.idx#MPNeuron facet, CGC user">MPNeuron users</a>
+<p><hr><p>
+Copyright (c) 1997-1998 The University of Texas.
+All rights reserved.
+See the file <a href="$PTOLEMY/copyright">$PTOLEMY/copyright</a> for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+</body>
+</html>

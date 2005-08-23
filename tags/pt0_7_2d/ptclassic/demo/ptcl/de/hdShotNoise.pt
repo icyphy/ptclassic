@@ -1,0 +1,36 @@
+reset
+# Creating universe 'hdShotNoise'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Poisson1 Poisson
+	setstate Poisson1 meanTime 0.1
+	setstate Poisson1 magnitude 1.0
+	star Filter1 Filter
+	setstate Filter1 decay 0.9
+	setstate Filter1 tau 0.0
+	setstate Filter1 state 0.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "High density shot noise"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 y =700x300-0+250"
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 1.0
+	star Discard1 Discard
+	setstate Discard1 threshold 50.0
+	star Xhistogram1 Xhistogram
+	setstate Xhistogram1 title "Histogram of shot noise level"
+	setstate Xhistogram1 saveFile ""
+	setstate Xhistogram1 binWidth 1.0
+	setstate Xhistogram1 options "-bar -nl =700x300+400+500 -0 count"
+	connect Poisson1 output Filter1 data
+	node node1
+	nodeconnect Filter1 output node1
+	nodeconnect Xgraph1 input node1
+	nodeconnect Discard1 input node1
+	connect Clock1 output Filter1 clock
+	connect Discard1 output Xhistogram1 input
+run 500
+wrapup

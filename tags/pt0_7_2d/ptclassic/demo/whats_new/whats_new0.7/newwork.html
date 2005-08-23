@@ -1,0 +1,153 @@
+<!-- Version: @(#)newwork.html	1.10 04/30/97 -->
+<html>
+<head>
+<title>New Work in Ptolemy 0.7</title>
+</head>
+<body bgcolor=#faf0e6>
+
+<H2>New work</H2>
+<DT> Further integrations of <A HREF="../../../tycho/doc/index.html">Tycho</A>
+into Ptolemy. 
+
+<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~eal">Edward A. Lee</A>,
+ <A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A>, 
+<A HREF="http://ptolemy.eecs.berkeley.edu/~kchang">Kevin Chang</A>,
+<A
+HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
+and many others.
+ <br>
+The <A HREF="../../../tycho/doc/releasenotes0.2.html">Tycho Release</A>
+notes describe the changes to Tycho more completely, below are some
+highlights:
+<MENU>
+	<LI> The
+	<A HREF="../../../tycho/java/doc/index.html">Java/Tycho
+	 interface</A>, including a Process Networks Sieve of Eratosthenes
+	 demo.
+
+	<LI> Compilation and dynamic <A
+HREF="../../../tycho/kernel/doc/usersGuides/LoaderHelp.html">loading</A>
+of C modules at runtime.
+
+	<LI> Improved <A
+HREF="../../../tycho/kernel/doc/usersGuides/PreferencesHelp.html">preferences</A>
+	manager.
+
+	<LI> An interface that allows the user to jump to C,C++ and Java
+	compiler errors.
+
+	<LI> Ptolemy <A
+HREF="../../../tycho/typt/editors/doc/usersGuides/RetargetHelp.html">Retargetting
+Tool</A>
+
+</MENU>
+ <DL>
+<DT> Finite State Machine (FSM) domain
+<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~bilung">Bilung Lee</A> - 
+<A HREF="../../../src/domains/fsm/demo/init.pal">
+FSM Palette</A> -
+
+<A HREF="fsm.html">Further documentation</A>
+
+<DT> Synchronous/Reactive (SR) Domain
+<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~sedwards">Stephen Edwards</A> -
+<A HREF="../../../src/domains/sr/demo/init.pal">SR Palette</A> -
+<A HREF="overall.html">Further documentation </A>
+
+<DT> Code Generation for the TMS320C50 DSP Domain
+<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~luisgm">Luis Gutierrez</A>,
+<a href="http://www.ece.utexas.edu/~bevans">Brian L. Evans</a> (UT Austin)
+<A HREF="../../../src/domains/c50/demo/init.pal">C50 Palette</A>
+
+<DT> Type System Modifications
+<DD> <a href="mailto:tgl@sss.pgh.pa.us">Tom Lane</a>(Structured
+Software Systems),
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A> -
+<A HREF="typesys.html">Further documentation</A>
+
+<DT> HTML documentation of stars.
+
+<DD> <CODE>ptlang</CODE> has been modified to create HTML
+documentation instead of troff documentation.  A new ptlang keyword named
+<CODE>htmldoc</CODE> has been added to ptlang.
+
+ <br>The <CODE>explanation</CODE> sections in the Ptolemy builtin
+stars have been converted to <CODE>htmldoc</CODE> sections. 
+
+ <br> For a simple example, see the <A
+HREF="../../../src/domains/sdf/stars/SDFRamp.htm">SDFRamp</A> star
+documentation.
+
+ <br>The HTML star documentation is viewable outside Ptolemy and Tycho with
+a standard HTML viewer.
+
+ The HTML star documentation is also viewable as a hierarchical table
+of contents with Tycho.  The documentation can be viewed as both a <A
+HREF="../../../src/domains/starHTML.idx">textual table of
+contents</A>, and as a <A HREF="../../../src/domains/starHTML.idx.fst">graphical forest</A>
+
+<br><A HREF="http://ptolemy.eecs.berkeley.edu/~eal">Edward A. Lee</A>,
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
+
+
+<DT> AcyLoopScheduler
+<DD>  This scheduler does joint code/data minimization; it generates
+single appearance schedules optimized for buffer memory usage.  Very
+useful in code generation, especially in assembly language domains.
+ <br>
+<A HREF="http://ptolemy.eecs.berkeley.edu/~murthy">Praveen Murthy</A>
+
+
+<DT> UltraSparc VIS C Code Generation Target
+<DD> The VIS target only works under sol2.5.cfront only, and it
+requires the
+<A HREF="http://www.sun.com/sparc/vis/vsdkfaq.html">Sun VIS Software Development Kit</A>
+ <br><a href="http://www.ctr.columbia.edu/~bchen">William Chen</a>
+(Columbia University),
+<A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A> -
+<A HREF="http://ptolemy.eecs.berkeley.edu/~williamc/vis/outline.html">Further documentation</A>
+
+
+<DT> TychoTarget C Code Generation Target
+<DD> The TychoTarget generates output that can be compiled and
+loaded into Tycho. It support creation of customized control
+panels using Tycho.
+<br>
+<A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A> -
+<A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A> -
+<A HREF="tychotarget.html">Further documentation</A>
+
+
+<DT> CGCostTarget
+<DD> For every star in a CG schematic, it will report implementation cost.  This
+information can be fed into a hardware/software partitioning tool
+or a scheduler.
+ <br><a href="http://www.ece.utexas.edu/~bevans">Brian L. Evans</a> (UT Austin),
+Raza Ahmed
+
+<DT> Cadence Leapfrog VHDL Target
+<DD> <A HREF="../../../src/domains/vhdl/targets"><CODE>$PTOLEMY/src/domains/vhdl/targets</CODE></A>
+contains the Cadence Leapfrog VHDL Target.
+This target, SimLF-VHDL, allows simulation of generated VHDL code with
+the Leapfrog simulator from Cadence.  This target is analogous to the
+SimVSS-VHDL target, which supports simulation with the Synopsys VHDL
+System Simulator.
+<br> Xavier Warzee (Thomson CSF),
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cameron">Michael C. Williamson</A> -
+<A HREF="leapfrog.html">Further Documentation</A>
+
+</DL>
+
+<p>
+<hr>
+Up to: <A HREF="index.html">What's New in Ptolemy 0.7</A> -
+Forward to: <A HREF="newstars.html">New Stars and Demos</A>
+
+<HR>
+Copyright &#169 1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated 04/30/97, 
+comments to <a href="mailto:ptolemy@ptolemy.eecs.berkeley.edu">ptolemy@ptolemy.eecs.berkeley.edu</a>.
+</body>
+</html>

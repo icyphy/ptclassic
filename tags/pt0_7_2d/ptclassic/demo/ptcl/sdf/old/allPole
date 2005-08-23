@@ -1,0 +1,46 @@
+reset
+# Creating universe 'allPole'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star IIDUniform1 IIDUniform
+	setstate IIDUniform1 lower 0.0
+	setstate IIDUniform1 upper 1.0
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "0.040609 0.001628 -.17853 -.37665 -.37665 -.17853 0.001628 0.040609"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic NO
+	setstate WaveForm1 period 0
+	star FloatSum.input=21 FloatSum
+	numports FloatSum.input=21 input 2
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FIR1 FIR
+	setstate FIR1 taps "0.040609 0.001628 -.17853 -.37665 -.37665 -.17853 0.001628 0.040609"
+	setstate FIR1 decimation 1
+	setstate FIR1 decimationPhase 0
+	setstate FIR1 interpolation 1
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Outputs of two identical filters"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options {-P -0 "block filter" -1 "feedback filter"}
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star BlockAllPole1 BlockAllPole
+	setstate BlockAllPole1 blockSize 128
+	setstate BlockAllPole1 order 9
+	connect BlockAllPole1 signalOut XMgraph.input=21 input#1
+	connect WaveForm1 output BlockAllPole1 coefs
+	node node1
+	nodeconnect IIDUniform1 output node1
+	nodeconnect BlockAllPole1 signalIn node1
+	nodeconnect FloatSum.input=21 input#1 node1
+	connect FloatSum.input=21 output Fork.output=21 input
+	connect FIR1 signalOut FloatSum.input=21 input#2
+	connect Fork.output=21 output#2 FIR1 signalIn 1
+	connect Fork.output=21 output#1 XMgraph.input=21 input#2
+run 1
+wrapup

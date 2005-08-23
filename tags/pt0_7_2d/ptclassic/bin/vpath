@@ -1,0 +1,27 @@
+#!/bin/csh -f
+# Version @(#)vpath	1.3 8/4/95
+# Author:	T. M. Parks
+# Created:	16 November 1993
+# Echo the full relative path to the "src" directory
+# corresponding to the current "obj.$PTARCH" directory.
+
+# Check to see if PTARCH is set.
+if (! $?PTARCH) then
+	echo vpath: PTARCH must be set
+endif
+
+# Check to see that obj.$PTARCH is part of the current path.
+if ($cwd !~ *obj.$PTARCH*) then
+	echo "vpath: must be run from obj.$PTARCH directory"
+	exit 1
+endif
+
+# Replace obj.$PTARCH with src.
+set dir = `echo $cwd | sed -e s/.\*obj.${PTARCH}/src/`
+set d = $dir
+while ("$d" != "src")
+	set dir = "../$dir"
+	set d = $d:h
+end
+set dir = "../$dir"
+echo $dir

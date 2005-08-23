@@ -1,0 +1,81 @@
+reset
+# Creating universe 'freqsample'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value {1 [6] 0.3904 0 [19] 0.3904 1 [5]}
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order 5
+	setstate ComplexFFT1 size 32
+	setstate ComplexFFT1 direction "-1"
+	star ComplexFFT2 ComplexFFT
+	setstate ComplexFFT2 order 8
+	setstate ComplexFFT2 size 32
+	setstate ComplexFFT2 direction 1
+	star DB1 DB
+	setstate DB1 min "-100.0"
+	setstate DB1 inputIsPower FALSE
+	star ComplexReal1 ComplexReal
+	star ComplexReal2 ComplexReal
+	star RectPolar1 RectPolar
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "phase response of filter, radians"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options {=800x150+0+450 -0 "arg H(w)" -x freq -y radians}
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star Xgraph2 Xgraph
+	setstate Xgraph2 title "Filter amplitude spectrum, dB"
+	setstate Xgraph2 saveFile ""
+	setstate Xgraph2 options {=800x200+0+225 -0 "H(w)" -x freq -y dB}
+	setstate Xgraph2 ignore 0
+	setstate Xgraph2 xUnits 1.0
+	setstate Xgraph2 xInit 0.0
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "1 -1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Impulse reponse of the filter"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "=800x200+0+625 -x n -P -0 real -1 imaginary"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star Xgraph3 Xgraph
+	setstate Xgraph3 title "Frequency response specification"
+	setstate Xgraph3 saveFile ""
+	setstate Xgraph3 options "-P =800x200+0+0 -0 spec"
+	setstate Xgraph3 ignore 0
+	setstate Xgraph3 xUnits 1.0
+	setstate Xgraph3 xInit 0.0
+	connect ComplexFFT2 output ComplexReal2 input
+	connect ComplexReal2 real RectPolar1 x
+	connect ComplexReal2 imag RectPolar1 y
+	connect RectPolar1 magnitude DB1 input
+	connect RectPolar1 phase Xgraph1 input
+	connect DB1 output Xgraph2 input
+	node node1
+	nodeconnect WaveForm1 output node1
+	nodeconnect FloatProduct.input=21 input#1 node1
+	nodeconnect Xgraph3 input node1
+	connect FloatProduct.input=21 output ComplexFFT1 input
+	connect WaveForm2 output FloatProduct.input=21 input#2
+	node node2
+	nodeconnect ComplexFFT1 output node2
+	nodeconnect ComplexFFT2 input node2
+	nodeconnect ComplexReal1 input node2
+	connect ComplexReal1 real XMgraph.input=21 input#1
+	connect ComplexReal1 imag XMgraph.input=21 input#2
+run 1
+wrapup

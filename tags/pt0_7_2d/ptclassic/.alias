@@ -1,0 +1,40 @@
+# Version: @(#).alias	1.3   6/22/96
+#
+# This file contains various aliases that are useful to Ptolemy developers.
+#
+# Two alternative aliases for switching between the source
+# and object directory trees are given below.  The first set is
+# just executed as a simple command, e.g.
+#	% srcdir
+# The second set is invoked by command substitution, e.g.
+#	% cd `src`
+#
+# Programmer: Tom Parks
+
+alias srcdir 'cd `echo $cwd | sed "s?/obj.$PTARCH/?/src/?"`'
+alias objdir 'cd `echo $cwd | sed "s?/src/?/obj.$PTARCH/?"`'
+
+alias obj 'echo $cwd | sed s:/src:/obj.${PTARCH}:'
+alias src 'echo $cwd | sed s:/obj.${PTARCH}:/src:'
+
+# The pt alias returns the name of the "official" Ptolemy
+# directory that corresponds to the current directory.
+# It assumes your duplicate Ptolemy tree is in ~/Ptolemy.
+# You may change this of course.
+alias pt 'echo $cwd | sed s:{$HOME}/Ptolemy:{$PTOLEMY}:'
+
+# Make symbolic links to all files in the corresponding Ptolemy directory.
+alias ptl 'ln -s `pt`/* .'
+
+# Swap the "official" ptolemy file or directory with your own copy.
+alias sw 'mv \!^ swap$$; mv .\!^ \!^; mv swap$$ .\!^' 
+
+# Expand a directory, creating symbolic links
+alias exp 'mkdir .\!^; sw \!^; cd \!^; ptl'
+
+# Remove symbolic links
+alias rml '\rm -f `\ls -F \!* | sed -n s/@\$//p`'
+
+# Make links to the makefiles
+alias mkl 'rml make*; ln -s `vpath`/make* .'
+

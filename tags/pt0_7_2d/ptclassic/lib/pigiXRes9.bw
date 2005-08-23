@@ -1,0 +1,62 @@
+! @(#)pigiXRes9.bw	1.12	02/23/97
+! VEM options for Pigi:
+vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1
+vem.deftechname:	ptolemy
+vem.grid.major.units:	100
+vem.grid.minor.units:	10
+vem.lambda:	1
+vem*logfile:	/dev/null
+vem*snap:	25
+vem*technology:	$PTOLEMY/lib/bw_patterns
+
+! The following are optional.  They can be overriden by the user.
+Vem*Font: *-times-medium-r-normal--*-180-*
+vem*wrap: word
+vem*grid*zero*size: 0
+vem*label*boundbox: 10
+vem*button*highlightThickness: 5
+vem*edit*borderWidth: 3
+#ifdef COLOR
+vem*cursor*color: red
+Vem*Background: white
+vem*foreground: black
+vem.background.color: white
+vem.grid.zero.color: white
+vem*menu*item*background: LightGray
+vem*button*foreground: IndianRed
+vem*title*foreground: black
+#else
+*Background:    white
+*Foreground:    black
+#endif
+
+! Ptolemy resources for xterm windows
+ptolemy_code*Background:	white
+ptolemy_code*Foreground: 	midnightBlue
+! the ptolemy resources below are not currently implemented
+ptolemy_sim.Background:		black
+ptolemy_sim.Foreground: 	white
+ptolemy_man*Background:		black
+ptolemy_man*Foreground: 	orange
+
+pxgraph.Background: white
+pxgraph.Markers: off
+pxgraph.Foreground: black
+pxgraph.ZeroColor: black
+! The following are ignored, contrary to xgraph documentation.
+pxgraph.0.Color: black
+pxgraph.1.Color: black
+pxgraph.2.Color: black
+pxgraph.3.Color: black
+pxgraph.4.Color: black
+pxgraph.5.Color: black
+pxgraph.6.Color: black
+pxgraph.7.Color: black
+pxgraph.0.Style: 0
+pxgraph.1.Style: 1
+pxgraph.2.Style: 2
+pxgraph.3.Style: 3
+pxgraph.4.Style: 4
+pxgraph.5.Style: 5
+pxgraph.6.Style: 6
+pxgraph.7.Style: 7

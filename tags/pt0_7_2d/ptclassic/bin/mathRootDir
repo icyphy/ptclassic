@@ -1,0 +1,118 @@
+#!/bin/sh
+#
+# Script to find the root (installation) Mathematica directory.  Used by
+# makefiles to determine the location of the MathLink external interface
+# library.  If the script finds a root Mathematica directory that contains
+# the sub-directories Bin/MathLink and Source/Includes, then the script
+# will return the root Mathematica directory.  Otherwise, it returns
+# an empty string.
+#
+# Author:  Brian L. Evans
+# Version: @(#)mathRootDir	1.7	05/27/97
+#
+# Copyright (c) 1990-1999 The Regents of the University of California.
+# All rights reserved.
+# See the file $PTOLEMY/copyright for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+#
+# This script takes no arguments.  It first searches for the script
+# "math" on the path and if it is not found there, it searches on
+# an alternative path of bin sub-directories in /usr.  If it finds
+# the math script, then it extracts the value of the 'mathdir'
+# shell variable.
+#
+#  Look for the Mathematica kernel startup script "math"
+#
+searchfile=math
+mmapath=""
+#
+#  Search the path
+#
+for i in `echo $PATH | sed -e 's/:/ /g'`
+do
+  if [ -x "$i/$searchfile" -a ! -d "$i/$searchfile" ]
+  then
+    mmapath=$i/$searchfile
+    break
+  fi
+done
+#
+#  Search an alternate path:  all bin sub-directories of /usr
+#
+if [ "$mmapath" = "" ]
+then
+  if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
+  then
+    altpath=/usr/{bin,*/bin}
+    for i in $altpath
+    do
+      if [ -x "$i/$searchfile" -a ! -d "$i/$searchfile" ]
+      then
+        mmapath=$i/$searchfile
+        break
+      fi
+    done
+  fi
+fi
+#
+#  If the math script is found, then
+#  1. extract the mathdir setting from the "math" script
+#  2. make sure that the mathdir setting is valid:  the mathdir should
+#     have Source/Includes and Bin/MathLink sub-directories
+#
+if [ "$mmapath" = "" ]
+then
+  echo ""
+else
+  # The following command to set newpath takes the following steps:
+  # 1. eliminate all comments:           sed -e 's/#\(.*\)//g' 
+  # 2. find the expression for mathdir:  grep "mathdir="
+  # 3. extract the value of mathdir:     sed -e 's/mathdir=//g'
+  newpath=`sed -e 's/#\(.*\)//g' "$mmapath" | grep 'mathdir=' | sed -e 's/mathdir=//g'`
+
+  if [ "$newpath" = "" ]
+  then
+    # Perhaps this is mathematica3?
+    newpath=`sed -e 's/#\(.*\)//g' "$mmapath" | grep 'topdir=' | sed -e 's/topdir=//g'`
+
+  fi
+  # If the newpath is not an absolute path name, then append
+  # newpath to the mmapath (mmapath is always guaranteed to be correct)
+  if [ ! -x "$newpath" ]
+  then
+    newdir=`dirname $mmapath`
+    newpath=$newdir/$newpath
+  fi
+  mathlinksrc=$newpath/Source
+  mathlinkincdir=$mathlinksrc/Includes
+  if [ -x "$mathlinksrc" -a -r "$mathlinksrc" -a -d "$mathlinksrc" -a \
+       -x "$mathlinkincdir" -a -r "$mathlinkincdir" -a -d "$mathlinkincdir" ]
+  then
+    # Mathematica2.x
+    mathlinkbin=$newpath/Bin
+    mathlinklib=$mathlinkbin/MathLink
+    if [ -x "$mathlinkbin" -a -r "$mathlinkbin" -a -d "$mathlinkbin" -a \
+         -x "$mathlinklib" -a -r "$mathlinklib" -a -d "$mathlinklib" ]
+    then
+        echo $newpath
+    else
+	echo ""
+	# Installation error: no Bin/MathLink sub-directory
+	echo "Found the Mathematica installation directory '$newpath', but it did not contain a Bin/MathLink sub-directory." >&2
+	exit 1
+    fi
+  else
+    # Mathematica3.x
+    mathlinkbin=$newpath/AddOns
+    mathlinklib=$mathlinkbin/MathLink
+    if [ -x "$mathlinkbin" -a -r "$mathlinkbin" -a -d "$mathlinkbin" -a \
+         -x "$mathlinklib" -a -r "$mathlinklib" -a -d "$mathlinklib" ]
+    then
+      echo $newpath
+    else
+      echo ""
+      echo "Found the Mathematica installation directory '$newpath', but it did not contain a AddOns/MathLink sub-directory." >&2
+      exit 1
+    fi
+  fi
+fi

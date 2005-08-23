@@ -1,0 +1,576 @@
+% /users/ptdesign/lib/colors/ptolemy/system:schematic:contents - output for a latex/dvi2ps special - from oct2ps on Mon Jan 17 18:53:24 1994
+% OCT2PS (compiled unknown-date)
+%
+% oct2ps -=T /users/ptdesign/lib/bw_patterns -f interface -L /users/ptdesign/lib/colors/ptolemy/system:schematic:contents
+%
+%
+% PostScript prologue file for oct2ps
+%
+%   Rick L. Spickelmier
+%
+
+%
+% tile a box
+%
+% llx lly urx ury tb
+%
+/tb {
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+% if the layer is all 1's, don't tile it, fill it
+bm 256 eq
+{
+  0 setgray
+  newpath
+  llx lly moveto
+  urx lly lineto
+  urx ury lineto
+  llx ury lineto
+  closepath fill
+}
+{
+bm 0 ne
+{
+gsave
+/tilex { bmw llx bmw div cvi mul bmw sub } def
+/tiley { bmh lly bmh div cvi mul bmh sub } def
+/xcount { 1 urx tilex sub bmw div cvi add } def
+/ycount { 1 ury tiley sub bmh div cvi add } def
+xcount 0 lt { /xcount 1 def } if
+ycount 0 lt { /ycount 1 def } if
+%
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+closepath clip
+
+/strng xcount string def
+
+0 1 xcount 1 sub { strng exch bm put } for
+
+ycount { tilex tiley moveto strng show 0 bmh translate } repeat
+
+grestore
+} if
+} ifelse
+} def
+%
+% tile a bitmap with out clipping (for polygons)
+%
+% llx lly urx ury tp
+%
+/tp {
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+% if the layer is all 1's, don't tile it, fill it
+bm 256 eq
+{
+  0 setgray
+  newpath
+  llx lly moveto
+  urx lly lineto
+  urx ury lineto
+  llx ury lineto
+  closepath fill
+}
+{
+bm 0 ne
+{
+gsave
+/tilex { bmw llx bmw div cvi mul bmw sub } def
+/tiley { bmh lly bmh div cvi mul bmh sub } def
+/xcount { 1 urx tilex sub bmw div cvi add } def
+/ycount { 1 ury tiley sub bmh div cvi add } def
+xcount 0 lt { /xcount 1 def } if
+ycount 0 lt { /ycount 1 def } if
+%
+/strng xcount string def
+
+0 1 xcount 1 sub { strng exch bm put } for
+
+ycount { tilex tiley moveto strng show 0 bmh translate } repeat
+
+grestore
+} if
+} ifelse
+} def
+%
+% formal terminal
+%
+% llx lly urx ury string ft
+%
+/ft {
+/str exch def
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+closepath stroke
+llx lly moveto
+str show
+} def
+%
+% actual terminal
+%
+% llx lly urx ury string at
+%
+/at {
+/str exch def
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+closepath stroke
+urx str stringwidth pop sub ury fscale sub moveto
+str show
+} def
+%
+% label
+%
+% x y string lb
+%
+/lb {
+/str exch def
+/y exch def
+/x exch def
+x y moveto
+str show
+} def
+%
+% outline with text
+%
+% llx lly urx ury string ot
+%
+/ot {
+/str exch def
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+/cx llx urx add 2 div def
+/cy lly ury add 2 div def
+/halfstrwidth str stringwidth pop 2 div def
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+closepath 0.8 setgray fill
+0 setgray newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+closepath stroke
+cx halfstrwidth sub cy moveto
+str show
+} def
+%
+% box outline 
+%
+% llx lly urx ury bx
+%
+/bx {
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+llx lly lineto
+closepath stroke
+} def
+%
+% abstract connector
+%
+% llx lly urx ury con
+%
+/con {
+/ury exch def
+/urx exch def
+/lly exch def
+/llx exch def
+newpath
+llx lly moveto
+urx lly lineto
+urx ury lineto
+llx ury lineto
+llx lly lineto
+urx ury lineto
+llx ury moveto
+urx lly lineto
+closepath stroke
+} def
+%
+% draw a line
+%
+% x1 y1 x2 y2 ln
+%
+/ln {
+/y2 exch def
+/x2 exch def
+/y1 exch def
+/x1 exch def
+newpath
+x1 y1 moveto
+x2 y2 lineto
+stroke
+} def
+
+/putbm {
+   /arr exch def
+   /str arr length string def
+   0 1 arr length 1 sub { str exch dup arr exch get put } for
+   str
+} def
+/fctm matrix currentmatrix def
+0 0 translate
+0 0 translate
+%%BoundingBox: 0 0 216 42
+/sc 0.533333 def
+/fsize 7.000000 def
+/fscale fsize sc div def
+/psize 8 def
+/scsize psize sc div def
+/lfont { /Times-Bold findfont fscale scalefont setfont } def
+/bmw scsize def
+/bmh scsize def
+sc sc scale
+-240 240 translate
+gsave
+/sctm matrix currentmatrix def
+fctm setmatrix
+/orangeSolid-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/orangeSolid-3220-BM { orangeSolid-3220 } def
+/yellowSolid-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/yellowSolid-3220-BM { yellowSolid-3220 } def
+/blueSolid-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/blueSolid-3220-BM { blueSolid-3220 } def
+/delay-3220 [ 24 24 24 24 24 24 24 24 24 24 24 24 24 24 24 24 255 255 255 255 24 24 24 24 24 24 24 24 24 24 24 24 ] putbm def
+/delay-3220-BM { delay-3220 } def
+/redSolid-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/redSolid-3220-BM { redSolid-3220 } def
+/violetSolid-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/violetSolid-3220-BM { violetSolid-3220 } def
+/greenSolid-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/greenSolid-3220-BM { greenSolid-3220 } def
+/brownOutline-3220 [ 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 ] putbm def
+/brownOutline-3220-BM { brownOutline-3220 } def
+/tanSolid-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/tanSolid-3220-BM { tanSolid-3220 } def
+/yellowSolid3-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/yellowSolid3-3220-BM { yellowSolid3-3220 } def
+/blueSolid3-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/blueSolid3-3220-BM { blueSolid3-3220 } def
+/redSolid3-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/redSolid3-3220-BM { redSolid3-3220 } def
+/violetSolid3-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/violetSolid3-3220-BM { violetSolid3-3220 } def
+/greenSolid3-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/greenSolid3-3220-BM { greenSolid3-3220 } def
+/orangeSolid3-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/orangeSolid3-3220-BM { orangeSolid3-3220 } def
+/brownOutline3-3220 [ 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 ] putbm def
+/brownOutline3-3220-BM { brownOutline3-3220 } def
+/tanSolid3-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/tanSolid3-3220-BM { tanSolid3-3220 } def
+/yellowSolid4-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/yellowSolid4-3220-BM { yellowSolid4-3220 } def
+/blueSolid4-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/blueSolid4-3220-BM { blueSolid4-3220 } def
+/redSolid4-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/redSolid4-3220-BM { redSolid4-3220 } def
+/violetSolid4-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/violetSolid4-3220-BM { violetSolid4-3220 } def
+/greenSolid4-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/greenSolid4-3220-BM { greenSolid4-3220 } def
+/orangeSolid4-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/orangeSolid4-3220-BM { orangeSolid4-3220 } def
+/brownOutline4-3220 [ 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 ] putbm def
+/brownOutline4-3220-BM { brownOutline4-3220 } def
+/tanSolid4-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/tanSolid4-3220-BM { tanSolid4-3220 } def
+/yellowSolid6-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/yellowSolid6-3220-BM { yellowSolid6-3220 } def
+/blueSolid6-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/blueSolid6-3220-BM { blueSolid6-3220 } def
+/redSolid6-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/redSolid6-3220-BM { redSolid6-3220 } def
+/violetSolid6-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/violetSolid6-3220-BM { violetSolid6-3220 } def
+/greenSolid6-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/greenSolid6-3220-BM { greenSolid6-3220 } def
+/orangeSolid6-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/orangeSolid6-3220-BM { orangeSolid6-3220 } def
+/brownOutline6-3220 [ 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 ] putbm def
+/brownOutline6-3220-BM { brownOutline6-3220 } def
+/tanSolid6-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/tanSolid6-3220-BM { tanSolid6-3220 } def
+/yellowSolid7-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/yellowSolid7-3220-BM { yellowSolid7-3220 } def
+/blueSolid7-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/blueSolid7-3220-BM { blueSolid7-3220 } def
+/redSolid7-3220 [ 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 170 170 170 170 85 85 85 85 ] putbm def
+/redSolid7-3220-BM { redSolid7-3220 } def
+/violetSolid7-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/violetSolid7-3220-BM { violetSolid7-3220 } def
+/greenSolid7-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/greenSolid7-3220-BM { greenSolid7-3220 } def
+/orangeSolid7-3220 [ 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 36 36 36 36 146 146 146 146 73 73 73 73 ] putbm def
+/orangeSolid7-3220-BM { orangeSolid7-3220 } def
+/brownOutline7-3220 [ 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 182 182 182 182 219 219 219 219 109 109 109 109 ] putbm def
+/brownOutline7-3220-BM { brownOutline7-3220 } def
+/tanSolid7-3220 [ 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 17 17 17 17 0 0 0 0 0 0 0 0 0 0 0 0 ] putbm def
+/tanSolid7-3220-BM { tanSolid7-3220 } def
+/Dict-3220 230 dict def
+/$workingdict 234 dict def
+Dict-3220 begin
+/FontType 3 def
+/FontMatrix [1.0 32 div 0 0 1.0 32 div 0 0] def
+/FontBBox [0 0 32 32] def
+/Encoding 116 array def
+Encoding 2 /orangeSolid put
+Encoding 5 /yellowSolid put
+Encoding 7 /blueSolid put
+Encoding 9 /delay put
+Encoding 11 /redSolid put
+Encoding 13 /violetSolid put
+Encoding 16 /greenSolid put
+Encoding 18 /brownOutline put
+Encoding 21 /tanSolid put
+Encoding 32 /yellowSolid3 put
+Encoding 34 /blueSolid3 put
+Encoding 36 /redSolid3 put
+Encoding 38 /violetSolid3 put
+Encoding 41 /greenSolid3 put
+Encoding 43 /orangeSolid3 put
+Encoding 44 /brownOutline3 put
+Encoding 47 /tanSolid3 put
+Encoding 52 /yellowSolid4 put
+Encoding 54 /blueSolid4 put
+Encoding 56 /redSolid4 put
+Encoding 58 /violetSolid4 put
+Encoding 61 /greenSolid4 put
+Encoding 63 /orangeSolid4 put
+Encoding 64 /brownOutline4 put
+Encoding 67 /tanSolid4 put
+Encoding 74 /yellowSolid6 put
+Encoding 76 /blueSolid6 put
+Encoding 78 /redSolid6 put
+Encoding 80 /violetSolid6 put
+Encoding 83 /greenSolid6 put
+Encoding 85 /orangeSolid6 put
+Encoding 86 /brownOutline6 put
+Encoding 89 /tanSolid6 put
+Encoding 94 /yellowSolid7 put
+Encoding 96 /blueSolid7 put
+Encoding 98 /redSolid7 put
+Encoding 100 /violetSolid7 put
+Encoding 103 /greenSolid7 put
+Encoding 105 /orangeSolid7 put
+Encoding 106 /brownOutline7 put
+Encoding 109 /tanSolid7 put
+/CharProcs 230 dict dup begin
+/orangeSolid { 32 32 true [1 0 0 1 0 0] { orangeSolid-3220-BM } imagemask } def
+/yellowSolid { 32 32 true [1 0 0 1 0 0] { yellowSolid-3220-BM } imagemask } def
+/blueSolid { 32 32 true [1 0 0 1 0 0] { blueSolid-3220-BM } imagemask } def
+/delay { 32 32 true [1 0 0 1 0 0] { delay-3220-BM } imagemask } def
+/redSolid { 32 32 true [1 0 0 1 0 0] { redSolid-3220-BM } imagemask } def
+/violetSolid { 32 32 true [1 0 0 1 0 0] { violetSolid-3220-BM } imagemask } def
+/greenSolid { 32 32 true [1 0 0 1 0 0] { greenSolid-3220-BM } imagemask } def
+/brownOutline { 32 32 true [1 0 0 1 0 0] { brownOutline-3220-BM } imagemask } def
+/tanSolid { 32 32 true [1 0 0 1 0 0] { tanSolid-3220-BM } imagemask } def
+/yellowSolid3 { 32 32 true [1 0 0 1 0 0] { yellowSolid3-3220-BM } imagemask } def
+/blueSolid3 { 32 32 true [1 0 0 1 0 0] { blueSolid3-3220-BM } imagemask } def
+/redSolid3 { 32 32 true [1 0 0 1 0 0] { redSolid3-3220-BM } imagemask } def
+/violetSolid3 { 32 32 true [1 0 0 1 0 0] { violetSolid3-3220-BM } imagemask } def
+/greenSolid3 { 32 32 true [1 0 0 1 0 0] { greenSolid3-3220-BM } imagemask } def
+/orangeSolid3 { 32 32 true [1 0 0 1 0 0] { orangeSolid3-3220-BM } imagemask } def
+/brownOutline3 { 32 32 true [1 0 0 1 0 0] { brownOutline3-3220-BM } imagemask } def
+/tanSolid3 { 32 32 true [1 0 0 1 0 0] { tanSolid3-3220-BM } imagemask } def
+/yellowSolid4 { 32 32 true [1 0 0 1 0 0] { yellowSolid4-3220-BM } imagemask } def
+/blueSolid4 { 32 32 true [1 0 0 1 0 0] { blueSolid4-3220-BM } imagemask } def
+/redSolid4 { 32 32 true [1 0 0 1 0 0] { redSolid4-3220-BM } imagemask } def
+/violetSolid4 { 32 32 true [1 0 0 1 0 0] { violetSolid4-3220-BM } imagemask } def
+/greenSolid4 { 32 32 true [1 0 0 1 0 0] { greenSolid4-3220-BM } imagemask } def
+/orangeSolid4 { 32 32 true [1 0 0 1 0 0] { orangeSolid4-3220-BM } imagemask } def
+/brownOutline4 { 32 32 true [1 0 0 1 0 0] { brownOutline4-3220-BM } imagemask } def
+/tanSolid4 { 32 32 true [1 0 0 1 0 0] { tanSolid4-3220-BM } imagemask } def
+/yellowSolid6 { 32 32 true [1 0 0 1 0 0] { yellowSolid6-3220-BM } imagemask } def
+/blueSolid6 { 32 32 true [1 0 0 1 0 0] { blueSolid6-3220-BM } imagemask } def
+/redSolid6 { 32 32 true [1 0 0 1 0 0] { redSolid6-3220-BM } imagemask } def
+/violetSolid6 { 32 32 true [1 0 0 1 0 0] { violetSolid6-3220-BM } imagemask } def
+/greenSolid6 { 32 32 true [1 0 0 1 0 0] { greenSolid6-3220-BM } imagemask } def
+/orangeSolid6 { 32 32 true [1 0 0 1 0 0] { orangeSolid6-3220-BM } imagemask } def
+/brownOutline6 { 32 32 true [1 0 0 1 0 0] { brownOutline6-3220-BM } imagemask } def
+/tanSolid6 { 32 32 true [1 0 0 1 0 0] { tanSolid6-3220-BM } imagemask } def
+/yellowSolid7 { 32 32 true [1 0 0 1 0 0] { yellowSolid7-3220-BM } imagemask } def
+/blueSolid7 { 32 32 true [1 0 0 1 0 0] { blueSolid7-3220-BM } imagemask } def
+/redSolid7 { 32 32 true [1 0 0 1 0 0] { redSolid7-3220-BM } imagemask } def
+/violetSolid7 { 32 32 true [1 0 0 1 0 0] { violetSolid7-3220-BM } imagemask } def
+/greenSolid7 { 32 32 true [1 0 0 1 0 0] { greenSolid7-3220-BM } imagemask } def
+/orangeSolid7 { 32 32 true [1 0 0 1 0 0] { orangeSolid7-3220-BM } imagemask } def
+/brownOutline7 { 32 32 true [1 0 0 1 0 0] { brownOutline7-3220-BM } imagemask } def
+/tanSolid7 { 32 32 true [1 0 0 1 0 0] { tanSolid7-3220-BM } imagemask } def
+end def
+/BuildChar
+{$workingdict begin
+/charcode exch def
+/fontdict exch def
+fontdict /CharProcs get
+fontdict /Encoding get
+charcode get get
+gsave
+0 setgray newpath
+32 0
+0 0
+32 32
+setcachedevice
+exec
+grestore
+end
+} def
+end
+/font-3220 Dict-3220 definefont pop
+/sf-3220 { /font-3220 findfont scsize scalefont setfont } def
+sf-3220
+sctm setmatrix
+gsave
+/sctm matrix currentmatrix def
+fctm setmatrix
+sf-3220
+sctm setmatrix
+/bm 0 def
+/bm 7 def
+gsave
+newpath
+280 -200 moveto
+240 -160 lineto
+320 -200 lineto
+240 -240 lineto
+closepath clip
+240 -240 320 -160 tp
+grestore
+newpath
+280 -200 moveto
+240 -160 lineto
+320 -200 lineto
+240 -240 lineto
+closepath stroke
+/bm 256 def
+300 -210 350 -190 tb
+grestore
+gsave
+/sctm matrix currentmatrix def
+fctm setmatrix
+sf-3220
+sctm setmatrix
+/bm 0 def
+/bm 7 def
+gsave
+newpath
+450 -200 moveto
+410 -160 lineto
+490 -200 lineto
+410 -240 lineto
+closepath clip
+410 -240 490 -160 tp
+grestore
+newpath
+450 -200 moveto
+410 -160 lineto
+490 -200 lineto
+410 -240 lineto
+closepath stroke
+/bm 256 def
+400 -210 450 -190 tb
+grestore
+gsave
+/sctm matrix currentmatrix def
+fctm setmatrix
+sf-3220
+sctm setmatrix
+/bm 9 def
+605 -220 645 -180 ln
+/bm 5 def
+/bm 0 def
+/bm 0 def
+%
+gsave
+/Helvetica findfont 16 scalefont setfont
+/maxwidth 0 def
+/width (bus) stringwidth pop def
+width maxwidth gt {/maxwidth width def} if
+/temp 36 maxwidth sub 2 div def
+/margin 607 temp add def
+/y -218 def
+/temp (bus) stringwidth pop def
+/x margin maxwidth temp sub 2 div add def
+x y moveto
+(bus) show
+/y y 20 sub def
+grestore
+%
+grestore
+gsave
+/sctm matrix currentmatrix def
+fctm setmatrix
+sf-3220
+sctm setmatrix
+/bm 9 def
+gsave
+newpath
+550 -180 moveto
+540 -200 lineto
+550 -220 lineto
+560 -200 lineto
+closepath clip
+540 -220 560 -180 tp
+grestore
+newpath
+550 -180 moveto
+540 -200 lineto
+550 -220 lineto
+560 -200 lineto
+closepath stroke
+/bm 5 def
+/bm 0 def
+/bm 0 def
+/bm 0 def
+/bm 0 def
+gsave
+newpath
+550 -180 moveto
+540 -200 lineto
+550 -220 lineto
+560 -200 lineto
+closepath clip
+540 -220 560 -180 tp
+grestore
+newpath
+550 -180 moveto
+540 -200 lineto
+550 -220 lineto
+560 -200 lineto
+closepath stroke
+grestore
+grestore

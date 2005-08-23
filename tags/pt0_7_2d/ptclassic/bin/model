@@ -1,0 +1,61 @@
+#! /bin/sh
+# Command-line program for the tycho.kernel.model utility \
+    exec itclsh "$0" "$@"
+
+# @(#)model	1.1 02/24/98
+# Author: John Reekie
+
+# If the MODEL_LIBRARY variable is set, add it to the auto_path
+if [info exists env(MODEL_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(MODEL_LIBRARY)] }  {
+	lappend auto_path $env(MODEL_LIBRARY)
+    }
+}
+
+# Require the tycho.kernel.model package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.kernel.model}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.kernel.model}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.kernel.model}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.kernel.model\". You can\n\
+	    1. Install tycho.kernel.model in a subdirectory of your Tcl library\n\
+	    2. Install tycho.kernel.model in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the MODEL_LIBRARY variable to point to the \
+	    model directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.kernel.model, version 2.0"
+
+# Run the main procedure
+eval model $argv
+
+# Done
+

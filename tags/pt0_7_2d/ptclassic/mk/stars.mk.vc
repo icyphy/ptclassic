@@ -1,0 +1,927 @@
+# Microsoft VC++ nmake file, based on stars.mk, but modified by hand.
+#
+# Version: @(#)stars.mk.vc	1.5 01/05/99
+#
+# Copyright (c) 1997-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#
+#
+# stars.mk :: Common definitions of star and target subsets.
+#
+# Eventually this file will be automatically generated.
+# But for now, we do it by hand.
+#
+# The following makefile symbols should be defined:
+#
+# ROOT		the root of the Ptolemy tree (e.g., $PTOLEMY).  Typically
+#		a relative path.
+# CROOT		the root of the custom Ptolemy tree used to define
+#		CUSTOM_DIRS, which is used by the mkPtolemyTree script
+# OBJDIR	the root of the object file tree for this arch.
+#		it can be either relative to current directory or absolute.
+# PTARCH	architecture of the current computer system returned
+#		by the ptarch script
+#
+# Problem with this file: it does not make clear which domains need
+# which libraries, so there may be a bit too much searching and remaking
+# when subset Ptolemies are built.  The symbols STAR_LIBFILES and
+# STAR_LIBS include ALL libraries.  It is OK to make subset Ptolemy builds
+# depend on these symbols and search all libraries, but it slows things
+# down a bit.
+#
+# CGC tcl stars are included because they don't pull in tk.
+# SDF tcl stars are omitted because they do.
+#
+# Note that you must explicitly include any target .obj files in TARGETS
+# for architectures that don't use shared libraries.  If you don't, then
+# you won't see these targets in non-shared library architectures.  For
+# an example, see the CG56 target section below.
+#
+# Stub files that pull in the stars.
+#
+# This file depends on make variables defined by the config.$(PTARCH).mk
+# and config.default makefiles, e.g. ITCL_LIBSPEC, ITK_LIBSPEC,
+# LIB_FLUSH_CACHE, LIBSUFFIX, SYSLIBS, TCL_LIBSPEC, TK_LIBSPEC,
+# USE_SHARED_LIBS, and X11_LIBSPEC.
+
+#STARS =
+#TARGETS =
+#LIBS =
+#LIBFILES =
+#PALETTES =
+#PT_DEPEND = 
+
+!ifndef  DEFAULT_DOMAIN
+DEFAULT_DOMAIN = SDF
+!endif 
+
+# Matlab settings
+!include  $(ROOT)\mk\matlab.mk.vc
+
+# Mathematica settings
+!include  $(ROOT)\mk\mathematica.mk.vc
+
+C50T = $(OBJDIR)\domains\c50\targets
+CG56T = $(OBJDIR)\domains\cg56\targets
+CGCT = $(OBJDIR)\domains\cgc\targets
+CGCTCLT = $(OBJDIR)\domains\cgc\tcltk\targets
+CGCVIST = $(OBJDIR)\domains\cgc\vis\targets
+CGT = $(OBJDIR)\domains\cg\targets
+SDFT = $(OBJDIR)\domains\sdf\targets
+VHDLT = $(OBJDIR)\domains\vhdl\targets
+VHDLTCLT = $(OBJDIR)\domains\vhdl\tcltk\targets
+
+BDFDIR = $(CROOT)\src\domains\bdf
+CGDDFDIR = $(CROOT)\src\domains\cg
+CGDIR = $(CROOT)\src\domains\cg
+CGCDIR = $(CROOT)\src\domains\cgc
+C50DIR = $(CROOT)\src\domains\c50
+CG56DIR = $(CROOT)\src\domains\cg56
+DDFDIR = $(CROOT)\src\domains\ddf
+DEDIR = $(CROOT)\src\domains\de
+HOFDIR = $(CROOT)\src\domains\hof
+IPUSDIR = $(CROOT)\src\domains\ipus
+MDSDFDIR = $(CROOT)\src\domains\mdsdf
+PNDIR = $(CROOT)\src\domains\pn
+SDFDIR = $(CROOT)\src\domains\sdf
+SRDIR = $(CROOT)\src\domains\sr
+VHDLBDIR = $(CROOT)\src\domains\vhdlb
+VHDLDIR = $(CROOT)\src\domains\vhdl
+FSMDIR = $(CROOT)\src\domains\fsm
+
+# Check make variables for including\excluding experimental domains
+
+!if "$(INCLUDE_IPUS_DOMAIN)" != "yes" #ifneq
+	# Non G++ compilers fail to compile IPUS' templates
+!undef IPUS
+!endif
+
+!if "$(INCLUDE_PN_DOMAIN)" != "yes" #ifneq
+!undef PN
+!endif
+
+# Tcl\Tk stars can be used in pigiRpc but not ptcl, for this we define TK
+
+!ifndef  TK
+	# We can't include the ipus domain since the non-tk ipus stars need 
+	# Blackboard* symbols, which are defined in the tk ipus stars.
+	# Set up definitions for stars.mk
+!undef IPUS
+
+!undef CGCTK
+!undef CGCVISTK
+!undef CODESIGN
+!undef FSM
+!undef SDFTK
+!undef SDFDFM
+!undef VHDLTK
+!endif
+
+# Synchronous\Reactive domain
+
+!ifdef  SR
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\sr\icons\sr.pal
+	# domain kernel and stars
+STARS = $(STARS) $(LIBDIR)\srstars.o
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SRDIR)\stars $(SRDIR)\kernel 
+LIBS = $(LIBS) -lsrstars -lsr
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsrstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libsr.$(LIBSUFFIX)
+!endif
+
+# Motorola DSP assembly code generation domain
+
+!ifdef  CG56
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\cg56\icons\main.pal
+	# special targets
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CG56DIR)\targets
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq
+LIBS = $(LIBS) -lcg56targets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcg56targets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(CG56T)\Sim56Target.o $(CG56T)\S56XTarget.o \
+			$(CG56T)\Sub56Target.o \
+			$(CG56T)\CG56MultiSimTarget.o \
+			$(CG56T)\CG56MultiSimSend.o \
+			$(CG56T)\CG56MultiSimReceive.o \
+			$(CG56T)\CG56XCReceive.o $(CG56T)\CG56XCSend.o \
+			$(CG56T)\CG56XCPeek.o $(CG56T)\CG56XCPoke.o \
+			$(CG56T)\CGCXReceive.o $(CG56T)\CGCXSend.o \
+			$(CG56T)\CGCXPeek.o $(CG56T)\CGCXPoke.o \
+	 		$(CG56T)\CGCXSynchComm.o \
+			$(CG56T)\CG56XCSynchComm.o \
+			$(CG56T)\CGCXAsynchComm.o \
+			$(CG56T)\CG56XCAsynchComm.o \
+			$(CG56T)\CGCXBase.o  
+!endif
+	# domain kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CG56DIR)\kernel $(CG56DIR)\stars $(CG56DIR)\dsp\stars
+STARS = $(STARS) $(LIBDIR)\cg56dspstars.o $(LIBDIR)\cg56stars.o
+LIBS = $(LIBS) -lcg56dspstars -lcg56stars -lcg56
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcg56dspstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libcg56stars.$(LIBSUFFIX) \
+		$(LIBDIR)\libcg56.$(LIBSUFFIX)
+	# dependencies
+	# must bring in the parallel schedulers for multi-cg56 targets
+CGFULL = 1
+	# Window and RaisedCosine stars in cg56\dsp\stars need ptdsp Library
+PTDSPLIB = 1
+	# CG56 CGC targets need CGCStar
+CGCLIB = 1
+	# CG56 CGC targets need CGCFix star
+CGC = 1
+!endif
+
+# Texas Instruments TMS320C50 Code Generation Domain
+
+!ifdef  C50
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\c50\icons\main.pal
+	# special targets
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(C50DIR)\targets
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+LIBS = $(LIBS) -lc50targets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libc50targets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(C50T)\DSKC50Target.o \
+			$(C50T)\SubC50Target.o
+!endif
+	# kernel and stars 
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(C50DIR)\kernel $(C50DIR)\stars $(C50DIR)\dsp\stars
+STARS = $(STARS) $(LIBDIR)\c50dspstars.o $(LIBDIR)\c50stars.o
+LIBS = $(LIBS) -lc50dspstars -lc50stars -lc50
+LIBFILES = $(LIBFILES) $(LIBDIR)\libc50dspstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libc50stars.$(LIBSUFFIX) \
+		$(LIBDIR)\libc50.$(LIBSUFFIX)
+	# dependencies
+	# must bring in the parallel schedulers for multi-c50 targets
+	# CGFULL = 1
+CG = 1
+	# Window and RaisedCosine star in c50\dsp\stars need ptdsp Library
+PTDSPLIB = 1
+	# C50 targets need CGCStar
+	# CGCLIB = 1
+!endif
+
+!ifdef  CGDDF
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGDDFDIR)\ddfScheduler
+CGDDFLIB = 1
+DDF = 1
+CGC = 1
+CGFULL = 1
+!endif
+
+!ifdef  CGCFULL
+CGC = 1
+CGFULL = 1
+NOWAM = 1
+!ifdef  TK
+CGCTK = 1
+CGCVISTK = 1
+!endif
+CGCVIS = 1
+!endif
+
+# CGC VIS demonstrations will only run under Solaris 2.5 under cfront,
+# but the CGC VIS subdomain will build under any architecture.
+!ifdef  CGCVIS
+	# Don't build the CGC VIS subdomain on a non-Solaris machine
+#!if ""$(filter sol% " == "$(PTARCH" #ifeq)","")
+CGCVIS =
+CGCVISTK =
+#!endif
+!endif
+
+!ifdef  CGFULL
+CG = 1
+CGPAR = 1
+!endif
+
+!ifdef  VHDLFULL
+VHDL = 1
+!ifdef  TK
+VHDLTK = 1
+!endif
+!endif
+
+!ifdef  VHDL
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\vhdl\icons\vhdl.pal
+	# special targets
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(VHDLDIR)\targets $(CROOT)\src\utils\ptvhdlsim
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+LIBS = $(LIBS) -lvhdltargets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libvhdltargets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(VHDLT)\ArchTarget.o \
+			$(VHDLT)\CGCVReceive.o \
+			$(VHDLT)\CGCVSend.o \
+			$(VHDLT)\CGCVSynchComm.o \
+			$(VHDLT)\SimLFTarget.o \
+			$(VHDLT)\SimMTTarget.o \
+			$(VHDLT)\SimVSSTarget.o \
+			$(VHDLT)\StructTarget.o \
+			$(VHDLT)\SynthArchTarget.o \
+			$(VHDLT)\SynthTarget.o \
+			$(VHDLT)\VHDLCReceive.o \
+			$(VHDLT)\VHDLCSend.o \
+			$(VHDLT)\VHDLLFCReceive.o \
+			$(VHDLT)\VHDLLFCSend.o \
+			$(VHDLT)\VHDLCSynchComm.o
+!endif
+	# Tcl\Tk
+!ifdef  VHDLTK
+		# special targets
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(VHDLDIR)\tcltk\targets
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+LIBS = $(LIBS) -lvhdltcltktargets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libvhdltcltktargets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(VHDLTCLT)\TkSchedTarget.o
+!endif
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(VHDLDIR)\kernel $(VHDLDIR)\stars
+STARS = $(STARS) $(LIBDIR)\vhdlstars.o
+LIBS = $(LIBS) -lvhdlstars -lvhdl
+LIBFILES = $(LIBFILES) $(LIBDIR)\libvhdlstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libvhdl.$(LIBSUFFIX) 
+	# dependencies
+CG = 1
+SDFLIB = 1
+CGCLIB = 1
+	# Window star in vhdl\stars needs the ptdsp Library
+PTDSPLIB = 1
+!endif
+
+!ifdef  VHDLB
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\vhdlb\icons\vhdlb.pal
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(VHDLBDIR)\kernel $(VHDLBDIR)\stars
+STARS = $(STARS) $(LIBDIR)\vhdlbstars.o
+LIBS = $(LIBS) -lvhdlbstars -lvhdlb
+LIBFILES = $(LIBFILES) $(LIBDIR)\libvhdlbstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libvhdlb.$(LIBSUFFIX)
+	# dependencies
+CG = 1
+SDFLIB = 1
+!endif
+
+!ifdef  MDSDF
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\mdsdf\icons\mdsdf.pal
+	# Tcl\Tk stars
+!ifdef  TK 
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(MDSDFDIR)\tcltk\stars
+STARS = $(STARS) $(LIBDIR)\mdsdftclstars.o
+LIBFILES = $(LIBFILES) $(LIBDIR)\libmdsdftclstars.$(LIBSUFFIX)
+LIBS = $(LIBS) -lmdsdftclstars
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(MDSDFDIR)\kernel $(MDSDFDIR)\stars
+STARS = $(STARS)  $(LIBDIR)\mdsdfstars.o
+LIBS = $(LIBS) -lmdsdfstars -lmdsdf
+LIBFILES = $(LIBFILES) $(LIBDIR)\libmdsdfstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libmdsdf.$(LIBSUFFIX)
+	# dependencies
+SDFLIB = 1
+!endif
+
+!ifdef  PN
+# 	# star icons
+# PALETTES = $(PALETTES) PTOLEMY\src\domains\pn\icons\pn.pal
+# 	# kernel and stars
+# CUSTOM_DIRS = $(CUSTOM_DIRS) $(PNDIR)\kernel $(PNDIR)\stars 
+# 	# PN is only supported under Sun, Solaris and HP-UX operating systems,
+# 	# matched by patterns sun% and sol% and hppa% respectively
+# !if ""$(filter sun% sol% hppa% " != "$(PTARCH" #ifneq)","")
+# STARS = $(STARS) $(LIBDIR)\pnstars.o
+# LIBS = $(LIBS) -lpnstars -lpn
+# LIBFILES = $(LIBFILES) $(LIBDIR)\libpnstars.$(LIBSUFFIX) \
+# 			$(LIBDIR)\libpn.$(LIBSUFFIX)
+# !if ""$(filter sun% sol% " != "$(PTARCH" #ifneq)","")
+# CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\thread\gthreads \
+# 				$(CROOT)\src\thread\posix \
+# 				$(CROOT)\thread\include \
+# 				$(CROOT)\thread\include.$(PTARCH) \
+# 				$(CROOT)\thread\lib.$(PTARCH)
+# 			# POSIX thread library from Florida State University.
+# LIBFILES = $(LIBFILES) $(ROOT)\thread\lib.$(PTARCH)\libgthreads.$(LIBNONSHAREDSUFFIX)
+# LIBS = $(LIBS) -lposixthread \
+# 				-L$(ROOT)\thread\lib.$(PTARCH) -lgthreads
+# !else
+# 			# HPUX 
+# LIBS = $(LIBS) -lposixthread \
+# 				-L\opt\dce\lib -lcma
+# !endif
+# LIBFILES = $(LIBFILES) $(LIBDIR)\libposixthread.$(LIBSUFFIX)
+# !endif
+# 	# dependencies
+SDFLIB = 1
+!endif
+
+!ifdef  DDF
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\ddf\icons\ddf.pal
+	# There are many DDF code generators and schedulers
+	# (HuScheduler, dcScheduler, ddfScheduler, dlScheduler, etc.)
+	# but none are currently being built.  When they are, add
+	# ifdef CG
+	#	LIBS +=
+	#	LIBFILES +=
+	# endif
+
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DDFDIR)\kernel $(DDFDIR)\stars 
+STARS = $(STARS) $(LIBDIR)\ddfstars.o
+LIBS = $(LIBS) -lddfstars -lddf
+LIBFILES = $(LIBFILES) $(LIBDIR)\libddfstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libddf.$(LIBSUFFIX)
+	# dependencies
+SDFLIB = 1
+!endif
+
+# We must have TK present to include the IPUS domain since the non-tk IPUS
+# stars need Blackboard* symbols, which are defined in the Tk IPUS stars.
+
+!ifdef  IPUS
+!ifdef  TK
+		# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\ipus\icons\ipus.pal
+		# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(IPUSDIR)\icp\kernel $(IPUSDIR)\kernel \
+				$(IPUSDIR)\stars $(IPUSDIR)\tcltk\stars 
+STARS = $(STARS) $(LIBDIR)\ipustclstars.o $(LIBDIR)\ipusstars.o
+LIBS = $(LIBS) -lipustclstars -lipusstars -lipus -licp
+LIBFILES = $(LIBFILES) $(LIBDIR)\libipustclstars.$(LIBSUFFIX) \
+				$(LIBDIR)\libipusstars.$(LIBSUFFIX) \
+				$(LIBDIR)\libipus.$(LIBSUFFIX) \
+				$(LIBDIR)\libicp.$(LIBSUFFIX)
+!endif
+!endif
+
+!ifdef  DEFULL
+DE = 1
+DECONTRIB = 1
+DEJAVA = 1
+!endif
+!ifdef  DE
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\de\icons\de.pal
+	# Asynchronous Transfer Mode stars
+!ifdef  ATM
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\atm
+STARS = $(STARS) $(LIBDIR)\deatmstars.o
+LIBS = $(LIBS) -ldeatmstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libdeatmstars.$(LIBSUFFIX)
+!endif
+	# Contributed stars by third-party users
+!ifdef  DECONTRIB
+!ifdef  TK
+			# The contrib stars use Tk
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\contrib\stars
+STARS = $(STARS) $(LIBDIR)\decontribstars.obj
+LIBS = $(LIBS) -ldecontribstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libdecontribstars.$(LIBSUFFIX)
+!endif
+!endif
+	# Tcl\Tk stars
+!ifdef  TK
+		# Java stars
+!ifdef  DEJAVA
+			# Note that because we use the Tycho tyjni interface,
+			# we don't have to have Java present to link in these
+			# stars. However, Java does need to be present at
+			# runtime
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\java\stars
+STARS = $(STARS) $(LIBDIR)\dejavastars.o
+LIBS = $(LIBS) -ldejavastars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libdejavastars.$(LIBSUFFIX)
+!endif
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\tcltk\stars
+STARS = $(STARS) $(LIBDIR)\detclstars.o
+LIBS = $(LIBS) -ldetclstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libdetclstars.$(LIBSUFFIX)
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\stars $(DEDIR)\kernel 
+
+##### NOTE: we comment out destars.obj here for building with nt4.vc
+
+STARS = $(STARS) $(LIBDIR)\destars.obj
+LIBS = $(LIBS) $(PTOLEMY)\lib.$(PTARCH)\libdestars.lib \
+		$(PTOLEMY)\lib.$(PTARCH)\libde.lib
+LIBFILES = $(LIBFILES) $(LIBDIR)\libdestars.$(LIBSUFFIX) \
+		$(LIBDIR)\libde.$(LIBSUFFIX)
+	# dependencies
+	#SDFLIB = 1
+!endif
+
+# Networks Of Workstations Active Messages
+!ifdef  NOWAM
+	# NOWam only supported under the Solaris operating system,
+	# matched by pattern sol%
+# !if ""$(filter sol%" != "$(PTARCH" #ifneq)","")
+# CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\targets\NOWam\NOWam \
+# 			$(CGCDIR)\targets\NOWam\libudpam
+# !if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+# LIBS = $(LIBS) -lNOWam
+# LIBFILES = $(LIBFILES) $(LIBDIR)\libNOWam.$(LIBSUFFIX)
+# !else
+# TARGETS = $(TARGETS) $(CGCT)\NOWam\NOWam\CGCNOWamRecv.o \
+# 				$(CGCT)\NOWam\NOWam\CGCNOWamSend.o \
+# 				$(CGCT)\NOWam\NOWam\CGCNOWamTarget.o
+# !endif
+# 		# dependencies
+# CGC = 1
+# CGPAR = 1
+#!endif
+!endif
+
+!ifdef  CGC
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\cgc\icons\cgc.pal
+	# UltraSparc Visual Instruction Set stars
+!ifdef  CGCVIS
+	        # CGC VIS stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\vis\stars 
+STARS = $(STARS) $(LIBDIR)\cgcvisstars.o
+LIBS = $(LIBS) -lcgcvisstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgcvisstars.$(LIBSUFFIX)
+
+		# CGC VIS target (no shared library version)
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\vis\targets
+TARGETS = $(TARGETS) $(CGCVIST)\CGCVISSimTarget.o
+
+		# CGC VIS TK
+!ifdef  CGCVISTK
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\vis\tcltk\stars
+LIBS = $(LIBS) -lcgcvistcltk
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgctcltk.$(LIBSUFFIX)
+!endif
+!endif
+	# Tcl\Tk
+!ifdef  CGCTK
+		# stars and library for generated code
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\tcltk\lib $(CGCDIR)\tcltk\stars
+STARS = $(STARS) $(LIBDIR)\cgctcltkstars.o
+LIBS = $(LIBS) -lcgctcltk
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgctcltk.$(LIBSUFFIX)
+
+		# special target (no shared library version)
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\tcltk\targets
+TARGETS = $(TARGETS) $(CGCTCLT)\CGCTclTkTarget.o \
+			$(CGCTCLT)\CGCTychoTarget.o
+!endif
+	# Multiprocessor targets are included if CGPAR is defined
+!ifdef  CGPAR
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\targets\multiproc
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+LIBS = $(LIBS) -lcgcmultitargets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgcmultitargets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(CGCT)\multiproc\CGCUnixSend.o \
+				$(CGCT)\multiproc\CGCUnixReceive.o \
+				$(CGCT)\multiproc\CGCMultiTarget.o \
+				$(CGCT)\multiproc\CGCMacroStar.o \
+				$(CGCT)\multiproc\CGCDDFCode.o \
+				$(CGCT)\multiproc\CompileCGSubsystems.o
+!endif
+!endif
+	# Uniprocessor targets are included by default
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\targets\uniproc
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+LIBS = $(LIBS) -lcgctargets
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgctargets.$(LIBSUFFIX)
+!else
+TARGETS = $(TARGETS) $(CGCT)\uniproc\CGCMakefileTarget.o \
+			   $(CGCT)\uniproc\CGCSDFBase.o \
+			   $(CGCT)\uniproc\CGCSDFSend.o \
+			   $(CGCT)\uniproc\CGCSDFReceive.o \
+			   $(CGCT)\uniproc\CreateSDFStar.o
+!endif
+	# kernel and stars
+STARS = $(STARS) $(LIBDIR)\cgcdspstars.o $(LIBDIR)\cgcstars.o
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\dsp\stars $(CGCDIR)\stars
+LIBS = $(LIBS) -lcgcdspstars -lcgcstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgcdspstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libcgcstars.$(LIBSUFFIX)
+	# dependencies
+SDFLIB = 1
+BDFLIB = 1
+CGCLIB = 1
+CG = 1
+	# Window and RaisedCos DSP stars need the ptdsp Library
+PTDSPLIB = 1
+!endif
+
+!ifdef  CGCLIB
+SDFLIB = 1
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGCDIR)\kernel
+LIBS = $(LIBS) -lcgc
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgc.$(LIBSUFFIX)
+!endif
+
+!ifdef  BDF
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\bdf\icons\bdf.pal
+	# special targets
+!ifdef  CG
+TARGETS = $(TARGETS) $(CGT)\CGBDFTarget.o 
+!endif
+!ifdef  CGC
+TARGETS = $(TARGETS) $(CGCT)\uniproc\CGCBDFTarget.o
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(BDFDIR)\stars
+STARS = $(STARS) $(LIBDIR)\bdfstars.o
+LIBS = $(LIBS) -lbdfstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libbdfstars.$(LIBSUFFIX)
+	# dependencies
+BDFLIB = 1
+SDF = 1
+!endif
+
+!ifdef  CG
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\cg\icons\cg.pal
+	# special targets
+TARGETS = $(TARGETS) $(CGT)\CGCostTarget.o
+!ifdef  CGPAR
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGDIR)\HuScheduler $(CGDIR)\ddfScheduler \
+			$(CGDIR)\macroScheduler $(CGDIR)\dcScheduler  \
+			$(CGDIR)\dlScheduler $(CGDIR)\hierScheduler \
+			$(CGDIR)\parScheduler
+TARGETS = $(TARGETS) $(CGT)\CGMultiTarget.o $(CGT)\CGSharedBus.o 
+LIBS = $(LIBS) -lMacro -lDC -lHu -lDL -lHier -lcgddf -lPar
+LIBFILES = $(LIBFILES) $(LIBDIR)\libMacro.$(LIBSUFFIX) \
+			$(LIBDIR)\libDC.$(LIBSUFFIX) \
+			$(LIBDIR)\libHu.$(LIBSUFFIX) \
+			$(LIBDIR)\libDL.$(LIBSUFFIX) \
+			$(LIBDIR)\libHier.$(LIBSUFFIX) \
+			$(LIBDIR)\libcgddf.$(LIBSUFFIX) \
+			$(LIBDIR)\libPar.$(LIBSUFFIX)
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CGDIR)\kernel $(CGDIR)\targets $(CGDIR)\stars
+STARS = $(STARS) $(LIBDIR)\cgstars.o
+LIBS = $(LIBS) -lcgstars -lcg
+LIBFILES = $(LIBFILES) $(LIBDIR)\libcgstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libcg.$(LIBSUFFIX)
+	# dependencies
+SDFLIB = 1
+!endif
+
+!ifdef  FSM
+	# stars icons (none)
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(FSMDIR)\kernel $(FSMDIR)\stars
+STARS = $(STARS) $(LIBDIR)\fsmstars.o
+LIBS = $(LIBS) -lfsmstars -lfsm
+LIBFILES = $(LIBFILES) $(LIBDIR)\libfsmstars.$(LIBSUFFIX) \
+		$(LIBDIR)\libfsm.$(LIBSUFFIX)
+!endif
+
+!ifdef  SDFFULL
+SDF = 1
+SDFIMAGE = 1
+SDFMATRIX = 1
+SDFMATLAB = 1
+SDFCONTRIB = 1
+SDFDSP = 1
+SDFVIS = 1
+!ifdef  TK
+SDFTK = 1
+SDFDFM = 1
+!endif
+!endif
+
+# We only build the VIS subdomain under the cfront compiler on Solaris
+# 2.5 and higher.  We test for sol2 and cfront in the architecture name
+# and the presence of the VSDKHOME environment variable.
+!ifdef  SDFVIS
+# !if ""$(findstring sol2" == "$(PTARCH" #ifeq)","")
+# SDFVIS =
+# !endif
+# !if ""$(findstring cfront" == "$(PTARCH" #ifeq)","")
+# SDFVIS =
+# !endif
+# !ifndef  VSDKHOME
+# SDFVIS =
+#!endif
+!endif
+
+!ifdef  ATM
+SDF = 1
+!endif
+
+!ifdef  SDF 
+	# star icons
+PALETTES = $(PALETTES) PTOLEMY\src\domains\sdf\icons\sdf.pal
+	# Asynchronous Transfer Mode stars
+!ifdef  ATM
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\atm\stars
+STARS = $(STARS) $(LIBDIR)\sdfatmstars.obj
+LIBS = $(LIBS) -lsdfatmstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfatmstars.$(LIBSUFFIX)
+!endif
+	# Design Flow Management stars
+!ifdef  SDFDFM
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\dfm\stars
+STARS = $(STARS) $(LIBDIR)\sdfdfmstars.obj
+LIBS = $(LIBS) -lsdfdfmstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfdfmstars.$(LIBSUFFIX)
+		# dependencies
+SDFTK = 1
+!endif
+	# Tcl\Tk stars
+!ifdef  SDFTK
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\tcltk\stars
+STARS = $(STARS) $(LIBDIR)\sdftclstars.obj
+LIBS = $(LIBS) -lsdftclstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdftclstars.$(LIBSUFFIX)
+		# dependencies
+SDFDSP = 1
+!endif
+	# DSP stars
+!ifdef  SDFDSP 
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\dsp\stars
+STARS = $(STARS) $(LIBDIR)\sdfdspstars.obj
+#LIBS = $(LIBS) -lsdfdspstars
+LIBS = $(LIBS) $(LIBDIR)\libsdfdspstars.$(LIBSUFFIX)
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfdspstars.$(LIBSUFFIX)
+!endif
+	# Image processing stars
+!ifdef  SDFIMAGE
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\image\stars
+STARS = $(STARS) $(LIBDIR)\sdfimagestars.obj
+LIBS = $(LIBS) -lsdfimagestars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfimagestars.$(LIBSUFFIX) 
+!endif
+	# Matrix stars
+!ifdef  SDFMATRIX 
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\matrix\stars
+STARS = $(STARS) $(LIBDIR)\sdfmatrixstars.obj
+LIBS = $(LIBS) -lsdfmatrixstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfmatrixstars.$(LIBSUFFIX)
+!endif
+	# Matlab interface stars
+!ifdef  SDFMATLAB
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\matlab\stars
+STARS = $(STARS) $(LIBDIR)\sdfmatlabstars.obj
+LIBS = $(LIBS) -lsdfmatlabstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfmatlabstars.$(LIBSUFFIX)
+		# dependencies
+EXTERNALTOOLSLIB = 1
+MATLABENGINE = 1
+!endif
+	# Contributed stars by third-party users
+!ifdef  SDFCONTRIB
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\contrib\kernel $(SDFDIR)\contrib\stars
+STARS = $(STARS) $(LIBDIR)\sdfcontribstars.obj
+LIBS = $(LIBS) -lsdfcontribstars -lsdfcontrib 
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfcontribstars.$(LIBSUFFIX) \
+			$(LIBDIR)\libsdfcontrib.$(LIBSUFFIX)
+!endif
+	# Ultrasparc Visual Instruction Set (VIS) stars
+!ifdef  SDFVIS
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\vis\stars
+STARS = $(STARS) $(LIBDIR)\sdfvisstars.obj
+LIBS = $(LIBS) -lsdfvisstars
+LIBS = $(LIBS) $(VSDKHOME)\util\vis.il
+!endif
+!ifdef  CG
+		# FIXME: The only thing in sdf\targets also depends on 
+		# cg... should this be in the cg directory?
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\targets
+TARGETS = $(TARGETS) $(SDFT)\CompileTarget.obj
+!endif
+	# kernel and stars
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\stars
+STARS = $(STARS) $(LIBDIR)\sdfstars.obj
+#LIBS = $(LIBS) -lsdfstars
+LIBS = $(LIBS) $(LIBDIR)\libsdfstars.$(LIBSUFFIX)	
+LIBFILES = $(LIBFILES) $(LIBDIR)\libsdfstars.$(LIBSUFFIX)
+	# dependencies
+SDFLIB = 1
+	# ptdsp library is used by the Play star as well as the SDF\DSP stars
+PTDSPLIB = 1
+!endif
+
+# Dependent libraries
+
+!ifdef  ATM
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\atm\kernel
+LIBS = $(LIBS) -latm
+LIBFILES = $(LIBFILES) $(LIBDIR)\libatm.$(LIBSUFFIX)
+!endif
+
+!ifdef  BDFLIB
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(BDFDIR)\kernel
+LIBS = $(LIBS) -lbdf
+LIBFILES = $(LIBFILES) $(LIBDIR)\libbdf.$(LIBSUFFIX)
+!endif
+
+!ifdef  SDFLIB
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(SDFDIR)\kernel $(SDFDIR)\loopScheduler
+#LIBS = $(LIBS) -lLS -lsdf
+LIBS = $(LIBS) $(LIBDIR)\libLS.$(LIBSUFFIX) \
+		    $(LIBDIR)\libsdf.$(LIBSUFFIX)
+LIBFILES = $(LIBFILES) $(LIBDIR)\libLS.$(LIBSUFFIX) \
+		    $(LIBDIR)\libsdf.$(LIBSUFFIX)
+!if "$(USE_SHARED_LIBS)" != "yes" #ifneq 
+TARGETS = $(TARGETS) $(OBJDIR)\domains\sdf\loopScheduler\LoopTarget.obj
+!endif
+!endif
+
+# HOF stars can be used in pigiRpc but not ptcl.
+# The HOF base classes call Tk_DoOneEvent so that if you accidentally
+# specify an infinite recursion (easy to do with HOF), you can hit the
+# STOP button and abort the run.  But Tk is not linked into ptcl, so
+# this call cannot be done.
+!ifdef  HOF
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(HOFDIR)\kernel $(HOFDIR)\stars
+STARS = $(STARS) $(LIBDIR)\hofstars.o
+LIBS = $(LIBS)	-lhofstars
+LIBFILES = $(LIBFILES) $(LIBDIR)\libhofstars.$(LIBSUFFIX)
+	# dependencies
+HOFLIB = 1
+!endif
+
+!ifdef  HOFLIB
+LIBS = $(LIBS)	-lhof
+LIBFILES = $(LIBFILES) $(LIBDIR)\libhof.$(LIBSUFFIX)
+!endif
+
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+#STARS =
+!endif
+
+!ifdef  OCT
+    CUSTOM_DIRS += $(CROOT)\src\pigilib
+    MISC_OBJS += $(ROOT)\obj.$(PTARCH)\pigilib\ptkRegisterCmds.o
+!if "$(USE_SHARED_LIBS)" == "yes" #ifeq 
+	# We need to include -lvov if we are using shared libraries, as
+	# the oh library has references to vov symbols in it.
+LIBVOV = -lvov
+!endif
+	# We need -loh because pigilib\compile.c calls ohFormatName()
+	# We need -llist because of a few calls in pigilib and librpc
+	# We need -lutility because a few file in pigilib call util_csystem()
+	# We need -lst because of calls in pigilib and liboh, librpc,libutility
+	# We need -lerrtrap and -luprintf because of the other oct libs
+    LIBS += 	-L$(OCTLIBDIR) -lpigi \
+		-lrpc -loh $(LIBVOV) -llist \
+		-lutility -lst -lerrtrap -luprintf #-lport
+
+!ifdef  USE_CORE_STATIC_LIBS
+LIBPIGI = $(LIBDIR)\libpigi.$(LIBNONSHAREDSUFFIX)
+!else
+LIBPIGI = $(LIBDIR)\libpigi.$(LIBSUFFIX)
+!endif
+
+    LIBFILES += $(LIBPIGI) \
+	$(OCTLIBDIR)\librpc.$(LIBSUFFIX)  \
+	$(OCTLIBDIR)\liboh.$(LIBSUFFIX) $(OCTLIBDIR)\libvov.$(LIBSUFFIX) \
+	$(OCTLIBDIR)\liblist.$(LIBSUFFIX) \
+	$(OCTLIBDIR)\libutility.$(LIBSUFFIX) \
+	$(OCTLIBDIR)\libst.$(LIBSUFFIX) $(OCTLIBDIR)\liberrtrap.$(LIBSUFFIX) \
+	$(OCTLIBDIR)\libuprintf.$(LIBSUFFIX)
+!endif
+!undef TK
+!ifdef  TK
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\ptklib 
+LIBS = $(LIBS) -lptk $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
+PT_DEPEND = $(PT_DEPEND) $(LIBDIR)\libptk.$(LIBNONSHAREDSUFFIX)
+!endif
+
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\kernel $(CROOT)\src\pigiRpc $(CROOT)\src\ptcl \
+	$(CROOT)\src\pitcl \
+	$(CROOT)\mk $(CROOT)\src\tysh $(CROOT)\src\pigiExample
+
+!ifdef  PITCL
+	# Under some architectures, we need to use static libraries or we get
+	# GateKeeper errors.
+!ifdef  USE_CORE_STATIC_LIBS
+LIBPTCL = $(LIBDIR)\libpitcl.$(LIBNONSHAREDSUFFIX)
+!else
+LIBPTCL = $(LIBDIR)\libpitcl.$(LIBSUFFIX)
+!endif
+!else
+	# Use libptcl, not libpitcl
+!ifdef  USE_CORE_STATIC_LIBS
+LIBPTCL = $(LIBDIR)\libptcl.$(LIBNONSHAREDSUFFIX)
+!else
+LIBPTCL = $(LIBDIR)\libptcl.$(LIBSUFFIX)
+!endif
+!endif
+
+PT_DEPEND = $(PT_DEPEND) $(LIBPTCL) $(LIBDIR)\libptolemy.$(LIBNONSHAREDSUFFIX) \
+	$(LIBFILES) $(STARS) $(TARGETS)
+
+# unfortunately, if we are building a stand-alone program and
+# link in libPar we must also get gantt function definitions in ptcl
+!ifndef  PIGI
+!ifdef  CGPAR
+PIGI =1
+!endif
+!endif
+
+# this would not be defined if we are making a small stand-alone 
+# Program to test the ptolemy libraries, see standalone.mk
+!ifdef  PIGI
+!ifdef  PITCL
+LIBS = $(LIBS) version.obj libpitcl.lib
+!else
+LIBS = $(LIBS) version.obj libptcl.lib
+!endif
+!endif
+
+# External C library of Ptolemy DSP C routines
+!ifdef  PTDSPLIB
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\utils\libptdsp
+#LIBS = $(LIBS) -lptdsp
+LIBS = $(LIBS) $(LIBDIR)\libptdsp.$(LIBSUFFIX)
+LIBFILES = $(LIBFILES) $(LIBDIR)\libptdsp.$(LIBSUFFIX)
+!endif
+
+# External interface support - we need to expand libexttools, because it
+# depends upon the Ptolemy kernel.  Matlab and mathematica are always pulled in
+CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\utils\libexttools \
+	$(CROOT)\src\utils\libptmatlab \
+	$(CROOT)\src\utils\libptmathematica
+#LIBS += -lexttools $(MATLABEXT_LIB) $(MATHEMATICAEXT_LIB)
+LIBS = $(LIBS) $(LIBDIR)\libexttools.$(LIBSUFFIX) \
+	$(LIBDIR)\libptmathematica.$(LIBSUFFIX) \
+	$(LIBDIR)\libptmatlab.$(LIBSUFFIX) \
+#LIBFILES += $(LIBDIR)\libexttools.$(LIBSUFFIX)
+
+# Now, pull in the Ptolemy kernel support, system libraries and tcl
+LIBS = $(LIBS) $(PTOLEMY)\src\kernel\libptolemy.lib $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+	$(SYSLIBS) $(LIB_FLUSH_CACHE)
+

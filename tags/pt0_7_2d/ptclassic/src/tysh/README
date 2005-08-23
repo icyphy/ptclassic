@@ -1,0 +1,9 @@
+
+This directory contains the main source files for Tycho Brahe,
+an object-oriented front-end for Ptolemy.
+
+FIXME: Temporary arrangements in this directory:
+
+Symbolic links are pointing to files that should eventually
+be moved over, but for now are kept with pigi so that only
+one source is maintained.

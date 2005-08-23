@@ -1,0 +1,20 @@
+#! /bin/sh
+
+# This shell script simply finds the appropriate (platform dependent)
+# version of wfir and invokes it.
+#
+# Version: @(#)wfir	1.6	01/28/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
+# 	All Rights Reserved.
+#
+
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+if [ -z "$PTARCH" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+fi
+
+exec $PTOLEMY/bin.$PTARCH/wfir ${1+"$@"}

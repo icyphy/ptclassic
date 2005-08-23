@@ -1,0 +1,196 @@
+h60167
+s 00183/00000/00000
+d D 1.1 99/09/08 11:23:11 cxh 1 0
+c date and time created 99/09/08 11:23:11 by cxh
+e
+u
+U
+f i 
+f e 0
+t
+T
+I 1
+%
+% WORDGUI - Wordlength design program. 
+%
+% Note: in the help below, quotes ("") are used to describe options. 
+% Do not enter any quotes into the WORDGUI edit boxes, just enter the
+% requested information.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% First, fill in the Path and Design Name edit boxes:
+%
+% Path: Enter the full path name into this box (no "/" at the end)
+%       (note: Unix style slashes, not DOS). (Note: should be automatically
+%	filled in at startup)
+%
+% Design Name: Enter the design name into this box (no extensions). (Note:
+%	should be automatically filled in at startup)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next, either Import or Load the design:
+%
+% Import: When Path and Design Name are valid, click this button to
+%       bring in the design from Ptolemy (loses any previous work).
+%
+% Load: If this design was previously Imported, clicking the Load
+%       button will restore any previous work done on the design.
+%
+% Save: Save all work done on this design. A subsequent Load in
+%       another session will restore this work. Can be done at any time
+%       after Import or Load.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next, fill in these various parameter edit boxes:
+%
+% Max. Wordlength: Enter the maximum wordlength to consider for any arc, or
+%       use the provided default.
+%
+% Max. I/O Wordlength: Enter the maximum input/output wordlength to consider 
+%       for memory interfaces, or use the provided default. NOTE: must be
+%       less than or equal to Max Wordlength.
+%
+% Max. Num. FPGAs: Enter the maximum number of FPGAs to consider, or use
+%       the provided default. NOTE: for this release, only 1 FPGA allowed.
+%
+% Board File: Enter the boardfile name. NOTE: for this release, the only
+%       options are: "Unconstrained" or "Wildfire".
+%       Enter Wildfire to build designs for the wildfire board.
+%       Use Unconstrained for experimenting only.
+%
+% Granularity: Enter the granularity with which to consider wordlength options
+%       (e.g. "1" to allow wordlengths 1,2,3,..., "4" to allow wordlengths
+%       4,8,12,... etc. Larger granularities allow for faster design time
+%       (but possibly suboptimal designs).
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next, calculate the range and variance arc parameters needed for analysis:
+%
+% Calc Range: Once design is Imported, clicking this button will
+%       calculate the min and max range for every arc in the flowgraph.
+%
+% Calc Var: Once the ranges are calculated, clicking this button will
+%       calculate the variances scale factors for every arc in the
+%       flowgraph.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Next, choose the
+%
+% Var. Comb. Mode: Succesive clicks on this button cycle through mode
+%         to use for multiple outputs when calculating the design variance.
+%
+%       "m" = Maximum. The maximum variance of any output is reported (the
+%             default, and a good one to start with).
+%
+%       "mw" = Maximum, Weighted.  Same as 'm', except that the individual
+%             variances are weighted before the maximum operation. The 
+%             weights are stored in a row vector "varweights", which
+%             defaults to all 1's (so the default behavior is the same as
+%             for the 'm' option). The user can change the varweights 
+%             row vector values in the Matlab command window if desired.
+%            
+%       "w" = Weighted. The individual variances are are weighted and then
+%             added. The weights are stored in a row vector "varweights", 
+%             which defaults to all 1's (so the default behavior is the same
+%             as for the 'm' option). The user can change the varweights 
+%             row vector values in the Matlab command window if desired.
+%
+%       "u" = Uncombined. The individual variances for each output are 
+%             kept separate. (NOTE: not really well tested! Also, much
+%             slower than other modes.)
+%
+%   NOTE: Before clicking this button, the user must have previously 
+%   performed Calc. Var. or an error results.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Next, optionally calculate a lower bounding curve on cost/variances.
+%  
+% NOTE: This feature is not operational this release.
+%
+% Lower Bound: This will draw a curve representing a theoretical lower
+%       bound on cost/variance combinations (which might or might not
+%       be achievable).
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Next, begin the actual wordlength design process.
+%
+% MCMC: Clicking on this performs a search for good wordlength combinations.
+%       When the search ends, the best designs from this search and previous
+%       searches are kept. The user may perform as many searches as desired,
+%       generally stopping when the improvements are small. Clicking the 
+%       Save button will save the results of all the searches to date,
+%       (a subsequent Load will restore these results. The search parameters
+%       have been adjusted so that reasonably short searches are performed.
+%
+% Clear Old Designs: Clicking on this button clears the results of previous
+%       searches. Generally, the user should click this if some of the 
+%       edit boxes have been changes (e.g. max wordlength, granularity etc)
+%       and the user does not want to consider those previous results.
+%
+% To guide the next search, the user may adjust the following:
+%
+% Max Cost: Enter the maximum cost to consider in the edit box. The 
+%       toggle button "Active/Inactive" controls whether or not this
+%       constraint is used. Changing this parameter does not invalidate
+%       any previous search results. This feature is useful for situations
+%       when previous searches have not adequately expored low cost regions
+%       of the search space.
+%
+% C/V Bound: When the toggle button "Active/Inactive" is set to Active,
+%       an upper bound on the next search in terms of cost and variance is
+%       used. The bound is derived by passing a polynomial through the 
+%       current best set of designs, and the variance bound is multiplied
+%       by the value in the Boundmult edit box. Initially, for the first 
+%       few searches, it is best to set this feature to "Inactive", to
+%       get a robust starting estimate of the lower bound. As the curve
+%       startes to look smooth, this feature should be activated, to 
+%       speed up the search process. The Boundmult value should typically be
+%       slowly decreased to about 1.01 at a minimum. (The user can start 
+%       out with a much higher value than the default if desired. Also,
+%       the value can really be set to just about anything greater than
+%       one in any order, but slowly decreasing it gives the best results
+%       on designs tested so far.)
+%
+%       NOTE: The polynomial fitting method used in this release is
+%       unsatisfactory and will be improved in the next release. (The 
+%       problem is that it doesnt fit the typical lower bounds very well,
+%       thus slowing down the searches.)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Next, select and generate the design for re-importation into PTOLEMY.
+% 
+% Selection: The user enters the design number to select into this edit box.
+%       The selection is hilighted in the cost/variance plot window.
+%       The user may reenter this parameters as many times as desired.
+% %W% %G%
+% Generate: The design last selected by the user is generated. 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Block Diagram (optional)
+%
+% If the user has Simulink installed, then these buttons will draw a 
+% helpful block diagram. (NOTE: the diagram is not really Simulink compatible,
+% so it cannot be used with other Simulink simulations). The diagram that
+% is generated contains the instance and node numbers of the design.
+% The user can use all the graphical commands of Simulink to rearrange and
+% save the drawing.
+% 
+% Open: Open a previously designed block diagram or create a new one.
+%
+% Clear: Clear the block diagram.
+%
+% Close: Save and close the block diagram.
+%
+% NOTE: design must have been previously Imported or Loaded.
+% NOTE: This feature really for internal development and debug.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Finally,
+%
+% Quit: Quit out of the WORDGUI tool. NOTE: dont forget to click
+%       the SAVE button! WORDGUI may be restarted by typing "wordgui" in
+%       the Matlab command window. 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+E 1

@@ -1,0 +1,53 @@
+<!-- documentation file generated from DEpropag_uldl.pl by ptlang -->
+<html>
+<head>
+<title>DE propag_uldl star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="propag_uldl star, DE domain">propag_uldl star in DE domain</a></h1>
+<p>
+This star implements a path loss model. A specific enviroment is
+        read in from a AutoCad-file. All obstacles which are in a path are 
+        searched for and their penetration loss is added to the path loss caused
+        by free space propagation. The resulting path loss is given out.
+        WARNING: I don't recommend anybody to trace down the following code. It
+        is kind of a quick hack and not very readable for others. Also, please 
+        excuse some comments in German I left behind. They are to many to  
+        translate them all ...
+        Moreover, the implementation highly depends on the environment I use. 
+        This is not a generic path-loss-model for any AutoCad-enviroment !!!
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/domain.idx#cell_list ">DEcell_list</a><br>
+<b>Location:</b> The WiNeS-Library<br>
+<b>Version:</b> 1.6 "06/11/98"<br>
+<b>Author:</b> A. Wernicke<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>MS_Position</font></b></i></td><td>Complex</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>cellnumb</font></b></i></td><td>int</td>
+</tr>
+</table>
+<h2>Outputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=firebrick>C_dBm</font></b></i></td><td>float</td>
+</tr>
+</table>
+<h2>States</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=blue>fileName</font></b></i></td><td>StringState</td>
+<td>File describing topology</td>
+<td>"$PTOLEMY/src/domains/de/contrib/stars/topo.dxf"</td>
+</tr>
+</table>
+<br><b>See:</b> <a href="DEpropag_uldl.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#propag_uldl facet, DE user">propag_uldl users</a>
+<p><hr><p>
+copyright (c) 1996 - 1997 Dresden University of Technology,
+                    Mobile Communications Systems
+</body>
+</html>

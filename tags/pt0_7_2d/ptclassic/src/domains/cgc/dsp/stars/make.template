@@ -1,0 +1,100 @@
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+# Makefile for Ptolemy CGC DSP stars
+# @(#)make.template	1.8 8/24/96
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/cgc/dsp/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# directory of basic CGC stars
+CGCSTARSDIR = $(ROOT)/src/domains/cgc/stars
+
+# CGCDIR is the directory containing CGC domain support
+CGCDIR = $(ROOT)/src/domains/cgc/kernel
+
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+
+INCL = -I$(CGCSTARSDIR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) \
+ $(PTCOMPAT_INCSPEC) -I$(ROOT)/src/utils/libptdsp
+
+# source files for all stars, using preprocessor
+# put base stars first, i.e., those that other stars are derived from
+PL_SRCS= \
+ CGCBiquad.pl \
+ CGCFastFIR.pl \
+ CGCFIR.pl \
+ CGCGoertzelBase.pl \
+ CGCLMS.pl \
+ CGCDirichlet.pl \
+ CGCDTMFPostTest.pl \
+ CGCFFTCx.pl \
+ CGCFIRFix.pl \
+ CGCGAL.pl \
+ CGCGGAL.pl \
+ CGCGoertzel.pl \
+ CGCGoertzelPower.pl \
+ CGCIIR.pl \
+ CGCLMSOscDet.pl \
+ CGCParametricEq.pl \
+ CGCRaisedCosine.pl \
+ CGCSinc.pl \
+ CGCWindow.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+DOMAIN=CGC
+STAR_MK=cgcdspstars
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
+PTLIB=libcgcdspstars.$(LIBSUFFIX)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

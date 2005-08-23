@@ -1,0 +1,15 @@
+#!/bin/sh
+# Generate ACS Corona and Core stars
+domain=ACS
+downcasedomain=acs
+domaindir=$PTOLEMY/src/domains/$downcasedomain/stars
+
+cd $domaindir
+
+$PTOLEMY/src/domains/acs/utils/mkcorona $domain Add
+$PTOLEMY/src/domains/acs/utils/mkcorona $domain Mpy
+$PTOLEMY/src/domains/acs/utils/mkcorona $domain Fork
+$PTOLEMY/src/domains/acs/utils/mkcorona $domain Sink
+$PTOLEMY/src/domains/acs/utils/mkcorona $domain Ramp
+
+make sources

@@ -1,0 +1,90 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (X11; I; SunOS 5.5.1 sun4m) [Netscape]">
+   <TITLE>Dynamic Higher Order Functions for DE</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FAF0E6">
+<!-- index.html	1.0 11/19/97
+Author:		Jens Voigt
+Created:	11/19/1997
+
+Copyright (C) 1997 Dresden University of Technology
+Mobile Communicatins Systems
+All rights reserved.
+Ptolemy SCCS Version: @(#)mutablede.html	1.1 05/13/98
+-->
+<H1>
+Dynamic Map Function for the Discrete Event Domain</H1>
+
+<HR WIDTH="100%">
+<BR><A HREF="#introduction">Introduction</A>
+
+<P><A HREF="#using">Using the stars</A>
+
+<P>
+<HR WIDTH="100%"><A NAME="introduction"></A>In Ptolemy 0.7 and earlier
+the DE domain did not support a mutable system configuration. The map function
+in Ptolemy's&nbsp; HOF domain allows for instantiating as many objects
+of a block as one needs. But, all these objects will be in the system configuration
+for the entire simulation's runtime. Moreover, one has to specify the number
+of objects before the simulation starts. So, the common map function does
+not support a mutable system configuration.
+
+<P>In the following, a group of stars which implement a dynamic map function
+is introduced. These stars look form the outside pretty much like the common
+map stars in the HOF domain. However, the <TT>DEDynMap</TT> star does not
+have a parameter for the number of multiplications - as it is the buswidth
+in the HOF domain -, but two additional inputs. These inputs expect events
+when a new copy of a block is to be put into the topology or is to be taken
+out of it. So, these stars allow for instantiation and deletion of any
+block during runtime on demand. Hence, they give the chance to change the
+topology during the runtime of a simulation.
+
+<P>In the contrary to Ptolemy's HOF stars, these stars have heavily to
+work and to interact with the scheduler. So, they are only implemented
+for the DE-domain.
+
+<P>All icons for the stars which are explained below are in a palette <TT>mutable.pal</TT>,
+which can be found in <TT>$PTOLEMY/src/domains/de/contrib/demo</TT>.
+
+<P>
+<HR WIDTH="100%">
+<BR><A NAME="using"></A>The <TT>DEDynMap </TT>star and derived types allow
+for runtime creation and deletion on demand of any block (star, galaxy,
+source, sink) in the DE domain. The block, which is to be multiplied at
+runtime, is in the following called the <I>master block</I>. It is the
+equivalent of the <I>replacement block</I> in the HOF domain. The <I>master
+block</I> can itself contain dynamic map functions, thus allowing cascaded
+mutations.
+
+<P>The <TT>DEDynMap</TT> star is always to be used together with <TT>DEDynMerge</TT>
+and/or <TT>DEDynFork</TT> stars in order to adapt the number of portholes
+and connections automatically during runtime. The <I>master block</I> itself
+is to be specified textually in the parameters of the <TT>DEDynMap star</TT>.
+Alternatively, a graphical version <TT>DEDynMapGr</TT> is also provided.
+
+<P>The <TT>DEDynMap</TT> star creates or deletes instances of the <I>master
+block</I> and connects their portholes to the multiportholes in <TT>DEDynFork
+</TT>and <TT>DEDynMerge</TT>. So, these stars separate the runtime mutations
+from their outside: All mutations take place between the <TT>DEDynFork
+</TT>and the <TT>DEDynMerge</TT> stars. The <TT>DEDynMap</TT> star creates
+a new copy of the <I>master block</I> and puts it into the topology each
+time it gets fired at the <I>newBlock</I> porthole. It takes a copy out
+of the topology and deletes it each time it gets fired at the <I>delBlock</I>
+porthole. The copies are identified by an<I> instancenumber</I>. These
+stars perform everything needed to mutate the topology, like changing the
+number of portholes in <TT>DEDynMerge</TT> and <TT>DEDynFork</TT> or setting
+up new connections. The user does not need to program anything. These stars
+can be used in Ptolemy schematics in the common way: they just are to be
+connected with other stars and their states are to be set.
+<BR>&nbsp;
+<ADDRESS>
+
+<HR WIDTH="100%"></ADDRESS>
+
+<ADDRESS>
+Last changed on 5/13/98. Please, send comments to: <A HREF="mailto: voigtje@ifn.et.tu-dresden.de">voigtje@ifn.et.tu-dresden</A>.</ADDRESS>
+
+</BODY>
+</HTML>

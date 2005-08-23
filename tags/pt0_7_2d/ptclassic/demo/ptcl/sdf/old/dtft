@@ -1,0 +1,56 @@
+reset
+# Creating universe 'dtft'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 0.314159
+	setstate FloatRamp1 value 0.0
+	star Sin1 Sin
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order 8
+	setstate ComplexFFT1 size 64
+	setstate ComplexFFT1 direction 1
+	star DB1 DB
+	setstate DB1 min "-100"
+	setstate DB1 inputIsPower FALSE
+	star DB2 DB
+	setstate DB2 min "-100"
+	setstate DB2 inputIsPower FALSE
+	star DTFT1 DTFT
+	setstate DTFT1 length 64
+	setstate DTFT1 numberOfSamples 256
+	setstate DTFT1 timeBetweenSamples 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "FFT Magnitude (in dB)"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-0 fft -x K -y mag =800x400+0+0"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 step 0.0024543693
+	setstate FloatRamp2 value 0.0
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title "A region of the magnitude DTFT"
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "-0 dtft -x freq -y mag =800x400+0+420"
+	setstate XYgraph1 ignore 0
+	setstate XYgraph1 xUnits 1.0
+	setstate XYgraph1 xInit 0.0
+	connect FloatRamp1 output Sin1 input
+	node node1
+	nodeconnect Sin1 output node1
+	nodeconnect ComplexFFT1 input node1
+	nodeconnect DTFT1 signal node1
+	connect DTFT1 dtft DB2 input
+	connect ComplexFFT1 output DB1 input
+	connect DB1 output Xgraph1 input
+	node node2
+	nodeconnect FloatRamp2 output node2
+	nodeconnect DTFT1 omega node2
+	nodeconnect XYgraph1 xInput node2
+	connect DB2 output XYgraph1 input
+run 1
+wrapup

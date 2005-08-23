@@ -1,0 +1,117 @@
+Version: @(#)README	1.6 8/20/96
+
+README file for ptolemy/src/domains/c50
+
+The Ptolemy c50 domain generates code for the Texas Instruments
+TMS320C50 fixed-point DSP processor.  To make much use of this domain,
+you will need a PC with a C50.
+
+The c50 domain is based on an initial implementation by Andreas
+Baensch and Prof. Fritz Heinrichmeyer at FernUniverstitat in Hagen,
+Germany.
+
+Luis Gutierrez and Brian Evans have fleshed out the c50 domain star
+library.
+
+Christopher Hylands packaged the tar overlay and patch.
+
+Files
+-----
+README		This file.
+asmc50		A bash script that will assemble c50 assembler. 
+c50_prog.ps	C50 domain programmer's manual in PostScript.
+c50_prog.txt	C50 domain programmer's manual in ascii.
+c50_user.ps	C50 domain users's manual in PostScript.
+c50_user.txt	C50 domain users's manual in ascii.
+loadc50		A bash script that loads the c50.
+pt-0.6.c50.patch A patch for Ptolemy0.6 that installs the c50 domain.
+
+Installation
+------------
+In August of 1996, the c50 domain was released as a tar file overlay for
+Ptolemy0.6.
+
+1) Untar the tar overlay
+	To install this tar file, untar it inside your Ptolemy distribution:
+		cd $PTOLEMY/..
+		gunzip /tmp/pt-0.6.c50.src.tar.gz
+		tar -xf /tmp/pt-0.6.c50.src.tar
+
+2) Patch the 0.6 tree.
+	Window and RaisedCosine star in c50/dsp/stars need the ptdsp
+	library, located in $PTOLEMY/src/utils/libptdsp.  This library
+	is not part of the Ptolemy0.6 release, but is included with
+	this tar overlay.
+
+	The following files need to be modified to use the c50 domain:
+
+$PTOLEMY/MAKEARCH		- Add c50 to EXPDOMAINS, and to EXPEXTRAS.
+				Add libptdsp to the utils section.
+
+$PTOLEMY/mk/ptbin.mk		- Add 'C50 = 1' to the FULL section so that
+				the c50 domain is in a full pigiRpc.
+
+$PTOLEMY/mk/stars/mk		- Add the c50 domain in several places.
+
+$PTOLEMY/src/domains/makefile 	- Add the c50 domain to EXPDOMAINS.
+
+$PTOLEMY/src/utils/makefile 	- Add libptdsp to DIRS.
+
+$PTOLEMY/src/domains/c50/kernel/{C50Target,TITarget}.{h,cc} -
+$PTOLEMY/src/domains/c50/target/{DSKC50Target,SubC50Target}.{h,cc} -
+				- In the Ptolemy0.6.1 development tree,
+				we added new functionality to CG.  These
+				eight files must be patched to back out that
+				functionality, or else we would have to
+				include src/domains/cg in this patch, which
+				would break all the other code generation
+				domains.
+	
+	The file ptolemy/src/domains/c50/pt-0.6.c50.patch is a patch
+	that makes the above changes.  To patch the vanilla Ptolemy
+	0.6 sources, do:
+
+	cd $PTOLEMY; patch -p3 < $PTOLEMY/src/domains/c50/pt-0.6.c50.patch
+ 
+	patch binaries for HPUX10.01, Solaris2.4 and SunOS4.1.3 are
+	available via anonymous ftp in the hppa, sol2 and sun4
+	subdirectories at ftp://ptolemy.eecs.berkeley.edu/pub/gnu
+
+3) Run make depend in the c50 directory.
+	If you don't do this step, you will see messages like:
+	
+	make[1]: *** No rule to make target
+	`../../../../src/domains/cg/kernel/ImplementationCost.h',
+	needed by `C50Target.o'.  Stop.
+	
+	cd $PTOLEMY/src/domains/c50; make depend
+
+4) Rebuild Ptolemy.  See the Installation Guide in Appendix A of the
+	User's manual for details.	
+	
+	If you have a prexisting obj.$PTARCH tree, you will need to
+	run MAKEARCH by hand to create the libptdsp and c50 object
+	directories:
+	
+	If you already have a obj.$PTARCH tree, the following commands
+	should build and install a pigiRpc that has the c50 domain:
+		cd $PTOLEMY; csh -f MAKEARCH
+		cd $PTOLEMY/obj.$PTARCH/domains/c50; make install
+		cd $PTOLEMY/obj.$PTARCH/utils/libptdsp; make install
+		cd $PTOLEMY/obj.$PTARCH/pigiRpc; make install
+		
+5) To view the c50 demos, start Ptolemy with:
+		pigi $PTOLEMY/src/domains/c50/demo/init.pal
+	
+	Note that most of the demos just produce c50 code.
+	
+Using the c50 domain
+--------------------
+
+The C50 domain is meant to run on a Linux machine with the DSK starter
+board and kit.  The C50 files are downloaded to the chip via a dos shell.
+
+The scripts asmc50 and loadc50 are bash scripts that worked for us
+locally.  These scripts probably won't work as is, and will require
+modificatoin.
+

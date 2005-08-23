@@ -1,0 +1,56 @@
+#!/bin/csh -f
+# Version:
+# @(#)g++-setup	1.27 10/27/99
+# Copyright (c) 1994-1999 The Regents of the University of California.
+# 	All Rights Reserved.
+
+# Set environment variables to use the the Ptolemy version of g++ and gcc.
+
+# You will need to source this script if you are using the prebuilt
+# compiler distributed with Ptolemy _and_ you do not have a link from
+# /users/ptolemy to the Ptolemy distribution.  If you have a link, then this
+# file should be at /users/ptolemy/bin/g++-setup.
+
+# If dynamic linking fails, then you may need this script.  If you are not
+# doing dynamic linking, then you probably need not run this script.
+
+# Don't use this script if you are using a compiler other than the
+# compiler distributed with Ptolemy in binary form (pt-*-gnu.$PTARCH.tar.Z)
+
+# If you rebuild Ptolemy with another version of gcc, you will not need
+# this script.
+
+# See the Ptolemy Installation guide for more information.
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
+endif
+
+# These variables are needed by the compiler
+#setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.95.1
+# This changed in gcc-2.95.1.  Note the trailing / is necessary
+setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/
+
+# C_INCLUDE_PATH must be set or CGC TclTk demos will fail to compile
+setenv C_INCLUDE_PATH $GCC_EXEC_PREFIX/include
+
+# Needed to compile c++ programs so we can find stream.h
+setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/common/include/g++:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$C_INCLUDE_PATH
+
+#setenv COMPILER_PATH $GCC_EXEC_PREFIX
+#setenv GCC_INCLUDE_DIR $PTOLEMY/gnu/$PTARCH/lib/gcc-lib
+
+# HPUX9.x requires that $PTOLEMY/gnu/$PTARCH/lib
+# be added to LIBRARY_PATH, or else incremental linking will fail with
+# messages like:
+#	collect2: ld returned 1 exit status
+#	/bin/ld: Can't find library for -lg++
+setenv LIBRARY_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib:$PTOLEMY/gnu/$PTARCH/lib
+
+# This variable is needed to find the libraries
+if ($PTARCH =~ hppa*) then
+	setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/tcl.${PTARCH}/lib/itcl
+else
+	setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/tcl.${PTARCH}/lib/itcl
+endif

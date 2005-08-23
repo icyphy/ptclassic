@@ -1,0 +1,24 @@
+This modem was designed a built over the course of a semester for an
+EECS 224 class project.  The project report for that class contains a
+detailed explaination of this modem.  Below are some areas for
+improvement.
+
+Ptolemy-internals related:
+  - Scalor register allocation.  This would greatly improve the speed
+    and code size of the simple blocks used by the AGC.
+  - Pointer register allocation.  This would greatly improve the speed
+    of the multirate blocks such as the filters and SSI star.
+  - Loop schedule.  Get the loop scheduler to work.  Use pointer reg allocation
+    to make efficient.
+  - Convert to COMPLEX data type.  This would both improve readability
+    of the graph, and provide some small speed and code-size improvement. 
+  - Get rid of the SSISkew, and instead use BDF.
+
+Modem-design related:
+  - Use the quatrature signal for bits.
+  - Use a line code like QAM.  (Currently just symbol code).
+  - Transfer real data, with byte to bit blocking.
+  - Add low-pass or band-bass into the phase splitter for noise (e.g.,
+    matched filtering).
+  - Use an interpolating filter (*not* upsampling) to cancel the sampling
+    error.

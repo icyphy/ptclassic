@@ -1,0 +1,116 @@
+domain SDF
+defgalaxy testSignal {
+	domain SDF
+	newstate noiseVar FLOAT 0.1
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 1.2566371
+	setstate FloatRamp1 value 0.0
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 step 1.3194689
+	setstate FloatRamp2 value 0.0
+	star FloatRamp3 FloatRamp
+	setstate FloatRamp3 step "PI/20"
+	setstate FloatRamp3 value 0.0
+	star Sin1 Sin
+	star Sin2 Sin
+	star Sin3 Sin
+	star FloatSum1 FloatSum
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance noiseVar
+	star BiQuad1 BiQuad
+	setstate BiQuad1 d1 "-0.850848"
+	setstate BiQuad1 d2 0.0
+	setstate BiQuad1 n0 1.0
+	setstate BiQuad1 n1 0.0
+	setstate BiQuad1 n2 0.0
+	setstate BiQuad1 state1 0.0
+	setstate BiQuad1 state2 0.0
+	connect FloatRamp1 output Sin1 input
+	connect FloatRamp2 output Sin2 input
+	connect FloatRamp3 output Sin3 input
+	connect IIDGaussian1 output BiQuad1 input
+	connect BiQuad1 output FloatSum1 input
+	connect Sin3 output FloatSum1 input
+	connect Sin1 output FloatSum1 input
+	connect Sin2 output FloatSum1 input
+	alias out FloatSum1 output
+}
+reset
+# Creating universe 'linearPrediction'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star BlackHole1 BlackHole
+	star BlackHole2 BlackHole
+	star BlockFIR1 BlockFIR
+	setstate BlockFIR1 blockSize 256
+	setstate BlockFIR1 order 32
+	setstate BlockFIR1 decimation 1
+	setstate BlockFIR1 decimationPhase 0
+	setstate BlockFIR1 interpolation 1
+	star XMgraph.input=31 XMgraph
+	numports XMgraph.input=31 input 3
+	setstate XMgraph.input=31 title "Linear prediction using the Burg method"
+	setstate XMgraph.input=31 saveFile ""
+	setstate XMgraph.input=31 options "-P -0 original -1 prediction -2 prediction-error =900x400+0+0"
+	setstate XMgraph.input=31 ignore 0
+	setstate XMgraph.input=31 xUnits 1.0
+	setstate XMgraph.input=31 xInit 0.0
+	star FloatDiff1 FloatDiff
+	star LMS1 LMS
+	setstate LMS1 taps {[12] 0.0 -.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609 [12] 0.0}
+	setstate LMS1 decimation 1
+	setstate LMS1 decimationPhase 0
+	setstate LMS1 interpolation 1
+	setstate LMS1 stepSize 0.02
+	setstate LMS1 errorDelay 1
+	setstate LMS1 saveTapsFile ""
+	star Fork.output=41 Fork
+	numports Fork.output=41 output 4
+	star FloatDiff2 FloatDiff
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star XMgraph.input=32 XMgraph
+	numports XMgraph.input=32 input 3
+	setstate XMgraph.input=32 title "Linear prediction using the LMS stochastic gradient algorithm"
+	setstate XMgraph.input=32 saveFile ""
+	setstate XMgraph.input=32 options "-P -0 original -1 prediction -2 prediction-error =900x400+0+440"
+	setstate XMgraph.input=32 ignore 0
+	setstate XMgraph.input=32 xUnits 1.0
+	setstate XMgraph.input=32 xInit 0.0
+	star Burg1 Burg
+	setstate Burg1 order 32
+	setstate Burg1 numInputs 256
+	star testSignal1 testSignal
+	setstate testSignal1 noiseVar 0.05
+	connect Burg1 lp BlockFIR1 coefs
+	node node1
+	nodeconnect BlockFIR1 signalOut node1
+	nodeconnect FloatDiff1 neg node1
+	nodeconnect XMgraph.input=31 input#2 node1
+	connect FloatDiff1 output XMgraph.input=31 input#3
+	connect Fork.output=41 output#4 LMS1 signalIn 1
+	connect Fork.output=41 output#2 BlockFIR1 signalIn 1
+	node node2
+	nodeconnect Fork.output=41 output#1 node2
+	nodeconnect FloatDiff1 pos node2
+	nodeconnect XMgraph.input=31 input#1 node2
+	node node3
+	nodeconnect LMS1 signalOut node3
+	nodeconnect FloatDiff2 neg node3
+	nodeconnect XMgraph.input=32 input#2 node3
+	connect FloatDiff2 output Fork.output=21 input
+	connect Fork.output=21 output#2 LMS1 error 1
+	connect Fork.output=21 output#1 XMgraph.input=32 input#3
+	connect Burg1 errPower BlackHole1 input
+	connect Burg1 refl BlackHole2 input
+	node node4
+	nodeconnect Fork.output=41 output#3 node4
+	nodeconnect Burg1 input node4
+	nodeconnect FloatDiff2 pos node4
+	nodeconnect XMgraph.input=32 input#1 node4
+	connect testSignal1 out Fork.output=41 input
+run 1
+wrapup

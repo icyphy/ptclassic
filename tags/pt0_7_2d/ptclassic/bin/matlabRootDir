@@ -1,0 +1,129 @@
+#!/bin/sh
+#
+# Script to find the root (installation) Matlab directory.  Used by
+# makefiles to determine the location of the external interface library.
+# It returns either the path name of the root Matlab directory or an
+# empty string.
+#
+# Author:  Brian L. Evans
+# Version: @(#)matlabRootDir	1.6	3/7/96
+#
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# See the file $PTOLEMY/copyright for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+#
+# This script takes no arguments.  It first searches for the script
+# "matlab" on the path and if it is not found there, it searches on
+# an alternative path of bin sub-directories in /usr.  If it finds
+# the matlab script, then it follows symbolic links to the actual
+# location of matlab script in the Matlab installation.  From that
+# path name, the script at the sub-directories of the directories
+# along the path name that contains the sub-directories extern/lib
+# and extern/include.
+#
+
+# Look for the matlab startup script
+searchfile=matlab
+matpath=""
+
+# Search the path
+for i in `echo $PATH | sed -e 's/:/ /g'`
+do
+  if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+  then
+    matpath=$i/$searchfile
+    break
+  fi
+done
+#
+#  Search an alternate path:  all bin sub-directories of /usr
+#
+if [ "$matpath" = "" ]
+then
+  if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
+  then
+    altpath=/usr/{bin,*/bin}
+    for i in $altpath
+    do
+      if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+      then
+        matpath=$i/$searchfile
+        break
+      fi
+    done
+  fi
+fi
+#
+#  If the Matlab script is found, then
+#  1. the first while statement will determine the full path name of the
+#     matlab script by following a finite number of symbolic links.
+#  2. the second while statement will back up one directory at a time
+#     along the full matlab script path name to find the Matlab root
+#     directory which contains the external interface sub-directories
+#     extern/include and extern/lib
+#
+if [ "$matpath" = "" ]
+then
+  echo ""
+else
+  numlinks=1
+  maxsymlinks=8
+  oldpath=""
+  newpath=$matpath
+  while [ "$oldpath" != "$newpath" -a $numlinks -lt $maxsymlinks ]
+  do
+    # Exit if the newpath is not a symbolic link
+    if [ ! -h $newpath ]
+    then
+      break
+    fi
+    # Get information about the symbolic link
+    lsinfo=`ls -l $newpath`
+    oldpath=$newpath
+    newpath=""
+    getnextword=0
+    for lsword in $lsinfo
+    do
+      if [ $getnextword -eq 1 ]
+      then
+        newpath="$lsword"
+        getnextword=0
+	break
+      fi
+      if [ "$lsword" = "->" ]
+      then
+        getnextword=1
+      fi
+    done
+    # If the newpath is not an absolute path name, then append
+    # newpath to the oldpath (oldpath is always guaranteed to be correct)
+    if [ ! -x $newpath ]
+    then
+      newdir=`dirname $oldpath`
+      newpath=$newdir/$newpath
+    fi
+    numlinks=`expr $numlinks + 1`
+  done
+  oldpath=$newpath
+  newpath=`dirname $oldpath`
+  while [ "$oldpath" != "$newpath" ]
+  do
+    matextern=$newpath/extern
+    if [ -x $matextern -a -r $matextern -a -d $matextern ]
+    then
+      matexterninc=$matextern/include
+      if [ -x $matexterninc -a -r $matexterninc -a -d $matexterninc ]
+      then
+        matexternlib=$matextern/lib
+        if [ -x $matexternlib -a -r $matexternlib -a -d $matexternlib ]
+	then
+	  break
+	fi
+      fi
+    fi
+    oldpath=$newpath
+    newpath=`dirname $oldpath`
+  done
+  echo $newpath
+fi

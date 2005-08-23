@@ -1,0 +1,96 @@
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+# Makefile for Ptolemy CG56 DSP stars
+# @(#)make.template	1.23 20 Sep 1996
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/cg56/dsp/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+CG56DIR = $(ROOT)/src/domains/cg56/kernel
+CG56SDIR = $(ROOT)/src/domains/cg56/stars
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+
+INCL = -I$(CG56DIR) -I$(CGDIR) -I$(KERNDIR) -I$(CG56SDIR) \
+       -I$(ROOT)/src/utils/libptdsp
+
+# source files for all stars, using preprocessor, listing base stars first
+PL_SRCS= \
+ CG56FIR.pl \
+ CG56GoertzelBase.pl \
+ CG56Allpass.pl \
+ CG56Biquad.pl \
+ CG56BiquadDSPlay.pl \
+ CG56Comb.pl \
+ CG56DTMFPostTest.pl \
+ CG56FFTCx.pl \
+ CG56Goertzel.pl \
+ CG56GoertzelPower.pl \
+ CG56IIR.pl \
+ CG56LMS.pl \
+ CG56LMSOscDet.pl \
+ CG56LMSRx.pl \
+ CG56LMSGanged.pl \
+ CG56RaisedCosine.pl \
+ CG56Sinc.pl \
+ CG56Window.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=cg56dspstars
+DOMAIN=CG56DSP
+DOMAIN_2=CG56
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
+PTLIB=libcg56dspstars.$(LIBSUFFIX)
+
+all:		makefile stars_all
+
+# nothing to install -- use it where it lies
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

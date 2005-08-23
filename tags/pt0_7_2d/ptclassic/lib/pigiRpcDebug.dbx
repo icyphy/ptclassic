@@ -1,0 +1,51 @@
+#! /bin/sh
+# usage: pigiRpcDebug.dbx <vem-args>
+# @(#)pigiRpcDebug.dbx	1.5 3/21/96
+
+# Use dbx as a debugger instead of gdb.
+# sol2.cfront requires this
+
+#dbgcmdfile=/tmp/pigiRpcDebug.dbx$$
+dbgcmdfile=$HOME/.dbxinit
+
+if [ -f $dbgcmdfile -a ! -f $dbgcmdfile.bak ]; then
+	echo "Saving your old $dbgcmdfile to $dbgcmdfile.bak"
+	cp $dbgcmdfile $dbgcmdfile.bak
+fi
+
+	
+#echo "debug $PIGIRPC" > $dbgcmdfile
+
+# If the user has a .ptdbxinit file, then add it to the command file
+if [ -f $HOME/.ptdbxinit ]; then
+	cat $HOME/.ptdbxinit > $dbgcmdfile
+fi
+
+#pathmap -d /tmp_mnt
+#pathmap /tmp_mnt /vol
+
+cat >> $dbgcmdfile <<EOF
+stop in main
+EOF
+
+echo "$0: dbx command file is:"
+echo "------start----"
+cat $dbgcmdfile
+echo "------end----"
+
+if [ "x$PT_DEBUG" != x ]; then
+	echo "\$PT_DEBUG was set to $PT_DEBUG, but we are using the ptdbx script"
+	#ptdbx -s $dbgcmdfile -c \"run $*\" $PIGIRPC &
+	echo "To start process in debugger, type:"
+	echo "run $*"
+	ptdbx $PIGIRPC &
+else
+	xterm -display $DISPLAY -title "pigiRpc dbx debug window" \
+		-bg black -fg green \
+		-e dbx -I$PTOLEMY/src/pigilib \
+		-I$PTOLEMY/src/pigiRpc -s $dbgcmdfile -c "run $*" \
+		$PIGIRPC &
+
+	#	-I$PTOLEMY/src/pigiRpc -s $dbgcmdfile -c "run $*"\ 
+fi
+

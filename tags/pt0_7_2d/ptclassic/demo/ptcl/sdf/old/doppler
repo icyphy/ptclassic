@@ -1,0 +1,81 @@
+domain SDF
+defgalaxy phaseShift {
+	domain SDF
+	star ComplexFIR1 ComplexFIR
+	setstate ComplexFIR1 taps "< ~ptolemy/src/domains/sdf/demo/analytic.cx"
+	setstate ComplexFIR1 decimation 1
+	setstate ComplexFIR1 decimationPhase 0
+	setstate ComplexFIR1 interpolation 1
+	star Cos1 Cos
+	star Sin1 Sin
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "-2.0"
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star ComplexReal1 ComplexReal
+	star FloatDiff1 FloatDiff
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain "-1.0"
+	connect Fork.output=21 output#1 Cos1 input
+	connect Fork.output=21 output#2 Sin1 input
+	alias out FloatDiff1 output
+	alias in FloatGain1 input
+	connect FloatGain1 output ComplexFIR1 signalIn
+	connect Cos1 output FloatProduct.input=21 input#2
+	connect Sin1 output FloatProduct.input=22 input#2
+	connect ComplexFIR1 signalOut ComplexReal1 input
+	connect ComplexReal1 real FloatProduct.input=21 input#1
+	connect ComplexReal1 imag FloatProduct.input=22 input#1
+	connect FloatProduct.input=21 output FloatDiff1 pos
+	connect FloatProduct.input=22 output FloatDiff1 neg
+	alias shift FloatGain2 input
+	connect FloatGain2 output Fork.output=21 input
+}
+reset
+# Creating universe 'doppler'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step "PI/20"
+	setstate FloatRamp1 value 0.0
+	star Sin2 Sin
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Doppler shifted sine wave"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "=1000x300+0+0 -0 original -1 shifted"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	star Fork.output=22 Fork
+	numports Fork.output=22 output 2
+	star phaseShift1 phaseShift
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value {0 [100] (PI/80) [160] (-PI/80) [160] 0 [100]}
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic NO
+	setstate WaveForm1 period 0
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top 0.0
+	setstate Integrator1 bottom 0.0
+	setstate Integrator1 saturate NO
+	setstate Integrator1 state 0.0
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	connect FloatRamp1 output Sin2 input
+	connect Sin2 output Fork.output=22 input
+	connect Fork.output=22 output#1 XMgraph.input=21 input#1 36
+	connect Integrator1 output phaseShift1 shift
+	connect Fork.output=22 output#2 phaseShift1 in
+	connect phaseShift1 out XMgraph.input=21 input#2
+	connect WaveForm1 output Integrator1 data
+	connect FloatDC1 output Integrator1 reset
+run 500
+wrapup

@@ -1,0 +1,103 @@
+This directory contains files contributed by TkMan users.  These files are
+not supported or installed.  They are included because some may find them
+useful, and if so they prevent duplication of effort.
+
+-----
+
+tkman.bitmap - Rei Shinozuka
+TkMan.xpm - by Roar Smith
+AIcons.bitmap - Anthony Thyssen
+hman.xbm - taken from Baudoulin Raoult's hman
+tkman.xbm - Mike Eggleston
+tkman.xpm - drawn by Ion Cionca, contributed by Dimitry Kloper
+
+These are a possible icons for TkMan.  Submissions for alternative icons
+are welcome.
+
+To use an icon, specify its path name in the Preferences/Icon dialog box
+(under the Occasionals menu) or as a command line option.
+
+-----
+
+xman-mandesc.tcl - Dietmar Theobald (theobald@fzi.de)
+
+Parse your old xman mandesc in TkMan.
+
+-----
+
+remote.tcl
+
+This code shows how to use the `send' command to call TkMan from another
+Tcl/Tk application.
+
+-----
+
+tkman_selection.txt - Scott Schwartz <schwartz@groucho.cse.psu.edu>
+tkmanclient - Chris Siebenmann <cks@hawkwind.utcs.toronto.edu>
+              changes by Anthony Baxter <anthony@aaii.oz.au>
+
+These two provide an alternative interface to TkMan, via the X selection or
+the command line, respectively.
+
+-----
+
+calltkman.tcl - Neil Smithline (Neil.Smithline@eng.sun.com)
+
+Adding the code for callTkMan to your .tkman file causes tkman to
+bring up a second window labeled "callTkMan".  The intent of this
+window is to provide a convenient mechanism for kicking off tkman
+searches without keeping the entire tkman window open on your screen.
+
+-----
+
+sgi_bindings.tcl -
+	Paul Raines (raines@bohr.physics.upenn.edu),
+	Craig Ruff (cruff@ncar.ucar.edu),
+	and Scott Nelson (nelson18@llnl.gov)
+
+Copy this file into your home directory and name it .tkman in order to
+establish the many volume groupings used by SGI.  You can edit the
+.tkman file to change the groupings, splitting out a group of
+particular interest, or merging some if you don't like 47 different
+groupings, most of which are sparsely populated.
+
+-----
+
+sco_bindings.tcl - anonymous
+
+Details changes to make to tkman.tcl before `compiling' (`make'ing) to
+adapt TkMan to SCO UNIX.
+
+-----
+
+solaris_bindings.tcl - Will C Lauer (wcl@cadre.com)
+
+Instead of collecting volumes that start with same character under a single
+volume listing (e.g., 1, 1b, 1c, 1f, 1m and 1s all collected under 1),
+keep them separate.
+
+-----
+
+local-man.tcl
+
+Use the local man command as the search engine for manual pages.
+(For perl man, set the flag in the first few lines.)
+
+Features lost:
+* volume listings, including list of recently added/changed
+* all tkmandesc commands
+* regular expression searches for man page names
+
+-----
+
+retkman ("re-TkMan"), suggested by Howard Moftich
+
+Kill existing TkMen and start a new one, picking up any changes
+to MANPATH such as those imparted by a modules package.
+
+-----
+
+
+WANTED
+
+a tutorial for tkmandesc commands

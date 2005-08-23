@@ -1,0 +1,27 @@
+reset
+# Creating universe 'quantize'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 0.1
+	setstate FloatRamp1 value "-2.5"
+	star Quantizer1 Quantizer
+	setstate Quantizer1 thresholds "-1.0 0.0 1.0"
+	setstate Quantizer1 levels "-1.5 -0.5 0.5 1.5"
+	star XMgraph.input=21 XMgraph
+	numports XMgraph.input=21 input 2
+	setstate XMgraph.input=21 title "Quantizer demo"
+	setstate XMgraph.input=21 saveFile ""
+	setstate XMgraph.input=21 options "=800x300+0+0 -P -0 original -1 quantized"
+	setstate XMgraph.input=21 ignore 0
+	setstate XMgraph.input=21 xUnits 1.0
+	setstate XMgraph.input=21 xInit 0.0
+	connect Quantizer1 output XMgraph.input=21 input#2
+	node node1
+	nodeconnect FloatRamp1 output node1
+	nodeconnect Quantizer1 input node1
+	nodeconnect XMgraph.input=21 input#1 node1
+run 50
+wrapup

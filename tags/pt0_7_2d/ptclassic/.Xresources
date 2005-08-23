@@ -1,0 +1,17 @@
+#ifdef COLOR
+XTerm*Background:		DarkSlateBlue
+XTerm*Foreground:		white
+XTerm*cursorColor:		gold
+#else
+*Background:			white
+*Forground:			black
+#endif
+XTerm*ScrollBar:        	on
+XTerm*saveLines:        	256
+Xterm*font:			9x15
+
+! MIT bug fixes for X11R4 server
+*SimpleMenu.saveUnder:          false
+*TransientShell.saveUnder:      false
+*Scrollbar*thickness:           8
+XTerm*SimpleMenu*BackingStore:  NotUseful

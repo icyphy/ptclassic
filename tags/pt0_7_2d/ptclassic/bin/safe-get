@@ -1,0 +1,62 @@
+#! /bin/csh -f
+# safe-get: arg is the name of the SCCS file
+# always does cd to proper place before doing the get.
+# Set execute permission if it is set for the SCCS file.
+# This is invoked by GNU make because the makefiles
+# set the variable $GET to equal "safe-get".
+# Note that Gnu make adds a "-G filename" option
+# to the end, so typical usage is:
+# 	safe-get SCCS/s.filename -G filename
+#
+# The file name is the first argument that does not start with a dash.
+# GNU make 3.71 outputs the get statement in the following format (which 
+# should work):
+# 	safe-get -Gfilename SCCS/s.filename
+# If the first argument is -G, then the first and second args are skipped,
+# so the following should work:
+#	safe-get -G filename SCCS/s.filename  
+# However, the following would fail:
+#	safe-get -anarg -G filename SCCS/s.filename
+# 
+#
+# @(#)safe-get	1.5	5/28/94
+
+# If the first arg is -G then skip the first and second args
+if ( $1 == "-G" ) then
+	shift;shift
+endif
+
+# fullname is the first arg that does not start with a dash
+set fullname = `echo $* | awk '{for(i=1;i<=NF;i++) if ($i !~ /^-/) {print $i;exit}	}' - `
+
+# get is in /usr/sccs on some systems
+if (-r /usr/sccs/get) set path = (/usr/sccs $path)
+
+if (! -r $fullname) then
+	echo safe-get: no such file: $fullname
+	exit 1
+endif
+
+# remove the trailing pathname component, leaving the head
+set sccsdir = $fullname:h
+
+# use the tail of the pathname only, I.e., the filename
+set root = $fullname:t
+
+# remove the leading "s." from the file name
+set file = `echo $root | sed s/s\.//`
+
+if ("$sccsdir" == "SCCS") then
+	echo "get SCCS/$root"
+else
+	set dir = $sccsdir:h
+	echo "cd $dir; get SCCS/$root"
+	cd $dir
+endif
+
+get SCCS/$root
+
+if (-x SCCS/$root) then
+	echo "chmod +x $file"
+	chmod +x $file
+endif

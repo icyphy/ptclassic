@@ -1,0 +1,38 @@
+reset
+# Creating universe 'schedTest'
+domain CG
+target FullyConnected
+	targetparam destDirectory PTOLEMY_SYSTEMS
+	targetparam nprocs 2
+	targetparam inheritProcessors NO
+	targetparam sendTime 1
+	targetparam childType "default-CG"
+	targetparam filePrefix code.proc
+	targetparam ganttChart YES
+	targetparam logFile "<stdout>"
+	targetparam ignoreIPC NO
+	targetparam overlapComm NO
+	targetparam useCluster YES
+	star Source1 Source
+	setstate Source1 runTime 1
+	star MultiOut.output=21 MultiOut
+	numports MultiOut.output=21 output 2
+	setstate MultiOut.output=21 runTime 1
+	star Through1 Through
+	setstate Through1 runTime 4
+	setstate Through1 control FALSE
+	star Sink1 Sink
+	setstate Sink1 runTime 1
+	star RateChange1 RateChange
+	setstate RateChange1 runTime 3
+	setstate RateChange1 consume 1
+	setstate RateChange1 produce 1
+	star Sink2 Sink
+	setstate Sink2 runTime 1
+	connect Source1 output MultiOut.output=21 input
+	connect MultiOut.output=21 output#1 Through1 input
+	connect Through1 output Sink1 input
+	connect MultiOut.output=21 output#2 RateChange1 input
+	connect RateChange1 output Sink2 input
+run 1
+wrapup

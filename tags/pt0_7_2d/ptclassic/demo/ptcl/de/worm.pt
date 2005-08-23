@@ -1,0 +1,34 @@
+domain DE
+defgalaxy wormGuts {
+	domain SDF
+	star "Add.input=21" Add
+	numports "Add.input=21" input 2
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	alias out "Add.input=21" output
+	alias in "Add.input=21" "input#1"
+	connect IIDGaussian1 output "Add.input=21" "input#2"
+}
+reset
+# Creating universe 'worm'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star wormGuts1 wormGuts
+	star Poisson1 Poisson
+	setstate Poisson1 meanTime 1.0
+	setstate Poisson1 magnitude 0.0
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Noisy Poisson Process"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-P -0 original -1 noisy =800x300+0+0"
+	node node1
+	nodeconnect Poisson1 output node1
+	nodeconnect wormGuts1 in node1
+	nodeconnect XMgraph.input=21 input#1 node1
+	connect wormGuts1 out "XMgraph.input=21" "input#2"
+run 40
+wrapup

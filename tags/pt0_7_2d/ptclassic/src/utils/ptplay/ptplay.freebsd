@@ -1,0 +1,8 @@
+#! /bin/sh
+# Version: @(#)ptplay.freebsd	1.1 11/20/95
+# The FreeBSD ptplay program should cat the speech file to /dev/audio, not
+# /dev/dsp.  It is /dev/audio that is designed to accept 8-bit mu-law
+# speech (Sun audio files): /dev/dsp plays linear speech, so while using
+# it results in intelligible output it is distorted.
+
+cat $1 >/dev/audio

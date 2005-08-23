@@ -1,0 +1,36 @@
+reset
+# Creating universe 'statistics'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Poisson1 Poisson
+	setstate Poisson1 meanTime 1.0
+	setstate Poisson1 magnitude 1.0
+	star Impulse1 Impulse
+	setstate Impulse1 magnitude 1.0
+	star StopTimer1 StopTimer
+	star Statistics1 Statistics
+	star Null1 Null
+	star Printer1 Printer
+	setstate Printer1 fileName "<cout>"
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Random Numbers"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P -0 x =800x300+0+0"
+	star "RanGen.distribution=u1" RanGen
+	setstate "RanGen.distribution=u1" distribution u
+	setstate "RanGen.distribution=u1" meanORupper 5.0
+	setstate "RanGen.distribution=u1" varianceORlower 1.0
+	connect Impulse1 output StopTimer1 input
+	node node1
+	nodeconnect RanGen.distribution=u1 output node1
+	nodeconnect Statistics1 input node1
+	nodeconnect Xgraph1 input node1
+	connect Null1 output Statistics1 reset
+	connect StopTimer1 output Statistics1 demand
+	connect Statistics1 average Printer1 input
+	connect Statistics1 variance Printer1 input
+	connect Poisson1 output "RanGen.distribution=u1" input
+run 10
+wrapup

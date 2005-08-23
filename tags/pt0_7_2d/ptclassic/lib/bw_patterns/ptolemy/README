@@ -1,0 +1,41 @@
+This directory contains the definitions of patterns used by Vem
+when running Ptolemy in black and white or when generating postscript
+output.  To change these, edit the file patterns.pat.
+Then run "installColors".
+
+The file patterns.pat defines the patterns used by vem to display ptolemy
+facets.  In Vem terminology, it defines the 'ptolemy technology.'
+The patterns can be changed, and users can define their own patterns.
+
+The patterns must be incorporated into the tap.views facet for any
+changes to take effect.  This can be done as follows:
+
+	cd ~ptolemy/lib/bw_patterns/ptolemy
+	installColors
+
+This invokes a program located in ~ptolemy/octtools/bin.sun4, where
+'sun4' may be replaced with whatever machine type you are running on.
+The dialog with the program should proceed as follows:
+	Root directory for technology [~ptolemy/lib/colors]:
+		< enter the directory if the default is not correct. E.g.>
+		~ptolemy/lib/bw_patterns
+	Color output device [yes]: no
+
+The file patterns.pat is pretty self-explanatory.
+Larger priorities 0,1,2,... indicate greater visibility priority.
+Priorities may evidently be arbitrarily large.
+
+If you wish to create your own patterns, you may create a directory
+like this one somewhere.  Suppose you define your patterns in a directory
+called "~myLogin/myPatterns".  Then
+	mkdir ~myLogin/myPatterns
+	cd ~myLogin/myPatterns
+	cp -r ~ptolemy/lib/patterns/ptolemy .
+	cd ptolemy
+	vi patterns.pat
+Edit patterns.pat, run installColors as explained above,
+and set the X resources as follows:
+
+vem.technology:  ~myLogin/myPatterns
+
+Then restart pigi.

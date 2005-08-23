@@ -1,0 +1,25 @@
+reset
+# Creating universe 'realTime'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	newstate timeScale float 0.05
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 1.0
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Actual Arrival Times"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P"
+	star Null1 Null
+	star Synchronize1 Synchronize
+	setstate Synchronize1 timeScale timeScale
+	star Timer1 Timer
+	setstate Timer1 timeScale timeScale
+	connect Synchronize1 output Timer1 trigger
+	connect Null1 output Timer1 reset
+	connect Clock1 output Synchronize1 input
+	connect Timer1 elapsedTime Xgraph1 input
+run 10
+wrapup

@@ -1,0 +1,117 @@
+<!--@(#)README.html	1.4 12/04/97-->
+<html>
+<head>
+<title>Pxgraph</title>
+</head>
+<body bgcolor="#faf0e6">
+<H1>Pxgraph</H1>
+Xgraph is 2-D plotting tool, originally written by David Harrison while
+at UC Berkeley.  Pxgraph is based on xgraph, with a few extensions.
+ <HR>
+<H2>Xgraph resources</H2>
+<MENU>
+
+<LI> <A HREF="ftp://ptolemy.eecs.berkeley.edu/pub/misc/pxgraph/index.html"><CODE>ftp://ptolemy.eecs.berkeley.edu/pub/misc/pxgraph/index.html</CODE></A> - The pxgraph website,
+which includes the latest release and any other information.
+
+<LI> <A HREF="http://ptolemy.eecs.berkeley.edu/java/ptplot">Ptplot</A> -
+A Java implementation of pxgraph.
+
+<LI> <A HREF="http://ptolemy.eecs.berkeley.edu/papers/almagest/docs/user/html/xgraph.doc.html">Ptolemy User's manual Pxgraph chapter</A>
+
+<LI> <A HREF="http://methi.ndim.edrc.cmu.edu:8888/tkxgraph1.0.tar.gz">tkgraph</A> - 
+A Tk interface that creates a new wish that uses the C functions in xgraph
+
+</MENU>
+
+ <HR>
+<H2>Installing Pxgraph</H2>
+<OL>
+
+<LI> To install Pxgraph, you need a compiler and X11 include files and
+libraries.  Pxgraph has been compiled under X11R6.  It formerly
+compiled under X11R4 and X11R5, but it has not recently been compiled
+under those releases.
+
+<LI> Pxgraph uses the GNU autoconf program for configuration.  To
+configure pxgraph, type:
+<PRE>
+configure
+</PRE>
+To get help with configure, type:
+<PRE>
+configure --help
+</PRE>
+
+<LI> To build, type:
+<PRE>
+make
+</PRE>
+
+<LI> To install, type:
+<PRE>
+make install
+</PRE>
+
+</OL>
+ <HR>
+<H2>Differences between pxgraph and xgraph</H2>
+
+<MENU>
+<LI> <CODE>-binary</CODE> option, added by Joe Buck.
+The <code>-binary</code>
+argument is the primary difference between <code>xgraph</code>
+and <code>pxgraph</code>.  The 
+<A HREF="http://ptolemy.eecs.berkeley.edu">Ptolemy Project</A> software
+makes extensive use of <code>-binary</code>.
+<br>The plot commands are encoded as single characters, and the numeric data 
+is a 4 byte float.  
+ <br>The commands are encoded as follows:
+  <dl>
+  <dt> <code>d <I>&lt;4byte float&gt; &lt;4byte float&gt;</I></code>
+  <dd> Draw a X,Y point
+  <dt> <code>e</code>
+  <dd> End of dataset
+  <dt> <code>n <I>&lt;dataset name&gt;</I>&#92n</code>
+  <dd> New dataset name, ends in <code>&#92n</code>
+  <dt> <code>m <I>&lt;4byte float&gt; &lt;4byte float&gt;</I></code>
+  <dd> Move to a X,Y point.
+  </dl>
+ <br>To view a binary plot file under unix, we can use the 
+<code>od</code> command.  Note that the first character is a <code>d</code>
+followed by eight bytes of data consisting of two floats of four bytes.
+<pre>
+cxh@carson 324% od -c data/integrator1.plt
+0000000   d  \0  \0  \0  \0  \0  \0  \0  \0   d   ? 200  \0  \0   ? 200
+0000020  \0  \0   d   @  \0  \0  \0   @   , 314 315   d   @   @  \0  \0
+
+</pre>
+
+
+<LI>  MIF (Maker Interchange Format) output, added by Edward A. Lee
+MIF is an input format compatible with Framemaker.
+
+<LI> pxgraph now builds with GNU autoconf.  Parts of <CODE>configure.in</CODE>
+and <CODE>Makefile.in</CODE> are based on files from SunScript's Tk8.0.
+
+
+<LI>  pxgraph compiles on ansi and non-ansi compliant compilers.
+
+<LI>  pxgraph has been compiled on:
+<MENU>
+<LI>HPUX 10.20
+<LI>Solaris 2.5.1
+<LI>SunOS4.1.3
+</MENU>
+pxgraph should compile on any modern Unix.
+
+<LI> Various bug fixes have been made to pxgraph.
+</MENU>
+
+<HR>
+Last updated: 12/04/97.
+<address>
+Send comments to <a href="mailto:cxh@eecs.berkeley.edu">cxh@eecs.berkeley.edu</a>.
+</address>
+</body>
+</html>

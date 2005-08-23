@@ -1,0 +1,47 @@
+reset
+# Creating universe 'scramble'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	targetparam schedulePeriod 10000.0
+	star Ramp1 Ramp
+	setstate Ramp1 step 1.0
+	setstate Ramp1 value 0.0
+	star "Distributor.output=21" Distributor
+	numports "Distributor.output=21" output 2
+	setstate "Distributor.output=21" blockSize 1
+	star "Distributor.output=22" Distributor
+	numports "Distributor.output=22" output 2
+	setstate "Distributor.output=22" blockSize 1
+	star "Distributor.output=23" Distributor
+	numports "Distributor.output=23" output 2
+	setstate "Distributor.output=23" blockSize 1
+	star "Commutator.input=21" Commutator
+	numports "Commutator.input=21" input 2
+	setstate "Commutator.input=21" blockSize 1
+	star "Commutator.input=22" Commutator
+	numports "Commutator.input=22" input 2
+	setstate "Commutator.input=22" blockSize 1
+	star "Commutator.input=23" Commutator
+	numports "Commutator.input=23" input 2
+	setstate "Commutator.input=23" blockSize 1
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "Output of scrambling network"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "-P =500x500+0+0 -0 ''"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	connect Ramp1 output "Distributor.output=21" input
+	connect "Distributor.output=21" "output#2" "Distributor.output=22" input
+	connect "Distributor.output=21" "output#1" "Distributor.output=23" input
+	connect "Distributor.output=23" "output#1" "Commutator.input=21" "input#1"
+	connect "Distributor.output=22" "output#2" "Commutator.input=22" "input#2"
+	connect "Distributor.output=23" "output#2" "Commutator.input=22" "input#1"
+	connect "Distributor.output=22" "output#1" "Commutator.input=21" "input#2"
+	connect "Commutator.input=22" output "Commutator.input=23" "input#2"
+	connect "Commutator.input=21" output "Commutator.input=23" "input#1"
+	connect "Commutator.input=23" output Xgraph1 input
+run 2
+wrapup

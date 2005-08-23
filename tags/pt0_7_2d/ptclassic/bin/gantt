@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# This shell script invokes the Tcl/Tk version of the Gantt chart
+# as a standalone application.  The old gantt chart, which was an
+# exectuable program, has been phased out.
+#
+# Copyright (c) 1990-1997 The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
+#
+# Programmer: Brian Evans
+# Version: @(#)gantt	1.10	01/05/99
+#
+PTOLEMY=${PTOLEMY:-~/ptolemy}
+PTARCH=`$PTOLEMY/bin/ptarch`
+ganttscript=$PTOLEMY/lib/tcl/gantt.tcl
+ptolemywish=$PTOLEMY/bin.$PTARCH/itkwish
+TCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tcl"
+TK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tk"
+ITCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itcl"
+ITK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itk"
+IWIDGETS_LIBRARY="$PTOLEMY/tcltk/tcl/lib/iwidgets"
+export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
+TYCHO=$PTOLEMY/tycho
+export TYCHO
+exec $ptolemywish $ganttscript "$@"

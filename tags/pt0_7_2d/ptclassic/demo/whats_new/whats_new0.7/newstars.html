@@ -1,0 +1,224 @@
+<!-- Version: @(#)newstars.html	1.9 04/30/97 -->
+<html>
+<head>
+<title>New Work in Ptolemy 0.7</title>
+</head>
+<body bgcolor=#faf0e6>
+
+<H1>New Stars and Demos</H1>
+Below we list the new stars and demos by domain.
+
+<H2>CGC Stars and Demos</H2>
+
+<DL>
+<DT> New Audio Infrastructure
+<DD> New Stars that can use the linear16 audio capabilities of the UltraSparc.
+ <BR><A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A>,
+<a href="http://www.ctr.columbia.edu/~bchen">William Chen</a>
+(Columbia University).
+ <br>
+
+The stars below inherit from the <A
+HREF="../../../src/domains/cgc/stars/CGCAudioBase.htm"><CODE>CGCAudioBase</CODE>
+star</A>.  See the individual star documentation for a list of demos
+that use that star.
+
+<MENU>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCMonoIn.htm"><CODE>CGCMonoIn</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCMonoOut.htm"><CODE>CGCMonoOut</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCStereoIn.htm"><CODE>CGCStereoIn</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCStereoOut.htm"><CODE>CGCStereoOut</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/tcltk/stars/CGCTkMonoIn.htm"><CODE>CGCTkMonoIn</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/tcltk/stars/CGCTkMonoOut.htm"><CODE>CGCTkMonoOut</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/tcltk/stars/CGCTkStereoIn.htm"><CODE>CGCTkStereoIn</CODE> star</A>
+
+<LI> <A HREF="../../../src/domains/cgc/tcltk/stars/CGCTkStereoOut.htm"><CODE>CGCTkStereoOut</CODE> star</A>
+
+</MENU>
+<MENU>
+<LI> To see the icons for these stars, look in the <A HREF="../../../src/domains/cgc/icons/sources.pal">CGC Sources Palette</A>
+and the 
+<A HREF="../../../src/domains/cgc/icons/sinks.pal">CGC Sinks Palette</A>
+
+<LI> For demonstrations of these stars, see
+the <A HREF="../eecs20/16bit">EECS 20 16 bit Palette</A>,
+the <A HREF="../../../src/domains/cgc/demo/sound.pal">CGC Sound Palette</A>,
+and the new <A HREF="../../../src/domains/cgc/tcltk/demo/tycho.pal">TychoTarget Palette</A>.
+
+<LI>  <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil/talk/talk.html">Further
+star documentation</A> -
+ <A HREF="tychotarget.html">TychoTarget documentation</A> -
+ <A HREF="sunaudio.html">Sun Audio documentation</A>
+</MENU>
+
+
+<DT> Other new CGC stars
+<DD> 
+<MENU>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCAbs.htm"><CODE>CGCAbs</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCAdaptLinQuant.htm"><CODE>CGCAdaptLinQuant</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCConstFix.htm"><CODE>CGCConstFix</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCFixToInt.htm"><CODE>CGCFixToInt</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCFloor.htm"><CODE>CGCFloor</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCIntToFix.htm"><CODE>CGCIntToFix</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCLinQuantIdx.htm"><CODE>CGLinQuantIdxC</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCOrderTwoInt.htm"><CODE>CGCOrderTwoInt</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cgc/stars/CGCQuantizer.htm"><CODE>CGCQuantizer</CODE> star</A>
+</MENU>
+To see the icons for these stars, look in the palettes under the
+<A HREF="../../../src/domains/cgc/icons/cgc.pal">CGC Palette</A>
+
+<DT> CGC TychoTarget and CGC control panels
+<DD> The CGC TychoTarget provides a new way to create CGC control panels.
+TychoTarget control panels are much more configurable than the older 
+CGC Control panels.
+ <br><A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A>,
+ <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A> -
+<A HREF="../../../src/domains/cgc/tcltk/demo/tycho.pal">CGC Tycho Palette</A>
+- <A HREF="tychotarget.html">TychoTarget documentation</A>
+
+</DL>
+<HR>
+<H2>New SDF Stars and Demos</H2>
+<DL>
+
+<DT> Sun Video Star
+<DD> The SDF <A HREF="../../../src/domains/sdf/image/stars/SDFSunVideo.htm"><CODE>SunVideo</CODE></A> star can be used to grab video data from a Sun Video camera.
+This star is very new, so it does not yet have any demos.
+ <br><A HREF="http://ptolemy.eecs.berkeley.edu/~luisgm">Luis Gutierrez</A>
+
+
+
+<DT> Adaptive Antenna Array Demos from
+Technische Universitaet Ilmenau
+<DD> Uwe Trautwien (tra@e-technik.tu-ilmenau.edu) wrote
+two demos that simulate an adaptive antenna array
+The transmitters may be turned around the location of the antenna
+array, which will change the beam pattern.  These demos can be found
+under the <A HREF="../../../src/domains/sdf/contrib/demo/init.pal"> SDF <CODE>tuicontrib</CODE> palette</A>
+<MENU>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFBeamAbs.htm"><CODE>SDBeamAbsF</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFBeamXYNorm.htm"><CODE>SDFBeamXYNorm</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFConstCx1ofN.htm"><CODE>SDFConstCx1ofN</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFLMSArray.htm"><CODE>SDFLMSArray</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFLMSArrayStO.htm"><CODE>SDFLMSArrayStO</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFRLSArray.htm"><CODE>SDFSDFRLSArray</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFRLSArrayStO.htm"><CODE>SDFRLSArrayStO</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFRLSCx.htm"><CODE>SDFRLSCx</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFRLSCxTO.htm"><CODE>SDFRLSCxTO</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/contrib/stars/SDFSrcPosXY.htm"><CODE>SDFSrcPosXY</CODE> star</A>
+</MENU>
+
+<DT> SDF Neural Network Demonstrations
+<DD> Demonstrations of logic functions using classical artificial neurons
+     and McCulloch-Pitts neurons can be found in the
+	<A HREF="../../../src/domains/sdf/demo/neuralNetworks.pal">SDF Neural Networks Palette</A>
+ <br>
+     <A HREF="http://anchovy.ece.utexas.edu/~blu">Biao Lu</a>
+     (The University of Texas at Austin),
+     <A HREF="http://www.ece.utexas.edu/~bevans">Brian L. Evans</a>
+     (The University of Texas at Austin)
+The following stars are in the <A HREF="../../../src/domains/sdf/icons/neural.pal">SDF Neural Palette</A>.
+<MENU>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFBinary.htm"><CODE>SDFBinary</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFMPNeuron.htm"><CODE>SDFMPNeuron</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFNeuron.htm"><CODE>SDFNeuron</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFSigmoid.htm"><CODE>SDFSigmoid</CODE> star</A>
+</MENU>
+
+
+<DT> <CODE>ParticleVector</CODE> class
+<DD> The <A
+HREF="../../../src/kernel/ParticleVector.h"><CODE>ParticleVector</CODE></A>
+class is new in Ptolemy 0.7.  The class allows Ptolemy to package
+arbitrary collections of data objects and treat them as a unit.
+
+ <br><CODE>ParticleVector</CODE> can be used, for example, to constuct
+discrete-event models of communication networks, where the packages
+are packets.  The SDF <A
+HREF="../../../src/domains/sdf/demo/PackUnpack"><CODE>PackUnpack</CODE></A>
+demo shows a simple use of <CODE>ParticleVector</CODE>.
+
+ <br><A HREF="http://ptolemy.eecs.berkeley.edu/~galicia">Ron Galicia </A> -
+<A HREF="http://ptolemy.eecs.berkeley.edu/~gunturi">Ravi Gunturi </A>
+
+The stars below use the <CODE>ParticleVector</CODE> class.
+<MENU>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFPack.htm"><CODE>SDFPack</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFUnpackFloat.htm"><CODE>SDFUnpackFloat</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFUnpackInt.htm"><CODE>SDFUnpackInt</CODE> star</A>
+
+</MENU>
+
+<DT> Other SDF Stars
+<DD> 
+<MENU>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFRanConst.htm"><CODE>SDFRanConst</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFRectCxDoppler.htm"><CODE>SDFRectCxDoppler</CODE> star</A>
+<LI> <A HREF="../../../src/domains/sdf/stars/SDFPCMReadInt.htm"><CODE>SDFPCMReadInt</CODE> star</A>
+</MENU>
+
+</DL>
+<HR>
+<H2>New Stars and Demos in Other Domains</H2>
+<DL>
+
+<DT> Discrete Event Domain <CODE>FlipFlop</CODE> stars
+<DD>  <A HREF="http://ptolemy.eecs.berkeley.edu/~davisj">John S. Davis, II</A>
+<MENU>
+<LI> <A HREF="../../../src/domains/de/stars/DEFlipFlopD.htm"><CODE>DEFlipFlopD</CODE> star</A>
+<LI> <A HREF="../../../src/domains/de/stars/DEFlipFlopJK.htm"><CODE>DEFlipFlopJK</CODE> star</A>
+<LI> <A HREF="../../../src/domains/de/stars/DEFlipFlopT.htm"><CODE>DEFlipFlopT</CODE> star</A>
+</MENU>
+
+<DT>New Discrete Event (DE) Domain stars 
+<DD> 
+<MENU>
+<LI> <A HREF="../../../src/domains/de/stars/DEEtherRecMes.htm"><CODE>DEEtherRecMes</CODE> star</A>
+<LI> <A HREF="../../../src/domains/de/stars/DEFillNullEvent.htm"><CODE>DEFillNullEvent</CODE> star</A>
+<LI> <A HREF="../../../src/domains/de/stars/DEFloatToInt.htm"><CODE>DEFloatToInt</CODE> star</A>
+<LI> <A HREF="../../../src/domains/de/stars/DEIntToFloat.htm"><CODE>DEIntToFloat</CODE> star</A>
+</MENU>
+
+<DT> New Code Generation stars
+<DD> 
+<MENU>
+<LI> <A HREF="../../../src/domains/cg/stars/CGBlackHole.htm"><CODE>CGBlackHole</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGCircToLin.htm"><CODE>CGCircToLin</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGDummySrc.htm"><CODE>CGDummySrc</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGDummySrcCx.htm"><CODE>CGDummySrcCx</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGDummySrcFix.htm"><CODE>CGDummySrcFix</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGDummySrcInt.htm"><CODE>CGDummySrcInt</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGLinToCirc.htm"><CODE>CGLinToCirc</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg/stars/CGTestMultirate.htm"><CODE>CGTestMultirate</CODE> star</A>
+</MENU>
+
+<DT> New Motorola 56x (CG56 stars
+<DD> 
+<MENU>
+<LI> <A HREF="../../../src/domains/cg56/dsp/stars/CG56RaisedCosine.htm"><CODE>CG56RaisedCosine</CODE> star</A>
+<LI> <A HREF="../../../src/domains/cg56/stars/CG56DeMux.htm"><CODE>CG56DeMux</CODE> star</A>
+</MENU>
+
+</DL>
+
+<p>
+<hr>
+Up to: <A HREF="index.html">What's New in Ptolemy 0.7</A> -
+Back to: <A HREF="newwork.html">New Work in Ptolemy 0.7</A> -
+Forward to: <A HREF="minorchanges.html">Minor Changes in Ptolemy 0.7</A>
+
+<HR>
+Copyright &#169 1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated 04/30/97, 
+comments to <a href="mailto:ptolemy@ptolemy.eecs.berkeley.edu">ptolemy@ptolemy.eecs.berkeley.edu</a>.
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!-- documentation file generated from DEWiNeS_Tcl_Animation.pl by ptlang -->
+<html>
+<head>
+<title>DE WiNeS_Tcl_Animation star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="WiNeS_Tcl_Animation star, DE domain">WiNeS_Tcl_Animation star in DE domain</a></h1>
+<p>
+This is an tcl-animation star. A tcl-script is read in and data 
+        containing positions of mobile stations, information about connections 
+        to the base stations as well as information about existing interferences
+        come to this star from CIR. Each time anything happens in the network 
+        the animation will depict it. All mobile stations are shown at their 
+        position, all connections are denoted by yellow arrows. Orange arrows 
+        show interferences which are caused by other mobile stations, while red
+        arrows show interferences which are caused by transmissions from other 
+        base stations. All interferences are measured in the uplink, so the 
+        receiving station is always the base station. 
+        This animation can be used for debugging and demonstration reasons. 
+        The most interesting and generic part of this star might be the code
+        which I use to read in data from a specific input instead of an input 
+        in a MultiPortHole as it is in the TclScript-star in the 
+        Ptolemy-library.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/kernel/DEStar.cc">DEStar</a><br>
+<b>Location:</b> The WiNeS Library<br>
+<b>Version:</b> 1.3 "06/24/97"<br>
+<b>Author:</b> J. Voigt<br>
+<h2>Inputs</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=forestGreen>New_</font></b></i></td><td>Complex</td>
+<td>a new handy's position</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>Delete_</font></b></i></td><td>int</td>
+<td>a dieing handy's reference number</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>strength</font></b></i></td><td>int</td>
+<td>an interference' strength</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>Interferenz</font></b></i></td><td>Complex</td>
+<td>interfering handy's numbers</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>strength_bs</font></b></i></td><td>int</td>
+<td>an interference' strength</td>
+</tr>
+<tr>
+<td><i><b><font color=forestGreen>Interferenz_bs</font></b></i></td><td>Complex</td>
+<td>interfering handy's numbers</td>
+</tr>
+</table>
+<h2>States</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=blue>tcl_file</font></b></i></td><td>StringState</td>
+<td>The file from which to read the Tcl script</td>
+<td>"$PTOLEMY/src/domains/de/contrib/stars/test.tcl"</td>
+</tr>
+<tr>
+<td><i><b><font color=blue>Segments</font></b></i></td><td>IntState</td>
+<td>0 = omnidiectional antennas</td>
+<td>"segments"</td>
+</tr>
+</table>
+<br><b>See:</b> <a href="DEWiNeS_Tcl_Animation.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#WiNeS_Tcl_Animation facet, DE user">WiNeS_Tcl_Animation users</a>
+<p><hr><p>
+Copyright (c) 1997 Dresden University of Technology,
+            Mobile Communications Systems
+</body>
+</html>

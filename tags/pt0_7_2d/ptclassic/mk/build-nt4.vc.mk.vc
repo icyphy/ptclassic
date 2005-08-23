@@ -1,0 +1,149 @@
+# Ptolemy under NT4 with Microsoft Visual C++ 6.0 build script
+# See config-nt4.vc.mk.vc for details
+
+# Version identification:
+# @(#)build-nt4.vc.mk.vc	1.9 10/31/99
+#
+# Copyright (c) 1998-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+# Date of creation: 12/28/98
+# Written by: Christopher Hylands
+
+PTOLEMY=\users\ptolemy
+BINDIR=$(PTOLEMY)\bin.$(PTARCH)
+LIBDIR=$(PTOLEMY)\lib.$(PTARCH)
+
+
+PTCL_PTINY=$(PTOLEMY)\src\ptcl\ptcl.ptiny.exe
+all: $(BINDIR) $(LIBDIR) $(PTCL_PTINY) 
+
+$(BINDIR):
+	-mkdir $@
+
+$(LIBDIR):
+	-mkdir $@
+
+# Tcl script that converts Unix makefiles to MSVC++ nmake files
+MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
+
+KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
+$(LIBDIR)\libptolemy.lib: $(KERNEL_LIB)
+# Usually libptolemy is static, even on platforms that are dynamically
+# linked, so we pass in PTLIB=
+$(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
+	cd $(PTOLEMY)\src\kernel
+	nmake -f makefile.vc install PTLIB=libptolemy.lib
+
+$(PTOLEMY)\src\kernel\makefile.vc: $(PTOLEMY)\src\kernel\makefile
+	\bin\sh -c PTOLEMY=/users/ptolemy; export PTOLEMY $(MAKEVCGEN) $@ $<
+
+PTCL_DESCRIPTION_OBJ=$(PTOLEMY)\src\ptcl\ptclDescription.obj
+  
+PTMATHEMATICA_LIB=$(PTOLEMY)\src\utils\libptmathematica\libptmathematica.lib
+$(PTMATHEMATICA_LIB): $(KERNEL_LIB)
+	cd $(PTOLEMY)\src\utils\libptmathematica
+	nmake -f makefile.vc install
+
+PTMATLAB_LIB=$(PTOLEMY)\src\utils\libptmatlab\libptmatlab.lib
+$(PTMATLAB_LIB): $(KERNEL_LIB)
+		 cd $(PTOLEMY)\src\utils\libptmatlab
+		 nmake -f makefile.vc install
+
+EXTTOOLS_LIB=$(PTOLEMY)\src\utils\libexttools\libexttools.lib
+$(EXTTOOLS_LIB): $(KERNEL_LIB) $(PTMATHEMATICA_LIB) $(PTMATLAB_LIB)
+	cd $(PTOLEMY)\src\utils\libexttools
+	nmake -f makefile.vc install
+
+PTDSP_LIB=$(PTOLEMY)\src\utils\libptdsp.lib
+PTDSP_DEP=
+$(PTDSP_LIB): $(PTDSP_DEP)
+	      cd $(PTOLEMY)\src\utils\libptdsp
+	      nmake -f makefile.vc install PTLIB=libptdsp.lib
+
+DE_LIB=$(PTOLEMY)\src\domains\de\kernel\libde.lib
+$(DE_LIB): $(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB)
+	cd $(PTOLEMY)\src\domains\de\kernel
+	nmake -f makefile.vc install
+
+DE_STAR_LIB=$(PTOLEMY)\src\domains\de\stars\libdestars.lib
+$(DE_STAR_LIB): $(KERNEL_LIB) $(DE_LIB)
+	cd $(PTOLEMY)\src\domains\de\stars
+	nmake -f makefile.vc install
+
+SDF_LIB=$(PTOLEMY)\src\domains\sdf\kernel\libsdf.lib
+SDF_DEP=$(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB) 
+$(SDF_LIB): $(SDF_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\kernel
+	nmake -f makefile.vc install
+
+SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
+SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
+$(SDF_STAR_LIB): $(SDF_STAR_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\stars
+	nmake -f makefile.vc install
+
+SDF_DSP_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfdspstars.lib
+SDF_DSP_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
+$(SDF_DSP_STAR_LIB): $(SDF_DSP_STAR_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\dsp\stars
+	nmake -f makefile.vc install
+
+SDF_LS_LIB=$(PTOLEMY)\src\domains\sdf\loopScheduler\libLS.lib
+SDF_LS_DEP=$(SDF_DEP) $(SDF_LIB)
+$(SDF_LS_LIB): $(SDF_LS_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\loopScheduler
+	nmake -f makefile.vc install
+
+ptcl:$(PTCL_LIB)
+PTCL_LIB=$(PTOLEMY)\src\ptcl\libptcl.lib
+$(PTCL_LIB): $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
+	cd $(PTOLEMY)\src\ptcl
+	touch override.mk.vc
+	nmake -f makefile.vc install
+
+
+ptcl.p:$(PTCL_PTINY)
+$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_DSP_STAR_LIB) $(SDF_LS_LIB) $(PTDSP_LIB)
+	cd $(PTOLEMY)\src\ptcl
+	touch override.mk.vc
+	nmake -f makefile.vc ptcl.ptiny
+
+
+
+clean:
+	cd $(PTOLEMY)\src\kernel
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\utils\dumpexts
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\utils\libexttools
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\utils\libptmathematica
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\domains\de\kernel
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\domains\de\stars
+	nmake -f makefile.vc clean
+	cd $(PTOLEMY)\src\ptcl
+	nmake -f makefile.vc clean

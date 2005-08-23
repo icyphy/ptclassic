@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Generate a all the MSVC++ nmake files from the appropriate
+
+# Copyright (c) 1999 The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
+#
+# Programmer: Christopher Hylands
+# Version: @(#)makevcgen-all	1.4 10/29/99
+#
+
+dirs="$PTOLEMY/src/kernel \
+	$PTOLEMY/src/utils/dumpexts \
+	$PTOLEMY/src/utils/libexttools \
+	$PTOLEMY/src/utils/libptmathematica \
+	$PTOLEMY/src/utils/libptmatlab \
+	$PTOLEMY/src/domains/de/kernel \
+	$PTOLEMY/src/domains/de/stars \
+	$PTOLEMY/src/domains/sdf/kernel \
+	$PTOLEMY/src/domains/sdf/stars \
+	$PTOLEMY/src/domains/sdf/dsp/stars \
+	$PTOLEMY/src/domains/sdf/loopScheduler \
+	$PTOLEMY/src/ptcl"
+for dir in $dirs
+do
+	echo $dir
+	cd $dir
+	$PTOLEMY/bin/makevcgen makefile
+done

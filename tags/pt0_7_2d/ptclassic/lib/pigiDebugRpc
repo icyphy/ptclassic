@@ -1,0 +1,29 @@
+#! /bin/csh
+# pigiDebugRpc -- script for use with pigiDebug
+# Important: if you want to use the PIGIRPC environment variable you must
+# set it in your .cshrc (Vem runs this using rsh)
+# Version identification:
+# @(#)pigiDebugRpc	1.6	3/7/96
+# Copyright (c) 1990-1996 The Regents of the University of California.
+#                       All Rights Reserved.
+
+if (! ($?PIGIRPC)) then
+	setenv PIGIRPC ~ptolemy/obj.$PTARCH/pigiRpc/pigiRpc
+endif
+
+setenv DISPLAY unix:0
+
+# check if we have an environment-passing file
+set tfile=/tmp/pigiDebug.$USER
+if (-r $tfile ) then
+	source $tfile
+	rm -f $tfile
+endif
+
+cat > /tmp/rpc$$ <<EOF
+break main
+run $*
+EOF
+xterm -display $DISPLAY -title "pigiRpc debug window" -bg black -fg green \
+	-e gdb $PIGIRPC -x /tmp/rpc$$ &
+

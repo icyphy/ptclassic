@@ -1,0 +1,61 @@
+#!/bin/csh -f
+# prfacet
+# SCCS info: @(#)prfacet	1.10 8/4/95
+#
+# Using oct2ps, send a PostScript view of a facet to a printer or file.
+#
+# usage: prfacet [-TOFILE file | -TOEPSI file] [oct2ps options] facet-name
+#
+#	Generate a PostScript or Encapsulate PS view of the specified facet.
+#	If the first argument to prfacet is "-TOFILE", the PostScript
+#	is saved to the specified file.	If the first argument to prfacet
+#	is "-TOEPSI", the Encapusulated PS view is saved to the specified
+#	file.  If neither "-TOFILE" or "-TOEPSI" are the first
+#	argument to prfacet, the PostScript is sent directly to the
+#	printer. The printer name must be specified by the environment
+#	variable PRINTER.
+#
+#	The last option must be the pathname of the facet to be printed.
+#	All other options are passed to "oct2ps".
+
+
+##
+## Set shell and environment variables.
+##
+if (!($?PTOLEMY)) setenv PTOLEMY ~ptolemy
+if (!($?OCTTOOLS)) setenv OCTTOOLS $PTOLEMY
+set path = ( $PTOLEMY/octtools/bin.$PTARCH $path )
+set fixedArgs = ( -=T $PTOLEMY/lib/colors -f interface )
+
+
+##
+## Need two separate "if" lines below because we can't
+## check $argv[1] whenever $#argv == 0.
+##
+## Need `expr` below because the simpler expression
+##		if ($argv[1] != "-TOFILE)
+## fails whenever $argv[1] is "-x", "-f", etc.
+##
+if ($#argv == 0) goto ToPrint
+if (`expr $argv[1] == "-TOFILE"`) goto ToFile
+if (`expr $argv[1] == "-TOEPSI"`) goto ToEpsi
+goto ToPrint
+
+
+ToFile:
+	oct2ps $fixedArgs $argv[3-]\:schematic > $argv[2]
+	exit
+
+ToEpsi:
+	oct2ps $fixedArgs $argv[3-]\:schematic > /tmp/prfacet$$.ps
+	ps2epsi /tmp/prfacet$$.ps $argv[2]
+	rm /tmp/prfacet$$.ps
+	exit
+
+ToPrint:
+	if ( $PTARCH =~ hppa* ) then
+		oct2ps $fixedArgs $argv[*]\:schematic | lp -d$PRINTER
+	else
+		oct2ps $fixedArgs $argv[*]\:schematic | lpr -P$PRINTER
+	endif
+	exit

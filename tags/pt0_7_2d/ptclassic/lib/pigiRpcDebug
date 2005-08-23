@@ -1,0 +1,19 @@
+#! /bin/sh
+# usage: pigiRpcDebug <vem-args>
+# Version: @(#)pigiRpcDebug	1.5 04/16/98
+#
+# This is typically invoked from wtih pigiRpcShell as the $COMMAND.
+# It brings up the debugger running PIGIRPC.
+
+dbgcmdfile=/tmp/rpc$$
+cat > $dbgcmdfile <<EOF
+break main
+run $*
+EOF
+
+DEBUG='xterm -sl 1000 -title pigiRpc_debug_window -bg black -fg green -e gdb'
+
+${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC
+
+rm $dbgcmdfile
+

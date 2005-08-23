@@ -1,0 +1,27 @@
+#!/bin/sh
+# Version: @(#)xv	1.1 10/28/99
+# xv - try to find and execute an image viewer (xv, gqview, ee or gimp)
+
+list='"xv" "gqview -t" "ee" "gimp"'
+
+set +u					# no error if accessing undefined vars
+
+ifs="$IFS"				# remember IFS settings
+tryexec () {
+  exe="$1" IFS=":"			# set separator to ":"
+  for myp in $PATH; do			# check all directories in PATH
+    case "$myp" in
+      $PTOLEMY/bin|.) ;;		# ignore path of this script and .
+      *) if [ -x "$myp/$exe" ]; then	# check if executable exist
+	   IFS="$ifs"			# restore IFS settings
+	   shift			# adjust arguments
+	   exec "$myp/$exe" "$@"	# invoke executable
+	 fi;;
+    esac
+  done
+  IFS="$ifs"				# restore IFS settings before returning
+}
+
+eval for prog in $list\; do tryexec \$prog \"\$@\"\; done
+echo "No viewer ($list) found" >&2
+exit 1

@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# This shell script invokes the Tcl/Tk script "ptfixtree.tcl" to check
+# that all the facets are using the $PTOLEMY environment variable.
+#
+# Copyright (c) 1990-1999 The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
+#
+# Programmer: Kennard White
+# Version: @(#)ptfixtree	1.10	01/28/99
+#
+
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+if [ -z "$PTARCH" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+fi
+
+exec $PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh $PTOLEMY/bin/ptfixtree.tcl ${1+"$@"}

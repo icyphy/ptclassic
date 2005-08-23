@@ -1,0 +1,60 @@
+reset
+# Creating universe 'qAndServer'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Server1 Server
+	setstate Server1 serviceTime 1.1
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 value 0.0
+	setstate FloatRamp1 step 1.0
+	star Clock1 Clock
+	setstate Clock1 interval 1.0
+	setstate Clock1 magnitude 1.0
+	star FIFOQueue1 FIFOQueue
+	setstate FIFOQueue1 capacity 3
+	setstate FIFOQueue1 numDemandsPending 1
+	setstate FIFOQueue1 consolidateDemands TRUE
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Queue data"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-P -0 'Q output' -1 'lost data' =800x300+0+0"
+	star Stack1 Stack
+	setstate Stack1 capacity 3
+	setstate Stack1 numDemandsPending 1
+	setstate Stack1 consolidateDemands TRUE
+	star Server2 Server
+	setstate Server2 serviceTime 1.1
+	star "XMgraph.input=22" XMgraph
+	numports "XMgraph.input=22" input 2
+	setstate "XMgraph.input=22" title "Data stacked"
+	setstate "XMgraph.input=22" saveFile ""
+	setstate "XMgraph.input=22" options "-P -0 'stack output' -1 'lost data' =800x300+0+600"
+	star "XMgraph.input=23" XMgraph
+	numports "XMgraph.input=23" input 2
+	setstate "XMgraph.input=23" title "Queue and Stack Sizes"
+	setstate "XMgraph.input=23" saveFile ""
+	setstate "XMgraph.input=23" options "-P -0 'queue size' -1 'stack size' =800x200+0+350"
+	connect Server1 output FIFOQueue1 demand
+	connect Clock1 output FloatRamp1 input
+	node node1
+	nodeconnect FloatRamp1 output node1
+	nodeconnect FIFOQueue1 inData node1
+	nodeconnect Stack1 inData node1
+	connect Server2 output Stack1 demand
+	connect Stack1 overflow "XMgraph.input=22" "input#2"
+	node node2
+	nodeconnect Stack1 outData node2
+	nodeconnect Server2 input node2
+	nodeconnect XMgraph.input=22 input#1 node2
+	node node3
+	nodeconnect FIFOQueue1 outData node3
+	nodeconnect Server1 input node3
+	nodeconnect XMgraph.input=21 input#1 node3
+	connect FIFOQueue1 overflow "XMgraph.input=21" "input#2"
+	connect FIFOQueue1 size "XMgraph.input=23" "input#1"
+	connect Stack1 size "XMgraph.input=23" "input#2"
+run 50
+wrapup

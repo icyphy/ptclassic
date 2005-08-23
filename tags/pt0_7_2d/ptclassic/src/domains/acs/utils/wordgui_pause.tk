@@ -1,0 +1,84 @@
+# @(#)wordgui_pause.tk	1.1 09/08/99
+# Defaults
+set winx 600
+set winy 220
+
+###############################
+# Add a button for terminiation
+###############################
+frame .bframe -relief ridge \
+	-borderwidth 3 \
+	-background green
+button .bframe.button -text "Done" -command {exit 0}	
+pack .bframe.button
+
+#########################
+# Add a button for cancel
+#########################
+frame .cframe -relief ridge \
+	-borderwidth 3 \
+	-background red
+button .cframe.button -text "Cancel" -command {exit 1}	
+pack .cframe.button
+
+##########
+# Add text
+##########
+frame .iframe
+message .iframe.instructions -text \
+"-- The ACSCGFPGATarget has been paused for word length analysis."
+frame .iframe2
+message .iframe2.instructions -text \
+"-- Invoke Matlab(TM) from the output design directory for the VHDL"
+frame .iframe3
+message .iframe3.instructions -text \
+"-- Start the wordgui tool by invoking the 'wlstart' script, \
+and revise word lengths as needed."
+frame .iframe4
+message .iframe4.instructions -text \
+"-- To export the netlist, and resume the ACSCGFPGATarget click 'Done'"
+frame .iframe5
+message .iframe5.instructions -text \
+"-- Click 'Cancel' to ignore results from word length analysis and \
+resume the ACSCGFPGATarget"
+frame .iframe6
+message .iframe6.instructions -text \
+"-- Resultant precisions from the wordgui tool will need to be manually \
+entered into each Ptolemy star.  This is due to a limitation in the current \
+version of Ptolemy (to be fixed in Ptolemy II).  A file has been generated, \
+called <galaxy_name>_recipe.txt, that will provide information on the new \
+precisions for each star." 
+
+.iframe.instructions configure -width $winx
+.iframe2.instructions configure -width $winx
+.iframe3.instructions configure -width $winx
+.iframe4.instructions configure -width $winx
+.iframe5.instructions configure -width $winx
+.iframe6.instructions configure -width $winx
+pack .iframe.instructions
+pack .iframe2.instructions
+pack .iframe3.instructions
+pack .iframe4.instructions
+pack .iframe5.instructions
+pack .iframe6.instructions
+
+#################
+# Establish title
+#################
+wm title . "ACSCGFPGATarget Paused"
+. configure -width $winx -height $winy 
+
+##########
+# Draw all
+##########
+pack .bframe .cframe .iframe .iframe2 .iframe3 .iframe4 .iframe5
+place configure .bframe -x 105 -y 180
+place configure .cframe -x 305 -y 180
+place configure .iframe -x 0 -y 0
+place configure .iframe2 -x 0 -y 20
+place configure .iframe3 -x 0 -y 40
+place configure .iframe4 -x 0 -y 60
+place configure .iframe5 -x 0 -y 80
+place configure .iframe6 -x 0 -y 100
+
+

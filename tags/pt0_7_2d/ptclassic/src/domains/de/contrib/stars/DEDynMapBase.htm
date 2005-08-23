@@ -1,0 +1,153 @@
+<!-- documentation file generated from DEDynMapBase.pl by ptlang -->
+<html>
+<head>
+<title>DE DynMapBase star</title>
+</head>
+<body bgcolor="#eeeee0">
+<h1><a name="DynMapBase star, DE domain">DynMapBase star in DE domain</a></h1>
+<p>
+This is the base star for a family of stars which supports a mutable 
+system configuration in the DE-domain. This star family implements the 
+functionality of a dynamic map-function for the discrete-event domain. A dynamic
+ map-function works like the map-function in the HOF-domain, but we can change 
+the number of blocks it multiplies during runtime of the simulation. Thus, we 
+support a mutable system configuration. Note, that this star family only works with the two standard DE schedulers.
+<p>
+This class is an abstract class, so it can't be instantiated and can not be used on its own. It contains methods which are used by its childs.
+<p>
+<b>Derived from:</b> <a href="$PTOLEMY/src/domains/de/kernel/DEStar.cc">DEStar</a><br>
+<b>Location:</b> $PTOLEMY/src/domains/de/contrib/stars<br>
+<b>Version:</b> 1.8 "03/27/98"<br>
+<b>Author:</b> J. Voigt<br>
+<b>Acknowledgements:</b> I use some code from Edward A. Lee's older version of 
+<tt>HOFBase</tt>. Former versions of <tt>DEDynMapBase</tt> called that code 
+directly. But, Tom Lane changed the HOF-stars. So, I copied the older code 
+directly into this file, having the advantage of being independent of further 
+changes in HOF now. MutableCQScheduler incorporated by John S. Davis II<br>
+<h2>States</h2>
+<table BORDER="1">
+<tr>
+<td><i><b><font color=blue>blockname</font></b></i></td><td>StringState</td>
+<td>The name of the block which 'll be instantiated.</td>
+<td>""</td>
+</tr>
+<tr>
+<td><i><b><font color=blue>where_defined</font></b></i></td><td>StringState</td>
+<td>The full path and facet name for the definition of blockname.</td>
+<td>""</td>
+</tr>
+<tr>
+<td><i><b><font color=blue>output_map</font></b></i></td><td>StringArrayState</td>
+<td>The names of the block's outputs for mapping.</td>
+<td>""</td>
+</tr>
+<tr>
+<td><i><b><font color=blue>input_map</font></b></i></td><td>StringArrayState</td>
+<td>The names of the block's inputs for mapping.</td>
+<td>""</td>
+</tr>
+<tr>
+<td><i><b><font color=blue>parameter_map</font></b></i></td><td>StringArrayState</td>
+<td>The mapping of parameters.</td>
+<td>""</td>
+</tr>
+</table>
+<h2>Details</h2><p>
+This star contains methods which are used by <tt>DEDynMap</tt> and <tt>DEDynMapGr</tt> for an instantiation of other blocks during runtime of the simulation. The descriptions of these stars explain their application. We here just
+ explain the single methods. 
+<p>        
+<h3>Creating a block dynamically is as follows (<i>createDynBlock</i>):</h3>
+<p>
+We create blocks using code from <tt>HOFBase::createBlock</tt> in 
+<i>createBlock</i>. 
+This method returns a pointer to a newly created block. 
+This block is instantiated, gets a unique name, and is added to the galaxy's 
+blocklist. 
+Furthermore, we put it into an internal list, so that we can find it back 
+lateron when we want to delete it. 
+<p>
+Then we look for input and output portholes of that newly created block and 
+create approriate farsides for these portholes in <tt>DEDynMerge</tt> and 
+<tt>DEDynFork</tt> using their <i>createPortHole()</i>-method. These portholes 
+are connected afterwards. We here just have pure virtual methods <i>
+connectXXXports</i>, because these portholes can 
+be of different datatypes and are members of our childs only. Once they are 
+connected, the newly created portholes are initialized. 
+<p>
+If <i>parameter_map</i> is not empty, the parameters in the new block are set in <i>setParameter</i>. If it is empty, the <i>initialization()</i>-method sets 
+the default values. 
+<p>
+The entire galaxy's connectivity is checked. Then we check for delayfreeloops 
+and update the porthole priorities.
+<p>
+We have to take special care of source-stars in the dynamically created blocks. 
+We look for them in <i>scanGalaxyForSources</i>. If there are any, we have to 
+give them an initial event at the current time. That means, all source-stars 
+derived from <tt>DERepeat</tt>-star give now out an initial event at the time of their creation (instead of time zero, when they probably don't exist). Otherwise these source-stars would never give out any event. See the description of the <tt>DERepeat</tt>-star for details.
+<p>
+<h3>Deletion of a block dynamically is as follows (<i>deleteDynBlock</i>):</h3>
+<p>
+I get a unique identifier for a block to be deleted as parameter. 
+This block is looked for in my internal list of currently existing blocks. I get a pointer to my deleteBlock from this list and remove that block from the list.
+<p>
+Then, the eventqueue is checked for any events pointing to deleteblock using 
+<i>scanEventList</i>. If any events are found, they are deleted from the 
+eventqueue.
+<p> 
+Then I look for input and output of the deleteblock. Again, the
+<i>disconnectXXXPorts</i> are here just pure virtual, because the portholes are 
+members of our childs and of a specila datatype. Inside 
+<i>disconnectXXXPorts</i> we check the eventqueue for any events which are 
+scheduled to the farside of the deleteblock's outputs. These farside are inputs, so events might be sent to them.Since we delete these farside, we better also 
+delete the events. Then I disconnect the portholes from their farside and delete
+ their farside using <i>removePortHole()</i> in <tt>DEDynMerge</tt> and 
+<tt>DEDynFork</tt>, respectively. 
+<p>
+Next, I remove deleteblock from the galaxy's blocklist, where it was added to by the code from <i>createDynBlock</i>. Once removed there, it can be recycled into our blockpool. 
+<p>
+The entire galaxy's connectivity it checked again. Then I check for 
+delayfreeloops again and update the porthole priorities.
+<p>
+<h3>Scanning the eventqueue is as follows (<i>scanEventList</i>):</h3>
+<p>
+Using <i>scanEventList()</i> and <i>scanGalaxyForContents()</i> I go down the 
+block's hierarchy until I only deal with atomic elements (<tt>stars</tt>). 
+For each star I check the current eventQueue for any pending pointer to it 
+(CQScheduler and MutableCQSCheduler) or for any pending pointer to any of its 
+input-portholes (DEScheduler) using <i>deletePendingEventsOfStar</i> or 
+<i>deletePendingEventsOfPortHole</i>, which should be self-exploratory both.
+<p>
+<h3>Setting parameter values:</h3>
+<p>
+All parameters are used in the derived class <tt>DEDynMap</tt>.
+<p>
+<h4>blockname:</h4> Name of the block, which is to multiply. The masterinstance. 
+This block can be any galaxy or star. However, it must not have multiportholes.
+<p>
+<h4>where_defined:</h4> The full path and facet name for the definition of 
+blockname.
+<p>
+<h4>output_map:</h4> The names of the block's outputs for mapping. The names of 
+the outputs from the masterinstance should be listed in the order in which they 
+should be connected.
+<p>
+<h4>input_map:</h4> The names of the block's inputs for mapping. The names of 
+the inputs to the masterblock should be listed in the order in which they should
+be connected.
+<p>
+<h4>parameter_map:</h4> The mapping of parameters like in HOF::Map.
+<p>
+<h3>The current limitations are:</h3>
+<p>
+A block which is to instantiate must not have multiportholes.
+<p>
+FIXME: The eventlist is to re-sort after the configuration changed. Thanks to Tom Lane for pointing this out.
+<p>
+<br><b>See:</b> <a href="DEDynMapBase.pl">source code</a>,
+ <a href="$PTOLEMY/src/domains/de/domain.idx#DynMapBase facet, DE user">DynMapBase users</a>
+<p><hr><p>
+copyright (c) 1997 Dresden University of Technology, WiNeS-Project              All rights reserved.
+See the file <a href="$PTOLEMY/copyright">$PTOLEMY/copyright</a> for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+</body>
+</html>

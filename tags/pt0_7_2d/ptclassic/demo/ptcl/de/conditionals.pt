@@ -1,0 +1,125 @@
+reset
+# Creating universe 'conditionals'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star Clock1 Clock
+	setstate Clock1 interval 2.0
+	setstate Clock1 magnitude 1.0
+	star Clock2 Clock
+	setstate Clock2 interval 1.0
+	setstate Clock2 magnitude 1.0
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 value 0
+	setstate FloatRamp1 step 2.5
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 value 1.5
+	setstate FloatRamp2 step 0.5
+	star Delay1 Delay
+	setstate Delay1 delay 0.5
+	star "Merge.input=21" Merge
+	numports "Merge.input=21" input 2
+	star "Merge.input=22" Merge
+	numports "Merge.input=22" input 2
+	star Delay2 Delay
+	setstate Delay2 delay 1.0
+	star Delay3 Delay
+	setstate Delay3 delay 0.25
+	star "XMgraph.input=31" XMgraph
+	numports "XMgraph.input=31" input 3
+	setstate "XMgraph.input=31" title "if (r >= b) result = 1 "
+	setstate "XMgraph.input=31" saveFile ""
+	setstate "XMgraph.input=31" options "-P -0 'r' -1 'result' -2 'b' =500x250+0+0"
+	star "XMgraph.input=32" XMgraph
+	numports "XMgraph.input=32" input 3
+	setstate "XMgraph.input=32" title "if (r < b) result=1"
+	setstate "XMgraph.input=32" saveFile ""
+	setstate "XMgraph.input=32" options "-P -0 'r' -1 'result' -2 'b' =500x250+505+0"
+	star "XMgraph.input=33" XMgraph
+	numports "XMgraph.input=33" input 3
+	setstate "XMgraph.input=33" title "if (r <= b) result = 1"
+	setstate "XMgraph.input=33" saveFile ""
+	setstate "XMgraph.input=33" options "-P -0 'r' -1 'result' -2 'b' =500x250+0+275"
+	star "XMgraph.input=34" XMgraph
+	numports "XMgraph.input=34" input 3
+	setstate "XMgraph.input=34" title "if (r > b) result = 1"
+	setstate "XMgraph.input=34" saveFile ""
+	setstate "XMgraph.input=34" options "-P -0 'r' -1 'result' -2 'b' =500x250+505+275"
+	star "XMgraph.input=35" XMgraph
+	numports "XMgraph.input=35" input 3
+	setstate "XMgraph.input=35" title "if (r == b) result = 1 "
+	setstate "XMgraph.input=35" saveFile ""
+	setstate "XMgraph.input=35" options "-P -0 'r' -1 'result' -2 'b' =500x250+0+550"
+	star "XMgraph.input=36" XMgraph
+	numports "XMgraph.input=36" input 3
+	setstate "XMgraph.input=36" title "if (r != b) result = 1"
+	setstate "XMgraph.input=36" saveFile ""
+	setstate "XMgraph.input=36" options "-P -0 'r' -1 'result' -2 'b' =500x250+505+550"
+	star "Test.condition=EQ1" Test
+	setstate "Test.condition=EQ1" condition EQ
+	setstate "Test.condition=EQ1" crossingsOnly FALSE
+	star "Test.condition=NE1" Test
+	setstate "Test.condition=NE1" condition NE
+	setstate "Test.condition=NE1" crossingsOnly FALSE
+	star "Test.condition=GT1" Test
+	setstate "Test.condition=GT1" condition GT
+	setstate "Test.condition=GT1" crossingsOnly FALSE
+	star "Test.condition=GE1" Test
+	setstate "Test.condition=GE1" condition GE
+	setstate "Test.condition=GE1" crossingsOnly FALSE
+	star "Test.condition=LT1" Test
+	setstate "Test.condition=LT1" condition LT
+	setstate "Test.condition=LT1" crossingsOnly FALSE
+	star "Test.condition=LE1" Test
+	setstate "Test.condition=LE1" condition LE
+	setstate "Test.condition=LE1" crossingsOnly FALSE
+	connect Clock1 output FloatRamp1 input
+	connect Clock2 output FloatRamp2 input
+	connect Delay1 output "Merge.input=21" "input#2"
+	node node1
+	nodeconnect FloatRamp2 output node1
+	nodeconnect Delay1 input node1
+	nodeconnect Merge.input=21 input#1 node1
+	connect Delay2 output "Merge.input=22" "input#2"
+	node node2
+	nodeconnect FloatRamp1 output node2
+	nodeconnect Merge.input=22 input#1 node2
+	nodeconnect Delay2 input node2
+	connect "Merge.input=21" output Delay3 input
+	connect "Test.condition=EQ1" output "XMgraph.input=35" "input#2"
+	connect "Test.condition=NE1" output "XMgraph.input=36" "input#2"
+	connect "Test.condition=GT1" output "XMgraph.input=34" "input#2"
+	connect "Test.condition=GE1" output "XMgraph.input=31" "input#2"
+	connect "Test.condition=LT1" output "XMgraph.input=32" "input#2"
+	connect "Test.condition=LE1" output "XMgraph.input=33" "input#2"
+	node node3
+	nodeconnect Delay3 output node3
+	nodeconnect XMgraph.input=34 input#1 node3
+	nodeconnect Test.condition=GT1 upper node3
+	nodeconnect XMgraph.input=35 input#1 node3
+	nodeconnect Test.condition=EQ1 upper node3
+	nodeconnect Test.condition=NE1 upper node3
+	nodeconnect XMgraph.input=36 input#1 node3
+	nodeconnect XMgraph.input=32 input#1 node3
+	nodeconnect Test.condition=LT1 upper node3
+	nodeconnect XMgraph.input=31 input#1 node3
+	nodeconnect Test.condition=GE1 upper node3
+	nodeconnect Test.condition=LE1 upper node3
+	nodeconnect XMgraph.input=33 input#1 node3
+	node node4
+	nodeconnect Merge.input=22 output node4
+	nodeconnect Test.condition=LE1 lower node4
+	nodeconnect XMgraph.input=34 input#3 node4
+	nodeconnect Test.condition=GT1 lower node4
+	nodeconnect XMgraph.input=35 input#3 node4
+	nodeconnect Test.condition=EQ1 lower node4
+	nodeconnect XMgraph.input=36 input#3 node4
+	nodeconnect Test.condition=NE1 lower node4
+	nodeconnect XMgraph.input=32 input#3 node4
+	nodeconnect Test.condition=LT1 lower node4
+	nodeconnect XMgraph.input=31 input#3 node4
+	nodeconnect Test.condition=GE1 lower node4
+	nodeconnect XMgraph.input=33 input#3 node4
+run 5
+wrapup

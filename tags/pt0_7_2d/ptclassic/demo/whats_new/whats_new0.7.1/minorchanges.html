@@ -1,0 +1,102 @@
+<!-- @(#)minorchanges.html	1.5 05/15/98 -->
+
+<html>
+<head>
+<title>Minor Changes in Ptolemy 0.7.1</title>
+</head>
+<body bgcolor=#faf0e6>
+
+<H1>Minor Changes in Ptolemy 0.7.1</H1>
+<menu>
+
+<LI> Vem/pigiRpc interlocks to prevent the dreaded "RPC Protocol Error" -
+     Tom Lane
+
+<LI> Custom display of universe parameters in run control panels.
+     It is now possible to add parameters to the Run Control panel by checking
+     check boxes in the Edit Parameters Window.  - Tom Lane
+
+<LI> Support for using the
+     <A HREF="http://www.cs.tu-bs.de/softech/ddd/">ddd</A>
+     debugger from <CODE>pigi -debug</CODE> - Jens Voigt
+
+<LI> Support for compiling Ptolemy under Solaris 2.5 for the PC using
+     PTARCH=sol2.5pc - Dominique Ragot
+
+<li> Support for the Process Network (PN) domain under Linux -
+	Wolfgang Reimer 
+
+
+<li> Script files have been converted from C Shell
+	to Bourne shell.  -
+	Christopher Hylands
+	Wolfgang Reimer 
+	 <br>The changed files are:
+	<menu>
+	<li> <CODE>bin/pigiEnv.csh</CODE> is now
+	<CODE>bin/pigiEnv.sh</CODE>, <CODE>bin/pigiEnv.csh</CODE>
+	is no longer shipped
+	<li> <CODE>bin/ptsetup.csh</CODE> has been converted.
+	Both <CODE>bin/ptsetup.csh</CODE> and <CODE>bin/ptsetup.sh</CODE>
+	are shipped since there are other scripts that source both versions
+
+	<li> <CODE>$PTOLEMY/MAKEARCH</CODE> has been converted to
+	Bourne shell.
+	</menu> 
+
+<li> Various bug fixes from Wolfgang Reimer, including:
+	<menu>
+	<li> Create 2 new Ptolemy targets for Linux (linux.static, linux.debug)
+	<li> Work around to allow to use Complex class of GNU libg++
+	<li> <CODE>matlab.mk</CODE> and <CODE>mathematica.mk</CODE>
+	now allow predefinition of <CODE>MATLABDIR</CODE>
+	and <CODE>MATHEMATICADIR</CODE>
+	</menu>
+
+For complete details, see
+<a href="http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html"><CODE>http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html</CODE></a>
+
+<li> VHDL Environment variable changes - Mike Williamson
+
+ <br> Brian Evans reported a bug where SimVSSTarget sets environment
+variables even when they are blank, and whatever it sets overrides the
+user's shell environment settings.  A further problem was that the
+target sets them when it's a child target.  Child target parameters
+are not editable from pigi, so if the defaults were wrong, the user could not fix them.
+</menu>
+
+
+
+</dl>
+
+<h2><a name="removedFeatures">Features present in Ptolemy 0.7 that were removed in 0.7.1</a></h2>
+<menu>
+<li> Many features in Tycho have been removed:
+	<menu>
+	<li> The TclJava interface has been removed, it does not work
+	with JDK1.1.  The new Tcl/Java interface is called TclBlend, but
+	it only works with Tcl8.0.  Itcl has not yet been ported to
+	Tcl8.0, so we can't use Tcl Blend yet.
+	</menu>
+
+<li> CGCDDF files have been removed.  CGCDDF was never well integrated into
+the Ptolemy tree, it required a rebuild.
+The affected stars are <CODE>CGCSelf</CODE>, <CODE>CGCRepeater</CODE>,
+<CODE>CGCLastOfN</CODE>, <CODE>CGCEndCase</CODE>, <CODE>CGCDownCounter</CODE>, <CODE>CGCCase</CODE>.
+
+</menu>
+
+<p>
+<hr>
+Up to: <A HREF="index.html">What's New in Ptolemy 0.7.1</A> -
+Back to: <A HREF="newstars.html">New Stars and Demos</A>
+Forward to: <A HREF="compatibility.html">Backward Compatibility Issues in Ptolemy 0.7.1</A>
+
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated 05/15/98,
+comments to <a href="mailto:ptolemy@ptolemy.eecs.berkeley.edu">ptolemy@ptolemy.eecs.berkeley.edu</a>.
+</body>
+</html>

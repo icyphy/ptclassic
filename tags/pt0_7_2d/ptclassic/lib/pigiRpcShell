@@ -1,0 +1,45 @@
+#! /bin/sh
+# usage: pigiRpcShell <vem-rpc-args>
+# Version: @(#)pigiRpcShell	1.15	04/21/98
+# Copyright (c) 1990-1997 The Regents of the University of California.
+# All Rights Reserved.
+#
+# This shell is invoked by vem via vem's rpc mechanism.  It is our
+# job to recover our environment from the other side of the link,
+# and exec the appropriate actual rpc client.
+
+# Notes:
+# 1) This is borne shell so that it is fast.  If you make this
+#    a csh script, use the "-f" option so that the user's .cshrc
+#    doesnt clobber the environment.
+
+
+#
+# check if we have an environment-passing file
+#
+# SysV uses LOGNAME instead of USER
+USER=${USER-$LOGNAME}
+cmdfile=/tmp/pigiCmds.$USER
+if [ -r $cmdfile ] ; then
+    . $cmdfile
+fi
+libdir=`dirname $0`
+PTOLEMY=${PTOLEMY-`dirname $libdir`}
+TYCHO=${TYCHO-$PTOLEMY/tycho}
+HOME=${HOME-.}
+ARCH=${PTARCH-`(/bin/arch || /bin/machine || $PTOLEMY/bin/arch ) 2> /dev/null`}
+PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$PTARCH/pigiRpc}
+
+#COMMAND=${COMMAND-$PIGIRPC}
+if [ -z "$COMMAND" ]; then
+    COMMAND=$PIGIRPC
+fi
+DISPLAY=${DISPLAY-'unix:0'}
+TAILARGS=${TAILARGS-''}
+TCL_LIBRARY=${TCL_LIBRARY-$PTOLEMY/tcltk/tcl/lib/tcl}
+TK_LIBRARY=${TK_LIBRARY-$PTOLEMY/tcltk/tk/lib/tk}
+PTPWD=${PTPWD-.}
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH-/usr/lib:/usr/X11/lib}
+export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH TYCHO
+cd $HOME
+exec $COMMAND $* $TAILARGS

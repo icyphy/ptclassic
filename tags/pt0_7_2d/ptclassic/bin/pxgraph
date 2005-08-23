@@ -1,0 +1,45 @@
+#! /bin/sh
+
+# This shell script simply finds the appropriate (platform dependent)
+# version of pxgraph and invokes it.
+#
+#	Changed to bourne shell script by Wolfgang Reimer 03/17/98
+#
+# Version: @(#)pxgraph	1.9 04/28/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
+# 	All Rights Reserved.
+#
+ 
+PTOLEMY=${PTOLEMY:?"environment variable null or not set, exiting script!"}
+PTARCH=${PTARCH:=`$PTOLEMY/bin/ptarch`}
+export PTOLEMY PTARCH
+ 
+# If you want to use the X11 version of pxgraph instead of the Java version
+# either set PT_USE_X11_PXGRAPH in your environment or uncomment
+# the line below:
+#PT_USE_X11_PXGRAPH=yes
+
+# See $PTOLEMY/src/pxgraph/README.txt for details.
+
+if [ "${PT_USE_X11_PXGRAPH}x" != "x" ]; then
+    # Use the X11 version
+    if [ -f $PTOLEMY/bin.$PTARCH/pxgraph.x11 ]; then
+	exec $PTOLEMY/bin.$PTARCH/pxgraph.x11 ${1+"$@"}
+    else 
+	echo "$0: Could not find $PTOLEMY/bin.$PTARCH/pxgraph.x11"
+	echo "    \$PT_USE_X11_PXGRAPH was set, so Ptolemy is attempting to"
+	echo "    use the X11 pxgraph instead of the Java pxgraph."
+	echo "    See $PTOLEMY/src/pxgraph/README.txt for more information"
+    fi
+else
+    # Use the java version:
+    if [ -f $PTOLEMY/bin.$PTARCH/pxgraph ]; then
+	exec $PTOLEMY/bin.$PTARCH/pxgraph ${1+"$@"}
+    else 
+	echo "$0: Could not find $PTOLEMY/bin.$PTARCH/pxgraph"
+	echo "    \$PT_USE_X11_PXGRAPH was not set, so Ptolemy is attempting"
+	echo "    to use the Java pxgraph instead of the X11 pxgraph."
+	echo "    See $PTOLEMY/src/pxgraph/README.txt for more information"
+    fi
+fi
+

@@ -1,0 +1,22 @@
+# Author: Olaf Lenzmann
+# Version: @(#)ptk.rc	1.1 02/04/99
+
+# Ptcl with Tk needs initialization by sourcing this file.
+# Currently this is not automatically sourced at startup,
+#  especially since Windows can not do tilde expansion.
+
+source $env(PTOLEMY)/lib/tcl/ptcl_help.tcl
+source $env(PTOLEMY)/lib/tcl/ptkColor.tcl
+source $env(PTOLEMY)/lib/tcl/ptkOptions.tcl
+
+set unique 1
+
+source $env(PTOLEMY)/lib/tcl/utilities.tcl
+source $env(PTOLEMY)/lib/tcl/ptkControl.tcl
+source $env(PTOLEMY)/lib/tcl/ptkBarGraph.tcl
+
+wm withdraw .
+
+ptkRunControlStandalone panel
+
+

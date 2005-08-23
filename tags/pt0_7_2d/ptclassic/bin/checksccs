@@ -1,0 +1,49 @@
+#! /bin/sh
+# @(#)checksccs	1.4 04/05/97
+# Check that all the files listed in stdin are checked in under SCCS.
+# All the files should be on one line in stdin.
+# The following files are ignored:
+#   tclIndex
+#   files ending in .class
+tmpfile=/tmp/checksccs.$$
+
+# Regular awk barfs on cg56
+# awk: record `CG56Chop.cc CG56Host...' too long
+gawk ' {filelist=$0}
+	END { nf=split(sccsfiles,s," ")
+		for(i=1;i<=nf;i++) {
+			sccsfiles[s[i]]=s[i]
+		}
+		nf=split(filelist,f," ")
+		for(i=1;i<=nf;i++) {
+			if (sccsfiles[f[i]] != f[i]) {
+			    if (f[i] != "tclIndex" && f[i] !~ /.class$/) {
+				    basen=split(f[i],base,".")
+				    plfile=base[1]".pl"
+				    if (sccsfiles[plfile] != plfile) {
+					print f[i]
+				    }
+			    }	
+			}
+		}
+	}' sccsfiles="`echo SCCS/s.* | sed 's=SCCS/s.==g'`" - > $tmpfile
+
+errfiles=`cat $tmpfile`
+rm -f $tmpfile
+
+printedheader=0
+
+for errfile in $errfiles
+do
+	if [ ! -d $errfile ]; then
+		if [ $printedheader != 1 ]; then
+			printedheader=1
+			echo -n "The following files are not in `pwd`/SCCS: "
+		fi
+		echo -n " $errfile"
+	fi
+done
+if [ $printedheader = 1 ]; then
+	echo ""
+	exit 1
+fi

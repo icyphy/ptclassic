@@ -1,0 +1,251 @@
+domain SDF
+defgalaxy periodogram {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate log2order FLOAT 9
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order log2order
+	setstate ComplexFFT1 size numInputs
+	setstate ComplexFFT1 direction 1
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "1/numInputs"
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	node node1
+	nodeconnect ComplexFFT1 output node1
+	nodeconnect FloatProduct.input=21 input#1 node1
+	nodeconnect FloatProduct.input=21 input#2 node1
+	connect FloatProduct.input=21 output FloatGain1 input
+	alias output FloatGain1 output
+	connect WaveForm1 output FloatProduct.input=22 input#2
+	connect FloatProduct.input=22 output ComplexFFT1 input
+	alias input FloatProduct.input=22 input#1
+}
+domain SDF
+defgalaxy autocorrelation {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate order FLOAT 16
+	newstate resolution FLOAT 128
+	newstate log2resolution FLOAT 7
+	star LevDur1 LevDur
+	setstate LevDur1 order order
+	star BlackHole1 BlackHole
+	star FloatGain2 FloatGain
+	setstate FloatGain2 gain "-1.0"
+	star ComplexFFT2 ComplexFFT
+	setstate ComplexFFT2 order log2resolution
+	setstate ComplexFFT2 size "order + 1"
+	setstate ComplexFFT2 direction 1
+	star FloatProduct.input=23 FloatProduct
+	numports FloatProduct.input=23 input 2
+	star FloatProduct.input=24 FloatProduct
+	numports FloatProduct.input=24 input 2
+	star Reciprocal1 Reciprocal
+	setstate Reciprocal1 magLimit 10000.0
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg numInputs
+	setstate Autocor1 noLags order
+	setstate Autocor1 unbiased 0
+	star Cut1 Cut
+	setstate Cut1 nread "order + 1"
+	setstate Cut1 nwrite 1
+	setstate Cut1 offset order
+	star Repeat1 Repeat
+	setstate Repeat1 numTimes resolution
+	star FloatPad1 FloatPad
+	setstate FloatPad1 nread order
+	setstate FloatPad1 nwrite "order + 1"
+	setstate FloatPad1 offset 1
+	setstate FloatPad1 fill 1.0
+	star FloatProduct.input=25 FloatProduct
+	numports FloatProduct.input=25 input 2
+	star WaveForm2 WaveForm
+	setstate WaveForm2 value "1 -1"
+	setstate WaveForm2 haltAtEnd NO
+	setstate WaveForm2 periodic YES
+	setstate WaveForm2 period 0
+	connect LevDur1 lp FloatGain2 input
+	connect LevDur1 refl BlackHole1 input
+	alias output FloatProduct.input=24 output
+	node node2
+	nodeconnect ComplexFFT2 output node2
+	nodeconnect FloatProduct.input=23 input#1 node2
+	nodeconnect FloatProduct.input=23 input#2 node2
+	connect Autocor1 output LevDur1 autocor
+	connect FloatProduct.input=23 output Reciprocal1 input
+	connect Reciprocal1 output FloatProduct.input=24 input#1
+	connect LevDur1 errPower Cut1 input
+	connect Cut1 output Repeat1 input
+	connect Repeat1 output FloatProduct.input=24 input#2
+	connect FloatGain2 output FloatPad1 input
+	connect FloatPad1 output ComplexFFT2 input
+	connect FloatProduct.input=25 output Autocor1 input
+	alias input FloatProduct.input=25 input#1
+	connect WaveForm2 output FloatProduct.input=25 input#2
+}
+domain SDF
+defgalaxy burg {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate order FLOAT 16
+	newstate resolution FLOAT 128
+	newstate log2resolution FLOAT 7
+	star BlackHole2 BlackHole
+	star ComplexFFT3 ComplexFFT
+	setstate ComplexFFT3 order log2resolution
+	setstate ComplexFFT3 size "order + 1"
+	setstate ComplexFFT3 direction 1
+	star FloatProduct.input=26 FloatProduct
+	numports FloatProduct.input=26 input 2
+	star FloatProduct.input=27 FloatProduct
+	numports FloatProduct.input=27 input 2
+	star Reciprocal2 Reciprocal
+	setstate Reciprocal2 magLimit 10000.0
+	star Burg1 Burg
+	setstate Burg1 order order
+	setstate Burg1 numInputs numInputs
+	star Repeat2 Repeat
+	setstate Repeat2 numTimes resolution
+	star Cut2 Cut
+	setstate Cut2 nread "order + 1"
+	setstate Cut2 nwrite 1
+	setstate Cut2 offset order
+	star FloatPad2 FloatPad
+	setstate FloatPad2 nread order
+	setstate FloatPad2 nwrite "order + 1"
+	setstate FloatPad2 offset 1
+	setstate FloatPad2 fill 1.0
+	star FloatGain3 FloatGain
+	setstate FloatGain3 gain "-1.0"
+	star FloatProduct.input=28 FloatProduct
+	numports FloatProduct.input=28 input 2
+	star WaveForm3 WaveForm
+	setstate WaveForm3 value "1 -1"
+	setstate WaveForm3 haltAtEnd NO
+	setstate WaveForm3 periodic YES
+	setstate WaveForm3 period 0
+	alias output FloatProduct.input=27 output
+	node node3
+	nodeconnect ComplexFFT3 output node3
+	nodeconnect FloatProduct.input=26 input#1 node3
+	nodeconnect FloatProduct.input=26 input#2 node3
+	connect FloatProduct.input=26 output Reciprocal2 input
+	connect Reciprocal2 output FloatProduct.input=27 input#1
+	connect Burg1 refl BlackHole2 input
+	connect Cut2 output Repeat2 input
+	connect Repeat2 output FloatProduct.input=27 input#2
+	connect Burg1 errPower Cut2 input
+	connect FloatGain3 output FloatPad2 input
+	connect Burg1 lp FloatGain3 input
+	connect FloatPad2 output ComplexFFT3 input
+	alias input FloatProduct.input=28 input#1
+	connect FloatProduct.input=28 output Burg1 input
+	connect WaveForm3 output FloatProduct.input=28 input#2
+}
+domain SDF
+defgalaxy testSignal {
+	domain SDF
+	newstate noiseVar FLOAT 0.1
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step 1.2566371
+	setstate FloatRamp1 value 0.0
+	star FloatRamp2 FloatRamp
+	setstate FloatRamp2 step 1.3194689
+	setstate FloatRamp2 value 0.0
+	star FloatRamp3 FloatRamp
+	setstate FloatRamp3 step "PI/20"
+	setstate FloatRamp3 value 0.0
+	star Sin1 Sin
+	star Sin2 Sin
+	star Sin3 Sin
+	star FloatSum1 FloatSum
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance noiseVar
+	star BiQuad1 BiQuad
+	setstate BiQuad1 d1 "-0.850848"
+	setstate BiQuad1 d2 0.0
+	setstate BiQuad1 n0 1.0
+	setstate BiQuad1 n1 0.0
+	setstate BiQuad1 n2 0.0
+	setstate BiQuad1 state1 0.0
+	setstate BiQuad1 state2 0.0
+	connect FloatRamp1 output Sin1 input
+	connect FloatRamp2 output Sin2 input
+	connect FloatRamp3 output Sin3 input
+	connect IIDGaussian1 output BiQuad1 input
+	connect BiQuad1 output FloatSum1 input
+	connect Sin3 output FloatSum1 input
+	connect Sin1 output FloatSum1 input
+	connect Sin2 output FloatSum1 input
+	alias out FloatSum1 output
+}
+reset
+# Creating universe 'powerSpectrum'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	newstate log2NumInputs int 9
+	newstate order int 32
+	star Xgraph1 Xgraph
+	setstate Xgraph1 title "3 sinusoids in colored noise"
+	setstate Xgraph1 saveFile ""
+	setstate Xgraph1 options "=800x200+0+0 -x n -0 signal"
+	setstate Xgraph1 ignore 0
+	setstate Xgraph1 xUnits 1.0
+	setstate Xgraph1 xInit 0.0
+	star DB1 DB
+	setstate DB1 min "-100"
+	setstate DB1 inputIsPower TRUE
+	star DB2 DB
+	setstate DB2 min "-100"
+	setstate DB2 inputIsPower TRUE
+	star periodogram1 periodogram
+	setstate periodogram1 numInputs "2 ^ log2NumInputs"
+	setstate periodogram1 log2order log2NumInputs
+	star autocorrelation1 autocorrelation
+	setstate autocorrelation1 numInputs "2 ^ log2NumInputs"
+	setstate autocorrelation1 order order
+	setstate autocorrelation1 resolution "2 ^ log2NumInputs"
+	setstate autocorrelation1 log2resolution log2NumInputs
+	star burg1 burg
+	setstate burg1 numInputs "2 ^ log2NumInputs"
+	setstate burg1 order order
+	setstate burg1 resolution "2 ^ log2NumInputs"
+	setstate burg1 log2resolution log2NumInputs
+	star DB3 DB
+	setstate DB3 min "-100"
+	setstate DB3 inputIsPower TRUE
+	star XMgraph.input=31 XMgraph
+	numports XMgraph.input=31 input 3
+	setstate XMgraph.input=31 title "power spectrum estimates (in dB)"
+	setstate XMgraph.input=31 saveFile ""
+	setstate XMgraph.input=31 options "-0 periodogram -1 autocorrelation -2 burg =800x400+0+230"
+	setstate XMgraph.input=31 ignore 0
+	setstate XMgraph.input=31 xUnits "PI/(2 ^ (log2NumInputs - 1))"
+	setstate XMgraph.input=31 xInit "-PI"
+	star testSignal1 testSignal
+	setstate testSignal1 noiseVar 0.101043
+	connect periodogram1 output DB1 input
+	connect autocorrelation1 output DB2 input
+	connect burg1 output DB3 input
+	connect DB2 output XMgraph.input=31 input#2
+	connect DB3 output XMgraph.input=31 input#3
+	connect DB1 output XMgraph.input=31 input#1
+	node node4
+	nodeconnect testSignal1 out node4
+	nodeconnect periodogram1 input node4
+	nodeconnect burg1 input node4
+	nodeconnect autocorrelation1 input node4
+	nodeconnect Xgraph1 input node4
+run 1
+wrapup

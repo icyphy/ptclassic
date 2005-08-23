@@ -1,0 +1,25 @@
+#! /bin/sh
+# usage: ptcl
+# or: ptcl filename
+
+# ptcl - Ptolemy interpreter
+# This shell script simply finds the appropriate (platform dependent)
+# version of ptcl and invokes it.  It also sets some critical environment
+# variables, like TCL_LIBRARY.
+#
+# Version: @(#)ptcl	1.9	01/28/99
+# Copyright (c) 1990-1999 The Regents of the University of California.
+# 	All Rights Reserved.
+#
+
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+
+# Set the commonly used environment variables
+# PTARCH is needed for the subsequent commands
+. "$PTOLEMY/bin/ptsetup.sh"
+
+exec $PTOLEMY/bin.$PTARCH/ptcl ${1+"$@"}

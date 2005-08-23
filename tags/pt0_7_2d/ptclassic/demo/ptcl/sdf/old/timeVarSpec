@@ -1,0 +1,131 @@
+domain SDF
+defgalaxy autocorrelation {
+	domain SDF
+	newstate numInputs FLOAT 512
+	newstate order FLOAT 16
+	newstate resolution FLOAT 128
+	newstate log2resolution FLOAT 7
+	star LevDur1 LevDur
+	setstate LevDur1 order order
+	star BlackHole1 BlackHole
+	star FloatGain1 FloatGain
+	setstate FloatGain1 gain "-1.0"
+	star ComplexFFT1 ComplexFFT
+	setstate ComplexFFT1 order log2resolution
+	setstate ComplexFFT1 size "order + 1"
+	setstate ComplexFFT1 direction 1
+	star FloatProduct.input=21 FloatProduct
+	numports FloatProduct.input=21 input 2
+	star FloatProduct.input=22 FloatProduct
+	numports FloatProduct.input=22 input 2
+	star Reciprocal1 Reciprocal
+	setstate Reciprocal1 magLimit 10000.0
+	star Autocor1 Autocor
+	setstate Autocor1 noInputsToAvg numInputs
+	setstate Autocor1 noLags order
+	setstate Autocor1 unbiased 0
+	star Cut1 Cut
+	setstate Cut1 nread "order + 1"
+	setstate Cut1 nwrite 1
+	setstate Cut1 offset order
+	star Repeat1 Repeat
+	setstate Repeat1 numTimes resolution
+	star FloatPad1 FloatPad
+	setstate FloatPad1 nread order
+	setstate FloatPad1 nwrite "order + 1"
+	setstate FloatPad1 offset 1
+	setstate FloatPad1 fill 1.0
+	star FloatProduct.input=23 FloatProduct
+	numports FloatProduct.input=23 input 2
+	star WaveForm1 WaveForm
+	setstate WaveForm1 value "1 -1"
+	setstate WaveForm1 haltAtEnd NO
+	setstate WaveForm1 periodic YES
+	setstate WaveForm1 period 0
+	connect LevDur1 lp FloatGain1 input
+	connect LevDur1 refl BlackHole1 input
+	alias output FloatProduct.input=22 output
+	node node1
+	nodeconnect ComplexFFT1 output node1
+	nodeconnect FloatProduct.input=21 input#1 node1
+	nodeconnect FloatProduct.input=21 input#2 node1
+	connect Autocor1 output LevDur1 autocor
+	connect FloatProduct.input=21 output Reciprocal1 input
+	connect Reciprocal1 output FloatProduct.input=22 input#1
+	connect LevDur1 errPower Cut1 input
+	connect Cut1 output Repeat1 input
+	connect Repeat1 output FloatProduct.input=22 input#2
+	connect FloatGain1 output FloatPad1 input
+	connect FloatPad1 output ComplexFFT1 input
+	connect FloatProduct.input=23 output Autocor1 input
+	alias input FloatProduct.input=23 input#1
+	connect WaveForm1 output FloatProduct.input=23 input#2
+}
+domain SDF
+defgalaxy signalSource {
+	domain SDF
+	newstate sweepTime int 5000
+	star FloatRamp1 FloatRamp
+	setstate FloatRamp1 step "PI/sweepTime"
+	setstate FloatRamp1 value 0.0
+	star Integrator1 Integrator
+	setstate Integrator1 feedbackGain 1.0
+	setstate Integrator1 top PI
+	setstate Integrator1 bottom "-PI"
+	setstate Integrator1 saturate NO
+	setstate Integrator1 state 0.0
+	star Cos1 Cos
+	star FloatDC1 FloatDC
+	setstate FloatDC1 level 0.0
+	star FloatProduct.input=24 FloatProduct
+	numports FloatProduct.input=24 input 2
+	star BiQuad1 BiQuad
+	setstate BiQuad1 d1 "-1.1430"
+	setstate BiQuad1 d2 0.41280
+	setstate BiQuad1 n0 0.067455
+	setstate BiQuad1 n1 0.135
+	setstate BiQuad1 n2 0.067455
+	setstate BiQuad1 state1 0.0
+	setstate BiQuad1 state2 0.0
+	star IIDGaussian1 IIDGaussian
+	setstate IIDGaussian1 mean 0.0
+	setstate IIDGaussian1 variance 1.0
+	connect FloatRamp1 output Integrator1 data
+	connect FloatDC1 output Integrator1 reset
+	connect Integrator1 output Cos1 input
+	connect Cos1 output FloatProduct.input=24 input#2
+	connect BiQuad1 output FloatProduct.input=24 input#1
+	connect IIDGaussian1 output BiQuad1 input
+	alias out FloatProduct.input=24 output
+}
+reset
+# Creating universe 'timeVarSpec'
+domain SDF
+target default-SDF
+	targetparam logFile ""
+	targetparam loopScheduler NO
+	star autocorrelation1 autocorrelation
+	setstate autocorrelation1 numInputs 256
+	setstate autocorrelation1 order 8
+	setstate autocorrelation1 resolution 128
+	setstate autocorrelation1 log2resolution 7
+	star Waterfall1 Waterfall
+	setstate Waterfall1 title "Time Varying Spectrum"
+	setstate Waterfall1 saveFile ""
+	setstate Waterfall1 options "=600x400+0+0 -0 'data' -1 'zero'"
+	setstate Waterfall1 ignore 0
+	setstate Waterfall1 xUnits "1/64"
+	setstate Waterfall1 xInit "-1.0"
+	setstate Waterfall1 traceLength 128
+	setstate Waterfall1 xUnits "1/64"
+	setstate Waterfall1 xInit "-1.0"
+	setstate Waterfall1 xOffset 8
+	setstate Waterfall1 yOffset 0.2
+	setstate Waterfall1 showHiddenLines NO
+	setstate Waterfall1 showZeroPlane YES
+	star signalSource1 signalSource
+	setstate signalSource1 sweepTime 5000
+	connect autocorrelation1 output Waterfall1 input
+	connect signalSource1 out autocorrelation1 input
+run 10
+wrapup

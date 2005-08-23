@@ -1,0 +1,23 @@
+reset
+# Creating universe 'psServer'
+domain DE
+target default-DE
+	targetparam timeScale 1.0
+	targetparam syncMode YES
+	star PSServer1 PSServer
+	setstate PSServer1 nomServiceTime 1.0
+	star "XMgraph.input=21" XMgraph
+	numports "XMgraph.input=21" input 2
+	setstate "XMgraph.input=21" title "Processor Sharing Server"
+	setstate "XMgraph.input=21" saveFile ""
+	setstate "XMgraph.input=21" options "-P -0 original -1 served =800x300+0+0"
+	star Clock1 Clock
+	setstate Clock1 interval 0.8
+	setstate Clock1 magnitude 1.0
+	node node1
+	nodeconnect Clock1 output node1
+	nodeconnect PSServer1 input node1
+	nodeconnect XMgraph.input=21 input#1 node1
+	connect PSServer1 output "XMgraph.input=21" "input#2"
+run 10
+wrapup

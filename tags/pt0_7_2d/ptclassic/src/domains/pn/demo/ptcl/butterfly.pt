@@ -1,0 +1,56 @@
+reset
+domain PN
+	star Gain1 Gain
+	setstate Gain1 gain 4.0
+	star Gain2 Gain
+	setstate Gain2 gain "1/12"
+	star Gain3 Gain
+	setstate Gain3 gain "-2.0"
+	star Add1 Add
+	star "Mpy.input=21" Mpy
+	numports "Mpy.input=21" input 2
+	star "Mpy.input=22" Mpy
+	numports "Mpy.input=22" input 2
+	star "Mpy.input=23" Mpy
+	numports "Mpy.input=23" input 2
+	star Ramp1 Ramp
+	setstate Ramp1 step "PI/100"
+	setstate Ramp1 value 0.0
+	star PolarToRect1 PolarToRect
+	star Sin1 Sin
+	star Cos1 Cos
+	star Cos2 Cos
+	star Exp1 Exp
+	star XYgraph1 XYgraph
+	setstate XYgraph1 title Butterfly
+	setstate XYgraph1 saveFile ""
+	setstate XYgraph1 options "=600x600+0+0 -0 xy"
+	setstate XYgraph1 ignore 0
+	connect Gain2 output Sin1 input
+	connect Gain1 output Cos1 input
+	connect Cos2 output Exp1 input
+	connect Cos1 output Gain3 input
+	node node1
+	nodeconnect Mpy.input=21 output node1
+	nodeconnect Mpy.input=22 input#1 node1
+	nodeconnect Mpy.input=22 input#2 node1
+	connect "Mpy.input=22" output "Mpy.input=23" "input#1"
+	node node2
+	nodeconnect Sin1 output node2
+	nodeconnect Mpy.input=21 input#1 node2
+	nodeconnect Mpy.input=21 input#2 node2
+	nodeconnect Mpy.input=23 input#2 node2
+	connect Gain3 output Add1 input
+	connect "Mpy.input=23" output Add1 input
+	connect Exp1 output Add1 input
+	connect Add1 output PolarToRect1 magnitude
+	node node3
+	nodeconnect Ramp1 output node3
+	nodeconnect Gain1 input node3
+	nodeconnect Gain2 input node3
+	nodeconnect PolarToRect1 phase node3
+	nodeconnect Cos2 input node3
+	connect PolarToRect1 x XYgraph1 xInput
+	connect PolarToRect1 y XYgraph1 input
+run 1000
+wrapup

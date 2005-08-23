@@ -1,0 +1,38 @@
+# @(#)vhdl_done.tk	1.1 09/08/99
+# Defaults
+set winx 500
+set winy 180
+
+###############################
+# Add a button for terminiation
+###############################
+frame .bframe -relief ridge \
+	-borderwidth 3 \
+	-background green
+button .bframe.button -text "Done" -command {exit}	
+pack .bframe.button
+
+##########
+# Add text
+##########
+frame .iframe
+message .iframe.instructions -text \
+"The ACSCGFPGATarget has completed."
+
+.iframe.instructions configure -width $winx
+pack .iframe.instructions
+
+#################
+# Establish title
+#################
+wm title . "ACSCGFPGATarget Paused"
+. configure -width $winx -height $winy 
+
+##########
+# Draw all
+##########
+pack .bframe .iframe
+place configure .bframe -x 205 -y 130
+place configure .iframe -x 10 -y 10
+
+

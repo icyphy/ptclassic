@@ -1,0 +1,43 @@
+# Compute numbers in the series 2^A * 3^B * 5^C
+# Version %W% %G%
+# Author: T. M. Parks
+
+reset
+newuniverse Kahn77fig4-opt
+domain PN
+
+     star GainInt1 GainInt
+	 setstate GainInt1 gain 5
+     star DelayInt1 DelayInt
+	 setstate DelayInt1 init 5
+     star DelayInt2 DelayInt
+	 setstate DelayInt2 init 3
+     star GainInt2 GainInt
+	 setstate GainInt2 gain 3
+     star DelayInt3 DelayInt
+	 setstate DelayInt3 init 1
+     star GainInt3 GainInt
+	 setstate GainInt3 gain 2
+     star Print1 Printer
+     star Merge1 Merge
+     star Merge2 Merge
+     connect GainInt1 output DelayInt1 input
+     connect GainInt2 output Merge1 a
+     connect Merge1 output DelayInt2 input
+     node node3
+	 nodeconnect DelayInt1 output node3
+	 nodeconnect GainInt1 input node3
+	 nodeconnect Merge1 b node3
+     node node4
+	 nodeconnect DelayInt2 output node4
+	 nodeconnect GainInt2 input node4
+	 nodeconnect Merge2 a node4
+     connect GainInt3 output Merge2 b
+     connect Merge2 output DelayInt3 input
+     node node7
+	 nodeconnect DelayInt3 output node7
+	 nodeconnect GainInt3 input node7
+	 nodeconnect Print1 input node7
+
+run 10
+wrapup

@@ -1,0 +1,543 @@
+M    The Ptolemy 0.x Frequently Asked Questions list   Last Updated: 	02/16/00
+------------------------------------------------------------------------
+
+CONTENTS:
+
+1.0 General Questions 
+        1.1 What is Ptolemy?
+        1.2 What are the hardware requirements?
+        1.3 What are the software requirements?
+        1.4 Demonstration Version (Ptiny Ptolemy)
+        1.5 Current release
+        1.6 Who was Ptolemy?
+        1.7 What is Tycho?
+        1.8 What is Ptolemy II?
+
+2.0 Getting Ptolemy
+        2.1 Ptolemy FTP site
+        2.2 Ptolemy WWW site 
+        2.3 Is Ptolemy available on CDROM?
+        2.4 Documentation
+        2.5 Technical Papers from the Ptolemy Group
+
+3.0 Ptolemy Users Groups
+        3.1 Ptolemy Mailing Lists
+        3.2 Ptolemy Interest Mailing List
+        3.3 Ptolemy Hackers Mailing List
+        3.4 The Ptolemy User Account
+        3.5 comp.soft-sys.ptolemy
+
+4.0 Octtools and facets
+        4.1 How are Ptolemy facets stored (what is Octtools)?
+	4.2 How do I move facets within a directory tree?
+	4.3 How do I ship facets	
+
+5.0 Troubleshooting Ptolemy
+        5.1  How to submit a good bug report
+        5.2  Troubleshooting guide
+--
+1.0  GENERAL QUESTIONS 
+
+1.1  What is Ptolemy?
+
+The ambitious objectives of the Ptolemy project include most aspects
+of designing signal processing and communications systems, ranging
+from designing and simulating algorithms to synthesizing hardware and
+software, parallelizing algorithms, and prototyping real-time systems.
+
+The Ptolemy software is a system-level design framework that allows
+mixing models of computation. In designing digital signal processing
+and communications systems, often the best available design tools are
+domain specific. The tools must be able to interact. Ptolemy allows
+the interaction of diverse models of computation by using the
+object-oriented principles of polymorphism and information hiding.
+For example, using Ptolemy, a high-level dataflow model of a signal
+processing system can be connected to a hardware simulator that in
+turn may be connected to a discrete-event model of a communication
+network.
+
+Since the Ptolemy project began in 1990, numerous advances in design,
+simulation, and code generation have occurred. Recent enhancements of
+the Ptolemy project have been in the realms of dataflow modeling of
+algorithms, synthesis of embedded software from such dataflow models,
+animation and visualization, multidimensional signal processing,
+managing complexity by means of higher-order functions,
+hardware/software partitioning, and VHDL code generation.  In 1993,
+the Ptolemy project joined the Advanced Research Projects Agencies
+(ARPA) RASSP project as a technology base developer.
+
+Ptolemy has been used for a broad range of applications including
+signal processing, telecommunications, parallel processing, wireless
+communications, network design, radio astronomy, real time systems,
+and hardware/software co-design.  Ptolemy has also been used as a
+laboratory for signal processing and communications courses.
+Currently Ptolemy has hundreds of users in hundreds of sites, in
+industry, academia, and government.
+
+1.2  What are the hardware requirements?
+
+Summary of architectures and 0.7.1
+ARCH           OS Release       Notes
+----           ----------       -----
+Our two main platforms that we provide binaries for:
+
+sol2.5         Solaris2.5.1 (Sparc)    Used in house at UCB
+hppa           HP-UX10.20       Used by other groups at UCB
+
+Four platforms we build on, but don't provide binaries:
+
+sol2.5.cfront  Solaris2.5.1 (Sparc)    Built in house at UCB, Used very little
+hppa.cfront    HP-UX10.20       Built in house at UCB, Used very little
+
+Active ports by others that we are folding fixes in from and hope
+to provide binaries for:
+
+alpha          Digital Unix 4    DEC Alpha port has alignment problems in vem
+hppa9          HPUX9
+linux          RedHat Linux 5.0	 In rpm format
+
+Binaries for these ports can be found in:
+ftp://ptolemy.eecs.berkeley.edu/pub/ptolemy/contrib
+
+Active ports by others that we are folding fixes in from, but we don't
+provide binaries.  See ftp://ptolemy.eecs.berkeley.edu/pub/ptolemy/contrib
+for available patches.
+
+aix            AIX4.1           RS/6000
+freebsd        FreeBSD 2.1-Stable
+irix6.32.cfront Irix6.x, 32 bit
+irix6.64.cfront Irix6.x, 64 bit
+
+linux		debian	
+
+Ports that have might not have been built in 0.7.1
+sun4		SunOS4.x	
+
+Ports that have might not have been built in 0.7.1
+
+aix.xlc        AIX3.2.5         Uses IBM xlc and xlC compilers, has many bugs
+nbsd.386       NetBSD
+unixware       UnixWare1.1
+
+Discontinued ports that once worked, but we've stopped trying to compile:
+
+mips           DEC Ultrix4.x    Discontinued in 0.5.2
+cfront         SunOS4.1.3       Sun CC1.x(?) Discontinued in 0.5.2
+
+Ptolemy 0.7.1 will build under Windows NT with Cygwin32 and Cygwin32
+X11 prebuilt binaries. For details, seen
+http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html 
+
+Installing the full system requires 110 Mbytes for Ptolemy (more if you
+optionally remake).  The demonstration version of Ptolemy, Ptiny
+Ptolemy, only requires 12 Mbytes of disk space.  Ptolemy requires at
+least 8 Mbytes of physical memory.
+
+1.3  What are the software requirements?
+
+Ptolemy requires the X window system.  Ptolemy relies on a subset of
+the GNU tools, such as GNU make and gcc/libg++.  The binaries for the
+GNU tools on some architectures are supplied as a separate compressed
+tar file. It is possible to build Ptolemy with non-GNU compilers.
+
+Ptolemy 0.7.1 is built with egcs-1.0.2
+
+You can build with gcc-2.7.2.2 and libg++-2.7.2, but libg++ must be
+built with --enable-shared. See
+http://ptolemy.eecs.berkeley.edu/ptolemy0.7/html/g++shared.txt
+
+Ptolemy 0.7.1 also requires Itcl2.2, which uses Tcl7.6/Tk4.2.  
+
+Itcl2.2 sources are included in the 'other.src' tar file.  Itcl2.2
+binaries are included in the various architecture dependent binary tar
+files.
+
+Ptolemy 0.7.2devel is built with egcs-1.1.
+
+Ptolemy 0.7.2devel also requires Itcl3.0, which requires Tcl8.0.2 and
+Tk8.0.2.  We include Itcl3.0.1, Tcl8.0.4 and Tk8.0.4 sources in
+the 0.7.2devel other.src tar file
+
+
+Ptolemy includes the Tycho system.  Tycho is a graphical front end
+that uses Itcl.
+
+
+1.4  Demonstration Version (Ptiny Ptolemy)
+
+The demonstration version of Ptolemy, known as Ptiny Ptolemy, is a
+subset of Ptolemy designed to give users a sample of the power and
+flexibility of Ptolemy without taking up quite so much disk space.
+Ptiny Ptolemy is also meant for the classroom as all of the Ptolemy
+laboratory exercises may be performed with Ptiny Ptolemy alone.
+
+Ptiny Ptolemy runs on the Sun 4, HP-PA, and DECStation (MIPS)
+workstations.  You will need 12 Mbytes of disk space to install it.
+
+The demonstration version of Ptolemy is available via FTP in the
+ptolemy.eecs.berkeley.edu FTP site in the pub/ptolemy/ptiny0.5
+directory.  More information on the Ptolemy FTP site is in the GETTING
+PTOLEMY section.  Ptiny Ptolemy is not available on tape at this time.
+
+Joe Buck has created a linux only version of Ptiny 0.5.2, available on
+the Ptolemy ftp site as
+pub/ptolemy/contrib/linux/pt-0.5.2tiny-linux.tar.gz.
+
+1.5  Current release
+
+The current production release of Ptolemy is version 0.7.1p1.  This is
+the the seventh major release of Ptolemy.  The zero out in front is to
+remind users that this is University software and not a commercial
+product.  Patches to the current release are found in the Ptolemy FTP
+site.
+
+Ptolemy0.7.1 was released on June 12, 1998.
+
+The current development release of Ptolemy is version 0.7.2devel.
+0.7.2devel is a release for developers, and is less stable than
+0.7.1.  The main features of 0.7.2devel are support for
+Itcl3.0/Tcl8.0/Tk8.0 and support for Cygwinb20.1 under NT.
+
+Ptolemy0.7.2devel was released in February of 1999.
+
+1.6  Who was Ptolemy?
+
+Claudius Ptolemaus (Ptolemy to his friends) fl A.D. 127-151, was an
+Hellenistic mathematician, astronomer, and geographer in Alexandria.
+He's most famous for his model of the Universe with the Earth at the
+center and heavenly bodies moving about it.  The planets moved on
+circles (attached to circles) attached to the circles of their orbits.
+Although ungainly, his model was able to accurately account for the
+movements across the sky of both the stars and planets.
+
+
+1.7 What is Tycho?
+
+Tycho is an object-oriented syntax manager with an underlying
+heterogeneous technical rationale. It provides a number of editors and
+graphical widgets in an extensible, reusable framework. The editors
+for textual syntaxes are modeled after emacs in the sense the emacs
+key bindings are used when possible. However, they make more extensive
+use of menus, windows, and dialogs than emacs. Also, the intent is
+that visual editors and visualization tools will be fully integrated,
+something that would be difficult to accomplish with emacs in its
+current form. Editors for visual syntaxes will be more diverse. The
+system documentation is integrated, using a hypertext system
+compatible with the worldwide web. Tycho has been designed primarily
+for use with the Ptolemy system, a heterogeneous design environment
+from U.C. Berkeley, but it is also useful on its own.
+
+Ptolemy 0.7.1 includes Tycho 0.2.1.
+
+Ptolemy 0.7.2devel includes a prerelease of Tycho 0.3.  
+
+http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html
+contains more information about Tycho.
+
+1.8 What is Ptolemy II?
+
+Ptolemy II is a set of Java packages supporting heterogeneous,
+concurrent modeling and design. Its kernel package supports clustered
+hierarchical graphs, which are collections of entities and relations
+between those entities. Its actor package extends the kernel so that
+entities have functionality and can communicate via the relations. Its
+domains extend the actor package by imposing models of computation on
+the interaction between entities. Examples of models of computation
+include discrete-event systems, dataflow, process networks,
+synchronous/reactive systems, and communicating sequential
+processes. Ptolemy II includes a number of support packages, such as
+graph, providing graph-theoretic manipulations, math, providing matrix
+and vector math and signal processing functions, plot, providing
+visual display of data, data, providing a type system, data
+encapsulation and an expression parser, etc.
+
+For more information about Ptolemy II, see:
+http://ptolemy.eecs.berkeley.edu/ptolemyII/
+
+2.0  GETTING PTOLEMY
+
+2.1  Ptolemy FTP site
+
+The Ptolemy FTP site is: ptolemy.eecs.berkeley.edu
+
+This site contains the latest release of Ptolemy, patches to the
+current release, a postscript version of the Ptolemy manual, the
+demonstration version of Ptolemy, selected Ptolemy papers and journal
+articles, as well as the log files for the mailing list.
+
+For those unfamiliar with anonymous ftp, here's what you do:
+FTP to Internet host "ptolemy.eecs.berkeley.edu"  (128.32.240.78)
+Login as "anonymous"; use your full email address as the password
+
+	cd pub
+
+get the README file and follow its instructions.
+
+Note that if you are downloading binary files from the Ptolemy ftp
+site, be sure to turn on binary mode by typing 'binary'.  The Ptolemy
+distribution tar files are binary files and should be downloaded in
+binary mode.
+
+There is an FTP mirror in Japan: ftp.iij.ad.jp This site is a mirror
+of the Berkeley site.  Ptolemy is in the pub/misc/ptolemy directory.
+
+There is a WWW mirror of in France at
+http://ptolemy.thomson-csf.fr/ptolemy
+and a ftp mirror at
+ftp://ptolemy.thomson-csf.fr/mirrors/ptolemy.eecs.berkeley.edu/
+
+2.2  Ptolemy WWW site
+
+There is a World Wide Web (WWW) page for Ptolemy:
+	http://ptolemy.eecs.berkeley.edu/
+The Ptolemy WWW page contains information about Ptolemy,
+demonstrations of Ptolemy programs, and access to the Ptolemy FTP
+site, and a hypertext version of the Users's Manual and the Kernel
+Manual.
+
+
+2.3 Is Ptolemy available on CDROM?
+
+Prime Time Freeware has in the past had Ptolemy available via CDROM.
+As of 9/95, the latest issue (Prime Time Freeware for UNIX, Issue 4-2)
+contains Ptolemy0.5.2
+
+Prime Time Freeware can be reached at:
+
+  Prime Time Freeware		Tel:	+1 408 433 9662
+  370 Altair Way, Suite 150	Fax:	+1 408 433 0727
+  Sunnyvale, CA			Email:	info@ptf.com
+  94086 USA			WWW:	www.ptf.com
+
+2.4  Documentation
+
+The Ptolemy Manual (The Almagest) is split into three volumes: 
+User's Manual, Programmer's Manual, and Kernel Manual.
+The new user will only need the User's Manual to get started.
+
+All three volumes are available in PostScript, HTML and PDF formats
+from the Ptolemy FTP site at
+http://ptolemy.eecs.berkeley.edu/papers/almagest/index.html
+
+In addition, bound hard copies of each of the volumes are available
+from the ILP Software Distribution Office Current price is $30 per
+volume, but this is subject to change.
+
+  EECS/ERL Industrial Liaison Program Office
+  Software Distribution Office
+  205 Cory Hall # 1770
+  University of California at Berkeley
+  Berkeley, CA 94720-1770
+  (510)643-6687 (voice)
+  (510)643-6694 (fax)
+  software@eecs.berkeley.edu
+  http://www.eecs.berkeley.edu/~ilp
+
+2.5  Technical Papers from the Ptolemy Group 
+
+A number of Ptolemy related papers and journal articles are available
+in the ptolemy.eecs.berkeley.edu FTP site in the pub/ptolemy/papers
+directory and also via the Ptolemy WWW homepage
+(http://ptolemy.eecs.berkeley.edu).  From the Ptolemy homepage, one
+can search the publications by keyword. Some of the papers are in the
+postscript format, and require a postscript printer or viewer.  Other
+papers are in HTML format.  The paper "overview" gives an overview of
+Ptolemy and would be of particular interest to new users.
+
+
+3.0  PTOLEMY USERS GROUPS
+
+3.1  Ptolemy Mailing lists 
+
+The Ptolemy mailing lists are run by the Majordomo mailing list 
+server.  This server can automatically subscribe you to mailing
+lists and it can send you monthly archive files for each of the
+lists.  To find out more about our Majordomo sever, send an email
+letter to: majordomo@ptolemy.eecs.berkeley.edu with the word "help"
+in the body of the letter.
+
+3.2 Ptolemy Interest Mailing list
+
+This moderated mailing list is for Ptolemy announcements only. Thus,
+you cannot post to this group.  The amount of mail here is kept very
+light (a few messages a year).
+
+To subscribe to the ptolemy-interest mailing list, send mail to:
+ptolemy-interest-request@ptolemy.eecs.berkeley.edu with the word
+"subscribe" in the body (not the subject) of the letter.
+
+All mail to ptolemy-interest also goes to ptolemy-hackers, so if you
+subscribe to ptolemy-hackers, there is no need to subscribe to
+ptolemy-interest too.
+
+3.3  Ptolemy Hackers Mailing list
+
+This is a discussion list for Ptolemy questions, bug reports, and to
+share Ptolemy additions and applications.  Since this is a discussion
+group, mail volume can sometimes be heavy.  All mail sent to Ptolemy-
+hackers is automatically cross posted to the comp.soft-sys.ptolemy
+newsgroup.
+
+To subscribe to the ptolemy-hackers mailing list, send mail to:
+ptolemy-hackers-request@ptolemy.eecs.berkeley.edu with the word 
+"subscribe" in the body of the letter.  To leave the newsgroup put
+the word "unsubscribe" in the body of your message.
+
+3.4  The Ptolemy Users Account
+
+Ptolemy is distributed without support or warranty.  However, if you
+really need to contact a human being with a Ptolemy question, you can
+send email to: ptolemy@eecs.berkeley.edu.
+
+For the latest information about Ptolemy: 
+finger ptolemy@eecs.berkeley.edu
+
+3.5  comp.soft-sys.ptolemy
+
+Just like the ptolemy-hackers mailing list, the comp.soft-sys.ptolemy
+newsgroup is a forum of the discussion of Ptolemy questions, bug
+reports, additions, and applications.  Note that all mail sent to the
+ptolemy-hackers mailing list is automatically posted to the
+comp.soft-sys.ptolemy newsgroup as well.
+
+The name is chosen to correspond to similar newsgroups for the Khoros
+and Matlab systems, which are also under comp.soft-sys.
+
+4.0 OCTTOOLS and Facets
+
+4.1 How are Ptolemy designs stored (what is Octtools)?
+
+Ptolemy stores its diagrams as binary format files.  Ptolemy uses the
+Octtools package to encode the data in what Octtools calls 'facets'.
+Octtools is a package that was written at UC Berkeley for CAD work.
+The Octtools manuals can be obtained from the Industrial Liason
+Project, see below for more contact information.  
+
+You can obtain Octtools manuals from:
+http://buffy.EECS.Berkeley.EDU/IRO/Software/Catalog/Description/octtools5.2.html
+
+>   1.Installation Notes. Available separately for $2.50 
+>   2.OctTools-5.2: Part I - User's Guide. Available separately for $15.00 
+>   3.OctTools-5.2: Part II - Reference. Available separately for $15.00 
+>   4.OctTools-5.2: Part III - Man Pages. Available separately for $15.00 
+>   5.OctTools-5.2: Part IV. Available separately for $15.00 
+
+The Octtools sources are distributed in a separate tar file called
+*.other.src.*.  If you are interested in seeing how Octtools works,
+the program oct2ps is a good starting point.  Oct2ps converts Octtools
+facets into PostScript, the sources are in the other.src tar file, in
+$PTOLEMY/src/octtools/oct2ps.  The sources for oct2ptcl, which
+converts Oct facet to ptcl scripts may also be of interest.  The
+source for oct2ptcl is in $PTOLEMY/src/octtools/tkoct/oct2ptcl.
+
+
+Vem documentation can be found at $PTOLEMY/src/octtools/vem/doc, which
+is in the Ptolemy other.src tar file
+
+In Ptolemy, the directory $PTOLEMY/src/pigilib is where most of the
+interface between octtools and the Ptolemy C++ back end exists.
+
+$PTOLEMY/lib/tcl contains the Tcl interface to Oct.
+There are a number of tcl commands that open oct facets and such.
+These tcl commands are basically undocumented, but a summary
+was posted to Ptolemy Hackers on 2/28/96 by Edward Lee.
+Go to www.dejanews.com and search for 
+"undocumented features" ptolemy
+
+4.2 How do I move facets within a directory tree?
+	Use either masters or ptfixtree.
+	See '2.12.2 Moving objects' in The Ptolemy User's Manual. 
+http://ptolemy.eecs.berkeley.edu/papers/almagest/docs/user/html/pigi.doc12.html
+
+4.3 How do I ship facets
+	Facets are in binary, so you can use tar and uuencode.
+	See:
+	See ftp://ptolemy.eecs.berkeley.edu/pub/ptolemy/contrib/stars/README
+
+5.0  TROUBLESHOOTING PTOLEMY
+
+5.1  How to submit a good bug report
+
+If you post to comp.soft-sys.ptolemy or mail to ptolemy-hackers about
+a problem, you might want to include the following:
+
+	* What release of Ptolemy you are running? The start up window
+	should state the version.
+	* What architecture and OS you are running?  For example, sol2
+	under Solaris2.4.
+	* Whether you built your own Ptolemy binaries, or are using
+	prebuilt binaries from ptolemy.eecs.berkeley.edu
+	* If applicable, whether you built your own gcc, or are using
+	prebuilt binaries.
+
+
+5.2  Troubleshooting guide
+
+Appendix A of the Ptolemy User's manual includes a troubleshooting guide.
+Appendix A can be found at:
+http://ptolemy.eecs.berkeley.edu/papers/almagest/appendixA.html
+
+The troubleshooting guide contains the following:
+
+A.5.1 Problems with tar files 
+               EOF messages while using tar on Suns 
+          A.5.2 Problems starting pigi 
+               pigi: Command not found 
+               Mr. Ptolemy window does not come up 
+               pigi fails to start when put in the background 
+               pigi fails to start up, giving shared library messages 
+               tycho fails to start up, giving TCL_LIBRARY messages 
+          A.5.3 Common problems while running pigi 
+               pxgraph fails to come up or displays a blank window 
+               Old flowgraphs do not work (facets are inconsistent) 
+               Ptolemy simulations do not stop 
+               Multi-porthole galaxies fail 
+               Star is a compiled-in star and cannot be dynamically loaded 
+          A.5.4 Window system problems 
+               Error: ld.so: libXext.so.4: not found 
+               pigi fails to start and gives a message about not finding fonts 
+               Ptolemy startup window only has an OK button 
+               Emacs confuses .pl files with Prolog 
+               Problems with the colormap 
+               The window manager crashes 
+               Problems with Mac X and Ptolemy 
+               Problems with Exceed and Ptolemy 
+               Problems with XFree86 
+          A.5.5 Problems with the compiler 
+               as vs. gas 
+               Collect 
+               Error: Linker: no constructors in linked-in code! 
+               Environment variables 
+               Using trace 
+          A.5.6 Problems compiling files 
+               Using cpp to diagnose .h file problems 
+               Narrowing the problem down. 
+               Using c++filt to demangle symbols 
+               Sources of information for compiler problems 
+          A.5.7 Generated code in CGC fails to compile 
+          A.5.8 Ptolemy will not recompile 
+               Messages about "unexpected end of line seen" while running make 
+               Can I use my own version of Tcl/Tk? 
+               Can I use my own version of gcc and libg++? 
+               Can't find genStarList or genStarTable during recompilation 
+               "CGCMakefileTarget.h: No such file or directory" while linking
+	       pigiRpc  
+               Missing symbols while linking pigiRpc 
+          A.5.9 Dynamic linking fails 
+          A.5.10 Dynamic linking and makefiles 
+          A.5.11 Path and/or environment variables not set in "debug" pigi 
+
+A.6.1 Bugs in vem 
+          A.6.2 Bugs in pigi 
+          A.6.3 Bugs in tycho 
+          A.6.4 Code generation bugs 
+          A.6.5 Bugs in pxgraph 
+          A.6.6 HPPA specific bugs 
+          A.6.7 IBM AIX specific bugs 
+          A.6.8 Silicon Graphics IRIX5 specific bugs 
+          A.6.9 Linux specific bugs 
+          A.6.10 Sun Solaris 2.4 specific bugs 
+          A.6.11 Sun OS4 specific bugs 
+          A.6.12 DEC Alpha specific bugs 
+          A.6.13 GNU compiler bugs 
+

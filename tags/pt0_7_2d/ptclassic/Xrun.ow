@@ -1,0 +1,10 @@
+#! /bin/csh -f
+# @(#)Xrun.ow	1.1 12/11/91
+# This file starts up Open Windows, configured correctly to run pigi with
+# the Open Look window manager.
+# The following files define the configuration: .xinitrc.ow, .Xdefaults
+setenv OPENWINHOME /usr/openwin
+setenv XINITRC ~/.xinitrc.ow
+openwin
+clear_colormap
+kbd_mode -a

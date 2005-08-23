@@ -1,0 +1,113 @@
+#! /bin/csh -f
+# @(#)checkextra	1.9 11/12/98
+# * print a list of "extra" files.
+# * print out the names of any files that are not significant in the first
+#   13 characters.  Linux has this problem with GNU ar.
+# * If the name of the current directory, print out the names of any icons 
+#   that don't have contents; or schematics; 
+# * print out the names of files not in SCCS
+
+set res = 0
+set prefix = ""
+if ($#argv >= 1 && "$1" == "-v") then
+	set prefix = "Extra files in ${cwd}: "
+	set toolongprefix = "Files with names that are not differnet in the first 13 chars in${cwd}: "
+	shift argv
+endif
+
+set files = ()
+foreach x ($*)
+	if (-r $x) set files = ($files $x)
+end
+
+
+# Check for files not in sccs
+if ( ! -d SCCS ) then
+	echo "No $cwd/SCCS directory"
+else
+	echo $files | checksccs 
+endif
+
+# Check for filenames that are not unique in the first 13 chars
+# gfold is GNU fold
+echo $files | gfold -s | checklen $toolongprefix
+if ($status == 1) then
+	set res = 1
+endif
+
+# If this is the stars directory, look for ~ in demos
+set curdir = `pwd`
+set thisdir = `basename $curdir`
+
+set baddemo = 0
+if ( "$thisdir" == "stars" ) then
+	if ( -d ../demo ) then
+		echo "Checking for tilde in ../demo/*/* facets"
+		foreach demo ( ../demo/* ../icons/* )
+			if ( -d  $demo/schematic ) then
+				strings $demo/schematic/* |& egrep '~[A-Za-z]|users' >& /dev/null
+				if ( $status == 0 ) then
+					echo "$demo         `strings $demo/schematic/* | egrep '~[A-Za-z]|users'`"
+					set baddemo = 1
+				endif
+			endif
+		end
+	endif
+endif
+
+# If this is a stars directory check for empty ../icons
+set iconretval = 0
+if ( "$thisdir" == "stars" ) then
+	if ( -d ../icons ) then
+		echo "Checking for bogus icons in ../icons"
+		set badiconfile = /tmp/badicons$$
+		rm -f $badiconfile
+		# fsm has no icons, so we check
+		(glob ../icons/*) >& /dev/null
+		if ( "$status" == 0 ) then
+			foreach icon ( ../icons/* )
+				if ( "`basename $icon .ps`" != "`basename $icon`" ) then
+					continue
+				endif
+				if ( ! -f $icon/schematic/contents\; || ! -f $icon/schematic/contents\;) then
+					echo -n "`pwd`/$icon " >> $badiconfile
+				endif
+			end
+		endif
+		if ( -f $badiconfile ) then
+			echo -n "The following icons should be removed: "
+			cat $badiconfile
+			echo ""
+			ls -laR `cat $badiconfile`
+			set iconretval = 1
+		endif
+		rm -f $badiconfile
+	endif
+endif
+
+ls . > /tmp/cj1$$
+
+ls -d $files > /tmp/cj2$$
+
+set files = (`comm -23 /tmp/cj1$$ /tmp/cj2$$`)
+if ($#files > 0) then
+	set res = 1
+	# for very long lines, this barfs
+	#echo "$prefix$files"
+	echo -n "$prefix "
+	echo $files
+endif
+
+rm -f /tmp/cj[12]$$
+
+if ( $iconretval != 0 ) then
+	exit $iconretval
+endif
+
+if ( $baddemo != 0 ) then
+	exit $baddemo
+endif
+
+exit $res
+endif
+

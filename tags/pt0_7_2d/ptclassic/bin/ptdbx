@@ -1,0 +1,17 @@
+#!/bin/csh -f
+# %W% %G%
+# Run dbx inside emacs.
+# Authors:	T. M. Parks, Christopher Hylands
+# Created:	16 March 1996
+
+set cmdFile = /tmp/emacs.dbx.$$
+
+onintr cleanUp
+cat >> $cmdFile << EOF
+(dbx "dbx $*")
+EOF
+
+emacs -l $cmdFile
+
+cleanUp:
+rm -f $cmdFile
