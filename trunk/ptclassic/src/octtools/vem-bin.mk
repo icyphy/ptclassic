@@ -51,8 +51,8 @@ C_INCL= -I../include -I../bitmaps -I../../include $(PTCOMPAT_INCSPEC) $(X11_INCS
 lint:	$(LIBCSRCS)
 	lint -u $(C_INCL) $^ > lint
 
-$(OBJS):
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) -c $<
+#$(OBJS):
+#	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) -c $<
 
 # Fake out rules in common.mk for $(LIBDIR)/$(LIB) and 
 # $(LIBDIR)/$(LIBNONSHARED)
