@@ -11,7 +11,7 @@
 # say, Sun-3 and Sun-4 objects can be maintained.
 
 # subdomain.mk reads MYVPATH
-MYVPATH = ../../../../../../
+MYVPATH = ../../../../../../src/domains/cgc/targets/NOWam
 
 include ../../../../../mk/subdomain.mk
 
