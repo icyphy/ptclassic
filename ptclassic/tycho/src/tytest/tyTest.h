@@ -3,9 +3,9 @@
 
 Authors: John Reekie.
 
-Version: $Id$
+Version: @(#)tyTest.h	1.4 04/08/97
 
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Tytest_TimerTask
  *
  * A procedure that starts and stop a C "task" of the kind required by
- * the Tycho scheduler. 
+ * tha Tycho scheduler. 
  */
 int
 Tytest_TestTask(ClientData dummy, Tcl_Interp *interp, int argc, char **argv);

@@ -1,13 +1,13 @@
 #! /bin/sh
 # Command-line program for the tycho.util.tydoc utility \
-    exec tclsh "$0" "$@"
+    exec itclsh "$0" "$@"
 
-# $Id$
+# @(#)tydoc	1.6 01/12/99
 # Author: John Reekie
 
 # Load up Itcl
-package require Itcl
-namespace import itcl::*
+#package require Itcl
+#namespace import itcl::*
 
 # Create the tycho namespace
 namespace eval ::tycho {}

@@ -2,7 +2,7 @@
 # Command-line program for the tycho.util.idoc utility \
     exec itkwish "$0" "$@"
 
-# $Id$
+# @(#)idoc	1.2 07/24/98
 # Author: John Reekie
 
 # Create the tycho namespace

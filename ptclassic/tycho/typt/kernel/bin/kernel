@@ -2,7 +2,7 @@
 # Command-line program for the tycho.typt.kernel utility \
     exec itclsh "$0" "$@"
 
-# $Id$
+# @(#)kernel	1.1 03/16/98
 # Author: John Reekie
 
 # If the KERNEL_LIBRARY variable is set, add it to the auto_path

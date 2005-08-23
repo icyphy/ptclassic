@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)gui.tcl	1.12 10/27/99
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

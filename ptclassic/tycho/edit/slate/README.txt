@@ -1,5 +1,5 @@
 README.txt
-$Id$
+@(#)README.txt	1.3 07/29/98
 
 This is the README.txt file for the Tycho
 package slate (also known as tycho.edit.slate).

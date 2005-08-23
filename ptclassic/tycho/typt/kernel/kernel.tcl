@@ -2,7 +2,7 @@
 #
 # @Authors: John Reekie, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)kernel.tcl	1.5 07/21/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

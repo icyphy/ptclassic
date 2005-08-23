@@ -1,9 +1,9 @@
 # Create a dialog box for the user to edit preferences with.
 #
-# @Version: $Id$
+# @Version: @(#)StyleChooser.itcl	1.31 06/29/98
 # @Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

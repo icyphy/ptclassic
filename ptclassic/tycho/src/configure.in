@@ -1,9 +1,9 @@
 dnl This file is an input file used by autoconf to generate the configure file.
 dnl 
 # Author: Christopher Hylands
-# Version: $Id$
+# Version: @(#)configure.in	1.35 01/20/99
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

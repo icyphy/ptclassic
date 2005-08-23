@@ -1,6 +1,6 @@
 /* One line description of file.
 
- Copyright (c) 1999 The Regents of the University of California.
+ Copyright (c) 1998 The Regents of the University of California.
  All rights reserved.
  Permission is hereby granted, without written agreement and without
  license or royalty fees, to use, copy, modify, and distribute this
@@ -23,18 +23,19 @@
  
                                         PT_COPYRIGHT_VERSION_2
                                         COPYRIGHTENDKEY
-@ProposedRating Red (yourname@eecs.berkeley.edu)
-@AcceptedRating Red (reviewmoderator@eecs.berkeley.edu)
+@ProposedRating Green (yourname@eecs.berkeley.edu)
+@AcceptedRating Green (reviewmoderator@eecs.berkeley.edu)
+
 */
 
 package MyPackageName;
 
 //////////////////////////////////////////////////////////////////////////
 //// ClassName
-/**
+/** 
 Description of the class
-@author yourname
-@version $Id$
+@author youname
+@version %W%	%G%
 @see classname
 @see full-classname
 */
@@ -45,7 +46,7 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */
+     */	
     public ClassName() {
     }
 
@@ -58,14 +59,14 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */
+     */	
     public int APublicMethod() {
         return 1;
     }
 
 
-    ///////////////////////////////////////////////////////////////////
-    ////                         protected methods                 ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         protected methods                      ////
 
     /** Description
      * @see full-classname#method-name()
@@ -73,7 +74,7 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */
+     */	
     protected int _AProtectedMethod() {
         return 1;
     }

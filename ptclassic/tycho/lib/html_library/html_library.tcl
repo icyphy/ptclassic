@@ -1,6 +1,6 @@
 # Simple HTML display library by Stephen Uhler (stephen.uhler@sun.com)
 # Copyright (c) 1995 by Sun Microsystems
-# Version: $Id$
+# Version: @(#)html_library.tcl	1.5 12/05/97
 # Based on Sun Version 0.3 Fri Sep  1 10:47:17 PDT 1995
 #
 # See the file "license.terms" for information on usage and redistribution

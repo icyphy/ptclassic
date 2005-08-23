@@ -2,9 +2,9 @@
 # tycho - Ptolemy Tycho Brahe Graphical Interface
 #
 # Authors: Edward Lee, Christopher Hylands
-# Version: $Id$
+# Version: @(#)tycho	1.62	03/29/98
 #
-# Copyright (c) 1994-%Q% The Regents of the University of California.
+# Copyright (c) 1994-1998 The Regents of the University of California.
 # All rights reserved.
 # See the file $TYCHO/copyright.txt for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
@@ -174,6 +174,10 @@ endif
 ##################################################################
 # itkwish
 if (! $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
+	# We did not select Ptolemy, so we just assume that itkwish
+	# is in the users path.  Bad idea?  One alternative would be
+	# to see if $PTOLEMY is set and then check for 
+	# $PTOLEMY/bin.$PTARCH/itkwish
 	if ( $?tychodebug ) then
 		if ( $?PT_DEBUG) then
 			set debugger = $PT_DEBUG
@@ -183,12 +187,9 @@ if (! $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
 		set debugcmdfile = /tmp/tychodbg.$$
 		echo "break main" > $debugcmdfile
 		echo run -f \"$TYCHO/kernel/Tycho.tcl\" $runargs >> $debugcmdfile
-		if ( $?PTOLEMY && -e "$PTOLEMY/bin.$PTARCH/itkwish" ) then
-			set prog = ($debugger -x $debugcmdfile $PTOLEMY/bin.$PTARCH/itkwish )
-			#set prog = (itkwish.pure -f $TYCHO/kernel/Tycho.tcl)
-		else
-			set prog = ($debugger -x $debugcmdfile itkwish)
-		endif
+		set prog = ($debugger -x $debugcmdfile itkwish)
+
+		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
 	else
 		set prog = (itkwish -f \"\$TYCHO/kernel/Tycho.tcl\")
 	endif

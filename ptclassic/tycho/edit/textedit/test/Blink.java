@@ -1,7 +1,7 @@
 /* 
 Authors: Sun Microsystems
 
-Version: $Id$
+Version: @(#)Blink.java	1.1 10/21/97
 
 Copyright (c) 1996 The Regents of the University of California.
 All rights reserved.

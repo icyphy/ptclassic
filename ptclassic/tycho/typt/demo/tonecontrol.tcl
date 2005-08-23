@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)tonecontrol.tcl	1.3 04/09/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.

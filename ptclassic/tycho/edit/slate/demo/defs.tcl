@@ -1,6 +1,6 @@
 # Utility procedures for Slate demos
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996- The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# $Id$
+# @(#)defs.tcl	1.1 07/29/98
 
 proc ::demo::newslate {title args} {
     # If running TYCHO, use the Tycho gui package

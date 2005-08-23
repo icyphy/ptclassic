@@ -1,9 +1,9 @@
 # Control the fonts in the Tycho system.
 #
 # @Author: Edward A. Lee, John Reekie
-# @Version: $Id$
+# @Version: @(#)FontManager.itcl	1.49   05/22/98
 #
-# @Copyright Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

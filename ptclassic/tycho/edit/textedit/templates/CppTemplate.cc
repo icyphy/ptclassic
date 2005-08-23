@@ -1,7 +1,7 @@
 static const char file_id[] = "ClassName";
 /**************************************************************************
 Version identification:
-$Id$
+%W% %G%
 
 Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

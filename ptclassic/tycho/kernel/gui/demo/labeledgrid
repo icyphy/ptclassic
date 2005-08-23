@@ -1,6 +1,6 @@
 #!/bin/sh
 #  LabeledGrid demo script
-#   $Id$
+#   @(#)labeledgrid	1.1 06/09/98
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 

@@ -1,5 +1,5 @@
 README.txt
-$Id$
+@(#)README.txt	1.2 03/05/98
 
 This is the README.txt file for the Tycho
 package tycho.util.ptsim.

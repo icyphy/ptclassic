@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Tycho system, slate/doc/tutorial directory.
 #
-# $Id$
+# @(#)makefile	1.3 07/29/98
 # Author: Christopher Hylands
 #
 # Copyright (c) 1996-1997 The Regents of the University of California.

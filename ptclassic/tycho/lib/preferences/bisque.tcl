@@ -1,4 +1,4 @@
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 # Tycho preferences file to set color to "bisque."
 #
-# $Id$
+# @(#)bisque.tcl	1.5 04/07/97
 
 ::tycho::preference assign edittext textBackground [ptkColor antiqueWhite white]
 ::tycho::preference assign edittext selectColor [ptkColor yellow white]

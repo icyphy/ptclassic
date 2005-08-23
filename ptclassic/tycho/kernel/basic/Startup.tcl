@@ -4,7 +4,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)Startup.tcl	1.9 08/05/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

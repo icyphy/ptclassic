@@ -3,7 +3,7 @@
 # To run this demo, execute
 #    ./demo Selection1
 #
-# $Id$
+# @(#)demoSelection1.tcl	1.1 07/29/98
 # Author: John Reekie
 
 proc ::demo::demoSelection1 {} {

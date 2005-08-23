@@ -2,9 +2,9 @@
 #
 # @Author: Wan-Teh Chang, Bilung Lee
 #
-# @Version: $Id$
+# @Version: @(#)EditBubbleAndArc.itcl	1.22 01/27/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -160,8 +160,7 @@ class ::tycho::EditBubbleAndArc {
     protected method chooseCursorOverNode {x y} 
     protected method find_close_node {x y} 
     protected method lineMidpoint {arc}
-    protected method slope_to_angle {slope xneg}
-    protected method snap_to_oval {oval x y}
+    protected method snap_to_oval {oval x y} 
     protected method unselect {} 
 
     # Establish bindings for the canvas.
@@ -421,9 +420,7 @@ body ::tycho::EditBubbleAndArc::bind_B1_Motion {x y} {
     set x [$slate canvasx $x]
     set y [$slate canvasy $y]
     if {$create_item == "node"} {
-	if {$oldx!=$x && $oldy!=$y} {
-	    $slate coords $node_id $oldx $oldy $x $y
-	}
+	$slate coords $node_id $oldx $oldy $x $y
     }
 }
 
@@ -701,12 +698,7 @@ body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
 	set edgeInfo($id,outSlope) [lindex $snap 2]
 	set edgeInfo($id,outXneg) [lindex $snap 3]
 	$slate coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
-        
-        # Modify Transition
-        $slate itemconfigure $id -oangle [slope_to_angle \
-                $edgeInfo($id,outSlope) $edgeInfo($id,outXneg)]
 	eval $slate coords $id [lreplace $coords 0 1 $x $y]
-
     } elseif {$dblselpt_index == [expr [llength $coords]/2 - 1]} {
 	# terminating  endpoint, it has to be snapped to the oval
 	set node $edgeInfo($id,dest)
@@ -718,13 +710,8 @@ body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
 	set edgeInfo($id,inSlope) [lindex $snap 2]
 	set edgeInfo($id,inXneg) [lindex $snap 3]
 	$slate coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
-
-        # Modify Transition
-        $slate itemconfigure $id -iangle [slope_to_angle \
-                $edgeInfo($id,inSlope) $edgeInfo($id,inXneg)]
 	eval $slate coords $id [lreplace $coords \
 		[expr 2*$dblselpt_index] end $x $y]
-
     } else {
 	# an internal point
 	# change the index'th coords by the move delta, and set the
@@ -939,26 +926,25 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	# get the coord (x,y)
 	set x [lindex $snap 0]
 	set y [lindex $snap 1]
-        set slope [lindex $snap 2]
-        set xneg  [lindex $snap 3]
-        # Creat Transition
-	set arc_id [$slate create Transition $x $y $x $y \
-                -arrow last -tags arc -fill brown \
-                -oangle [slope_to_angle $slope $xneg]]
-                
-        # Record the first point
-        set arc_coords [lrange $snap 0 1]
-
+	set arc_coords [lrange $snap 0 1]
+	set arc_id [$slate create line $x $y $x $y \
+		-arrow last -tags arc -fill brown]
 	# the first point has been drawn
 	set point_to_draw nonfirst
 	lappend nodeInfo($close_node,outEdges) $arc_id
-	set edgeInfo($arc_id,src)      $close_node
+	set edgeInfo($arc_id,src) $close_node
 	set edgeInfo($arc_id,outSlope) [lindex $snap 2]
-	set edgeInfo($arc_id,outXneg)  [lindex $snap 3]
-	set edgeInfo($arc_id,points)   [$slate create rectangle \
+	set edgeInfo($arc_id,outXneg) [lindex $snap 3]
+	set edgeInfo($arc_id,points) [$slate create rectangle \
 		[expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		-fill {} -outline {}]
-
+	# debug messages
+	#puts stdout "Setting edgeInfo($arc_id,src) = \
+		$edgeInfo($arc_id,src)"
+	#puts stdout "Setting edgeInfo($arc_id,outSlope) = \
+		$edgeInfo($arc_id,outSlope)"
+	#puts stdout "Setting edgeInfo($arc_id,outXneg) = \
+		$edgeInfo($arc_id,outXneg)"
     } else {
 	# Drawing non-first points.
 	set close_node [find_close_node $x $y]
@@ -970,24 +956,17 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	    lappend edgeInfo($arc_id,points) [$slate create rectangle \
 		    [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		    -fill {} -outline {}]
-
 	} else {
 	    # over a node
 	    # this is the other endpoint
-	    # create the other endpoint and do other stuff
+	    #create the other endpoint and do other stuff
 	    # Snap (x,y) to the node
 	    set snap [snap_to_oval $close_node $x $y]
-
 	    # Change x and y to the new snapped-to values.
-	    set x     [lindex $snap 0]
-	    set y     [lindex $snap 1]
-            set slope [lindex $snap 2]
-            set xneg  [lindex $snap 3]
+	    set x [lindex $snap 0]
+	    set y [lindex $snap 1]
 	    eval $slate coords $arc_id $arc_coords $x $y
-
-	    $slate itemconfigure $arc_id -fill black \
-                    -iangle [slope_to_angle $slope $xneg]
-
+	    $slate itemconfigure $arc_id -fill black
 	    lappend edgeInfo($arc_id,points) [$slate create rectangle \
 		    [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		    -fill {} -outline {}]
@@ -1221,33 +1200,6 @@ body ::tycho::EditBubbleAndArc::lineMidpoint {arc} {
 	# is the middle point.
 	return [lrange $coords [expr ($n/2)-1] [expr $n/2]]
     }
-}
-
-#################################################################
-#### slope_to_angle
-# Transform a slope into an angle between -pi & pi.
-#
-body ::tycho::EditBubbleAndArc::slope_to_angle {slope xneg} {
-    set pi 3.14159265358979
-
-    if {$slope == "tan90"} {
-        set angle [expr $pi/2]
-    } elseif {$slope == "tan270"} {
-        set angle [expr -$pi/2]
-    } else {
-        set angle [expr atan($slope)]
-        if {$xneg} {
-            if {$angle>=0} {
-                # angle should be in 3rd quadrant
-                set angle [expr -$pi+$angle]
-            } else {
-                # angle should be in 2nd quadrant
-                set angle [expr $pi+$angle]
-            }
-        }
-    }
-
-    return $angle
 }
 
 #################################################################

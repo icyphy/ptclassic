@@ -1,4 +1,4 @@
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@
 #
 # File to demonstrate the Tycho scheduler
 #
-# $Id$
+# @(#)test.tcl	1.4 04/29/98
 #
 
 # Initialize a Tcl counter

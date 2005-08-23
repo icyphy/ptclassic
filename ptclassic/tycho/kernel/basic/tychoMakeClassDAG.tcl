@@ -2,9 +2,9 @@
 #
 # @Authors: Edward A. Lee, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)tychoMakeClassDAG.tcl	1.29 07/17/98
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

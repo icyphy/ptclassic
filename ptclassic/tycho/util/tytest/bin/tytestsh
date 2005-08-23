@@ -2,7 +2,7 @@
 # Command-line program for the tycho.util.tytest utility, shell-only version \
     exec itclsh "$0" "$@"
 
-# $Id$
+# @(#)tytestsh	1.4 07/21/98
 # Author: Christopher Hylands
 
 # Create the tycho namespace

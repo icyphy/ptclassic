@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.47 09/27/98
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -90,8 +90,7 @@ ITCL_SRCS = \
 	SmartLine.itcl \
 	Solid.itcl \
 	Stepper.itcl \
-	Terminal.itcl \
-	Transition.itcl
+	Terminal.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl README.txt
 

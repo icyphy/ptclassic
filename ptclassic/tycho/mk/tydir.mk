@@ -1,9 +1,9 @@
 # Makefile for tycho directory that contains no target files
 #
 # Version identification:
-# $Id$
+# @(#)tydir.mk	1.11 06/24/98
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

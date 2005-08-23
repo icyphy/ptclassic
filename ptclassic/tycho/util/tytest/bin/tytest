@@ -2,7 +2,7 @@
 # Command-line program for the tycho.util.tytest utility \
     exec itkwish "$0" "$@"
 
-# $Id$
+# @(#)tytest	1.8 07/21/98
 # Author: Christopher Hylands
 
 # Don't show the default top-level

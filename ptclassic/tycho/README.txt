@@ -1,5 +1,5 @@
-$Id$
-README file for Tycho, version 0.3devel
+@(#)README.txt	1.8a 01/11/98
+README file for Tycho, version 0.3alpha
 
 Tycho is a framework for developing and running
 [incr Tcl] applications. Tycho consists of a number

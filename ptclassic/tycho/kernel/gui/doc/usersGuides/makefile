@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, kernel/gui/doc/codeDoc directory.
 #
-# $Id$
+# @(#)makefile	1.22	06/08/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
