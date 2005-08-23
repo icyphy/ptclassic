@@ -34,7 +34,7 @@ MAKEVARS = "PTARCH=$(PTARCH)"
 ifdef MYVPATH
 	TMPVPATH = $(MYVPATH)
 else
-	TMPVPATH = ../../../../..
+	TMPVPATH = ../../../../../src/domains/$(ME)
 endif
 
 makefiles:
@@ -42,12 +42,13 @@ makefiles:
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
-		  if [ ! -f make.template -a -f makefile ]; then \
-		     echo "make.template does not exist, linking make.template to makefile"; \
-		     ln -s makefile make.template; \
+		  if [ ! -f $(TMPVPATH)/$$x/make.template \
+			-a -f $(TMPVPATH)/$$x/makefile ]; then \
+		     echo "make.template does not exist, linking make.template to makefile in $(TMPVPATH)/$$x"; \
+		     (cd $(TMPVPATH)/$$x; ln -s makefile make.template); \
 	          fi; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
