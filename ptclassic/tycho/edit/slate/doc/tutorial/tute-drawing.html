@@ -1,0 +1,176 @@
+<!-- @(#)tute-drawing.html	1.13 05/22/98 -->
+<html>
+<head>
+<Title>Introduction to drawing</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Introduction to drawing</h1>
+
+<p>Tycho contains two classes that extend the Tk canvas: the 
+<A HREF="../codeDoc/IncrCanvas.html">IncrCanvas</A> class
+extends the canvas with complex hierarchical items, while the
+<A HREF="../codeDoc/Slate.html">Slate</A> adds symbolic
+item manipulation and support for user interaction.
+IncrCanvas is, as far as 
+possible, fully upwards-compatible with the canvas -- any code that 
+works with the canvas should work if an IncrCanvas is substituted for the 
+canvas. In this tutorial, however, we will always be using a Slate.
+
+<p>IncrCanvas and Slate have (like the Tk canvas) a large number of
+operations, and this document only gives a cursory overview of most of
+them.  For more detailed information on the kinds of operations
+supported by the canvas and the Slate, see the <A
+HREF="../../../../doc/itclhtml/tk4.2/canvas.n.html">Tk canvas
+documentation</a> and the <a href="../codeDoc/index.html">Slate code
+documentation</a>.
+
+<p>To illustrate the operation of the Slate, we will create a Slate in
+a blank toplevel window. Normally, however, you will use the Slate
+inside the Graphics widget, or within your own custom widget. The
+<code>::tycho::slate</code> procedure creates a new Slate. For our
+purposes, we will just source a file that
+creates the Slate and places it into a top-level Displayer window:
+
+<tcl quiet><pre>
+  set slate [::tycho::Slate::demoslate]
+</pre></tcl>
+
+ <P>You may want to experiment further with Slate operations while
+executing this tutorial. To do so, simply type commands into the Tycho
+console.
+
+<p>The graphical items drawn on the slate are called just that: items.
+The <code>create</code> method creates new items. Its first argument 
+is the type of the item; this is followed by two or more coordinates
+at which to create the items, and these are followed by zero or more
+options. Coordinates are in the form <i>x</i>-value followed by
+<i>y</i>-value; options are in the form 
+<code>-<i>optionname optionvalue</i></code>.
+
+<p>The Slate supports all canvas item types, including
+<code>rectangle</code>, <code>oval</code>, <code>polygon</code>,
+<code>line</code>, and <code>text</code>.  In addition, the Slate has
+complex items composed of one or more of these primitive items,
+including <code>Frame</code> (a pseudo-3D rectangle),
+<code>Solid</code> (a pseudo-3D polygon), labeled ovals and
+rectangles, and any other complex item anyone cares to defined with an
+Itcl class. (See 
+<a href="tute-custom.html">Creating custom items</a>.)
+Note that primitive item types start with a lower-case
+letter; complex item types start with an upper-case letter. Items are
+created with the <code>create</code> method, which returns a unique ID
+that can be used later to access the item; here is a selection:
+
+<tcl quiet><pre>
+set r [$slate create rectangle 60 20 80 40 -fill red]
+set o [$slate create oval 60 60 100 80 -outline blue -width 3]
+set l [$slate create line 30 30 30 50 50 50 50 70 -arrow last]
+set f [$slate create Frame 120 120 150 140 -borderwidth 4 -color green]
+set s [$slate create Solid 100 20 120 20 120 10 140 30 120 50 120 40 100 40]
+</pre></tcl>
+
+<p>To read the coordinates of an item, use the <code>coords</code>
+method:
+<tcl><pre>
+$slate coords $r
+</pre></tcl>
+
+<p>To change the coordinates of an item, supply arguments to
+<code>coords</code>:
+<tcl quiet><pre>
+$slate coords $r 50 10 90 25
+</pre></tcl>
+
+<p>To move an item, use the <code>move</code> method:
+<tcl><pre>
+$slate move $l 10 10
+</pre></tcl>
+
+<p>To delete an item, use <code>delete</code>:
+<tcl><pre>
+$slate delete $o
+</pre></tcl>
+
+<p>Each item has a number of <i>configuration options</i>, which have 
+names beginning with a dash; the <code>-fill</code> option to the first 
+call to <code>create</code> above is a configuration option.  Options 
+follow the coordinates when an item is created.  Later on, options can 
+be queried with <code>itemcget</code>:
+
+<tcl><pre>
+$slate itemcget $r -fill
+</pre></tcl>
+
+Options can be set with <code>itemconfigure</code>:
+
+<tcl><pre>
+$slate itemconfigure $f -relief sunken
+</pre></tcl>
+
+To see all options of an item, use <code>itemconfigure</code> with 
+no arguments:
+
+<tcl><pre>
+$slate itemconfigure $f
+</pre></tcl>
+
+The Slate can be used to find the IDs of items satisfying some criterion:
+
+<tcl><pre>
+$slate find overlapping 100 30 120 60
+</pre></tcl>
+
+(See the <a href="../codeDoc/IncrCanvas.html#find method of
+::tycho::IncrCanvas class">IncrCanvas documentation</a> for other types of
+find.)
+
+Any item can have an arbitrary set of <i>tags</i> attached to it.
+The tags are one of the configuration options. We'll add a tag to
+a couple of items:
+
+<tcl><pre>
+$slate create rectangle 100 30 120 60 -outline red
+$slate addtag fred overlapping 100 30 120 60
+$slate addtag fred withtag $f
+$slate addtag fred withtag $l
+</pre></tcl>
+
+The <code>addtag</code> method has the same kind of specification
+as find -- you can add a tag to items enclosed by a 
+given rectangle, for example.
+
+ <P>You can find the "bounding box" of an item or a set of items with a 
+given tag:
+
+<tcl quiet><pre>
+eval $slate create rectangle [$slate bbox fred] -outline grey
+</pre></tcl>
+
+Tags can also be given as arguments to many of the other Slate methods, 
+including <code>delete</code> and <code>move</code>:
+
+<tcl><pre>
+$slate move fred 10 10
+</pre></tcl>
+
+The <code>dtag</code> method removes tags from items:
+
+<tcl><pre>
+$slate dtag $f fred
+$slate move fred 10 10
+</pre></tcl>
+
+<p>
+<a href="tute-interactors.html">Next</a><br>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/22/98,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

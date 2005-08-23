@@ -1,0 +1,95 @@
+<!-- @(#)tute-interactors.html	1.9 04/06/98 -->
+<html>
+<head>
+<Title>Interactors</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Interactors</h1>
+
+<p>The Slate supports bindings in exactly the same way as the
+Tk canvas. These can be used to implement moving of items and other 
+forms of interaction. The Slate also provides a higher-level 
+mechanism, based on the concept of <i>interactors</i>, as described by 
+Brad Myers and used in the Garnet system.
+
+<tcl quiet><pre>
+  set slate [::tycho::Slate::demoslate]
+  set r [$slate create rectangle 60 20 80 40 -fill red]
+  set f [$slate create Frame 120 120 150 140 &#92
+       -borderwidth 4 -color green -tags fred]
+</pre></tcl>
+
+<p>Each interactor is an object that inherits from the Interactor 
+class. The most basic kind of interactor is the Follower, which 
+"follows" the mouse. Assuming you still have the Slate from earlier in 
+this tutorial (if not, you will need to go back and re-execute
+the code), you can create an interactor with the <code>interact</code> 
+method:
+
+<tcl quiet><pre>
+set follower [$slate interactor Follower]
+</pre></tcl>
+
+<p>An interactor is "bound" to one or more objects with the
+<CODE>bind</CODE> command. For example, this will bind the follower
+you just created to the items tagged with <CODE>fred</CODE> (the
+Frame):
+
+<tcl quiet><pre>
+$follower bind fred -button 1
+</pre></tcl>
+
+<p>You can now drag the frame, but not the rectangle, with the mouse!
+To turn this off again, use <code>unbind</code>:
+
+<tcl><pre>
+$follower unbind fred -button 1
+</pre></tcl>
+
+<p>There are several other kinds of interactor. <i>Bounder</i> moves
+an object within a specified region of the Slate. We'll create a 
+rectangle so you can see the region:
+
+<tcl quiet><pre>
+$slate create rectangle 50 50 200 200 -outline red
+set bounder [$slate interactor Bounder -bounds {50 50 200 200}]
+$bounder bind $r -button 1
+</pre></tcl>
+
+(Try moving the red rectangle with the mouse.) If the <code>-bounds</code>
+option is not given, the Bounder interactor keeps the object within the
+bounds of the Slate. Bounder can be used constrain movement along
+one axis:
+
+<tcl quiet><pre>
+$bounder configure -constrain x
+</pre></tcl>
+
+(Try moving the red rectangle now.) 
+
+<p>Interactors can be cascaded, to make more complex interactions. For 
+example, we can create a <i>Stepper</i> interactor that quantizes 
+movement to a certain size, and cascade it with the bounder:
+
+<tcl><pre>
+set stepper [$slate interactor Stepper -stepsize 10]
+$bounder configure -constrain none
+$bounder cascade $stepper
+</pre></tcl>
+
+(Try moving the red rectangle now.)
+
+<p>
+<a href="tute-aspects.html">Next</a><br>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 96/12/11,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<TITLE>widgettree - Create and manipulate a widgettree widget</TITLE>
+<H1>widgettree - Create and manipulate a widgettree widget</H1>
+
+</pre><H2>SYNOPSIS</H2>
+<B>widgettree<I> <I>pathName</I> </B></I>?<I>options</I>?
+</pre><H2>INHERITANCE</H2>
+itk::Widget &lt;- Widgettree
+</pre><H2>STANDARD OPTIONS</H2>
+<P>
+<table cellpadding=5>
+<td valign=top>
+<B>background</B><br>
+<B>foreground</B><br>
+</td>
+<td valign=top>
+<B>cursor</B><br>
+<B>highlightColor</B><br>
+</td>
+<td valign=top>
+<B>font</B><br>
+<B>highlightThickness</B><br>
+</td>
+<td valign=top>
+<B>disabledForeground</B><br>
+</td>
+</table>
+<P>
+See the <A HREF="http://www.sco.com/Technology/tcl/man/tk_man/options.n.html"> "options" </A> manual entry for details on the standard options.
+</pre><H2>WIDGET-SPECIFIC OPTIONS</H2>
+<P>
+<pre>
+Name:                   <B>closedIcon</B>
+Class:                  <B>Icon</B>
+Command-Line Switch:	<B>-closedicon</B>
+</pre>
+<UL>
+Specifies the name of an image to be used in the widgettree before
+those nodes that are closed. The default icon is called "openNode,"
+which is automatically generated.
+</UL>
+<P>
+<table cellpadding=5>
+<td valign=top>
+Command-Line<br>
+</td>
+<td valign=top>
+Switch:<br>
+</td>
+<td valign=top>
+<B>-closecommand</B><br>
+</td>
+<td valign=top>
+</td>
+</table>
+<UL>
+The command to execute when a node of the tree is closed.
+If this command is null, clicking on the open-close button will
+close the node; if not, the node id is appended
+to the command and the command is executed at the global scope,
+and the node will not close automatically.
+</UL>
+<P>
+<table cellpadding=5>
+<td valign=top>
+Command-Line<br>
+</td>
+<td valign=top>
+Switch:<br>
+</td>
+<td valign=top>
+<B>-createcommand</B><br>
+</td>
+<td valign=top>
+</td>
+</table>
+<UL>
+The command to execute when a node of the tree is opened
+if the node does not currently contain any widgets. The node id is appended
+to the command and the command is executed at the global scope.
+The command should use the &lt;b&gt;add&lt;/b&gt; method to create the contents of
+the node. If the command is null, the node is opened but
+nothing will be displayed.
+</UL>
+<P>
+<pre>
+Name:                   <B>indent</B>
+Class:                  <B>Indent</B>
+Command-Line Switch:	<B>-indent</B>
+</pre>
+<UL>
+The minimum indent for each level of the tree. This option is needed
+in order that each level is indented correctly, regardless of the
+presence or not of open-close buttons at each level. It sets the
+minimum indent, not the actual indent: if either <B>-closedbitmap</B>
+or <B>-openedbitmap</B> makes an open-close button wider than the
+specified indent, that width will be used instead. (There is no
+reasonable way to avoid this, since that's how Tk's grid manager
+works.) The default value is 24 pixels.
+</UL>
+<P>
+<pre>
+Name:                   <B>openIcon</B>
+Class:                  <B>Icon</B>
+Command-Line Switch:	<B>-openicon</B>
+</pre>
+<UL>
+Specifies the name of an image to be used in the widgettree before
+those nodes that are open. The default icon is called "openNode,"
+which is automatically generated.
+</UL>
+<P>
+<table cellpadding=5>
+<td valign=top>
+Command-Line<br>
+</td>
+<td valign=top>
+Switch:<br>
+</td>
+<td valign=top>
+<B>-opencommand</B><br>
+</td>
+<td valign=top>
+</td>
+</table>
+<UL>
+The command to execute when a node of the tree is opened
+and the node already has children. The node id is appended
+to the command and the command is executed at the global scope.
+The node is opened after the command returns.
+</UL>
+<P>
+<pre>
+Name:                   <B>padX</B>
+Class:                  <B>PadX</B>
+Command-Line Switch:	<B>-padx</B>
+</pre>
+<UL>
+The horizontal padding to use when gridding leaf widgets. By default,
+all leaves are packed with the same padding. If needed, the Tk
+<B>grid configure</B> command can be used to override this
+default -- note, however, that reconfiguring this option after
+widgets have been created will return all widgets to the new
+value of <B>-pady</B>.
+</UL>
+<P>
+<pre>
+Name:                   <B>padY</B>
+Class:                  <B>PadY</B>
+Command-Line Switch:	<B>-pady</B>
+</pre>
+<UL>
+The vertical padding to use when gridding leaf widgets. By default,
+all leaves are packed with the same padding. If needed, the Tk
+<B>grid configure</B> command can be used to override this
+default -- note, however, that reconfiguring this option after
+widgets have been created will return all widgets to the new
+value of <B>-pady</B>.
+</UL>
+<P>
+</pre><HR>
+
+</pre><H2>DESCRIPTION</H2>
+<P>
+The <B>widgettree</B> command creates an unfolding tree of widgets,
+with a button at each node to open and close the node. The widget is
+designed for implementing unfolding preference and dialog boxes as
+well as viewers of tree-like structures.
+<P>
+Each item in the tree is referenced by a unique id, which is constructed
+in the same manner as hierarchical Tk widget names, but without
+the leading period. For example, a node at the top level may
+have the id &lt;code&gt;foo&lt;/code&gt;, and a widget contained within that
+node the id &lt;code&gt;foo.bar&lt;/code&gt;. Widgets and nodes are added to
+the tree with the <B>add</B> method.
+<P>
+Widgets can be added to the tree either when the Widgettree is
+created or as each node is opened. To add widgets as node are opened,
+supply the <B>-createcommand</B> option. This command will be
+evaluated when a node with no children is opened -- it should
+call <B>add</B> to add children to the node.
+
+</pre><H2>TREE TRAVERSAL</H2>
+
+If the <B>-traversal</B> option is true, the widget tree can be
+navigated using tab traversal and cursor keys. Each button will accept
+the focus, and can be traversed using the standard Tk traversal
+mechanism. The Return key opens or closes the node with the focus. In
+addition, cursor keys navigate the tree as follows:
+<DL>
+<DT> <B>down</B>
+</I></B>
+<DD> Move to the next button in the same node. If at the bottom,
+stay there.
+</DL>
+<DL>
+<DT> <B>up</B>
+</I></B>
+<DD> Move to the previous button in the same node. If at the top,
+stay there.
+</DL>
+<DL>
+<DT> <B>left</B>
+</I></B>
+<DD> Move up to the parent node, if there is one. If there
+isn't, stay there.
+</DL>
+<DL>
+<DT> <B>right</B>
+</I></B>
+<DD> If the node is closed, open it. If there are child nodes,
+move to the first child. If there aren't any, stay there.
+</DL>
+<P>
+Widgettree does not implement a selection mechanism, but does provides
+some support for it with the <B>locate</B> method. If required,
+selection can be implemented by wrapping or subclassing Widgettree.
+
+</pre><H2>METHODS</H2>
+<P>
+The <B>widgettree</B> command creates a new Tcl command whose
+name is <I>pathName</I></B></I>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+<pre>
+<I>pathName</I> option </B></I>?<I>arg arg ...</I>?
+</pre>
+<I>Option</I> and the <I>arg</I>s
+determine the exact behavior of the command.  The following
+commands are possible for widgettree widgets:
+
+</pre><H2>WIDGET-SPECIFIC METHODS</H2>
+<DL>
+<DT> <I>pathName</I> <B>add</B> <I>type</I> <I>id</I> ?<I>arg</I> ...?
+</I></B>
+<DD> 
+Add a new widget to the tree. The first argument is the widget type,
+and the second is its unique id. Raise an error if an item with
+<I>id</I> already exists. IDs are hierarchical, as in
+&lt;code&gt;foo.bar&lt;/code&gt; -- the parent node must already exist
+(&lt;code&gt;foo&lt;/code&gt;, in this case). The special type <B>node</B> is used
+to create a new node, in which case options are passed directly to the
+constructor of the node label, which is a Tk label. Usually, the
+options will include at least the <B>-text</B> option.
+<UL>
+Any other value of <I>type</I> is assumed to be the type of the widget to 
+create.  The optional arguments comprise an option-value list which can 
+contain any valid options for <I>type</I>.  By default, the widget's options 
+are integrated into the mega-widgets option-list with the <B>usual</B> 
+option handling, which will cause the following   option-handling
+commands to be used:
+</UL>
+</DL>
+<pre>
+    keep -font -background -cursor -disabledforeground -foreground \
+    	-highlightthickness -highlightcolor
+	rename -labelfont -font font Font
+</pre>
+To override this behaviour, the <I>optioncmds</I> argument 
+can be appended to the option list.  This is in the same form as the second 
+argument to the <B>itk_component add</B> method of <B>itk::Archetype</B>.  
+For example, we could add an entry widget to the tree and rename its 
+background to a new option called <B>-entrybackground</B>:
+<pre>
+  $widgettree add entry {
+      usual
+      rename -background -entrybackground entryBackground Background
+  }
+</pre>
+<DL>
+<DT> <I>pathName</I> <B>cget</B> <I>option</I>
+</I></B>
+<DD> 
+Returns the current value of the configuration option given by
+<I>option</I>.  <I>Option</I> may have any of the values accepted by the
+<B>widgettree</B> command.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B> close</B>  <I>nodeid</I>
+</I></B>
+<DD> 
+Close a node of the tree. If the node is already closed, this method
+does nothing. If the <B>-closecommand</B> option is not null, append
+the id and evaluate the command in the global scope. In this case,
+the node is not closed -- the close command must explicitly close it
+with the <B>hide</B> method. If the <B>-closecommand</B> option is null,
+the node is just closed.  Raise an error if the node does not exist or
+if <I>nodeid</I> is a leaf.
+</DL>
+<DL>
+<DT> <I>pathName</I></B></I> <B>configure</B> ?<I>option</I>? ?<I>value option value ...</I>?
+</I></B>
+<DD> 
+Query or modify the configuration options of the widget.  If no
+<I>option</I> is specified, returns a list describing all of the
+available options for <I>pathName</I></B></I> (see <B>Tk_ConfigureInfo</B> for
+information on the format of this list).  If <I>option</I> is specified
+with no <I>value</I>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <I>option</I> is specified).  If
+one or more <I>option-value</I> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s); in
+this case the command returns an empty string.  <I>Option</I> may have
+any of the values accepted by the <B>widgettree</B> command.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>delete</B> <I>id</I>
+</I></B>
+<DD> 
+Delete an item from the tree. If the item is a node, then all
+descendents are deleted too. Raise an error if the item does not
+exist. Note that the grid rows occupied by the item are not reclaimed,
+but this should not be visible.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>disable</B> <I>nodeid</I>
+</I></B>
+<DD> 
+Disable a node. Raise an error if the node does not
+exist or <I>nodeid</I> is not a node.  The open-close button is disabled,
+and the label foreground changed to the value given by the 
+<B>-disabledforeground</B> option.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>enable</B> <I>nodeid</I>
+</I></B>
+<DD> 
+Enable a node. Raise an error if the node does not
+exist or <I>nodeid</I> is not a node.  The open-close button is enabled,
+and the label foreground changed to the value given by the 
+<B>-foreground</B> option.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>hide</B> <I>nodeid</I>
+</I></B>
+<DD> 
+Unconditionally close a node of the tree, without checking the
+<B>-closecommand</B> option. If the node is already closed, this method
+does nothing. Raise an error if the node does not exist or if
+<I>nodeid</I> is a leaf.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>itemcget</B> <I>id</I> <I>option</I>
+</I></B>
+<DD> 
+Return a configuration option of an item. Raise an error if the item
+does not exist or if the option is invalid. Legal options are exactly
+those described for the <B>add</B> method.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>itemconfigure</B> <I>id</I> ?<I>option</I>? ?<I>arg</I> ...?
+</I></B>
+<DD> 
+Configure options of an item. If only <I>id</I> is supplied, return
+the list of options of that item. If <I>option</I> is supplied, return
+that option. If additional arguments are supplied, configure each
+option with the given value. Raise an error if the item does not exist
+or an invalid option is supplied. Legal options are exactly those
+described for the <B>add</B> method.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>locate</B> <I>x</I> <I>y</I> ?<I>id</I>?
+</I></B>
+<DD> 
+Return the id of the item at the given <I>x</I> and <I>y</I>
+coordinates. If the <I>id</I> argument is given, it must be a node,
+and the <I>x</I> and <I>y</I> coordinates are relative to the interior
+of that node. If <I>x</I> is negative, then the <I>x</I> coordinate is
+ignored in figuring out which item is under the mouse -- this is most
+useful when drag-selecting a region of the tree. If <I>x</I> is
+non-negative, then an id is returned only if the mouse is actually
+over an item.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>names</B> ?<I>nodeid</I>?
+</I></B>
+<DD> 
+Return the ids of children of a node. If the
+<I>nodeid</I> argument is not supplied, return the list of items at the
+top level of the tree. If <I>nodeid</I> is supplied, it must be a node or
+an error is raised. The result in this case will be a list of children
+of that item.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>open</B> <I>nodeid</I>
+</I></B>
+<DD> 
+Open a node of the tree. If the node is already open, do nothing. If
+the node has no children and <B>-createcommand</B> is not null, append
+the id and evaluate at the global scope. If the node has children and
+<B>-opencommand</B> is not null, append the id and evaluate at the
+global scope. Raise an error if the node does not exist or if
+<I>nodeid</I> is not a node.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>toggle</B> <I>nodeid</I>
+</I></B>
+<DD> 
+Toggle the state of a node of the tree: if the node is open, close it;
+if it is closed, open it. The effects of this operation are as described
+for the <B>open</B> and <B>close</B> methods.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>traverse</B> <I>mode</I> ?<I>nodeid</I>?
+</I></B>
+<DD> 
+Traverse the tree. This method is provided because Tk's default Tab
+traversal doesn't give the user enough control over where the
+traversal goes. The <I>mode</I> controls the traversal operation, while
+the <I>nodeid</I> is the id of the button that currently has the
+focus. If <I>nodeid</I> is null or not supplied, then no button has the
+focus. To aid construction of call-backs, the <I>nodeid</I> can either be
+a node id or a widget path. <I>mode</I> is case-insensitive, and can be one
+of <B>down</B>, <B>return</B>, <B>up</B>, <B>left</B>, or <B>right</B>,
+with the effect described for the default bindings. It can also be
+<B>to</B>, which moves the focus to the given node.  If the
+<B>-traversal</B> option is false, the method returns without doing
+anything.
+</DL>
+<DL>
+<DT> <I>pathName</I> <B>type</B> <I>id</I>
+</I></B>
+<DD> 
+Return the type of <I>id</I>. The type will be value of the <I>type</I>
+argument passed to the <B>add</B> method when the item was created.
+Raise an error if the item does not exist.
+ 
+</DL>
+</pre><H2>COMPONENTS</H2>
+<I>Widgettree</I> dynamically creates components as widgets
+and nodes are added to the tree.
+<P>
+<pre>
+Name:                   <I>id</I>
+Class:                  <I>widgetclass</I>
+</pre>
+<UL>
+A leaf item of the tree. The <I>id</I> item is the id passed to the
+<B>add</B> method when the item was created.
+</UL>
+<P>
+<pre>
+Name:                   <I>nodeid</I>
+Class:                  <B>Frame</B>
+</pre>
+<UL>
+A frame containing the children of a tree node.  The frame is not
+created until a child is added to that node with the <B>add</B> method.
+See the "frame" widget manual entry for details.
+</UL>
+<P>
+<pre>
+Name:                   <I>id</I><B>button</B>
+Class:                  <B>Button</B>
+</pre>
+<UL>
+The button of a tree node. See the "button" widget manual entry for
+details.
+</UL>
+<P>
+<pre>
+Name:                   <I>id</I><B>label</B>
+Class:                  <B>Label</B>
+</pre>
+<UL>
+The label of a tree node. See the "label" widget manual entry for
+details.
+</UL>
+</table>
+
+</pre><H2>EXAMPLE</H2>
+<pre>
+FIXME
+</pre>
+</pre><H2>AUTHOR</H2>
+John Reekie,  johnr@eecs.berkeley.edu
+
+</pre><H2>ACKNOWLEDGMENTS</H2>
+Widgettree is inspired by the SubPanel and MultiPanel widgets written by 
+Farhana Sheikh and Cliff Cordeiro of UC Berkeley.  Widgettree is 
+contributed to [incr Widgets] by the Tycho project at UC Berkeley: 
+http://ptolemy.eecs.berkeley.edu/tycho.
+
+</pre><H2>KEYWORDS</H2>
+widgettree, hierarchy, widget

@@ -1,0 +1,95 @@
+<!-- @(#)tute-aspects.html	1.10 05/19/98 -->
+<html>
+<head>
+<Title>Shapes and aspects</title>
+</head>
+<body bgcolor="#faf0e6">
+
+<h1>Shapes and aspects</h1>
+
+<p> The Slate gives every item a set of <i>aspects</i> -- that is,
+named points on the item. The aspects of an item depends on its shape,
+and you can query the Slate for the shape of an item:
+
+<tcl quiet><pre>
+  set slate [::tycho::Slate::demoslate]
+  set f [$slate create Frame 120 120 150 140 -borderwidth 4 -color green]
+  set l [$slate create line 30 30 30 50 50 50 50 70 -arrow last]
+  set s [$slate create Solid 100 20 120 20 120 10 140 30 120 50 120 40 100 40]
+  $slate shape $s
+</pre></tcl>
+
+The "shape" of an item is one of the following: point, line,
+rectangle, oval, line, or polygon. For each shape, there is a default
+set of aspects; for example, the "rectangle" shape has the aspects
+<code>c</code> or <code>center</code>, and the eight compass points:
+<code>n</code>, <code>s</code>, <code>e</code>, <code>w</code>,
+<code>ne</code>, <code>nw</code>, <code>se</code>, and
+<code>sw</code>. An item with "line" shape has aspects
+<CODE>start</CODE>, <CODE>end</CODE>, and one aspect of the form
+<B>vertex-</B><code>n</code> of each vertex.
+
+ <P>To query an item for an aspect, just use the <code>aspect</code>
+method:
+
+<tcl><pre>
+$slate aspect $f nw
+</pre></tcl>
+
+More than one aspect can be given:
+
+<tcl><pre>
+$slate aspect $l vertex-0 vertex-1
+</pre></tcl>
+
+ <P>If no aspects are given, this method return a list of
+all aspects of the item:
+
+<tcl><pre>
+$slate aspect $l
+</pre></tcl>
+
+An item can be moved so that one of its aspects is at a specified
+coordinate:
+
+<tcl quiet><pre>
+$slate moveto $l 2 2 start
+</pre></tcl>
+
+(For lines, the aspect <I>vertex-0</I> is the same as the aspect
+<CODE>start</CODE>.)
+
+ <P>An item can be reshaped by specifying an aspect and
+the distance to move it (click multiple times):
+
+<tcl quiet><pre>
+$slate reshape $f 10 10 se
+</pre></tcl>
+
+ <P>More than one aspect can be moved if it makes sense to
+do so (click multiple times):
+
+<tcl quiet><pre>
+$slate reshape $l 10 0 vertex-2 vertex-3
+</pre></tcl>
+
+ <P>An item can also be reshaped by specifying an absolute
+location for one of its aspects:
+
+<tcl quiet><pre>
+$slate reshapeto $l 100 100 end
+</pre></tcl>
+
+<p>
+<a href="tute-custom.html">Next</a><br>
+<a href="index.html">Back up</a><br>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/19/98,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

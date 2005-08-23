@@ -1,0 +1,868 @@
+<!-- Automatically generated from PITcl.cc -->
+<html>
+<head>
+<title>pitcl interface to Ptolemy</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1>Pitcl interface to Ptolemy</h1>
+<a name="pitcl interface to Ptolemy">
+<p>
+Author: Edward A. Lee (eal@eecs.berkeley.edu)
+<p>
+The Tcl commands defined here implement an interface to the Ptolemy
+kernel that is significantly richer than the older <code>ptcl</code> interface.
+Normally, these commands should not be used directly. Use instead
+the class interface defined in the ::ptolemy namespace.
+<p>
+The commands are designed to expose most of functionality of the
+kernel at the Tcl level, although at this point the facilities are
+still incomplete. In certain cases, the commands are designed to try
+to hide blemishes in the design of the kernel, providing a more
+sensible interface. All commands are defined in the ::pitcl
+namespace, except the <code>matlab</code> and <code>mathematica</code> commands, which are
+defined in both the global namespace and the ::pitcl namespace.
+<p>
+Because interaction with Itcl is not as rich as it might be, this
+implementation preserves from its predecessor the notion of a
+current galaxy and current universe. This seems to be the simplest
+approach, and is hidden from the user by the classes in the
+::ptolemy namespace. For commands that operate on a block, the block
+can usually be a star, galaxy, universe, wormhole, or target. Names
+of blocks can take any of the following forms:
+<ol>
+<li><i>name</i>
+<li><i>name1.name2</i>
+<li><i>name1.name2...nameN</i>
+<li><i>.name</i>
+<li><i>.name1.name2</i>
+<li><i>.name1.name2...nameN</i>
+<li> this
+<li> target
+</ol>
+<p>
+The first can specify a member of the current galaxy, a master star,
+a master galaxy, or a target (names conflicts are resolved in that order).
+The second can specify a star within a galaxy within the current galaxy,
+or a star or galaxy within a master galaxy.
+The third is just the obvious generalization of this.
+The fourth specifies a universe.
+The fifth specifies a block (star or galaxy) within a universe.
+The sixth is the obvious generalization.
+The seventh specifies the current galaxy, and the last specifies
+the current target.
+<p>
+Remaining to be done:
+<ul>
+<li> begin without init causes a core dump.
+<li> check aliasing mechanism interaction with HOF.
+<li> Need a way to invoke the go method of stars.  Generalize run.
+<li> Also need a method to just initialize portholes.
+<li> Need a way to get types of portholes, states.
+<li> Eliminate curtarget, curuniverse.  Leave only curgalaxy, curdomain.
+<li> Provide a way in the naming scheme to address a domain: e.g. SDF:Ramp.
+</ul>
+<p>
+<a name="addBlock pitcl command">
+<h2>addBlock</h2>
+</a>
+<p>
+<b>Usage:</b> addBlock <i>name</i> <i>class</i>
+<p>
+Create a new instance of star, galaxy, or wormhole. The specified
+block name may be absolute or relative to the current galaxy, unless
+it is a universe, in which case it must be absolute. I.e., it must
+begin with a leading period. The galaxy within which the block is to
+be created must exist or an error is triggered. An error is also
+triggered if the block already exists.
+<p>
+<a name="addState pitcl command">
+<h2>addState</h2>
+</a>
+<p>
+<b>Usage:</b> addState <i>statename</i> <i>type</i> <i>initvalue</i>
+<p>
+Create a new state for a galaxy or universe. The specified
+state name may be absolute or relative to the current galaxy.
+<p>
+NOTE: Currently this is restricted to adding states to galaxies and
+universe. It should be generalized to add states to arbitrary blocks.
+<p>
+<a name="addUniverse pitcl command">
+<h2>addUniverse</h2>
+</a>
+<p>
+<b>Usage:</b> addUniverse <i>name</i> <i>domain</i>
+<p>
+Create a new, empty universe. The name can begin with a period (as
+in ".foo") or can omit the period (as in "foo"). In either case, the
+full name of the resulting universe has a leading period (".foo").
+If a universe with the given name already exists, it is cleared. The
+second argument is the domain of the new universe.
+<p>
+<a name="aliasDown pitcl command">
+<h2>aliasDown</h2>
+</a>
+<p>
+<b>Usage:</b> aliasDown ?-deep? <i>portname</i>
+<p>
+Return the full name of the port that is aliased to the specified galaxy
+port.  If there is none, return an empty string.  If the -deep option
+is given, then return the bottom-level port, which is always a star port.
+Otherwise, just return the next level down.
+<p>
+<a name="aliasUp pitcl command">
+<h2>aliasUp</h2>
+</a>
+<p>
+<b>Usage:</b> aliasUp ?-deep? <i>portname</i>
+<p>
+If the -deep option is not given, return the full name of the galaxy
+port that is aliased to the specified port at the next level up in the
+hierarchy, or an empty string if there is none. If the -deep option
+is given, then return the top-level galaxy port, which may in fact be
+the same as the specified port if that port is already at the top level.
+<p>
+NOTE: If the specified port is a plain port within a multiport, the
+returned port may be a plain port within a multiport one level up in
+the hierarchy.  This port name can be used to disconnect, but not
+to recreate the topology.
+<p>
+<a name="begin pitcl command">
+<h2>begin</h2>
+</a>
+<p>
+<b>Usage:</b> begin <i>blockname</i>
+<p>
+Invoke the begin method of the specified block.
+The block must be a star, universe, or wormhole.
+This must be called after <code>init</code>.
+<p>
+NOTE: Ptolemy Universes don't actually have begin methods.  This is an
+oversight.  We query for the target and invoke its begin method here.
+<p>
+FIXME: Calling <code>begin</code> without <code>init</code> causes a core dump.
+<p>
+<a name="blocks pitcl command">
+<h2>blocks</h2>
+</a>
+<p>
+<b>Usage:</b> blocks ?-fullname? ?-deep? ?<i>blockname</i>?
+<p>
+Return a list of blocks contained by the specified block.
+If the -fullname option is given, the names in the returned list
+have the form _.universe.galaxy...galaxy.block_, giving the exact
+unique name of each block, with a leading period.
+If the -deep option is given, then recursively descend into
+galaxies, adding their blocks to the list, rather than listing
+the galaxy.  Thus, all blocks returned will be stars.  Note that
+probably makes no sense to use the -deep option without the
+-fullname option, since the names may not end up being unique.
+<p>
+If no blockname is given, then the current galaxy is used.
+If the argument is the name of a star (and hence contains no
+blocks), then return an empty string.
+<p>
+<a name="clear pitcl command">
+<h2>clear</h2>
+</a>
+<p>
+<b>Usage:</b> clear ?<i>univname</i>?
+<p>
+Delete all blocks in the specified universe, or if none is specified,
+the current universe.  The target is also reset to the default target.
+<p>
+<a name="connect pitcl command">
+<h2>connect</h2>
+</a>
+<p>
+<b>Usage:</b> connect ?-bus <i>buswidth</i>? ?-note <i>annotation</i>? <i>srcport</i> <i>dstport</i>
+<p>
+Form a connection between two ports.  The ports are given by dotted
+names that can be absolute (beginning with a period) or relative to the
+current galaxy.
+If a<i>buswidth</i>option is given, then it specifies the number of parallel
+connections to make.  If the<i>annotation</i>option is given, the annotation
+is recorded on the connection.  Such annotations are used, for example,
+in dataflow domains to specify the number and values of initial tokens that
+are put on an arc.  For such domains, the<i>annotation</i>argument
+is a list giving the values of initial tokens that will be put on the arc.
+<p>
+<a name="connected pitcl command">
+<h2>connected</h2>
+</a>
+<p>
+<b>Usage:</b> connected ?-deep? <i>portname</i>
+<p>
+Return a list of ports to which the given port is connected, or an
+empty list if it is not connected. The full name of each port is
+returned. If the given port is the alias of a galaxy port and the
+-deep option is not given, then the galaxy port name is reported as
+{<code>aliasUp</code> _portname_}. It is possible for a multiport to have both
+an upward alias and a connection, in which case, both are returned.
+If the -deep option is given, then star ports
+are always returned, never galaxy ports. That is, the star port to
+which the given port is ultimately connected to is returned. If the
+name of a multiport is given, this method returns a list of all the
+ports connected to the multiport.
+<p>
+NOTE: If the far side port is a multiport, then the specific port
+within that multiport to which we are connected is returned.  This
+is probably not exactly the information originally used to create the
+connection, since the connect command accepts a multiport name, and
+creates ports within that multiport as needed.
+However, the information returned here is exactly what is needed to
+recreate the exact the topology, since if a multiport is given in a
+connect command, there is no control over which specific port is used
+for the connection.
+<p>
+<a name="cont pitcl command">
+<h2>cont</h2>
+</a>
+<p>
+<b>Usage:</b> cont <i>univname</i> ?<i>stoptime</i>?
+<p>
+Continue an execution of a universe until the specified stop time.
+What this time means depends on the domain. In SDF, for example, it
+gives the number of iterations of a complete schedule. In DE, it
+gives the simulated time after which no more events will be
+processed. If no argument is given, then the stop time is taken to
+be unity. As a side effect, the current galaxy is set to the
+universe being run.
+<p>
+<a name="currentGalaxy pitcl command">
+<h2>currentGalaxy</h2>
+</a>
+<p>
+<b>Usage:</b> currentGalaxy ?<i>name</i>?
+<p>
+Return the full name of current galaxy or universe if no argument is
+given. If a name is given and a galaxy or universe exists with that
+name, make that the current galaxy. If there is no such galaxy,
+return an error.
+<p>
+<a name="defGalaxy pitcl command">
+<h2>defGalaxy</h2>
+</a>
+<p>
+<b>Usage:</b> defGalaxy <i>galname</i> <i>domain</i> ?{<i>galaxy-building-commands</i>}?
+<p>
+Define a master galaxy. The first argument is the name of the
+galaxy, i.e. the name that is registered on the knownBlocks list for
+use by <code>addBlock</code>. The second argument is the domain of the galaxy.
+The galaxy can only be used in this domain, and the inside of the
+galaxy is also in this domain; to define a wormhole (a galaxy that
+is used in a domain different from its internals), use the
+<code>defWormhole</code> command. The third argument is a set of galaxy
+building commands. If it is not given, an empty galaxy is defined.
+Otherwise, the commands are executed in the ::pitcl namespace to
+construct the galaxy. Any pitcl commands can be included.
+Note that if errors occur during the execution
+of these galaxy defining commands, then a partially constructed
+galaxy will be on the knownBlocks list.
+<p>
+<a name="defWormhole pitcl command">
+<h2>defWormhole</h2>
+</a>
+<p>
+<b>Usage:</b> defWormhole <i>wormname</i> <i>outerdomain</i> <i>innerdomain</i> <i>target</i> ?{<i>galaxy-building-commands</i>}?");
+<p>
+Define a master wormhole. The first argument is the name of the
+wormhole, i.e. the name that is registered on the knownBlocks list
+for use by <code>addBlock</code>. The second argument is the external domain of
+the wormhole. This is the domain within which the wormhole can be
+used. The third argument is the internal domain of the wormhole.
+This can be the same as the outer domain, and a wormhole will still
+be created. The fourth argument is the name of the target.  If this is
+an empty string, then the default target for the inner domain will be
+used.  The final (optional) argument is a set of galaxy building
+commands. If it is not given, an empty wormhole is defined.
+Otherwise, the commands are executed in the ::pitcl namespace to
+construct the wormhole. Note that if errors occur during the
+execution of these wormhole defining commands, then a partially
+constructed wormhole will be on the knownBlocks list.
+<p>
+NOTE: In the predecessor interface, ptcl, defgalaxy was used for
+wormholes and galaxies. But that approach relied far too much on on
+the current state, and precluded incremental construction of
+wormholes.
+<p>
+<a name="galaxyPort pitcl command">
+<h2>galaxyPort</h2>
+</a>
+<p>
+<b>Usage:</b> galaxyPort <i>portname</i> <i>aliasport</i>
+<p>
+This procedure establishes an "alias" relationship between a galaxy
+port and a port in a block within the galaxy.  The first argument is
+the name of the galaxy port.  If no port with that name exists, it is
+created.  The second argument is the name of a block port within the
+galaxy.
+<p>
+NOTE: This procedure replaces the <code>alias</code> command in PTcl.
+Also note that this procedure could be greatly simplified by
+bypassing the InterpGalaxy::alias method.  We use that method
+only because it registers the operation on the "actionList" for
+later cloning of the galaxy.  If the cloning mechanism is simplified,
+then this implementation can probably be simplified.
+<p>
+<a name="getAnnotation pitcl command">
+<h2>getAnnotation</h2>
+</a>
+<p>
+<b>Usage:</b> getAnnotation <i>portname</i>
+<p>
+Return the annotation created with the <code>-note</code> option for a given port.
+If no annotation was specified, return an empty string.
+<p>
+NOTE: If a multiport is passed in, this method returns an empty string,
+indicating no annotation. Is this what we want?
+<p>
+<a name="getClassName pitcl command">
+<h2>getClassName</h2>
+</a>
+<p>
+<b>Usage:</b> getClassName ?<i>blockname</i>?
+<p>
+Return the class name of the specified block, or if none is
+specified, of the current galaxy. Note that the class name of a
+galaxy is the name of the master galaxy from which it was originally
+cloned, or if the galaxy is a master (on the KnownBlocks list), then
+its own name. The class name of a Ptolemy star has the domain name
+as a prefix, as in "SDFRamp".
+<p>
+<a name="getData pitcl command">
+<h2>getData</h2>
+</a>
+<p>
+<b>Usage:</b> getData ?-geo? <i>portname</i>
+<p>
+Return the data buffered in the port, or if the -geo option is given,
+the data buffered on the geodesic.  The data is returned as a list of
+items, where each item is a string constructed using the <code>print</code> method
+of the particle.  If there is no data, an empty string is returned.
+<p>
+NOTE: Because of flaws in the design of the Ptolemy kernel, without
+the -geo option, only the current particle (that accessed with
+operator %0) is returned. Other particles in the port are ignored.
+<p>
+FIXME: This procedure has only been tested in the SDF domain.
+In particular, the -geo option is unlikely to yield anything useful
+in other domains.
+<p>
+<a name="getDescriptor pitcl command">
+<h2>getDescriptor</h2>
+</a>
+<p>
+<b>Usage:</b> getDescriptor ?<i>blockname</i>?
+<p>
+Return the descriptor of the specified block, or if none is specified,
+of the current galaxy.
+<p>
+<a name="getDomain pitcl command">
+<h2>getDomain</h2>
+</a>
+<p>
+<b>Usage:</b> getDomain ?-inside? ?<i>blockname</i>?
+<p>
+Return the domain of the specified block, or if none is
+specified, of the current galaxy.  The domain returned by default is
+the one within which the block is designed to work.  Thus, for a wormhole,
+it will not be the inside domain, but rather the outside domain.  To get
+the inside domain of a wormhole, use the -inside option.  This option
+is ignored if the block is not a wormhole.
+<p>
+<a name="getFullName pitcl command">
+<h2>getFullName</h2>
+</a>
+<p>
+<b>Usage:</b> getFullName ?<i>blockname</i>?
+<p>
+Return the full name of the specified block, or if none is
+specified, of the current galaxy.  The full name begins with a period,
+followed by the universe name, followed by parent galaxy names separated
+by periods, followed by the final block name.
+<p>
+<a name="getParent pitcl command">
+<h2>getParent</h2>
+</a>
+<p>
+<b>Usage:</b> getParent ?<i>blockname</i>?
+<p>
+Return the full name of the parent of the specified block, or if
+none is specified, of the current galaxy. If the specified block is
+an instance of a star or galaxy, then the full name begins with a
+period, followed by the universe name, followed by parent galaxy
+names separated by periods, followed by the final block name. If the
+specified block is a universe, then return ".". If the specified
+block is a master star or galaxy, then return the empty string. If
+the specified block does not exist, then return an error.
+<p>
+<a name="getSchedule pitcl command">
+<h2>getSchedule</h2>
+</a>
+<p>
+<b>Usage:</b> getSchedule ?<i>blockname</i>?
+<p>
+Return the schedule of the specified universe, or if none is specified,
+of the current universe.  Note that it is necessary to invoke <code>init</code>
+before there is a schedule.  If <code>init</code> has not been invoked, then
+return an error. The format of the returned schedule is as follows:
+<pre>
+&lt;schedule&gt; ::= { ( &lt;entry&gt; )+ }
+<p>
+&lt;entry&gt;    ::= { scheduler &lt;string:scheduler_identifier&gt; }
+             | { galaxy &lt;string:galaxy_or_universe_name&gt; }
+             | { target &lt;string:target_name&gt; }
+             | { numberOfProcessors &lt;int:numprocs&gt; }
+             | { numberOfStars &lt;int:numstars&gt; }
+             | { numberOfStarOrClusterFirings &lt;int:sizeofDAG&gt; }
+             | { makespan &lt;int:makespan&gt; }
+             | { totalIdleTime &lt;int:idletime&gt; }
+             | { utilization &lt;float:utilization&gt; }
+             | { preamble &lt;schedule&gt; }
+             | { cluster &lt;schedule&gt; }
+             | { cluster &lt;string:name&gt; &lt;schedule&gt; }
+             | { assign &lt;string:token&gt; &lt;string:value&gt; }
+             | { fire &lt;star&gt; }
+             | { fire &lt;star&gt; &lt;f_info&gt; }
+             | { idle &lt;int:idletime&gt;}
+             | { processor &lt;string:name&gt; &lt;schedule&gt; }
+             | { repeat &lt;int:repetitions&gt; &lt;schedule&gt; }
+             | { &lt;string:annotation&gt; &lt;schedule&gt; }
+             | { &lt;string:annotation&gt; &lt;schedule&gt; &lt;string:endannotation&gt;}
+<p>
+&lt;star&gt;     ::= send
+             | receive
+             | &lt;string:star_name&gt;
+<p>
+&lt;f_info&gt;   ::= { ( &lt;f_entry&gt; )+ }
+<p>
+&lt;f_entry&gt;  ::= { exec_time &lt;int:exec_time&gt; }
+             | { start_row &lt;int:start_row_index&gt; }
+             | { start_col &lt;int:start_col_index&gt; }
+             | { end_row &lt;int:end_row_index&gt; }
+             | { end_col &lt;int:end_col_index&gt; }
+             | { &lt;string:label&gt; &lt;string:value&gt; }
+</pre>
+The notation "( &lt;<em>name</em>&gt; ) +" means one or more items
+of type <em>name</em>.
+The notation "&lt;<em>type</em>:<em>description</em>&gt;" means
+an item of the given type and description.
+The braces ("{" and "}") are all part of the format,
+and are included to make the string trivial to parse in Tcl.
+<p>
+Note that all entries are optional, and the list will inevitably
+grow as we add more schedulers.  Some are used only by specific
+schedulers.  For instance, the "assign" item is used by BDF to
+record a value that affects the schedule. Thus a tool that uses any of
+this information
+to display a schedule cannot count on any item being present.  It has to fail
+gracefully if it does not know how to display the schedule.
+The last two items of type "entry" can use any string as an identifier.
+This makes the format flexible, so that it can support new schedulers.
+I believe all schedule visualization tools should fall back on
+a textual schedule display if they cannot represent the given
+information, or necessary information is missing.
+So for example, one way to write
+the gantt tool would be to search the schedule for annotations that
+it does not recognize.  If it finds any, display the schedule textually.
+Otherwise, draw a gantt chart.
+<p>
+The &lt;f_entry&gt; items allow the scheduler to give additional
+information about the schedule. Anything is allowed here, but
+the specific items listed are used by parallel CG schedulers and
+the MDSDF scheduler.
+<p>
+For example,
+<pre>
+{
+  { scheduler "T.C. Hu's Parallel Scheduler"}
+  { galaxy foo}
+  { numberOfProcessors 2}
+  { processor 1 {
+     { totalIdleTime 20 }
+     { target NOW }
+     { fire starA { exec_time 5 } }
+     { fire starB { exec_time 5 } }
+  }}
+  { processor 2 {
+     { fire starC { exec_time 25 } }
+     { fire starD { exec_time 5 } }
+  }}
+  { totalIdleTime 20}
+  { makespan 30}
+  { utilization 66.66}
+}
+</pre>
+Here is a simpler example:
+<pre>
+{
+  {fire starA}
+  {fire starB}
+  {fire starC}
+}
+</pre>
+<p>
+<a name="getTarget pitcl command">
+<h2>getTarget</h2>
+</a>
+<p>
+<b>Usage:</b> getTarget ?-inside? ?<i>blockname</i>?
+<p>
+Given a block, return the name of its target. This procedure is most
+useful for blocks that are universes and wormholes when the -inside
+option is given. In this case, it returns the name of the target
+that controls the invocation of the blocks inside the universe or
+wormhole. Without the -inside option, it returns the name of the target
+that controls the invocation of the specified block (its outside target).
+However, this name will always be a null string before the universe has
+been initialized.
+<p>
+<a name="init pitcl command">
+<h2>init</h2>
+</a>
+<p>
+<b>Usage:</b> init ?<i>blockname</i>?
+<p>
+Initialize the specified block, or if none is specified, the current
+galaxy. This causes the states and portholes to be initialized and,
+for stars, universes, and wormholes, the setup method to be run. In
+addition, if the block is a universe or a wormhole, then the target
+is initialized. In statically scheduled domains, initializing the
+target causes the schedule to be computed. If a halt is requested or
+an error occurs during the initialization, then return an error (so
+that no script continues assuming the block has been initialized).
+Note that the begin method is not invoked. That should be explicitly
+invoked after this initialization.
+<p>
+<a name="initState pitcl command">
+<h2>initState</h2>
+</a>
+<p>
+<b>Usage:</b> initState <i>statename</i>
+<p>
+Initialize a state.  This causes the initial value to be evaluated
+and the current value set to the initial value.
+<p>
+<a name="isGalaxy pitcl command">
+<h2>isGalaxy</h2>
+</a>
+<p>
+<b>Usage:</b> isGalaxy <i>blockname</i>
+<p>
+Return 1 if the specified block is a galaxy.  Return 0 otherwise.
+A wormhole is not galaxy for these purposes, since normally you cannot
+see inside.
+<p>
+<a name="isMultiPort pitcl command">
+<h2>isMultiPort</h2>
+</a>
+<p>
+<b>Usage:</b> isMultiPort <i>portname</i>
+<p>
+Return 1 if the specified port is a multiport.  Return 0 otherwise.
+A multiport in Ptolemy is a port that contains any number of other ports.
+<p>
+<a name="isWormhole pitcl command">
+<h2>isWormhole</h2>
+</a>
+<p>
+<b>Usage:</b> isWormhole <i>blockname</i>
+<p>
+Return 1 if the specified block is a Wormhole.  Return 0 otherwise.
+A Wormhole in Ptolemy is a star that contains a galaxy.
+<p>
+<a name="knownBlocks pitcl command">
+<h2>knownBlocks</h2>
+</a>
+<p>
+<b>Usage:</b> knownBlocks ?<i>domain</i>?
+<p>
+Return a list of the available blocks in the specified domain, or (if no
+domain is given) the current domain.
+<p>
+<a name="knownDomains pitcl command">
+<h2>knownDomains</h2>
+</a>
+<p>
+<b>Usage:</b> knownDomains
+<p>
+Return a list of the available domains.
+<p>
+<a name="knownTargets pitcl command">
+<h2>knownTargets</h2>
+</a>
+<p>
+<b>Usage:</b> knownTargets ?<i>domain</i>?
+<p>
+Return a list of targets for the specified domain. (if no
+domain is given) the current domain.
+<p>
+<a name="knownUniverses pitcl command">
+<h2>knownUniverses</h2>
+</a>
+<p>
+<b>Usage:</b> knownUniverses
+<p>
+Return a list of the names of the known universes.
+Each name begins with a dot, and hence is absolute.
+<p>
+<a name="mathematica pitcl command">
+<h2>mathematica</h2>
+</a>
+<p>
+<b>Usage:</b> mathematica <i>command</i> ?<i>arg</i> ...? 
+<p>
+Manage a Mathematica session. Mathematica is a commercial program for
+symbolic mathematics. This command will only work if your version
+of the executable has been built with an interface to Mathematica.
+Possible commands and their arguments are given below:
+<pre>
+  terminate session:             end
+  evaluate Mathematica command:  eval<i>script</i>
+  get expression in Tcl form:    get<i>name</i>?_script_?
+  evaluate Mathematica command:  send<i>script</i>
+  start a session:               start ?_identifier_?
+  Tcl/Mathematica status:        status
+</pre>
+ 
+The "mathematica send" command will not return output generated by
+Mathematica (unless an error occurs), "mathematica eval" will return
+it as a single string, and "mathematica get" sends the script for
+evaluation and returns the value of the variable name.  For example,
+"<tcl>mathematica send {Plot[Sin[2 Pi x], {x, 0, 1}]}</tcl>" will
+create a simple plot, and "<tcl>mathematica eval {?Plot}</tcl>"
+will return help information about the Plot command.
+ 
+The "mathematica status" command returns 0 if the Tcl/Mathematica
+connection is open and Mathematica is running, and non-zero
+otherwise. A -1 indicates that the connection is not open, whereas 1
+means that Mathematica is not running.
+ 
+Note that Mathematica syntax uses square brackets to denote function
+calls, parenthesis to group algebraic expressions, and curly braces
+to denote vectors and matrices.  If Tcl tries to evaluate a string
+containing any of these special characters, then Tcl will flag an error.
+<p>
+<a name="matlab pitcl command">
+<h2>matlab</h2>
+</a>
+<p>
+<b>Usage:</b> matlab <i>command</i> ?<i>arg</i> ...? 
+<p>
+Manage a Matlab session. This command will only work if your version
+of the executable has been built with Matlab. Possible commands and
+their arguments are given below:
+<pre>
+  terminate session:           end
+  evaluate Matlab script:      eval<i>script</i>
+  get matrix as Tcl lists:     get<i>name</i>?_script_?
+  get matrix as ordered pairs: getpairs<i>name</i>?_script_?
+  evaluate Matlab script:      send<i>script</i>
+  set matrix as Tcl lists:     set<i>name</i>_rows_<i>cols</i>_real_ ?_imag_?
+  start a session:             start ?_identifier_? ?_start_command_?
+  Tcl/Matlab status:           status
+  unset a matrix:              unset
+</pre>
+ 
+The "matlab send" command will not return output from by Matlab (unless
+an error occurs), "matlab eval" will return output as a single string, and
+"matlab get" sends the script for evaluation and returns the value of
+the variable name. For example,
+"<tcl>::pitcl::matlab send {plot( [1 2 2.5 1] )}</tcl>"
+will create a simple plot, and
+"<tcl>::pitcl::matlab eval {help plot}</tcl>" will
+return help information about the plot command.
+<p>
+The "matlab status" command returns 0 if the Tcl/Matlab connection is
+open and Matlab is running, and non-zero otherwise.  A return value of
+-1 indicates that the connection is not open, whereas 1 means that
+Matlab is not running.
+ 
+The "matlab start" command will launch an interface to Matlab.  If the
+MATLAB_SERVER_HOSTNAME environment variable is set, then Matlab will
+be started on that machine.
+The <start_command> argument specifies how to start Matlab.
+ 
+Note that Matlab syntax uses square brackets to denote vectors and matrices,
+which will cause errors if Tcl tries to evaluate a string containing them.
+<p>
+NOTE: The matlab command can cause Tycho to hang if it is being run
+in the background.  This is because the external interface provided
+for matlab assumes that a terminal is connected to the program.  To
+unhang tycho, put it in the foreground.  We have also sometimes seen
+matlab hang the entire X window session.  To correct this, kill the
+matlab process.  Bugs should be reported to the Math Works, Inc.
+<p>
+<a name="monitor pitcl command">
+<h2>monitor</h2>
+</a>
+<p>
+<b>Usage:</b> monitor on|off
+<p>
+Turn on or off the monitoring of ptcl commands.  When monitoring is on,
+then every time a ptcl command is called, the full text of the command
+is passed to the "monitorPtcl" procedure.  By default, that procedure
+prints out the command using the Tcl puts procedure, but that procedure
+may be overridden.
+<p>
+<a name="monitorPtcl pitcl command">
+<h2>monitorPtcl</h2>
+</a>
+When monitoring is turned on, this procedure is called each time a Ptcl
+procedure is invoked.  The full text of the command is passed as arguments.
+This method may be overridden, but the default method prints the command
+using the Tcl puts procedure.
+<p>
+FIXME: This does not work for defGalaxy commands.
+<p>
+<a name="onFiring pitcl command">
+<h2>onFiring</h2>
+</a>
+<p>
+<b>Usage:</b> onFiring ?-before? ?-after? ?<i>starname</i>? <i>command</i>
+<p>
+Bind a Tcl command to the firing of a star.  If the -after option
+is given, then the binding triggers after the star firing (the invocation
+of its <code>run</code> method, which invokes the <code>go</code> method).
+If the -before option is given, or if no options are given, then
+the binding triggers before the firing.
+If no starname is specified, then the command is bound to all star
+firings.  In either case, the full name of the particular star that
+triggers the binding will be appended to the command before the command
+invoked. For example, the command
+<pre>
+	onFiring puts
+</pre>
+will result in the printing of the name of every star after it is fired.
+The value returned by registerAction is a handle (a unique string)
+that can be used to cancel the action using <code>onFiringCancel</code>.
+<p>
+<a name="onFiringCancel pitcl command">
+<h2>onFiringCancel</h2>
+</a>
+<p>
+<b>Usage:</b> onFiringCancel <i>handle</i>|all
+<p>
+Cancel a binding created with <code>onFiring</code>.
+The single argument is the handle returned by <code>onFiring</code> or the keyword
+"all", in which case the all existing bindings are canceled.
+<p>
+<a name="ports pitcl command">
+<h2>ports</h2>
+</a>
+Return a list of port names for the specified block.
+<p>
+<b>Usage:</b> ports ?-inputs? ?-outputs? ?-multiports? <i>blockname</i>
+<p>
+If options are specified, they can be any combination of:
+<ul>
+<li> -inputs
+<li> -outputs
+<li> -multiports
+</ul>
+The first two options indicate that inputs or outputs should be
+listed. Specifying both of these options lists only ports that are
+both an input and an output, something supported in some domains.
+Specifying neither results in all ports being listed.
+The -multiports option specifies that only multiports should be
+listed, rather than the individual ports within the multiport.
+In this case, after each multiport is a list of its contained ports.
+For example, a multiport named "input" with two contained ordinary
+ports will appear in the result as "input {input#1 input#2}".
+<p>
+<a name="portsContained pitcl command">
+<h2>portsContained</h2>
+</a>
+<p>
+<b>Usage:</b> portsContained ?-deep? <i>portname</i>
+<p>
+Return a list of ports contained by the given multiport. If the
+-deep option is given, then return the lowest level ports in the alias
+chain, which are always star ports.  Otherwise, the returned ports
+may be galaxy ports.  It is an error if the named port is not a multiport.
+<p>
+<a name="remove pitcl command">
+<h2>remove</h2>
+</a>
+<p>
+<b>Usage:</b> remove <i>name</i>
+<p>
+Delete the specified block.
+<p>
+<a name="reset pitcl command">
+<h2>reset</h2>
+</a>
+<p>
+<b>Usage:</b> reset ?<i>galname</i>?
+<p>
+Reconstruct the specified galaxy, or if none is specified, the current
+galaxy.  This deletes all contained blocks, and then
+constructs new blocks of the same time and redoes all the connections.
+It uses the actionList of InterpGalaxy.
+<p>
+FIXME: test
+<p>
+<a name="run pitcl command">
+<h2>run</h2>
+</a>
+<p>
+<b>Usage:</b> run <i>univname</i> ?<i>stoptime</i>?
+<p>
+Run a universe until the specified stop time.  What this time means
+depends on the domain.  In SDF, for example, it gives the number of
+iterations of a complete schedule.  In DE, it gives the simulated time
+after which no more events will be processed.  If no argument is given,
+then the stop time is taken to be unity.  As a side effect, the current
+galaxy is set to the universe being run.  This procedure is equivalent
+to the sequence <code>init</code>, <code>begin</code>, <code>cont</code>.
+<p>
+<a name="setState pitcl command">
+<h2>setState</h2>
+</a>
+<p>
+<b>Usage:</b> setState <i>statename</i> <i>statevalue</i>
+<p>
+Set the initial value of the specified state.  For this to affect the
+current value you must invoke <code>initState</code>.
+<p>
+<a name="setTarget pitcl command">
+<h2>setTarget</h2>
+</a>
+<p>
+<b>Usage:</b> setTarget ?<i>blockname</i>? <i>targetname</i>
+<p>
+Change the target for the specified block. Currently, the block must
+be a universe, although eventually it may be allowed to be a
+wormhole. If no block is specified, assume the current galaxy (which
+again must be a universe).  The targets for the all the constituent
+blocks are immediately updated (no need to initialize).
+<p>
+<a name="states pitcl command">
+<h2>states</h2>
+</a>
+<p>
+<b>Usage:</b> states ?<i>blockname</i>?
+<p>
+Return the list of states in the given block. If no argument is
+given, return a list of the states of the current galaxy.
+<p>
+<a name="stateValue pitcl command">
+<h2>stateValue</h2>
+</a>
+<p>
+<b>Usage:</b> stateValue ?-initial? <i>statename</i>
+<p>
+Return the value of the specified state. If the option is -initial,
+then return the initial value. Otherwise, return the current value.
+<p>
+<a name="wrapup pitcl command">
+<h2>wrapup</h2>
+</a>
+<p>
+<b>Usage:</b> wrapup <i>univname</i>
+<p>
+Invoke the wrapup method of the specified universe.
+<p>
+</body>
+</html>

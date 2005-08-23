@@ -1,0 +1,4 @@
+#
+foreach f (`glob *.n`)
+   tk2html $f > html/$f.html
+end
