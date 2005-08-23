@@ -1,5 +1,5 @@
 README.txt
-$Id$
+@(#)README.txt	1.2 05/07/98
 
 This is the README.txt file for the Tycho
 package tycho.typt.edit

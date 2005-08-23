@@ -2,9 +2,9 @@
 #
 # @Authors: Christopher Hylands, John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)TyDocMain.itcl	1.38 01/26/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

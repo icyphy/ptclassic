@@ -2,7 +2,7 @@
 # Command-line program for the tycho.typt.edit utility \
     exec itclsh "$0" "$@"
 
-# $Id$
+# @(#)edit	1.3 05/07/98
 # Author: John Reekie
 
 # If the PTEDIT_LIBRARY variable is set, add it to the auto_path

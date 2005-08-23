@@ -1,8 +1,8 @@
 # Makefile rules that are common to most files.
 #
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)tycommon.mk	1.93 08/30/98
+# Copyright (c) 1990-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

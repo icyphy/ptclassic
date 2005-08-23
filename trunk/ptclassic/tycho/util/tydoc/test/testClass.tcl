@@ -2,7 +2,7 @@
 #
 # @Author: Cliff Cordeiro
 #
-# @Version: $Id$
+# @Version: @(#)testClass.tcl	1.3 03/16/98
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.

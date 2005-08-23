@@ -2,7 +2,7 @@
 #
 # @Authors: Christopher Hylands, John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.4 08/25/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)basic.tcl	1.6 05/08/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

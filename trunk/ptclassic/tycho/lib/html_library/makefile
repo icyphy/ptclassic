@@ -1,10 +1,10 @@
 # Makefile for Ptolemy Tycho system, lib/html_library  directory.
 # html_library was written by Sun, see license.terms
 #
-# $Id$
+# @(#)makefile	1.4 12/16/96
 # Author: Christopher Hylands
 #
-# Copyright (c) 1991-%Q% The Regents of the University of California.
+# Copyright (c) 1991-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * @(#)DrawTest.java	1.1 10/21/97
  *
  * Copyright (c) 1994-1996 Sun Microsystems, Inc. All Rights Reserved.
  *

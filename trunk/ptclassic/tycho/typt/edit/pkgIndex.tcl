@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)pkgIndex.tcl	1.3 05/07/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

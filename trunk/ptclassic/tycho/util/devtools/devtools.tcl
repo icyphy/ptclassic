@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)devtools.tcl	1.4 04/24/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)JRPCServer.tcl	1.9 05/08/98
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.

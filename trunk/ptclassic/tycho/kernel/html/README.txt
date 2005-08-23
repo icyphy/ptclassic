@@ -1,5 +1,5 @@
 README.txt
-$Id$
+@(#)README.txt	1.1 02/24/98
 
 This is the README.txt file for the Tycho
 package tycho.kernel.html.

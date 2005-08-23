@@ -1,8 +1,8 @@
 # Generating star-demo cross indices
-# $Id$
+# @(#)starindex.tcl	1.12	10/05/96
 # Authors: Brian L. Evans, Christopher Hylands
 #
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

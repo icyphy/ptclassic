@@ -1,7 +1,7 @@
 # Compatbility classes for running Slate stand-alone.
 # These are just empty shells of some root Tycho classes.
 #
-# @Version: $Id$
+# @Version: @(#)classes.tcl	1.1 07/29/98
 # @Author: H. John Reekie
 #
 # @Copyright (c) 1996- The Regents of the University of California.

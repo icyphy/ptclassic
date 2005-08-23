@@ -2,7 +2,7 @@
 # Source for this template is at
 # $PTOLEMY/tycho/edit/textedit/templates/Cmakefile.mk
 #
-# $Id$
+# %W% %G%
 # Makefile Author: Christopher Hylands
 #
 # Copyright (c) 1997-%Q% The Regents of the University of California.

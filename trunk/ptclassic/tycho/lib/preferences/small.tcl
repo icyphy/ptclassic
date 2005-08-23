@@ -1,4 +1,4 @@
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 # Tycho preferences file to use small fonts.
 #
-# $Id$
+# @(#)small.tcl	1.6 04/07/97
 
 ::tycho::preference assign fonts textFont  {Screen 12}
 ::tycho::preference assign fonts entryFont {Helvetica 12}

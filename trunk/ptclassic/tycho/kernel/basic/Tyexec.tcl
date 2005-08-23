@@ -2,9 +2,9 @@
 #
 # @Authors: Christopher Hylands and Kevin Chang
 #
-# @Version: $Id$
+# @Version: @(#)Tyexec.tcl	1.1 05/12/98
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996- The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without

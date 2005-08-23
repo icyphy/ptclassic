@@ -5,7 +5,7 @@
 # lndir in that it handles SCCS directories, and won't create subdirectories
 # for directories named 'junk' or 'adm'
 #
-# $Id$
+# @(#)tylndir	1.4 08/31/98
 
 # tylndir is based on lndir:
 

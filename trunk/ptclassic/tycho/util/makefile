@@ -1,9 +1,9 @@
 # Makefile for Tycho utils directory
 #
-# $Id$
+# @(#)makefile	1.12 10/12/98
 # Author: Christopher Hylands
 #
-# Copyright (c) 1997-%Q% The Regents of the University of California.
+# Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,7 +41,7 @@ VPATH =		$(ROOT)/$(ME)
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-DIRS =		devtools tydoc idoc ptsim tytest pakman
+DIRS =		devtools tydoc idoc ptsim tytest # pakman
 
 EXTRA_SRCS = 	pkgIndex.tcl
 

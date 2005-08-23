@@ -1,6 +1,6 @@
 # Makefile for Tycho's editors package directory
 #
-# $Id$
+# @(#)makefile	1.20a 01/08/99
 # Author: Christopher Hylands
 #
 # Copyright (c) 1998 The Regents of the University of California.
@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = ptII textedit visedit slate graphedit cts pn
+DIRS = textedit visedit slate # cts pn ptII
 
 # Root of Tycho directory
 ROOT =		..

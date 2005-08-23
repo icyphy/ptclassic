@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.31 02/04/99
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -56,7 +56,6 @@ ITCL_SRCS = \
 	EditProgram.itcl \
 	EditSDL.itcl \
 	EditTcl.itcl \
-	EditTeX.itcl \
 	HTMLOutline.itcl \
 	Matlab.itcl \
 	Mathematica.itcl
@@ -66,7 +65,6 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	edithtml.style \
 	makefile.style \
 	pkgIndex.tcl \
-	tex.style \
 	textedit.tcl
 
 MISC_FILES = doc img templates test tclIndex 

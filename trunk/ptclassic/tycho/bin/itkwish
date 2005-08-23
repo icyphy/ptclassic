@@ -2,8 +2,8 @@
 # This script is used to run itkwish from prebuilt binaries
 # Author: Christopher Hylands
 #         changed to bourne shell script by Wolfgang Reimer
-# Version: $Id$
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Version: @(#)itkwish	1.11 03/25/98
+# Copyright (c) 1996-1998 The Regents of the University of California.
 # 	All Rights Reserved.
 
 # PTOLEMY and PTARCH are part of the Ptolemy project.
@@ -45,8 +45,8 @@ if [ -z "$PTARCH" ]; then
     if [ -x "$TYCHO/bin/ptarch" ]; then
 	PTARCH=`$TYCHO/bin/ptarch`
 	export PTARCH
-    elif [ -x "$ITCLDIR/tcl/bin/ptarch" ]; then
-	PTARCH=`$ITCLDIR/tcl/bin/ptarch`
+    elif [ -x "$ITCLDIR/itcl/bin/ptarch" ]; then
+	PTARCH=`$ITCLDIR/itcl/bin/ptarch`
 	export PTARCH
     elif [ -x "$PTOLEMY/bin/ptarch" ]; then
 	PTARCH=`$PTOLEMY/bin/ptarch`
@@ -54,7 +54,7 @@ if [ -z "$PTARCH" ]; then
     else
 	echo '$PTARCH is not set.'
 	echo "$TYCHO/bin/ptarch, $PTOLEMY/bin/ptarch, and"
-	echo "$ITCLDIR/tcl/bin/ptarch either are not"
+	echo "$ITCLDIR/itcl/bin/ptarch either are not"
 	echo " executable or do not exist, so we cannot"
 	echo " run ptarch."
 	echo 'Perhaps you need to set $ITCLDIR?'
@@ -63,33 +63,7 @@ fi
 
 progname=`basename $0`
 
-if [ -f $ITCLDIR/tcl/lib/itcl/itcl.tcl ]; then
-    case "$PTARCH" in
-    hppa*) if [ "$SHLIB_PATH" ]; then
-	    SHLIB_PATH=$ITCLDIR/tcl.$PTARCH/lib:${SHLIB_PATH}
-	else
-	    SHLIB_PATH=$ITCLDIR/tcl.$PTARCH/lib
-	fi
-	export SHLIB_PATH;;
-    *) if [ "$LD_LIBRARY_PATH" ]; then
-	    LD_LIBRARY_PATH=$ITCLDIR/tcl.$PTARCH/lib:${LD_LIBRARY_PATH}
-	else
-	    LD_LIBRARY_PATH=$ITCLDIR/tcl.$PTARCH/lib
-	fi
-	export LD_LIBRARY_PATH;;
-    esac
-
-    # Itcl3.0
-    TCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tcl"
-    TK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tk"
-    ITCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itcl"
-    ITK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itk"
-    IWIDGETS_LIBRARY="$PTOLEMY/tcltk/tcl/lib/iwidgets"
-    export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
-
-    exec $ITCLDIR/tcl.$PTARCH/bin/$progname ${1+"$@"}
-
-elif [ -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ]; then
+if [ -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ]; then
     case "$PTARCH" in
     hppa*) if [ "$SHLIB_PATH" ]; then
 	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${SHLIB_PATH}

@@ -3,9 +3,9 @@
 # @Authors: Joel King and Edward A. Lee
 # @Contributor: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)RevControlSCCS.itcl	1.54	12/05/97
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

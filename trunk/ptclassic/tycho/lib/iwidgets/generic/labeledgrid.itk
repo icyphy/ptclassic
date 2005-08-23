@@ -26,7 +26,7 @@
 #  L. Ulferts. Labeledgrid is contributed to [incr Widgets] by the Tycho
 #  project at UC Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
 #
-#  $Id$
+#  @(#)labeledgrid.itk	1.12 05/11/98
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 1995-1997 The Regents of the University of California.

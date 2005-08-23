@@ -2,9 +2,9 @@
 #
 # @Authors: Edward A. Lee, Joel R. King
 #
-# @Version: $Id$
+# @Version: @(#)EditSearch.itcl	1.40	01/27/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

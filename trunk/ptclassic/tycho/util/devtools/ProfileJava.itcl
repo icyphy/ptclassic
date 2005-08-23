@@ -3,9 +3,9 @@
 # @Author: Christopher Hylands
 # @Contributor: Edward A. Lee, based on ProfileTcl.itcl
 #
-# @Version: $Id$
+# @Version: @(#)ProfileJava.itcl	1.4 01/27/99
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without

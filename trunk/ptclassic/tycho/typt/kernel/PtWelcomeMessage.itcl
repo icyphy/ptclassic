@@ -2,9 +2,9 @@
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)PtWelcomeMessage.itcl	1.19   04/24/98
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -123,7 +123,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 1990-%Q%, " \
+	    "Copyright \251 1990-1999, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
 	    "<a href=$TYCHO/copyright>See the copyright notice, " \

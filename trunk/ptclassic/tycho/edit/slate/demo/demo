@@ -2,7 +2,7 @@
 # Command-line program for running slate demos \
     exec wish "$0" "$@"
 
-# $Id$
+# @(#)demo	1.1 07/29/98
 # Author: John Reekie
 
 # Create the demo namespace

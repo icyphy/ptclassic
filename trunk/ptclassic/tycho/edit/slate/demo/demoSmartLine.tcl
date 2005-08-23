@@ -4,7 +4,7 @@
 # To run this demo, execute
 #    ./demo SmartLine
 #
-# $Id$
+# @(#)demoSmartLine.tcl	1.1 07/29/98
 # Author: John Reekie
 
 proc ::demo::demoSmartLine {} {

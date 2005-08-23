@@ -3,9 +3,9 @@
 #
 # @Authors: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)ptlangTroffToHTML.tcl	1.7 10/03/96
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

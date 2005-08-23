@@ -1,8 +1,8 @@
 ##########################################################################
-# @Version: $Id$
+# @Version: @(#)JavaViewer.itcl	1.8 05/22/98
 # @Author: Cliff Cordeiro, John Reekie
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

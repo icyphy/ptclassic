@@ -5,9 +5,9 @@
 #
 # @Authors: Edward A. Lee, Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)Tycho.tcl	1.158a   01/11/99
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1999 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -288,9 +288,7 @@ if {[file exists [file join $TYCHO edit ptII]] \
     # from within pigi.  As of 12/98, 'package require java' would
     # crash pigi upon startup with a message like:
     #    Vem RPCfread(): read 0 bytes, connection has been broken.
-    if [ catch {package require tycho.edit.ptII} errmsg] {
-	puts "Warning 'package require tycho.edit.ptII failed':\n$errmsg"
-    }
+    package require tycho.edit.ptII
 }
 
 # These are obsolete and will be removed soon [johnr 10/13/98]
@@ -378,7 +376,7 @@ if {![info exists TychoBinaryInfo]} {
 # If you change ::tycho_version, then update $TYCHO/README.txt and
 # $TYCHO/lib/windows/tycho-windows.itk
 global ::tycho_version
-set tycho_version 0.3devel
+set tycho_version 0.3alpha
 
 if {![info exists TychoVersionInfo]} {
     if [info exists tk_version] {

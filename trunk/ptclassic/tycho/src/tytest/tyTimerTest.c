@@ -3,7 +3,7 @@
 
 Authors: John Reekie.
 
-Version: $Id$
+Version: @(#)tyTimerTest.c	1.3 01/20/97
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
