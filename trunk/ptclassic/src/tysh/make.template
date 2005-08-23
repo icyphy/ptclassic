@@ -133,6 +133,19 @@ PIGI_OBJS += 	-ltysh
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
 
+BarGraph.cc BarGraph.h TclStarIfc.cc TclStarIfc.h XYPlot.cc XYPlot.h:
+	@if [ ! -f $@ ]; then \
+		echo "Linking to ../ptklib/$@"; \
+		ln -s ../ptklib/$@; \
+	fi
+
+TclObj.cc TclObj.h pthreadsCompat.h sol2compat.h:
+	@if [ ! -f $@ ]; then \
+		echo "Linking to ../pigilib/$@"; \
+		ln -s ../pigilib/$@; \
+	fi
+
+
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
