@@ -39,3 +39,6 @@
 include $(ROOT)/mk/config-sol8.mk
 # PTSOL8 is read in src/compat/ptolemy/compat.h
 ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -DPTSOL7 -DPTSOL8 -DPTSOL10 -D_PTHREAD_1003_1c
+
+# Don't compile the Matlab interface, it does not work with Matlab-6.5.1
+INCLUDE_MATLAB = no
