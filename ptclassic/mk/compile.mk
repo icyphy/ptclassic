@@ -55,8 +55,9 @@
 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
+# OTHERCFLAGS is used in octtools/vem/dispatch/make.template
 .c.o:
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) -c $<
 
 # The optimizer in g++-2.7.2 and later have bugs that we workaround by turning
 # off the optimizer.  The problem is that when the optimizer is turned on, 
