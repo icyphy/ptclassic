@@ -198,7 +198,6 @@ else
                 $(DEPEND) $(DEPEND_INCL) $(SRCS)|\
                         cat make.template - > makefile.n;\
                 mv -f makefile.n makefile
-endif
 
 makefile:	make.template $(MDEPS)
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
@@ -240,3 +239,4 @@ weblint:
 sccsinfo:
 	@sccs check || true
 
+endif

@@ -42,6 +42,10 @@ makefiles:
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
+		  if [ ! -f make.template -a -f makefile ]; then \
+		     echo "make.template does not exist, linking make.template to makefile"; \
+		     ln -s makefile make.template; \
+	          fi; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
 		) \
