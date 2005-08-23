@@ -59,7 +59,7 @@ all install clean sources realclean extraclean checkjunk sccsinfo weblint:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
@@ -71,7 +71,7 @@ TAGS:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
@@ -83,7 +83,7 @@ depend:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
