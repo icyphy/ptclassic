@@ -49,7 +49,7 @@ TCL_SRCS = \
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	PtolemyFacets.fst tclIndex doc
+MISC_FILES =	PtolemyFacets.fst tclIndex #doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex PtolemyFacets.fst *.html
