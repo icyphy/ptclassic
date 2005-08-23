@@ -1,0 +1,621 @@
+# Definition of a menu bar widget
+# 
+# @Author: Farhana Sheikh
+# @Contributors: Edward A. Lee, John Reekie
+#
+# @Version: @(#)MenuSupport.itcl	1.32 05/19/98
+# 
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### MenuSupport
+# This class defines functionality that supports a simple interface
+# for creating, deleting, enabling, and disabling menus. Do not
+# instantiate this class: use its subclasses, such as <i>MenuBar</i>
+# and <i>PopupMenu</i>.
+#
+# The MenuSupport code is designed to simplify access to menus.
+# All menus and entries are accessed by a tag, provided when the
+# menu or entry was created. The tag is independent of where
+# the menu or entry is located -- for example, you can disable
+# the menu entry "Undo"
+# without knowing which menu the entry is contained in. This makes
+# it easier for different widgets to manipulate a common set of menus,
+# as well as requiring only one change rather than several if an entry
+# needs to be moved. Third, the methods are little forgiving about "errors":
+# for example, if you try and disable a
+# menu entry that does not exist, then the method silently does
+# absolutely nothing, on the assumption that one piece of code somewhere
+# deleted that entry and it's just easier for you not to have to
+# know this (this is very easy to do with a class hierarchy in which
+# menus are manipulated at different levels of the hierarchy.)
+# What this means is that if you _do_ make an error, such as disabling
+# a non-existent menu entry, you will not be notified of the mistake,
+# so be careful.
+#
+# Some errors, however, such as attempting to create a menu with a tag
+# that already exists, do generate an error{} call, since not
+# doing so is simply too likely to lead to mysterious errors
+# in the user interface. Note that this class is much less
+# lenient than it used to be, simply because I (hjr) found that
+# failing silently in these sort of cases ended up being
+# much more trouble than it was worth!
+#
+class ::tycho::MenuSupport {
+    inherit ::tycho::TWidget
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The font to use for displaying menus
+    itk_option define -font font Font [::tycho::font helvetica]
+
+    # The horizontal menu button padding
+    itk_option define -padx padX Pad 5
+
+    # The vertical menu button padding
+    itk_option define -pady padY Pad 4
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a menu entry to a menu
+    method add {type tag inMenu args}
+
+    # Clear all entries from a menu (but don't delete the menu)
+    method clear {menu}
+
+    # Add a command menu entry to a menu
+    method command {tag inMenu args}
+
+    # Delete a menu or menu entry
+    method delete {tag}
+
+    # Disable an entry or an entire menu
+    method disable {tag}
+
+    # Return the entries of a menu
+    method entries {tag}
+
+    # Enable an entry or an entire menu
+    method enable {tag}
+
+    # Get an option of a menu entry
+    method entrycget {tag option}
+
+    # Set options of a menu entry
+    method entryconfigure {tag args}
+
+    # Test ia a menu or an entry exists
+    method exists {tag}
+
+    # Given an entry tag, get its Tk index
+    method index {tag}
+
+    # Insert a menu entry before the specified entry
+    method insert {type tag before args}
+
+    # Return the menu tag in which an entry is contained
+    method inmenu {tag}
+
+    # Invoke the action for the menu entry
+    method invoke {tag}
+
+    # Get an option of a menu
+    method menucget {tag option}
+
+    # Set options of a menu
+    method menuconfigure {tag args}
+
+     # Get the names of all menus and menuentries
+    method names {{pattern *}}
+
+    # Get the Tk path of a menu
+    method path {tag}
+
+    # Post the given menu
+    method post {tag}
+
+    # Add a separator to a menu
+    method separator {tag inMenu}
+
+    # Unpost a menu
+    method unpost {tag}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # Each menu has a list of tags of its entries
+    protected variable _menuentries
+
+    # Each menu has an access path
+    protected variable _menupath
+
+    # Each entry is contained in a menu
+    protected variable _parentmenu
+
+    # Each menu widget has a tag that it is referenced by
+    protected variable _tag
+
+    # Menu paths are generated by a unique counter
+    protected variable _unique 0
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::MenuSupport::constructor {args} {
+    eval itk_initialize $args
+}
+
+###################################################################
+###################################################################
+####                      public methods                       ####
+
+
+#####################################################################
+#### add
+#
+# Add a menu entry to the end of a menu. The *type* command is the type of
+# entry, and can be *command*, *separator*, *cascade*, *radiobutton*,
+# *checkbutton*. The *tag* argument is the tag
+# used to refer to the menu entry. *inMenu* is the tag of the menu in which
+# the menu entry is to be added. Remaining argument are other menu
+# entry options, which can be any options valid for the given *type*.
+# Some common options are:
+#
+# <ul>
+# <li>*-label* _type_: The string to display as the entry label.
+# <li>*-command* _command_: The command to be executed when the entry is
+# selected.
+# <li>*-underline* _index_: Underline the character of the entry label
+# specified by _index_.
+# <li>*-accelerator* _string_: Display _string_ next to the entry label.
+# </ul>
+#
+# If there is already
+# an entry with the specified tag, an error is generated.
+# The returned result is the tag.
+#
+body ::tycho::MenuSupport::add {type tag inMenu args} {
+    # Check if the menu exists
+    if { ! [::info exists _menupath($inMenu)] } {
+	error "Menu $inMenu does not exist"
+    }
+    # If the entry already exists, complain
+    if { [::info exists _parentmenu($tag)] } {
+	error "Menu entry $tag already exists"
+    }
+    # Create the entry
+    if { $type == "cascade" } {
+    # Create a sub-menu
+	set _parentmenu($tag) $_menupath($inMenu)
+	set _menupath($tag) $_menupath($inMenu).[incr _unique]
+	set _tag($_menupath($tag)) $tag
+	itk_component add $tag {
+	    menu $_menupath($tag) -tearoff 0
+	} {
+	    keep -background -cursor -font
+	}
+	eval $_menupath($inMenu) add cascade $args -menu $_menupath($tag)
+    } else {
+	# Create some other type of menu entry
+	set _parentmenu($tag) $_menupath($inMenu)
+	eval $_menupath($inMenu) add $type $args
+    }
+    # Remember the entry in its menu
+    lappend _menuentries($_menupath($inMenu)) $tag
+    return $tag
+}
+
+#####################################################################
+#### clear
+# Clear all entries from a menu. If the menu does not exist, then
+# flag an error.
+#
+body ::tycho::MenuSupport::clear {menu} {
+    # Check validity
+    if { ! [::info exists _menupath($menu)] } {
+	error "Menu $menu does not exist"
+    }
+    # Check that the menu has something in it
+    if ![info exists _menuentries($_menupath($menu))] {
+        return
+    }
+
+    # Delete the menu entries. Note: Do in reverse
+    # order so indexes don't get mixed up
+    set i [expr [llength $_menuentries($_menupath($menu))] -1]
+    foreach tag [::tycho::lreverse $_menuentries($_menupath($menu))] {
+	if { [$_menupath($menu) type $i] == "cascade" } {
+	    $this delete $tag
+	} else {
+	    $_menupath($menu) delete $i
+	    unset _parentmenu($tag)
+	}
+	incr i -1
+    }
+    set _menuentries($_menupath($menu)) {}
+}
+
+#####################################################################
+#### command
+#
+# Add a "command" menu entry to the end of a menu. This is a version
+# of the add{} method that is streamlined for the most common type
+# of menu entry: command entries.
+#
+body ::tycho::MenuSupport::command {tag inMenu args} {
+    # Check if the menu exists
+    if { ! [::info exists _menupath($inMenu)] } {
+	error "Menu $inMenu does not exist"
+    }
+    # If the entry already exists, complain
+    if { [::info exists _parentmenu($tag)] } {
+	error "Menu $tag already exists"
+    }
+    # Create the menu entry
+    set _parentmenu($tag) $_menupath($inMenu)
+    eval $_menupath($inMenu) add command $args
+    lappend _menuentries($_menupath($inMenu)) $tag
+    return $tag
+}
+
+#####################################################################
+#### delete
+# Delete a menu or a menu entry. If the specified menu or entry
+# does not exist, flag an error.
+#
+body ::tycho::MenuSupport::delete {tag} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	# FIXME: Reinstate error when HTML has the
+	# bogus "delete Format" removed
+	return
+	error "Menu $tag does not exist"
+    }
+
+    # If it's a submenu, delete it
+    if { [::info exists _menupath($tag)] } {
+	# Delete nested submenus
+	clear $tag
+
+	# Delete and forget the menu
+	destroy $_menupath($tag)
+	unset _menupath($tag)
+    }
+
+    # Remove the entry from the menu
+    $_parentmenu($tag) delete [index $tag]
+
+    # Remove it from the entry list of its parent
+    set _menuentries($_parentmenu($tag)) \
+	    [::tycho::ldelete $_menuentries($_parentmenu($tag)) $tag]
+
+    # Finally, just forget it!
+    unset _parentmenu($tag)
+}
+
+#####################################################################
+#### disable
+# Disable a menu or a menu entry. Do nothing if the menu or entry
+# does not exist.
+#
+body ::tycho::MenuSupport::disable {tag} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	return
+    }
+    # Disable the menu entry
+    $_parentmenu($tag) entryconfigure [index $tag] -state disabled
+}
+
+#####################################################################
+#### enable
+# Enable a menu or a menu entry. Do nothing if the menu or entry
+# does not exist.
+#
+body ::tycho::MenuSupport::enable {tag} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	return
+    }
+    # Enable the menu entry
+    $_parentmenu($tag) entryconfigure [index $tag] -state normal
+}
+
+#####################################################################
+#### entries
+# Return the entries of a menu. The returned entries
+# will be in the order in which they appear on the menu.
+#
+body ::tycho::MenuSupport::entries {tag} {
+    # Check validity
+    if { ! [::info exists _menupath($tag)] } {
+	error "Menu $tag does not exist"
+    }
+    return $_menuentries($_menupath($tag))
+}
+
+#####################################################################
+#### entrycget
+# Get a configuration option of a menu entry. Flag an error if the entry
+# does not exist.
+#
+body ::tycho::MenuSupport::entrycget {tag option} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	error "$tag is not a menu entry"
+    }
+    # Get the option
+    $_parentmenu($tag) entrycget [index $tag] $option
+}
+
+#####################################################################
+#### entryconfigure
+# Get or configure options of a menu entry. Flag an error if the entry
+# does not exist.
+#
+body ::tycho::MenuSupport::entryconfigure {tag args} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	error "$tag is not a menu entry"
+    }
+    # Get or set the option(s)
+    eval $_parentmenu($tag) entryconfigure [index $tag] $args
+}
+
+#####################################################################
+#### exists
+# Test if a menu or an entry exists
+#
+body ::tycho::MenuSupport::exists {tag} {
+    expr {  [::info exists _menupath($tag)] \
+	    || [::info exists _parentmenu($tag)] }
+}
+
+#####################################################################
+#### index
+# Given an entry tag, get its Tk index. This method takes into account
+# the value of the -tearoff option of the parent menu, since Tk
+# unhelpfully gives the tearoff itself index 0 if -tearoff is set.
+#
+body ::tycho::MenuSupport::index {tag} {
+    # Check validity
+    if { ! [::info exists _parentmenu($tag)] } {
+	error "$tag is not a menu entry"
+    }
+    # Get the index and adjust for -tearoff
+    set index [lsearch -exact $_menuentries($_parentmenu($tag)) $tag]
+    expr {$index + [$_parentmenu($tag) cget -tearoff]}
+}
+
+#####################################################################
+#### inmenu
+# Return the tag of the menu containing the given entry.
+#
+body ::tycho::MenuSupport::inmenu {tag} {
+    # Check if the entry exists
+    if { ! [::info exists _parentmenu($tag)] } {
+        error "Menu entry $tag does not exist"
+    }
+    return $_tag($_parentmenu($tag))
+}
+
+#####################################################################
+#### insert
+# Insert an entry before the specified entry. An error is flagged
+# if the entry to insert before does not exist. If the new entry
+# already exists, flag an error.
+# The returned result is the tag.
+#
+body ::tycho::MenuSupport::insert {type tag before args} {
+    # Check if the entry to insert before exists
+    if { ! [::info exists _parentmenu($before)] } {
+	error "Menu entry $before does not exist"
+    }
+    # If the entry already exists, complain
+    if { [::info exists _parentmenu($tag)] } {
+	error "Menu $tag already exists"
+    }
+    # Get the index of the menu to insert before
+    set idx [index $before]
+	
+    # Create a sub-menu
+    if { $type == "cascade" } {
+	set _parentmenu($tag) $_parentmenu($before)
+	set _menupath($tag) $_parentmenu($before).$tag
+	itk_component add $_menupath($tag) {
+	    menu $_menupath($tag) -tearoff 0
+	} {
+	    keep -background -cursor -font
+	}
+	eval $_parentmenu($before) insert $idx cascade \
+		$args \
+		-menu $_menupath($tag)
+    } else {
+	# Create some other type of menu entry
+	set _parentmenu($tag) $_parentmenu($before)
+	eval $_parentmenu($before) insert $idx \
+		$type $args
+    }
+    # Remember the entry in its menu
+    set _menuentries($_parentmenu($before)) \
+    	[linsert $_menuentries($_parentmenu($before)) $idx $tag]
+
+    return $tag
+}
+
+#####################################################################
+#### invoke
+# Invoke the action of a menu entry. The single argument is
+# the tag given when the entry was created.
+#
+body ::tycho::MenuSupport::invoke {tag} {
+    # Check if the menu exists
+    if { ! [::info exists _parentmenu($tag)] } {
+	error "Menu entry $tag does not exist"
+    }
+    $_parentmenu($tag) invoke \
+	    [lsearch -exact $_menuentries($_parentmenu($tag)) $tag]
+}
+
+#####################################################################
+#### menucget
+# Get a configuration option of a menu. Flag an error if the
+# menu does not exist. (FIXME: Should it just exit silently?)
+#
+body ::tycho::MenuSupport::menucget {tag option} {
+    # Check validity
+    if { ! [::info exists _menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Get the option
+    $_menupath($tag) cget $option
+}
+
+#####################################################################
+#### menuconfigure
+# Get or configure options of a menu. Flag an error if the
+# menu does not exist. (FIXME: Should it just exit silently?)
+#
+body ::tycho::MenuSupport::menuconfigure {tag args} {
+    # Check validity
+    if { ! [::info exists _menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Get or set the option(s)
+    eval $_menupath($tag) configure $args
+}
+
+#####################################################################
+#### names
+# Return a list of all menu tags, optionally matching a pattern.
+#
+body ::tycho::MenuSupport::names {{pattern *}} {
+    array names _parentmenu $pattern
+}
+
+#####################################################################
+#### path
+# Return the menu path given a menu tag.
+#
+body ::tycho::MenuSupport::path {tag} {
+    # Check if the menu exists
+    if { ! [::info exists _menupath($tag)] } {
+        error "Menu $tag does not exist"
+    }
+    return $_menupath($tag)
+}
+
+#####################################################################
+#### post
+# Post the given menu, and make it "active" so that it responds
+# to cursor keys for menu traversal. This works with both top-level
+# menus and cascaded menus. If a cascaded menu is posted,
+# then its parent menus are also recursively posted. The menu will
+# not be posted if it's corresponding entry is disabled. Return
+# 1 is the menu posted, zero if not.
+#
+body ::tycho::MenuSupport::post {tag} {
+    # Check validity
+    if { ! [::info exists _menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Post it
+    if { [::info exists _parentmenu($tag)] } {
+	# Post a cascade menu
+	if ![::winfo ismapped $_parentmenu($tag)] {
+	    # Recursively post parent and update screen
+	    if { ! [post [inmenu $tag]] } {
+		return 0
+	    }
+	    ::tycho::safeUpdate $this
+	}
+        # Post this cascade if it's not disabled, and activate its entry
+        set index [index $tag]
+	if { [$_parentmenu($tag) entrycget $index -state] == "disabled" } {
+	    return 0
+	}
+	$_parentmenu($tag) postcascade $index
+        $_parentmenu($tag) activate $index
+
+        # OK, So Tk has posted the menu for us but the focus
+        # is still in the parent menu. Change the focus to the
+        # child menu the "down" key will actually go down the
+        # lowest-level posted menu
+        focus $_menupath($tag)
+    } else {
+        # Post a top-level menu
+        # FIXME: Use a tk proc so that traversal works correctly
+	$_menupath($tag) post \
+		[winfo rootx [component hull]] \
+		[winfo rooty [component hull]]
+        # To activate it, give it the focus
+        # focus $_menupath($tag)
+    }
+    return 1
+}
+
+#####################################################################
+#### separator
+#
+# Add a "separator" menu entry to the end of a menu. This is a version
+# of the add{} method that is streamlined for separators.
+#
+body ::tycho::MenuSupport::separator {tag inMenu} {
+    # Check if the menu exists
+    if { ! [::info exists _menupath($inMenu)] } {
+	error "Menu $inMenu does not exist"
+    }
+    # If the entry already exists, complain
+    if { [::info exists _parentmenu($tag)] } {
+	error "Menu entry $tag already exists"
+    }
+    # Create the menu entry
+    set _parentmenu($tag) $_menupath($inMenu)
+    eval $_menupath($inMenu) add separator
+    lappend _menuentries($_menupath($inMenu)) $tag
+    return $tag
+}
+
+#####################################################################
+#### unpost
+# Unpost the given menu.
+#
+body ::tycho::MenuSupport::unpost {tag} {
+    # Check validity
+    if { ! [::info exists _menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Unpost it
+    tkMenuUnpost $_menupath($tag)
+}
+

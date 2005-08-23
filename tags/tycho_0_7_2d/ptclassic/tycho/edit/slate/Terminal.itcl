@@ -1,0 +1,541 @@
+#########################################################################
+# @Version: @(#)Terminal.itcl	1.30 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+########################################################################
+## Terminal
+#
+# A "terminal" for making connections to dataflow nodes and
+# such. This kind of terminal is based on arrowed lines.
+# Its coordinates are the coordinates at which it "connects" to 
+# whatever it is that it is a terminal of.
+#
+# <p><b>Options</b>:
+# 
+# <ul>
+# <li><b>-arrowshape</b>. The shape of the arrow, if in one of the
+# arrow styles. Default is *{8 10 3}*.
+# 
+# <li><b>-direction</b>. The direction of the terminal away from its 
+# origin (the point at which it "connects" to something). This value
+# can be any of the eight compass directions. The default is <b>e</b>,
+# meaning that the terminal will be horizontal and drawn to connect
+# to a node on its left, and to a wire on its right.
+# 
+# <li><b>-fill</b>. The color of the terminal. 
+# 
+# <li><b>-length</b>. The length of the line representing the terminal. 
+# 
+# <li><b>-scaled</b>. If 1 and the item has a parent item, the
+# coordinates are scaled relative to the region occupied by
+# the parent item. (100,100) is full scale. If there is a parent
+# then the coordinates are relative to the parent. If there is no
+# parent the terminal is placed at absolute coordinates. Default is 1.
+# 
+# <li><b>-size</b>. The size of the radius of the circle, in the
+# circle or rectangle styles.
+# 
+# <li><b>-slash</b>. If true, a slash is drawn across the terminal.
+# The default is false.
+# 
+# <li><b>-style</b>.  The "style" of terminal: <i>plain</i>,
+# <i>arrowin</i>, <i>arrowtail</i>, <i>arrowout</i>, <i>doublearrowout</i>, 
+# <i>circle</i>, or <i>rectangle</i>. Default is <i>plain</i>.
+# 
+# <li><b>-width</b>. The width of the line.
+# 
+# </ul>
+# 
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>blob</b>: A component item used for terminal ends. Provided
+# for test suites.
+# </ul>
+#
+# <p><b>Enhancements</b>: (none)
+# 
+# <p><b>Example</b>: Create some terminals:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "A collection of terminals"]
+#   set x 0
+#   set y 0
+#   $slate create line 0 0 320 200 -fill grey
+#   foreach options {
+#    	{}
+#    	{-style plain -fill red}
+#    	{-style arrowin -fill red -arrowshape {10 15 3}}
+#    	{-style arrowout -fill green -length 60 -direction w} 
+#    	{-style circle -fill blue -direction n}
+#    	{-style rectangle -fill magenta -width 2 -direction sw}
+#    	{-style doublearrowin -direction se}
+#    	{-style doublearrowout -direction ne}
+#   } {
+#       incr x 40
+#       incr y 25
+#    	eval $slate create Terminal $x $y $options -tags moveable
+#   }
+# </pre></tcl>
+#
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::Terminal {
+    inherit ::tycho::ComplexItem
+
+    # Create a new Terminal item
+    proc construct {id canvas slate tags x0 y0 args}
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-arrowshape* option
+    proc _arrowshape {id canvas slate arrowshape}
+    
+    # Update the *-direction* option
+    proc _direction {id canvas slate direction}
+    
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+    
+    # Update the *-length* option
+    proc _length {id canvas slate length}
+    
+    # Update the *-scaled* option
+    proc _scaled {id canvas slate size}
+    
+    # Update the *-size* option
+    proc _size {id canvas slate size}
+    
+    # Update the *-slash* option
+    proc _slash {id canvas slate slash}
+    
+    # Update the *-style* option
+    proc _style {id canvas slate length}
+    
+    # Update the *-type* option
+    proc _type {id canvas slate type}
+    
+    # Update the *-width* option
+    proc _width {id canvas slate width}
+
+    # Get a feature
+    proc feature {id canvas slate args}
+
+    # Set or get the Terminal's coordinates
+    proc coords {id canvas slate {x {}} {y {}}}
+    
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Terminal {
+    #### Set method table
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+
+    set methodtable(_arrowshape) ::tycho::Terminal::_arrowshape
+    set methodtable(_scaled)     ::tycho::Terminal::_scaled
+    set methodtable(_size)       ::tycho::Terminal::_size
+    set methodtable(_direction)  ::tycho::Terminal::_direction
+    set methodtable(_fill)       ::tycho::Terminal::_fill
+    set methodtable(_length)     ::tycho::Terminal::_length
+    set methodtable(_slash)      ::tycho::Terminal::_slash
+    set methodtable(_style)      ::tycho::Terminal::_style
+    set methodtable(_type)       ::tycho::Terminal::_type
+    set methodtable(_width)      ::tycho::Terminal::_width
+
+    set methodtable(feature)      ::tycho::Terminal::feature
+    set methodtable(construct)   ::tycho::Terminal::construct
+    set methodtable(coords)      ::tycho::Terminal::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+
+    set optiondefault(-arrowshape) {8 11 3}
+    set optiondefault(-direction) e
+    set optiondefault(-fill)      black
+    set optiondefault(-length)    20
+    set optiondefault(-scaled)    1
+    set optiondefault(-shape)     point
+    set optiondefault(-size)      3
+    set optiondefault(-slash)     0
+    set optiondefault(-style)     plain
+    set optiondefault(-type)      input
+    set optiondefault(-width)     1
+}
+
+
+##########################################################################
+#### -arrowshape option configuration
+#
+body ::tycho::Terminal::_arrowshape {id canvas slate arrowshape} {
+    set option(arrowshape$id) $arrowshape
+    $canvas itemconfigure $primary($id) -arrowshape $arrowshape
+}
+
+##########################################################################
+#### -direction option configuration
+#
+body ::tycho::Terminal::_direction {id canvas slate direction} {
+    set option(direction$id) $direction
+    set coords [$canvas coords $primary($id)]
+    set variable(vector$id) [::tycho::Shape::compassToVector $direction]
+
+    # Figure the other end.
+    set x1 [expr [lindex $coords 0] \
+	    + [lindex $variable(vector$id) 0] * $option(length$id)]
+    set y1 [expr [lindex $coords 1] \
+	    + [lindex $variable(vector$id) 1] * $option(length$id)]
+
+    # Change the coordinates
+    eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
+
+    # Get the right appearance by setting the style option
+    _style $id $canvas $slate $option(style$id)
+}
+
+##########################################################################
+#### -fill option configuration
+#
+body ::tycho::Terminal::_fill {id canvas slate fill} {
+    set option(fill$id) $fill
+
+    $canvas itemconfigure $primary($id) -fill $option(fill$id)
+    if { [::info exists component(blob$id)] } {
+	$canvas itemconfigure $component(blob$id) -fill $option(fill$id)
+    }
+    if { [::info exists component(slash$id)] } {
+	$canvas itemconfigure $component(slash$id) -fill $option(fill$id)
+    }
+}
+
+##########################################################################
+#### -length option configuration
+#
+body ::tycho::Terminal::_length {id canvas slate length} {
+    set option(length$id) $length
+    ::tycho::assign x0 y0 [$canvas coords $primary($id)]
+
+    # Figure the other end.
+    set x1 [expr $x0 \
+	    + [lindex $variable(vector$id) 0] * $option(length$id)]
+    set y1 [expr $y0 \
+	    + [lindex $variable(vector$id) 1] * $option(length$id)]
+
+    # Change the coordinates
+    $canvas coords $primary($id) $x0 $y0 $x1 $y1
+
+    # Get the right appearance by setting the style option
+    _style $id $canvas $slate $option(style$id)
+}
+
+##########################################################################
+#### -scaled option configuration
+#
+body ::tycho::Terminal::_scaled {id canvas slate scaled} {
+    if { $scaled != $option(scaled$id) } {
+        set coords [coords $id $canvas $slate]
+        set option(scaled$id) $scaled
+        eval coords $id $canvas $slate $coords
+    }
+}
+
+##########################################################################
+#### -size option configuration
+#
+body ::tycho::Terminal::_size {id canvas slate size} {
+    set option(size$id) $size
+
+    # Update the style
+    _style $id $canvas $slate $option(style$id)
+}
+
+##########################################################################
+#### -slash option configuration
+#
+body ::tycho::Terminal::_slash {id canvas slate slash} {
+    set option(slash$id) $slash
+
+    if !$slash {
+	if { [::info exists component(slash$id)] } {
+	    $canvas delete $component(slash$id)
+	    unset component(slash$id)
+	}
+    } elseif { ![::info exists component(slash$id)] } {
+	set coords [$canvas coords $primary($id)]
+	set x [expr ([lindex $coords 0] + [lindex $coords 2]) / 2]
+	set y [expr ([lindex $coords 1] + [lindex $coords 3]) / 2]
+	set component(slash$id) [$canvas create line \
+		[expr $x+5] [expr $y-5] [expr $x-5] [expr $y+5] \
+		-fill $option(fill$id) -width $option(width$id)]
+    }
+}
+
+##########################################################################
+#### -style option configuration
+#
+body ::tycho::Terminal::_style {id canvas slate style} {
+    set option(style$id) $style
+
+    if { [::info exists component(blob$id)] } {
+	$canvas delete $component(blob$id)
+	unset component(blob$id)
+    }
+    
+    switch -exact $style {
+	"plain" {
+	    $canvas itemconfigure $primary($id) -arrow none
+	}
+	"arrowin" {
+	    $canvas itemconfigure $primary($id) -arrow first
+	}
+	"arrowout" {
+	    $canvas itemconfigure $primary($id) -arrow last
+	}
+	"arrowtail" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
+
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [$canvas create line \
+		    [expr [lindex $coords 2] - $xdir * 7] \
+		    [expr [lindex $coords 3] - $ydir * 7] \
+		    [expr [lindex $coords 2] - $xdir * 8] \
+		    [expr [lindex $coords 3] - $ydir * 8] \
+		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
+		    -arrow last \
+		    -tags [$canvas gettags $id]]
+	}
+	"doublearrowin" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
+
+	    $canvas itemconfigure $primary($id) -arrow first
+	    set component(blob$id) [$canvas create line \
+		    [expr [lindex $coords 0] + $xdir * 5] \
+		    [expr [lindex $coords 1] + $ydir * 5] \
+		    [expr [lindex $coords 0] + $xdir * 6] \
+		    [expr [lindex $coords 1] + $ydir * 6] \
+		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
+		    -arrow first \
+		    -tags [$canvas gettags $id]]
+	}
+	"doublearrowout" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
+
+	    $canvas itemconfigure $primary($id) -arrow last
+	    set component(blob$id) [$canvas create line \
+		    [expr [lindex $coords 2] - $xdir * 6] \
+		    [expr [lindex $coords 3] - $ydir * 6] \
+		    [expr [lindex $coords 2] - $xdir * 5] \
+		    [expr [lindex $coords 3] - $ydir * 5] \
+		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
+		    -arrow last \
+		    -tags [$canvas gettags $id]]
+	}
+	"circle" {
+	    set coords [$canvas coords $primary($id)]
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [eval $canvas create oval \
+		    [::tycho::Rectangle::stretch \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    $option(size$id)] \
+		    -fill $option(fill$id) -outline $option(fill$id) \
+		    -tags [list [$canvas gettags $id]]]
+	}
+	"rectangle" {
+	    set coords [$canvas coords $primary($id)]
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [eval $canvas create rectangle \
+		    [::tycho::Rectangle::stretch \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    [lindex $coords 2] [lindex $coords 3] \
+		    $option(size$id)] \
+		    -fill $option(fill$id) -outline $option(fill$id) \
+		    -tags [list [$canvas gettags $id]]]
+	}
+        default {
+            error "Invalid style \"$style\""
+        }
+    }
+}
+
+##########################################################################
+#### -type option configuration
+#
+body ::tycho::Terminal::_type {id canvas slate type} {
+    set option(type$id) type
+   $canvas itemconfigure $primary($id) -type $type
+}
+
+##########################################################################
+#### -width option configuration
+#
+body ::tycho::Terminal::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $width
+    if { [::info exists component(slash$id)] } {
+	$canvas itemconfigure $component(slash$id) -width $option(width$id)
+    }
+}
+
+##########################################################################
+#### feature
+#
+body ::tycho::Terminal::feature {id canvas slate args} {
+    array set opts $args
+    if ![::info exists opts(-features)] {
+	return {origin terminal}
+    }
+
+    set result {}
+    set coords [$canvas coords $primary($id)]
+    foreach feature $opts(-features) {
+	switch -exact $feature {
+	    "origin" {
+		lappend result [lindex $coords 0]
+		lappend result [lindex $coords 1]
+	    }
+	    "terminal" {
+		lappend result [lindex $coords 2]
+		lappend result [lindex $coords 3]
+	    }
+	}
+    }
+    return $result
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::Terminal::construct {id canvas slate tags x y args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+        set option([string trimleft $opt -]$id) $val
+    }
+    set variable(vector$id) \
+            [::tycho::Shape::compassToVector $option(direction$id)]
+
+    # Figure out the origin
+    set parent [$slate parent $id]
+    if { $parent != "" } {
+	::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+	if $option(scaled$id) {
+	    set x0 [expr $a0 + ($a1-$a0)/100.0 * $x]
+	    set y0 [expr $b0 + ($b1-$b0)/100.0 * $y]
+	} else {
+	    set x0 [expr $a0 + $x]
+	    set y0 [expr $b0 + $y]
+	}
+        # Remember the set coordinates for coords{}
+        set variable(x$id) $x
+        set variable(y$id) $y
+    } else {
+        set x0 $x
+        set y0 $y
+    }
+    # Figure the other end.
+    set x1 [expr $x0 + [lindex $variable(vector$id) 0] * $option(length$id)]
+    set y1 [expr $y0 + [lindex $variable(vector$id) 1] * $option(length$id)]
+
+    # The primary component is also the line.
+    set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
+	    -tags $tags -fill $option(fill$id) \
+	    -width $option(width$id) -arrowshape $option(arrowshape$id)]
+
+     # Update the style
+    _style $id $canvas $slate $option(style$id)
+}
+
+##########################################################################
+#### coords
+#
+body ::tycho::Terminal::coords {id canvas slate {x {}} {y {}}} {
+    ::tycho::assign a b [$canvas coords $primary($id)]
+    set parent [$slate parent $id]
+
+    # No args: just return coordinates
+    if { $x == "" } {
+        if { $parent != "" } {
+            ::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+            if $option(scaled$id) {
+                set x0 [expr double($a-$a0)/($a1-$a0) * 100]
+                set y0 [expr double($b-$b0)/($b1-$b0) * 100]
+            } else {
+                set x0 [expr $a-$a0]
+                set y0 [expr $b-$b0]
+            }
+        } else {
+            set x0 $a
+            set y0 $b
+        }
+        return [list $x0 $y0]
+    }
+
+    # Figure out the origin
+    if { $parent != "" } {
+	::tycho::assign a0 b0 a1 b1 [$slate region $parent]
+	if $option(scaled$id) {
+	    set x0 [expr $a0 + ($a1-$a0)/100.0 * $x]
+	    set y0 [expr $b0 + ($b1-$b0)/100.0 * $y]
+	} else {
+	    set x0 [expr $a0 + $x]
+	    set y0 [expr $b0 + $y]
+	}
+    } else {
+        set x0 $x
+        set y0 $x
+    }
+    # Move there
+    $canvas move $id [expr $x0-$a] [expr $y0-$b]
+}

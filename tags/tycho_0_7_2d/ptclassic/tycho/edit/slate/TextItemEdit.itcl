@@ -1,0 +1,704 @@
+##########################################################################
+# @Version: @(#)TextItemEdit.itcl	1.21 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and <tribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### TextItemEdit
+#
+# An interactor for "editing" items. This provides the basic functionality
+# needed for labels and short text fields. More complex editing
+# interactions can be built by cascading editors.
+#
+# <p> The Tk canvas (and thus the Slate) provides no in-built editing
+# capabilities for text. The <i>TextItemEdit</i> interactor encapsulates the 
+# code needed by the Slate to support basic interactive editing on text 
+# items. Note that this is intended only for editing small
+# items like labels in diagrams.
+#
+# <p> The <i>TextItemEdit</i> interactor adds no configuration options to
+# those inherited from the <a href="Interactor.html">Interactor</a>
+# superclass.
+#
+# <p> The interactor is attached to one or a set of Slate items with the 
+# <code>bind</code> command (as usual).  Once activated, the insertion 
+# cursor remains in the text item until the <code>stop</code> method is 
+# called.  How this method is called depends on the client -- it will 
+# usually be by the user clicking on a different item.  (The 
+# usual click-drag-release sequence <i>is</i> used in this interactor, but 
+# to drag-select text.)
+#
+# <p> An item which is the target of an editor interactor must respond to 
+# the following methods (see the documentation for the Tk canvas): 
+# <code>dchars</code>, <code>focus</code>, <code>icursor</code>, 
+# <code>index</code>, <code>insert</code>, and <code>select</code>.
+#
+# <p> While an item has the insertion cursor, the text can be edited as 
+# follows:
+#
+# <ul>
+# <li>Typing deletes the selection (if any) and inserts text;
+# <li>Left and right cursor keys move one character, control-left and
+# control-right move a word;
+# <li>Text can be drag-selected with the mouse; double-click and dragging
+# selects words at a time;
+# <li>Holding shift while pressing cursor keys extends the selection.
+# </ul>
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-button</b> _button_
+# <dd> The button for moving the cursor through the text.
+# Note that the button that activates the interactor is given
+# in arguments to the bind{} method -- this option controls
+# the button used in subsequent interaction.
+# 
+# <dt><b>-highlightcolor</b> _color_
+# <dd> The highlight color when the interactor is activated.
+# By default this is "", which means that the highlight rectangle
+# has no color.
+# 
+# <dt><b>-highlightfill</b> _color_
+# <dd> The highlight fill color when the interactor is activated.
+# This gives the text a background which is a more subtle way of
+# distinguishing text being edited than changing the color of the
+# outline box.
+# 
+# </dl></dl>
+#
+# <p><b>Bugs</b>
+#
+# The bindings used by this editor will interfere with
+# bindings to the Slate if they overlap.
+#
+# <p><b>Enhancements</b>
+#
+# <ol>
+# <li>Double-click and dragging does not quite work: 
+# the selection moves from the start of the first selected word, not 
+# from the farthest end.
+# <li>The up and down cursors should be made to 
+# work in multi-line items.
+# <li>The cursor should change to the insertion cursor while
+# over an item being edited.
+# </ol>
+#
+# <p><b>Example</b>
+# 
+# Create a slate and a TextItemEdit interactor. Clicking on
+# either text item will make it editable. Escape makes either
+# item uneditable:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "A TextItemEdit example"]
+#   $slate create text 50 50 -text Foo -tags foo
+#   $slate create text 100 100 -text Bar -tags foo
+#   set edit [$slate interactor TextItemEdit]
+#   $edit bind foo -button 1
+# </pre></tcl>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::TextItemEdit {
+    inherit ::tycho::Interactor
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+
+	eval $this configure $args
+    }
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The button used to move the cursor
+    public variable button 1
+
+    # The highlight color when text is being edited
+    public variable highlightcolor ""
+
+    # The highlight fill color when text is being edited
+    public variable highlightfill grey75
+
+    # The highlight width when text is being edited
+    public variable highlightwidth 1
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Attach the interactor to the current item
+    method activate {t x y args}
+
+    # Click on a position in the text item.
+    method click {x y args}
+
+    # Double-click on the text item.
+    method dbclick {}
+
+    # Remove the interactor from the current item
+    method deactivate {args}
+
+    # Drag the mouse to select.
+    method drag {x y}
+
+    # Insert a key
+    method key {key keysym state args}
+
+    # Release the mouse from the item.
+    method release {}
+
+    # Stop editing an item
+    method stop {}
+
+    ###################################################################
+    ####                        protected methods                  ####
+
+    # Redraw the highlight background
+    protected method highlight {}
+
+    # Adjust the cursor position
+    protected method icursor {mode}
+
+    # Adjust the selection in the text item
+    protected method select {mode args}
+
+    ###################################################################
+    ####                        private  variables                 ####
+
+    # The "anchor" of the selection
+    private variable _anchor
+
+    # A flag to indicate word-dragging mode
+    private variable _wordmode 0
+}
+
+#######################################################################
+#### activate target x y
+#
+# Activate the interactor on an item.
+# 
+body ::tycho::TextItemEdit::activate {t x y args} {
+    # If already editing another item, deactivate from it first
+    if { $target != "" } {
+	$this deactivate
+    }
+
+    # Set the target
+    $this target $t
+
+    # Set the focus to the slate
+    $slate focusin
+
+    # Focus on the target
+    $slate focus $target
+
+    # Make the background highlight
+    $this highlight
+
+    # Create the binding to insert keys
+    # FIXME: Can this be bound to the individual item?
+    ::bind $slate <Key> "$this key %A %K %s $args"
+
+    # Execute the user-specified activation command
+    if { $activatecommand != "" } {
+        uplevel #0 $activatecommand $target $x $y
+    }
+
+    # Set up the mouse bindings for drag-selecting. This uses
+    # the default button (button  1), NOT the button used to activate this
+    # interactor. This could be parameterised with an option, but
+    # I doubt it's necessary.
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Click -button $button] \
+	    "$this click %x %y -button $button"
+
+    # Also a binding to detect a double-click, for word-dragging
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event DoubleClick -button $button] \
+	    "$this dbclick"
+
+    # Start the interaction sequence
+    eval $this click $x $y -button $button
+}
+
+#######################################################################
+#### click
+#
+# Click on a text item. This moves the insertion cursor to the
+# point under the mouse. We assume that the item already has the
+# focus and the key insertion bindings.
+#
+body ::tycho::TextItemEdit::click {x y args} {
+    # Clear the selection
+    $this select clear
+
+    # Move the insertion cursor
+    $slate icursor $target @$x,$y
+
+    # Set the text anchor
+    $slate select from insert
+
+    # Make the motion event bindings
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion -button $button] \
+	    "$this drag %x %y"
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release -button $button] \
+	    "$this release"
+
+    # Forward to a cascaded interactor if there is one
+    if { $cascaded != "" } {
+	eval $cascaded click $x $y $args
+    }
+}
+
+#######################################################################
+#### dbclick
+#
+# Double-click on a text item. This selects the word underneath
+# and sets the mode for word-dragging.
+#
+body ::tycho::TextItemEdit::dbclick {} {
+    # Set this for word-mode dragging
+    set _wordmode 1
+
+    # Select the word underneath the  cursor
+    $this icursor -word
+    $this select adjust +char
+
+    # Make the motion event bindings
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion -button $button] \
+            "$this drag %x %y"
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release -button $button] \
+	    "$this release"
+}
+
+#######################################################################
+#### deactivate
+#
+# Deactivate the interactor from the target. This method must be called
+# by the script bound to the release event.
+# 
+body ::tycho::TextItemEdit::deactivate {args} {
+    # Remove the focus
+    $slate focus ""
+    ::bind $slate <Key> {}
+
+    # Clear the selection
+    $this select clear
+
+    # If there is no target, return here
+    if { $target == "" } {
+        return
+    }
+
+    # Remove the text editing highlight
+    $canvas delete texthighlight.$target
+
+    # Remove the text drag-selection bindings
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Click -button $button] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event DoubleClick -button $button] {}
+
+    # Call the deactivation command. This must follow the above bindings!
+    if { $deactivatecommand != "" } {
+        uplevel #0 $deactivatecommand $target
+    }
+
+    # Clear the target
+    $this target ""
+}
+
+#######################################################################
+#### drag
+#
+# Drag-select a text region.
+#
+body ::tycho::TextItemEdit::drag {x y} {
+    $this select adjust @$x,$y
+
+    # Forward to a cascaded interactor if there is one
+    if { $cascaded != "" } {
+	$cascaded drag $x $y
+    }
+    # Call the drag command
+    if { $dragcommand != "" } {
+        uplevel #0 $dragcommand $target $x $y
+    }
+}
+
+#######################################################################
+#### key
+#
+# Process a key press. If the key is a return, terminate the
+# interaction.
+#
+body ::tycho::TextItemEdit::key {key keysym state args} {
+
+    # Get flags to indicate modifiers
+    set shift   [expr $state & 1]
+    set control [expr $state & 4]
+    set meta    [expr $state & 8] 
+    set alt     [expr $state & 64]
+
+    # Process control keys
+    if { $control } {
+	switch -exact $keysym {
+	    "a" {
+		$this select clear
+		$this icursor 0
+	    }
+	    "e" {
+		$this select clear
+		$this icursor end
+	    }
+	    "d" {
+		$this select delete
+		$slate dchars $target insert
+	    }
+	    "Left" {
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    $this select adjust -word
+		} else {
+		    $this select clear
+		    $this icursor -word
+		}
+	    }
+	    "Right" {
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    $this select adjust +word
+		} else {
+		    $this select clear
+		    $this icursor +word
+		}
+	    }
+	}
+    } elseif { $meta || $alt } {
+	return
+    } else {
+	# Process regular keys. We get an event even for control
+	# keys and the like, so we have to filter them out...
+	switch -exact $keysym {
+	    "Control_L" -
+	    "Control_R" -
+	    "Shift_L" -
+	    "Shift_R" -
+	    "Alt_L" -
+	    "Alt_R" -
+	    "Meta_L" -
+	    "Meta_R" -
+	    "Caps_Lock" -
+	    "Multi_key" -
+	    "Mode_switch" -
+	    "F1" -
+	    "F2" -
+	    "F3" -
+	    "F4" -
+	    "F5" -
+	    "F6" -
+	    "F7" -
+	    "F8" -
+	    "F9" -
+	    "F10" -
+	    "F11" -
+	    "F12" -
+	    "Prior" -
+	    "Next" -
+	    "Up" -
+	    "Down" -
+	    "Pause" -
+	    "KP_Insert" -
+	    "KP_Prior" -
+	    "KP_Next" -
+	    "KP_End" -
+	    "KP_Up" -
+	    "KP_Right" -
+	    "KP_Down" -
+	    "KP_Left" -
+	    "KP_Home" {
+ 		return
+	    }
+	    "Escape" {
+		eval $this deactivate $args
+	    }
+	    "Return" {
+		# If there's a selection, then delete it
+		$this select delete
+
+		# Insert the character
+		$slate insert $target insert "\n"
+	    }
+	    "BackSpace" {
+		# If there's a selection then delete it
+		if { [$this select exists] } {
+		    $this select delete
+		} else {
+		    # If not, then delete the previous character
+		    $this icursor -char
+		    $slate dchars $target insert
+		}
+                # Adjust the highlight
+		$this highlight
+	    }
+	    "Delete" {
+		# If there's a selection then delete it
+		if { [$this select exists] } {
+		    $this select delete
+		} else {
+		    # If not, then delete the next character
+		    $slate dchars $target insert
+		}
+                # Adjust the highlight
+                $this highlight
+            }
+	    "Left" {
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    $this select adjust -char
+		} else {
+		    $this select clear
+		    $this icursor -char
+		}
+	    }
+	    "Right" {
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    $this select adjust +char
+		} else {
+		    $this select clear
+		    $this icursor +char
+		}
+	    }
+	    "End" {
+		$this select clear
+		$this icursor 0
+	    }
+	    "Home" {
+		$this select clear
+		$this icursor end
+	    }
+	    default {
+		# If there's a selection, then delete it
+		$this select delete
+
+		# Insert the character
+		$slate insert $target [$slate index $target insert] $key
+
+                # Adjust the highlight
+                $this highlight
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### release
+#
+body ::tycho::TextItemEdit::release {} {
+    set _wordmode 0
+
+    # Clear the motion and release events
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion -button $button] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release -button $button] {}
+}
+
+#######################################################################
+#### stop
+#
+body ::tycho::TextItemEdit::stop {} {
+    if { $target != "" } {
+	$this deactivate
+    }
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+#######################################################################
+#### highlight
+#
+# Draw or redraw the highlight background of the object being
+# edited. This is needed because the slate selection is deleted
+# when a text selection is created.
+#
+body ::tycho::TextItemEdit::highlight {} {
+    if { $target == "" } {
+	return
+    }
+    set highlight [$slate find withtag texthighlight.$target]
+    if { $highlight == "" } {
+	set highlight [eval $canvas create rectangle \
+		[$canvas bbox $target] \
+		[list -width $highlightwidth \
+		-outline $highlightcolor \
+		-fill $highlightfill -tags "texthighlight.$target"]]
+	# Lower the box to just below the item
+	$canvas lower texthighlight.$target $target
+    } else {
+	# Already highlighted, so change the coordinates
+	eval $canvas coords texthighlight.$target [$canvas bbox $target]
+    }
+}
+
+#######################################################################
+#### icursor
+#
+# Manipulate the insertion cursor in useful ways. This proc only
+# works correctly if there is no selection. (Use the select{}
+# proc if there is a selection.)
+#
+# <ul>
+# <li><b>start</b>: Move to the start of the item
+# <li><b>end</b>: Move to the end of the item
+# <li><b>+char</b>: Move forward one character
+# <li><b>-char</b>: Move back one character
+# <li><b>+word</b>: Move forward one word
+# <li><b>-word</b>: Move back one word
+# <li><i>index</i>: Move to <i>index</i>
+# </ul>
+#
+body ::tycho::TextItemEdit::icursor {mode} {
+    switch -exact /$mode {
+	"/start" {
+	    $slate icursor $target 0
+	}
+	"/end" {
+	    $slate icursor $target end
+	}
+	"/+char" {
+	    $slate icursor $target [expr [$slate index $target insert] + 1]
+	}
+	"/-char" {
+	    $slate icursor $target [expr [$slate index $target insert] - 1]
+	}
+	"/+word" {
+	    set str [$slate itemcget $target -text]
+	    $slate icursor $target [::tycho::wordright $str \
+		    [$slate index $target insert]]
+	}
+	"/-word" {
+	    set str [$slate itemcget $target -text]
+	    $slate icursor $target [::tycho::wordleft $str \
+		    [$slate index $target insert]]
+	}
+	default {
+	    $slate icursor $target $mode
+	}
+    }
+}
+
+#######################################################################
+#### select
+#
+# Manipulate the selection in useful ways.
+#
+body ::tycho::TextItemEdit::select {mode args} {
+    switch -exact $mode {
+	"adjust" {
+	    # Move the end of the selection to the given index
+	    set index [lindex $args 0]
+
+	    # If there's no selection, create it
+	    if { [$slate select item] == "" } {
+		set _anchor [$slate index $target insert]
+		$slate select from $target $_anchor
+	    }
+
+	    # Move the cursor
+	    $this icursor $index
+
+	    # Adjust the selection
+ 	    if { [$slate index $target insert] == $_anchor } {
+ 		$slate select clear
+ 	    } else {
+		if { ! $_wordmode } {
+		    # Adjust in character mode
+		    if { [$slate index $target insert] > $_anchor } {
+			$this icursor -char
+			$slate select to $target insert
+			$this icursor +char
+		    } else {
+			$slate select to $target insert
+		    }
+		} else {
+		    # Adjust in word mode
+		    # FIXME: this is not quite right...
+		    if { [$slate index $target insert] > $_anchor } {
+			$this icursor +word
+			$this icursor -char
+			$slate select to $target insert
+			$this icursor +char
+		    } else {
+			$this icursor -word
+			$slate select to $target insert
+		    }
+		}
+	    }
+	}
+	"clear" {
+	    if { ! ([$slate select item] == "") } {
+		$slate select clear
+	    }
+
+	}
+	"delete" {
+	    if { ! ([$slate select item] == "") } {
+		$slate dchars $target sel.first sel.last
+		$slate select clear
+                # Adjust the highlight
+		$this highlight
+	    }
+	}
+	"exists" {
+	    return [expr {! ([$slate select item] == "")}]
+	}
+    }
+}

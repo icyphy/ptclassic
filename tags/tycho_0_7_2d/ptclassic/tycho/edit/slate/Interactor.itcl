@@ -1,0 +1,589 @@
+##########################################################################
+# @Version: @(#)Interactor.itcl	1.46 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Interactor
+#
+# The abstract superclass of all interactor classes. <i>Interactors</i>
+# are a mechanism originally developed in Brad Meyer's Garnet system.
+# The key idea is to abstract various forms of user interaction into
+# objects, so that a) user interaction code can be reused easily and
+# b) more complex interactions can be built from simpler ones. The
+# interactors implemented in this set of classes fulfills both of these
+# goals, although they are much smaller, lighter, and more numerous
+# than the interactors in Garnet.
+#
+# Each sub-class of <i>Interactor</i> implements a particular kind of
+# user interaction. Each is based on the observation that most user
+# interactions can be broken into a sequence: a <i>click</i>, some number
+# of <i>drags</i>, and a <i>release</i>. Note that each of these
+# <i>actions</i> is abstract, and they do not necessarily correspond to
+# to physical mouse clicks, drags, and releases.
+#
+# Interactors can be combined to make more complex interactions: several
+# interactors can be <i>bound</i> to the same item; they can be
+# <i>cascaded</i> to modify each other's effects. Actions eventually
+# end up being given to am IncrCanvas item, which then reacts according
+# to its current "behavior."
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-action</b>
+# <dd>The action take by the interactor on the target object.
+# This can either be <b>move</b> or <b>reshape</b>. The default
+# is <b>move</b>.
+#
+# <dt><b>-activatecommand</b>
+# <dd>If not null, this is a script which is 
+# evaluated with the current target and coordinates appended.
+# This is used to customize the behavior of the interactor
+# depending on information that is not known until activation.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>If not null, this is a script which is evaluated with the
+# current target appended. 
+#
+# <dt><b>-clickprefix</b>
+# <dd>If not null, this is a script which has the target and coordinates
+# appended and evaluated in the click{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
+# It is propagated to a cascaded interactor. 
+#
+# <dt><b>-dragcommand</b>
+# <dd>If not null, this is a script which is evaluated with the
+# current target and coordinates appended.
+#
+# <dt><b>-dragprefix</b>
+# <dd>If not null, this is a script which has the target and coordinates
+# appended and evaluated in the drag{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
+# It is propagated to a cascaded interactor. 
+#
+# <dt><b>-releaseprefix</b>
+# <dd>If not null, this is a script which has the target
+# appended and evaluated in the release{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
+# It is propagated to a cascaded interactor. 
+#
+# </dl></dl>
+#
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Interactor {
+
+    constructor {} {}
+    destructor {}
+
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The "action" taken by default by an interactor. This can either
+    # be "move" (the default) or "reshape."
+    public variable action "move"
+
+    # A script executed at the beginning of the interaction sequence. It
+    # is typically used to set target parameters or to chain interactors.
+    # The current target and the current coordinates are appended to
+    # the script.
+    public variable activatecommand {}
+
+    # The prefix used to forward click events
+    public variable clickprefix {}
+
+    # A script executed at the end of the interaction sequence. It is
+    # useful for assigning objects created during an interaction to
+    # variables, and other clean-up stuff.
+    public variable deactivatecommand {}
+
+    # A script executed at the completion of the interactor's drag{}
+    # method. This is useful for performing some actions on
+    # an object when it is moved, etc.
+    public variable dragcommand {}
+
+    # The prefix used to forward drag events
+    public variable dragprefix {}
+
+    # The prefix used to forward release events
+    public variable releaseprefix {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Set up bindings to intercept events that I need from now on
+    method activate {t x y args}
+
+    # ``Bind'' an interactor to an item
+    method bind {tagOrID args}
+
+    # Forward actions to a cascaded interactor
+    method cascade {that}
+
+    # Start the interaction sequence on the target
+    method click {x y args}
+
+    # Remove my bindings
+    method deactivate {args}
+
+    # Disable this interactor
+    method disable {}
+
+    # Continue the interaction sequence: move the mouse
+    method drag {x y}
+
+    # Re-enable an interactor
+    method enable {}
+
+    # Terminate the interaction sequence
+    method release {}
+
+    # Set or get the target object
+    method target {args}
+
+    # Remove a binding from the interactor to the target
+    method unbind {tagOrID args}
+
+    # Stop cascading actions to a cascaded interactor
+    method uncascade {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Generate a Tk event code from parameters
+    proc event {type args}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The tags or items to which this item has been bound and arguments
+    protected variable _bindings
+
+    # The canvas on which this interactor resides.
+    protected variable canvas ""
+
+    # The slate on which this interactor resides.
+    protected variable slate ""
+
+    # The item that this interactor is currently operating on.
+    protected variable target ""
+
+    # An interactor to forward actions to.
+    protected variable cascaded ""
+
+    ###################################################################
+    ####                     private variables                     ####
+    
+    # Aliases for event names to reduce my memory load!
+    private common eventName
+
+    # Event class determines how to add extra stuff
+    private common eventClass
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Interactor {
+    array set eventName {
+        "button"        Button
+	"press"         Button
+	"click"         Button
+	"buttonpress"   Button
+	"double"        Double-Button
+	"doubleclick"   Double-Button
+	"triple"        Triple-Button
+	"tripleclick"   Triple-Button
+	"release"       ButtonRelease
+	"buttonrelease" ButtonRelease
+	"drag"          Motion
+	"move"          Motion
+	"motion"        Motion
+        "enter"         Enter
+	"leave"         Leave
+	"key"           Key
+	"keypress"      Key
+	"keydown"       Key
+	"keyup"         KeyRelease
+	"keyrelease"    KeyRelease
+    }
+    array set eventClass {
+        Button        button
+        Double-Button button
+	Triple-Button button
+        ButtonRelease button
+        Motion        fussybutton
+        Enter         simple
+	Leave         simple
+	Key           key
+	KeyRelease    key
+    }       
+}
+
+
+#######################################################################
+#### configbody -action
+#
+# Give the new prefix to the cascaded interactor, if there is one.
+#
+configbody ::tycho::Interactor::action {
+    if { $cascaded != "" } {
+    	$cascaded configure -action $action
+    }
+}
+
+#######################################################################
+#### configbody -dragprefix
+#
+# Give the new prefix to the cascaded interactor, if there is one.
+#
+configbody ::tycho::Interactor::dragprefix {
+    if { $cascaded != "" } {
+    	$cascaded configure -dragprefix $dragprefix
+    }
+}
+
+#######################################################################
+#### configbody -releaseprefix
+#
+# Give the new prefix to the cascaded interactor, if there is one.
+#
+configbody ::tycho::Interactor::releaseprefix {
+    if { $cascaded != "" } {
+    	$cascaded configure -releaseprefix $releaseprefix
+    }
+}
+
+#######################################################################
+#### activate
+#
+# <i>Abstract method</i>.
+# Make this interactor active. That is, set up bindings to intercept
+# events that I need from now on. One of the bindings is obliged to
+# call *deactivate* to remove the bindings.
+#
+body ::tycho::Interactor::activate {t x y args} {
+    ::tycho::abstractMethod Interactor activate
+}
+
+#######################################################################
+#### bind
+#
+# ``Bind'' an interactor to an item or to a tag. This creates a binding
+# to the specified item or tag so that, when the appropriate event
+# occurs on that item or an item with the specified tags, the
+# interactor is ``activated'' on the target. The
+# options *-button* and *-modifiers* determine the actual events.
+# By default, the mouse-press event is the one used to activate
+# the interactor. Return the first argument.
+#
+body ::tycho::Interactor::bind {t args} {
+    # Remember the binding
+    set _bindings([concat $t $args]) $args
+
+    # Create the default activation binding
+    $slate bind $t \
+	    [eval ::tycho::Interactor::event Click $args] \
+	    "$this activate \[$slate find withtag current\] %x %y $args"
+
+    # Return the passed tag
+    return $t
+}
+
+#######################################################################
+#### cascade
+#
+# Tell the interactor to forward actions to a cascaded interactor
+# instead of directly to the target object. This is typically used
+# when further modification of the
+# interaction can be provided by another interactor -- for example,
+# a <a href="Stepper.html"><i>Stepper</i></a> interactor can be used
+# to quantize movement within a bounded rectangular region provided by the
+# <a href="Bounder.html"><i>Bounder</i></a> interactor.
+#
+# With no argument, this method returns the cascaded interactor;
+# with a null argument, it disconnects the cascade.
+#
+body ::tycho::Interactor::cascade {args} {
+    if { $args == "" } {
+	return $cascaded
+    } elseif { [lindex $args 0] == "" } {
+	set cascaded {}
+    } else {
+	set that [lindex $args 0]
+
+	set cascaded $that
+	$that target $target
+	$that configure \
+		-action $action \
+		-clickprefix $clickprefix \
+		-dragprefix $dragprefix \
+		-releaseprefix $releaseprefix
+    }
+}
+
+#######################################################################
+#### click
+#
+# Start an interaction sequence. The co-ordinates _x_ and _y_
+# are the current mouse coordinates relative to the slate.
+# By default, this method simply forwards a *click* action
+# to the target. If this interactor has a cascaded interactor,
+# then it calls the click{} method of the cascaded; if there is
+# no cascaded but the *-clickprefix* option is not null, then it
+# appends the current target and _x_ and _y_ coordinates and
+# evaluates it. Sub-classes that over-ride this method should
+# always call this implementation to forward the click action.
+#
+body ::tycho::Interactor::click {x y args} {
+    if { $cascaded != "" } {
+	eval $cascaded click $x $y $args
+    } elseif { $clickprefix != "" } {
+        uplevel #0 $clickprefix $target $x $y $args
+    } else {
+	eval $slate ${action}click $target $x $y $args
+    }
+}
+
+#######################################################################
+#### deactivate
+#
+# <i>Abstract method</i>.
+# Make this interactor inactive. In other words, remove my bindings.
+#
+body ::tycho::Interactor::deactivate {args} {
+    ::tycho::abstractMethod Interactor deactivate
+}
+
+#######################################################################
+#### disable
+#
+# Disable an interactor. This calls unbind{} on all bindings to
+# disable events, but remembers what they are so they can be
+# enabled again.
+#
+body ::tycho::Interactor::disable {} {
+    set temp [array get _bindings]
+    foreach {ix options} $temp {
+        eval $this unbind [lindex $ix 0] $options
+    }
+    array set _bindings $temp
+}
+
+#######################################################################
+#### drag
+#
+# Continue an interaction sequence with a mouse move. The co-ordinates
+# _x_ and _y_ are the current mouse coordinates relative to
+# the slate. By default, this method simply forwards a *drag*
+# action to the target and evaluates the *-dragcommand* option
+# (if not null) with the target and current coordinates appended.
+# If this interactor has a cascaded interactor,
+# then it calls its drag{} method; if there is
+# no cascaded interactor but the *-dragprefix* option is not null, then it
+# appends the current target and _x_ and _y_ coordinates and
+# evaluates it. Sub-classes that over-ride this method should always call
+# this implementation to forward the drag action.
+#
+body ::tycho::Interactor::drag {x y} {
+    if { $cascaded != "" } {
+	$cascaded drag $x $y
+    } elseif { $dragprefix != "" } {
+        uplevel #0 $dragprefix $target $x $y
+    } else {
+	$slate ${action}drag $target $x $y
+    }
+    if { $dragcommand != "" } {
+    	uplevel #0 $dragcommand $target $x $y
+    }
+}
+
+#######################################################################
+#### enable
+#
+# Re-enable an interactor. This calls bind{} on all bindings to
+# re-enable events.
+#
+body ::tycho::Interactor::enable {} {
+    set temp [array get _bindings]
+    unset _bindings
+    foreach {ix options} $temp {
+    	eval $this bind [lindex $ix 0] $options
+    }
+}
+
+#######################################################################
+#### release
+#
+# Terminate an interaction sequence. By default, this method
+# simply forwards a *release* action to the target. If this
+# interactor has a cascaded interactor,
+# then it calls the release{} method of the cascaded; if there is
+# no cascaded but the *-releaseprefix* option is not null, then it
+# appends the current target and evaluates it.  Sub-classes
+# that over-ride this method should always call this
+# implementation to forward the release action.
+#
+body ::tycho::Interactor::release {} {
+    if { $cascaded != "" } {
+	$cascaded release
+    } elseif { $releaseprefix != "" } {
+        uplevel #0 $releaseprefix $target
+    } else {
+	$slate ${action}release $target
+    }
+}
+
+#######################################################################
+#### target
+#
+# Set or get the item that this interactor is currently
+# operating on. With no argument, return the current target;
+# with an argument, sets the target item to that value. The
+# argument can be null, which clears the target. This
+# method is for use only within actions -- the target is not valid
+# until the interactor has been activated. You can call this method
+# in the *-activatecommand* script to have the item being operated on
+# set to a different item to the one being moused on, which is
+# very useful in some situations -- see
+# <a href="Slider.html"><i>Slider</i></a> for an example.
+#
+body ::tycho::Interactor::target {args} {
+    if { $args == "" } {
+	return $target
+    } else {
+	set target [lindex $args 0]
+	if { $cascaded != "" } {
+	    $cascaded target $target
+	}
+    }
+}
+
+#######################################################################
+#### unbind
+#
+# Remove a binding from the interactor to an item or a tag. The
+# optional arguments _must_ be the same as they were for the
+# corresponding call to bind{}. If the interactor is currently
+# activated, deactivate it -- this makes some kinds of
+# complex interactor sequences easier to write.
+#
+body ::tycho::Interactor::unbind {t args} {
+    # Make sure that the interactor is deactivated first
+    if { $target != "" } {
+        $this deactivate $target $args
+    }
+
+    # Forget the target
+    unset _bindings([concat $t $args])
+
+    # Remove the bindings
+    $slate bind $t \
+	    [eval ::tycho::Interactor::event Press $args] {}
+}
+
+#######################################################################
+#### uncascade
+#
+# Stop forwarding actions to a cascaded interactor.
+#
+body ::tycho::Interactor::uncascade {} {
+    set cascaded {}
+}
+
+#######################################################################
+#### event
+#
+# Translate an event specification into a Tk event code. The first
+# argument is the event code or type, and can be any of the
+# following: button, press, click, buttonpress, double, doubleclick,
+# triple, tripleclick, release, buttonrelease, drag, move, motion,
+# enter, leave, key, keypress, keydown, keyup, or keyrelease.
+# Case is not significant.
+# Following arguments are option-value pairs, and can be:
+#
+# <ul>
+# <li><b>-button</b> _button_: specifies which button to use.
+# If not supplied, no button specifier will be added to the
+# event.
+# <li><b>-key</b> _key_: specifies which key to use.
+# If not supplied, no key will be added to the event.
+# <li><b>-modifiers</b> _key_: specifies the event
+# modifiers. Modifiers can be any valid Tk modifier, including
+# shift, alt, and meta. Case is not significant.
+# </ul>
+#
+# Note that this proc does not try to prevent you from
+# constructing non-sensensical events.
+#
+body ::tycho::Interactor::event {type args} {
+    array set opt [concat {-key {} -button {} -modifiers {}} $args]
+    set type [string tolower $type]
+    if { ! [::info exists eventName($type)] } {
+        error "Unknown event type $type"
+    }
+    set event $eventName($type)
+
+    switch -exact $eventClass($event) {
+        "button" {
+            if { $opt(-button) != "" } {
+                append event "-$opt(-button)"
+            }
+        }
+	"fussybutton" {
+	    if { $opt(-button) != "" } {
+		set event [join [list "B" $opt(-button) "-" $event] ""]
+	    }
+	}
+	"key" {
+	    if { $opt(-key) != "" } {
+		set event "$event-$opt(-key)"
+	    }
+	}
+    }
+    foreach m $opt(-modifiers) {
+	set event [join [list [::tycho::capitalize $m] $event] "-"]
+    }
+    return <$event>
+}

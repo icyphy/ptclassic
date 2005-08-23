@@ -1,0 +1,227 @@
+# Error message window.
+#
+# @Author: Edward A. Lee
+# 
+# @Version: @(#)ErrorMessage.itcl	1.31 06/29/98
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### tkerror
+# Inform the user of an error, and return only after the user has
+# acknowledged.  This is a procedure in the global scope that will
+# handle all background errors in Tk.  Therefore, within the tycho
+# namespace and within classes it should be sufficient to simply
+# call the Tcl command <code>error</code>, rather than calling this
+# directly. If the *singleStackTrace* preference in the *interaction*
+# stylesheet is true, then only one stack trace window will
+# be used; otherwise, a new stack trace window will be created
+# for each error.
+#
+proc ::tkerror {msg} {
+    # Handle the blank message case
+    if {$msg == ""} {set msg "Tcl reports an error"}
+    set nm [::tycho::autoName .error]
+    if [::tycho::stylesheet get interaction singleStackTrace] {
+        uplevel #0 [list ::tycho::ErrorMessage $nm \
+                -text $msg -bitmap error \
+                -stackwindow .stacktrace]
+    } else {
+        uplevel #0 [list ::tycho::ErrorMessage $nm \
+                -text $msg -bitmap error]
+    }        
+    ::tycho::Dialog::wait $nm
+}
+
+##########################################################################
+#### silentError
+# This utility triggers an error silently.
+# It does this by redefining tkerror temporarily, then invoking the
+# Tcl error command.  This can be used when cancelling a command where
+# the only clean way to unwind the stack is to use the Tcl error facility,
+# but where there is no point in informing the user about the error.
+#
+proc ::tycho::silentError {} {
+    set savetkerror [info body ::tkerror]
+    proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+    error silent
+}
+
+##########################################################################
+#### showStack
+# This utility displays the stack in a window. Insert it in code for
+# debugging. The argument is displayed on the first line, and can be
+# used to give additional information or distinguish between distinct
+# instances of the procedure call.
+#
+proc ::tycho::showStack {args} {
+    # From Ousterhout
+    append trace "Stack: $args"
+    set level [info level]
+    for {set i 1} {$i < $level} {incr i} {
+	append trace "\n"
+        append trace "$level $i: [info level $i]"
+    }
+    ::tycho::post $trace
+}
+
+# COMPATIBILITY procedure.  This procedure emulates the behavior
+# of similarly named procedures in pigi, the predecessor to Tycho.
+# The window name in the first argument is ignored (since they bring
+# up modal dialogs, the window names are not important anyway).
+proc ::ptkImportantMessage {win msg} {::tycho::warn $msg}
+
+# COMPATIBILITY procedure.  This procedure emulates the behavior
+# of similarly named procedures in pigi, the predecessor to Tycho.
+proc ::ptkDisplayErrorInfo {} {
+    global ::errorInfo
+    # We have to return immediately, or the pigiRpc process gets into
+    # very bad state where it hangs on an Rpc call.
+    # Delay the posting of the message so that we can return immediately
+    after 1 [list error $errorInfo]
+}
+
+##########################################################################
+#### ErrorMessage
+# Issue an error message to the user. To issue an error message, simply call
+# the Tcl command <code>error</code>. If the error occurred in processing a
+# background Tk command, then <code>tkerror</code> will be invoked, which in turn
+# will create an instance of this class and pop up a modal dialog to
+# inform the user. "Modal" means that nothing further will happen until
+# the window is destroyed.  Here is an example:
+# <tcl><pre>
+# ::tycho::ErrorMessage .xx -text {An error message}
+# wm deiconify .xx
+# </pre></tcl>
+# The stack trace that you will get if you push the stack trace button on this
+# example is irrelevant, since no error occurred.
+#
+class ::tycho::ErrorMessage {
+    inherit ::tycho::Message
+
+    constructor {args} {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The name of the stack trace window to create
+    itk_option define -stackwindow stackWindow StackWindow ""
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Show the stack trace in a window, if there is one.
+    method stackTrace {}
+
+    ###################################################################
+    ####                      private variables                    ####
+
+    # Store the error information locally.
+    private variable localErrorInfo {}
+}
+
+##########################################################################
+#### constructor
+#
+body ::tycho::ErrorMessage::constructor {args} {
+    # Pack the stack trace button, if there is error info.
+    global ::errorInfo
+    if {$errorInfo != ""} {
+	addButton trace -text "Stack Trace" -underline 0 \
+                -command "$this stackTrace"
+        # Remove undocumented bindings
+	# bind $prefix <Control-h> "$this stackTrace"
+	# bind $prefix <b> "$this stackTrace"
+        # Redundant now that -underline is supported by ButtonBox
+	# bind $prefix <s> "$this stackTrace"
+	set localErrorInfo $errorInfo
+    }
+
+    # In case there is a Ptolemy system running, halt it.
+    # This is put in catch so that this code can be used outside of Ptolemy.
+    set savestack $errorInfo
+    catch {::tycho::halt}
+    set errorInfo $savestack
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+}
+
+##########################################################################
+#### stackTrace
+# Show the stack trace in a window, if there is one.
+# Note that this stack trace is that associated with the most recent error.
+# That error may be one that was caught, and that therefore was never seen
+# by the user.  Normally, this method should only be invoked after an error
+# that the user should see. If the *-stackwindow* option is not null
+# and a window with that name already exists, then the stack trace
+# is inserted into that window; if it doesn't exist, then
+# a window with that name is created; if *-stackwindow* is null,
+# than a new window with an automatically-generated name is
+# created.
+#
+body ::tycho::ErrorMessage::stackTrace {} {
+    # If a name is supplied and the window exists, insert
+    # the trace in that window
+    set name $itk_option(-stackwindow)
+    if { $name != "" && [::infoWhichCommand $name] != "" } {
+	set trace $name.v
+	$trace configure -readonly 0
+	$trace clear
+	$trace insertData \
+		"The most recent stack trace found is:\n$localErrorInfo"
+	$trace markUnmodified
+	$trace configure -readonly 1
+	raise $name
+    } else {
+	# Otherwise, create a new window
+	if { $name == "" } {
+	    set name [::tycho::autoName .stacktrace]
+	}
+	if {$localErrorInfo != ""} {
+	    ::tycho::view EditStack \
+		    -name $name \
+		    -text "The most recent stack trace found is:\n$localErrorInfo" \
+		    -readonly 1 \
+		    -withdrawn 1
+	    $name centerOnScreen
+	} {
+	    safeEval ::tycho::warn "No stack trace found"
+	}
+    }
+
+    # NOTE: I'm not sure why this has to be delayed.
+    # NOTE: I took this out, because a) it doesn't work and b) the
+    # Displayer has already given the focus to the stack window. But
+    # for some reason, the stack window loses it by the time we get
+    # back to idle -- hjr 1/30/97
+    # 
+    # after 200 "update; $nm focusin"
+
+    # Delete this dialog box
+    delete object $this
+}

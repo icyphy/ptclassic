@@ -1,0 +1,534 @@
+# A control widget for simulations executed by Ptolemy II.
+#
+# @Author: John Reekie
+#
+# @Version: @(#)RunWindow.itcl	1.9 08/05/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### RunWindow
+#
+# A <i>RunWindow</i> is a class that displays a control panel
+# for a running Ptolemy II simulation. The control panel can
+# be subclassed to provide implementation-specific control
+# panels, or simply have methods on it called to tailor the
+# control panel to particular simulations.
+#
+# Despite its name, this widget is not a top-level window, but
+# a view that needs to be packed into a Displayer or similar
+# such window.
+#
+class ::tycho::RunWindow {
+    inherit ::tycho::View
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # Enable debugging messages
+    itk_option define -debug debug Debug 0
+
+    # The name of the HTML help file
+    itk_option define -helpfile helpFile HelpFile ""
+
+    # The orientation of the button box
+    itk_option define -orient orient Orient vertical
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a subpanel widget into this widget
+    method add {tag args}
+
+    # Connect a callback to a control
+    method callback {control callback}
+
+    # Connect a slider or scale widget to a control
+    method connect {widget control {scale {}} {offset {}}}
+
+    # Pause the simulation
+    method pause {}
+
+    # Resume the simulation
+    method resume {}
+
+    # Show a new panel
+    method show {show args}
+
+    # Simulation control
+    method simulation {mode args}
+
+    # Start the simulation
+    method start {}
+
+    # Stop the simulation
+    method stop {}
+
+    # Callback to update callbacks
+    method _update {widget value}
+
+    # Callback to update iteration count
+    method _counttrace {args}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Register a widget by simulation name
+    proc registerWidget {name widget}
+
+    # Register a callback from a star
+    proc starConnect {galaxy star control callback}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Tell the class to use for the simulation.
+    protected method _simulationClass {}
+
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Print a debug message
+    protected method debug {msg} {
+	if $debug {
+	    puts "DEBUG: $_simulationName: $msg"
+	}
+    }
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The common array of iteration counters. FIXME: we are
+    # currently using a global variable here so that C packages
+    # can update the iteration counter.
+    # protected common iterationcounter
+
+    # The common array of widgets, indexed by simulation name
+    protected common widgetnames
+
+    # The array of star callbacks, indexed by control name
+    protected variable controlcallbacks
+
+    # The array of control names, indexed by widget name
+    protected variable widgetcontrols
+
+    # The simulation interface object.
+    protected variable _simulation
+
+    # The name of the simulation
+    protected variable _simulationName ""
+
+    # The script file sourced to extend the panel
+    protected variable _scriptFile ""
+}
+
+######################################################################
+#### -help configuration option
+# Add a help button to the control panel.
+#
+configbody ::tycho::RunWindow::helpfile {
+    if { $itk_option(-helpfile) != "" } {
+        $itk_component(bbox) add help -text Help \
+                -command "::tycho::File::openContext \
+                [::tycho::expandPath $itk_option(-helpfile)]"
+    }
+}
+
+######################################################################
+#### -orient configuration option
+# Set the button box to be vertical or horizontal.
+#
+configbody ::tycho::RunWindow::orient {
+    if { $itk_option(-orient) == "vertical" } {
+        $itk_component(bbox) configure -columns 1
+    } else {
+        $itk_component(bbox) configure -columns 0
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::RunWindow::constructor {args} {
+    # Create a bunch of buttons
+    itk_component add bbox {
+        ::tycho::ButtonBox $itk_interior.bbox -ringwidth 0
+    } {
+	keep -background -cursor -font -padx -pady
+    }
+    pack $itk_component(bbox) -side bottom -expand no -padx 2 -pady 4
+
+    # Initialize the iteration counter and add a trace to it
+    global iterationcounter
+    set iterationcounter($this) 0
+    trace variable iterationcounter($this) "w" "$this _counttrace"
+
+    # Initialize args
+    eval itk_initialize $args
+
+    # Set the command name
+    set cmd ::tycho::$_simulationName
+
+    # Now that we have the -orient option set, add the buttons
+    $itk_component(bbox) add start -text Start -command "$this start"
+    $itk_component(bbox) add pause -text Pause -command "$this pause"
+    $itk_component(bbox) add resume -text Resume -command "$this resume"
+    $itk_component(bbox) add stop -text Stop -command "$this stop"
+    
+    # Add shortcut bindings
+    bind $this <Control-g> "$this start"
+    bind $this <Control-p> "$this pause"
+    bind $this <Control-r> "$this resume"
+    bind $this <Control-s> "$this stop"
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### add
+#
+# Add a control subpanel widget into this control panel.
+# The arguments to this command are exactly as they would be
+# for the <b>itk_component add</b> command.
+# 
+# The widget is not packed -- this must be done with the
+# show{} command.
+#
+body ::tycho::RunWindow::add {tag create {options {}}} {
+    # puts $create
+    # set create [uplevel subst $create]
+    # puts $create
+
+    if { $options == "" } {
+	itk_component add $tag $create
+    } else {
+	itk_component add $tag $create $options
+    }
+    uplevel "set $tag $itk_component($tag)"
+
+    return $itk_component($tag)
+}
+
+#######################################################################
+#### callback
+#
+# Give a control name and a callback that implements it. The callback
+# will be called with the control value appended whenever it changes.
+#
+body ::tycho::RunWindow::callback {control callback} {
+    debug "Connect control \"$control\" to callback \"$callback\""
+
+    # Remember the callback
+    set controlcallbacks($control) $callback
+
+    # Make sure that the controlled value is consistent
+    # with a control -- if already connected
+    foreach  widget [array names widgetcontrols] {
+        foreach {ctrl _ _} $widgetcontrols($widget) {
+            if { $ctrl == $control } {
+                _update $widget
+            }
+        }
+    }
+}
+
+#######################################################################
+#### connect
+#
+# Give a control name and a widget that writes to it. This method
+# can be called more than once for each widget. The widget's
+# *-command* option is overwritten.
+#
+body ::tycho::RunWindow::connect {widget control {scale {}} {offset {}}} {
+    if { $scale != "" } {
+	if { $offset != "" } {
+	    debug "Connect \"$widget\" -> \"$control\" x $scale + $offset"
+	} else {
+	    debug "Connect \"$widget\" -> \"$control\" x $scale"
+	}
+    } else {
+	debug "Connect \"$widget\" -> \"$control\""
+    }
+
+    # Remember the widget and control
+    lappend widgetcontrols($widget) $control $scale $offset
+
+    # Make sure that the widget display 
+    # is consistent with the controlled value
+    _update $widget [$widget get]
+
+    # Make the widget update callbacks when it changes value
+    $widget configure -command "$this _update $widget"
+}
+
+#######################################################################
+#### pause
+#
+# Pause the simulation.
+#
+body ::tycho::RunWindow::pause {} {
+    # Call the simulation
+    $_simulation pause
+
+    # Change button states -- doesn't work!
+    set bbox $itk_component(bbox)
+    $bbox buttonconfigure start  -relief raised -state disabled
+    $bbox buttonconfigure pause  -relief sunken -state disabled 
+    $bbox buttonconfigure resume -relief raised -state normal
+    $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Paused"
+}
+
+#######################################################################
+#### resume
+#
+# Resume the simulation.
+#
+body ::tycho::RunWindow::resume {} {
+    # Call the simulation
+    $_simulation resume
+
+    # Change button states -- doesn't work!
+    set bbox $itk_component(bbox)
+    $bbox buttonconfigure start  -relief raised -state disabled
+    $bbox buttonconfigure pause  -relief raised -state normal 
+    $bbox buttonconfigure resume -relief sunken -state disabled
+    $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+}
+
+#######################################################################
+#### show
+#
+# Pack a control panel widget into the runwindow. The first
+# argument can either be the widget tag or its full path.
+#
+body ::tycho::RunWindow::show {widget args} {
+    if [info exists itk_component($widget)] {
+	set widget $itk_component($widget)
+    }
+    eval pack $widget $args
+}
+
+#######################################################################
+#### simulation
+#
+# Access simulation control.
+#
+# FIXME: docs
+#
+body ::tycho::RunWindow::simulation {mode args} {
+    switch -exact $mode {
+	"create" {
+	    # Create a new simulation.
+	    set simClass [_simulationClass]
+	    set _simulation [uplevel #0 $simClass #auto $args]
+            # puts !$_simulation
+	    $_simulation startServer
+	    return $_simulation
+	}
+	"delete" {
+	    # Delete the current simulation.
+	    if [info exists _simulation] {
+		delete object $_simulation
+		unset _simulation
+	    }
+	}
+	"name" {
+	    if { $args != "" } {
+		set _simulationName [lindex $args 0]
+		$_simulation configure -simulationName $_simulationName
+		displayer configure -title $_simulationName
+	    } else {
+		$_simulation cget -simulationName
+	    }
+	}
+	"script" {
+	    if { $args != "" } {
+		set f [lindex $args 0]
+		set _scriptFile "[file root $f]Init.tcl"
+		# puts "Script file is $_scriptFile"
+		if [file exists $_scriptFile] {
+		    namespace eval _temp_ "set runWindow $this"
+		    namespace eval _temp_ "set simulation $_simulation"
+		    namespace eval _temp_ "source $_scriptFile"
+		    namespace delete _temp_
+		} else {
+		    set _scriptFile ""
+		}
+	    }
+	}
+	default {
+	    error "Invalid mode: \"$mode\""
+	}
+    }
+}
+
+#######################################################################
+#### start
+#
+# Start the simulation.
+#
+body ::tycho::RunWindow::start {} {
+    # Call the simulation
+    $_simulation start
+
+    # Change button states
+    set bbox $itk_component(bbox)
+    $bbox buttonconfigure start  -relief sunken -state disabled
+    $bbox buttonconfigure pause  -relief raised -state normal 
+    $bbox buttonconfigure resume -relief raised -state disabled
+    $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+}
+
+#######################################################################
+#### stop
+#
+# Stop the simulation.
+#
+body ::tycho::RunWindow::stop {} {
+    # Call the simulation
+    $_simulation stop
+
+    # Change button states
+    set bbox $itk_component(bbox)
+    $bbox buttonconfigure start  -relief raised -state normal
+    $bbox buttonconfigure pause  -relief raised -state disabled 
+    $bbox buttonconfigure resume -relief raised -state disabled
+    $bbox buttonconfigure stop   -relief sunken -state disabled
+
+    putStatus "Stopped"
+}
+
+#######################################################################
+#### _counttrace
+#
+# Callback to update the iteration display in the status bar.
+# Not for general use.
+#
+body ::tycho::RunWindow::_counttrace {args} {
+    global iterationcounter
+    putStatus "Running: $iterationcounter($this)"
+}
+
+#######################################################################
+#### _update
+#
+# Callback to update callbacks. Not for general use.
+#
+body ::tycho::RunWindow::_update {widget value} {
+    if { ! [::info exists widgetcontrols($widget)] } {
+	debug "Widget $widget has not registered to any controls!"
+	return
+    }
+    foreach {control scale offset} $widgetcontrols($widget) {
+        set v $value
+        if { $scale != "" } {
+            set v [expr $v * $scale]
+        }
+	if { $offset != "" } {
+	    set v [expr $v + $offset]
+	}
+	debug "$_simulationName.$control = $v"
+
+        if { [::info exists controlcallbacks($control)] } {
+            uplevel #0 $controlcallbacks($control) $v
+        }
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### registerWidget
+#
+# Register a widget by simulation name.
+#
+body ::tycho::RunWindow::registerWidget {name widget} {
+    debug "Simulation \"$name\" displayed by widget \"$widget\""
+    set widgetnames($name) $widget
+}
+
+#######################################################################
+#### starConnect
+#
+# Register a callback for a star control. This procedure is
+# called by the *connectControl* function in the *tycgc*
+# support package. Stars call *connectControl* in their
+# *tychoSetup* code stream, to enable user-interface scripts
+# to control their parameters. The callbacks are regular
+# Tcl C functions, and will be the same ones used by the
+# TclTk target.
+#
+body ::tycho::RunWindow::starConnect {galaxy star control callback} {
+    if { ! [::info exists widgetnames($galaxy)] } {
+        error "No control panel exists for \"$galaxy\""
+    }
+    $widgetnames($galaxy) callback $star.$control $callback
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### _simulationClass
+# Return the class to create for simulations. Subclasses can override
+# this method to have specific subclasses of <b>Simulation</b>
+# created.
+#
+body ::tycho::RunWindow::_simulationClass {} {
+    return ::tycho::Simulation
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::RunWindow::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    # Disable file status display
+    statusbar configure -filestatus none
+}

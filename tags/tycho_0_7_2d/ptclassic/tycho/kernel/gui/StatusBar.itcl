@@ -1,0 +1,983 @@
+# Status bar for the bottom of windows.
+#
+# @Version: @(#)StatusBar.itcl	1.43    05/22/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1990-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### StatusBar
+#
+# A very simple prototype status bar display, for putting at the
+# bottom of windows. This status bar is a single row of a Tk grid,
+# with four columns containing (from left to right):
+# <ol>
+# <li> A small amount of padding at the left.
+# <li> A file status indicator, showing whether the file is read-only
+# or modified.
+# <li> A main status area used to status messages, progress bars
+# and so on.
+# <li> A Button, usually labeled "Close."
+# <li> A padding area to allow for good alignment in the presence
+# of scrollbars in the main window.
+# </ol>
+#
+# The main status area expands to fill the available space, while
+# all other areas are a fixed size. The file status and scrollbar
+# padding areas can be set to zero size if appropriate.
+# The main status area is itself divided into two columns, the
+# first being used for text messages, and the second containing
+# some other form of feedback widget. Currently, the second column
+# can contain a progress indicator or an entry widget.
+#
+class ::tycho::StatusBar {
+    inherit ::tycho::TWidget
+
+    constructor {args} {}
+    destructor {}
+
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The command to call when the Close button is pressed
+    itk_option define -closecommand closeCommand CloseCommand {}
+
+    # The text to display in the Close button ("Close" by default)
+    itk_option define -closetext closeText CloseText "Close"
+
+    # The current file status: none, readonly, readwrite, modified
+    itk_option define -filestatus filestatus FileStatus "none"
+
+    # Flag to indicate whether to leave space for a scroll bar
+    itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
+
+    # The font to use for the close button and the file status
+    itk_option define -font font Font [::tycho::font helvetica]
+
+    # The font to use for messages and the entry widget
+    itk_option define -messagefont messageFont MessageFont \
+            [::tycho::font helvetica]
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Complete the filename in the "minibuffer."
+    method _complete {filename caseSens {down 1}}
+
+    # Display the file status help -- callback for enter events
+    method _filestatushelp {}
+
+    # Execute a command with the entry widget contents -- key callback
+    method _entrycommand {command}
+    
+    # Execute a command with the entry widget or return it's name
+    method _entrywidget {args}
+    
+    # Open the file or begin searching the directory in the minibuffer
+    method _openfile {filename caseSensitive}
+
+    # Create an entry field in the status bar
+    method entry {label args}
+    
+    # Create an entry field to open a file in the status bar
+    method fileentry {label args}
+    
+    # Put the focus in the statusbar
+    method focusin {}
+    
+    # Get the most recent message written to the status bar
+    method get {}
+
+    # Get the current mode
+    method mode {}
+
+    # Display a message in the status bar
+    method putMessage {string}
+
+    # Put a string to the status bar -- obsolete
+    method puts {string}
+
+    # Start or update progress display
+    method progress {{label {}} {command {}}}
+    
+    ###################################################################
+    ####                       private methods                     ####
+
+    # Draw the progress bar
+    private method _drawprogress {progress {color blue}}
+
+    # Insert text into the entry widget and adjust the view
+    private method _entryinsert {args}
+    
+    # Set the label text
+    # FIXME: public because Edit uses it...
+    method _label {label}
+    
+    # Lock the current display mode
+    private method _lock {}
+
+    # Set the current display mode
+    private method _setmode {mode}
+
+    # Unlock the current display mode
+    private method _unlock {}
+
+    ###################################################################
+    ####                       private variables                   ####
+
+    # The current file completion
+    private variable _completedata
+
+    # The current mode lock
+    private variable _lock 0
+
+    # The current mode: "message" or "progress" or "entry"
+    private variable _mode "message"
+
+    # The delay between updates (in pseudo-milliseconds)
+    private variable _updateInterval 250
+
+    # The command to get the current progress
+    private variable _progressCommand ""
+}
+
+
+#######################################################################
+#### -closecommand configuration
+#
+configbody ::tycho::StatusBar::closecommand {
+    $itk_component(closeButton) configure -command $itk_option(-closecommand)
+}
+
+
+#######################################################################
+#### -closetext configuration
+#
+configbody ::tycho::StatusBar::closetext {
+    $itk_component(closeButton) configure -text $itk_option(-closetext)
+}
+
+
+#######################################################################
+#### filestatus configuration
+#
+# The file status display. Valid values
+# are ``readonly,'' ``readwrite,'' and ``modified.''
+#
+# <b>Note</b>: Currently the display consists simply of the letters
+# ``R'' (readonly) or ``M'' (modified). This needs to be replaced
+# with some meaningful icons.
+#
+configbody ::tycho::StatusBar::filestatus {
+    if { $itk_option(-filestatus) == "none" } {
+	# Delete the file status if there is one
+	if [::info exists itk_component(filestatus)] {
+	    destroy $itk_component(filestatus)
+	    catch {unset itk_component(filestatus)}
+	}
+        grid columnconfigure $itk_interior 0 -minsize 0
+   } else {
+	# Create the file status if there isn't one
+	if { ! [::info exists itk_component(filestatus)] } {
+	    itk_component add filestatus {
+		label $itk_interior.filestatus -width 3 \
+			-borderwidth 1 \
+			-relief raised
+	    } {
+		keep -background -cursor -font
+	    }
+	    grid $itk_component(filestatus) \
+                    -row 0 -column 1 \
+		    -sticky ns \
+		    -padx 0 -pady 2
+            grid columnconfigure $itk_interior 0 -minsize 2
+        }
+	
+	# Bind help to the file status display
+	bind $itk_component(filestatus) <Enter> \
+		[@scope [info class] "$this _filestatushelp"]
+	bind $itk_component(filestatus) <Leave> \
+		[@scope [info class] "$this putMessage {}"]
+
+	# Set the status display
+	switch -exact $itk_option(-filestatus) {
+	    "readonly" {
+		$itk_component(filestatus) configure -text "R"
+	    }
+	    "readwrite" {
+		$itk_component(filestatus) configure -text ""
+	    }
+	    "modified" {
+		$itk_component(filestatus) configure -text "M"
+	    }
+	    default {
+		error "StatusBar::filestatus: Invalid option $status"
+	    }
+	}
+    }
+}
+
+
+#######################################################################
+#### -scrollbarpad configuration
+#
+configbody ::tycho::StatusBar::scrollbarpad {
+    if $itk_option(-scrollbarpad) {
+        # Create the empty space under the scroll bar
+        # FIXME: Need a better way of getting the scroll bar width
+        grid columnconfigure $itk_interior 4 -minsize 23
+    } else {
+        grid columnconfigure $itk_interior 4 -minsize 0
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::StatusBar::constructor {args} {
+
+    # The file status frame is in column zero, but is
+    # created in the -filestatus configuration body
+
+    # Create the main status frame -- this gives the status
+    # area a border
+    itk_component add status {
+        frame $itk_interior.status \
+		-borderwidth 1 \
+		-relief raised
+    } {
+	keep -background -cursor
+    }
+    # Create the status message display
+    itk_component add message {
+	label $itk_interior.status.message \
+		-anchor w -justify left
+    } {
+	keep -background -cursor
+	rename -font -messagefont messageFont MessageFont
+    }
+    # Create the close button
+    itk_component add closeButton {
+	button $itk_interior.closeButton -text Close -pady 2 \
+                -takefocus 0
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground \
+		-padx -pady
+    }
+
+    # Grid components
+    grid $itk_component(status) \
+            -row 0 -column 2 \
+            -sticky nsew \
+            -padx 1 -pady 2
+    grid $itk_component(closeButton) -row 0 -column 3 -sticky ns
+    grid $itk_component(message) -row 0 -column 0 -sticky nsew
+ 
+    # The main status expands to fill available space
+    grid columnconfigure $itk_interior 2 -weight 1 -minsize 100
+
+    # The feedback column with the status expands
+    grid columnconfigure $itk_component(status) 1 -weight 1
+
+    # Initialise options
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### _complete
+# 
+# Implements completion in the minibuffer. Called when tab is pressed,
+# as well as up, down, and sometimes return (see fileentry{}).
+#
+# If many completions exist, the first call will reset the minibuffer to
+# the common completion, and the second call will begin scrolling through
+# the possible completions. Up and down (passing the appropriate value to 
+# the down argument) will scroll in the respective directions. 
+#
+# FIXME: NT support for spaces in filenames is incomplete. Completion works, 
+# however, scrolling through completions does not.
+#
+body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
+    set entryWidget $itk_component(feedback)
+
+    # Check for dummy filename signifying repeat
+    if {$filename == "?DUMMY?"} {
+        set filename $_completedata(lastEntry)
+    }
+
+    ###### Implement "rotation" through possible completions ######
+    if {($filename == $_completedata(lastEntry)) && \
+            ($caseSens == $_completedata(lastCase))} {
+        set length [llength $_completedata(list)]
+
+        # Rotate if length > 1
+        if {$length > 1} {
+            # Calculate next item 
+            if {$down} {
+                set num [expr ($_completedata(listNum) + 1) % $length]
+            } else {
+                set num $_completedata(listNum)
+                if {$num != -1} {
+                    # -1 is special (should become _last_ item)
+                    incr num -1
+                } 
+                set num [expr $num % $length]
+            }
+            set completion [::tycho::expandPath \
+                    [lindex $_completedata(list) $num]]
+
+            # Make sure separator is inserted (expandPath removes it)
+            if {([file type $completion] == "directory")} {
+                append completion [::tycho::directorySeparator]
+            }
+
+            # Save _completedata
+            set _completedata(listNum) $num
+            set _completedata(lastEntry) "$completion"
+
+            # Insert completion
+            _label "Open File: ([expr $num+1]/$length)"
+            _entryinsert $completion
+        } elseif {$length == 1} {
+            # Open if length == 1 unless directory
+            if {[file type $filename] != "directory"} {
+                _label {}
+                ::tycho::openContext $filename
+                set _completedata(lastEntry) {}
+                set _completedata(list) {}
+            } else {
+                # else recurse (continue in directory)
+                if {$caseSens} {
+                    set _completedata(list) [glob -nocomplain -- $filename*]
+                } else {
+                    set _completedata(list) [glob -nocomplain -- \
+                            [::tycho::noCase $filename]*]
+                }
+                set _completedata(listNum) -1
+                _complete $filename $caseSens $down
+            }
+        } else {
+            bell
+        }
+        return
+    }
+
+    ###### directory parent shortcut #####
+    if {[regexp "[::tycho::directorySeparator]\[.\]\$" $filename]} {
+        if {[glob -nocomplain -- $filename.*] != {}} {
+            # Insert completion
+            _entryinsert $filename.
+            return
+        }
+    }
+
+    ###### standard completion ######
+    if {$caseSens} {
+        set files [glob -nocomplain -- $filename*]
+    } else {
+        set filename [::tycho::noCase $filename]
+        set files [glob -nocomplain -- $filename*]
+    }
+    set length [llength $files]
+
+    if {$length == 0} {
+        # No completion
+        _label "Open File: (0)  "
+        bell
+    } elseif {$length == 1} {
+        # Single completion
+        set completion $files
+
+        # Fix for bug in glob (try [file exists [glob c:/Pro*]] on NT)
+        if {![file exists $completion]} {
+            set completion [lindex $completion 0]
+        } 
+
+        set completion [::tycho::expandPath $completion]
+
+        # Make sure separator is inserted (expandPath removes it)
+        if {([file type $completion] == "directory")} {
+            append completion [::tycho::directorySeparator]
+            _label "Open Directory:  "
+        } else {
+            _label "Open File: (1/1)"
+        }
+
+        # Insert completion
+        _entryinsert $completion
+
+        # Save _completedata
+        set _completedata(lastEntry) "$completion"
+        set _completedata(lastCase) $caseSens
+        set _completedata(list) $completion
+        set _completedata(listNum) 0
+    } else {        
+        # Multiple completions
+
+        if {$caseSens} {
+            set completion [::tycho::expandPath \
+                    [::tycho::lsubstring $files]]
+        } else {
+            set completion [::tycho::expandPath \
+                    [::tycho::lsubstring $files -nocase]]
+        }
+
+        # Insert separator
+        if {[file exists $completion] && \
+                ([file type $completion] == "directory")} {
+            append completion [::tycho::directorySeparator]
+        }                               
+
+        # If it's valid, this is the first completion
+        if {[file exists $completion]} {
+            if {[file type $completion] != "directory"}  {
+                _label "Open File: (1/$length)"
+                set _completedata(listNum) 0
+            } else {
+                # It's a directory
+                set _completedata(listNum) -1
+                _label "Open Directory: (0/$length)"
+            }
+        } else {
+            # It's not yet a completion
+            set _completedata(listNum) -1
+            _label "Open File: (0/$length)"
+        }
+        # Now insert completion, after label has changed
+        _entryinsert $completion
+
+        # Save _completedata
+        set _completedata(lastEntry) "$completion"
+        set _completedata(lastCase) $caseSens
+        set _completedata(list) $files        
+    }
+}
+
+#######################################################################
+#### _entrycommand
+#
+# Key press callback to entry widget. Subsitute the current
+# widget value for "%s" and evaluate at global scope.
+#
+body ::tycho::StatusBar::_entrycommand {command} {
+    # Make sure we're in the right mode and the widget still exists
+    if { $_mode != "entry" \
+	    || ![::info exists itk_component(feedback)] } {
+        return
+    }
+    # Substitute for %e and evaluate
+    regsub -all -- % $command [$itk_component(feedback) get] script
+    uplevel #0 $script
+}
+
+#####################################################################
+#### _entrywidget
+# 
+# If no arguments are given, return the entry widget; if there is none,
+# return null. If arguments are given and there is an entry widget, execute
+# this command on the entry and return the result. If there are args
+# but no entry, do nothing and return null.
+#
+body ::tycho::StatusBar::_entrywidget {args} {
+    # Make sure we're in the right mode and the widget still exists
+    if { $_mode != "entry" \
+	    || ![::info exists itk_component(feedback)] } {
+        return
+    }     
+    if {$args == {}} {
+        return $itk_component(feedback)
+    } else {
+        eval [$itk_component(feedback) $args]
+    }
+}
+
+#######################################################################
+#### _filestatushelp
+#
+# Mouse event callback to display file status help.
+#
+body ::tycho::StatusBar::_filestatushelp {} {
+    switch -exact $itk_option(-filestatus) {
+	"readonly" {
+	    putMessage "File is read-only"
+	}
+	"readwrite" {
+	    putMessage "File is writable"
+	}
+	"modified" {
+	    putMessage "File has been modified"
+	}
+    }
+}
+
+#####################################################################
+#### _openfile
+# Expects to be called from the minibuffer during a minibuffer file open,
+# checks to see if the given name is a directory or file, and either opens
+# the file using openContext or opens the directory in the minibuffer.
+#
+body ::tycho::StatusBar::_openfile {filename caseSens} {
+    if {[file exists $filename] && ([file type $filename] == "directory")} {
+        if {$_completedata(listNum) > -1} {
+            # In the middle of a scroll, break out of it 
+            _complete $filename* $caseSens
+        } else {
+            # Not scrolling, repeat complete
+            _complete $filename $caseSens
+        }
+    } else {
+        ::tycho::openContext $filename
+        putMessage {}
+    }
+    set _completedata(lastEntry) {}
+    set _completedata(list) {}
+}
+
+#######################################################################
+#### entry
+#
+# Create an entry field in the status bar. If there is already
+# an entry field, it is deleted and a new one created.
+# The first argument is
+# a string to display to the left of the entry field; following
+# arguments are an option-value list, and can be any of:
+# <ul>
+# <li><b>-command</b>: The command to execute when the user hits
+# Return. The current contents of the widget will be substituted
+# for any occurrence of the string "%%", and the command evaluated
+# at the global scope. Note that "%%" should be enclosed in
+# braces. The default is null.
+# <li><b>-tabcommand</b>: The command to execute when the user hits
+# Tab. The current contents of the widget will be substituted
+# for any occurrence of the string "%%", and the command evaluated
+# at the global scope. Note that "%%" should be enclosed in
+# braces. The default is null.
+# <li><b>-default</b>: The default text to place into the entry field.
+# <li><b>-keycommand</b>: The command to execute when the user hits
+# any key other than return, tab, or escape. The character input
+# will be substituted for any occurrence of the string "%A,"
+# and the command evaluated in the global scope.
+# <li><b>-returnfocus</b>: A widget to return the focus to if
+# <Escape> is pressed. Defaults to the toplevel containing
+# this status bar.
+# </ul>
+# More options will be implemented at a later date, including options
+# to control file completion.
+#
+body ::tycho::StatusBar::entry {label args} {
+    _setmode "idle"
+    _setmode "entry"
+    
+    # Extract args
+    array set opts {-command {} -keycommand {} -default {} -tabcommand {}}
+    array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
+    array set opts $args
+
+    # Configure the label
+    $itk_component(message) configure -text $label
+
+    # Configure the entry widget
+    _entryinsert $opts(-default)
+    if { $opts(-command) != "" } {
+        bind $itk_component(feedback) <Return> \
+                [list $this _entrycommand $opts(-command)]
+    }
+    if { $opts(-keycommand) != "" } {
+        bind $itk_component(feedback) <Key> $opts(-keycommand)
+    }
+    # Make sure the Tab key breaks to prevent tab-traversal
+    if { $opts(-tabcommand) != "" } {
+        bind $itk_component(feedback) <Tab> \
+                "[list $this _entrycommand $opts(-tabcommand)]; break"
+    } elseif {[bind $itk_component(feedback) ] == {}} {
+	# Only bind if unbound. I call this function repeatedly
+	# to update the label.
+	bind $itk_component(feedback) <Tab> {break}
+    }
+
+    # The Escape key returns the focus to where it was
+    bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
+   
+    # Allow the following to be handled by the top-level (displayer)
+    bind $itk_component(feedback) <<NextPane>> { }
+
+    # Now focus on the entry
+    focus $itk_component(feedback)
+}
+
+#######################################################################
+#### fileentry
+#
+# Create an entry field in the status bar and configure it to
+# perform file completion. If the progress bar is currently active,
+# do nothing. The first argument is
+# a string to display to the left of the entry field; following
+# arguments are an option-value list, and can be any of:
+# <ul>
+# <li><b>-casesensitive</b>: If true, completion is case-sensitive.
+# The default is false.
+# <li><b>-default</b>: The default text to place into the entry field.
+# <li><b>-returnfocus</b>: A widget to return the focus to if
+# <Escape> is pressed. Defaults to the toplevel containing
+# this status bar.
+# </ul>
+#
+body ::tycho::StatusBar::fileentry {label args} {
+    # Extract args
+    array set opts {-command {} -default {} -casesensitive 0}
+    array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
+    array set opts $args
+
+    # Call the entry{} method
+    entry $label \
+            -default $opts(-default) \
+            -returnfocus $opts(-returnfocus) \
+            -command "$this _openfile \"%%\" $opts(-casesensitive)" \
+            -tabcommand "$this _complete \"%%\" $opts(-casesensitive)"
+
+    # Bind for reverse rotation
+    # No... Control-Tab moves the focus to the next pane.
+    # bind $itk_component(feedback) <Control-Tab> \
+    #        "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+
+    # NOTE: These sorts of undocumented bindings are a really bad
+    # idea.  Let's keep things simple please.
+    # bind $itk_component(feedback) <Up> \
+    #       "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+    # Alternative to Tab
+    # bind $itk_component(feedback) <Down> \
+    #       "$this _complete ?DUMMY? $opts(-casesensitive) 1"
+    
+    # Initialize completion data
+    set _completedata(lastEntry) {}
+    set _completedata(lastCase) {}
+    set _completedata(list) {}
+    set _completedata(listNum) 0
+}
+
+#######################################################################
+#### focusin
+#
+# Put the focus in the status bar. If there is an entry widget,
+# put the focus there; otherwise, just focus on the toplevel.
+#
+body ::tycho::StatusBar::focusin {} {
+    if [::info exists itk_component(feedback)] {
+        focus $itk_component(feedback)
+    } else {
+        focus $itk_component(hull)
+    }
+}
+
+#######################################################################
+#### get
+#
+# Get the most recent string written to the statusbar.
+#
+body ::tycho::StatusBar::get {} {
+    $itk_component(message) cget -text
+}
+
+#######################################################################
+#### mode
+#
+# Get the current mode of the status bar. This can be one of
+# <b>message</b>, <b>progress</b>, or <b>entry</b>.
+#
+body ::tycho::StatusBar::mode {} {
+    return $_mode
+}
+
+#######################################################################
+#### progress
+#
+# Start or update the progress bar. If the _label_ argument
+# is supplied, then the status display is changed to show the
+# progress bar, with _label_ displayed to the left of the
+# bar and the bar set to show zero progress. _command_ is a
+# callback that will be used in future calls to this method
+# to update the amount of progress shown in the bar. An after{}
+# callback is set up to this method to start a series
+# of progress bar updates at regular intervals.
+#
+# If _label__ argument is not supplied (which is how this method
+# is called in the after{} callbacks), then the command supplied
+# by a previous call to this method is evaluated at the global
+# scope and the return value used to set proportion of the
+# progress bar display. The returned value is expected to be
+# between 0.0 and 1.0 -- values outside this range will be
+# limited to 0.0 or 1.0. If the value is less than 1.0, another
+# after{} callback will be generated in order that the progress
+# bar will update again after a short period of time. If the 
+# If the command raises an error, the progress bar will be
+# displayed in red and no further callbacks generated.
+# The update rate of the progress bar is set to about 5 times
+# per second.
+#
+body ::tycho::StatusBar::progress {{label {}} {command {}}} {
+    if { $label != "" } {
+	if { $command == "" } {
+	    error "wrong # args: should be \"$this progress label command\""
+	}
+	# Set up for progress display
+	if ![_setmode "progress"] {
+	    # Oops, someone else has locked it
+	    return
+	}
+	# Lock the mode
+	_lock
+
+	# Display the label and draw the progress bar
+	$itk_component(message) configure -text $label:
+	_drawprogress 0
+
+	# Remember the command and create the callback.
+	set _progressCommand $command
+        after $_updateInterval [list catch "$this progress"]
+    } else {
+	# Evaluate the progress command
+	if [catch {uplevel \#0 $_progressCommand} progress] {
+	    # The evaluation failed: display the bar in red
+	    _drawprogess 1 red
+	    # Make sure to release the mode
+	    _unlock
+	} else {
+	    # Draw the progress bar with the returned value
+	    _drawprogress $progress
+
+	    # If the returned value is less then one, schedule another callback
+	    if { $progress < 1.0 } {
+		after $_updateInterval [list catch "$this progress"]
+	    } else {
+		# If not, then we're done: make sure we unlock the mode!
+		_unlock
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### putMessage
+#
+# Display a message in the status bar.  If the message display
+# widget has not been mapped to the screen yet (for example, during
+# construction of the window that contains this status bar), defer
+# the message display until the widget is mapped. If the progress bar
+# is currently active, do nothing. The label can be any
+# arbitrary length, and it will be forced to wrap around in
+# the available space.
+#
+body ::tycho::StatusBar::putMessage {string} {
+    if ![_setmode "message"] {
+	return
+    }
+    # If we are not mapped, yet, defer this call
+    if ![winfo ismapped [component message]] {
+        whenMapped message [list $this putMessage $string]
+    } else {
+        # Set the wrap length of the label to the length of
+        # the containing frame less a fudge factor, to prevent
+        # long messages from making the window resize
+        set width [expr [winfo width $itk_component(status)] - 10]
+        $itk_component(message) configure -wraplength $width -text $string
+    }
+}
+
+#######################################################################
+#### puts
+#
+# This method is obsolete -- do not use.
+#
+body ::tycho::StatusBar::puts {string} {
+    ::puts "Warning: obsolete method \"::tycho::StatusBar::puts $string\""
+    putMessage $string
+}
+
+#######################################################################
+#### _drawprogress
+#
+# Draw or update the progress bar.
+#
+body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
+    if { $progress < 0 } {
+	set progress 0
+    } elseif { $progress > 1.0 } {
+	set progress 1.0
+    }
+    # First get/create an item
+    if { [$itk_component(feedback) find withtag foo] == "" } {
+	$itk_component(feedback) create rectangle \
+		0 0 0 0 \
+		-outline "" \
+		-fill $color \
+		-tags foo
+    }
+    set width  [winfo width $itk_component(feedback)]
+    set height [winfo height $itk_component(feedback)]
+    set width  [expr $width * $progress]
+    $itk_component(feedback) coords foo 0 0 $width $height
+    # Update the color too in case it changed
+    $itk_component(feedback) itemconfigure foo -fill $color
+}
+
+#######################################################################
+#### _entryinsert
+#
+# Insert text into the entry widget and view the cursor. Does nothing
+# if not in entry mode. If the label is being changed at the same
+# time, this method should be _after_ changing the label.
+#
+body ::tycho::StatusBar::_entryinsert {text} {
+    if { $_mode != "entry" } {
+        return
+    }
+    $itk_component(feedback) delete 0 end
+    $itk_component(feedback) insert 0 $text
+
+    # Call Tk proc to view the insertion cursor. These procs
+    # are undocumented, but this saves me writing it... This
+    # proc works fine, but we still perform an update first, in
+    # case the label has changed, causing the size of the entry widget
+    # to change
+    ::tycho::safeUpdate $this
+    tkEntrySeeInsert $itk_component(feedback)
+}
+
+#######################################################################
+#### _label
+#
+# Set the label text. This is intended for use to change the
+# label of the widget created by entry{} or fileentry{}.
+#
+body ::tycho::StatusBar::_label {label} {
+    $itk_component(message) configure -text $label
+}
+
+#######################################################################
+#### _lock
+#
+# Lock the current mode. This is required by feedback widgets
+# such as the progress bar, that require that they don't have
+# other modes interfering until they're good and ready.
+#
+body ::tycho::StatusBar::_lock {} {
+    set _lock 1
+}
+
+#######################################################################
+#### _setmode
+#
+# Change the display mode to _mode_. The mode can be:
+# <ul>
+# <li><b>progress</b>: Display the progress bar.
+# <li><b>entry</b>: Display the entry widget.
+# <li><b>message</b>: Display just a plain label.
+# </ul>
+# If _mode_ is not one of these, raise an error.
+# If the mode is locked, then the mode will not be changed
+# and this method returns 0. Otherwise, if _mode_ is the same
+# as the current mode, do nothing and return 1. Otherwise
+# change the mode and the display accordingly, and return 1.
+#
+body ::tycho::StatusBar::_setmode {mode} {
+    # If locked, return 0
+    if $_lock {
+	return 0
+    }
+    # If the mode is the same as the current mode, return 1
+    if { $mode == $_mode } {
+	return 1
+    }
+    set _mode $mode
+
+    # Whatever is in the feedback column, forget and delete
+    if [::info exists itk_component(feedback)] {
+        grid forget $itk_component(feedback)
+        destroy $itk_component(feedback)
+        catch {unset itk_component(feedback)}
+    }
+
+    # Create a new feedback widget if needed
+    switch $mode {
+	"idle" {
+	    # Do nothing, but just set the mode flag
+	}
+	"entry" {
+            # Create the entry widget
+            itk_component add feedback {
+                ::entry $itk_interior.status.feedback \
+                        -borderwidth 1 \
+                        -relief sunken \
+                        -highlightthickness 2
+            } {
+                keep -background -cursor
+                rename -font -messagefont messageFont MessageFont
+            }
+            grid $itk_component(feedback) \
+                    -row 0 -column 1 \
+                    -sticky nsew \
+                    -padx 4
+	}
+	"progress" {
+            # Create the progress display bar. We just set it
+            # to a fixed height because if you try and make
+            # it a fraction of the status bar height it gets
+            # zero if invoked before the window is mapped. Same
+            # old samo Tk nonsense... -- hjr
+            itk_component add feedback {
+                canvas $itk_interior.status.feedback \
+                        -height 10 \
+                        -borderwidth 2 \
+                        -relief sunken
+            } {
+                keep -background -cursor
+            }
+            grid $itk_component(feedback) -row 0 -column 1 -sticky nsew
+	}
+	"message" {
+            # Nothing needs to be done
+	}
+	default {
+	    error "Unknown mode $mode"
+	}
+    }
+    return 1
+}
+
+#######################################################################
+#### _unlock
+#
+# Unlock the current mode. This allows the mode to be changed.
+#
+body ::tycho::StatusBar::_unlock {} {
+    set _lock 0
+}
+

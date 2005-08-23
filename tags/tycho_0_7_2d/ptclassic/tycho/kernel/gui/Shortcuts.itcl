@@ -1,0 +1,188 @@
+# Centralized control of the key bindings in Tycho.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)Shortcuts.itcl	1.6	05/20/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### Shortcuts
+# This non-instantiable class manages shortcuts (key bindings) in Tycho.
+# Only the core set of shortcuts supported by the kernel are dealt with
+# here.  The class provides both standard and emacs-like bindings,
+# associating them with virtual events.
+#
+class ::tycho::Shortcuts {
+    inherit ::tycho::Uninstantiable
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Specify a binding set (0, 1, etc.) and create the virtual bindings.
+    proc choose {bindingset} {}
+
+    # Return a description of a shortcut for insertion in the menu label.
+    proc getLabel {eventname} {}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Which binding set is in force
+    private common __bindset
+
+    # An array that defines the bindings and how they are described
+    # in the menu.  Some basic bindings, like those of arrow keys,
+    # are not given here because they are the same on all platforms.
+    # The names of the elements in the array are the names of the
+    # corresponding virtual events.  E.g., you can bind to the virtual
+    # event <<Open>>, and with windows bindings this will be triggered
+    # by control-o, and with unix bindings it will be triggered by
+    # control-x followed by control-f.  Each entry in the array gives
+    # a list of form {keysequence label keysequence label ...} where the
+    # keysequence is what would normally appear in the bind statement
+    # (without virtual events) and the label is what appears in the menu
+    # to guide the user.
+
+    # First, define a list that identifies the binding sets by name.
+    # To augment the binding sets, add names to this list, and for each
+    # name added, add a keysequence and label to each virtual event entry.
+    # NOTE: Use full screen to view the following table.
+
+    private common __bindingsets {windows unix compromise}
+    private common __bindings
+    array set __bindings { \
+            AltFile      {{} {}                       <Control-x><Control-v> {C-x C-v}          {} {}} \
+            Bottom       {{Control-End} {Ctrl+End}    <Escape><greater> {Esc->}                 {Control-End} {Ctrl+End}} \
+            Capitalize   {{} {}                       <Meta-C> M-C                              {} {}} \
+            Capitalize2  {{} {}                       <Escape><C> {Esc C}                       {} {}} \
+            Center       {<Control-l> Ctrl+L          <Control-l> C-l                           <Control-l> Ctrl+L} \
+            ClearToEnd   {<Control-k> Ctrl+K          <Control-k> {C-k}                         <Control-k> Ctrl+K} \
+            ClearToStart {<Control-u> Ctrl+U          <Control-u> {C-u}                         <Control-u> Ctrl+U} \
+            Close        {<Control-w> Ctrl+W          <Control-x><k> {C-x k}                    <Control-w> Ctrl+W} \
+            Copy         {<Control-c> Ctrl+C          <Meta-w> M-w                              <Control-c> Ctrl+C} \
+            Copy2        {{} {}                       <Escape><Key-w> Esc-w                     {} {}} \
+            Cut          {<Control-x> Ctrl+X          <Control-w> C-w                           <Control-x> Ctrl+X} \
+            DownLine     {{} {}                       <Control-n> {C-n}                         <Control-n> {C-n}} \
+            DownPage     {<Next> {Page Down}          <Control-v> {C-v}                         <Next> {Page Down}} \
+            Evaluate     {{} {}                       <Control-x><Control-r> {C-x C-r}          {} {}} \
+            EvaluateConstruct {{} {}                  <Control-x><Control-Shift-R> {C-x C-R}    {} {}} \
+            Exit         {<Control-q> Ctrl+Q          <Control-x><Control-c> {C-x C-c}          <Control-q> Ctrl+Q} \
+            Fill         {{} {}                       <Meta-q> M-q                              {} {}} \
+            Fill2        {{} {}                       <Escape><Key-q> {Esc q}                   {} {}} \
+            FillPrefix   {{} {}                       <Control-x><period> {C-x .}               {} {}} \
+            FillColumn   {{} {}                       <Control-x><f> {C-x f}                    {} {}} \
+            Find         {<Control-f> Ctrl+F          <Control-S> C-S                           <Control-F> Ctrl+Shift+F} \
+            Goto         {<Control-g> Ctrl+G          <Control-c><Control-g> {C-c C-g}          <Control-g> Ctrl+G} \
+            HalfHeight   {<Control-F7> Ctrl+F7        <Control-x><Key-2> {C-x 2}                <Control-F7> Ctrl+F7} \
+            Iconify      {<Control-F9> Ctrl+F9        <Control-x><0> {C-x 0}                    <Control-F9> Ctrl+F9 } \
+            InsertFile   {{} {}                       <Control-x><i> {C-x i}                    {} {}} \
+            LineStart    {<Home> Home                 <Control-a> {C-a}                         <Control-a> Ctrl+a} \
+            LineEnd      {<End> End                   <Control-e> {C-e}                         <Control-e> Ctrl+e} \
+            LowerCase    {{} {}                       <Meta-l> M-l                              {} {}} \
+            LowerCase2   {{} {}                       <Escape><l> {Esc l}                       {} {}} \
+            Maximize     {<Control-F10> Ctrl+F10      <Control-x><Key-1> {C-x 1}                <Control-F10> Ctrl+F10} \
+            NextPane     {<Control-Tab> Ctrl+Tab      <Control-x><o> {C-x o}                    <Control-Tab> Ctrl+Tab} \
+            NextWindow   {<Control-F6> Ctrl+F6        <Control-x><O> {C-x O}                    <Control-F6> Ctrl+F6} \
+            Open         {<Control-o> Ctrl+O          <Control-x><Control-f> {C-x C-f}          <Control-o> Ctrl+O} \
+            OpenLine     {<Control-j> Ctrl+J          <Control-o> C-o                           <Control-j> Ctrl+J} \
+            OpenSource   {{} {}                       <Control-x><Key-s> {C-x s}                {} {}} \
+            Paste        {<Control-v> Ctrl+V          <Control-y> C-y                           <Control-v> Ctrl+V} \
+            PrevWindow   {<Control-Shift-F6> Ctrl+Shift+F6 <Control-x><O> {C-x O}               <Control-Shift-F6> Ctrl+Shift+F6} \
+            Print        {<Control-p> Ctrl+P          <Control-x><p> {C-x p}                    <Control-P> Ctrl+Shift+P} \
+            Redo         {<Control-y> Ctrl+Y          <Control-x><u> {C-x u}                    <Control-y> Ctrl+Y} \
+            Restore      {<Control-F5> Ctrl+F5        <Control-x><Key-6> {C-x 6}                <Control-F5> Ctrl+F5} \
+            RevisionControl {{} {}                    <Control-x><v> {C-x v}                    {} {}} \
+            Save         {<Control-s> Ctrl+S          <Control-x><Control-s> {C-x C-s}          <Control-s> Ctrl+S} \
+            SaveAs       {{} {}                       <Control-x><Control-w> {C-x C-w}          {} {}} \
+            Search       {<Control-t> Ctrl+T          <Control-s> C-s                           <Control-t> Ctrl+T} \
+            SearchBackwards {<Control-r> Ctrl+R       <Control-r> C-r                           <Control-r> Ctrl+R} \
+            SelectAll    {<Control-a> Ctrl+A          <Control-slash> {C-/}                     <Control-A> Ctrl+Shift+A} \
+            Spelling     {{} {}                       <Meta-dollar> {M-\$}                      {} {}} \
+            Spelling2    {{} {}                       <Escape><dollar> {Esc-\$}                 {} {}} \
+            Tab          {<Control-i> Ctrl+I          <Control-q><Tab> {C-q Tab}                <Control-i> Ctrl+i} \
+            ToggleReadOnly {{} {}                     <Control-x><Control-q> {C-x C-q}          {} {}} \
+            Top          {<Control-Home> {Ctrl+Home}  <Escape><less> {Esc-<}                    <Control-Home> {Ctrl+Home}} \
+            Undo         {<Control-z> Ctrl+Z          <Control-x><u> {C-x u}                    <Control-z> Ctrl+Z} \
+            UnselectAll  {{} {}                       <Control-backslash> "C-\\"                {} {}} \
+            UpperCase    {{} {}                       <Meta-u> M-u                              {} {}} \
+            UpperCase2   {{} {}                       <Escape><u> {Esc u}                       {} {}} \
+            UpLine       {{} {}                       <Control-p> {C-p}                         {} {}} \
+            UpPage       {<Prior> {Page Up}           <Meta-v> {M-v}                            <Prior> {Page Up}} \
+            UpPage2      {{} {}                       <Escape><v> {Esc-v}                       {} {}} \
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### choose
+# Specify a binding set by name and create the virtual bindings.
+# If the name is "automatic" then the Tcl interpreter is queried
+# for the platform name and a binding set by that name is sought.
+# Specifying a binding set that is not defined results in windows
+# bindings being used.  The method returns the binding set used.
+#
+body ::tycho::Shortcuts::choose {bindingset} {
+    if {$bindingset == {automatic}} {
+        global tcl_platform
+        set setnum [lsearch -exact $__bindingsets $tcl_platform(platform)]
+    } else {
+        set setnum [lsearch -exact $__bindingsets $bindingset]
+    }
+    if {$setnum < 0} {
+        set setnum 0
+    }
+    foreach name [array names __bindings] {
+        set sequence [lindex $__bindings($name) [expr $setnum*2]]
+        event delete <<$name>>
+        if {$sequence != {}} {
+            event add <<$name>> $sequence
+        }
+    }
+    set __bindset $setnum
+    return [lindex $__bindingsets $setnum]
+}
+
+#####################################################################
+#### getLabel 
+# Return a description of a shortcut for insertion in the menu label.
+#
+body ::tycho::Shortcuts::getLabel {eventname} {
+    if [catch {
+        set desc [lindex $__bindings($eventname) [expr $__bindset*2+1]]
+    } msg] {
+        error "no such event name: $eventname\n$msg"
+    }
+    return $desc
+}

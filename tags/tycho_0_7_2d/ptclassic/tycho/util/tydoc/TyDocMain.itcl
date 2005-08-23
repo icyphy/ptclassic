@@ -1,0 +1,2515 @@
+# Define classes for tydoc, the Tycho documentation system
+#
+# @Authors: Christopher Hylands, John Reekie
+#
+# @Version: @(#)TyDocMain.itcl	1.38 01/26/99
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# This file consists of several classes, partly so that the tydoc system
+# has a sample file that consists of more than one class.
+
+# The big question here is how do we organize the information.
+# It would be nice if we had a nested list of classes so that we could 
+# easily traverse the class hierarchy.  This would help with the class
+# browser.
+# 
+# Each class needs to contain certain information, like what file it is
+# associated with, the name of the class, who its parents are, the methods
+# and variables.
+#
+# We could create a DocClass to hold the class documentation.  The DocClass
+# could have an array for the class wide doctags, an array that is indexed
+# by construct type, each element of the array would contain a construct.
+# Each construct would be an array that would consist of the name,
+# the arguments, the doc comment description and the doc comment explanation
+# 
+# One complication is that the interface/implementation thing could be 
+# causing troubles.  We need to be able to associate a body defined outside
+# a class with the method declared inside a class.  If we find a body, we
+# could search the docClass and add the comment as
+#
+# We could create a DocClass to hold the class documentation.  The DocClass
+# Since a file can have multiple classes, we may want to have a list of
+# tags that apply on a per file basis.  We could assume that these will
+# be at the top of the file, before we have any class definitions.
+# (What do we do about non-class things like external procedures etc?)
+
+########################################################################
+#### TyDoc
+# This is a dummy class solely for the purpose of structuring
+# the Tycho class hierarchy and documentation until we figure
+# out a better way of doing it with namespaces.
+#
+class ::tycho::TyDoc {
+    constructor {args} {}
+    destructor {}
+}
+
+######################################################################
+#### DocClass
+# This class contains the data for one class.  Each field of a DocSys
+# object contains the respective data for that construct in the class
+# we are documenting.
+#
+class ::tycho::DocClass {
+    inherit ::tycho::TyDoc
+
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Append a construct to the appropriate variable
+    public method appendConstruct { construct comment \
+	    access argList} {}
+
+    # Return the class name for this class
+    public method getClassName {} {
+	return [lindex [lindex $class 0] 2]
+    }
+
+    # Merge all the constructs
+    public method mergeAllConstructs {} {}
+
+    ###################################################################
+    ####                   public variables                        ####
+
+    public variable comment {}
+    public variable srcFile {}
+
+    public variable array {}
+    public variable body {}
+    public variable class {}
+    public variable common {}
+    public variable configbody {}
+    public variable constructor {}
+    public variable destructor {}
+    public variable inherit {}
+    public variable itk_option {}
+    public variable method {}
+    public variable option {}
+    public variable private {}
+    public variable protected {}
+    public variable proc {}
+    public variable public {}
+    public variable set {}
+    public variable variable {}
+
+    # We store ensembles, options, procs that are declared outside of a class
+    public variable outsideEnsemble {}
+    public variable outsideOption {}
+    public variable outsideProc {}
+
+    # The fileWide description goes here, usually this is from the first line
+    # of the file.  
+    public variable fileWideDesc {}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Merge one type of construct with another construct
+    private method mergeConstructs {src dst} {}
+
+    ###################################################################
+    ####                   private variables                        ####
+
+    # List of DocComments that we have appended (used only for destruction)
+    private variable docCommentList {}
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::DocClass::destructor {} {
+    # puts "dbg: ::tycho::DocClass::destructor $this [configure]"
+    if [info exist docCommentList] {
+        foreach docComment $docCommentList {
+            catch {delete object $docComment}
+        }
+        set docCommentList {}
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### appendConstruct
+# Append a construct to the appropriate variable
+#
+body ::tycho::DocClass::appendConstruct { construct comment access argList } {
+    set myDocComment [::tycho::DocComment .docClass#auto $comment]
+    # Save the name of the docComment so we can delete it later
+    lappend docCommentList $myDocComment
+    lappend $construct \
+	    [list  $myDocComment \
+	    $access [lindex $argList 0] $argList]
+    #puts "DC:AppCnstct: $construct [set $construct] [$myDocComment configure]"
+}
+    
+
+#######################################################################
+#### mergeAllConstructs
+# Merge all the constructs
+# Constructs can have an interface defined in the class body, and
+# an implementation defined at the top level.  Here, we merge
+# all the top level implementation comments into the class body interface
+# comments
+#
+body ::tycho::DocClass::mergeAllConstructs {} {
+    mergeConstructs body method
+    mergeConstructs body proc
+    mergeConstructs body destructor
+    mergeConstructs body constructor
+    mergeConstructs configbody variable
+    mergeConstructs configbody itk_option
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### mergeConstructs
+# We need to merge bodies into methods and procs, configbodies into
+# public variables.
+#
+body ::tycho::DocClass::mergeConstructs {src dst} {
+    if [llength $src] {
+	#puts "mergeConstructs( $src $dst)"
+	#if {$dst == "itk_option"} {
+	#    puts "mergeConstructs( $src $dst) src:[set $src] dst:[set $dst]"
+	#    #puts "-->[[lindex [lindex [set $src] 1] 0] configure]"
+	#}
+	foreach srcIter [set $src] {
+	    foreach dstIter [set $dst] {
+		if {$dst == "itk_option"} {
+		    # Unfortunately, for 'itk_option define', we need
+		    # a special case
+		    #puts "dstTarget:::[lindex [lindex $dstIter 3] 2]"
+		    set dstTarget [lindex [lindex $dstIter 3] 2]
+		} else {
+		    if {$dst == "destructor"} {
+			set dstTarget destructor
+		    } else {
+			set dstTarget [lindex $dstIter 2]
+		    }
+		}
+	        #puts "sT:[namespaceTail [lindex $srcIter 2]] $dstTarget"
+		if { [namespaceTail [lindex $srcIter 2]] == 
+		 $dstTarget } {
+		    # We've found a match, so now we add the comment
+		    # from the source construct to the comment
+		    # of the dest construct as an @expl
+		    set srcDocComment [lindex [lindex $dstIter 0] 0]
+		    set dstDocComment [lindex [lindex $srcIter 0] 0]
+		    #puts "Found Match, src:[$srcDocComment configure]"
+		    #puts "Found Match, dst:[$dstDocComment configure]"
+		    $srcDocComment configure -expl \
+			    [$dstDocComment cget -desc]
+		}
+	    }
+	}
+    }
+}
+
+########################################################################
+#### DocComment
+# This class contains the data for a comment, organized by doctag
+class ::tycho::DocComment {
+    inherit ::tycho::TyDoc
+
+    constructor {args} {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Parse a comment into tags
+    method parseComment {comment}
+
+    ###################################################################
+    ####                         public variables                  ####
+
+    public variable author {}
+    public variable contributor {}
+    public variable version {}
+    public variable copyright {}
+    public variable desc {}
+    public variable expl {}
+
+    private common taglist {}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    protected common newlineMagicCookie XnlMagicX 
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Check if newTag is valid, if it is return the canonical tag.
+    private proc validTag {newTag lastTag} {}
+} 
+
+#######################################################################
+#### constructor
+# Read in a comment and parse the doctags 
+#
+body ::tycho::DocComment::constructor {args} {
+
+    # If there is no data, then we are done
+    if { [lindex $args 0] == {} } {
+	return
+    }
+
+    # If we have not yet generated a list of valid tags, do so
+    if {$taglist == {} } {
+	set varlist [ $this configure ]
+	foreach varname $varlist {
+	    lappend taglist [string range [lindex $varname 0] 1 end]
+	}
+	#puts "DocComment taglist= $taglist"
+    }
+    parseComment [lindex  $args 0]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### parseComment
+# Parse a comment into tags
+#
+body ::tycho::DocComment::parseComment {comment} {
+    # Before the next bit, trim off leading spaces
+    set comment [string trim $comment " "]
+
+    # Substitute \n for the magic cookie, then split into a list,
+    # each element of the list is a line
+    # If the magic cookie is preceded by a space, then grab the space
+    # too.  If we don't then if we have tcl commands embedded in a
+    # comment, we will end up with a space at the end of each line.
+    # We do something similar for trailing spaces
+    regsub -all " ?$newlineMagicCookie ?" $comment "\n" textWithNewLines
+    set commentLineList [split $textWithNewLines "\n" ]
+
+    # The default doc tag is desc
+    set currentTag desc
+    foreach commentLine $commentLineList {
+	#puts $commentLine
+	if [regexp {^@([A-Za-z]+):*[ 	]+(.*)} \
+		$commentLine dummy docTag docValue] {
+	    set currentTag [validTag $docTag $currentTag]
+	    set commentLine $docValue
+	    #puts "ct: $currentTag, cl: $docValue"
+	}
+	if {$currentTag == "copyright"} {
+	    if {[set $currentTag] == "" } {
+		# We save only the first line of the copyright
+		append $currentTag $commentLine "\n"
+	    }
+	} else {
+	    append $currentTag $commentLine "\n"
+	}
+    }
+    #puts [$this configure]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### validTag
+# Check if newTag is valid, if it is return the canonical tag.
+# If it is not valid return lastTag.  A tag is valid if it 
+# is a capitalized version of one of the public variables of this class.
+# A tag is also valid if it is a plural of one of the public variables. 
+#
+body ::tycho::DocComment::validTag {newTag lastTag} {
+    if {[lsearch $taglist $newTag] >= 0 } {
+	return $newTag
+    }
+    foreach tag $taglist {
+	# Search for plurals of tags
+	if { "${tag}s" == "$newTag" } {
+	    return $tag
+	}
+	set capitalTag "[string toupper [string range $tag 0 0]][string range $tag 1 end]"
+	if { "$capitalTag" == "$newTag" } {
+	    return $tag
+	}
+	if { "${capitalTag}s" == "$newTag" } {
+	    return $tag
+	}
+    }
+    puts stderr "Warning, tag: \'$newTag\' is not valid"
+    return $lastTag
+}
+
+#######################################################################
+#### DocSys
+# Read in a file and create an internal representation of the doc comments. 
+class ::tycho::DocSys {
+    inherit ::tycho::TyDoc
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Read in a file and extract the documentation system information.
+    method readFile {file}
+
+    # Parse a list representation of a file
+    method parseFileAsList {fileAsList}
+
+    
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Safe update, local copy so we can run this in a script w/o Tycho.
+    protected method tydocUpdate {obj}
+
+    # When we find a construct call the appropriate method below
+    # Child classes of this class often redefine these methods
+    protected method arrayClause { comment access argList} {
+	printClause array $comment {} $argList}
+    protected method bodyClause { comment access argList} {
+	printClause body $comment {} $argList}
+    protected method classClause { comment access argList} {
+	# Parse the body of the class so that we get the constructs
+	$this parseFileAsList [lindex $argList 1]
+    }
+    protected method commentClause { comment access argList } {
+	printClause comment $comment {} {} }
+    protected method commonClause { comment access argList} {
+	printClause common $comment $access $argList}
+    protected method configbodyClause { comment access argList} {
+	printClause configbody $comment {} $argList} 
+    protected method constructorClause { comment access argList} {
+	printClause constructor $comment {} $argList}
+    protected method destructorClause { comment access argList} {
+	printClause destructor $comment {} $argList}
+    protected method inheritClause { comment access argList} {
+	printClause inherit $comment $access $argList}
+    protected method itk_optionClause { comment access argList} {
+	printClause itk_option $comment $access $argList}
+    protected method methodClause { comment access argList} {
+	printClause method $comment $access $argList}
+    protected method optionClause { comment access argList} {
+	printClause option $comment $access $argList}
+    protected method privateClause { comment access argList} {
+	error "Internal Error: we called privateClause by mistake?"}
+    protected method protectedClause { comment access argList} {
+	error "Internal Error: we called protectedClause by mistake?"}
+    protected method procClause { comment access argList} {
+	printClause proc $comment $access $argList}
+    protected method publicClause { comment access argList} {
+	error "Internal Error: we called publicClause by mistake?"}
+    protected method setClause { comment access argList} {
+	printClause set $comment {} $argList}
+    protected method variableClause { comment access argList} {
+	printClause variable $comment $access $argList}
+    protected method unknownClause { comment access argList} {
+	puts "variable $access $argList\t#$comment"}
+
+
+    ###################################################################
+    ####                      protected variables                  ####
+
+    # The current file that we are reading in
+    protected variable currentFile
+
+    ###################################################################
+    ####                      protected commons                    ####
+
+    # At various points, we substitute the value of this variable for newlines
+    protected common newlineMagicCookie XnlMagicX 
+
+    ###################################################################
+    ####                      private procs                        ####
+
+    # Print out construct information
+    private proc printClause { construct comment access argList} {
+	puts "$construct:\t$access\t$argList\t#$comment"
+    }
+
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Table containing information about constructs
+    # We use a table here so that we can identify constructs by name with
+    # the use of info exists syntax($foo).  We also use a table so that
+    # we can add flags to change the behaviour for various constructs.
+    private common syntax
+
+    # The format of this array is:
+    #   construct               { isAccess? }
+    # Where isAccess? is 1 if construct is public|private|protected
+    set syntax(array) 		{0}
+    set syntax(body) 		{0}
+    set syntax(class)		{0}
+    set syntax(common)		{0}
+    set syntax(configbody)	{0}
+    set syntax(constructor)	{0}
+    set syntax(destructor)	{0}
+    set syntax(inherit)		{0}
+    set syntax(itk_option)	{0}
+    set syntax(method)		{0}
+    set syntax(option)		{0}
+    set syntax(private)		{1}
+    set syntax(protected)	{1}
+    set syntax(proc)		{0}
+    set syntax(public)		{1}
+    set syntax(set)		{0}
+    set syntax(variable)	{0}
+
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### readFile
+# Read in a file, and add the files' classes, methods etc. to the DocSys
+#
+body ::tycho::DocSys::readFile {file} {
+    # Save the filename so we can later make links
+    set currentFile $file
+
+    # Read in the file line by line, identify comments, backslash protect 
+    # the comment contents and then append to a variable
+    set inEscapedComments ""
+    set fd [open $file]
+    while {![eof $fd]} {
+	gets $fd lineIn
+	tydocUpdate $this
+	if [ regexp {^[	 ]*# (.*)$} $lineIn dummy commentText ] {
+	    if { ! [regexp {^# --+[ 	]*$} $lineIn ]} {
+		# Filter out comment lines like the ones in iwidgets:
+		# -----------------------------------
+		regsub -all {([\\{}"])} $commentText {\\\1} commentEscaped
+		# This comment is here to fix the colorizing problems caused by:"
+		append inEscapedComments "# " [list $commentEscaped] "\n"
+	    }
+	} else {
+            if { ! [regexp {^[	 ]*##+.*$} $lineIn]} {
+                # The text is not a comment line with two or more hashmarks
+		# or two or more dashes.
+   	        append inEscapedComments $lineIn "\n"
+            }
+	}
+    }
+    close $fd
+    
+    # Substitute a magic cookie for newlines
+    set a [split $inEscapedComments "\n"]
+    set b [join $a " $newlineMagicCookie "]
+
+    # Add a space between a close curly and a close square.
+    # The following example was breaking:
+    # curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
+    regsub -all "\}]" $b "\} ]" c
+    regsub -all "\"]" $c "\" ]" fileAsList
+
+    $this parseFileAsList $fileAsList
+}	    
+
+#######################################################################
+#### parseFileAsList
+# Parse the file and call the appropriate methods for each construct
+#
+body ::tycho::DocSys::parseFileAsList {fileAsList} {
+    # Set the stateflags for our parser to an initial state
+    set commentBody ""
+    set inComment 0
+    set wasInComment 0
+    set sawNewLine 0
+    set sawAccess 0
+    set inConstruct 0
+    set unknownConstruct 0
+    set doneWithConstructArgList 0
+    set constructAccess public
+    set constructArgList {}
+
+    # Check to see if we are going to fail because fileAsList is not
+    # a proper list
+    if [catch {llength $fileAsList} errMsg] {
+	error "Problem with reading the file as a list.\nThe error message \
+		was:\n$errMsg\nThe contents of the file:\n$fileAsList"
+    }
+
+
+    foreach item "$fileAsList" {
+	tydocUpdate $this
+	if {$item == "#"} {
+	    set inComment 1
+	    if $wasInComment {
+		set wasInComment 0
+	    } 
+	} else {
+	    # We did not see a '#'
+	    if $inComment {
+		if {$item == $newlineMagicCookie} { 
+		    # If we see a newlineMagicCookie, then this line
+		    # is over and we are no longer for sure in a comment
+		    #puts "was inComment, saw $newlineMagicCookie"
+		    set sawNewLine 1
+		    set inComment 0
+		    set wasInComment 1
+		    append commentBody " " $item
+		} else {
+		    append commentBody " " $item
+		}
+	    } else {
+	        #puts "->> $wasInComment,  $inConstruct: <$item>"
+		if {$wasInComment} {
+		    # If we were in a comment, but the next item is
+		    # not a '#', then the doc comment is over
+		    set wasInComment 0
+		    if {$item == $newlineMagicCookie && $sawNewLine} { 
+			# If we get two newlines in a row, then nuke comment
+			# This can happen if we are outside a class, and the
+			# first comment of the file is followed by a 
+			# blank line, then a option.
+			commentClause $commentBody {} {}
+			set commentBody ""
+		    } 
+		    set sawNewLine 0
+		    #puts "Comment: $commentBody"
+		    #puts "Item: $item"
+		}
+		    
+		if !$inConstruct {
+		    # Process the construct keyword.  If the construct
+		    # keyword is public, protected or private, we
+		    # make a note of what it was and go through this
+		    # section twice. 
+
+		    set construct $item
+		    if [catch {set syntaxList $syntax($construct)} ] {
+			if {$construct != "$newlineMagicCookie"} {
+			    # FIXME: eventually this puts will go away
+			    #puts "Don't know much about $construct"
+
+			    set construct $item
+			    set inConstruct 1
+			    set unknownConstruct 1
+			    # We set sawAccess so that we don't try to 
+			    # process public etc.  We are setting inConstruct
+			    # so we should never check the access, but
+			    # we set this anyway for safer coding
+			    set sawAccess 1
+			}
+		    } else {
+			# We have a keyword that is in our table of constructs
+			set inConstruct 1
+			if !$sawAccess {
+			    # If we have not yet seen a access keyword,
+			    # then check to see if this is one.
+			    if {[lindex $syntaxList 0]} {
+				set sawAccess 1				    
+				set constructAccess $construct
+				set inConstruct 0
+			    } else {
+				set constructAccess "public"
+			    }
+			}
+			 #puts "==>$item \{$syntax($construct)\} $sawAccess $constructAccess $inConstruct: $construct"
+		    }
+		} else {
+		    # We are in a construct, we keep accumulating
+		    # args until we get a "newlineMagicCookie"
+		    # If we see a backslash, then we get
+		    # " $newlineMagicCookie" (Note the space in front)
+		    # Note that we are not doing any error checking
+		    # on the number of args here.
+		    if { $item == "$newlineMagicCookie" } {
+			set doneWithConstructArgList 1
+		    }
+		    
+		    if { $item == " $newlineMagicCookie" } {
+			# Saw a \ at the end of the line
+			continue
+		    }
+		    
+		    if $doneWithConstructArgList {
+			if $unknownConstruct {
+			    # If this is an unknown construct, we cheat
+			    # and save the original construct name in the
+			    # constructAccess variable.  
+			    # FIXME: perhaps this could cause trouble if we
+			    # had an unknown that involved 
+			    # public|protected|private? Since we set sawAccess
+			    # when we have an unknown, I think we are ok.
+			    set constructAccess $construct
+			    set construct unknown
+			}
+			if [ catch {
+			    ${construct}Clause $commentBody $constructAccess \
+				    $constructArgList} errMsg ] {
+				puts "Failed to call\
+					${construct}Clause:\n---\n$errMsg"
+				#global errorInfo
+				#puts $errorInfo
+				puts "---\nCommentBody was: '$commentBody'"
+
+			    }
+		        #puts "..>$construct:\t <$commentBody> <$constructAccess> <$constructArgList>"
+
+			set inConstruct 0
+			set commentBody ""
+			set sawAccess 0
+			set inConstruct 0
+			set unknownConstruct 0
+			set doneWithConstructArgList 0
+			set constructArgList {}
+		    } else {
+			lappend constructArgList $item
+		    }
+		}
+	    }
+	}
+    }
+} 
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### tydocUpdate
+# Safe update, local copy so we can run this in a script w/o Tycho.
+# This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
+#
+body ::tycho::DocSys::tydocUpdate {obj} {
+    update
+    global gStop
+    if {[info exists gStop] && $gStop > 0} {
+                set gStop -1
+	error "Hit Stop"
+    }
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[infoWhichCommand $obj] == {}} {
+	# If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+
+        #::tycho::silentError
+	set savetkerror [info body ::tkerror]
+	proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+	error silent
+
+    }
+    # ::tycho::BuilderDialog sets gStop
+   
+    return 0
+
+}
+
+########################################################################
+#### ListDocSys
+# @desc Read in a file and represent the entire file as a structured list of
+# constructs.
+#
+# @expl Each class in the file has its own DocClass object.  Each DocClass
+# object consists of variables that contain constructs of similar types.
+# After we fill in the ListDocSys object, we can query it to produce output.
+#
+# The reason we need to generate a list is so that we can collect interface
+# and implementation comments in one place.  Also, we want to be able to
+# print all the public methods and then all the protected methods etc. in
+# order, and the order in the file might not be the order we want these
+# constructs.
+# 
+# Constructs that are outside of a class and do not belong to a class
+# are documented with the class that follows.  If the unknown constructs are
+# at the end of the file, then they are documented with the last class
+# in the file
+#
+class ::tycho::ListDocSys {
+    inherit ::tycho::DocSys
+
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Append a construct data to the appropriate construct variable
+    public method appendConstruct {construct comment access argList } {}
+
+    # Generate List output (used primarily for testing)
+    public method generateOutputFile {filename} {
+	foreach class $classList {
+	    $class mergeAllConstructs
+	    puts "--------Contents of $this: [getClassName]------"
+	    regsub -all { \{-} [$this configure] "\n\{-" prettyConfigure
+	    puts $prettyConfigure
+	    puts "--------End of contents of $this: [getClassName]------"
+	}
+    }
+
+    # Read in a file. This is needed to keep track classes have already
+    # been printed out.
+    method readFile {file} {
+	set currentClassIndex [llength $classList]
+	
+	::tycho::DocSys::readFile $file
+    }
+
+#    public method resetOutsideClassComment {} {
+#                catch {delete object $outsideClassComment}
+#	set outsideClassComment {}
+#                catch {delete object $currentClass}
+#	set currentClass {}
+#                catch {delete object $topClass}
+#	set topClass {}
+#    }
+    
+    ###################################################################
+    ####                         public procedures                 ####
+
+    # Return the description tag for a particular construct
+    public proc getDocCommentTag {construct tag} {}
+
+    # Return the access field for a particular construct
+    public proc getAccess {construct} {
+	return [lindex $construct 1]
+    }
+
+    # Return the name for a particular construct
+    public proc getName {construct} {
+	regsub -all "$newlineMagicCookie" [lindex $construct 2] \
+		"\n" textWithNewlines
+	return $textWithNewlines
+    }
+
+    # Return the arguments for a particular construct
+    public proc getArgs {construct} {
+	regsub -all "$newlineMagicCookie" [lindex [lindex $construct 3] 1] \
+		"\n" textWithNewlines
+	return $textWithNewlines
+    }
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Append array data
+    protected method arrayClause { comment access argList} {
+	appendConstruct array $comment {} $argList 
+    }
+
+    # Append body data
+    protected method bodyClause { comment access argList} {
+	appendConstruct body $comment {} $argList
+    }
+
+    # Append class data
+    protected method classClause { comment access argList} {}
+
+    protected method commentClause { comment access argList } {}
+
+    protected method commonClause { comment access argList} {
+	appendConstruct common $comment $access $argList}
+    protected method configbodyClause { comment access argList} {
+	appendConstruct configbody $comment {} $argList} 
+    protected method constructorClause { comment access argList} {
+	appendConstruct constructor $comment {} $argList}
+    protected method destructorClause { comment access argList} {
+	appendConstruct destructor $comment {} $argList}
+    protected method inheritClause { comment access argList} {
+	appendConstruct inherit $comment $access $argList}
+    protected method itk_optionClause { comment access argList} {
+	appendConstruct itk_option $comment $access $argList}
+    protected method methodClause { comment access argList} {
+	appendConstruct method $comment $access $argList}
+    protected method optionClause { comment access argList} {
+	appendConstruct option $comment $access $argList}
+    protected method procClause { comment access argList} {
+	appendConstruct proc $comment $access $argList}
+    protected method setClause { comment access argList} {
+	appendConstruct set $comment {} $argList}
+    protected method variableClause { comment access argList} {
+	appendConstruct variable $comment $access $argList}
+    protected method unknownClause { comment access argList} {
+	appendConstruct unknown $comment $access $argList}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The file-wide comment is saved here.
+    # This is common so that if we define more than one class in a file
+    # we can share the data.
+    protected common outsideClassComment {}
+
+    # List of DocClass objects that consist of the classes we have seen.
+    protected variable classList {}
+
+    # The index of the first class in the list that hasn't been printed yet
+    protected variable currentClassIndex 0
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # State variable that indicates if we are currenly processing a class.
+    private variable inClass 0
+
+    # The DocClass object that contains the current class.
+    private variable currentClass {}
+
+    # All constructs outside a class are associated with topClass
+    private variable topClass {}
+
+    ###################################################################
+    ####                   private variables                        ####
+
+    # List of DocComments that we have appended (used only for destruction)
+    private variable ldsDocCommentList {}
+}
+
+#######################################################################
+#### destructor
+body ::tycho::ListDocSys::destructor {} {
+    foreach classItem $classList {
+        catch {delete object $classItem}
+    }
+    set classList {}
+    foreach docComment $ldsDocCommentList {
+        catch {delete object $docComment}
+    }
+    set ldsDocCommentList {}
+    catch { delete object $outsideClassComment}
+    set outsideClassComment {}
+    catch { delete object $currentClass}
+    set currentClass {}
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+#######################################################################
+#### appendConstruct
+# Append a construct data to the appropriate construct variable
+#
+body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
+    #puts "appendConstruct#0: $inClass $construct $comment $access $argList"
+    if { $currentClass == {} } {
+	# If we don't have a currentClass, then create one
+	#puts "appendConstruct#1: $construct $comment $access $argList"
+	set currentClass [::tycho::DocClass  ::tycho::.ListClass#auto]
+	lappend classList  $currentClass
+	# All constructs outside a class are associated with topClass
+	set topClass $currentClass
+    }
+    set myClass $currentClass
+    if {!$inClass} {
+	# If we are not in a class, then we have to decipher
+	# the construct so we know what class to put it in
+	if { $construct == "body" || $construct == "configbody" } { 
+	    # Determine which class a construct declared outside
+	    # a class belongs to.
+	    #puts "appendConstruct#2: $construct $comment $access $argList"
+	    #puts [lindex $argList 0]
+	    set foundClass 0
+	    foreach classIter $classList {
+		#puts "appendConstruct#2.5: $classIter cn=[$classIter getClassName] ns=[namespaceQualifiers [lindex $argList 0]] 0=[lindex $argList 0]"
+		if { [$classIter getClassName] == \
+			[namespaceQualifiers [lindex $argList 0]]} {
+		    set myClass $classIter
+		    set foundClass 1
+		    break
+		}
+	    }
+
+	    # We did not find a match, now check the global namespace.
+	    # If the class has a fully qualified name like ::a::b, and contains
+	    # a method c, but the body or configbody has a partially
+	    # qualified name like a::b::c, then the above code won't
+	    # find the class, so now we append a ::.
+	    # in iwidgets, the hyperhelp.itk file contains examples of this.
+	    foreach classIter $classList {
+		#puts "appendConstruct#3.5: $classIter cn=[$classIter getClassName] ns=[namespaceQualifiers [lindex $argList 0]] 0=[lindex $argList 0]"
+		if { [$classIter getClassName] == \
+			"::[namespaceQualifiers [lindex $argList 0]]"} {
+		    set myClass $classIter
+		    set foundClass 1
+		    break
+		}
+	    }
+
+	    if {! $foundClass} {
+		# Print out the argList of what ever failed on us.
+		set textWithNewlines $argList
+		catch {regsub -all "$newlineMagicCookie" $argList "\n" \
+			textWithNewlines}
+		error "Warning, did not find a class for\
+			'$construct'.\nAt or near:\n$textWithNewlines"
+	    }
+	} else {
+	    # If we get here, then we have a construct that is outside 
+	    # of a class.  In tycho, usually this is either an 'option'
+	    # or a 'proc'.  We save this information separately to 
+	    # be output separately from the class procs and options.
+	    switch $construct {
+		option { set construct outsideOption }
+		proc { set construct outsideProc}
+		unknown {
+		    if {$access == "ensemble"} {
+			set construct outsideEnsemble
+		    }
+		}
+	    }
+	    set myClass $topClass
+	    #if {$construct != "class" } {
+		#puts "appendConstruct#4: $myClass $topClass $inClass $construct $comment $access $argList"
+	    #}
+	} 
+    }
+    #puts "$currentClass: $construct:\t$access"
+    #puts "$currentClass: $construct:\t$access\t$argList\t#$comment"
+    $myClass appendConstruct $construct $comment $access $argList
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### getDocCommentTag
+# Return the description tag for a particular construct
+#
+body ::tycho::ListDocSys::getDocCommentTag {construct tag} {
+    # FIXME: This is incredibly evil, we are doing something
+    # wrong with scoping here.  The problem is that the DocComment
+    # object is down in the ::tycho::DocClass scope, so we
+    # have to specify it
+    if {[lindex $construct 0] != "" } {
+	set val [string trim \
+		[::tycho::DocClass::[lindex $construct 0] cget $tag]]
+	# Reverse the backslashing we did in DocSys::readFile
+	# Note that after this, we cannot safely use regexp 
+	# on the value we return from here.
+	regsub -all {\\\"} $val {"} val1
+	regsub -all {\\\{} $val1 "\{" val2
+	regsub -all {\\\}} $val2 "\}" val3
+	regsub -all {\\\\} $val3 "\\" val4
+	return $val4
+    } else {
+	return ""
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### classClause
+# Append class data
+#
+body ::tycho::ListDocSys::classClause { comment access argList} {
+    set topClass $currentClass
+    appendConstruct class $comment {} $argList
+    appendConstruct srcFile {} {} $currentFile 
+
+    set inClass 1
+    # Parse the body of the class so that we get the constructs
+    $this parseFileAsList [lindex $argList 1]
+
+    # Save the comment
+    commentClause $comment {} {}
+
+    set inClass 0
+
+    # Create a newClass for any unknown constructs that follow
+    set currentClass [::tycho::DocClass  ::tycho::.ListClass#auto]
+    lappend classList  $currentClass
+}
+
+#######################################################################
+#### commentClause
+# Append comment data
+# If we are outside a class, then this comment data is file-wide
+# Note that we don't append desc and expl tag values, we just overwrite
+# any preexisting values.
+#
+body ::tycho::ListDocSys::commentClause { comment access argList } {
+    if {[string length $comment] > 0 } {
+	if !$inClass {
+	    if {$outsideClassComment == {} } {
+		set outsideClassComment \
+			[::tycho::DocComment ::tycho::.outsideComment#auto $comment]
+	    } else {
+		# This is fairly evil, but if we already have a description
+		# in the outside comment, We don't want to append more stuff
+		# to it.
+		set saveDesc [$outsideClassComment cget -desc]
+		$outsideClassComment parseComment $comment
+		if { $saveDesc != "" } {
+		    $outsideClassComment configure -desc $saveDesc
+		}
+	    }
+	} else {
+                    set myComment [::tycho::DocComment .docComment#auto $comment]
+                    # Save myComment  in the list of comments to be destructed
+                    lappend ldsDocCommentList $myComment
+	    appendConstruct comment $myComment  {} {}
+	}
+    }
+}
+
+########################################################################
+#### HTMLDocSys
+# @desc Generate HTML documentation for an itcl file
+# @expl This class generates HTML documentation for an HTML file.
+# 
+class ::tycho::HTMLDocSys {
+    inherit ::tycho::ListDocSys
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Generate HTML files for all the classes in the class list
+    public method generateClassHTML {}
+
+    # Generate HTML files for all the constructs that are outside of classes
+    public method generateOutsideClassHTML {}
+
+    # Generate an Index file for the classes we have generated
+    public method generateHTMLIndex { indexfd  }
+
+    # Check if the given file is newer than its related documentation.
+    method modCheck {filename}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Generate HTML for all the files named in filelist
+    public proc generateHTML {verbose debug generateIndex title filelist}
+
+    # Return a list of all the classes defined in the given source file.
+    public proc getClassesInSource {filename}
+
+    ###################################################################
+    ####                   public variables                        ####
+
+    # If verbose is 1, then document everything, otherwise avoid 
+    # producing html for constructors and destructors without comments,
+    # itk_option add, and private methods and variables
+    public variable verbose 0
+
+
+    ###################################################################
+    ####                       protected procs                     ####
+
+    # Capitalize the word that is passed in
+    protected proc capitalize {word} {
+	return "[string toupper [string range $word 0 0]][string range $word 1 end]" 
+    }
+
+    ###################################################################
+    ####                      protected methods                    ####
+
+    # Return a string appropriate for a H2 reference
+    protected method xrefH2String {className construct {access {}}} {}
+
+    # Return a string appropriate for a H2 reference
+    protected method xrefItk_OptionString {className constructList} {}
+
+    # Return 1 if we are supposed to print constructors and destructors
+    # that don't have comments
+    protected method printConstructorDestructor {construct constructList} {
+	return [expr { [ expr {$construct == "constructor" || \
+		$construct == "destructor"}]  && \
+		$verbose == 0 && \
+		[getDocCommentTag $constructList -desc] == {} && \
+		[getDocCommentTag $constructList -expl] == {} } ]
+    }
+
+    # Return 1 if we are supposed to print 'option add' lines
+    protected method printOptionAdd {construct constructList} {
+	return [expr { $verbose == 0 && \
+		$construct == "option" && \
+		[getName $constructList] == "add"} ]
+    }
+
+    # Return 1 if we need to output any outside constructs here.
+    # If verbose is not set, then don't print out any options
+    protected method needToOutputOutsideConstructs {class} {
+	return [expr {[$class cget -outsideProc] != "" || \
+		[$class cget -outsideEnsemble] != "" || \
+		[$class cget -outsideOption] != "" && $verbose == 1}]
+    }
+
+    ###################################################################
+    ####                         private procs                     ####
+
+    # Given a class name, return the html file name for that class
+    private proc getFileName {classname} {}
+
+    # Given a class name, generate the FileName that will contain
+    # documentation for that constructs related to that class.
+    private proc getOutsideFileName {classname} {
+	return "[namespaceTail $classname]_rel.html"
+    }
+
+    ###################################################################
+    ####                         private methods                   ####
+
+    # Generate HTML files for constructs that are not associated w/ a class
+    private method generateNonClassHTML {class}
+
+    # Generate a table of contents for this class
+    private method putsClassContents {fd class} {}
+
+    # Generate a comment
+    private method putsClassComment {fd construct} {}
+
+    # Generate a html definition 
+    private method putsDefinition {fd xref name argslist} {}
+
+    # Generate a html definition for a configuration option
+    private method putsOption {fd xref name argslist} {}
+
+    # If the value of the construct is not empty, print out the construct
+    # into the file named by the tcl filedescriptor fd.
+    private method putsConstructIfNotEmpty {fd docClass construct} {}
+
+    # Generate a table of contents for this class
+    private method putsClassConstructs {fd class} {}
+
+    ###################################################################
+    ####                         private variable                  ####
+
+    # List of files that don't have classes
+    private variable nonClassFileList {}
+    ###################################################################
+    ####                         private common                    ####
+
+    # Holds the contents of $TYCHO/lib/idx/codeDoc.idx
+    private common codeDocIdxContents {}
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### generateClassHTML
+# Generate one HTML file per class.  Each of the HTML files has a header
+# that includes a table of contents and a footer that includes information
+# like the author, the copyright and the version control information.
+#
+body ::tycho::HTMLDocSys::generateClassHTML {} {
+    foreach class [lrange $classList $currentClassIndex end] {
+	tydocUpdate $this
+	$class mergeAllConstructs
+
+	set className [$class getClassName]
+
+	if {$className == {}} {
+	    continue
+	}
+	#puts "generateClassHTML: $class, $className [$class configure]"
+
+        # Don't call getFilename here, or we might end up putting the
+        # output file in a location that we get from the codeDoc.idx file.
+	::tycho::tydocRmIfNotWritable [namespaceTail $className].html
+	set fd [open [namespaceTail $className].html "w"]
+
+	# Print the header
+	puts $fd "<!-- Automatically generated by the Tycho\
+		tydoc program -->\n<html>\n<head>\n<title>Class\
+		$className</title>\n</head>\n<body bgcolor=\"#faf0e6\">\n<h1>\
+		Class "
+	set classTail [namespaceTail $className]
+	set classQualifiers [namespaceQualifiers $className]
+#	puts $fd "<a name=\"$classTail class documentation ($classQualifiers\
+#		namespace)\">\n$className</a></h1>\n[$class cget -comment]"
+
+	puts $fd "<a name=\"$classTail class documentation ($classQualifiers\
+		namespace)\">\n$className</a></h1>"
+
+	putsClassContents $fd $class
+
+	putsClassConstructs $fd $class
+
+	# Print the footer
+	puts $fd "<p><p><A HREF=\"index.html\"> Index of classes</A>\n<HR>"
+
+        # puts "outsideClassComment: [$outsideClassComment configure]"
+	putsConstructIfNotEmpty $fd $outsideClassComment author
+	putsConstructIfNotEmpty $fd $outsideClassComment contributor
+	putsConstructIfNotEmpty $fd $outsideClassComment version
+	putsConstructIfNotEmpty $fd $outsideClassComment copyright
+	puts $fd "</body>\n</html>"
+	close $fd
+
+	# Here, we save the file wide comment for use in the index,
+	# provided that the class was the only one in the file. If there's
+	# more than one class in the file, then leave the file-wide
+	# description blank so the class description will be used
+	# instead.
+	if { $currentClassIndex == [expr [llength $classList] - 1] } {
+	    if {$outsideClassComment != ""} {
+		if {[ $class cget -fileWideDesc ] == ""} {
+		    $class configure -fileWideDesc \
+			    [$outsideClassComment cget -desc]
+		}
+	    }
+	}
+    }
+    return ""
+}
+
+#######################################################################
+#### generateOutsideClassHTML
+# Generate one HTML file per class that contains constructs that are not
+# part of a class.
+# Each of the HTML files has a header that includes a table of
+# contents and a footer that includes information like the author, the
+# copyright and the version control information.
+#
+body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
+    foreach class [lrange $classList $currentClassIndex end] {
+	tydocUpdate $this
+	if {[needToOutputOutsideConstructs $class]} {
+	    set className [$class getClassName]
+	    if {$className == {}} {
+		# If there is no classname, then this file does not
+		# define a class, so it consists only of procs.
+		generateNonClassHTML $class
+		return
+	    }
+
+	    ::tycho::tydocRmIfNotWritable [getOutsideFileName $className]
+	    set fd [open [getOutsideFileName $className] "w"]
+
+	    # Print the header
+	    puts $fd "<!-- Automatically generated by the Tycho\
+		    tydoc program -->\n<html>\n<head>\n<title>Constructs\
+		    related to $className</title>"
+	    puts $fd "</head>\n<body bgcolor=\"#faf0e6\">\n<H1>\
+		    Constructs related to\n\
+		    <A NAME=\"[namespaceTail $className] class\
+		    related documentation\
+ 		    ([namespaceQualifiers $className]\
+		    namespace)\">$className</A></H1>"
+#	    puts $fd "[$class cget -comment]\n<HR>\nRelated class:\
+#		    <A HREF=\"[getFileName \
+#		    $className]\"><CODE>$className</CODE></A>"
+	    
+	    puts $fd "<HR>\nRelated class:\
+		    <A HREF=\"[getFileName \
+		    $className]\"><CODE>$className</CODE></A>"
+
+	    # The list of outside constructs we are going to output
+	    if {$verbose} {
+		set allConstructs {outsideOption outsideProc outsideEnsemble}
+	    } else {
+		set allConstructs {outsideProc outsideEnsemble}
+	    }
+
+	    # Print out the table of contents
+	    puts $fd " Contents:" 
+	    set contentsCount 0
+	    foreach construct $allConstructs {
+		set constructListList [$class cget -$construct]
+		foreach constructList $constructListList {
+		    tydocUpdate $this
+		    set shortConstruct \
+			    [capitalize [string range $construct 7 end]]
+		    if {$contentsCount >= 1 } {
+			# Print a dash between each category
+			puts -nonewline $fd { - }
+		    }
+		    incr contentsCount
+		    if {[llength $constructListList] > 1} {
+			puts $fd "<A HREF=\"#${shortConstruct}s associated\
+				with $className\">${shortConstruct}s</A>"
+                    } else {
+			puts $fd "<A HREF=\"#${shortConstruct} associated\
+				with $className\">${shortConstruct}</A>"
+                   }
+		    break
+		}
+	    }
+	    
+	    # Print out the outside constructs
+	    # puts $fd "<HR>"
+	    foreach construct $allConstructs {
+		set printedConstructHeader 0
+		set constructListList [$class cget -$construct]
+		foreach constructList $constructListList {
+		    tydocUpdate $this
+		    set shortConstruct \
+			    [capitalize [string range $construct 7 end]]
+		    if !$printedConstructHeader {
+			puts $fd "<HR>\n"
+			if {[llength $constructListList] > 1} {
+			    puts $fd "<H2><A NAME=\"${shortConstruct}s\
+				    associated with\
+				    $className\">\n${shortConstruct}s</A></H2>"
+			} else {
+			    puts $fd "<H2><A NAME=\"${shortConstruct}\
+				    associated with\
+				    $className\">\n$shortConstruct</A></H2>"
+			}
+			puts $fd "<DL>"
+			set printedConstructHeader 1
+		    }
+		    # Hack to avoid printing out the entire body of the
+		    # ensemble
+		    if { $construct == "outsideEnsemble" } {
+			putsDefinition $fd \
+			    " <A NAME=\"[namespaceTail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $className class\">" \
+			    [getName $constructList] \
+			    ""
+		    } else {
+			putsDefinition $fd \
+			    " <A NAME=\"[namespaceTail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $className class\">" \
+			    [getName $constructList] \
+			    "\{[getArgs $constructList]\}"
+		    }
+		    putsClassComment $fd $constructList
+		}
+		if $printedConstructHeader {
+		    puts $fd "</DL>"
+		}
+	    }
+
+
+	    # Print the footer
+	    puts $fd "<p><p><A HREF=\"index.html\"> Index of classes</A>\n<HR>"
+
+	    #puts "outsideClassComment: [$outsideClassComment configure]"
+	    putsConstructIfNotEmpty $fd $outsideClassComment author
+	    putsConstructIfNotEmpty $fd $outsideClassComment contributor
+	    putsConstructIfNotEmpty $fd $outsideClassComment version
+	    putsConstructIfNotEmpty $fd $outsideClassComment copyright
+	    puts $fd "</body>\n</html>"
+	    close $fd
+	}
+
+    }
+}
+
+#######################################################################
+#### generateHTMLIndex
+# Traverse the classList and generate an index.html file that contains
+# links to each class in the classList
+#
+body ::tycho::HTMLDocSys::generateHTMLIndex { indexfd } {
+    # FIXME: The order that the files are listed is dependents on the order
+    # that the files were read into the system.  We should be sorting
+    # the files here by name, but we can't just lsort the list, since
+    # the classnames are down inside the list elements.
+    foreach class $classList {
+	tydocUpdate $this
+	set className [$class getClassName]
+	# FIXME: Since we create a dummy class to pick up objects outside
+	# of a class, there is the possibility that a class might not 
+	# have a name, which would mean that it is the dummy class
+	if {$className != "" } {
+	    puts $indexfd " <DT> <A HREF=\"[getFileName\
+		    $className]\"><CODE>$className</CODE></A> "
+	    #if {[needToOutputOutsideConstructs $class]} {
+	    #	puts $indexfd ": <A HREF=\"[getOutsideFileName\
+	    #		$className]\">Related constructs</A>"
+	    #}
+
+ 	    # By default, use the file-wide description. If there isn't
+ 	    # one, use the first paragraph of the class description, or,
+	    # if that is too long, then just use the first sentence. Make
+ 	    # sure to look for blank space -- counting the length of the
+ 	    # file description string isn't enough!
+ 	    set fileWideDesc [$class cget -fileWideDesc]
+ 	    if { [regexp "\[^ \t\n\]" $fileWideDesc] } {
+ 		puts $indexfd $fileWideDesc
+ 	    } else {
+ 		set classDesc [getDocCommentTag [lindex \
+ 			[$class cget -class] 0] -desc]
+
+		if { [regexp -indices "\n\[ \t\]*\n" $classDesc upto] } {
+		    set upto [lindex $upto 0]
+		    set classDesc [string range $classDesc 0 $upto]
+		}
+		if { [string length $classDesc] < 160 } {
+		    set upto "end"
+		} else {
+		    # To find the first sentence, look for a period
+		    # or exclamation followed by a space or newline. If
+		    # there isn't one, use the whole string.
+		    if { [regexp -indices "\[\\\.!\]\[ \n\]" $classDesc upto] } {
+			set upto [lindex $upto 1]
+		    } else {
+			set upto "end"
+		    }
+		}
+ 		puts $indexfd "     <DD>[string range $classDesc 0 $upto]"
+ 	    }
+ 	}
+    }
+    foreach nonClassFile $nonClassFileList {
+	puts $indexfd " <DT> Procs defined in\
+		<A HREF=\"[file rootname $nonClassFile].html\"><CODE>$nonClassFile</CODE></A>"
+    }
+}
+
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so.
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. Takes about 5% of 
+# the time to create the docs.
+#
+# A more ideal system would check which classes need to be redocumented.
+# However, there are few sources with more than one class so this is a
+# decent compromise.
+#
+# For non-itcl/itk/tcl/tk files, it silently returns 1 because it can't tell.
+#
+body ::tycho::HTMLDocSys::modCheck {filename} {
+    set sourceTime [file mtime $filename]
+    set extension [file extension $filename]
+
+    if {$extension == ".tcl" || $extension == ".tk" || $extension == ""} {
+        set docFile [file join doc codeDoc [file root $filename].html]
+        if ![file exists $docFile] {
+            # No tcl-only documentation
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer than the tcl-only docs
+            return 1
+        }
+        # It's okay
+        return 0
+    }
+    
+    if {$extension != ".itcl" && $extension != ".itk"} {
+        # Can't check other types of files
+        return 1
+    }
+
+    set classes [getClassesInSource $filename]
+    foreach class $classes {
+        if {$class == "related"} {
+            set relFile [file join doc codeDoc [file root $filename]_rel.html]
+            if ![file exists $relFile] {
+                # No class-related documentation
+                return 1
+            }
+            if {$sourceTime > [file mtime $relFile]} {
+                # The source is newer than the related docs
+                return 1
+            }
+            continue
+        }
+        set docFile [file join doc codeDoc [namespaceTail $class].html]
+        if ![file exists $docFile] {
+            # There is no documentation.
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer.
+            return 1
+        }
+    }
+    # not modified
+    return 0
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### generateHTML
+# Generate HTML for all the files named in filelist, placing the output in
+# the doc/codeDoc subdirectory
+#
+body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
+        title filelist} {
+    global gStop
+    if ![file isdirectory [file join doc codeDoc]] {
+	file mkdir [file join doc codeDoc]
+    }
+
+
+    if {$generateIndex == 1} {
+	::tycho::tydocRmIfNotWritable [file join doc codeDoc index.html]
+	set indexfd [open [file join doc codeDoc index.html] "w"]
+    	# Print the header
+	puts $indexfd "<!-- Automatically generated by the Tycho tydoc program\
+		-->\n<html>\n<head>\n<title>$title</title>\n\
+		</head>\n<body bgcolor=\"#faf0e6\">\n<h1>$title</h1>\n<DL>"
+    }
+    set retval ""
+    foreach filename $filelist {
+	if ![file readable $filename] {
+	    set retval "$retval\nWarning: generateHTML: $filename \
+		    is not readable"
+	} else {
+	    set HTMLDocSys [::tycho::HTMLDocSys \
+		    [::tycho::tydocAutoName .HTMLDocSys]]
+	    $HTMLDocSys configure -verbose $verbose
+
+	    # Ok to call Update, this is a proc, not a method
+	    update
+            if ![$HTMLDocSys modCheck $filename] {
+                # It doesn't need to be regenerated.
+                if !{$generateIndex} {
+                    continue
+                }
+                # But it will be if the index needs to be made.
+            }
+            if $debug {
+                # Put name only if it _is_ being regenerated.
+                puts "$filename"
+            }
+	    $HTMLDocSys readFile $filename
+
+	    # cd to the proper location so that getFileName works properly
+	    cd [file join doc codeDoc]
+	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
+                                if {[info exists ::gStop] && $gStop != 0} {
+                                    error "Stop button hit. $errMsg"
+                                }
+		set retval "$retval\nWarning: $errMsg"
+	    }
+	    if [catch {$HTMLDocSys generateOutsideClassHTML} errMsg] {
+                                if {[info exists ::gStop] && $gStop != 0} {
+                                    error "Stop button hit. $errMsg"
+                                }
+		set retval "$retval\nWarning: $errMsg"
+	    }
+	    if {$generateIndex == 1} {
+		if [catch {$HTMLDocSys generateHTMLIndex $indexfd} errMsg] {
+		    set retval "$retval\nTyDoc generateHTMLIndex: Warning: $errMsg"
+		}
+	    }
+	    cd [file join .. ..]
+#	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
+#                                if {[info exists ::gStop] && $gStop != 0} {
+#                                    error "Stop button hit. $errMsg"
+#                                }
+#		set retval "$retval\nWarning: $errMsg"
+#	    }
+	    delete object $HTMLDocSys
+
+	}
+    }
+    if {$generateIndex == 1} {
+	puts $indexfd "</DL>\n<HR>"
+	# Use %m/%d/%y here instead of %D because %D does not work under
+	# Tcl8.0.4 and Cygwin b20.1.
+	puts $indexfd "Last Updated: [clock format [clock seconds] -format %m/%d/%y]"
+	puts $indexfd "</body>\n</html>"
+	close $indexfd
+    }
+    return $retval
+}
+
+#####################################################################
+#### getClassesInSource
+# Quickly scan the source file for the classes which are defined within.
+# Requires around 5% of the time it takes to make the docs. Returns 
+# "related" if there are non-class structures (such as ensembles and 
+# procs) in the file. 
+#
+# This is approximate, they must be declared before the first class 
+# in a file or after a body within a file. Which is only decent coding
+# style.
+#
+body ::tycho::HTMLDocSys::getClassesInSource {filename} {
+    set inClass 0
+    set related 0
+    set retval {}
+    
+    set fd [open $filename]
+    while {![eof $fd]} {
+        gets $fd lineIn
+        if [regexp {^[	 ]*(class)[ 	]+([^ ]+)[ 	]+\{} \
+                $lineIn dummy dummy2 classname] {
+            lappend retval $classname
+            set inClass 1
+        }
+        if {$related} {
+            # don't bother checking
+            continue
+        }
+        # If no related information found yet, keep looking
+        if {$inClass} {
+            # if we see a body, we're out of the class declaration
+            if [regexp {^[	 ]*(body)[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set inClass 0
+            }
+        } else {
+            # check for outside procs or ensembles when not in the class
+            if [regexp {^[	 ]*((proc)|(ensemble))[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set retval [linsert $retval 0 "related"]
+                set related 1
+            }
+        }
+    }
+    close $fd
+    return $retval
+}
+ 
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#######################################################################
+#### xrefH2String
+# Return a string appropriate for a H2 reference
+#
+body ::tycho::HTMLDocSys::xrefH2String {className construct {access {}}} {
+    if {$access != {}} {
+	return \
+	"$access $construct of [namespaceTail $className] class"
+    } else {
+	return "$construct of [namespaceTail $className] class" 
+    }
+}
+
+#######################################################################
+#### xrefItk_OptionString
+# Return a string appropriate for a itk_option reference
+#
+body ::tycho::HTMLDocSys::xrefItk_OptionString {className constructList} {
+    return "[lindex [lindex $constructList 3] 2] itk_option of [namespaceTail $className] class"
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### generateNonClassHTML
+# Generate HTML files for constructs that are not associated w/ a class.
+# A file that does not define a class, but only defines a collection
+# of procs would be an example of a non-class file
+#
+body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
+
+    if {[needToOutputOutsideConstructs $class]} {
+	set className [$class getClassName]
+	if {$className != {}} {
+	    return
+	}
+
+	lappend nonClassFileList $currentFile
+	set baseName [file rootname [file tail $currentFile]]
+
+	::tycho::tydocRmIfNotWritable $baseName.html
+	set fd [open $baseName.html "w"]
+
+	# Print the header
+	puts $fd "<!-- Automatically generated by the Tycho\
+		tydoc program -->\n<html>\n<head>\n<title>Procedures\
+		from [file tail $currentFile]</title>"
+	puts $fd "</head>\n<body bgcolor=\"#faf0e6\">\n<H1>\
+		Procedures associated with\n\
+		<A NAME=\"$baseName procedures\">$baseName\(s\)</A></H1>"
+	# Create a link to the source file
+	# Here we assume that the source is ../.. from the docs
+
+
+	# Here, we assume that the source file is two levels up.
+	set srcFile [file join .. .. $currentFile]
+	puts $fd "<br> The procs below are not associated with\
+		a particular class.  These procs were defined in\
+		<A HREF=\"$srcFile\"><CODE>[file tail \
+		$currentFile]</CODE></A>, but no class\
+		was defined.\n<HR>"
+
+	# We don't print out a table of contents, since we only have procs
+	# Print out the outside constructs
+	# puts $fd "<HR>"
+	foreach construct {outsideProc outsideEnsemble} {
+	    set printedConstructHeader 0
+	    set constructListList [$class cget -$construct]
+	    foreach constructList $constructListList {
+		tydocUpdate $this
+		set shortConstruct \
+			[capitalize [string range $construct 7 end]]
+		if !$printedConstructHeader {
+			puts $fd "<DL>"
+			set printedConstructHeader 1
+		}
+		# Hack to avoid printing out the entire body of the
+		# ensemble
+		if { $construct == "outsideEnsemble" } {
+		    putsDefinition $fd \
+			    " <A NAME=\"[namespaceTail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $baseName\(s\)\">" \
+			    [getName $constructList] \
+			    ""
+		} else {
+		    putsDefinition $fd \
+			    " <A NAME=\"[namespaceTail\
+			    [getName $constructList]] $shortConstruct\
+			    associated with $baseName\(s\)\">" \
+			    [getName $constructList] \
+			    "\{[getArgs $constructList]\}"
+		}
+		putsClassComment $fd $constructList
+	    }
+	    if $printedConstructHeader {
+		puts $fd "</DL>"
+	    }
+	}
+
+	# Print the footer
+	puts $fd "<p><p><A HREF=\"index.html\"> Index of classes</A>\n<HR>"
+
+	#puts "outsideClassComment: [$outsideClassComment configure]"
+	putsConstructIfNotEmpty $fd $outsideClassComment author
+	putsConstructIfNotEmpty $fd $outsideClassComment contributor
+	putsConstructIfNotEmpty $fd $outsideClassComment version
+	putsConstructIfNotEmpty $fd $outsideClassComment copyright
+	puts $fd "</body>\n</html>"
+	close $fd
+    }
+}
+
+
+#######################################################################
+#### putsClassComment
+# Generate a comment
+# If the explanation is non-existant, but there is a description, 
+# print the description
+#
+body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
+    tydocUpdate $this
+
+    set descTag [getDocCommentTag $construct -desc]
+    set explTag [getDocCommentTag $construct -expl]
+
+    # Choose the string to print
+    set comment {}
+    if {[string length $explTag] == 0} {
+	if {[string length $descTag] != 0} {
+	    set comment $descTag
+	}
+    } else {
+	set comment $explTag
+    }
+
+    # Blank lines are a new paragraph, so insert <p> tags.
+    # However, we don't want to do this inside a <pre></pre>
+    # tag. First, escape newlines and ampersands inside <pre></pre>:
+    while { [regexp -nocase "<pre>.*\n.*</pre>" $comment pre] } {
+        regsub -all \n $pre {!n!} pre
+        regsub -all {\&} $pre {!a!} pre
+        regsub -nocase "<pre>.*\n.*</pre>" $comment $pre comment
+    }
+    # Add <p> to blank lines
+    regsub -all "\n\[ \t\]*\n" $comment "\n<p>" comment
+    # Restore text inside <pre></pre>
+    regsub -all {!n!} $comment "\n" comment
+    regsub -all {!a!} $comment {\&} comment
+
+    # Underscores delimit italicized text. Because of the way regsub
+    # works, we have to do it twice to catch eg "_x_ _y_." We also
+    # need to be careful to catch the start and end of the string.
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub {^_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {<i>\1</i>\2} comment
+    regsub {([^a-zA-Z0-9])_([^_]*)_$} $comment \
+	    {\1<i>\2</i>} comment
+
+    # Asterisks delimit _single_ program code words
+    regsub -all {([^a-zA-Z0-9])\*([^\* ]*)\*([^a-zA-Z0-9])} $comment \
+	    {\1<code>\2</code>\3} comment
+
+    # A single word followed by {} is a method or proc name
+    regsub -all {([a-zA-Z0-9_-]+)\{\}} $comment \
+           {<code>\1</code>} comment
+
+    # Catch comments that don't have a terminating period (or other
+    # suitable mark)
+    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
+
+    puts $fd $comment
+}
+
+#######################################################################
+#### putsDefinition
+# Generate a html definition 
+#
+body ::tycho::HTMLDocSys::putsDefinition {fd xref name arglist} {
+    tydocUpdate $this
+    if { "$arglist" != "" } {
+	puts $fd " <DT>$xref<CODE>\n $name</CODE></A><CODE> $arglist</CODE>"
+    } else {	
+	puts $fd " <DT>$xref<CODE>\n $name</CODE></A>"
+    }
+    puts -nonewline $fd " <DD>"
+}
+
+#######################################################################
+#### putsOption
+# Generate a html definition for a configuration option
+#
+body ::tycho::HTMLDocSys::putsOption {fd xref name arglist} {
+    tydocUpdate $this
+    puts $fd " <DT>$xref<CODE>\n$name</CODE></A>"
+    if { [llength $arglist] > 1 } {
+	puts $fd "<CODE>\{$arglist\}</CODE>"
+    } elseif { $arglist != "" } {
+	puts $fd "<CODE>$arglist</CODE>"
+    }
+    puts -nonewline $fd "<DD>"
+}
+
+#######################################################################
+#### putsConstructIfNotEmpty
+# If the value of the construct is not empty, print out the construct
+# into the file named by the tcl filedescriptor fd.
+#
+body ::tycho::HTMLDocSys::putsConstructIfNotEmpty {fd docClass construct} {
+    if {$docClass != ""} {
+	if { [string length [$docClass cget -$construct]] } {
+	    puts $fd "<BR>[capitalize $construct]:\
+		    [$docClass cget -$construct]"
+	}
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     private procs                         ####
+
+#######################################################################
+#### getFileName
+# Try to get the right link for the parent class.  There
+# are several different conditions:
+# <OL>
+# <LI> The parent class .html file already exists
+# This would happen if either tydoc had been run once already
+# or if the parent class was handled first by tydoc
+# In this case, we just print a link.
+#
+# <LI> The parent class is in a separate directory, and it
+# has already been processed with tydoc, and $TYCHO/lib/idx/codeDoc.idx
+# already exists.  In this case, we search the index
+# and use the link
+# 
+# <LI> The parent class is not part of Tycho, so there is no
+# .html file and there never will be.  We could generate
+# docs for the itk classes here.
+#
+# <LI> The parent class file cannot be found.  This could happen
+# if this is the first time we are running tydoc and the
+# codeDoc.idx file is not present.  In this case, we 
+# hope the user regenerates the docs again sometime.
+# </OL>
+#
+# This is all sort of complicated, but at least we will get
+# the links to parent classes in tycho subdirectories right.
+#
+body ::tycho::HTMLDocSys::getFileName {classname} { 
+    # puts "getFileName{$classname}"
+    global env
+    set docFile "[namespaceTail $classname].html"
+    if [file readable $docFile] {
+	# The file exists in the current directory, so return it
+	return $docFile
+    }
+
+    if [info exists env(TYCHO)] {
+	set codeDocIdx [file join $env(TYCHO) lib idx codeDoc.idx]
+	if [file readable $codeDocIdx] {
+	    # The codeDoc.idx file is present, check it to see if it
+	    # has a link to our file
+	    if { $codeDocIdxContents == {} } {
+		 # puts "getFileName: reading in $codeDocIdx"
+		# Read codeDoc.idx into a common variable
+		set fd [open $codeDocIdx r]
+		set tmpContents [read $fd]
+		close $fd
+		# Remove comments.
+		regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $tmpContents {} \
+			codeDocIdxContents
+	    }
+	    # puts "getFileName: done reading in"
+	    foreach item [lindex $codeDocIdxContents 1] {
+		set len [llength $item]
+		if {$len != 3 && $len != 2} {
+		    error "Syntax error in index item: $item \n\
+			    Should contain the form { id filename point } \
+			    or { id indexlist }"
+		}
+		if [regexp "$classname class$" [lindex $item 0]] {
+		    # puts "getFileName: found $item "
+		    set retfile [::tycho::tydocRelativePath  [pwd] [lindex $item 1]]
+		    # puts "getFileName: returning1 $retfile"
+		    if ![ file exists $retfile] {
+			puts stderr "tydoc: Warning: while looking for\
+				`$classname',\n\
+				`[lindex $item 1]' was found,\n which resolves\
+				to `$retfile`, which does not exist"
+		    }
+		    return $retfile
+		}
+	    }
+
+	    # Strip off the namespace qualifier and look for just the tail.
+	    # We need this to find ::tycho::Uninstantiable, which only
+	    # has a constructor and a destructor.
+	    set classNameTail [namespaceTail $classname]
+	    # puts "getFileName: classNameTail = $classNameTail" 
+	    foreach item [lindex $codeDocIdxContents 1] {
+		set len [llength $item]
+		if [regexp "$classNameTail class documentation" \
+			[lindex $item 0]] {
+		    # puts "getFileName: found $item "
+		    set retfile [::tycho::tydocRelativePath  [pwd] [lindex $item 1]]
+		    # puts "getFileName: returning2 $retfile"
+		    if ![ file exists $retfile] {
+			puts stderr "tydoc: Warning: while looking for\
+				`$classname',\n\
+				`[lindex $item 1]' was found,\n which resolves\
+				to `$retfile`, which does not exist"
+		    }
+		    return $retfile
+		}
+	    }
+	}
+    }
+
+    # We failed to find a pre-existing html file with the right name,
+    # so we just return the calculated name and hope that it gets
+    # created later
+    # puts "getFileName: returning at bottom: $docFile"
+    return $docFile
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     private methods                       ####
+
+#######################################################################
+#### putsClassContents
+# Generate a table of contents for this class
+#
+body ::tycho::HTMLDocSys::putsClassContents {fd class} {
+    tydocUpdate $this
+    set contentsCount 0
+    set className [$class getClassName]
+
+    puts $fd "<HR>"
+
+    # Deal with inheritance
+    set printedInheritsHeader 0
+    set hasParents 0
+    foreach parentClass [lindex [lindex [$class cget -inherit ] 0] 3] {
+	if !$printedInheritsHeader {
+	    puts $fd "Inherits:"
+	    set printedInheritsHeader 1 
+	} else {
+	    puts -nonewline $fd ", "
+	}
+
+	puts $fd "<A HREF=\"[getFileName\
+		$parentClass]\"><CODE>$parentClass</CODE></A> -"
+    }
+
+    if {[needToOutputOutsideConstructs $class]} {
+	puts $fd " <A HREF=\"[getOutsideFileName\
+		$className]\">Related constructs</A> -"
+    }
+
+
+    # Create a link to the source file
+    # Here we assume that the source is ../.. from the docs
+    set src [file join .. .. \
+	    [file tail [getName [lindex [$class cget -srcFile] 0 ]]]]
+
+    puts $fd " <A HREF=\"$src\">Source File</A> -"
+
+    puts $fd " Contents:" 
+
+    foreach construct { itk_option option constructor destructor} {
+	tydocUpdate $this
+	set constructListList [$class cget -$construct]
+	# We only are interested in finding if there are more than 0
+	# constructs of this type, so we don't need to parse the entire list
+	if {[llength $constructListList] > 0} {
+	    set constructList [lindex $constructListList 0]
+	    if { [printConstructorDestructor $construct $constructList ] || \
+		    [printOptionAdd $construct $constructList ] } {
+		# Don't print constructors and destructors that don't
+		# have comments.
+		# Don't print option add
+	    } else {
+		if {$contentsCount >= 1 } {
+		    # Print a dash between each category
+		    puts -nonewline $fd { - }
+		}
+		incr contentsCount
+		if { $construct == "itk_option"} {
+		    if {[llength $constructListList] > 1} {
+			puts $fd "<A HREF=\"#[xrefItk_OptionString $className\
+				$constructList]\">itk_options</A>"
+		    } else {
+			puts $fd "<A HREF=\"#[xrefItk_OptionString $className\
+				$constructList]\">itk_option</A>"
+		    }
+                } else {
+		    # If we have more than one, then make it plural
+		    if {[llength $constructListList] > 1} {
+			puts $fd "<A HREF=\"#[xrefH2String $className\
+				${construct}s]\">${construct}s</A>"
+		    } else {
+			puts $fd "<A HREF=\"#[xrefH2String $className\
+				$construct]\">${construct}</A>"
+		    }
+		}
+	    }
+	}
+    }
+
+    if {$verbose} {
+	set allAccesses { public protected private}
+    } else {	
+	set allAccesses { public protected }
+    }
+    foreach access $allAccesses {
+	foreach construct { method proc variable common } {
+	    tydocUpdate $this
+	    set constructListList [$class cget -$construct]
+	    # If we have a match incr the constructCount.
+	    # We use this later to figure out pluralization in headers.
+	    set constructCount 0
+	    foreach constructList $constructListList {
+		if {[lindex $constructList 1] == $access } {
+		    incr constructCount
+		}
+	    }
+	    # We only create table of contents entries for
+	    # construct/access pairs that exist in this class
+	    foreach constructList $constructListList {
+		if {[lindex $constructList 1] == $access } {
+		    if {$contentsCount >= 1 } {
+			# Print a dash between each category
+			puts -nonewline $fd { - }
+		    }
+		    incr contentsCount
+		    if {$constructCount > 1} {
+			puts $fd "<A HREF=\"#[xrefH2String $className\
+				${construct}s $access]\">\
+				$access ${construct}s</A>"
+		    } else {
+			puts $fd "<A HREF=\"#[xrefH2String $className\
+				$construct $access]\"> $access $construct</A>"
+		    }
+		    break
+		}
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### putsClassConstructs
+# Generate a construct documentation for this class
+#
+body ::tycho::HTMLDocSys::putsClassConstructs {fd class} {
+    tydocUpdate $this
+    set className [$class getClassName]
+
+    puts $fd "<HR>"
+
+    # Print out the class comment
+    putsClassComment $fd [lindex [$class cget -class] 0]
+
+    foreach construct { itk_option option constructor destructor} {
+        set printedConstructHeader 0
+	set constructListList [$class cget -$construct]
+	foreach constructList $constructListList {
+	    tydocUpdate $this
+	    if {[printConstructorDestructor $construct $constructList ] || \
+		    [printOptionAdd $construct $constructList ] } {
+		# Don't print option add
+		# We are not in verbose mode, so don't print constructors
+		# and destructors that do not have comments
+	    } else {
+		if !$printedConstructHeader {
+		    puts $fd "<HR>\n<H2>"
+		    if {[llength $constructListList] > 1} {
+			puts $fd "<A NAME=\"[xrefH2String $className\
+				${construct}s]\">[capitalize\
+				$construct]s</A></H2>\n<DL>"
+		    } else {
+			puts $fd "<A NAME=\"[xrefH2String $className\
+				$construct]\">[capitalize\
+				$construct]</A></H2>\n<DL>"
+		    }
+		    set printedConstructHeader 1
+		}
+		switch $construct {
+		    constructor {
+		    putsDefinition $fd \
+			    "<A NAME=\"constructor of $className class\">" \
+			    "$construct" \
+			    [getName $constructList]
+		    }
+		    destructor {
+			# Note that destructors take no arguments
+			putsDefinition $fd \
+			    "<A NAME=\"destructor of $className class\">" \
+			    "$construct" \
+			    {}
+		    }
+		    itk_option {
+			# Treat itk_option special
+			#puts "itk_option: $constructList"
+			set argList [lindex $constructList 3]
+			set argName [lindex $argList 1]
+			set argVal  [lindex $argList 4]
+			putsOption $fd \
+				"<A NAME=\"[xrefItk_OptionString $className\
+				$constructList]\">" \
+				$argName $argVal
+		    }
+		    default {
+			putsDefinition $fd \
+				"<A NAME=\"[getName $constructList]\
+				$construct of $className class\">" \
+				"$construct [getName $constructList]" \
+				[getArgs $constructList]
+		    }
+		}
+	    putsClassComment $fd $constructList
+	    }
+	}
+	if $printedConstructHeader {
+	    puts $fd "</DL>"
+	}
+    }
+
+    # Print out the methods, procs, variables and commons
+    if {$verbose} {
+	set allAccesses { public protected private}
+    } else {	
+	set allAccesses { public protected}
+    }
+    foreach access $allAccesses {
+	set printedConstructHeader 0
+	foreach construct { method proc variable common } {
+	    set constructListList [$class cget -$construct]
+	    tydocUpdate $this
+	    # If we have a match incr the constructCount.
+	    # We use this later to figure out pluralization in headers.
+	    set constructCount 0
+	    foreach constructList $constructListList {
+		if {[lindex $constructList 1] == $access } {
+		    incr constructCount
+		}
+	    }
+	    # We only create table of contents entries for
+	    # construct/access pairs that exist in this class
+	    set printedAccessHeader 0
+	    foreach constructList $constructListList {
+		tydocUpdate $this
+		if {[lindex $constructList 1] == $access } {
+		    if !$printedConstructHeader {
+			puts $fd "<HR>\n\n<H2>[capitalize $access]\
+				constructs</H2>"
+			set printedConstructHeader 1
+		    }
+		    if !$printedAccessHeader {
+			if {$constructCount > 1} {
+			    puts $fd "\n<H3><A NAME=\"[xrefH2String\
+				    $className ${construct}s\
+				    $access]\">[capitalize $access]\
+				    [capitalize $construct]s</A></H3>"
+			} else {
+			    puts $fd \
+				    "\n<H3><A NAME=\"[xrefH2String \
+				    $className $construct \
+				    $access]\">[capitalize $access]\
+				    [capitalize $construct]</A></H3>"
+			}
+			puts $fd "<DL>"
+			set printedAccessHeader 1
+		    }
+		    # Fiddle about to get the "-" in public variable names
+		    set itemName [getName $constructList]
+		    if { $access == "public" && $construct == "variable" } {
+			set itemName -$itemName
+			putsOption $fd \
+				" <A NAME=\"[getName $constructList]\
+				$construct of $className class\">" \
+				$itemName \
+				"[getArgs $constructList]"
+		    } else {
+			putsDefinition $fd \
+				" <A NAME=\"[getName $constructList]\
+				$construct of $className class\">" \
+				$itemName \
+				"[getArgs $constructList]"
+		    }
+		    putsClassComment $fd $constructList
+		}
+	    }
+	    if $printedAccessHeader {
+		puts $fd "</DL>"
+	    }
+	}
+    }
+}
+
+# The procs below were copied so we could ship tydoc standalone.
+
+# tycho::tydocAutoName is copied from tycho/kernel/basic/Path.tcl
+
+##########################################################################
+#### tydocAutoName 
+# Return a name constructed by augmenting the provided
+# stem with a number to guarantee that the name is unique. A global
+# (within the tycho namespace) array autoNames is used to keep track of
+# the numbers used for each stem. This procedure should be used for
+# window classes instead of the #auto facility in itcl to assign to the
+# class valid names for windows. Window names must begin with a period.
+# By convention, for a class named "Class", we would use the stem
+# ".class". Thus, the single argument should be ".class".
+# Note that if you invoke this outside the namespace "tycho", you
+# must call it "::tycho::tydocAutoName".
+#
+proc ::tycho::tydocAutoName {stem} {
+    global ::autoNames
+    if {[info exists autoNames] && [info exists autoNames($stem)]} {
+        incr autoNames($stem)
+    } else {
+        set autoNames($stem) 0
+    }
+    return "$stem$autoNames($stem)"
+}
+
+# tycho::tydocExpandPath is copied from tycho/kernel/basic/Path.tcl
+
+########################################################################
+#### tydocExpandPath
+# Expand a filename, returning an absolute filename with the complete path.
+# The argument might begin with an environment variable, a
+# global Tcl variable, or a reference to a user's home directory. If
+# the argument begins with a dollar sign ($), then everything up to
+# the first slash is taken to be a variable name.  If an environment
+# variable exists with that name, then the dollar sign and the variable
+# name are replaced with the value of the environment variable. For
+# example, if the value of of the environment variable TYCHO is
+# /usr/tools/tycho, then
+# <pre>
+#     ::tycho::tydocExpandPath \$TYCHO/tmp
+# </pre>
+# returns /usr/tools/tycho/tmp. If there is no such environment
+# variable, but a global Tcl variable with the given name exists, then
+# the value of that variable is substituted. If no such variable is
+# defined as well, then an error is reported. Similarly, "~user/foo"
+# will be expanded (on Unix systems) to "/users/user/foo", assuming
+# that "user" has his or her home directory at "/users/user". If there
+# is no user named "user", or we are not on a Unix system, then an
+# error is reported. In all cases, any extra spaces at the beginning or
+# the end of the given path are removed. Moreover, filenames are
+# normalized before being returned. Symbolic links are followed, as are
+# fields in the path like "/../". Thus, any two references to the same
+# path should return the same string. If _path_ is a null string,
+# return a null string.
+#
+# Formerly, this procedure was in File.itcl, but it was moved so that it
+# could be used in scripts that use itclsh, which does not have windows.#
+#
+proc ::tycho::tydocExpandPath { path } {
+    global tcl_platform
+    set path [string trim $path]
+    if { $path == "" } {
+        return ""
+    }
+    
+    switch $tcl_platform(platform) {
+	macintosh {
+	    # On the mac, 'file join {$tycho:foo}' results in :$tycho:foo
+	    # So we may need to pull the leading : off.
+	    if [string match {:$*} $path] {
+		set path [string rang $path 1 end]
+	    }
+	    set directorySeparator ":"
+	}
+	default {
+	    set directorySeparator "/"
+	}
+    }
+    if {[string first \$ $path] == 0} {
+        global ::env
+
+
+	set slash [string first $directorySeparator  $path]
+	if {$slash > 0} {
+	    set envvar [string range $path 1 [expr {$slash-1}]]
+	} {
+	    set envvar [string range $path 1 end]
+	}		
+
+	set envvar [string range [lindex [file split $path] 0] 1 end]
+
+	if {$tcl_platform(platform) == "macintosh" } {
+	    set envvar [string trimright $envvar :] 
+	}
+
+        if [info exists env($envvar)] {
+            set envval $env($envvar)
+        } elseif {"$envvar" != "" && [uplevel #0 info exists $envvar]} {
+            global $envvar
+            set envval [set $envvar]
+        } else {
+            # No such variable.
+            error "No such variable: `$envvar' in the path `$path'."
+        }
+
+
+        if {$slash > 0} {
+            set path [format "%s%s" $envval [string range $path $slash end]]
+        } {
+            set path $envval
+        }
+    } elseif {[string first ~ $path] == 0} {
+        set splat [file split $path]
+        # Test for non-existent user
+        set user [lindex $splat 0]
+        set relpath [lrange $splat 1 end]
+	set path [eval file join [concat [file split [glob $user]] $relpath]]
+    }
+    # Get a consistent filename using "cd".  Note that this may not work
+    # on non-Unix machines.  The catch is in case the directory does not
+    # exist.
+    catch {
+        set savedir [pwd]
+        # If the filename itself is a directory, normalize it
+        if [file isdirectory $path] {
+            cd $path
+            set path [pwd]
+        } {
+            cd [file dirname $path]
+	    set path [file join [pwd] [file tail $path]]
+        }
+        cd $savedir
+    }
+    return $path
+}
+
+# tycho::tydocRelativePath is copied from tycho/kernel/basic/Path.tcl
+
+##############################################################################
+#### tydocRelativePath 
+# Given two pathnames srcFile and dstFile, return a relative pathname
+# that goes from the srcFile to the dstFile.  This is useful for
+# creating HTML links that are relative, thus avoiding the non-portable 
+# use of $TYCHO.
+#
+proc ::tycho::tydocRelativePath {srcFile dstFile} {
+    #puts "$srcFile $dstFile"
+    if { [string index $dstFile 0] != "$" && \
+	    [file pathtype $dstFile] != "absolute" && \
+        [file pathtype $dstFile] != "volumerelative" } {
+	return $dstFile
+    }
+    set srcList [file split [::tycho::tydocExpandPath $srcFile]]
+    set dstList [file split [::tycho::tydocExpandPath $dstFile]]
+
+    set equalCount 0
+    foreach srcElement $srcList dstElement $dstList {
+	if {$srcElement != $dstElement} {
+	    break
+	}
+	incr equalCount
+    }
+
+    set results {}
+
+    if {$equalCount < [llength $srcList]} {
+	set srcLength [llength $srcList]
+	set dstLength [llength $dstList]
+
+	set upDirs [expr {[llength $srcList] - $equalCount}]
+	#puts "$srcList $dstList $equalCount $srcLength $dstLength $upDirs"
+
+	for {set i 0} {$i < $upDirs} {incr i} {
+	    lappend results ..
+	}
+    }
+    set results [concat $results [lrange $dstList $equalCount end]]
+    if {"$results" == {}} {
+	return [file tail $dstFile]
+    }
+    return [eval file join $results]
+}
+
+# tycho::tydocRmIfNotWritable is copied from tycho/kernel/basic/Path.tcl
+
+##############################################################################
+#### tydocRmIfNotWritable
+# Remove a file if we can't open it for writing.
+# Lots of times a user will have symbolic links to a master tree
+# that they don't have write permission to.  If one of these links is
+# a derived file, such as a documentation file, then the user will
+# not be able to update the documentation file if it is not writable
+# by the user.  The solution is to break the link.
+#
+proc ::tycho::tydocRmIfNotWritable { file } {
+    # If a file is a link to a nonexistant file, then the link will
+    # exist, but not be readable.
+    if {[file exists $file] && \
+	    ![file writable $file] || ![file readable $file]} {
+	file delete -force $file
+    }
+}
+

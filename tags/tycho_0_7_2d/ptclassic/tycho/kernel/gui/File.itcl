@@ -1,0 +1,1573 @@
+# Definition of a basic viewer widget with an interface to the file system.
+#
+# @Author: Edward A. Lee
+# @Contributors: Joel King, Farhana Sheikh, Christopher Hylands
+#
+# @Version: @(#)File.itcl	1.222   01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#####################################################################
+#### openContext
+# Open a file based on its extension, name, or header.
+# If an editor has been registered for the file or directory, use it to
+# open the file or directory. Otherwise, if it is a file, open a plain
+# text editor and return the name of the editor object. If a window
+# already exists editing this file, simply raise it instead. New
+# windows are always opened at the global scope. File names are
+# expanded using <code>::tycho::expandPath</code>, making them absolute
+# and unique.
+#
+# The _mode_ argument, if supplied, overrides the default mode
+# and the mode determined from
+# the file. If the file is already open in this mode, raise the
+# viewer window. If not, then open it. Note: It is the callers'
+# responsibility to ensure that multiple open windows on the same
+# file behave correctly.
+#
+proc ::tycho::openContext {filename {mode {}}} {
+    set filename [::tycho::expandPath $filename]
+
+    if { $mode == "" } {
+	# We only want one window to be open on this file
+	if [::tycho::registry isopen $filename] {
+	    set win [lindex [::tycho::registry windows $filename] 0]
+	    if [catch {$win raiseWindow} msg] {
+		# windowMenuRemoveAll $filename
+		global ::errorInfo
+		set saveInfo $errorInfo
+		error "Registered command failed on $filename:\n$msg" $saveInfo
+	    }
+	    return $win
+	}
+    } else {
+	# We allow one window in each mode
+	foreach win [::tycho::registry windows $filename] {
+	    if { [::tycho::registry windowcget $filename $win -mode] \
+		    == $mode } {
+		if [catch {$win raiseWindow} msg] {
+		    windowMenuRemoveAll $filename
+		    global ::errorInfo
+		    set saveInfo $errorInfo
+		    error "Registered command failed on \
+			    $filename:\n$msg" $saveInfo
+		}
+		return $win
+	    }
+	}
+    }
+    # If we got to here, we can open the file in the appropriate mode
+    # Check for existing autosave files
+    set filename [::tycho::File::checkForAutoSaveFiles $filename]
+
+    # If a mode is not supplied, get the default mode and
+    # override with the mode from the file header
+    if { $mode == "" } {
+        # Read the header if the file exists and is not a directory
+        if { [::tycho::resource exists $filename] && \
+                ![::tycho::resource isdirectory $filename] } {
+            ::tycho::readFileHeader $filename hdr
+
+            # If a mode was read from the header and we understand
+            # it, remember it
+	    if { [::info exists hdr(mode)] \
+		    && [::tycho::registry modeexists $hdr(mode)] } {
+                set mode $hdr(mode)
+            }
+        }
+        # If there was no header, get the default mode
+        if { $mode == "" } {
+            set mode [::tycho::registry filemode $filename]
+        }
+        # If there's still no mode, assume "text"
+        if { $mode == "" } {
+            set mode "text"
+        }
+    }
+    # Check that the mode exists
+    if ![::tycho::registry modeexists $mode] {
+	set mode "text"
+    }
+    # Get the command for this mode and execute it
+    set command [::tycho::registry modecget $mode -command]
+    if [catch {
+	set command [format $command $filename]
+	set result [uplevel #0 $command]
+    } msg] {
+	global ::errorInfo
+	set saveInfo $errorInfo
+	error "Registered command failed on $filename:\n$msg" $saveInfo
+    }
+    return $result
+}
+
+#######################################################################
+#### File
+# This is a base class for widgets that have persistent data in files.
+# It handles auto-saving, crash recovery saving, version control,
+# saving before exiting, and other interfaces to the file system. A
+# copy of the file is made automatically periodically with an interval
+# given by the -autosaveinterval option. If the compiled version of
+# Tycho is used (for example, running it with Ptolemy), then crash
+# recovery files are also automatically created if the program crashes.
+# Unfortunately, there appears to be no way to accomplish this when using
+# a standard itkwish.
+# <p>
+# If the File is "attached" to a Displayer object, then the File
+# object initializes its menu bar with three menus. The "File" menu
+# contains commands to open a file, insert a file, save data to a file,
+# save as some other file name, print, evaluate the data, reload the
+# last saved version, toggle read-only, version control, close the
+# window, and exit the application. The "Window" menu contains commands
+# to open new (blank) top-level windows of all types that have been
+# registered with the <code>File</code> class using one of the
+# <code>register...</code> procedures. It also contains commands to
+# bring to the foreground any currently open editor that has a file
+# name associated with it. Note that editors with the default name
+# "NoName" do not appear on this list. Finally, a "Help" menu contains
+# pointers to key Tycho documentation.
+# <p>
+# Here is an example:
+# <tcl><pre>
+# ::tycho::view File
+# </pre></tcl>
+# <p>
+# Derived classes should normally redefine the methods
+# <ul>
+# <li> <code>clear</code>,
+# <li> <code>help</code>,
+# <li> <code>insertData</code>,
+# <li> <code>print</code>, and
+# <li> <code>saveText</code>.
+# </ul>
+# In order to support hypertext jumps into particular points in the
+# display, the derived class may also redefine <code>seeFragment</code>,
+# and <code>currentPoint</code>. These two should always be redefined
+# as a pair, since <code>currentPoint</code> is assumed to return a
+# syntax understood by <code>seeFragment</code>. Derived classes may wish
+# to redefine <code>indicateReadOnly</code>, for example to disable menu
+# entries. Finally, most derived classes will want to redefine
+# <code>focusin</code> to give the focus to a key widget.
+#
+# The <code>-file</code> options specifies the file to be opened.
+# If this option is given when the widget is constructed, the
+# insertData{} method will be called when the most specific constructor
+# calls itk_initialize{} -- because of this, constructors of derived
+# classes must ensure that insertData{} will function properly
+# by the time that itk_initialize{} is called.
+# 
+class ::tycho::File {
+    inherit ::tycho::View
+
+    # Specify the interval (in minutes) between auto-save operations.
+    itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
+
+    # NOTE: The following should really be a public variable, not an
+    # Itk option. But the Itk implementation does not recognize public
+    # variables as options. When this is fixed, change this to a public
+    # variable and remove the protected variable "file".
+
+    # Specify the name of the file associated with the data being edited.
+    itk_option define -file file File "NoName"
+
+    # If zero, do not query for saving on exit.
+    itk_option define -save save Save 1
+
+    # NOTE: This should really be a public variable, not an Itk option.
+    # But the Itk implementation does not recognize public variables as
+    # options.  When this is fixed, change this to a public variable.
+
+    # Specify whether this is a temporary file
+    itk_option define -tmpfile tmpfile Tmpfile 0
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Query the user for another file to edit in the same window.
+    method altFile {}
+
+    # Save a backup file and arrange to be called again later.
+    method autoSave {}
+
+    # In derived classes, clear the data being displayed or edited.
+    method clear {}
+
+    method compareTo {}
+
+    # Query the user for a filename, then evaluate its contents as Tcl commands.
+    method evaluate {}
+
+    # Return the name of the file associated with the object.
+    method filename {} {return $completeFilePath}
+
+    # Open a help window.  Redefine in derived classes.
+    method help {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {filename {point {}}}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
+    # Insert the specified data.  Redefine in derived classes.
+    method insertData {data}
+
+    # Insert the contents of a file specified via a file browser.
+    method insertFile {}
+
+    # Return 1 if the text has been modified since the last save, 0 otherwise.
+    method isModified {}
+
+    # If possible, indicate that data has been modified.
+    method markModified {}
+
+    # If possible, mark the window as containing unmodified data.
+    method markUnmodified {}
+
+    # Open up the Itcl HTML documentation
+    method openItclHTMLPage {} {}
+
+    # Open a file browser, and then open an editor for the file.
+    method openWinMethod {} {}
+
+    # Open a file from a "minibuffer."
+    method openWinMinibuffer {} {}
+
+    # Print the contents of the file. The default behavior is an error.
+    method print {}
+
+    # Reload from the last saved version of the file.
+    method reload {}
+
+    # Create a revision control object for the current file.  
+    method revisionControl {}
+
+    # Save to the current file.
+    method save {}
+
+    # Open the file browser to save to some other file name.
+    method saveAs {args}
+
+    # Change the associated file to the specified file name and then save.
+    method saveAsFile {filename}
+
+    # Save data to a crash recovery file.
+    method saveCrash {}
+
+    # If the file is modified, then ask the user if they want to save it
+    method saveQuery {{useSaveAs 0}}
+
+    # Toggle the read-only status of a file (maybe invoking revision control).
+    method toggleReadOnly {}
+
+    # Add me to the window menus of all menu bars
+    method windowMenuAddAll {label}
+
+    # Remove a label from the window menus of all menu bars
+    method windowMenuRemoveAll {label}
+
+    ##########################################################################
+    ####                         public procedures                        ####
+
+    # If the argument is a File object, call its autoSave method.
+    proc callAutoSave {obj}
+
+    # Check for auto-save or crash-recovery files, and return the file to open.
+    proc checkForAutoSaveFiles {filename} {}
+
+   # Call the saveCrash method for all File objects.
+    proc emergencySave {}
+
+    # Edit a file based on its extension, mode, etc
+    proc openContext {filename {mode {}}}
+
+    # Open a file browser, and then open an editor for the file.
+    proc openWin {{megawidget {}}}
+
+    # Get the window name by the rootname of a file.
+    proc winGetByRootName {rootname}
+	
+    ##########################################################################
+    ####                  protected methods                               ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Write the data to the given file
+    protected method saveFile {filename}
+
+    # Return the data to be saved. Redefine in derived classes.
+    protected method saveText {}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # Indicate whether or not the file has been modified since it was
+    # last saved.
+    protected variable modified 0    
+
+    # Recall the previous filename associated with
+    # the window in case the name is changed.
+    protected variable previousfile {}
+
+    # The most recently used print command (or the default if none).
+    # FIXME: default print command should be a preference.
+    protected common printCmd {lpr}
+
+    ##########################################################################
+    ####                  private methods                                 ####
+
+    # Initialize the menubar.
+    private method _initializeMenubar {menubar}
+
+    # Initialize the menubar.
+    private method _configureFile {menubar}
+
+    # Remove the backup file that gets automatically created periodically.
+    private method removeBackupFiles {}
+
+    ##########################################################################
+    ####                  private procedures                              ####
+
+    ##########################################################################
+    ####                         private variables                        ####
+
+    # The expanded path to the current file.
+    private variable completeFilePath "NoName"
+
+    # This array stores the names of all currently active objects
+    # of type File.  This is used to create crash recovery files.
+    private common fileObjects
+
+    # Keep track of the compare widget
+    private variable diffWidget {}
+}
+
+#########################################################################
+#########################################################################
+####                          option configure                       ####
+
+#########################################################################
+#### -file configuration
+# Set or change the name of the file being edited.
+# Set the window title and icon name to match, and set the protected
+# "completeFilePath" variable equal to file name.  The filename
+# is expanded into an absolute filename, resolving any references
+# environment variables, user home directories, etc.  See
+# <code>::tycho::expandPath</code> for details about how this is done.
+# Note that the file is not actually loaded.  Call <code>reload</code>
+# after configuring this option to accomplish that (the constructor does
+# this automatically).
+#
+configbody ::tycho::File::file {
+    set completeFilePath $itk_option(-file)
+    if { $completeFilePath == "" } {
+	error "File name cannot be null"
+    }
+    if {$completeFilePath != $previousfile} {
+        if {$itk_option(-file) != {NoName}} {
+            set completeFilePath [::tycho::expandPath $completeFilePath]
+        }
+	if { $completeFilePath != "NoName" \
+		&& [::tycho::registry isopen $completeFilePath] } {
+	    foreach win [::tycho::registry windows $completeFilePath] {
+		if { ![$win getReadOnly] && ![getReadOnly]} {
+		    $win raiseWindow
+		    if {![safeEval ::tycho::askuser \
+			    "File $completeFilePath is already open for \
+			    writing. Proceed anyway?"]} {
+			# Exit by triggering an error.
+			::tycho::silentError
+		    }
+		    break
+		}
+	    }
+	}
+        # Following used to be conditional using:
+        # if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" }
+        displayer configure -title "$itk_option(-file)"
+
+        # Keep track of which files are open by name.
+        # This is used to avoid opening the same file twice.
+        # It is also used to maintain the Window menu entries.
+        if {$previousfile != {}} {
+	    ::tycho::deregister window $previousfile $this
+            # unmap the revcontrol window.
+            set topwin $itk_component(hull)
+            if {[winfo exists $topwin.revcontrol]} {
+                wm withdraw $topwin.revcontrol
+            }
+            # unmap the search window.
+            if {[winfo exists $topwin.search]} {
+                wm withdraw $topwin.search
+            }
+            # unmap the spell check window.
+            if {[winfo exists $topwin.spell]} {
+                wm withdraw $topwin.spell
+            }
+        }
+        if {$completeFilePath != "NoName"} {
+            set previousfile $completeFilePath
+        }
+	# Add the current object to the menu entries in all open editors.
+	windowMenuAddAll $completeFilePath
+    }
+    # Hocus pocus
+    focusin
+}
+
+#########################################################################
+#### -tmpfile configuration
+# Specifies initial tmpfile to display.
+#
+configbody ::tycho::File::tmpfile {
+}
+
+#########################################################################
+#########################################################################
+####                      constructor & destructor                   ####
+
+###################################################################
+#
+body ::tycho::File::constructor {args} {
+    global tcl_platform
+
+    # Bindings.
+    bind [winfo toplevel $prefix] <<Open>> {}
+    bind $prefix <<Open>> "$this openWinMinibuffer; break"
+    bind $prefix <<Save>> "$this save; break"
+    bind $prefix <<AltFile>> "$this altFile; break"
+    bind $prefix <<SaveAs>> "$this saveAs; break"
+    bind $prefix <<InsertFile>> "$this insertFile; break"
+    bind $prefix <<Print>> "$this print; break"
+    bind $prefix <<Evaluate>> "$this evaluate; break"
+    bind $prefix <<ToggleReadOnly>> "$this toggleReadOnly; break"
+    bind $prefix <<RevisionControl>> "$this revisionControl; break"
+ 
+    # The following initialize options and then invoke any
+    # configuration options, assuming there are options specified.
+    eval itk_initialize $args
+
+    # Subscribe to the style sheets
+    stylesheet subscribe \
+	    -autosaveinterval system autoSaveInterval
+
+    # Identify the object for crash recovery
+    set fileObjects($this) $this
+
+    # reload runs after constructors are done
+    whenConstructed "$this reload"
+
+    # Initiate the auto-save loop
+    autoSave
+}
+
+#####################################################################
+#### destructor
+# If the modified flag is set, query the user to see whether the
+# file should be saved.  If the user cancels the close, trigger an
+# error.  This has the effect of undoing the destruction.
+#
+body ::tycho::File::destructor {} {
+    if {[info exists modified]} {
+	if {$itk_option(-tmpfile)} { 
+	    # This is a temporary file, if it is modified, as the user
+	    # if they want to save it.  If they do, call saveAs
+	    set useSaveAs 1
+            set copyFilename $completeFilePath
+	    saveQuery $useSaveAs
+            file delete $copyFilename
+	} else {
+	    saveQuery
+	}
+    }
+    # Deregister this menubar
+    if { [menubar] != "" } {
+	::tycho::deregister menubar [menubar]
+    }
+    # Remove this file from all menubars
+    windowMenuRemoveAll $completeFilePath
+
+    # If an error occurred in construction, this may not exist.
+    if [::info exists fileObjects($this)] {
+	unset fileObjects($this)
+    }
+    # Do not get rid of the backup files.  This should be done
+    # only on a successful save.
+    # removeBackupFiles
+}
+
+#########################################################################
+#########################################################################
+####                          public methods                         ####
+
+#####################################################################
+#### altFile
+# Query the user for a filename, and edit its contents
+# using the current editor.
+#
+body ::tycho::File::altFile {} {
+    saveQuery
+
+    set prevfile $itk_option(-file)
+
+    set filename [safeEval ::tycho::queryfilename {Alternate file to load:}]
+
+    if {$filename != {}} {
+	configure -file $filename
+	windowMenuRemoveAll $prevfile
+
+        # Reset the insertion cursor to the origin, or else we will
+        # try to preserve the point in the file.
+	# NOTE: This is completely bogus -- a File widget
+	# might not have a text component!!!! I removed it and
+	# the method still seems to work fine... -- hjr 5/30/97
+        # $itk_component(text) mark set insert 1.0
+
+        markUnmodified
+        reload
+    }
+    after 1 [code evalIfExists $this focusin]
+}
+
+#####################################################################
+#### autoSave
+# If the data has been modified, save the data to a file with the name
+# given in the -file option, but with the prefix "#auto#". Then arrange
+# to be called later again, with the time interval given by the option
+# -autosaveinterval.  A value of zero for this option disables auto-saving.
+# An auto-save file is not generated if this file is itself an auto-save
+# file.
+#
+body ::tycho::File::autoSave {} {
+    if !$itk_option(-save) {return}
+    # Auto-save only if the file is modified, has a file name,
+    # is a local file, and is not itself an auto-save file.
+    if { $modified \
+            && $completeFilePath != "NoName" \
+            && ![::tycho::resource isremote $completeFilePath] \
+            && ![regexp {^#auto#} [::tycho::url tail $completeFilePath]] } {
+        set filename [::tycho::url tail $completeFilePath]
+        set filename "#auto#$filename"
+        set filename [::tycho::url join \
+                [::tycho::url dirname $completeFilePath] $filename]
+        if {[catch "saveFile $filename" message] != 0} {
+            putStatus "Auto-save failed: $message"
+            # This is what we used to do:
+            # safeEval ::tycho::warn "Auto-save failed: $message"
+        }
+    }
+    set interval [expr int(60000*$itk_option(-autosaveinterval))]
+    if {$interval < 0 || $interval > 7200000} {
+	error "Auto-save interval is out of range (object $this)"
+    }
+    if {$interval != 0} {
+	after $interval "::tycho::File::callAutoSave $this"
+    }
+}
+
+#####################################################################
+#### clear
+# Reset internal data. 
+# In this base class, trigger an error. Subclasses should
+# override.
+#
+body ::tycho::File::clear {} {
+    error "Sorry, clear not implemented yet."
+}
+
+#####################################################################
+#### compareTo
+# Compare the current file with another one, using EditDiff
+#
+body ::tycho::File::compareTo {} {
+    
+    if {![winfo exists $diffWidget]} {
+        set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
+    }
+    $diffWidget configure -filename1 $completeFilePath
+    
+    set file2 [safeEval ::tycho::queryfilename {File to compare with:}]
+    if { $file2 != "" } {
+        $diffWidget configure -filename2 $file2
+        $diffWidget compareFile
+    }
+}
+
+#####################################################################
+#### evaluate
+# Query the user for a filename, then evaluate its contents as Tcl commands.
+#
+body ::tycho::File::evaluate {} {
+    set filename [safeEval ::tycho::queryfilename {Tcl file to evaluate:}]
+
+    if {$filename != {}} {
+	::tycho::resource source $filename
+    }
+}
+
+#########################################################################
+#### help
+# Open a window with help on the current widget.
+# This should be redefined in derived classes.
+#
+body ::tycho::File::help {} {
+    global ::TYCHO
+    ::tycho::openContext \
+	    [file join $TYCHO kernel gui doc usersGuides FileHelp.html] html
+}
+
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is the empty string, just call <code>seeFragment</code>,
+# passing it the second argument. If the filename is relative (does not
+# begin with "/", "~", or "$"), then prepend the directory of the file
+# currently being edited or viewed. Then, expand the filename using
+# <code>::tycho::expandPath</code> and open the resulting file with
+# <code>::tycho::openContext</code>, which will choose an editor
+# based on the filename extension. Finally, invoke
+# <code>seeFragment</code> to view the specified point within the file.
+# The format for the <i>point</i> argument depends on the type of file
+# being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+#
+body ::tycho::File::hyperJump {filename {point {}}} {
+    if {$filename != {}} {
+	if { [::tycho::url pathtype $filename] == "relative" } {
+            set filename [::tycho::url join \
+                    [::tycho::url dirname $completeFilePath] $filename]
+        }
+    }
+    chain $filename $point
+}
+
+#####################################################################
+#### insertData
+# Insert the specified data.
+# In this base class, trigger an error. Subclases should
+# override to insert data and call markModified{}.
+#
+body ::tycho::File::insertData {data} {
+    error "Sorry, insert data not implemented yet."
+}
+
+#####################################################################
+#### insertFile
+# Insert the contents of a file.
+# Open a file browser to query the user for a filename, and then
+# insert the contents of that file via the method <code>insertData</code>.
+#
+body ::tycho::File::insertFile {} {
+    set filename [safeEval ::tycho::queryfilename {File to insert:}]
+
+    if {$filename != "NoName"} {
+	if {[::tycho::resource exists $filename]} {
+	    if {[::tycho::resource readable $filename]} {
+		insertData [::tycho::resource read $filename]
+                markModified
+	    } {
+		safeEval ::tycho::warn "File is not readable: $filename"
+	    }
+	} {
+	    safeEval ::tycho::warn "File does not exist: $filename"
+	}
+    }
+}
+
+###################################################################
+#### isModified
+#
+body ::tycho::File::isModified {} {
+    return $modified
+}
+
+#####################################################################
+#### markModified
+# If this view is with a Displayer object, show that the data has been
+# modified by putting an icon in the lower left corner.
+#
+body ::tycho::File::markModified {} {
+    if !$modified {
+ 	statusbar configure -filestatus "modified"	
+        set modified 1
+    }
+}
+
+#####################################################################
+#### markUnmodified
+# If this view is with a Displayer object, show that the data is
+# unmodified by clearing the icon in the lower left corner.
+#
+body ::tycho::File::markUnmodified {} {
+    if $modified {
+	if [getReadOnly] {
+ 	    statusbar configure -filestatus "readonly"	    
+	} {
+	    statusbar configure -filestatus "readwrite"
+	}
+        set modified 0
+    }
+}
+
+#####################################################################
+#### openItclHTMLPage
+# Open up the Itcl HTML documentation.  The Itcl2.2 sources
+# contain the Itcl HTML documentation at itcl2.2/html/TclTkMainList.html
+# Tycho does not understand frames, so Tycho can't read the index.html
+# file in that directory
+# In Tycho, the itclHTMLPage preference controls what file is opened.
+#
+body ::tycho::File::openItclHTMLPage {} {
+    set itclhtmlpage [::tycho::stylesheet get system itclHTMLPage]
+    if { $itclhtmlpage != "" } {
+	set itclhtmlpage [::tycho::expandPath $itclhtmlpage]
+    }
+    
+    if [::tycho::resource exists $itclhtmlpage] {
+        ::tycho::openContext "$itclhtmlpage"
+    } else {
+	error "Sorry, $itclhtmlpage does not exist. You can\nuse\
+	the itclHTMLPage Miscellaneous preference to set the\npath\
+	of the file that is opened by this page.\nThe Itcl2.2 sources\
+	come with html man pages located at\nitcl2.2/html/TclTkMainList.html"
+    }
+}
+
+#####################################################################
+#### openWinMethod
+# Open a file browser, and then open an editor for the file.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
+# ordinary text editor.
+#
+body ::tycho::File::openWinMethod {} {
+    ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+	    -command "::tycho::openContext " \
+	    -text "Open File:" \
+            -initial $completeFilePath
+}
+
+#####################################################################
+#### openWinMinibuffer
+# Place an entry widget in the status bar, if there is one, and
+# set it up so that Return opens the file in it. If there is
+# no statusbar, call openWinMethod{}.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
+# ordinary text editor.
+#
+body ::tycho::File::openWinMinibuffer {} {
+    if { [statusbar] == "" } {
+        openWinMethod
+    } else {
+        if { $completeFilePath == "NoName" } {
+            set default [pwd]
+        } else {
+            set default [::tycho::url dirname $completeFilePath]
+        }
+	append default [::tycho::directorySeparator]
+
+        set caseSensitive \
+                [stylesheet get interaction caseSensitiveCompletion]
+	
+        # Call the statusbar to create the minibuffer
+        statusbar fileentry "Open File:       " \
+                -default $default \
+                -casesensitive $caseSensitive
+    }
+}
+
+#####################################################################
+#### print
+# Print the contents of the file. The default behavior is an error.
+#
+body ::tycho::File::print {} {
+    error "Sorry, print not implemented yet."
+}
+
+#####################################################################
+#### reload
+# Reload from the last saved version of the current file. This method
+# first disables read-only status (if it is set), then replaces the
+# current data with data from the current file, and then sets read-only
+# status based on the permissions of the file. The data is marked
+# unmodified after loading the file, and the clipboard is restored to
+# its form prior to the reload. If the file does not exist, then
+# the current data is cleared, leaving a blank slate. If the current
+# file exists but is not readable, an error occurs. The actual
+# replacement of the data occurs via the method
+# <code>insertData</code>. Note that if the data is modified, then
+# changes will be lost -- if this is a possibility then callers
+# must be sure to call the saveQuery{} method before calling
+# reload{}.
+#
+body ::tycho::File::reload {} {
+    if {$completeFilePath == "NoName"} {
+	return 
+    }
+    # This call to saveQuery has been commented out because it
+    # was causing erroneous save queries after checking
+    # in a modified file and not saving changes. Hopefully
+    # it won't break anything else. See the method comment.
+    # saveQuery
+    set saveclipboard [getClipboard]
+    if [::tycho::resource exists $completeFilePath] {
+        if [::tycho::resource readable $completeFilePath] {
+	    configure -readonly 0
+            set point [currentPoint]
+            clear
+            insertData [::tycho::resource read $completeFilePath]
+            seeFragment $point
+            if {[::tycho::resource writable $completeFilePath]} {
+		configure -readonly 0
+            } else {
+		configure -readonly 1
+            }
+        } {
+            error "File $completeFilePath exists but is not readable"
+        }
+    } {
+        # File does not exist.  Simply clear current data.
+	configure -readonly 0
+        clear
+    }
+    setClipboard $saveclipboard
+    # In case the reloading marks the buffer modified as a side effect.
+    markUnmodified
+}
+
+###################################################################
+#### revisionControl
+# Invoke revision control.  If the file is under the control of a
+# recognized revision control system (such as SCCS and RCS), then use
+# that system.  Otherwise, query the user about putting the file under
+# revision control.  A control panel is opened that permits the user
+# to check in or check out the file, examine its revision history, etc.
+#
+body ::tycho::File::revisionControl {} {
+    ::tycho::RevControl::setup $itk_component(hull) $this
+}
+
+#####################################################################
+#### save
+# Save the widget contents to its current file. If the current filename
+# is null or "NoName," 
+# then invoke saveAs{} so the user can specify the name to save
+# the file as. If it begins with "#auto#" or "#crash#", invoke
+# saveAs{} with arguments to open the file browser in the correct
+# directory and a suitable default file name. Otherwise just
+# save the file, remove backup files, and mark it unmodified.
+# Return 1 if it successfully saves, and 0 (or an error) otherwise.
+#
+body ::tycho::File::save {} {
+    set filename $completeFilePath
+    set ft [::tycho::url tail $filename]
+    if {([string match {#auto#*} $ft] || [string match {#crash#*} $ft])} {
+        # The file was automatically created.  Invoke saveAs in the
+        # proper directory with the proper default.
+        regsub {(#auto#)|(#crash#)} $ft {} prefname
+        if { $prefname == "NoName" } {
+            if { ! [saveAs -initial $filename] } {
+                return 0
+            }
+        } else {
+            if { ! [saveAs -initial $filename -filename $prefname] } {
+                return 0
+            }
+        }
+    } elseif {$filename != {} && $filename != "NoName"} {
+	# Only save if it's been modified. NOTE: this used to
+	# always save -- was there a reason for it or was that
+	# an artifact of the earlier implementation of this method?
+	if [isModified] {
+	    saveFile $filename
+	    removeBackupFiles
+	    markUnmodified
+	    putStatus "Saved $filename"
+	} else {
+	    putStatus "No changes to save"
+	}
+    } else {
+	# The file has not been specified.  Invoke saveAs
+	if { ! [saveAs] } {
+            return 0
+        }
+    }
+    return 1
+}
+
+#####################################################################
+#### saveAs
+# Invoke the file browser to prompt the user for a file name,
+# and then, if the file is writable or creatable, save the contents
+# of the editor to that file.  The user will be queried
+# if the name inserted by the user already exists.
+# Note that in the base class, this will eventually fail
+# because the saveText{} method is not implemented.
+# Optional arguments can be given to this method: the
+# *-initial* option will be passed to the file browser and
+# will cause the file browser to open in that directory
+# if the user has the fileBrowserUseLastDirectory option turned
+# off. If not given, the browser will be opened in the same
+# directory as this widget's file. The *-filename* option will 
+# place a string into the file browser's entry box and force the
+# file browser to change to the directory given by *-initial*
+# (unless it is null). Return 0 or cause a silent error if
+# not successfully saved, otherwise return 1.
+#
+body ::tycho::File::saveAs {args} {
+    array set opt [concat [list \
+            -initial $completeFilePath -filename {}] $args]
+
+    set filename [safeEval ::tycho::queryfilename \
+	    {Save As File:} \
+	    $opt(-initial) \
+	    $opt(-filename)]
+
+    # Prevent saving files as "NoName"
+    if { [::tycho::url tail $filename] == {NoName}} {
+	::tycho::warn "Cannot use name \"NoName\""
+	return 0
+    }
+    # Ignore if the user canceled
+    if {$filename == {}} {
+	return 0
+    }
+    # Check if file already exists
+    if {[::tycho::resource exists $filename]} {
+	if { ! [safeEval ::tycho::askuser \
+                "File \"$filename\" exists.  Overwrite?"] } {
+	    # File exists and user cancelled, so exit
+            focusin
+            ::tycho::silentError
+	}
+    }
+    # Everything's OK, so save it
+    saveAsFile $filename
+    return 1
+}
+
+#####################################################################
+#### saveAsFile
+# Change the associated file to the specified file name and then save,
+# remove backup files, and change the title of the window.
+# Return 1 if the save is successful.  Return 0 or trigger an error
+# if the save is not successful. Subclasses can override this method
+# to modify the save-as policy (for example, not changing the
+# name of the window title, as in the TclShell class).
+#
+body ::tycho::File::saveAsFile {filename} {
+    saveFile $filename
+    markUnmodified
+    configure -file $filename
+    focusin
+    putStatus "Saved $filename"
+    removeBackupFiles
+    return 1
+}
+
+#####################################################################
+#### saveCrash
+# Save data to a crash recovery file.
+# The crash recovery filename is constructed from the true file name
+# by prepending the prefix "#crash#".
+#
+body ::tycho::File::saveCrash {} {
+    if {$modified && $completeFilePath != "NoName"} {
+	if ![::tycho::resource isremote $completeFilePath] {
+	    set filename [::tycho::url tail $completeFilePath]
+	    set filename "#crash#$filename"
+	    set filename [::tycho::url join \
+		    [::tycho::url dirname $completeFilePath] $filename]
+	    saveFile $filename
+	}
+    }    
+}
+
+#####################################################################
+#### saveQuery
+# If the file is marked as modified, then ask the user whether to save it.
+# This method should be called before invoking any operation on the disk
+# image of the file, such as checking it in, running a program on it, etc.
+# If the optional argument is given and has a non-zero value,
+# then <code>saveAs</code> is used instead of <code>save</code>,
+# so that the user is prompted for a file name.
+# <p> 
+# If the file is not modified, or if the -save option was given with
+# value 0, return 2 and do nothing.
+# If the file is modified and is saved, return 1.
+# If the file is modified but not saved, return 0.
+# If the user hits cancel or Escape, trigger a silentError, which unravels
+# the calling stack all the way to the top-level.  This has the effect
+# of cancelling the entire operation.
+#
+body ::tycho::File::saveQuery {{useSaveAs 0}} {
+    if {$modified == 1 && $itk_option(-save)} {
+	set title [::tycho::url tail $completeFilePath]
+        set nm [::tycho::autoName .filedestr]
+        uplevel #0 [list ::tycho::YesNoCancel $nm \
+		-text "Save changes to $title?"]
+	set response [safeEval ::tycho::Dialog::wait $nm]
+	# If the user hits the cancel button, or dismisses the dialog
+        # with Escape, trigger a silent error.
+	if {$response == -1 || $response == {}} {
+ 	    ::tycho::silentError
+	}
+	if {$response == 1} {
+	    if {$useSaveAs} {
+		saveAs
+	    } else {
+		save
+	    }
+	}
+	return $response
+    }
+    return 2
+}
+
+#####################################################################
+#### toggleReadOnly
+# Toggle the read-only status of the file.  If the file is under
+# revision control (e.g. SCCS or RCS), then check in or check out
+# the file.
+#
+body ::tycho::File::toggleReadOnly {} {
+    global tcl_platform
+    # If we are under Unix, continue, if we are under Windows, look for
+    # chmod, if we are on the Mac, return.
+    switch $tcl_platform(platform)  {
+        unix {}
+        windows {
+            # See if there is a chmod command installed.  If there is
+	    # no chmod command, return
+            if { [::tycho::pathEnvSearch chmod.exe] == {}} {
+                return
+            }    
+        }
+        macintosh {
+            return
+        }
+    }
+
+    set revclass [::tycho::RevControl::whichRevClass $this]
+    if {$revclass != {}} {
+        if {![::tycho::resource writable [filename]]} {
+            ${revclass}::checkOut $this
+        } {
+            ${revclass}::checkIn $this
+        }
+    } {
+        # NOTE: Unix-only implementation here.
+        if ![::tycho::resource exists [filename]] {
+            saveQuery
+        }
+        if [::tycho::resource exists [filename]] {
+            if ![::tycho::resource writable [filename]] {
+		catch {::tycho::resource chmod [filename] "+w"}
+                configure -readonly 0
+            } {
+                if {$modified} {
+                    if [safeEval ::tycho::askuser \
+                            "Save modifications before making \
+                            file read-only?"] {
+                        # update changes since last save
+                        save
+                    }
+                }
+                catch {::tycho::resource chmod [filename] "-w"}
+                configure -readonly 1
+            }
+        } {
+            bell
+        }
+    }
+    focusin
+}
+
+#####################################################################
+#### windowMenuAddAll
+# Add me to all "Window" menus of all current file objects.
+# The argument, normally a file name, gives the menu label.
+# Do nothing if this View is not inside a Displayer.
+#
+body ::tycho::File::windowMenuAddAll {label} {
+    # puts "windowMenuAddAll $label ([info class])"
+    if { [displayer] == {} } {
+	return
+    }
+    set mode [::tycho::registry viewmode [info class]]
+    if { $label != "NoName" } {
+	::tycho::register window $label $this \
+		-label $label \
+		-mode $mode
+    } elseif { $mode != "" } {
+	set label [::tycho::registry modecget $mode -label]
+	if { $label != "" } {
+	    ::tycho::register window $label $this \
+		    -label "Untitled $label" \
+		    -mode $mode
+	}
+    }
+}
+
+#####################################################################
+#### windowMenuRemoveAll
+# Remove the specified label from the Window menu of all
+# menu bars.  The specified label must match
+# exactly the label given in the call to <code>windowMenuAddAll</code>
+# that created the entry in the first place. Do nothing if this View
+# is not inside a Displayer.
+#
+body ::tycho::File::windowMenuRemoveAll {label} {
+    if { [displayer] == {} } {
+	return
+    }
+    # puts "windowMenuRemoveAll $label $this"
+    ::tycho::deregister window $label $this
+}
+
+#########################################################################
+#########################################################################
+####                          public procedures                      ####
+
+#####################################################################
+#### callAutoSave
+# Check to see whether the object whose name is passed as an argument
+# exists and is a File object, and if so, call its autoSave method.
+#
+body ::tycho::File::callAutoSave {obj} {
+    if {[infoObjects $obj] != "" && [$obj isa ::tycho::File]} {
+	$obj autoSave
+    }
+}
+
+#####################################################################
+#### checkForAutoSaveFiles
+# Check to see whether there is an auto-save or crash recovery file for
+# the supplied filename that is newer than the file corresponding to
+# the supplied filename. If so, query the user to see whether first the
+# crash recovery file, then the autosave file should be opened. Return
+# the name of the file that should be opened.
+#
+body ::tycho::File::checkForAutoSaveFiles {filename} {
+
+    # If a remote file, there are no backups
+    if [::tycho::resource isremote $filename] {
+	return $filename
+    }
+
+    # Get the names of the backup and crash recovery files.
+    set filetail [::tycho::url tail $filename]
+    set dirname [::tycho::url dirname $filename]
+    set emerfile [::tycho::url join $dirname "#crash#$filetail"]
+    set backfile [::tycho::url join $dirname "#auto#$filetail"]
+
+    # See whether a backup or crash recovery files exists and is
+    # newer than the file being opened.
+    if [::tycho::resource exists $emerfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $emerfile] > \
+		    [::tycho::resource mtime $filename]} {
+		if [::tycho::askuser "A crash recovery file exists for\
+			$filename. \
+			\nDo you wish to open it instead?"] {
+		    return $emerfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "A crash recovery file exists, but\
+		    $filename does not.\
+		    \nDo you wish to open the crash recovery file instead?"] {
+		return $emerfile
+	    }
+	}
+    }
+    if [::tycho::resource exists $backfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $backfile] > \
+		    [::tycho::resource mtime $filename]} {
+		if [::tycho::askuser "A newer auto-save file exists\
+			for $filename. \
+			\nDo you wish to open it instead?"] {
+		    return $backfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "An auto-save file exists, but \
+		    $filename does not.\
+		    \nDo you wish to open the auto-save file instead?"] {
+		return $backfile
+	    }
+	}
+    }   
+
+    # The original file is the file to open.
+    return $filename
+}
+
+#####################################################################
+#### emergencySave
+# Call the saveCrash method for all existing objects that are of
+# class File, or are derived from class File.
+#
+body ::tycho::File::emergencySave {} {
+    foreach obj [array names fileObjects] {
+	$obj saveCrash
+    }
+}
+
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar and in the menus
+# whether modifications are allowed on the buffer.
+#
+body ::tycho::File::indicateReadOnly {bool} {
+
+    ::tycho::View::indicateReadOnly $bool
+    
+    if {$bool} {
+        menubar disable insert
+        menubar disable save
+    } {
+        menubar enable insert
+        menubar enable save
+    }
+}
+
+#####################################################################
+#### openContext
+# Open a file with the correct kind of widget. <b>Deprecated</b>
+# (use <a href="File_rel.html"><code>::tycho::openContext</code></a>
+# instead).
+#
+body ::tycho::File::openContext {filename {mode {}}} {
+     eval [list ::tycho::openContext $filename] $mode
+}
+
+#####################################################################
+#### openWin
+# Open a file browser, and then open an editor for the file.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
+# ordinary text editor.
+#
+# The optional argument is the name of the widget that this proc
+# is being invoked from.  Usually, openWin is called from a
+# keystroke binding, and the megawidget argument is %W.  See
+# TopLevel for an example. (Note: do not use %Q as the argument:
+# Itk puts in a "???" if the binding is matched by a
+# megawidget hull instead of one of its components.)
+#
+body ::tycho::File::openWin {{megawidget {}}} {
+    # Get the megawidget corresponding to the widget
+    if { $megawidget != {} } {
+        set mw [winfoMegawidget $megawidget]
+        if { $mw != "" } {
+            set megawidget $mw
+        }
+        set megawidget [winfoCommand $megawidget]
+    }
+    if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
+        ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+                -command "::tycho::openContext " \
+                -text "Open File:"
+    } else {
+        ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+                -command "::tycho::openContext " \
+                -text "Open File:" \
+                -initial [$megawidget filename]
+    }
+}
+
+#####################################################################
+#### winGetByRootName
+# Check if there is a file with the same root name (without directory path)
+# as "rootname". If YES, then return the window name,
+# otherwise, return an empty string.
+#
+body ::tycho::File::winGetByRootName {rootname} {
+    set filenames [::tycho::registry files]
+    foreach filename $filenames {
+        set name [::tycho::url rootname [::tycho::url tail $filename]]
+        if {$name == $rootname} {
+            return [::tycho::registry windows $filename]
+        }
+    }
+    return ""
+}
+
+
+#########################################################################
+#########################################################################
+####                          protected methods                      ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::File::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+    
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposedly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::File::_initializeMenubar $menubar
+    }
+    displayer configure -title $itk_option(-file)
+
+    #if {$completeFilePath != "NoName"} {
+	# We have to call this again here, because the
+	# first time it is called (in the -file configbody), the displayer
+	# doesn't exist, and the window will therefore not be
+	# registered...
+        windowMenuAddAll $completeFilePath
+    #}
+}
+
+#####################################################################
+#### saveFile
+# Save this widget's data to the given file. In this class, the
+# data is returned by the saveText{} method; subclasses can
+# override this method if the saved data is different.
+#
+body ::tycho::File::saveFile {filename} {
+    set txt [saveText]
+    ::tycho::resource write $filename $txt
+}
+
+#####################################################################
+#### saveText
+# Return the text to save.  In this base class, trigger an error,
+# since we don't know how to save.  This should be redefined in derived
+# classes.
+#
+body ::tycho::File::saveText {} {
+    error "Tried to save to file: $completeFilePath.\nSave not implemented yet."
+}
+
+#########################################################################
+#########################################################################
+####                          private methods                        ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::File::_initializeMenubar {menubar} {
+    global tcl_platform
+
+    # Construct the menus
+    $menubar addMenu file   -label File -underline 0
+    $menubar addMenu window -label Window -underline 0
+    $menubar addMenu help   -label Help -side right -underline 0
+
+    # File menu contents
+    $menubar command open file \
+	    -label "Open..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Open] \
+            -command "$this openWinMethod"
+    
+    $menubar command switchfile file \
+	    -label "Switch File..." \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel AltFile] \
+            -command "$this altFile"
+    
+    $menubar command insert file \
+	    -label "Insert..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel InsertFile] \
+            -command "$this insertFile"
+    
+    $menubar command reload file \
+	    -label "Reload" \
+            -underline 0 \
+	    -command "$this reload"
+    
+    $menubar separator filesep1 file
+    
+    $menubar command save file \
+	    -label "Save" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Save] \
+            -command "$this save"
+    
+    $menubar command saveas file \
+	    -label "SaveAs..." \
+            -underline 4 \
+	    -accelerator [::tycho::Shortcuts::getLabel SaveAs] \
+            -command "$this saveAs"
+    
+    $menubar command print file \
+	    -label "Print..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Print] \
+            -command "$this print"
+    
+    $menubar separator filesep2 file
+    
+    $menubar command evaluate file \
+	    -label "Evaluate" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Evaluate] \
+            -command "$this evaluate"
+    
+    $menubar command compareto file \
+	    -label "Compare To..." \
+            -underline 2 \
+            -command "$this compareTo "
+
+    $menubar command revisioncontrol file \
+	    -label "Revision Control..." \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel RevisionControl] \
+            -command "$this revisionControl"
+
+    $menubar command togglereadonly file \
+	    -label "Toggle Read-Only" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel ToggleReadOnly] \
+            -command "$this toggleReadOnly"
+
+    # Windows might have a chmod and RCS.
+    if {$tcl_platform(platform) == "macintosh"} {
+	$menubar disable togglereadonly
+	$menubar disable revisioncontrol
+    }
+
+    $menubar separator filesepbot file
+    
+    $menubar command close file \
+	    -label "Close" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Close] \
+	    -command "[displayer] prevWindow 1; delete object [displayer]"
+
+    if {[::tycho::TopLevel::normalExit] == 1} {
+	$menubar command quit file \
+		-label "Exit" \
+                -underline 1 \
+                -accelerator [::tycho::Shortcuts::getLabel Exit] \
+		-command "::tycho::TopLevel::exitProgram"
+    }
+    
+    # Register the menubar so its Window and Help menus get set up
+    ::tycho::register menubar $menubar $this
+
+    # Add the window operations to the menu. It's not clear
+    # whether these should be in Registry or not...
+    $menubar separator windowsep2 window
+
+    $menubar command nextwindow window \
+	    -label "Next Window" \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel NextWindow] \
+            -command "$this displayer nextWindow 1"
+
+    $menubar command prevwindow window \
+	    -label "Prev Window" \
+            -underline 6 \
+	    -accelerator [::tycho::Shortcuts::getLabel PrevWindow] \
+            -command "$this displayer prevWindow 1"
+
+    $menubar command nextpane window \
+	    -label "Next Pane" \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel NextPane] \
+            -command "$this displayer nextPane"
+
+    $menubar command iconify window \
+	    -label "Minimize" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Iconify] \
+            -command "$this displayer prevWindow 1; \
+            wm iconify \[winfo toplevel $itk_component(hull)\]"
+
+    $menubar command maximize window \
+	    -label "Maximize" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Maximize] \
+            -command "$this displayer fullScreen"
+
+    $menubar command minimize window \
+	    -label "Restore" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Restore] \
+            -command "$this displayer originalSize"
+
+    $menubar command halfheight window \
+	    -label "Half Height" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel HalfHeight] \
+            -command "$this displayer halfHeight"
+}
+
+#####################################################################
+#### removeBackupFiles
+# Remove the backup file that gets automatically created periodically,
+# if it exists.  Also remove the crash-recovery file, if it exists.
+#
+body ::tycho::File::removeBackupFiles {} {
+    # If remote, there are no backup files
+    if [::tycho::resource isremote $completeFilePath] {
+	return
+    }
+    set filetail [::tycho::url tail $completeFilePath]
+    set dirname [::tycho::url dirname $completeFilePath]
+
+    set savefile [::tycho::url join $dirname "#auto#$filetail"]
+    # FIXME -- add -force option to ::tycho::resource delete
+    # ::tycho::resource delete -force $savefile
+    if [::tycho::resource exists $savefile] {
+	::tycho::resource delete $savefile
+    }
+    set savefile [::tycho::url join $dirname "#crash#$filetail"]
+    # FIXME -- add -force option to ::tycho::resource delete
+    # ::tycho::resource delete -force $savefile
+    if [::tycho::resource exists $savefile] {
+	::tycho::resource delete $savefile
+    }
+}
+
+
+#########################################################################
+#########################################################################
+####                          private procedures                     ####
+

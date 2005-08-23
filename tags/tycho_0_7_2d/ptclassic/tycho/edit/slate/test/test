@@ -1,0 +1,92 @@
+#!/bin/sh
+# Script for running single tests \
+    exec wish80 "$0" "$@"
+
+# @(#)test	1.2 07/29/98
+# Author: John Reekie
+
+# Try SLATE_LIBRARY
+if [info exists env(SLATE_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(SLATE_LIBRARY)] }  {
+	lappend auto_path $env(SLATE_LIBRARY)
+    }
+}
+
+# Try TCL_PACKAGES
+if [info exists env(TCL_PACKAGES)] {
+    if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	lappend auto_path $env(TCL_PACKAGES)
+    }
+}
+
+# Try TYCHO, or PTOLEMY if there is not TYCHO
+if ![info exists env(TYCHO)] {
+    if [info exists env(PTOLEMY)] {
+	# TYCHO is not set, but PTOLEMY is.
+	if [file exists [file join $env(PTOLEMY) tycho]] {
+	    set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	}
+    } 
+}
+if [info exists env(TYCHO)] {
+    if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	lappend auto_path $env(TYCHO)
+    }
+}
+
+# Try loading the package. If it doesn't work, print a helpful
+# error message and exit
+if [catch {package require slate} err ] {
+    puts "Cannot load \"slate\"\
+	    Error was:\n--start--\n$errorInfo\n--end--\n\
+	    The auto_path variable lists the directories that were searched.\n\
+	    auto_path = $auto_path\n\
+	    You can:\n\
+	    1. Install slate in a subdirectory of your \
+	    Tcl library\n\
+	    2. Install slate in the directory given by the \
+	    TCL_PACKAGES variable\n\
+	    3. Set the SLATE_LIBRARY variable to point to the \
+	    slate directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n\
+	    5. Set the PTOLEMY variable to point to your \
+	    Ptolemy installation\n"
+    exit
+}
+
+# Load the test package
+package require slate.test
+
+# Print startup sig
+puts "Testing slate, version 3.0, ($env(SLATE_LIBRARY))"
+
+# If there are no arguments, run all tests
+if { $argv == "" } {
+    set cwd [pwd]
+    cd [file join $env(SLATE_LIBRARY) test]
+    set argv [glob test*.itcl]
+    cd $cwd
+} 
+
+# Source each named file
+foreach f $argv {
+    if [file exists [file join $env(SLATE_LIBRARY) test $f]] {
+	puts $f
+	source [file join $env(SLATE_LIBRARY) test $f]
+    } elseif [file exists [file join $env(SLATE_LIBRARY) test $f].itcl ] {
+	puts $f.itcl
+	source [file join $env(SLATE_LIBRARY) test $f].itcl
+    } elseif [file exists [file join $env(SLATE_LIBRARY) test test$f].itcl ] {
+	puts test$f.itcl
+	source [file join $env(SLATE_LIBRARY) test test$f].itcl
+    } else {
+	puts "Unknown file: $f"
+    }
+}
+
+doneTests
+
+if { [file tail [lindex $argv 0]] == "test" } {
+    exit
+}

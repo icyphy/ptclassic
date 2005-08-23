@@ -1,0 +1,401 @@
+# Definition of the class which handles revision control using SCCS.
+#
+# @Authors: Joel King and Edward A. Lee
+# @Contributor: Christopher Hylands
+#
+# @Version: @(#)RevControlSCCS.itcl	1.54	12/05/97
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#### FIXME:  Known bugs
+# - When checking in a file, the window in which the user enters comments
+#   is modal.  This makes it awkward to look around to construct the comments.
+#   It should not be modal.
+
+
+#######################################################################
+#### RevControlSCCS
+# This class defines how revision control will be handled when using 
+# SCCS, and is intended to be contained within objects that use such 
+# facilities.  Note that this is a UNIX-specific interface to SCCS.
+#
+class ::tycho::RevControlSCCS {
+    inherit ::tycho::RevControl
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                      public methods                       ####
+
+    # Put the file under revision control.
+    method initializeRevControl {}
+
+    # Get the specified version and open the file.
+    method retrieveVersion {version}
+
+    # Unedit the file associated with this class.
+    method unedit {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Check in the file associated with the specified File object.
+    proc checkIn {object} {}
+
+    # Check out the file associated with the specified File object.
+    proc checkOut {object} {}
+
+    # Check out the previous checked in file, and remove from history
+    proc fixRecent {object version} {}
+
+    # Return 1 if the given file is under revision control, 0 otherwise.
+    proc isUnderRevControl {file} {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Return 1 if the file is checked out, 0 otherwise.
+    protected method isCheckedOut {}
+
+    # Return the name of the person who checked this file out
+    protected method isCheckedOutBy {}
+
+    # Update the history information, if it is on display.
+    protected method updateHistory {}
+
+    # View the version control history.
+    method viewHistory {} {}
+
+
+    ###################################################################
+    ####                   private methods                         ####
+
+}
+
+###################################################################
+# constructor
+#
+body ::tycho::RevControlSCCS::constructor {args} {
+    eval itk_initialize $args 
+
+    configure -text "SCCS revision control for: $file"
+
+    # FIXME: This is a complete hack: force the window to resize
+    # itself so that if the -text option goes over more than
+    # one line, the contents of the window are correctly
+    # displayed. This is completely bogus and needs to be
+    # fixed properly. Note: this only happens on some window
+    # managers, such as ctwm.
+    after idle "$itk_component(childsite) configure -borderwidth 1"
+}
+
+#####################################################################
+#### checkIn
+# Check in the file associated with the specified File object.
+# 
+body ::tycho::RevControlSCCS::checkIn {object} {
+    ::tycho::RevControl::checkIn $object
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "The file \"$basefile\" is not checked out."
+    }
+    if {![file writable [format "%s/SCCS" $dir]]} {
+	error "SCCS file is not writable"
+    }
+    cdDir $dir
+    set comment [getComments]
+    if {$comment == ""} {
+	# cancelled
+	return
+    }
+    catch {exec echo " $comment" | sccs delget $basefile} output
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "Checkin failed: $output"
+    }
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
+#### checkOut
+# Check out the file associated with the specified File object.
+# 
+body ::tycho::RevControlSCCS::checkOut {object} {
+    ::tycho::RevControl::checkOut $object
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "The file \"$basefile\" is already checked out."
+    }
+    if {![file writable [format "%s/SCCS" $dir]]} {
+	error "SCCS file is not writable"
+    }
+    cdDir $dir
+    catch {exec sccs edit $basefile} output
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "Checkout failed: $output."
+    }
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
+#### fixRecent
+# Check out the most recent file, then remove it from history
+# 
+body ::tycho::RevControlSCCS::fixRecent {object version} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    cdDir $dir
+    if {[catch {exec sccs fix -r$version $basefile} output]} {
+        ::tycho::inform $output
+    }
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
+#### initializeRevControl
+# Put the file under revision control.
+# 
+body ::tycho::RevControlSCCS::initializeRevControl {} {
+    ::tycho::RevControl::initializeRevControl
+    #set file [$object filename]
+    set dir [file dirname $file]
+    set revdir [format "%s/SCCS" $dir]
+    set basefile [file tail $file]
+    if [file exists [format "%s/s.%s" $revdir $basefile]] {
+	# Nothing to do
+	return
+    }
+    set olddir [eval pwd]
+    if {![file exists $revdir]} {
+	if {![file writable $dir]} {
+	    error "The directory \"$revdir\" doesn't exist, and you do not\
+		    have write permission to create it."
+	}   
+	exec mkdir $revdir
+    }
+    cdDir $dir
+
+    # There was some nasty error, so trash the SCCS file
+    if [catch {eval exec sccs create $basefile} output] {
+        set revfile [file join $revdir s.$basefile]
+        catch {exec rm -f $revfile}
+        catch {exec chmod u+w $basefile}
+	error "Failed to place $basefile under revision	control: $output."
+    }
+
+    # Run sccs admin
+    set opts [stylesheet get system sccsAdminOptions]
+    if [catch {eval exec sccs admin $opts $basefile} output] {
+	error "Failed to run 'sccs admin $opts $basefile:\
+		$output."
+    }
+    
+    # Run sccs get
+    if [catch {eval exec sccs get $basefile} output] {
+	error "Failed to run 'sccs get $basefile:\
+		$output."
+    }
+
+    $object reload
+    cd $olddir
+}
+
+#####################################################################
+#### retrieveVersion
+# Get the specified version and open the file.
+# 
+body ::tycho::RevControlSCCS::retrieveVersion {version} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    cdDir $dir
+
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile].$version- [file extension $basefile]]
+
+    # In sccs get, -s means silent, -p means to stdout.
+    if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
+        error "Problem executing:\n\
+                `sccs get -p -s -r$version $basefile > $tmpFile':\n\ $output"
+    }
+    
+    cd $olddir
+    return $tmpFile
+}
+
+
+#####################################################################
+#### unedit
+# Unedit the file associated with this class.
+# 
+body ::tycho::RevControlSCCS::unedit {} {
+    ::tycho::RevControl::unedit
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "The file \"$basefile\" is not checked out."
+    }
+    cdDir $dir
+    catch {exec sccs unedit $basefile} output 
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	error "Unedit failed: $output"
+    }    
+    cd $olddir
+    $object reload
+    focusin
+
+    enableButton checkout
+    updateHistory
+}
+
+
+    ###################################################################
+    ####                   public procs                            ####
+
+#####################################################################
+#### isUnderRevControl
+# Check whether the given file is under revision control, and
+# return a 1 if it is or a 0 otherwise.
+# 
+body ::tycho::RevControlSCCS::isUnderRevControl {file} {
+    #set file [$object filename]
+    set dir [file dirname $file]
+    set revdir [format "%s/SCCS" $dir]
+    set basefile [file tail $file]
+    if [file exists [format "%s/s.%s" $revdir $basefile]] {
+	return 1
+    }
+    return 0
+}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+#####################################################################
+#### isCheckedOut
+# Return 1 if the file is checked out, 0 otherwise.
+# Here we assume that if the file is read-only, then it is not checked out.
+# 
+body ::tycho::RevControlSCCS::isCheckedOut {} {
+    if {[isCheckedOutBy]=={}} {
+        return 0
+    } {
+        return 1
+    }
+}
+
+#####################################################################
+#### isCheckedOutBy
+# Later we will get rid of isCheckedOut, and replace it with this function
+#
+body ::tycho::RevControlSCCS::isCheckedOutBy {} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    cdDir $dir
+    # Read in information list (who checked this file?)
+    catch {exec sccs info} infolist
+    set info {}
+    foreach i [split $infolist \n] {
+        # Need to match the format:
+        #    ToolBar.itcl: being edited: 1.19 1.20 kchang 97/04/15 14:12:17
+        if [regexp "^ *$basefile: .*" $i] {
+            # Format is:
+            set info $i
+        }
+    }
+    cdDir $olddir
+
+    if {$info!={}} {
+        return "[lindex $info 6] [lindex $info 7], <checked out by\
+                [lindex $info 5]>"
+    } else {
+        return {}
+    }
+}
+
+#####################################################################
+#### updateHistory
+# Update the history information, if it is on display.
+# 
+body ::tycho::RevControlSCCS::updateHistory {} {
+    if {[info exists itk_component(history)] && \
+	    [winfo exists $itk_component(history)]} {
+        #delete object $itk_component(history)
+        viewHistory
+    }
+}
+
+#####################################################################
+#### viewHistory
+# View or close the version control history.
+# 
+body ::tycho::RevControlSCCS::viewHistory {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    
+    if {![file exists [format "%s/SCCS/s.$basefile" $dir]]} {
+        error "The file \"$file\" is not under SCCS control."
+    }
+    cdDir $dir
+    # Read in from the SCCS execution
+    catch {exec sccs prs $basefile} history
+    
+    # Parse the history
+    parseHistory $history [$itk_component(history) textWinName]
+    
+    # FIXME: Delay or the focus command is ignored.  Tk bug?
+    #after 500 "focus [$itk_component(history) textWinName]"
+    cd $olddir
+}

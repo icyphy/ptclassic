@@ -1,0 +1,366 @@
+#! /bin/csh -f
+# tycho - Ptolemy Tycho Brahe Graphical Interface
+#
+# Authors: Edward Lee, Christopher Hylands
+# Version: @(#)tycho	1.62	03/29/98
+#
+# Copyright (c) 1994-1998 The Regents of the University of California.
+# All rights reserved.
+# See the file $TYCHO/copyright.txt for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+
+# This script starts up tycho.  Most of the confusion occurs because 
+# tycho can be shipped as part of Ptolemy, or standalone
+
+# If you add to this script, make sure that you don't make it dependent
+# on Ptolemy.
+
+# If this script fails for you, you can try starting tycho with:
+#	itkwish -f $TYCHO/kernel/Tycho.tcl
+# To use the Ptolemy itkwish binary:
+#	$PTOLEMY/bin.$PTARCH/tysh
+
+# To debug this script, do: csh -fx $TYCHO/bin/tycho
+
+# Below are several sample invocations:
+# tycho
+# tycho /tmp/foo.tcl
+# tycho -ptiny
+# tycho -debug -ptiny
+# tycho -debug -bin $PTOLEMY/obj.$PTARCH/tysh/tysh.ptiny.debug
+# tycho -e /tmp/foo.tcl
+
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-e tclscript] [file...]"
+
+set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
+
+if ( ! $?DISPLAY ) then
+	echo "${0}: Your DISPLAY environment variable must be set"
+	exit 1
+endif
+
+# tclscript has a value, it is not a boolean so we can't just use
+# $?tclscript, since if we refer to tclscript anywere, it will be
+# dereferenced, so if it is not set, we get an error.
+set tclscript=""
+
+while ($#argv)
+	switch ("$argv[1]")
+		case -help:
+			echo "$usagestring"
+			echo " -debug         Bring up in debug mode w/ gdb"
+			echo " -ptiny         Smaller version, fewer domains"
+			echo " -ptrim         Small version, more domains"
+			echo " -pigi          Big version, many domains"
+			echo " -tty 	      Non-graphical version"
+			echo " -bin tychobin  Run the binary 'tychobin'"
+			echo " -nowelcome     No welcome window"
+			echo " -noconsole     No console window"
+			echo " -e tclfile     Start up and source tclfile"
+			echo " files...       Files to open"
+			exit 0
+		case -debug:
+			set tychodebug
+			breaksw
+		case -ptiny:
+			if ( $?selectPtolemy || $?selectJava) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
+			set tychoptiny
+			breaksw
+		case -ptrim:
+			if ( $?selectPtolemy || $?selectJava) then				
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
+			set tychoptrim
+			breaksw
+		case -pigi:
+			if ( $?selectPtolemy || $?selectJava) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
+			set tychopigi
+			breaksw
+		case -tty:
+			if ( $?selectJava || $?selectTty) then
+				echo $argError
+				exit 2
+			endif
+			set selectTty
+			breaksw
+		case -bin:
+			if ( $?selectPtolemy || $?selectJava) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
+			set prog = $argv[2]
+			shift
+			breaksw
+		case -java:
+			echo "Sorry tycho -java is not supported in Tycho0.2.1 and later"
+			breaksw
+		case -nowelcome:
+			set nowelcome
+			breaksw
+		case -noconsole:
+			set noconsole
+			if ( $#argv == 1 && ! $?filename ) then
+				echo "tycho: warning, you called 'tycho -noconsole' without passing a file" 
+				echo "which means that tycho will not do much."
+				echo "Try 'tycho -noconsole yourfile'"
+			endif
+			breaksw
+		case -e:
+			set tclscript = $argv[2]
+			shift
+			breaksw			
+		case -*:
+			echo Bad option: $argv[1]
+			echo "$usagestring"
+			exit 1
+			breaksw
+		case *:
+			if (! $?filename) then
+			    set filename="$1"
+			else
+			    set filename="$filename $1"
+			endif
+			breaksw
+	endsw
+	shift
+end
+
+if ( ! $?TYCHO ) then
+	if ( $?PTOLEMY ) then
+		setenv TYCHO "$PTOLEMY/tycho"
+	else
+		# Wrap this in quotes so if ~ptolemy does not exist, we don't
+		# get an 'Unknown user: ptolemy' message
+		setenv TYCHO "~ptolemy/tycho"
+		if ( -d "$TYCHO" ) then
+			echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
+		else
+		    echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
+		    echo " See tycho/doc/running.html for further information"
+		endif
+	endif
+endif
+
+if ( ! -d "$TYCHO") then
+	echo "The directory $TYCHO does not exist!  Cannot find Tycho."
+	exit 2
+endif
+
+# If -debug, then set up the arguments we are passing to gdb
+if ( $?tychodebug) then
+	set runargs=""
+	if ( $?nowelcome ) set runargs = (-nowelcome)
+	if ( $?noconsole ) set runargs = ($runargs -noconsole)
+	if ( $tclscript != "" ) set runargs = ($runargs -e $tclscript)
+	if ( $?filename) then
+		set runargs =($runargs $filename)
+	endif
+endif
+
+# We could use an if/else/if/else here, but the indentation makes
+# it hard to read
+
+##################################################################
+# itkwish
+if (! $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
+	# We did not select Ptolemy, so we just assume that itkwish
+	# is in the users path.  Bad idea?  One alternative would be
+	# to see if $PTOLEMY is set and then check for 
+	# $PTOLEMY/bin.$PTARCH/itkwish
+	if ( $?tychodebug ) then
+		if ( $?PT_DEBUG) then
+			set debugger = $PT_DEBUG
+		else
+			set debugger = gdb
+		endif
+		set debugcmdfile = /tmp/tychodbg.$$
+		echo "break main" > $debugcmdfile
+		echo run -f \"$TYCHO/kernel/Tycho.tcl\" $runargs >> $debugcmdfile
+		set prog = ($debugger -x $debugcmdfile itkwish)
+
+		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
+	else
+		set prog = (itkwish -f \"\$TYCHO/kernel/Tycho.tcl\")
+	endif
+endif 
+
+##################################################################
+# itclsh - non graphical version
+if (! $?selectJava && $?selectTty) then
+	if ( $?tychodebug ) then
+		if ( $?PT_DEBUG) then
+			set debugger = $PT_DEBUG
+		else
+			set debugger = gdb
+		endif
+		set debugcmdfile = /tmp/tychodbg.$$
+		echo "break main" > $debugcmdfile
+		echo run \"$TYCHO/kernel/Tycho.tcl\" $runargs >> $debugcmdfile
+		set prog = ($debugger -x $debugcmdfile itclsh)
+
+		#set prog = (itclsh.purify $TYCHO/kernel/Tycho.tcl)
+	else
+		if ( $?prog) then
+			set prog = ($prog \"\$TYCHO/kernel/Tycho.tcl\")
+		else 
+			if ( ! $?selectPtolemy ) then
+				set prog = (itclsh \"\$TYCHO/kernel/Tycho.tcl\")
+			else
+				if ( $?tychoptiny) then
+					set prog = (pitcl.ptiny \"\$TYCHO/kernel/Tycho.tcl\")
+				else if ( $?tychoptrim) then
+					set prog = (pitcl.ptrim \"\$TYCHO/kernel/Tycho.tcl\")
+				else if ( $?tychopigi) then
+					set prog = (pitcl \"\$TYCHO/kernel/Tycho.tcl\")
+
+				endif
+			endif
+		endif
+	endif
+endif
+
+##################################################################
+# Ptolemy, no Java
+if ( $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
+	# We selected Ptolemy
+	if ( ! $?PTOLEMY ) then
+		setenv PTOLEMY ~ptolemy
+	endif
+
+	if ( ! -r "$PTOLEMY/bin/ptsetup.csh" ) then
+		echo "Can't find $PTOLEMY/bin/ptsetup.csh"
+		echo "Are you sure Ptolemy is installed?"
+		exit 2
+	endif
+
+	# Set the commonly used environment variables
+	source "$PTOLEMY/bin/ptsetup.csh"
+
+	# To get tcl/tk man pages before corresponding unix man pages,
+	# and to guess about a reasonable manpath if none is set.
+	if (! $?MANPATH ) then
+	    setenv MANPATH "$PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man"
+	else
+	    setenv MANPATH "$PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH"
+	endif
+
+	set bindir = ($PTOLEMY/bin.$PTARCH)
+
+	if ( ! $?prog && $?tychodebug) then
+		set tychodebugnoprog=1
+	endif
+	if ( ! $?prog ) then
+		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
+		    set prog = "$bindir/tysh.ptiny"
+		else
+			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
+			    set prog = $bindir/tysh.ptrim
+			else 
+				if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
+				    set prog = $bindir/tysh
+				else
+				    set tychoedit
+				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
+				endif
+			endif
+		endif
+	else # ! $?prog
+		echo "prog=$prog"
+	endif
+	if ( $?tychodebug ) then
+		if ( $?PT_DEBUG) then
+			set debugger = $PT_DEBUG
+		else
+			set debugger = gdb
+		endif
+		set debugcmdfile = /tmp/tychodbg.$$
+		echo "break main" > $debugcmdfile
+		# Since we are running tysh, not itkwish, we need
+		# not pass -f .../Tycho.tcl
+		echo "run $runargs"  >> $debugcmdfile
+
+		if ( ! $?tychodebugnoprog ) then
+			set prog = ($debugger -x $debugcmdfile $prog)
+		else
+			# The user called 'tycho -ptiny -debug'
+			# but did not specify a binary, so we look for a .debug
+			if ( -e $prog.debug ) then
+			  set prog = ($debugger -x $debugcmdfile $prog.debug)
+			else
+			  if ( $?PTOLEMY && $?PTARCH ) then
+			    if ( -e $PTOLEMY/obj.$PTARCH/tysh/`basename $prog`.debug) then
+			       echo "$prog.debug does not exist"
+			       set prog="$PTOLEMY/obj.$PTARCH/tysh/`basename $prog`.debug"
+			       echo "Using $prog instead"
+			    endif
+			  endif
+			  set prog = ($debugger -x $debugcmdfile $prog)
+			endif	
+		endif
+		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
+	endif
+
+endif # ?selectPtolemy
+
+##################################################################
+
+if ( "$1" =~ "-*" ) then
+    echo "${0}: Bad option: $1"
+    exit 1
+endif
+
+# Add in options that are passed directly to Tycho.
+# If we are running gdb, we pass these in as part of the run script
+if ( ! $?tychodebug) then
+	if ( $?nowelcome ) set prog = ($prog -nowelcome)
+	if ( $?noconsole ) set prog = ($prog -noconsole)
+	if ( $tclscript != "") set prog = ($prog -e $tclscript)
+else 
+	if ( ! $?selectJava) then
+		# Have gdb echo the contents of the command file
+		set cmdfile=`cat $debugcmdfile`
+		echo "echo gdb commands:\n" >> $debugcmdfile
+		echo "echo $cmdfile\n" >> $debugcmdfile
+	endif
+endif
+
+# If selectPtolemy is set then we are just running itkwish
+# If the user has used -debug, then don't check, the user must be a god :-) 
+if ($?selectPtolemy && ! $?tychodebug && ! $?selectTty) then
+	# Can't use && here, as since if we are running just 'tycho'
+	# then the program name will be 'itkwish' which is not necessarily
+	# executable.
+
+	# If we call 'tycho -ptiny' then $prog will have one arg
+	# If we call 'tycho -ptiny -nowelcome' then $prog will have two args
+	if ( $#prog == 1 ) then
+		if (! -x $prog) then
+			echo "Program does not exist: $prog"
+			exit 3
+		endif
+	else
+		if (! -x $prog[1]) then
+			echo "Program does not exist: $prog"
+			exit 3
+		endif
+			
+	endif
+endif
+
+if (! $?filename || $?tychodebug) then
+	eval $prog
+else
+	eval $prog $filename
+endif
+

@@ -1,0 +1,448 @@
+##########################################################################
+# @Version: @(#)Solid.itcl	1.35 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## Solid
+#
+# <i>Solid</i> is a pseudo-3D polygon.
+# This accepts all "standard" relief options: flat,
+# raised, sunken, ridge, and groove. Because
+# of some funnies with Tk's coordinates, the last two don't work too
+# well with sharp angles (< 25 or so), but with moderate angles
+# they look fine.
+#
+# <i>Solid</i> implements its scaling code so that the borderwidth remains 
+# constant when the item is resized. Its coordinates, (like the 
+# standard Tk canvas <i>polygon</i> item) are a list of vertex 
+# coordinates. They must, however, be in a "clockwise" direction for the 
+# borders to be drawn properly.  In all other respects, it can be 
+# treated like any other polyginal item.
+#
+# <p><b>Options</b>
+#
+# <ul>
+# <li><b>-borderwidth</b>:
+# The width of the border of the item. By default, it is two. For
+# various reasons, the borderwidth is actually twice this value if the
+# <code>-relief</code> option is <i>groove</i> or <i>ridge</i>.
+#
+# <li><b>-color</b>:
+# The color of the item. This is a "generic" color as implemented by
+# the <a href="../codeDoc/Shades.html">Shades</a> class -- this will
+# soon be replaced by an enhanced version of
+# <a href="../../../../kernel/gui/doc/codeDoc/ColorManager.html">ColorManager</a>.
+# By default, the color is the same as the standard Tk background color
+# ("grey85").
+#
+# <li><b>-relief</b>:
+# The "relief" of the pseudo-3D item. This can be one of:
+# <i>raised</i>, <i>sunken</i>, <i>groove</i>, <i>ridge</i>, or
+# <i>flat</i>. The meanings of these are the same as for the Tk
+# <code>frame</code> widget. The default is <i>raised</i>.
+#
+# </ul>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>lit</b>: The polygon that is "lit".
+# <li><b>notlit</b>: The polygon in the inside shadow
+#     (ridge and groove reliefs only).
+# <li><b>shaded</b>: The polygon that is "shaded."
+# <li><b>notshaded</b>: The polygon in the inside lit region
+#      (ridge and groove reliefs only).
+# <li><b>surface</b>: The rectangular surface.
+# </ul>
+#
+# <p><b>Bugs</b>
+#
+# With the -ridge option, some polygons are not tagged properly and get
+# "left behind" when the item is moved.
+#
+# <p><b>Enhancements</b>
+#
+# (i) In an earlier version of the Slate, Solid
+# had an additional option,<code>-fill</code>, which could take
+# values <i>none</i>,  <i>gloss</i>,  and <i>matt</i>. In the first 
+# case, the Solid had no "surface" -- that is, it was transparent, which 
+# was particularly useful if <code>-relief</code> was <i>ridge</i>. This 
+# should be reimplemented. (ii) In an earlier version of the Slate, 
+# <i>Solid</i> had methods to rotate and "flip" itself -- this should
+# be reimplemented.
+#
+# <p><b>Example</b>
+# 
+# Create some Solids with various options. These can be moved around
+# with the mouse:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "Some \"Solids\""]
+#   $slate create Solid 100 20 120 20 120 10 140 30 120 50 120 40 100 40 &#92
+# 		  -color green -tags moveable
+#   $slate create Solid 60 20 60 40 40 40 &#92
+# 		  -color grey -borderwidth 3 -tags moveable
+# </pre></tcl>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::Solid {
+    inherit ::tycho::ComplexItem
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-borderwidth* option
+    proc _borderwidth {id canvas slate borderwidth}
+    
+    # Update the *-color* option
+    proc _color {id canvas slate color}
+    
+    # Update the *-relief* option
+    proc _relief {id canvas slate relief}
+
+    # Create a new item
+    proc construct {id canvas slate tags args}
+
+    # Set or get the item's coordinates
+    proc coords {id canvas slate args}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # All methods are looked up through a table
+    private common methodtable
+
+    # All options have a default value
+    private common optiondefault
+
+    ###################################################################
+    ####                        private procs                      ####
+
+    # Adjust the border polygons to new coordinates
+    private proc adjust {id canvas name shade coords} {}
+}
+
+
+###################################################################
+####                       class initialization                ####
+namespace eval ::tycho::Solid {
+    #### Set method table
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+
+    set methodtable(_borderwidth) ::tycho::Solid::_borderwidth
+    set methodtable(_color)       ::tycho::Solid::_color
+    set methodtable(_relief)      ::tycho::Solid::_relief
+
+    set methodtable(construct)   ::tycho::Solid::construct
+    set methodtable(coords)      ::tycho::Solid::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+
+    set optiondefault(-color)       background
+    set optiondefault(-borderwidth) 2
+    set optiondefault(-relief)      raised
+    set optiondefault(-shape)       polygon
+}
+
+##########################################################################
+## -borderwidth option configuration
+#
+# Update the *-borderwidth* configuration option. Just cause a redraw
+# by calling the coords{} method with the current coordinates.
+#
+# This could be made a lot faster by duplicating code.
+#
+body ::tycho::Solid::_borderwidth {id canvas slate borderwidth} {
+    set option(borderwidth$id) $borderwidth
+    eval coords [$canvas coords $primary($id)]
+}
+
+##########################################################################
+## -color option configuration
+#
+# Update the *-color* configuration option.
+#
+body ::tycho::Solid::_color {id canvas slate color} {
+    set option(color$id) $color
+    set variable(color$id) [::tycho::Shades::new $color]
+
+    # FIXME: quick and dirty
+    _relief $id $canvas $option(relief$id)
+    $canvas itemconfigure $component(surface$id) -fill [$variable(color$id) matt]
+}
+
+##########################################################################
+## -relief option configuration
+#
+body ::tycho::Solid::_relief {id canvas slate relief} {
+    set option(relief$id) $relief
+    if { $relief == "ridge" || $relief == "groove" } {
+
+	set light [$variable(color$id) light]
+	set dark  [$variable(color$id) dark]
+
+	if { $relief == "groove" } {
+	    set light $dark
+	    set dark [$variable(color$id) light]
+	}
+
+	# Change the color of the lit and shaded components
+	foreach i $component(lit$id) {
+	    $canvas itemconfigure $i -fill $light
+	}
+	foreach i $component(shaded$id) {
+	    $canvas itemconfigure $i -fill $dark
+	}
+
+	# If the relief has changed to ridge or groove, then we
+	# have to create the inside border polygons, and move
+	# the surface if it exists.
+	if { ! [info exists component(notlit$id)] } {
+
+	    set coords [$canvas coords $primary($id)]
+
+	    ::tycho::assign inside junk1 junk2 \
+		    [::tycho::Polygon::borders 45 -135 \
+		    $coords $option(borderwidth$id)]
+	    ::tycho::assign inside notlitC notshadedC \
+		    [::tycho::Polygon::borders 45 -135 \
+		    $inside $option(borderwidth$id)]
+
+	    set component(notlit$id)    {}
+	    set component(notshaded$id) {}
+
+	    adjust $id $canvas "notshaded" $light $notshadedC
+	    adjust $id $canvas "notlit"    $dark  $notlitC
+
+	    if { [::info exists component(surface$id)] } {
+		eval $canvas coords $component(surface$id) $inside
+	    }
+	} else {
+	    foreach i $component(notshaded$id) {
+		$canvas itemconfigure $i -fill $light
+	    }
+	    foreach i $component(notlit$id) {
+		$canvas itemconfigure $i -fill $dark
+	    }
+	}
+    } else {
+	set light [$variable(color$id) light]
+	set dark  [$variable(color$id) dark]
+
+	if { $relief == "sunken" } {
+	    set light $dark
+	    set dark [$variable(color$id) light]
+	} elseif { $relief == "flat" } {
+	    set light [$variable(color$id) matt]
+	    set dark $light
+	}
+
+	# Change the color of the various components
+	foreach i $component(lit$id) {
+	    $canvas itemconfigure $i -fill $light
+	}
+	foreach i $component(shaded$id) {
+	    $canvas itemconfigure $i -fill $dark
+	}
+
+	# If the relief has changed _from_ ridge or groove, then we
+	# delete the inside border polygons and move the surface.
+	if { [::info exists component(notlit$id)] } {
+	    
+	    eval $canvas delete $component(notlit$id) $component(notshaded$id)
+	    unset component(notlit$id)
+	    unset component(notshaded$id)
+
+	    if { [::info exists component(surface$id)] } {
+		set coords [$canvas coords $primary($id)]
+		::tycho::assign inside junk1 junk2 \
+			[::tycho::Polygon::borders 45 -135 \
+			$coords $option(borderwidth$id)]
+		eval $canvas coords $component(surface$id) $inside
+	    }
+	}
+    }
+}
+
+##########################################################################
+## adjust name shade coords
+#
+# Adjust a list of polygons to a new set of coordinates
+#
+body ::tycho::Solid::adjust {id canvas name shade coords} {
+
+    # Move the components to their new locations.
+    set polys [set component([set name]$id)]
+    set count [::tycho::min [llength $polys] [llength $coords]]
+    set usepolys  [lrange $polys 0 [expr $count-1]]
+    set usecoords [lrange $coords 0 [expr $count-1]]
+    foreach p $usepolys c $usecoords {
+	eval $canvas coords $p $c
+    }
+
+    # If there weren't enough polygons, create some more. Lower the
+    # new components to the same level as the primary component.
+    if { [llength $coords] > $count } {
+	set tags [$canvas gettags $primary($id)]
+	set moreneeded [lrange $coords $count end]
+	foreach c $moreneeded {
+	    set p [eval $canvas create polygon $c \
+		    -fill $shade \
+		    -tags [list $tags]]
+	    lappend component([set name]$id) $p
+	    $canvas lower $p $primary($id)
+	}
+    } elseif { [llength $coords] < $count } {
+	# If there were too many polygons, delete the leftovers
+	set leftovers [lrange $polys $count end]
+	set component([set name]$id) [lrange $polys 0 [expr $count-1]]
+	# FIXME: replace with eval $canvas delete $leftovers and TEST
+	foreach p $leftovers {
+	    $canvas delete $p
+	}
+    }
+}
+
+##########################################################################
+## construct
+#
+body ::tycho::Solid::construct {id canvas slate tags args} {
+    # Split coordinates and options
+    if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
+	set options [lrange $args $t end]
+	set args [lreplace $args $t end]
+    } else {
+        set options {}
+    }
+
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $options] {
+	set option([string trimleft $opt -]$id) $val
+    }
+
+    # This object is used to get the shades of color
+    set variable(color$id) [::tycho::Shades::new $option(color$id)]
+    
+    # Create the primary component for the outline coordinates
+    set primary($id) [eval $canvas create polygon $args \
+	    [list -tags $tags -fill ""]]
+
+    # Create the surface component with null size
+    set component(surface$id) [$canvas create polygon 0 0 0 0 0 0 \
+	    -fill [$variable(color$id) matt] -tags $tags]
+
+    # Create the borders using the coords{} method. Set the list and
+    # shaded components to null to save work in coords{}.
+    set component(lit$id)    {}
+    set component(shaded$id) {}
+
+    eval coords $id $canvas $slate $args
+}
+
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
+
+##########################################################################
+## coords
+## coords {coord}+
+#
+# Query or set the coordinates of the object. This procedure ensures
+# that the last two points are the same as the first two.
+#
+body ::tycho::Solid::coords {id canvas slate args} {
+    # No args: just return coordinates
+    if { $args == "" } {
+	set coords [$canvas coords $primary($id)]
+	return $coords
+    }
+
+    # Make sure that end point is same as start point
+    if { [lindex $args 0] != [lindex $args [expr [llength $args] - 2]] \
+	    || [lindex $args 1] != [lindex $args end] } {
+	lappend args [lindex $args 0]
+	lappend args [lindex $args 1]
+    }
+
+    # Move the primary.
+    set coords $args
+    eval $canvas coords $primary($id) $coords
+
+    # Get the coordinates of the borders and the surface component
+    ::tycho::assign inside litC shadedC \
+	    [::tycho::Polygon::borders 45 -135 $coords $option(borderwidth$id)]
+
+    # Adjust the positions of the border polygons, creating and
+    # deleting them as necessary.
+    adjust $id $canvas "lit"    [$variable(color$id) light] $litC
+    adjust $id $canvas "shaded" [$variable(color$id) dark]  $shadedC
+
+    # If the relief is "groove" or "ridge," adjust the inner borders
+    # as well. Note that _inside_ is over-written with new values.
+    if { $option(relief$id) == "ridge" || $option(relief$id) == "groove" } {
+	::tycho::assign inside notlitC notshadedC \
+		[::tycho::Polygon::borders 45 -135 \
+		$inside $option(borderwidth$id)]
+
+	adjust $id $canvas "notshaded" \
+		[$variable(color$id) light] $notshadedC
+	adjust $id $canvas "notlit" \
+		[$variable(color$id) dark]  $notlitC
+    }
+
+    # Change the co-ordinates of the surface component, if it exists.
+    if { [::info exists component(surface$id)] } {
+	eval $canvas coords $component(surface$id) $inside
+    }
+}
+
+##########################################################################
+## transform mode args
+#
+# Transformation on a solid has to be overridden to make sure that
+# the "direction" in which the coordinates run remains correct.
+# Without this overriding, the solid will change relief from
+# "raised" to "sunken," or vice versa.
+#
+#body ::tycho::Solid::transform {mode args} {
+#    if { $mode == "flip" || $mode == "flop" } {
+#	eval $this coords [lineReverse [$this coords]]
+#    }
+#    eval [$this shape] transform $mode $args
+#}

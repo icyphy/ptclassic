@@ -1,0 +1,218 @@
+#########################################################################
+# @Version: @(#)LabeledRect.itcl	1.18 07/29/98
+# @Author: John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## LabeledRect
+#
+# <i>LabeledRect</i> is a rectangle with a text label and graphics.
+# In all other respects, it can be treated like any other rectangle item.
+#
+# <p><a name="LabeledRect class Options"></a><b>Options</b>
+#
+# See also <a href="LabeledItem.html#LabeledItem class Options">LabeledItem</a>.
+#
+# <ul>
+# <li><b>-fill</b>:
+# The color with which the rectangle is filled. By default, 
+# it is "", which means that the rectangle is not filled.
+#
+# <li><b>-outline</b>:
+# The color of the outline of the rectangle. If "", 
+# the rectangle has no outline. By default, it is black.
+#
+# <li><b>-width</b>:
+# The width of the outline of the rectangle, in pixels. By 
+# default, it is one.
+#
+# </ul>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>label</b>:
+# The editable text label.
+# </ul>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Example</b>: Create a labeled rectangle:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "A LabeledRect demo"]
+#   $slate create LabeledRect 40 40 100 80 -fill blue -outline red &#92
+#               -anchor nw -text Foo -tags moveable &#92
+#               -graphics "line 0 0 100 100; line 0 100 100 0"
+# </pre></tcl>
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::LabeledRect {
+    inherit ::tycho::LabeledItem
+
+    ###################################################################
+    ####                     option update procs                   ####
+
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+
+    # Update the *-outline* option
+    proc _outline {id canvas slate outline}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Create a new item with options already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+
+    # Set or get the item's coordinates
+    proc coords {id canvas slate args}
+    
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+}   
+
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::LabeledRect {
+    #### Set method table
+    array set methodtable [array get ::tycho::LabeledItem::methodtable]
+
+    set methodtable(_fill)     ::tycho::LabeledRect::_fill
+    set methodtable(_outline)  ::tycho::LabeledRect::_outline
+    set methodtable(_width)    ::tycho::LabeledRect::_width
+
+    set methodtable(construct) ::tycho::LabeledRect::construct
+    set methodtable(coords)    ::tycho::LabeledRect::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
+
+    set optiondefault(-fill)    ""
+    set optiondefault(-outline) "black"
+    set optiondefault(-shape)   rectangle
+    set optiondefault(-width)   "1"
+}
+
+
+##########################################################################
+## -fill option configuration
+#
+body ::tycho::LabeledRect::_fill {id canvas slate fill} {
+    set option(fill$id) $fill
+    $canvas itemconfigure $primary($id) -fill $fill
+}
+
+##########################################################################
+## -outline option configuration
+#
+body ::tycho::LabeledRect::_outline {id canvas slate outline} {
+    set option(outline$id) $outline
+    $canvas itemconfigure $primary($id) -outline $outline
+    if { $option(text$id) != "" } {
+	$canvas itemconfigure $component(label$id) -fill $outline
+    }
+}
+
+##########################################################################
+## -width option configuration
+#
+body ::tycho::LabeledRect::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $width
+}
+
+##########################################################################
+#### _construct
+#
+body ::tycho::LabeledRect::_construct {id canvas slate tags x0 y0 x1 y1} {
+    # Create the primary component. This is the displayed rectangle.
+    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
+	    -fill $option(fill$id) -outline $option(outline$id) \
+	    -width $option(width$id) -tags $tags]
+    
+    # Create the graphics and text label -- do not change the order!
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
+    }
+    # Call the proc to do the real work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
+}
+
+##########################################################################
+#### coords
+#
+# Set or read the rectangle's coordinates
+#
+body ::tycho::LabeledRect::coords {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
+    # No args: just return coordinates
+    if { $args == "" } {
+        return $coords
+    }
+
+    # Move the rectangle itself
+    eval $canvas coords $primary($id) $args
+
+    # Move and scale the text and graphics
+    eval ::tycho::LabeledItem::coords $id $canvas $slate $coords $args
+}

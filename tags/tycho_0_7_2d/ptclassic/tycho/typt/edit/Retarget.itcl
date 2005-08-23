@@ -1,0 +1,491 @@
+# Ptolemy Retargeting mechanism: Display information about domains
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)Retarget.itcl	1.30 01/27/99
+#
+# @Copyright (c) 1996-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### Retarget
+# Display Ptolemy Retargeting information.
+# The user can compare stars in two Ptolemy domains, and check
+# to see if the current universe would have conflicts while
+# being retargeted between domains.
+# <p>
+# Here is an example of how to use the Retarget
+# <tcl><pre>
+#	::tycho::Retarget .t
+#	.t centerOnScreen
+# </pre></tcl>
+#
+# Under no circumstances should the code in Retarget.itcl call ::pitcl
+# methods.  Instead, the code here should call ::tycho::DomainInfo methods
+# so that this file can support both ptcl and pitcl.
+#
+class ::tycho::Retarget {
+    inherit ::tycho::EditForest
+
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the name of the PtclEdit object we are working with
+    itk_option define -edit edit Edit ""
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Generate data for new domains
+    method compareDomains { {universeName {}} {domainStarList {}}}
+
+    # Update domainA
+    method changeDomainA {}
+
+    # Update domainB
+    method changeDomainB {}
+
+    # Look for conflicts in the current universe
+    method checkUniverse {}
+
+    # Open a help window.
+    method help {}
+
+    ###################################################################
+    ####                         public procedures                 ####
+
+    # Print the same star from two different domains
+    public proc printStars { starName relation domainA domainB}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
+    ####                         private methods                   ####
+
+    # Initialize the tool bar.
+    private method _initializeToolbar {toolbar}
+
+    # Initialize the counters at the bottom of the window
+    private method modifyAfterDomainChange { {universeName {}} \
+            {ports 0} {multiports 0} {states 0} \
+            {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {}
+
+    ###################################################################
+    ####                         private variables                 ####
+    private variable domainA {CG56}
+    private variable domainB {C50}
+
+    # If we need to run compareDomains, then set this variable to 1
+    private variable dirtyCompareDomains 1
+
+    # Editor object that contains the universe we are retargeting.
+    private variable editor
+
+    # List of stars that clash, arranged by categories into sublists
+    private variable clashList
+}
+
+#######################################################################
+#### -editor configuration
+# The id of the editor we are using.  This editor is usually a ptclEdit 
+# object that contains the universe we are trying to retarget.
+configbody ::tycho::Retarget::edit {
+    set editor $itk_option(-edit)
+    if {$editor != "" } {
+    }
+}
+#######################################################################
+#### constructor
+#
+body ::tycho::Retarget::constructor {args} {
+    if {[catch {set domainList [::tycho::DomainInfo::domains]} errMsg] == 1}  {
+	error "Retarget constructor failed to get list of domains.\nIt could \
+		be that this binary does not have Ptolemy built in.\nPerhaps \
+		you need to run 'tycho -pigi', 'tycho -ptrim' or \
+		'tycho -ptiny'?" 
+    }
+
+    eval itk_initialize $args
+    if { $editor != "" && [$editor info commands domains] == "domains"} {
+        # Call the domains method of the Ptcl editor to get the list of domains
+        set domains [$editor domains]
+        if {[llength $domains] > 1 } {
+            set domainA [lindex [$editor domains] 0]
+        } else {
+            set domainA $domains
+	}
+        if { [lsearch $domainList $domainA] == -1 } {
+            error "Sorry, the Universe contains '$domainA',\
+                    which is not present\
+                    in this version of Tycho.\nThis version of Tycho contains\
+                    the following domains: $domainList.\nTo run a version of\
+                    Tycho that has all the domains, run 'tycho -pigi'."
+        }
+    } else {
+        set domainA [lindex $domainList 0]
+    }
+    set domainB [lindex $domainList end]
+
+    modifyAfterDomainChange
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### changeDomainA
+# Change the name of one of the domains that we are going to compare
+#
+body ::tycho::Retarget::changeDomainA {} {
+    set tmpDomain [::tycho::DomainInfo::queryDomain "Domain A" "$domainA"]
+    if {$tmpDomain != ""} {
+        set domainA $tmpDomain
+    }
+    clear
+    set dirtyCompareDomains 1
+    catch {delete object [graph]}
+    toolbar buttonconfigure domainAButton -text "Change Domain A: $domainA" 
+    modifyAfterDomainChange
+}
+
+#######################################################################
+#### changeDomainB
+# Change the name of one of the domains that we are going to compare
+#
+body ::tycho::Retarget::changeDomainB {} {
+    set tmpDomain [::tycho::DomainInfo::queryDomain "Domain B" "$domainB"]
+    if {$tmpDomain != ""} {
+        set domainB $tmpDomain
+    }
+    clear
+    set dirtyCompareDomains 1
+    catch {delete object [graph]}
+    toolbar buttonconfigure domainBButton -text "Change Domain B: $domainB" 
+    modifyAfterDomainChange
+}
+
+#######################################################################
+#### checkUniverse
+# Change the name of one of the domains that we are going to compare
+#
+body ::tycho::Retarget::checkUniverse {} {
+    if {$editor == {} } {
+        error "No universe loaded, use the Ptcl editor to load a universe"
+        return
+    }
+    set starList [$editor stars]
+    if {$dirtyCompareDomains} {
+	putStatus "Regenerating Domain Information, please wait."
+        update idletasks
+	busy $this compareDomains [$editor universeName] $starList
+	putStatus ""
+        ::tycho::safeUpdate $this
+    }
+    
+}
+
+#######################################################################
+#### compareDomains
+# Determine what stars are in two domains and compare them by plotting
+# the information as a Forest.
+#
+body ::tycho::Retarget::compareDomains { {universeName {}} \
+        {domainStarList {}}} {
+    set clashList [::tycho::DomainInfo::diffDomains $domainA $domainB]
+
+    clear
+    catch {delete object [graph]}
+
+    set starList {}
+    if { $domainStarList != {} } {
+        # Generate a list of just stars
+        foreach domainStar $domainStarList {
+            lappend starList [lindex $domainStar 1]
+        }
+    }
+    # Cycle through the different types of clashes
+    set headers [list {Common Stars} {Different Ports} \
+            {Different MultiPorts} {Different States} \
+            "${domainA} Only" "${domainB} Only"]
+    set indexCount 0
+    foreach header $headers {
+        [graph] add $header {} {}
+        set header [list $header]
+        foreach star [lindex $clashList $indexCount] {
+            if { $starList != {} } {
+                if {[lsearch $starList $star] != -1 } {
+                    set contents [list tcl \
+                            "::tycho::Retarget::printStars $star \"$header\" \
+                            $domainA $domainB" ]
+                    [graph] add $star $contents $header
+                }
+            } else {
+                set contents [list tcl \
+                        "::tycho::Retarget::printStars $star \"$header\" \
+                        $domainA $domainB" ]
+                [graph] add $star $contents $header
+            }
+        }
+        incr indexCount
+    }
+
+    # If the user has loaded in a universe in domain A, but is
+    # comparing domains B and C, it could be that a star that is present
+    # in domain A might not be present in domain B or C, so we check.
+    # If there is a hit, then we add another category to the forest.
+    if { $starList != {} } {
+        # Set createdTop to 1 after we have created the top of the tree
+        set createdTop 0
+        foreach star $starList {
+            set foundIt 0
+            for {set indexCount 0} {$indexCount <= 5} {incr indexCount} { 
+                if {[lsearch [lindex $clashList $indexCount] $star] != -1} {
+                    set foundIt 1
+                    break
+                }
+            }
+            if {$foundIt == 0} {
+                if {!$createdTop} {
+                    set createdTop 1
+                    [graph] add "Not in $domainA or $domainB" {} {}
+                }
+                set contents [list tcl \
+                        "::tycho::Retarget::printStars $star \"$header\" \
+                        $domainA $domainB" ]
+                [graph] add $star $contents \
+                        [list "Not in $domainA or $domainB"]
+            }
+        }
+    }
+    # ports multiports states aOnly bOnly bothAandB bTotal0 aTotal0
+    modifyAfterDomainChange $universeName \
+            [llength [lindex $clashList 1]] \
+            [llength [lindex $clashList 2]] \
+            [llength [lindex $clashList 3]] \
+            [llength [lindex $clashList 4]] \
+            [llength [lindex $clashList 5]] \
+            [llength [lindex $clashList 0]] \
+            [llength [::tycho::DomainInfo::knownBlocks $domainB]] \
+            [llength [::tycho::DomainInfo::knownBlocks $domainA]]
+
+    #[graph] redrawGraph
+    set dirtyCompareDomains 0
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::Retarget::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO typt edit doc usersGuides RetargetHelp.html] html
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### printStars
+# Print the same star from two different domains
+# This procedure is called when the user double clicks on a star name
+body ::tycho::Retarget::printStars { starName relation domainA domainB} {
+    if [catch {set domainAPrint \
+            [::tycho::DomainInfo::print $starName $domainA]}] {
+        set domainAPrint "Star $starName is not present in domain $domainA"
+    }
+    if [catch {set domainBPrint \
+            [::tycho::DomainInfo::print $starName $domainB]}] {
+        set domainBPrint "Star $starName is not present in domain $domainB"
+    }
+    
+    switch $relation "
+        {Common Stars} { 
+            set relationMessage \
+                    \"The $starName star has the same ports, multiports \
+                    and states \
+                    in $domainA and $domainB.\"
+        }
+
+        {Different Ports} {
+            set relationMessage \
+                    \"The $starName star does not have the same ports \
+                    in $domainA and $domainB.\"
+        }
+        {Different Multiports} {
+            set relationMessage \
+                    \"The $starName star does not have the same multiports \
+                    in $domainA and $domainB.\"
+        }
+        {Different States} {
+            set relationMessage \
+                    \"The $starName star does not have the same states \
+                    in $domainA and $domainB.\"
+        }
+        \"${domainA} Only\" {
+            set relationMessage \
+                    \"The $starName star is only in $domainA, not in $domainB.\"
+        } 
+        \"${domainB} Only\" {
+            set relationMessage \
+                    \"The $starName star is only in $domainB, not in $domainA.\"
+        }
+        default {
+            set relationMessage \
+                    \"Internal Error: I don't know about: $relation\"
+        }
+    "
+
+    set hmsg [::tycho::htmlmessage "
+        <H1>$starName star in domains $domainA and $domainB</H1>
+        $relationMessage
+
+        <tcl quiet><pre>
+        # Click here to see the sources for $domainA $starName
+        ::tycho::view EditPtlang -star {$domainA $starName}
+        </pre></tcl>
+        <tcl quiet><pre>
+        # Click here to see the sources for $domainB $starName
+        ::tycho::view EditPtlang -star {$domainB $starName}
+        </pre></tcl>
+        <H2>$domainA Domain</H2>
+        <pre>
+        $domainAPrint
+        </pre>
+        <H2>$domainB Domain</H2>
+        <pre>
+        $domainBPrint
+        </pre>
+    "]
+    return $hmsg
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::Retarget::_initializeBars \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Retarget::_initializeToolbar $toolbar
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### _initializeToolbar
+# Initialize the tool bar.  Adds entries specific to this class.
+#
+body ::tycho::Retarget::_initializeToolbar {toolbar} {
+    $toolbar button newDomains \
+            -text {Compare Domains} \
+            -underline 0 \
+            -description {Compare Domains} \
+	    -command "$this busy $this compareDomains"
+    $toolbar button domainAButton \
+            -text "Change Domain A: $domainA" \
+            -underline 0 \
+            -description "Change DomainA: $domainA" \
+	    -command "$this changeDomainA"
+    $toolbar button domainBButton \
+            -text "Change Domain B: $domainB" \
+            -underline 0 \
+            -description "Change Domain B: $domainB" \
+	    -command "$this changeDomainB"
+    $toolbar button checkUniverse \
+            -text {Check Universe} \
+            -underline 0 \
+	    -description {Check Universe} \
+	    -command "$this checkUniverse"
+}
+
+#######################################################################
+#### modifyAfterDomainChange
+# Initialize the counters at the bottom of the window
+body ::tycho::Retarget::modifyAfterDomainChange { {universeName {}} \
+        {ports 0} {multiports 0} {states 0} {aOnly 0} {bOnly 0} \
+        {bothAandB 0} {bTotal 0} {aTotal 0}} {
+    addInfo diffPorts {Ports} $ports 3 \
+            "Number of stars that have the same name, but different ports."
+    addInfo diffMultiports {MultiPorts} $multiports 3 \
+            "Number of stars that have the same name, but different multiports."
+    addInfo diffStates {States} $states 3 \
+            "Number of stars that have the same name, but different states."
+    addInfo domainBOnly "$domainB Only" $bOnly 3 \
+            "Number of stars that are only in $domainA."
+    addInfo domainAOnly "$domainA Only" $aOnly 3 \
+            "Number of stars that are only in $domainB."
+
+    addInfo commonStars {Common} $bothAandB 3 \
+            "Number of stars that are in both domains and have the same ports, multiports and states."
+
+    addInfo domainBCount "$domainB" $bTotal 3 \
+            "Total number of stars in $domainB."
+    addInfo domainACount "$domainA" $aTotal 3 \
+            "Total number of stars in $domainA."
+
+    if {$universeName != {}} {
+        $this modify titleSet title \
+                "Retargeting $universeName from $domainA domain to $domainB domain"
+	displayer configure -title "$universeName: $domainA vs. $domainB" 
+    } else {
+        $this modify titleSet title \
+                "Comparison of $domainA and $domainB domains"
+	displayer configure -title "$domainA vs. $domainB" 
+    }
+
+    # Mark the graph as unmodified so that we do not get asked if
+    # we want to save until we have actually written a graph
+    markUnmodified
+
+    set dirtyCompareDomains 1
+}

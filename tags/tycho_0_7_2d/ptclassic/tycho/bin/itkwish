@@ -1,0 +1,120 @@
+#! /bin/sh
+# This script is used to run itkwish from prebuilt binaries
+# Author: Christopher Hylands
+#         changed to bourne shell script by Wolfgang Reimer
+# Version: @(#)itkwish	1.11 03/25/98
+# Copyright (c) 1996-1998 The Regents of the University of California.
+# 	All Rights Reserved.
+
+# PTOLEMY and PTARCH are part of the Ptolemy project.
+# You can set $PTARCH by hand to either:
+# Solaris2.5
+# setenv PTARCH sol2.5
+# SunOS4.1.3
+# setenv PTARCH sun4
+# HPUX10.20
+# setenv PTARCH hppa
+
+if [ -z "$PTOLEMY" ]; then 
+    if [ "$TYCHO" -a -f "$TYCHO/../bin/ptarch" ]; then
+	PTOLEMY="$TYCHO/.."
+	export PTOLEMY
+    elif [ -d "/usr/eesww/share/ptolemy" ]; then
+	PTOLEMY=/usr/eesww/share/ptolemy
+	export PTOLEMY
+    fi
+fi
+
+if [ -z "$TYCHO" ]; then
+    if [ "$PTOLEMY" -a -f "$PTOLEMY/tycho/bin/ptarch" ]; then
+	TYCHO="$PTOLEMY/tycho"
+	export TYCHO
+    elif [ -d "/usr/eesww/share/tycho0.2/tycho0.2" ]; then
+	TYCHO=/usr/eesww/share/tycho0.2/tycho0.2
+	export TYCHO
+    fi
+fi
+
+# ITCLDIR should be the location of the untar'd itcl files
+if [ -z "$ITCLDIR" ]; then
+    ITCLDIR="$PTOLEMY/tcltk"
+    export ITCLDIR
+fi
+
+if [ -z "$PTARCH" ]; then
+    if [ -x "$TYCHO/bin/ptarch" ]; then
+	PTARCH=`$TYCHO/bin/ptarch`
+	export PTARCH
+    elif [ -x "$ITCLDIR/itcl/bin/ptarch" ]; then
+	PTARCH=`$ITCLDIR/itcl/bin/ptarch`
+	export PTARCH
+    elif [ -x "$PTOLEMY/bin/ptarch" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+	export PTARCH
+    else
+	echo '$PTARCH is not set.'
+	echo "$TYCHO/bin/ptarch, $PTOLEMY/bin/ptarch, and"
+	echo "$ITCLDIR/itcl/bin/ptarch either are not"
+	echo " executable or do not exist, so we cannot"
+	echo " run ptarch."
+	echo 'Perhaps you need to set $ITCLDIR?'
+   fi
+fi
+
+progname=`basename $0`
+
+if [ -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ]; then
+    case "$PTARCH" in
+    hppa*) if [ "$SHLIB_PATH" ]; then
+	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${SHLIB_PATH}
+	else
+	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl
+	fi
+	export SHLIB_PATH;;
+    *) if [ "$LD_LIBRARY_PATH" ]; then
+	    LD_LIBRARY_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${LD_LIBRARY_PATH}
+	else
+	    LD_LIBRARY_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl
+	fi
+	export LD_LIBRARY_PATH;;
+    esac
+
+    # Itcl2.1
+    TCL_LIBRARY=$ITCLDIR/itcl/lib/itcl/tcl
+    TK_LIBRARY=$ITCLDIR/itcl/lib/itcl/tk
+    ITCL_LIBRARY=$ITCLDIR/itcl/lib/itcl/itcl
+    ITK_LIBRARY=$ITCLDIR/itcl/lib/itcl/itk
+    IWIDGETS_LIBRARY=$ITCLDIR/itcl/lib/itcl/iwidgets
+    export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
+
+    exec $ITCLDIR/itcl.$PTARCH/bin/$progname ${1+"$@"}
+
+elif [ -f $PTOLEMY/tcltk/tcl/lib/tcl/init.tcl ]; then
+    # Itcl2.0 with statically linked libs, which was shipped with Ptolemy0.6 
+    TCL_LIBRARY=$PTOLEMY/tcltk/tcl/lib/tcl
+    TK_LIBRARY=$PTOLEMY/tcltk/tk/lib/tk
+    ITCL_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl
+    ITK_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itk
+    IWIDGETS_LIBRARY=$PTOLEMY/tcltk/itcl/lib/iwidgets
+    export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
+
+    exec $PTOLEMY/bin.$PTARCH/$progname ${1+"$@"}
+
+else
+    # If we just call itkwish here, we will end up in 
+    # a recursive loop
+    #exec itkwish $*
+
+    # Find the next itkwish by traversing the path, looking
+    # for an itkwish that is not a script
+    # Is this a big mistake?
+    #     No, I tested this and it seems to work :-) (Wolfgang Reimer)
+
+    bindir=`dirname $0`
+    for dir in `echo $PATH|sed 's/:/ /g'`; do
+	if [ "$dir" != "$bindir" -a -x $dir/$progname ] ; then
+	    file $dir/$progname | egrep -s 'csh|shell|script' || \
+ 	    exec $dir/$progname ${1+"$@"}
+	fi	
+    done
+fi

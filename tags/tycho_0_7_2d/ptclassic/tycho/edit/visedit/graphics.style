@@ -1,0 +1,78 @@
+# -*- mode: tcl -*-
+#
+# @(#)graphics.style	1.3 10/07/97
+#
+# The "graphics" master style-sheet
+#
+configure -title "Graphics settings"
+configure -description {
+    Settings for the Graphics class.
+}
+
+style default \
+	-label "Default"  {
+    
+    parameter canvasColor  azure3 -type color \
+	    -label "Canvas background color"
+    parameter canvasHeight 500 -type integer \
+	    -label "Default canvas height, in pixels"
+    parameter canvasWidth  600 -type integer \
+	    -label "Default canvas width, in pixels"
+
+    # Vertices displayed as text have a background box
+    # FIXME: Change name to itemBackground
+    parameter nodeBoxColor azure3 -type color \
+	    -label "Item background color"
+
+    # Following parameter do not appear in parameter
+    # user interface. It's not even clear they should exist.
+    
+    # Specify types of titles in the order in which they
+    # appear on the screen.
+    parameter titleTypes {title subtitle author version copyright}
+
+    # FIXME: Pending better handling of fonts. What we really need is a
+    # way of specifying a) default size, b) default typeface, c)
+    # size, weight and style relative to the default, and d) color.
+    #
+    # Font lists
+    parameter authorFont    {helvetica 16 bolditalic} -type font
+    parameter copyrightFont {helvetica 14} -type font
+    parameter versionFont   {helvetica 14} -type font
+    parameter subtitleFont  {helvetica 16 bold} -type font
+    parameter titleFont     {helvetica 24 bold} -type font
+
+    # Colors for title text
+    parameter authorColor    firebrick -type color
+    parameter copyrightColor black -type color
+    parameter subtitleColor  blue  -type color
+    parameter titleColor     black -type color
+    parameter versionColor   black -type color
+
+    # Other colors
+    parameter linkColor blue -type color
+    parameter lineColor gray40 -type color
+
+    group diagram \
+	    -label "More settings for line diagrams" {
+
+	# Default start position in the horizontal direction (in pixels).
+	parameter startx 10
+
+	# Default start position (below title) in the vertical direction 
+	# (in pixels).
+	parameter starty 5
+
+	# Default vertical spacing (as a fraction of a nominal default)
+	parameter spacingy 1.0
+	
+	# Default horizontal spacing (as a fraction of a nominal default)
+	parameter spacingx 1.0
+	
+	# Default horizontal offset for children (in pixels).
+	parameter indent 50
+	
+	# Default vertical spacing (as a multiplier of font height)
+	parameter vertspacing 1.2
+    }
+}

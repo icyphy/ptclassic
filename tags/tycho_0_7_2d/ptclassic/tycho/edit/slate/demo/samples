@@ -1,0 +1,28 @@
+# Create some sample items for the tcltk-98 paper
+#
+# Run with
+#     ../bin/slate <filename>
+# or
+#     ../bin/slate8 <filename>
+#
+# @(#)samples	1.2 07/21/98
+# Author: John Reekie
+ 
+# Start here
+# set slate [::tycho::demo::newslate -background white]
+set slate [::tycho::demo::newslate]
+
+set f [$slate create Frame 50 50 100 100 -color green -relief ridge \
+	-borderwidth 4]
+
+set s [$slate create Solid 220.0 60.0 252.0 60.0 252.0 44.0 \
+	284.0 76.0 252.0 108.0 252.0 92.0 220.0 92.0 220.0 60.0 \
+	-color green -borderwidth 4]
+
+set r [$slate create LabeledRect 50 150 100 200 -fill green2  \
+	-outline red -width 3 \
+	-textanchor nw -text "Foo!" \
+	-graphics "line 0 0 100 100; line 0 100 100 0"]
+
+set l [$slate create SmartLine 220 150 260 200 \
+	-start s -end w -width 3 -alpha 20 -arrow last]

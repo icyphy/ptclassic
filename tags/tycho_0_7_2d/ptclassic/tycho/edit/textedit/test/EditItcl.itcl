@@ -1,0 +1,521 @@
+# Definition of an itcl context-sensitive editor.
+#
+# @Authors: Edward A. Lee, Christopher Hylands
+#
+# @Version: @(#)EditItcl.itcl	1.1 10/21/97
+#
+# @Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### EditItcl
+# This class defines a text widget containing an emacs-like editor with
+# some context-specific features for editing Itcl files. Specifically,
+# in addition to features provided by the base class, it keeps track of
+# classes that are defined within so that it can delete the class
+# definitions and instances before evaluating the file. Note that for
+# this to work, all derived classes must be accessible by auto-loading.
+# This implies some formatting restrictions on the source code file.
+# Specifically, class definitions must appear with the keyword "class"
+# starting in column zero and the class name following it on the same
+# line.
+# <p>
+# This class inherits its hyperlink mechanism from EditTcl.
+# However, because of the namespaces in Itcl, the tagLinks method
+# will only tag references that are completely qualified.  For
+# example, "::tycho::EditTcl" will be identified as a link,
+# but "EditTcl" will not.  Unfortunately, since Itcl is
+# dynamically scoped, it appears that there is no way around this.
+# The entries in the auto_index array are fully qualified, and there
+# is no way to tell without actually executing a piece of code in
+# some context what namespaces to search for an identifier.
+# We might consider putting in some special support for the tycho
+# namespace, but it would be hard to do much more.
+#
+class ::tycho::EditItcl {
+    inherit ::tycho::EditTcl
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The color of Itcl options.
+    itk_option define -optioncolor optionColor OptionColor black {
+	$itk_component(text) tag configure optionname \
+		-foreground $itk_option(-optioncolor)
+    }
+
+    # Location of the template file
+    itk_option define -filetemplate fileTemplate FileTemplate \
+	    $TYCHO/editors/textedit/templates/ItclTemplate.itcl {}
+
+    # Location of the template file
+    itk_option define -testtemplate testTemplate TestTemplate \
+	    $TYCHO/editors/textedit/templates/testTemplate.itcl {}
+
+
+    ###################################################################
+    ####                     public methods                        ####
+
+    # Insert a body template
+    method bodyTemplate {}
+
+    # Execute the Itcl code in the selection or the entire text widget.
+    method evaluate {}
+
+    # Generate and display a doc file from the current buffer
+    method gendocBuffer {}
+
+    # Generate and display an idoc file from the current buffer
+    method genidocBuffer {}
+
+    # Guess about the class name from the filename
+    public method getClassName {}
+
+    # Open a help window.
+    method help {}
+
+    # Tag and color the code in a region.
+    method parseNow {start stop}
+
+    ###################################################################
+    ####                    public procedures                      ####
+
+    # Run tydoc on filename, generate html documentation and display it.
+    proc gendoc {filename}
+
+    # Run idoc on filename, generate idocumentation and display it.
+    proc genidoc {filename}
+
+    ###################################################################
+    ####                    protected methods                      ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    protected variable className {}
+
+    ####################################################################
+    ####                    protected commons                       ####
+
+    # Regular expression to select a construct
+    protected common selectConstructRegexp {^(proc|body|configbody)}
+
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Initialize the menubar.
+    private method initializeMenubar {menubar}
+}
+
+###################################################################
+#
+body ::tycho::EditItcl::constructor {args} {
+    eval itk_initialize $args
+
+   # Subscribe to the preference set
+   preference subscribeoptions $this \
+           -optioncolor optionColor
+}
+
+
+###################################################################
+###################################################################
+####                     public methods                        ####
+
+
+#####################################################################
+#### bodyTemplate
+# Insert a body template
+#
+body ::tycho::EditItcl::bodyTemplate {} {
+
+    set template "#####################################################################\n#### myMethod \n# \n#\nbody [getClassName]::myMethod {} {\n\n}\n"
+
+    insertData $template
+    markModified
+}
+
+#####################################################################
+#### evaluate
+# Override the base class to undefine classes defined in the file or
+# the selection to be evaluated. Note that derived classes are
+# undefined and not redefined. They will hopefully be auto-loaded next
+# time they are needed. Also note that this will only work if the class
+# name is fully qualified. Thus, if the declaration is "class
+# ::tycho::foo", the class can be re-evaluated, but if it is "class
+# tycho::foo", then there is no way to tell from the source code what
+# namespace it is defined in.
+# <p>
+# A number of objects may be deleted as a side effect of invoking this
+# command.  These include all objects of classes defined in the file
+# or of derived classes.  However, this command is fairly fragile
+# anyway.  In particular, if a deleted object is component of another
+# object, that other object may be left in an invalid state.
+# In version 2.0 and 2.1 of Itcl, this can cause a core dump.
+# For now, we issue a warning, pending a better fix.
+#
+body ::tycho::EditItcl::evaluate {} {
+    set start 1.0
+    set end end
+    if {[getSelection] != {}} {
+	set start sel.first
+	set end sel.last
+    }
+    set itclClasses {}
+    set pat {^[ 	]*class[ 	]+([^ 	]*)}
+    while {[set beg [$itk_component(text) search -count len -regexp -- \
+	    $pat $start $end]] != {}} {
+	# found a class definition
+	regexp $pat [get $beg "$beg + $len chars"] match className
+
+	set start [$itk_component(text) index "$beg + $len chars"]
+	lappend itclClasses $className
+	# The following appears to be needed to prevent infinite loops.
+	if [$itk_component(text) compare $start >= end] {break}
+    }
+	
+    if {[lsearch -exact $itclClasses [$this info class]] != -1} {
+	error {Sorry: I cannot evaluate my own class definition.}
+    }
+	
+    # NOTE: Itcl 2.0 and 2.1 can dump core here if here we delete a class that
+    # has objects existing as components of another class.
+    if {$itclClasses != {} && \
+            [preference get itclClassRedefinitionWarning] == 1} {
+        if {![safeEval ::tycho::askuser \
+                "Warning: all objects with the following \
+                classes (and derived classes) will be deleted: \n \
+                $itclClasses\n \
+                Proceed anyway? \
+                If such objects exist, you could get a crash."]} {
+            return
+        }
+    }
+
+    # NOTE: We should really check to make sure that we aren't
+    # about to undefine this editor class by unloading one of its
+    # parent classes.  But this is unlikely to occur to anyone
+    # unless they are developing context-sensitive editors like this one.
+	
+    foreach class $itclClasses {
+	# The "info classes" command is fairly weak, so we have to parse
+	# the class name and invoke info in the appropriate namespace.
+	if [regexp {^(((::[^:]*)*)(::))?([^:]*)$} $class \
+		match junk1 space junk2 junk3 class] {
+	    if {$space != {}} {
+		namespace $space "
+		    if {\[info classes $class\] != {}} {
+			delete class $class
+		    }
+		"
+	    } {
+                if {[uplevel #0 info classes $class] != {}} {
+                    uplevel #0 delete class $class
+                }
+	    }
+	}
+    }
+
+    EditTcl::evaluate
+}
+
+#####################################################################
+#### getClassName
+# Guess about the class name from the filename
+# If the file has not been parsed then the className variable might
+# not be set.  If it is not set, guess on the className from
+# the name of the file
+#
+body ::tycho::EditItcl::getClassName {} {
+    if {$className == {}} {
+	return [file tail [file rootname [filename]]]
+    }
+    return $className
+}
+    
+###################################################################
+#### gendocBuffer
+# Generate and display a doc file from the current file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditItcl::gendocBuffer {} {
+    return [ ::tycho::EditProgram::gendocBufferInternal \
+        [list set docfile [file join doc codeDoc \
+                [info namespace tail [getClassName]].html]] \
+    {
+        set verbose 0
+        set debug 0
+        set generateIndex 0
+        file delete -force $docfile
+        ::tycho::HTMLDocSys::generateHTML \
+                $verbose $debug $generateIndex {An Itcl Class} $tail
+    }]
+}
+
+###################################################################
+#### genidocBuffer
+# Generate and display an idoc file from the current file.
+# If the idoc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditItcl::genidocBuffer {} {
+    return [ ::tycho::EditProgram::gendocBufferInternal \
+        [list set docfile [file join doc codeDoc \
+                [info namespace tail [getClassName]].idoc]] \
+    {
+        set debug 0
+        set generateIndex 0
+        file delete -force $docfile
+        ::tycho::IDocSys::generateIDoc \
+                $debug $generateIndex {An Itcl Class} $tail
+    }]
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditItcl::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	[file join $TYCHO editors textedit doc usersGuides \
+	    EditItclHelp.html]
+}
+
+
+#####################################################################
+#### parseNow
+# Invoke the base class parser to color comments, the strings "NOTE"
+# and "FIXME", and procedure names. Then identify class definitions and
+# methods. To recognize class definitions, it requires that "class" be
+# the first non-space token on the line, followed by the class name on
+# the same line. Note that the program that makes the auto-load index
+# has the even tighter restriction that the keyword must start at
+# column zero, and reloading will not work without auto-loading anyway.
+#
+body ::tycho::EditItcl::parseNow {start stop} {
+    
+    EditTcl::parseNow $start $stop
+    set text $itk_component(text)
+    
+    # Remove tags first, if necessary
+    $text tag remove methodname $start $stop
+    $text tag remove classname $start $stop
+    $text tag remove varname $start $stop
+    $text tag remove optionname $start $stop
+    
+    # Search for procedure definitions.
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set regexp "^$spaces*((public|protected|private|itk_option)$spaces+)?(class|inherit|method|body|constructor|destructor|variable|common|define|add|configbody)$spaces+(\[^ \t\]*)"
+
+    while {[set ind [$text search -count len -regexp $regexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+    	if [regexp -indices {^[ 	]*class[ 	]+([^ 	]*)} \
+		$line match classNameIndices] {
+	    # Class definitions. Tag and save the class name.
+	    set first [lindex $classNameIndices 0]
+	    set last [lindex $classNameIndices 1]
+	    set className [string range $line $first $last]
+	    $text tag add classname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices \
+		{^[ 	]*inherit[ 	]+([^ 	]*)} \
+		$line match classNameIndices] {
+	    # Inheritance. Tag the class name.
+	    set first [lindex $classNameIndices 0]
+	    set last [lindex $classNameIndices 1]
+	    $text tag add classname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices \
+		{^[ 	]*(public[ 	]+|protected[ 	]+|private[ 	]+)?(method|body)[ 	]+([^ 	]*)} \
+		$line match access methodORbody methodName] {
+	    # Method definitions. Tag the method name.
+	    set first [lindex $methodName 0]
+	    set last [lindex $methodName 1]
+	    $text tag add methodname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices {^[ 	]*(constructor|destructor)[ 	]} \
+		$line match word] {
+	    # Constructor or Destructor
+	    set first [lindex $word 0]
+	    set last [lindex $word 1]
+	    $text tag add methodname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices \
+		{^[ 	]*(public[ 	]+|protected[ 	]+|private[ 	]+)?(variable|common)[ 	]+([^ 	]*)} \
+		$line match access variableORcommon varName] {
+	    # Variable definitions. Tag the variable name.
+	    set first [lindex $varName 0]
+	    set last [lindex $varName 1]
+	    $text tag add varname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices \
+		{^[ 	]*itk_option[ 	]+(define|add)[ 	]+([^ 	]*)} \
+		$line match defineORadd optionName] {
+	    # Option definitions. Tag the option name (command-line syntax only)
+	    set first [lindex $optionName 0]
+	    set last [lindex $optionName 1]
+	    $text tag add optionname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	} elseif [regexp -indices {^[ 	]*configbody[ 	]+([^ 	]*)} \
+		$line match methodName] {
+	    # configbody definitions. Tag the name.
+	    set first [lindex $methodName 0]
+	    set last [lindex $methodName 1]
+	    $text tag add optionname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	}
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    # Set the visual characteristics of the tagged text
+}
+###################################################################
+###################################################################
+####                     public procedures                     ####
+
+###################################################################
+#### gendoc
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditItcl::gendoc {filename} {
+    return [ ::tycho::EditProgram::gendocFileInternal $filename\
+            [list set docfile [file join doc codeDoc \
+            [info namespace tail [file tail [file rootname $filename].html]]]] \
+            {
+        set verbose 0
+        set debug 0
+        set generateIndex 0
+        file delete -force $docfile
+        ::tycho::HTMLDocSys::generateHTML \
+                $verbose $debug $generateIndex {An Itcl Class} $tail
+    }]
+}
+
+###################################################################
+#### genidoc
+# Generate and display an idoc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditItcl::genidoc {filename} {
+    return [ ::tycho::EditProgram::gendocFileInternal $filename\
+            [list set docfile [file join doc codeDoc \
+            [info namespace tail [file tail [file rootname $filename].idoc]]]] \
+            {
+        set debug 0
+        set generateIndex 0
+        file delete -force $docfile
+        ::tycho::IDocSys::generateIDoc \
+                $debug $generateIndex {An Itcl Class} $tail
+    }]
+}
+
+###################################################################
+###################################################################
+####                    protected methods                      ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditItcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # If you add Special Menu choices, be sure to consider deleting them
+    # in EditPTcl, which inherits from EditItcl.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditItcl::initializeMenubar $menubar
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditItcl::initializeMenubar {menubar} {
+
+    $menubar separator specialsep1 special
+
+    $menubar command bodytemplate special \
+	    -label "Body Template" -underline 0 \
+            -command "$this bodyTemplate"
+    
+    $menubar command filetemplate special \
+	    -label "File Template" -underline 0 \
+            -command "$this fileTemplate $itk_option(-filetemplate) \
+            \[$this getClassName\]"
+
+    $menubar command testtemplate special \
+	    -label "Test Template" -underline 0 \
+            -command "$this fileTemplate $itk_option(-testtemplate) \
+            \[$this getClassName\]"
+
+    $menubar add separator specialsep2 special
+    
+    $menubar command generatedoc special \
+	    -label "Generate HTML Documentation" -underline 0 \
+            -command "$this gendocBuffer"
+        
+    $menubar command generateidoc special \
+	    -label "Generate IDoc Documentation" -underline 9 \
+            -command "$this genidocBuffer"
+
+    $menubar command generateclassdiagram special \
+	    -label "Generate class diagram" -underline 9  \
+            -command "::tycho::view ItclClassList \
+            -file [file join [file dirname [$this filename]] classList.icl] \
+            -toolbar 1"
+}

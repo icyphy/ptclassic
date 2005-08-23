@@ -1,0 +1,70 @@
+<!-- @(#)audioio.html	1.4 05/07/98 -->
+<html>
+<head>
+<title>Audio I/O demonstration</title>
+<body bgcolor="#faf0e6">
+<h1>Audio I/O demonstration</h1>
+
+Welcome to the prototype audio control panel! Sorry about the
+formatting, but this will be fixed sooner or later ...
+
+ <P>
+<b>General information</b>
+
+ <P> This application controls the Sun Audio device. By default, the
+Ptolemy universe that created it configures the device to run stereo
+at 44.1 kHz with 16-bit linear encoding. This is the simplest (and
+most useless!) real-time audio demonstration we have -- it just
+demonstrates that the audio works.
+
+ <P>
+<b>Controls</b>
+
+<dl>
+
+<dt>Input and output selectors
+
+<dd>The input and output selectors do the obvious thing. Or, at least,
+they would if they worked. We haven't gotten around to this
+yet. Really, buttons would be nicer than check-boxes --  what do you
+think?
+
+<dt>Rec
+
+<dd>Controls the gain on the input. For CD source, this should really
+be down quite low to avoid clipping.
+
+<dt>Bal
+
+<dd>Controls the balance of the output signal. Negative numbers are
+left, positive are right (we think...)
+
+<dt>Gain
+
+<dd>Controls the output gain. Again, if it's too high or there's too
+much gain in a filter (in other applications), you'll get nasty
+noises.  We really need an amplitude-limiting star to prevent this...
+
+</dl>
+
+ <P>
+<b>Shortcuts</b>
+
+<ul>
+<li>Start -- Control-g
+<li>Pause -- Control-p
+<li>Resume -- Control-r
+<li>Stop -- Control-s
+<li>Close -- Control-x k
+</ul>
+<p>
+<a href="../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1997-1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/07/98,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>

@@ -1,0 +1,400 @@
+# Query box that prompts the user for one or more text entries.
+#
+# @Authors: Edward A. Lee, Joel R. King
+#
+# @Version: @(#)EditSearch.itcl	1.40	01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### EditSearch class.
+# Create a dialog box for searching for text in an Edit object. This
+# dialog box should be child window of the Edit object so that it
+# is removed when the parent is removed. To do this, just give it a
+# name that is the name of the Edit window (or its top-level
+# parent) with an additional field appended after a period. For
+# example, if the name of the top-level object is ".file0", the search
+# object could be ".file0.search".
+#
+class ::tycho::EditSearch {
+    inherit ::tycho::Query
+
+    constructor {args} {}
+
+    #################################################################
+    ####                        options                          ####
+
+    # Specify backwards search.
+    itk_option define -backwards backwards Backwards 0
+
+    # The command to execute on a change and find command.
+    itk_option define -chfindcommand chfindcommand ChangeAndFindCommand ""
+
+    # The associated Edit object.
+    itk_option define -edit edit Edit ""
+
+    # The command to execute on a find command.
+    itk_option define -findcommand findcommand FindCommand ""
+
+    # If this option value is non-zero, do not permit changes.
+    itk_option define -nochange nochange NoChange 0
+
+    ##################################################################
+    ####                     public methods                       ####
+
+    # Change the selection, replacing it with the replacement string.
+    method change {}
+
+    # Change the text in the selection to the value in the "Change To" box.
+    method changeAndFind {}
+
+    # Clear the find-match marks on the associated text window.
+    method clearFindMatch {}
+
+    # Find the specified pattern and tag it in the text.
+    method find {{start {}}}
+
+    ###################################################################
+    ####                      private variables                    ####
+
+    # Remember the last search pattern and change string
+    private common lastSearchPattern ""
+    private common lastChangeString ""
+
+    # Keep common configuration information
+    private common wordsw 0
+    private common casesw 0
+    private common backwardssw 0
+    private common regexpsw 0
+    private common changeallsw 0
+
+    # Identify "find again" as distinct from the first find of a
+    # a particular string.  This is used to avoid repeatedly finding
+    # the same string.
+    private variable myLastSearchPattern ""
+}
+
+#####################################################################
+#### -backwards option
+# Set or change the configuration for forwards or backwards search.
+# The value of the option should be 0 or 1.
+# 
+configbody ::tycho::EditSearch::backwards {
+    if {$itk_option(-backwards)} \
+	    {$itk_component(backwards) select} \
+	    {$itk_component(backwards) deselect}
+}
+
+#####################################################################
+#### -edit option
+# Specify the Edit object on which the search will occur.
+# 
+configbody ::tycho::EditSearch::edit {
+    if {$itk_option(-edit) == {} || \
+	    [infoObjects $itk_option(-edit)] == {} || \
+	    ![$itk_option(-edit) isa ::tycho::Edit]} {
+	error "EditSearch::find: Invalid -edit option: \
+		$itk_option(-edit)"
+    }
+}
+
+#####################################################################
+#### constructor
+#
+body ::tycho::EditSearch::constructor {args} {
+
+    # Define the switches that configure the search
+    itk_component add switches {
+	frame $itk_component(childsite).switches
+    } {
+	keep -cursor -background
+    }
+    pack $itk_component(switches) -after $itk_component(querysite)
+
+    itk_component add word {
+	checkbutton $itk_component(switches).word -text "Whole Word" \
+		-variable [scope wordsw] \
+		-relief flat
+    } {
+	keep -cursor -font -background -foreground
+    }
+    pack $itk_component(word) -side left
+
+    itk_component add case {
+	checkbutton $itk_component(switches).case -text "Consider Case" \
+		-variable [scope casesw] \
+		-relief flat
+    } {
+	keep -cursor -font -background -foreground
+    }
+    pack $itk_component(case) -side left
+
+    itk_component add backwards {
+	checkbutton $itk_component(switches).backwards -text "Find Backwards" \
+		-variable [scope backwardssw] \
+		-relief flat
+    } {
+	keep -cursor -font -background -foreground
+    }
+    pack $itk_component(backwards) -side left
+    
+    itk_component add regexp {
+	checkbutton $itk_component(switches).regexp -text "Regular Expression" \
+		-variable [scope regexpsw] \
+		-relief flat
+    } {
+	keep -cursor -font -background -foreground
+    }
+    pack $itk_component(regexp) -side left
+
+    eval itk_initialize $args
+
+    if {$itk_option(-nochange) == 0} {
+        configure -queries {
+            {line pattern {Search pattern:} {}}
+            {line change {Change to:} {}}
+        }
+    } {
+        configure -queries {
+            {line pattern {Search pattern:} {}}
+        }
+    }
+
+    # Well, the following are undocumented bindings.  So be it.
+    bind $itk_component(hull) <<Search>> \
+	    "$this configure -backwards 0; $this find"
+    bind $itk_component(hull) <<Find>> \
+	    "$this configure -backwards 0; $this find"
+    bind $itk_component(hull) <<SearchBackwards>> \
+	    "$this configure -backwards 1; $this find"
+
+    # If the findcommand option has not been set, set the default now.
+    # This has to be done in the constructor rather than in the class
+    # definition (as a default) because "$this" is known here.
+    if {$itk_option(-findcommand) == {}} {
+	configure -findcommand "$this find"
+    }
+
+    $itk_component(bbox) buttonconfigure ok \
+	    -text {Find} \
+            -underline 0 \
+	    -command "$this execCommand -findcommand"
+    # NOTE: There is not facility in the base classes to remove the
+    # previous binding (to letter "o") to invoke this button and to
+    # add a new binding, so we do it by brute force.  Ugh.
+    bind $itk_component(hull) <Key-o> {}
+    bind $itk_component(hull) <Key-f> "$this invoke ok; break"
+
+    addButton clearfind -text {Clear Marks} \
+            -underline 6 \
+	    -command "$this clearFindMatch"
+
+    if {$itk_option(-nochange) == 0} {
+
+	if {$itk_option(-chfindcommand) == {}} {
+	    configure -chfindcommand "$this changeAndFind"
+	}
+
+	addButton change -text {Change} \
+                -underline 1 \
+		-command "$this change"
+	addButton changeandfind -text {Change & Find} \
+                -underline 2 \
+		-command "$this execCommand -chfindcommand"
+
+	# Add an option to change all matches
+	itk_component add changeall {
+	    checkbutton $itk_component(switches).changeall -text "Change All" \
+		    -variable [scope changeallsw] \
+		    -relief flat
+	} {
+	    keep -cursor -font -background -foreground
+	}
+	pack $itk_component(changeall) -side left
+    } {
+	remove change
+    }
+
+    # Insert defaults into the entry boxes, if appropriate.
+    if [info exists lastSearchPattern] {
+	insert pattern $lastSearchPattern
+    }
+    if {$itk_option(-nochange) == 0 && [info exists lastChangeString]} {
+	insert change $lastChangeString
+    }
+
+    configure -title "Search [file tail [$itk_option(-edit) filename]]"
+}
+
+##################################################################
+####                     public methods                       ####
+
+#####################################################################
+#### change
+# Change the text in the selection to the value in the "Change To" box.
+# 
+body ::tycho::EditSearch::change {} {
+    set editWindow $itk_option(-edit)
+
+    set changeto [get change]
+    if {$changeallsw} {
+        set pattern [get pattern]
+        if {$pattern == ""} {
+            error "A change all requires text in the Search Pattern box"
+        }
+        if {$pattern != $lastSearchPattern} find
+	# Change all tagged text.  Note that we have to have done
+	# a search, or we will get an error message.
+	$editWindow replaceAll findmatch $changeto
+    } {
+	# Change only one
+	if {[$editWindow getSelection] != {}} {
+	    $editWindow deleteRange sel.first sel.last
+	    $editWindow insertString insert $changeto
+	} {
+	    error "No selection to change"
+	}
+    }
+    set lastChangeString $changeto
+}
+
+#####################################################################
+#### changeAndFind
+# Change the text in the selection to the value in the "Change To" box
+# and find the next instance that matches the pattern.
+# 
+body ::tycho::EditSearch::changeAndFind {} {
+    change
+    find
+}
+
+#####################################################################
+#### clearFindMatch
+# Clear the highlighting in the text window due to a search.
+# 
+body ::tycho::EditSearch::clearFindMatch {} {
+    set tw $itk_option(-edit)
+    [$tw textWinName] tag remove findmatch 1.0 end
+    [$tw textWinName] tag remove currmatch 1.0 end
+}
+
+#####################################################################
+#### find
+# Find and mark the specified pattern in the associated Edit
+# object. The search starts at the insertion cursor, unless the
+# optional argument is given, in which case it starts at the specified
+# point. The first match found is selected.  The rest are tagged and the
+# background color changed.
+# 
+body ::tycho::EditSearch::find {{start {}}} {
+
+    set tw $itk_option(-edit)
+    set pattern [get pattern]
+    if {$pattern == ""} {
+	error "A search requires text in the Search Pattern box"
+    }
+
+    set lastSearchPattern $pattern
+    
+    # To avoid finding the same string over and over again ...
+    if {$start == {}} {
+	if {$myLastSearchPattern == $pattern && !$backwardssw} {
+	    set start {insert +1 char}
+	} else {
+	    set start insert
+	}
+    }
+    set myLastSearchPattern $pattern
+    
+    if {$backwardssw} \
+            {set stop 1.0} \
+            {set stop end}
+
+    set result [$tw findOne $casesw $backwardssw $regexpsw $wordsw \
+            $pattern $start $stop {}]
+
+    if {$result == {}} {
+	if {$backwardssw} {
+	    if [safeEval ::tycho::askuser \
+		    "Not found.  Start search again at the bottom?"] {
+                # This used to be deferred with "after idle". Not sure why.
+		$this focusin
+		find end
+	    }
+	} {
+	    if [safeEval ::tycho::askuser \
+		    "Not found.  Start search again at the top?"] {
+                # This used to be deferred with "after idle". Not sure why.
+		$this focusin
+		find 1.0
+	    }
+	}
+    } {
+        # Found a match.  Select it.
+        set text [$tw textWinName]
+
+        # The behaviour of the selection tag changed in Tk 8.
+        # The changes file says:
+        #
+        # 11/25/96 (feature change) Under Windows and Macintosh, the selection
+        # highlight is now hidden whenever an entry or text widget loses focus.
+        # Also, the previous selection information is not lost when a new
+        # selection is made in a different widget. (SS)
+
+        selection clear -displayof $text
+        $text tag remove sel 1.0 end
+        $text tag delete currmatch
+        set firstind [lindex $result 0]
+        set numchars [lindex $result 1]
+        if {$firstind != {}} {
+            # First, do the sel tag so that when the focus is in the 
+            # window we are searching, the selection is highlighted.
+            $tw selectRange $firstind "$firstind + $numchars chars"
+
+            # Then, do the currmatch tag so that we can see the results
+            # in the window we are searching while the focus is 
+            # in the EditSearch window. 
+            $text see $firstind
+            $text tag add currmatch $firstind "$firstind + $numchars chars"
+            $text mark set insert $firstind
+	    $text tag configure currmatch \
+                    -background [stylesheet get text selectBackground] \
+                    -foreground [stylesheet get text selectForeground]
+        }
+        # Mark the rest of the matches.
+        $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
+
+        # Set up reverse video for the found text. First lower the
+        # priority of the tag so current match is still visible as normal.
+
+        $text tag raise currmatch findmatch
+        $text tag raise sel currmatch
+        $text tag configure findmatch \
+                -background [stylesheet get text search.background] \
+                -foreground [stylesheet get text search.foreground]    }
+    }

@@ -1,0 +1,537 @@
+##########################################################################
+# @Version: @(#)Rectangle.itcl	1.19 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Rectangle
+#
+# The shape of rectangular items. An item with this shape has
+# four coordinates, being the left, top, right, and bottom
+# coordinates. Items with this shape include <I>rectangle</I>,
+# <I>Frame</I>, <I>LabelledRect</I>, and <I>LabelledFrame</I>.
+#
+# Note: Because the "rectangle" shape
+# may be applied to items that are not in fact rectangular,
+# this shape always uses the region{} method instead of the
+# coords{} method.
+#
+#  <P><b>Primitive features</b>
+#
+# <ul>
+# <li><B>n</B>: The center of the top edge.
+# <li><B>s</B>: The center of the bottom edge.
+# <li><B>e</B>: The center of the right edge.
+# <li><B>w</B>: The center of the left edge.
+# </ul>
+#
+# <p><b>Derived features</b>
+#
+# <ul>
+# <li><B>ne</B>: The top-right corner.
+# <li><B>nw</B>: The top-left corner.
+# <li><B>se</B>: The bottom-right corner.
+# <li><B>sw</B>: The bottom-left corner.
+# <li><B>c</B> or <B>center</B>: The center of the rectangle.
+# </ul>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">An overview of Shape classes</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="../codeDoc/index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Rectangle {
+    inherit ::tycho::Shape
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
+
+    # Attach a set of grapples to an item
+    proc _grapple {id canvas slate interactor args}
+
+    # Reshape one or more features of an item
+    proc _reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc _reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc _reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc _reshaperelease {id canvas slate}
+
+    # Get a feature of a rectangle
+    proc feature {x0 y0 x1 y1 feature}
+
+    # Test if the first rectangle is inside the second.
+    proc inside {x0 y0 x1 y1 a0 b0 a1 b1}
+
+    # Move a rectangle by a given distance
+    proc move {x0 y0 x1 y1 a b}
+
+    # Test if two rectangles overlap
+    proc overlap {x0 y0 x1 y1 a0 b0 a1 b1}
+
+    # Reshape one or more features of a rectangle
+    proc reshape {x0 y0 x1 y1 x y args}
+
+    # Stretch a rectangle
+    proc stretch {x0 y0 x1 y1 hdelta {vdelta {}}}
+
+    # Shrink a rectangle
+    proc shrink {x0 y0 x1 y1 hdelta {vdelta {}}}
+
+    # Return the "union" of two rectangles
+    proc union {x0 y0 x1 y1 a0 b0 a1 b1}
+
+    ###################################################################
+    ####                     private variables                     ####
+
+    # The weights mapping features to features
+    private common xweights
+    private common yweights
+    
+    # The expressions used to get features
+    private common featureExpr
+}
+
+###################################################################
+####                  class initialization                     ####
+
+array set ::tycho::Rectangle::xweights {
+    nw.sw 1 nw.w 1 nw.n 0.5 nw.ne 0 nw.c 0.5
+    ne.se 1 ne.e 1 ne.n 0.5 ne.nw 0 ne.c 0.5
+    sw.nw 1 sw.w 1 sw.s 0.5 sw.se 0 sw.c 0.5
+    se.ne 1 se.e 1 se.s 0.5 se.sw 0 se.c 0.5
+    n.w 0 n.nw 0 n.ne 0 n.e 0 n.c 0
+    s.w 0 s.sw 0 s.se 0 s.e 0 s.c 0
+    e.n 0.5 e.ne 1 e.se 1 e.s 0.5 e.c 0.5
+    w.n 0.5 w.ne 1 w.se 1 w.s 0.5 w.c 0.5
+}
+
+array set ::tycho::Rectangle::yweights {
+    nw.sw 0 nw.w 0.5 nw.n 1 nw.ne 1 nw.c 0.5
+    ne.se 0 ne.e 0.5 ne.n 1 ne.nw 1 ne.c 0.5
+    sw.nw 0 sw.w 0.5 sw.s 1 sw.se 1 sw.c 0.5
+    se.ne 0 se.e 0.5 se.s 1 se.sw 1 se.c 0.5
+    n.w 0.5 n.nw 1 n.ne 1 n.e 0.5 n.c 0.5
+    s.w 0.5 s.sw 1 s.se 1 s.e 0.5 s.c 0.5
+    e.n 0 e.ne 0 e.se 0 e.s 0 e.c 0
+    w.n 0 w.ne 0 w.se 0 w.s 0 w.c 0
+}
+
+array set ::tycho::Rectangle::featureExpr {
+    n {list [expr ($x0+$x1) / 2] $y0}
+    s {list [expr ($x0+$x1) / 2] $y1}
+    e {list $x1 [expr ($y0+$y1) / 2]}
+    w {list $x0 [expr ($y0+$y1) / 2]}
+    nw {list $x0 $y0}
+    ne {list $x1 $y0}
+    sw {list $x0 $y1}
+    se {list $x1 $y1}
+    c {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+    center {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+}
+
+
+#######################################################################
+#### _feature feature
+#
+body ::tycho::Rectangle::_feature {id canvas slate args} {
+    array set opts {-features {}}
+    array set opts $args
+    
+    if { $opts(-features) == "" } {
+	return {n s e w ne nw se sw}
+    } else {
+	set region [$slate region $id]
+	set result {}
+	foreach a $opts(-features) {
+	    eval lappend result [eval feature $region $a]
+	}
+	return $result
+    }
+}
+
+#######################################################################
+#### _grapple interactor [-ghost]
+#
+# Attach a set of grapples to a target item. The grapple is attached
+# to the target as a constraint. If the specified interactor is null,
+# then the grapple is removed from the object.
+#
+# FIXME: This is _very_ old and needs to be resurrected.
+#
+body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
+    ::tycho::getflag ghost args
+
+    # If the interactor argument is null, remove an existing
+    # resizer. This gets its value as an annotation, and 
+    # then detachs it as a constraint.
+    if { $interactor == "" } {
+	set resizer [$target annotation "resizer"]
+	if { $resizer != "" } {
+	    $target annotation "resizer" {}
+	    $target detach body ::tycho::$resizer
+	    $slate  delete $resizer
+	}
+	return
+    }
+
+    # If it's not null, then create four grapplers in a composite.
+    ::tycho::assign x0 y0 x1 y1 [$target coords]
+
+    set resizer [$slate create Composite]
+
+    set nw [$resizer component create "grapple" Grapple 10]
+    set ne [$resizer component create "grapple" Grapple 10]
+    set sw [$resizer component create "grapple" Grapple 10]
+    set se [$resizer component create "grapple" Grapple 10]
+
+    # Move them to the corners of the rectangle
+    $nw moveto nw $x0 $y0
+    $ne moveto ne $x1 $y0
+    $sw moveto sw $x0 $y1
+    $se moveto se $x1 $y1
+
+    # Set up the interaction between them
+    $nw behavior \
+	    exec $nw move $ne movey $sw movex $target \
+	    [concat reshape nw [makeflag ghost]]
+
+    $ne behavior \
+	    exec $ne move $nw movey $se movex $target \
+	    [concat reshape ne [makeflag ghost]]
+
+    $sw behavior \
+	    exec $sw move $se movey $nw movex $target \
+	    [concat reshape sw [makeflag ghost]]
+
+    $se behavior \
+	    exec $se move $sw movey $ne movex $target \
+	    [concat reshape se [makeflag ghost]]
+
+    # Bind the interactor to each grappler.
+    $interactor bind $nw
+    $interactor bind $ne
+    $interactor bind $sw
+    $interactor bind $se
+
+    # Assuming that a bounded interactor is being used, set the
+    # bounds query of each grappler. This is ridiculously hard
+    # to follow, because the calculations have to be deferred
+    # until the grappler is actually clicked-on.
+    $nw query set bounds "list \
+	    2 \
+	    2 \
+	    \[expr \[lindex \[$se feature nw\] 0\] - 2\] \
+	    \[expr \[lindex \[$se feature nw\] 1\] - 2\] "
+
+    $ne query set bounds "list \
+	    \[expr \[lindex \[$sw feature ne\] 0\] + 2\] \
+	    2 \
+	    \[expr \[winfo width $slate\] - 3\] \
+	    \[expr \[lindex \[$sw feature ne\] 1\] - 2\] "
+
+    $sw query set bounds "list \
+	    2 \
+	    \[expr \[lindex \[$ne feature sw\] 1\] + 2\] \
+	    \[expr \[lindex \[$ne feature sw\] 0\] - 2\] \
+	    \[expr \[winfo height $slate\] - 3\] "
+
+    $se query set bounds "list \
+	    \[expr \[lindex \[$nw feature se\] 0\] + 2\] \
+	    \[expr \[lindex \[$nw feature se\] 1\] + 2\] \
+	    \[expr \[winfo width  $slate\] - 3\] \
+	    \[expr \[winfo height $slate\] - 3\] "
+
+
+    # So that the resizer moves when the target moves,
+    # attach it as a constraint. Also, add it as an annotation
+    # so that it can be deleted later.
+    $target attach "body" $resizer move {}
+    $target annotation add "resizer" $resizer
+}
+
+#######################################################################
+#### _reshape
+#
+body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
+    array set opts {-features {}}
+    array set opts $args
+
+    eval $slate region $id \
+	    [eval reshape [$slate region $id] $x $y $opts(-features)]
+}
+
+#######################################################################
+#### _reshapeclick
+#
+# Start a reshape interaction sequence. This works by building a script
+# that will be evaluated in the drag phase of the interaction. This
+# makes the code somewhat obscure, but does
+# make the drag as fast as possible. If and when the Tcl compiler
+# runs, this strategy may no longer be necessary.
+#
+body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
+    # Extract options
+    array set opts {-ghost 0 -features {}}
+    array set opts $args
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
+    }
+
+    # Remember how I am now.
+    ::tycho::assign \
+	    scratch(w.$unique) \
+	    scratch(n.$unique) \
+	    scratch(e.$unique) \
+	    scratch(s.$unique) [$slate region $id]
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # For each direction, see if it is present in the features list,
+    # and if it is, add it to the drag script
+    set script ""
+    if { [lsearch $opts(-features) "*w"] >= 0 } {
+    	append script {; set scratch(w.$unique) \
+    		[expr $scratch(w.$unique) + $deltaX]}
+    }
+    if { [lsearch $opts(-features) "*e"] >= 0 } {
+    	append script {; set scratch(e.$unique) \
+    		[expr $scratch(e.$unique) + $deltaX]}
+    }
+    if { [lsearch $opts(-features) "n*"] >= 0 } {
+    	append script {; set scratch(n.$unique) \
+    		[expr $scratch(n.$unique) + $deltaY]}
+    }
+    if { [lsearch $opts(-features) "s*"] >= 0 } {
+    	append script {; set scratch(s.$unique) \
+    		[expr $scratch(s.$unique) + $deltaY]}
+    }
+    set scratch(script.$unique) $script
+
+    # If the -ghost flag is set, draw the ghost box.
+    if { $opts(-ghost) } {
+	$slate ghost $id
+	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
+    }
+}
+
+#######################################################################
+#### _reshapedrag
+#
+body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
+
+    # Remember the current coordinates
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+    
+    # Evaluate the drag script to update coordinates
+    eval $scratch(script.$unique)
+
+    # If there's a ghost, reshape it. Otherwise reshape the item.
+    if $scratch(ghost.$unique) {
+	$slate region ghost.$id \
+		$scratch(w.$unique) $scratch(n.$unique) \
+		$scratch(e.$unique) $scratch(s.$unique)
+    } else {
+	$slate region $id  \
+		$scratch(w.$unique) $scratch(n.$unique) \
+		$scratch(e.$unique) $scratch(s.$unique)
+    }
+}
+
+#######################################################################
+#### _reshaperelease
+#
+body ::tycho::Rectangle::_reshaperelease {id canvas slate} {
+	set unique $id.[$slate uniqueid]
+
+    # If there's a ghost, reshape the item to its shape
+    # and then delete the ghost.
+    if { $scratch(ghost.$unique) } {
+	# Reshape the item
+	eval $slate region $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
+    }
+
+    # General cleaning up
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
+    unset scratch(w.$unique)
+    unset scratch(n.$unique)
+    unset scratch(e.$unique)
+    unset scratch(s.$unique)
+    unset scratch(script.$unique)
+}
+
+##########################################################################
+#### feature
+#
+# Return a feature of a rectangle. Valid features are any
+# of the eight compass points and "c" or "center."
+#
+body ::tycho::Rectangle::feature {x0 y0 x1 y1 feature} {
+    eval $featureExpr($feature)
+}
+
+##########################################################################
+#### inside
+#
+# Test if the first rectangle is inside the second.
+#
+body ::tycho::Rectangle::inside {x0 y0 x1 y1 a0 b0 a1 b1} {
+    expr $x0 >= $a0 && $y0 >= $b0 && $x1 <= $a1 && $y1 <= $b1
+}
+
+##########################################################################
+#### move
+#
+# Move a rectangle by the given distance
+#
+body ::tycho::Rectangle::move {x0 y0 x1 y1 a b} {
+    list \
+	    [expr $x0 + $a] \
+	    [expr $y0 + $b] \
+	    [expr $x1 + $a] \
+	    [expr $y1 + $b]
+}
+
+##########################################################################
+#### overlap
+#
+# Test if two rectangle overlap.
+#
+body ::tycho::Rectangle::overlap {x0 y0 x1 y1 a0 b0 a1 b1} {
+    return [expr $a0 <= $x1 && $b0 <= $y1 && $a1 >= $x0 && $b1 >= $y0]
+}
+
+#######################################################################
+#### reshape
+#
+# Given a rectangle, reshape it by moving the given features
+# by the specified _x_ and _y_ relative
+# values. Aspects are only affected by the appropriate _x_ or _y_
+# value -- for example, if the "e" (east) feature is specified, it
+# is moved only by the _x_ amount.
+#
+body ::tycho::Rectangle::reshape {x0 y0 x1 y1 x y args} {
+    # For each direction, see if it is present in the features list,
+    # and if it is, add to the appropriate direction
+    if { [lsearch $args "*w"] >= 0 } {
+	set x0 [expr $x0 + $x]
+    }
+    if { [lsearch $args "*e"] >= 0 } {
+	set x1 [expr $x1 + $x]
+    }
+    if { [lsearch $args "n*"] >= 0 } {
+	set y0 [expr $y0 + $y]
+    }
+    if { [lsearch $args "s*"] >= 0 } {
+	set y1 [expr $y1 + $y]
+    }
+
+    # Return new rectangle
+    return [list $x0 $y0 $x1 $y1]
+}
+
+#######################################################################
+#### shrink
+#
+# Shrink a rectangle on all sides. The rectangle will be smaller
+# in the horizontal direction by 2 * _hdelta_ pixels, and by
+# 2 * _vdelta_ pixels in the vertical direction. If _vdelta_
+# is omitted, then _hdelta_ is used in both directions.
+#
+body ::tycho::Rectangle::shrink {x0 y0 x1 y1 hdelta {vdelta {}}} {
+    if { $vdelta == "" } {
+	set vdelta $hdelta
+    }
+    list \
+	    [expr $x0 + $hdelta] \
+	    [expr $y0 + $vdelta] \
+	    [expr $x1 - $hdelta] \
+	    [expr $y1 - $vdelta]
+}
+
+#######################################################################
+#### stretch
+#
+# Stretch a rectangle on all sides. The rectangle will be larger
+# in the horizontal direction by 2 * _hdelta_ pixels, and by
+# 2 * _vdelta_ pixels in the vertical direction. If _vdelta_
+# is omitted, then _hdelta_ is used in both directions.
+#
+body ::tycho::Rectangle::stretch {x0 y0 x1 y1 hdelta {vdelta {}}} {
+    if { $vdelta == "" } {
+	set vdelta $hdelta
+    }
+    list \
+	    [expr $x0 - $hdelta] \
+	    [expr $y0 - $vdelta] \
+	    [expr $x1 + $hdelta] \
+	    [expr $y1 + $vdelta]
+}
+
+##########################################################################
+#### union
+#
+# Return the ``union'' of two rectangles: that is, the rectangle that
+# contains both rectangles.
+#
+body ::tycho::Rectangle::union {x0 y0 x1 y1 a0 b0 a1 b1} {
+    list \
+	    [::tycho::min $x0 $a0] \
+	    [::tycho::min $y0 $b0] \
+	    [::tycho::max $x1 $a1] \
+	    [::tycho::max $y1 $b1]
+}
+

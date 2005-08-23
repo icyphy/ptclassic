@@ -1,0 +1,283 @@
+# A text editor for email message.
+#
+# @Author: Kevin Chang
+#
+# @Version: @(#)EditMail.itcl	1.10 02/22/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+# FIXME: Known bugs
+#
+# This will crash if the site is unknown, or user is unknown.
+# Also, if the system does not use a standard sendmail protocol,
+# then it will fail. This is highly dependent on ResourceMail.itcl.
+#
+
+#######################################################################
+#### EditMail
+# This class defines a widget that provides an emacs-like editor
+# for the <code>mailto</code> protocol.
+#
+class ::tycho::EditMail {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # When a new instance is created, -filename1 and -filename2 are
+    # passed onto the entry lines.
+    itk_option define -mailto mailto Mailto ""
+
+    # The subject line of the message
+    itk_option define -subject subject Subject ""
+
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Check if sendmail is complete. If so, close this window
+    method autoDestroy { {timetowait 1000} }
+    
+    # the command to execute after pressing enter on the entry
+    method entryCommand {{entryname {}} {_ {}} }
+
+    # Open a help window.  This should be redefined in derived classes.
+    method help {}
+
+    # Send mail to [toolbar get mailto], using ResourceMail
+    method sendmail {}
+
+    ####################################################################
+    ####                   protected methods                        ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ####################################################################
+    ####                     private methods                        ####
+
+    # Initialize the toolbar
+    private method _initializeToolbar {toolbar}
+
+    ####################################################################
+    ####                    private variables                       ####
+    
+    # mail object instantiated only once
+    private variable mailobj {}
+}
+
+######################################################################
+#### -EditMail configuration
+#
+configbody ::tycho::EditMail::mailto {
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists EditMail] == 1} {
+        toolbar clear EditMail
+        toolbar insert EditMail $itk_option(-EditMail)
+    }
+}
+
+######################################################################
+#### -subject configuration
+#
+configbody ::tycho::EditMail::subject {
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists subject] == 1} {
+        toolbar clear subject
+        toolbar insert subject $itk_option(-subject)
+    }
+}
+
+###################################################################
+#
+body ::tycho::EditMail::constructor {args} {
+    eval itk_initialize $args
+
+    # FIXME: The following requires after? Tk bug?
+    if {$itk_option(-mailto)=={}} {
+        after 1000 "$this toolbar focusin mailto"
+    } elseif {$itk_option(-subject)=={}} {
+        after 1000 "$this toolbar focusin subject"
+    }
+}
+
+#######################################################################
+#### autoDestroy
+#
+body ::tycho::EditMail::autoDestroy { {timetowait 1000} } {
+    # Base case, make sure we don't get an error if user closes first.
+    if {![winfo exists [string trim $this :]]} {return}
+
+    # Make sure the mail object still exists!
+    #if {![info exists $mailobj]} {return}
+
+    if {[$mailobj getprogress]>=1} {
+        catch "safeEval [$this statusbar cget -closecommand]"
+        return
+    }
+
+    # safeEval doesn't work! That's okay, this is not modal anyway.
+    after $timetowait "catch \"eval $this autoDestroy $timetowait\""
+}
+
+#####################################################################
+#### entryCommand
+# The command to execute after pressing enter on the entry line
+#
+body ::tycho::EditMail::entryCommand {{entryname {}} {_ {}}} {
+    # Setting from entry list name -> $itk_option(-filename)
+    if {$entryname=="mailto"} {
+        displayer configure -title "Compose: [$this toolbar get mailto]"
+        # jump to the next line
+        toolbar focusin subject
+    } elseif {$entryname=="subject"} {
+        focusin
+    }
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditMail::help {} {
+    global ::TYCHO
+
+    ::tycho::File::openContext \
+        [file join $TYCHO edit textedit doc usersGuides \
+	    EditMailHelp.html] html
+}
+
+###################################################################
+#### sendmail
+# Send the mail in the content
+#
+body ::tycho::EditMail::sendmail {} {
+    # Error check before sending out data
+    if {[llength [$this toolbar get mailto]] > 1} {
+        error "Sending to multiple user is not supported in this version."
+    }
+
+    toolbar disable send
+    toolbar disable mailto
+    toolbar disable subject
+    toolbar disable attachment
+    configure -readonly 1
+    markUnmodified
+
+    # Create a new object to open up the mail server
+    if {![info exists $mailobj]} {
+        set mailobj [::tycho::resource new mailto:[$this toolbar get mailto]]
+    }    
+    $mailobj open
+    $mailobj puts "Subject: [$this toolbar get subject]"
+    $mailobj puts [$itk_component(text) get 0.0 end]
+    $mailobj close
+
+    #statusbar progress Counting "$mailobj progress"
+    statusbar progress Counting "$mailobj getprogress"
+
+    # Check to see if [$mailobj getprogress] returns 1. If so, close.
+    autoDestroy
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditMail::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    configure -readonly 0
+
+    # Insert items in the tool bar. This is faster in a seperate
+    # method.
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditMail::_initializeToolbar $toolbar
+    }
+
+    if {$menubar != {}} {
+	# Delete menu entries from the File menu
+        $menubar delete compareto
+        $menubar delete insert
+        $menubar delete save
+        $menubar delete saveas
+        $menubar delete evaluate
+        $menubar delete revisioncontrol
+        $menubar delete togglereadonly
+	$menubar delete reload
+	$menubar delete compareto
+	$menubar delete switchfile
+    }
+
+    if {$itk_option(-subject) != {}} {
+        $this toolbar clear subject
+        $this toolbar insert subject $itk_option(-subject)
+    }
+
+    if {$itk_option(-mailto) != {}} {
+        $this toolbar clear mailto
+        $this toolbar insert mailto $itk_option(-mailto)
+    }
+
+    displayer configure -title "Compose: $itk_option(-mailto)"
+}
+
+#####################################################################
+#### _initializeToolbar
+# Initialize the tool bar. Adds entries specific to this class.
+#
+body ::tycho::EditMail::_initializeToolbar {toolbar} {
+    $toolbar button send \
+            -text {Send Mail} \
+            -description {Send mail to the user} \
+            -command "$this sendmail"
+
+    $toolbar button addr \
+            -text {Address Book} \
+            -description {Find the address in the address book} \
+            -command "" \
+            -state disabled
+
+    $toolbar entry mailto "Mail to:" {} "$this entryCommand mailto "
+    $toolbar entry subject "Subject:" {} "$this entryCommand subject "
+    $toolbar entry attachment "Attachment:" {} "$this entryCommand subject "
+    $toolbar disable attachment
+}
+

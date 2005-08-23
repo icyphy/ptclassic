@@ -1,0 +1,776 @@
+##########################################################################
+# @Version: @(#)Selector.itcl	1.31 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Selector
+#
+# A _Selector_ is an interactor that selects items. It can
+# be configured to select items by clicking, to toggle items in and out
+# of the selection set, and to support drag-selecting. One of its
+# key functions is conditional activation of interactors -- for example,
+# it could activate a Stepper interactor on the selected items, or an
+# Editor interactor on a single selected item. A Slate should use
+# a Selector when the simple binding mechanism provided by default
+# in all interactors is not sophisticated enough.
+#
+# When an item is selected, it is given the tag "sel". Client code
+# can use this to process selected items; note, however, that this tag is
+# maintained by the Selector and the Slate, and must not be added to
+# or removed from items -- use the Slate's select{} method instead.
+# When an item is selected, it is highlighted using the Slate's
+# highlight{} method.
+#
+# The Selector is bound to to items and tags with its bind{} method,
+# as usual for interactors. The Selector's method, however, has an
+# additional argument that must be either "click", indicating that
+# the binding applies to selection or deselection of items by clicking
+# on them; or "drag," indicating that the bindings applies to selection
+# and deselection by drag-selecting. The method accepts the usual
+# *-button* and *-modifiers* options, and an additional option,
+# *-toggle*, which causes the binding to toggle items into and out
+# of the selection.
+#
+# Once an item is selected, the Selector can activate another
+# interactor on it -- this is specified by the delegate{}
+# method. There are three modes which control how activation
+# takes place, enabling quite complex patterns of modal interaction
+# to be created.
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
+# <dl>
+# <dt><b>-dragmode</b>
+# <dd>This can be <i>overlapping</i>, in which case an item 
+# is selected if the drag-selector interactor has dragged out a region 
+# that overlaps its bounding box, or <i>enclosed</i>, in which case an 
+# item is selected only if the drag-selector has dragged out a region 
+# that fully encloses its bounding box. The default is <i>overlapping</i>.
+#
+# <dt><b>-dragcolor</b>
+# <dd>The color of the box used to mark the current 
+# drag-selection region. The default color is "grey."
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>
+# <ul>
+# <li> ...
+# </ul>
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+#
+# <ul>
+# <li><a href="../internals/i-select.html">Managing graphical selections</a>.
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Selector {
+    inherit ::tycho::Interactor
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+
+	eval $this configure $args
+
+	# Create the selection handler
+	# ::selection handle $slate "$this describe"
+
+        # The Escape key clears the selection
+        ::bind $slate <Key-Escape> "$this clear"
+    }
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The prefix used to forward selection clear events
+    public variable clearprefix {}
+
+    # The prefix used to forward deselection events
+    public variable deselectprefix {}
+
+    # The prefix used to forward selection events
+    public variable selectprefix {}
+
+    # The drag-select mode: "overlapping," or "enclosed"
+    public variable dragmode "overlapping"
+
+    # The color of the drag-select box
+    public variable dragcolor "grey60"
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Activate the interactor for drag-selecting
+    method activate {tag x y args}
+
+    # Bind the selector to mouse events
+    method bind {tag args}
+
+    # Clear the selection.
+    method clear {}
+
+    # Start the drag-select interaction sequence.
+    method click {x y args}
+
+    # Remove the interactor from drag-selecting
+    method deactivate {args}
+
+    # Specify a delegate interactor to operate on selected items
+    method delegate {interactor tag args}
+
+    # Continue the drag-select interaction sequence
+    method drag {x y}
+
+    # Process a click on an item
+    method itemclick {tag x y args}
+
+    # Notify that the selection has been changed by someone else
+    method refresh {args}
+
+    # Terminate the drag-select interaction sequence
+    method release {}
+
+    # Notify that the canvas size has changed
+    method resize {}
+
+    # Remove a mouse binding
+    method unbind {tag args}
+
+    ###################################################################
+    ####                        protected methods                  ####
+
+    # Record a single delegate interactor.
+    protected method _attach {interactor id x y options}
+
+    # Text if an item has an attached interactor.
+    protected method _attached {id}
+
+    # Clear the selection
+    protected method _clear {}
+
+    # Activate delegate interactors
+    protected method _delegate {mode id x y args}
+
+    # Deselect an item
+    protected method _deselect {id}
+    
+    # Remove all delegate interactors.
+    protected method _detach {}
+
+    # Select an item
+    protected method _select {id}
+
+    ###################################################################
+    ####                    private variables                      ####
+
+    # Currently activated delegates
+    private variable _attached
+
+    # The delegate interactors
+    private variable _delegates
+
+    # The items currently selected by dragging
+    private variable covered ""
+
+    # The drag box
+    private variable dragbox ""
+
+    # The drag box
+    private variable targetTags ""
+
+    # A flag saying whether we are toggling
+    private variable toggling 0
+
+    # The origin of the drag box
+    private variable xOrigin
+    private variable yOrigin
+}
+
+#######################################################################
+#### activate
+#
+# Activate the drag-selector. Apart from the standard
+# -button and -modifiers options, the method also responds to the
+# *-toggle* option, which causes items to toggle in and out
+# of the selection.
+#
+body ::tycho::Selector::activate {tag x y args} {
+    # Process depending on whether this is toggle mode or not
+    array set opt [concat -toggle 0 $args]
+    set toggling $opt(-toggle)
+
+    # Change raw coordinates to correct canvas coordinates
+    # (needed if canvas has scrollbars)
+    set x [$canvas canvasx $x]
+    set y [$canvas canvasy $y]
+
+    # Set the target
+    $this target $tag
+
+    # Set up the bindings to perform the moving and deactivation.
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Motion $args] \
+	    "$this drag %x %y; update idletasks"
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Release $args] \
+	    "$this release; $this deactivate $args"
+
+    # Start the interaction sequence
+    eval $this click $x $y $args
+}
+
+#######################################################################
+#### bind
+#
+# Bind a selector interactor. This causes any items with the given _tag_
+# to be selectable by either clicking on it or by dragging the mouse
+# over it (thus allowing multiple items to be selected). When
+# dragging, a grey rectangle is shown. By default, the item upon
+# which drag-selecting can be performed as an "invisible" item
+# on the slate called "#background." The *-background* option
+# can be specified to give a different background item. By default,
+# clicking on an item or the background deselects currently selected
+# items. If, however, the *-toggle* option is specified and true,
+# then clicking and drag-selecting will toggle items into and out
+# of the selection. 
+#
+# Other options can also be specified, being the *-buttons*
+# and *-modifiers* options of the <code>::tycho::event</code>
+# procedure. I recommend that a caller _always_ specifies a *-button*
+# option, to reduce the chances of accidental
+# interference between different interactors.
+#
+# Note: do not specify an item ID as the first argument. This must
+# be a tag or the selector won't work properly.
+#
+# FIXME: If the background item does not cover the whole slate,
+# drag-selecting will need to be adjusted by the origin of that
+# item.
+#
+body ::tycho::Selector::bind {tag args} {
+    if [regexp {^_?[0-9]+$} $tag] {
+	error "A Selector can be bound only to tags, not items ids ($tag)"
+    }
+    # Extract options
+    array set opt [concat -background #background $args]
+    set bgtag $opt(-background)
+    unset opt(-background)
+    set args [array get opt]
+
+    # Remember the binding tag.
+    set _bindings([concat $tag $args]) $args
+
+    # Here's the event
+    set event [eval ::tycho::Interactor::event Click $args]
+
+    # Make the binding for clicking
+    $slate bind $tag $event "$this itemclick $tag %x %y $args"
+
+    # If using the default background and it doesn't exist, make it
+    if { $bgtag == "#background" \
+	    && [$canvas find withtag #background] == "" } {
+	# Create the background item
+	$canvas create rectangle \
+		0 0 [winfo width $slate] [winfo height $slate] \
+		-outline "" \
+		-tags [list # #background]
+	$canvas lower #background
+
+	# If the slate resizes, we have to resize the background too
+	::bind $slate <Configure> "$this resize"
+    }
+    
+    # Make the drag-select binding
+    $slate bind $bgtag $event "$this activate $bgtag %x %y $args"
+}
+
+#######################################################################
+#### clear
+#
+# Clear the selection.
+#
+body ::tycho::Selector::clear {} {
+    $this _detach
+    $slate select clear
+}
+
+#######################################################################
+#### click
+#
+# Start an interaction sequence.
+#
+body ::tycho::Selector::click {x y args} {
+    if !$toggling {
+	$this _clear
+    }
+
+    # Give the slate the focus for key events etc
+    $slate focusin
+
+    # Detach delegate interactors
+    $this _detach
+
+    # Figure out which tags are valid for selection
+    set targetTags {}
+    foreach b [array names _bindings] {
+	if { [lreplace $b 0 0] == $args } {
+	    lappend targetTags [lindex $b 0]
+	}
+    }
+
+    # Create the drag box and make it "invisible"
+    set xOrigin $x
+    set yOrigin $y
+    
+    set dragbox [$slate create rect $x $y $x $y \
+	    -outline $dragcolor \
+	    -tags "#"]
+}
+
+#######################################################################
+#### deactivate
+#
+body ::tycho::Selector::deactivate {args} {
+    # Remove bindings
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion $args] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release $args] {}
+
+    # Update the screen. This appears to be necessary to ensure that
+    # the "current" tag is updated correctly before processing another
+    # event.
+    update idletasks
+}
+
+#######################################################################
+#### delegate
+#
+# Specify a "delegate" interactor -- that is, one which will
+# activated by the Selector if the selected items
+# i) all have the given _tag_ and ii) the *-button* and *-modifiers*
+# options match those that apply when the item is clicked-upon.
+# Valid options are:
+# <ul>
+# <li><b>-mode</b> _0|1|+_: This option selects the "mode"
+# in which the delegation takes place. It can be a single
+# mode or a list -- the default is {0 1 +}.
+# The modes are:
+# <ul>
+#  <li><b>0</b>: The interactor will be activated if no
+#  items were previously selected and a single item
+#  becomes selected.
+#  <li><b>1</b>: The interactor will be activated if there
+#  is already a single item selected and it is clicked on
+#  again.
+#  <li><b>+</b>: The interactor will be activated if
+#  there is more than one item in the selection.
+# </ul>
+# <li><b>-button</b> _int_: the *-button* option that will be passed to
+# the interactor when activated or bound.
+# <li><b>-modifiers</b> _modifiers_: the *-modifiers* list that will be
+# passed to the interactor when activated or bound.
+# </ul>
+body ::tycho::Selector::delegate {interactor tag args} {
+    # Extract options
+    array set opt [concat {-mode {0 1 +}} $args]
+    set mode $opt(-mode)
+    unset opt(-mode)
+    set args [array get opt]
+
+    # Remember the delegate
+    foreach m $mode {
+        lappend _delegates([list $m $interactor $args]) $tag
+    }
+}
+
+#######################################################################
+#### drag
+#
+# Continue an interaction sequence with a mouse move. The behaviour
+# depends on the current "mode" of the selector: in "select" mode,
+# the drag box is moved and any newly covered items are selected;
+# In "toggle" mode, an item that becomes covered or uncovered is
+# toggled into or out of the selection. Whether an item
+# is covered depends on the *-dragmode* option: if "overlapping" then
+# an item is covered if the drag box overlaps it at all;
+# if "enclosed" then the item is covered if the drag box
+# entirely encloses it.
+#
+body ::tycho::Selector::drag {x y} {
+    # Change raw coordinates to correct canvas coordinates
+    # (needed if canvas has scrollbars)
+    set x [$canvas canvasx $x]
+    set y [$canvas canvasy $y]
+
+    # Resize the drag box
+    $slate coords $dragbox $xOrigin $yOrigin $x $y
+
+    # Get the box again in "correct" coordinates. This is needed
+    # because it may be that x < xOrigin or y < yOrigin.
+    set coords [$slate coords $dragbox]
+
+    # Get the newly covered and uncovered items
+    set cu [eval $slate search $dragmode $this.covered $coords]
+    set covered [lindex $cu 0]
+    set uncovered [lindex $cu 1]
+
+    # Process according to selection mode
+    if !$toggling {
+	# Add newly covered selectable objects. An object
+	# is selectable if it has a tag that is in the binding set
+	foreach {o tags} $covered {
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
+		# Select it
+		$this _select $o
+	    }
+	}
+    	# Deselect selectable objects that are no longer covered
+	foreach {o tags} $uncovered {
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
+		# Deselect it
+		$this _deselect $o
+	    }
+    	}
+    } else {
+	# Toggle any selectable objects that have changed state
+    	foreach {o tags} [concat $covered $uncovered] {
+	    # An object is selectable if it has a tag in the binding set.
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
+		# Test if already selected or not, and act accordingly
+		if { [$slate hastag $o "sel"] } {
+		    # Deselect it
+		    $this _deselect $o
+		} else {
+		    # Select it
+		    $this _select $o
+		}
+	    }
+	}
+    }
+    # Execute the client-specified update command
+    if { $dragcommand != "" } {
+        uplevel #0 $dragcommand $target $x $y
+    }
+}
+
+#######################################################################
+#### itemclick
+#
+# Process a click on an item.
+#
+body ::tycho::Selector::itemclick {tag x y args} {
+    # Get the current object
+    set current [$slate find withtag current]
+
+    # Give the slate the focus for key events etc
+    $slate focusin
+
+    # If this item has an active interactor, do nothing
+    if { [$this _attached $current] != "" } {
+        return
+    }
+ 
+    # Otherwise detach any other attached interactors
+    $this _detach
+
+    # Extract options
+    array set opt [concat -toggle 0 $args]
+    set toggle $opt(-toggle)
+    unset opt(-toggle)
+    set args [array get opt]
+
+    # Number of items currently selected
+    switch [llength [$slate find withtag "sel"]] {
+	0 {
+	    set prior 0
+	}
+	1 {
+	    set prior 1
+	}
+	default {
+	    set prior "+"
+	}
+    }
+
+    # Process depending on whether this is toggle mode or not
+    if { ! $toggle } {
+	if { [$slate hastag $current "sel"] } {
+            # This item is already selected. Don't change the selection,
+	    # and set the delegation mode according to number of
+	    # selected items.
+	    set post $prior
+        } else {
+	    # The item was not selected. Since the item is newly
+	    # selected and there is only one, the delegation mode
+	    # is always zero
+	    set post 0
+
+	    # Deselect all currently selected objects if there
+	    # were any
+	    if { $prior != 0 } {
+		$this _clear
+	    }
+	    # Select and highlight the current object
+	    $this _select $current
+
+	}
+	# FIXME: Why was this here????!!!
+	set junk {
+	    else {
+		# It's already selected, so delegation mode is the same
+		set post $prior
+	    }
+	}
+    } else {
+	# Toggle the state of the clicked-on item
+	if { [$slate hastag $current "sel"] } {
+	    # The item is selected, so deselect it
+	    $this _deselect $current
+
+	    # Don't activate delegates
+	    set post {}
+
+	} else {
+	    # Choose the delegation mode
+	    if { $prior == 0 } {
+		set post "0"
+            } else {
+                set post "+"
+	    }
+	    # The item is not selected. Select and highlight it
+	    $this _select $current
+	}
+    }
+    # Now activate a delegate interactor according to the "mode"
+    if { $post != "" } {
+	eval $this _delegate $post $current $x $y $args
+    }
+}
+
+#######################################################################
+#### refresh
+#
+# The selection has been changed by someone else. Update the
+# delegate bindings. Arguments are ignored.
+#
+body ::tycho::Selector::refresh {args} {
+    $this _detach
+}
+
+#######################################################################
+#### release
+#
+# Terminate an interaction sequence.
+#
+body ::tycho::Selector::release {} {
+    # Delete the drag box
+    $slate delete $dragbox
+
+    # Finish the search
+    $slate dtag $this.covered
+}
+
+#######################################################################
+#### resize
+#
+# Notify that the size of the canvas has changed.
+#
+body ::tycho::Selector::resize {} {
+    # First test the scroll region: if not null, use that as the
+    # size of the background item
+    set region [$slate cget -scrollregion]
+    if { $region != "" } {
+	eval $slate coords #background $region
+    } else {
+	# Otherwise use the displayed size
+	$slate coords #background 0 0 \
+		[winfo width $slate] \
+		[winfo height $slate]
+    }
+}
+
+#######################################################################
+#### unbind
+#
+# Remove the selector from the given background item or tag.
+#
+body ::tycho::Selector::unbind {tag args} {
+    set event [eval ::tycho::Interactor::event Click $args]
+    unset _bindings([concat $tag $args])
+    $slate bind $tag $event {}
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+#######################################################################
+#### _attach
+#
+# Record a single delegate interactor.
+#
+body ::tycho::Selector::_attach {interactor id x y options} {
+    set _attached($interactor) [list $id $x $y $options]
+    eval $interactor activate $id $x $y $options
+}
+
+#######################################################################
+#### _attached
+#
+# Test if an interactor is attached to a given item. If there is,
+# return it, otherwise return null.
+#
+body ::tycho::Selector::_attached {id} {
+    foreach {interactor _} [array get _attached] {
+        if { [$interactor target] == $id } {
+            return $interactor
+        }
+    }
+    return ""
+}
+
+#######################################################################
+#### _clear
+#
+body ::tycho::Selector::_clear {} {
+    if { $clearprefix == "" } {
+	$slate select clear
+    } else {
+	eval $clearprefix
+    }
+}
+
+#######################################################################
+#### _delegate
+#
+# Activate a delegate interactor in a certain mode. If only a single
+# item is selected, activate the first interactor found that has matching
+# options, and that has been bound to that item, or that has a tag to
+# which the interactor has been bound.
+#
+# If more than one item is selected, find the first interactor
+# that has matching options. Each item in the selection that
+# the interactor has been bound to, or that has a tag to which
+# the interactor has been bound, is added to the sub-selection.
+# The interactor is then activated on the sub-selection.
+#
+body ::tycho::Selector::_delegate {mode id x y args} {
+    $slate dtag "subsel"
+    switch -exact $mode {
+	"0" -
+	"1" {
+	    foreach index [array names _delegates [list $mode * *]] {
+                ::tycho::assign _ interactor options $index
+                set tags $_delegates($index)
+		# Activate the delegate interactor if that item
+                # has a tag that is in the tags
+		if { $args == $options } {
+		    if { ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
+			# Activate it
+                        $this _attach $interactor $id $x $y $options
+			return $interactor
+		    }
+		}
+	    }
+	}
+	"+" {
+	    # Process interactors that operate on the whole selection
+	    foreach index [array names _delegates [list + * *]] {
+                ::tycho::assign _ interactor options $index
+                set tags $_delegates($index)
+		# Find the sub-selection: an item is in the sub-selection
+                # it has a tag that is in the interactor's tags
+		if { $args == $options } {
+		    foreach item [$slate find withtag "sel"] {
+                        if { ![::tycho::ldisjoint $tags [$slate gettags $item]] } {
+                            # Add the "subsel" tag
+                            $slate addtag "subsel" withtag $item
+                        }
+                    }
+                    # Activate it
+                    $this _attach $interactor "subsel" $x $y $options
+                    return $interactor
+                }
+	    }
+	}
+    }
+    return ""
+}
+
+#######################################################################
+#### _deselect
+#
+body ::tycho::Selector::_deselect {id} {
+    if { $deselectprefix == "" } {
+	$slate select remove $id
+    } else {
+	eval $deselectprefix $id
+    }
+}
+
+#######################################################################
+#### _detach
+#
+# Remove any delegate interactors that haven't already detached
+# themselves from an item.
+#
+body ::tycho::Selector::_detach {} {
+    foreach {interactor info} [array get _attached] {
+        if { [$interactor target] != "" } {
+            eval $interactor deactivate $info
+        }
+    }
+    catch {unset _attached}
+}
+
+#######################################################################
+#### _select
+#
+body ::tycho::Selector::_select {id} {
+    if { $selectprefix == "" } {
+	$slate select add $id
+    } else {
+	eval $selectprefix $id
+    }
+}
+

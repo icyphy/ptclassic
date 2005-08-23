@@ -1,0 +1,31 @@
+# -*- model: tcl -*-
+#
+# @(#)edithtml.style	1.4 11/25/97
+#
+# The "edithtml" master style-sheet
+#
+configure -title "HTML editor colors"
+configure -description {
+    Additional color settings for HTML editors.
+}
+
+style default \
+	-label "Default"  {
+    
+    # FIXME: provide labels
+    parameter commandColor maroon \
+	    -type color \
+	    -label "?commandColor?"
+
+    parameter pointerColor blue \
+	    -type color \
+	    -label "?pointerColor?"
+
+    parameter destColor forestGreen \
+	    -type color \
+	    -label "?destColor?"
+
+    parameter targetColor lightskyblue \
+	-type color \
+	-label "?Target color?"
+}

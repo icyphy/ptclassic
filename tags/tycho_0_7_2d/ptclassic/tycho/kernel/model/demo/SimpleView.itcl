@@ -1,0 +1,429 @@
+##########################################################################
+# Version: @(#)SimpleView.itcl	1.8 05/20/98
+# Author: John Reekie
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+##########################################################################
+#### SimpleView
+#
+# SimpleView is a view that illustrates the model-view architecture.
+# It is a display of the contents of an instance of the
+# <a href="SimpleModel.html">SimpleModel</a> class. Following
+# are some examples illustrating the use of this class: the
+# stand-alone script <b>simpleview</b> essentially replicates
+# this example. Firstly, create the model and give it some data:
+# <pre><tcl>
+#     catch {delete object $model}
+#     set model [::tycho::SimpleModel #auto]
+#     $model type configure item -email ""
+#     $model parse {
+#         # Create some items
+#         item john -email johnr@eecs
+#         item christopher -email cxh@eecs -office "493-Cory"
+#
+#         # This item has items inside it
+#         item edward -email eal@eecs {
+#             item sato -phone 1-800-BIGDOGGY -color "Grey-ish, I think"
+#             item grendel -color "Black and white"
+#         }
+#     }
+#     $model describe
+# </tcl></pre>
+#
+# Now, create two instances of the SimpleView class.
+# Usually, we would use the
+# <b>::tycho::view</b> procedure to place these views
+# into a Displayer, but to keep this example portable,
+# here we will just pack them into top-level windows.
+# <pre><tcl>
+#     catch {destroy .t1 .t2 .t1.v .t2.v}
+#     toplevel .t1
+#     toplevel .t2
+#     set view1 [::tycho::SimpleView .t1.v]
+#     set view2 [::tycho::SimpleView .t2.v]
+#     pack $view1 -fill both -expand on
+#     pack $view2 -fill both -expand on
+# </tcl></pre>
+# 
+# Tell each instance which model it is viewing. This will cause
+# the view to initialize itself with the data in the model.
+# <pre><tcl>
+#     $view1 configure -model $model
+#     $view2 configure -model $model
+# </tcl></pre>
+#
+# Now, subscribe each view to the model. The view is subscribed
+# to "data" with the tag <b>all</b> to indicate that the view
+# is to be notified whenever any data changes. This code
+# is not executable, as these models execute in their constructors.
+# <pre>
+#     $model subscribe data $view1
+#     $model subscribe data $view2
+# </pre>
+#
+# Now, any changes made to the model via the <b>publish</b> command
+# will be reflected in both views. For example, change the <b>-phone</b>
+# attribute of item <b>John</b>:
+# <pre><tcl>
+#     $model publish attrset john -phone 3-7683
+# </tcl></pre>
+#
+# What this does is cause the model to look for subscribers
+# interested in item <b>john</b>, Since both views have subscribed
+# to "all" data, both will have their <b>notify</b> methods called
+# with (in this case) the arguments <b>john attrset -phone 3-7683</b>.
+# The notify method of SimpleView must take appropriate action --
+# in this case, changing the displayed value. You can enter data into
+# either window, and clicking on the "Apply" button will
+# update the model with the new data, and both views will change.
+#
+# Any other data-modifying command can be recorded. Delete an
+# item:
+# <pre><tcl>
+#     $model publish delete john
+# </tcl></pre>
+# 
+# Delete an attribute:
+# <pre><tcl>
+#     $model publish attrdel {edward sato} -phone
+# </tcl></pre>
+# 
+# Use the redo and undo buttons to go forwards and backwards
+# through the command history. (Note: there is a bug apparent
+# here: the command history does not preserve the ordering
+# of items. Is this important?)
+#
+class ::tycho::SimpleView {
+    inherit ::itk::Widget
+
+    public variable model "" {
+        if { $model != "" } {
+            _initialize
+        }
+    }
+
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Apply changed data to the model
+    method apply {{context {}}}
+
+    # Process notification from the model
+    method notify {command args}
+    
+    # Redo one command
+    method redo {}
+
+    # Undo one command
+    method undo {}
+
+    #################################################################
+    ####                  private methods                        ####
+
+    private method _initialize {}
+    private method _additem {item}
+    private method _delitem {item}
+    private method _addattr {item attr value {row {}}}
+    private method _delattr {item attr}
+    private method _hasattr {item attr}
+    private method _setattr {item attr value}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::SimpleView::constructor {args} {
+    # Frame for the data
+    itk_component add data {
+        frame $itk_interior.data -borderwidth 2 -relief raised
+    }
+    # Frame for the buttons
+    itk_component add buttons {
+        frame $itk_interior.buttons -borderwidth 2 -relief raised
+    }
+    pack $itk_interior.data $itk_interior.buttons \
+            -fill both -expand on -side top
+
+    # Buttons
+    foreach {button label command} {
+        undo Undo "$this undo"
+        redo Redo "$this redo"
+        apply Apply "$this apply"
+        close Close "destroy [winfo toplevel [string trimleft $this ::]]"
+    } {
+        itk_component add $button {
+            button $itk_component(buttons).$button \
+                    -text $label \
+                    -command [subst $command]
+        }
+        pack $itk_component($button) -side left
+    }
+    $itk_component(undo) configure -state disabled
+    $itk_component(redo) configure -state disabled
+
+    # Evaluate options
+    eval itk_initialize $args
+}
+
+########################################################################
+#### apply
+#
+# Compare every entry widget with the value obtained from
+# the model, and if the entry widget is different, update
+# the model.
+#
+body ::tycho::SimpleView::apply {{context {}}} {
+   # Figure out the widget path
+    if { $context != "" } {
+        set path $itk_component([join $context .])
+    } else {
+        set path $itk_component(data)
+    }
+
+    # Process items
+    foreach i [$model match item $context] {
+        set item [concat $context $i]
+
+        # Process each attribute
+        foreach {attr val} [$model attrget $item] {
+            if { $val != [$path.$i.entry$attr get] } {
+                # Different value, so update the model
+                $model publish attrset $item $attr [$path.$i.entry$attr get]
+            }
+        }
+        # Process nested items recursively.
+        if { [$model match item $item] != "" } {
+            apply $item
+        }
+    }
+}
+
+########################################################################
+#### notify
+# Process a notification from the model.
+#
+body ::tycho::SimpleView::notify {command args} {
+    # Switch on the command
+    switch -exact -- $command {
+        "add" {
+            # Item was added: add type item ?attr value...?
+            _additem [lindex $args 1]
+        }
+        "delete" {
+            # Item was deleted: delete item
+            _delitem [lindex $args 0]
+        }
+        "attrset" {
+            # Attributes changed: attrset item ?attr value...?
+            set item [lindex $args 0]
+            set args [lreplace $args 0 0]
+            foreach {attr value} $args {
+                if [_hasattr $item $attr] {
+                    _setattr $item $attr $value
+                } else {
+                    _addattr $item $attr $value
+                }
+            }
+        }
+        "attrdel" {
+            # Attributes deleted: attrdel item ?attr...?
+            # For each, call exists{} (in case
+            # the attribute has a default, in which case we don't
+            # really want to delete it.)
+            set item [lindex $args 0]
+            set args [lreplace $args 0 0]
+            foreach attr $args {
+                if [$model exists $item $attr] {
+                    _setattr $item $attr [$model attrget $item $attr]
+                } else {
+                    _delattr $item $attr
+                }
+            }
+        }
+    }
+    # Update the undo and redo buttons
+    if [$model mark compare first == current] {
+        # No more undo commands
+        $itk_component(undo) configure -state disabled
+    } else {
+         $itk_component(undo) configure -state normal
+ 
+    }       
+    if [$model mark compare current == last] {
+        # No more redo commands
+        $itk_component(redo) configure -state disabled
+    } else {
+        $itk_component(redo) configure -state normal
+    }
+}
+
+########################################################################
+#### undo
+#
+body ::tycho::SimpleView::undo {} {
+    $model undo
+    if [$model mark compare first == current] {
+        # No more undo commands
+        $itk_component(undo) configure -state disabled
+    }
+    $itk_component(redo) configure -state normal
+}
+
+########################################################################
+#### redo
+#
+body ::tycho::SimpleView::redo {} {
+    $model redo
+    if [$model mark compare current == last] {
+        # No more redo commands
+        $itk_component(redo) configure -state disabled
+    }
+    $itk_component(undo) configure -state normal
+}
+
+
+########################################################################
+########################################################################
+####                       private methods                        ####
+
+########################################################################
+#### _initialize
+# Initialize the display from a model.
+#
+body ::tycho::SimpleView::_initialize {} {
+    # Get the data and display it
+    foreach n [$model match item] {
+        _additem $n
+    }
+    # Subscribe to further changes
+    $model subscribe data $this
+}
+
+########################################################################
+#### _additem
+#
+body ::tycho::SimpleView::_additem {item} {
+    # Strip types from the name.
+    set name [join $item .]
+    set path $itk_component(data).$name
+
+    # Create a frame for this item
+    itk_component add $name {
+        frame $path
+    }
+    set row [lindex [grid size [winfo parent $path]] 1]
+    grid $path -row $row -column 2 -sticky nsew
+
+    # Column 1 contains attribute labels: allow it to expand
+    grid columnconfigure $path 1 -weight 1
+
+    # Create its label
+    itk_component add $name.label {
+        label $path.label -text [lindex $item end]
+    }
+    grid $path.label -row 0 -column 0
+
+    # Process each attribute
+    set i 0
+    foreach {attr val} [$model attrget $item] {
+        _addattr $item $attr $val $i
+        incr i
+    }
+
+    # Process nested items. Repeat after me: I love recursion, I love...
+    foreach n [$model match item $item] {
+        _additem [concat $item $n]
+    }
+}
+
+########################################################################
+#### _delitem
+#
+body ::tycho::SimpleView::_delitem {item} {
+    set name [join $item .]
+    destroy $itk_component($name)
+    unset    itk_component($name)
+}
+
+########################################################################
+#### _addattr
+#
+body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
+    set name [join $item .]
+    set path $itk_component($name)
+
+    # Get the row, if not provided
+    if { $row == "" } {
+        set row [lindex [grid size $path] 1]
+    }
+
+    # Create the attribute label
+    itk_component add $name.label$attr {
+        label $path.label$attr -text $attr -foreground blue
+    }
+    grid $path.label$attr -row $row -column 1 -sticky e
+
+    # Create the entry widget
+    itk_component add $name.entry$attr {
+        entry $path.entry$attr
+    }
+    $path.entry$attr insert 0 $value
+    grid $path.entry$attr -row $row -column 2
+}
+
+########################################################################
+#### _delattr
+#
+body ::tycho::SimpleView::_delattr {item attr} {
+    set name [join $item .]
+    destroy $itk_component($name.label$attr)
+    destroy $itk_component($name.entry$attr)
+    unset itk_component($name.label$attr)
+    unset itk_component($name.entry$attr)
+}
+
+########################################################################
+#### _setattr
+#
+body ::tycho::SimpleView::_setattr {item attr value} {
+    set name [join $item .]
+    $itk_component($name.entry$attr) delete 0 end
+    $itk_component($name.entry$attr) insert 0 [$model attrget $item $attr]
+}
+
+########################################################################
+#### _hasattr
+#
+body ::tycho::SimpleView::_hasattr {item attr} {
+    set name [join $item .]
+    ::info exists itk_component($name.entry$attr)
+}
+

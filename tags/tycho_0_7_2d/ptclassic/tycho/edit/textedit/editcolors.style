@@ -1,0 +1,80 @@
+# -*- mode: tcl -*-
+#
+# @(#)editcolors.style	1.4 11/25/97
+#
+# The "textcolors" master style-sheet
+#
+configure -title "Text colors"
+configure -description {
+    This style contains highlight colors for plain text editors,
+    such as code editors and so on. In general, a new style
+    will be needed if new styles are create in the <i>textcolors</i>
+    style-sheet.
+}
+
+style default \
+	-label "Black on white" \
+	-description {
+    The default highlighting colors. These colors work well
+    for black-on-white text.
+} {
+    parameter commentColor firebrick \
+	    -type color \
+	    -label "Comment highlight"
+
+    parameter keywordColor blue \
+	    -type color \
+	    -label "Keyword highlight"
+
+    parameter stringColor gray50 \
+	    -type color \
+	    -label "String highlight"
+
+    parameter procColor blue \
+	    -type color \
+	    -label "Procedure name highlight"
+
+    parameter classColor blue \
+	    -type color \
+	    -label "Class name highlight"
+
+    parameter methodColor purple \
+	    -type color \
+	    -label "Method name highlight"
+
+    parameter variableColor forestGreen \
+	    -type color \
+	    -label "Variable highlight"
+
+    parameter optionColor DeepPink \
+	    -type color \
+	    -label "Tk option highlight"
+
+    parameter linkColor blue \
+	    -type color \
+	    -label "Hyperlink highlight"
+
+    parameter versionColor blue \
+	    -type color \
+	    -label "Color of version text"
+
+    # FIXME: Move this into a separate "ptolemy" stylesheet
+    parameter ptlangKeywordColor coral \
+	    -type color \
+	    -label "PtLang keyword highlight"
+
+    parameter fixmeColor red \
+	    -type color \
+	    -label "Color of \"FIXME\" strings"
+}
+
+style reverse \
+	-label "White on black" {
+    parameter stringColor orange
+    parameter procColor lightskyblue1
+    parameter classColor lightblue1
+    parameter methodColor lightskyblue1
+    parameter commentColor bisque2
+    parameter optionColor pink
+}
+

@@ -1,0 +1,610 @@
+# A "control panel" for tasks executed by the Scheduler.
+#
+# @Author: John Reekie
+#
+# @Version: @(#)ControlPanel.itcl	1.11 08/05/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### controlpanel
+#
+# Create a control panel. This procedure is provided to make
+# it easier for user scripts to create a control panel and
+# connect it to a background task. The argument is the name
+# of the shared-library file containing the task to run. By
+# default, the new control panel is packed into a Displayer
+# window and the name of the control panel widget returned. If,
+# however, the second argument is supplied, the control panel
+# widget is created with this name, and is _not_ packed into
+# a Displayer. (The same name is returned.)
+#
+# This procedure assumes that the loaded package has a single
+# Tcl command with the same name as the package name. For
+# example, the *foo.so* package will implement the procedure
+# *::tycho::foo*. This proc has the following submodes:
+# <ul>
+# <LI><B>scriptfile</B>: Return the name of the user interface script
+# file set in the TychoTarget parameters window in VEM.
+# <LI><B>init</B>: Call the <CODE>tychoSetup()</CODE> function,
+# causing stars to tell Tycho what to do when controls
+# are moved by the user.
+# <LI><B>setup</B>: Call the <CODE>setup()</CODE> function. If
+# an additional argument is called, it is the name of a Tcl
+# variable that is updated with the iteration count after
+# each call to <CODE>execute()</CODE>.
+# <LI><B>execute</B>: Execute the universe until the C timer
+# expires (by default, Tycho sets this to 20 ms).
+# Update the Tcl iteration counter if one was specified
+# in the setup call.
+# <LI><B>wrapup</B>: Call the <CODE>wrapup()</CODE> function.
+# </ul>
+# 
+# The <b>scriptfile</b> mode should return the name of a file
+# that adds "panels" to a ControlPanel widget called
+# "controlPanel." Each panel should be a subclass of
+# <a href="ControlSubpanel.html">ControlSubpanel</a>.
+# For example, to create a sub-panel with controls for
+# real-time audio, the script contains
+# <pre>
+#     ::tycho::AudioIO controlPanel.io
+#     controlPanel add controlPanel.io -side left
+# </pre>
+# Note that the script does not have to create the control panel,
+# since this is done by the <code>::tycho::controlpanel</code>
+# procedure. Note also that no dollar-sign is required in front
+# of <code>controlPanel</code>: the  <code>::tycho::controlpanel</code>
+# substitutes the name of the actual control panel widget for
+# this string.
+#
+# A useful statement to place in the script file is
+# <pre>
+#     controlPanel debug 1
+# </pre>
+# which makes the ControlPanel widget print out debugging
+# messages.
+#
+proc ::tycho::controlpanel {filename {widgetname {}}} {
+    set name [file rootname [file tail $filename]]
+    set directory [file dirname $filename]
+
+    # First make sure support packages are loaded
+    # Use update idletasks so we can see that packages are loading
+    ::tycho::loadIfNotPresent ::tycho::timer tytimer
+    update idletasks
+    ::tycho::loadIfNotPresent ::tycho::cgc tycgc
+    update idletasks
+
+    # Create the control panel widget
+    if { $widgetname != "" } {
+        uplevel #0 ::tycho::ControlPanel $widgetname -taskname $name
+    } else {
+        set widgetname [::tycho::view ControlPanel -taskname $name]
+    }
+
+    # Register the new widget so that we can access it by name later
+    ::tycho::ControlPanel::registerWidget $name $widgetname
+
+    # If the module is not already loaded, load it. (We are
+    # going to have to figure out how to get a "new" version
+    # of an already loaded script. We might have to do some
+    # horrible messing about with the library name...)
+    #
+    if { [::infoWhichCommand ::tycho::$name] == "" } {
+	puts "loading $filename"
+	update idletasks
+	load $filename
+    }
+
+    # Get the name of this module's custom script file. If not
+    # null, source the file. The script file must use the name
+    # "controlPanel" to reference the control panel widget -- before
+    # executing the script, the name of the actual widget is
+    # substituted for every occurrence of "controlPanel." (Note
+    # that controlPanel is not a variable: do not use "$controlPanel".)
+    #
+    set scriptfile [::tycho::$name scriptfile]
+    if { $scriptfile != "" } {
+	# Read the script
+        puts "loading script file $scriptfile"
+	set fd [open [::tycho::expandPath $scriptfile]]
+	set script [read $fd]
+	close $fd
+
+	# Substitute the widget name for "controlPanel"
+	regsub -all controlPanel $script $widgetname script
+
+	# Execute it at the global scope. (I'm not certain this
+	# _should_ be at the global scope -- would it be simpler
+	# to execute it in the scope of the widget? That would mean
+	# that script writers would write eg connect foo instead
+	# of controlPanel connect foo...)
+	uplevel #0 $script
+    }
+
+    # Now call the module's initialization to set up callbacks
+    ::tycho::$name init
+
+    # Return the widget name
+    return $widgetname
+}
+
+#######################################################################
+#### ControlPanel
+#
+# A <i>ControlPanel</i> is a class that displays a control panel
+# for a Tycho task running in the "background" in Tycho.
+# The task is executed by the _Scheduler_ class, and
+# interleaves execution with other tasks. It manages the
+# call-backs from control widgets to the generated C code.
+#
+# This widget is generally created by the
+# <code>::tycho::controlpanel</code> procedure, which also
+# sources a script file that should configure a control panel
+# named "controlPanel." (See the <a href="ControlPanel_rel.html">
+# <code>::tycho::controlpanel</code></a> proc for more information.)
+# Most of the methods of the ControlPanel widget are used
+# internally, by the <a href="../../../../src/tycgc/doc">tycgc</a>
+# support library, and by the ControlSubPanel class, but the script file
+# writer is likely to use the following:
+# <ul>
+# <li><b>-helpfile</b>: The name of a file containing HTML help
+# text. If this option is set, a help button appears on the
+# control panel.
+# <li><b>-orient</b>: The orientation of the start/stop control 
+# buttons. This can be "vertical" or "horizontal."
+# <li><b>add</b> _subpanel_ ?_option value_?: Add a sub-panel (a sub-class of
+# <a href="ControlSubpanel.html">ControlSubpanel</a>) into the
+# control panel.
+# <li><b>debug</b> _bool_: Turn debugging messages on or off.
+# </ul>
+#
+class ::tycho::ControlPanel {
+    inherit ::tycho::View
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # The name of the HTML help file
+    itk_option define -helpfile helpFile HelpFile ""
+
+    # The name of the task being run by this panel
+    itk_option define -taskname taskName TaskName ""
+
+    # The orientation of the button box
+    itk_option define -orient orient Orient vertical
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a subpanel widget into this widget
+    method add {widget args}
+
+    # Connect a callback to a control
+    method callback {control callback}
+
+    # Connect a slider or scale widget to a control
+    method connect {widget control {scale {}} {offset {}}}
+
+    # Turn debugging on or off
+    method debug {what}
+
+    # Pause the task
+    method pause {}
+
+    # Resume the task
+    method resume {}
+
+    # Start the task
+    method start {}
+
+    # Stop the task
+    method stop {}
+
+    # Callback to update callbacks
+    method _update {widget value}
+
+    # Callback to update iteration count
+    method _counttrace {args}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Register a widget by task name
+    proc registerWidget {name widget}
+
+    # Register a callback from a star
+    proc starConnect {galaxy star control callback}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # A flag to enable debugging
+    protected common debug 0
+
+    # The common array of iteration counters. FIXME: we are
+    # currently using a global variable here so that C packages
+    # can update the iteration counter.
+    # protected common iterationcounter
+
+    # The common array of widgets, indexed by task name
+    protected common widgetnames
+
+    # The array of star callbacks, indexed by control name
+    protected variable controlcallbacks
+
+    # The array of control names, indexed by widget name
+    protected variable widgetcontrols
+}
+
+######################################################################
+#### -help configuration option
+# Add a help button to the control panel.
+#
+configbody ::tycho::ControlPanel::helpfile {
+    if { $itk_option(-helpfile) != "" } {
+        $itk_component(bbox) add help -text Help \
+                -command "::tycho::File::openContext \
+                [::tycho::expandPath $itk_option(-helpfile)]"
+    }
+}
+
+######################################################################
+#### -orient configuration option
+# Set the button box to be vertical or horizontal.
+#
+configbody ::tycho::ControlPanel::orient {
+    if { $itk_option(-orient) == "vertical" } {
+        $itk_component(bbox) configure -columns 1
+    } else {
+        $itk_component(bbox) configure -columns 0
+    }
+}
+
+######################################################################
+#### -taskname configuration option
+# Set the name of the task.
+#
+configbody ::tycho::ControlPanel::taskname {
+    displayer configure -title $itk_option(-taskname)
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::ControlPanel::constructor {args} {
+    # Create a bunch of buttons
+    itk_component add bbox {
+        ::tycho::ButtonBox $itk_interior.bbox -ringwidth 0
+    } {
+	keep -background -cursor -font -padx -pady
+    }
+    pack $itk_component(bbox) -side right -expand no -padx 2 -pady 4
+
+    # Initialize the iteration counter and add a trace to it
+    global iterationcounter
+    set iterationcounter($this) 0
+    trace variable iterationcounter($this) "w" "$this _counttrace"
+
+    # Initialize args
+    eval itk_initialize $args
+
+    # Set the command name
+    set cmd ::tycho::$itk_option(-taskname)
+
+    # Now that we have the -orient option set, add the buttons
+    $itk_component(bbox) add start -text Start -command "$this start"
+    $itk_component(bbox) add pause -text Pause -command "$this pause"
+    $itk_component(bbox) add resume -text Resume -command "$this resume"
+    $itk_component(bbox) add stop -text Stop -command "$this stop"
+    
+    # Add shortcut bindings
+    bind $this <Control-g> "$this start"
+    bind $this <Control-p> "$this pause"
+    bind $this <Control-r> "$this resume"
+    bind $this <Control-s> "$this stop"
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### add
+#
+# Add a control subpanel widget into this control panel.
+# The widget must be a subclass of ControlSubpanel. Optional
+# arguments are passed to the Tk *pack* command. The widget's
+# *-controlpanel* option is set, and the widget's requestConnect{}
+# method is called.
+#
+body ::tycho::ControlPanel::add {widget args} {
+    # Pack the widget
+    eval pack $widget $args
+
+    # Tell the widget about its control panel and make it
+    # connect its controls
+    $widget configure -controlpanel $this
+    $widget requestConnect
+}
+
+#######################################################################
+#### callback
+#
+# Give a control name and a callback that implements it. The callback
+# will be called with the control value appended whenever it changes.
+#
+body ::tycho::ControlPanel::callback {control callback} {
+    if $debug {
+    	puts "Connect control \"$control\" to callback \"$callback\""
+    }
+    # Remember the callback
+    set controlcallbacks($control) $callback
+
+    # Make sure that the controlled value is consistent
+    # with a control -- if already connected
+    foreach  widget [array names widgetcontrols] {
+        foreach {ctrl _ _} $widgetcontrols($widget) {
+            if { $ctrl == $control } {
+                _update $widget
+            }
+        }
+    }
+}
+
+#######################################################################
+#### connect
+#
+# Give a control name and a widget that writes to it. This method
+# can be called more than once for each widget. The widget's
+# *-command* option is overwritten.
+#
+body ::tycho::ControlPanel::connect {widget control {scale {}} {offset {}}} {
+    if $debug {
+        if { $scale != "" } {
+            if { $offset != "" } {
+                puts "Connect \"$widget\" -> \"$control\" x $scale + $offset"
+            } else {
+                puts "Connect \"$widget\" -> \"$control\" x $scale"
+            }
+        } else {
+            puts "Connect \"$widget\" -> \"$control\""
+        }
+    }
+    # Remember the widget and control
+    lappend widgetcontrols($widget) $control $scale $offset
+
+    # Make sure that the widget display
+    # is consistent with the controlled value
+    _update $widget [$widget get]
+
+    # Make the widget update callbacks when it changes value
+    $widget configure -command "$this _update $widget"
+}
+
+#######################################################################
+#### pause
+#
+# Pause the task.
+#
+body ::tycho::ControlPanel::pause {} {
+    # Call the scheduler
+    ::tycho::Scheduler::suspend $itk_option(-taskname)
+
+    # Change button states -- doesn't work!
+    # set bbox $itk_component(bbox)
+    # $bbox buttonconfigure start  -relief raised -state disabled
+    # $bbox buttonconfigure pause  -relief sunken -state disabled 
+    # $bbox buttonconfigure resume -relief raised -state normal
+    # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Paused"
+    update idletasks
+}
+
+#######################################################################
+#### resume
+#
+# Resume the task.
+#
+body ::tycho::ControlPanel::resume {} {
+    # Call the scheduler
+    ::tycho::Scheduler::resume $itk_option(-taskname)
+
+    # Change button states -- doesn't work!
+    # set bbox $itk_component(bbox)
+    # $bbox buttonconfigure start  -relief raised -state disabled
+    # $bbox buttonconfigure pause  -relief raised -state normal 
+    # $bbox buttonconfigure resume -relief sunken -state disabled
+    # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+    update idletasks
+}
+
+#######################################################################
+#### start
+#
+# Start the task.
+#
+body ::tycho::ControlPanel::start {} {
+    # Call the scheduler
+    ::tycho::Scheduler::startC \
+	    ::tycho::$itk_option(-taskname) \
+	    iterationcounter($this)
+
+    # Change button states -- doesn't work!
+    # set bbox $itk_component(bbox)
+    # $bbox buttonconfigure start  -relief sunken -state disabled
+    # $bbox buttonconfigure pause  -relief raised -state normal 
+    # $bbox buttonconfigure resume -relief raised -state disabled
+    # $bbox buttonconfigure stop   -relief raised -state normal
+
+    putStatus "Running"
+    update idletasks
+}
+
+#######################################################################
+#### stop
+#
+# Stop the task.
+#
+body ::tycho::ControlPanel::stop {} {
+    # Call the scheduler
+    ::tycho::Scheduler::kill $itk_option(-taskname)
+
+    # Change button states -- doesn't work!
+    # set bbox $itk_component(bbox)
+    # $bbox buttonconfigure start  -relief raised -state normal
+    # $bbox buttonconfigure pause  -relief raised -state disabled 
+    # $bbox buttonconfigure resume -relief raised -state disabled
+    # $bbox buttonconfigure stop   -relief sunken -state disabled
+
+    putStatus "Stopped"
+    update idletasks
+}
+
+#######################################################################
+#### _counttrace
+#
+# Callback to update the iteration display in the status bar.
+# Not for general use.
+#
+body ::tycho::ControlPanel::_counttrace {args} {
+    global iterationcounter
+    putStatus "Running: $iterationcounter($this)"
+}
+
+#######################################################################
+#### _update
+#
+# Callback to update callbacks. Not for general use.
+#
+body ::tycho::ControlPanel::_update {widget value} {
+    if { ! [::info exists widgetcontrols($widget)] } {
+	if $debug {
+	    puts "Widget $widget has not registered to any controls!"
+	}
+	return
+    }
+    foreach {control scale offset} $widgetcontrols($widget) {
+        set v $value
+        if { $scale != "" } {
+            set v [expr $v * $scale]
+        }
+	if { $offset != "" } {
+	    set v [expr $v + $offset]
+	}
+        if $debug {
+            puts "$itk_option(-taskname).$control = $v"
+        }
+        if { [::info exists controlcallbacks($control)] } {
+            uplevel #0 $controlcallbacks($control) $v
+        }
+    }
+}
+
+#######################################################################
+#### debug
+#
+# Turn debugging on or off. This is provided since scripts to create
+# control panels may be created by non-Tycho programmers. All 
+# methods of a control panel try and print useful information
+# if debugging is turned on.
+#
+body ::tycho::ControlPanel::debug {what} {
+    set debug $what
+    if $debug {
+    	puts "Debugging $itk_option(-taskname)"
+    } else {
+    	puts "Not debugging $itk_option(-taskname)"
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### registerWidget
+#
+# Register a widget by task name.
+#
+body ::tycho::ControlPanel::registerWidget {name widget} {
+    if $debug {
+        puts "Task \"$name\" displayed by widget \"$widget\""
+    }
+    set widgetnames($name) $widget
+}
+
+#######################################################################
+#### starConnect
+#
+# Register a callback for a star control. This procedure is
+# called by the *connectControl* function in the *tycgc*
+# support package. Stars call *connectControl* in their
+# *tychoSetup* code stream, to enable user-interface scripts
+# to control their parameters. The callbacks are regular
+# Tcl C functions, and will be the same ones used by the
+# TclTk target.
+#
+body ::tycho::ControlPanel::starConnect {galaxy star control callback} {
+    if { ! [::info exists widgetnames($galaxy)] } {
+        error "No control panel exists for \"$galaxy\""
+    }
+    $widgetnames($galaxy) callback $star.$control $callback
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::ControlPanel::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    # Disable file status display
+    statusbar configure -filestatus none
+}

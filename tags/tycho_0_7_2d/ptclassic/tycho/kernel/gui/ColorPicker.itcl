@@ -1,0 +1,431 @@
+# A color picker based on Tycho's hue-saturation-value color
+# interface.
+#
+# @Author: John Reekie
+#
+# @Version: @(#)ColorPicker.itcl	1.6 04/29/98
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+##########################################################################
+#### pickcolor
+# Bring up a color picker dialog to query for a color.
+#
+proc ::tycho::pickcolor {} {
+    set name [autoName .color]
+    uplevel #0 [list ::tycho::ColorPicker $name -text {} -title "Color Picker"]
+    wm deiconify $name
+}
+
+##########################################################################
+#### ColorPicker
+# A color picker based on Tycho's hue-saturation-value color interface.
+#
+class ::tycho::ColorPicker {
+    inherit ::tycho::Dialog
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The font to use in labels 
+    itk_option define -labelfont labelFont Font [::tycho::font helvetica]
+
+    ##################################################################
+    ####                     public methods                       ####
+
+    # Refresh the color picker
+    method refresh {}
+
+    # Process a single click
+    method click {widget}
+
+    # Bring up the color browser
+    method _browser {}
+
+    # Change the current rgb value
+    method _setrgb {rgb}
+
+    # Process a new hsv value from the option menus
+    method _newhsv {}
+
+    # Process a new rgb value from the entry widget
+    method _newrgb {}
+
+    # Process a new symbolic color value from the entry widget
+    method _newcolor {}
+
+    ##################################################################
+    ####                   protected methods                      ####
+
+
+    ##################################################################
+    ####                   protected variables                    ####
+
+    ##################################################################
+    ####                    private variables                     ####
+    
+    # The HSV of each widget
+    private variable _hsv
+}
+
+######################################################################
+#
+body ::tycho::ColorPicker::constructor {args} {
+    # Container
+    itk_component add frame {
+	frame $itk_component(hull).frame
+    } {
+	keep -cursor -background
+    }
+    pack $itk_component(frame) -side bottom -anchor nw\
+	    -expand yes -fill x -after $itk_component(top)
+
+    # Grid for displaying info
+    itk_component add topgrid {
+	labeledgrid $itk_component(hull).frame.topgrid \
+                -relief raised -borderwidth 2 \
+                -labelforeground blue
+    } {
+	keep -cursor -background -font -labelfont
+    }
+    grid $itk_component(topgrid) -sticky n \
+            -row 0 -column 0 \
+            -ipadx 18 -ipady 12
+
+    # Add the HSV selectors and the RGB display
+    set hues [::tycho::ColorManager::hue]
+    set sats [::tycho::ColorManager::saturation]
+    set vals [::tycho::ColorManager::value]
+    $itk_component(topgrid) add optionmenu hue \
+            -label "Hue" -entries $hues \
+            -command "$this _newhsv" \
+            -initial ""
+    $itk_component(topgrid) add optionmenu saturation \
+            -label "Saturation" -entries $sats \
+            -command "$this _newhsv" \
+            -initial ""
+    $itk_component(topgrid) add optionmenu value \
+            -label "Value" -entries $vals \
+            -command "$this _newhsv" \
+            -initial ""
+    
+    $itk_component(topgrid) add entry rgb -label "RGB"
+    set e [$itk_component(topgrid) component rgb]
+    bind $e <FocusOut> "$this _newrgb"
+    bind $e <Return>   "$this _newrgb"
+
+    # Add a symbolic color field and an edit button
+    $itk_component(topgrid) vskip -minsize 12
+    $itk_component(topgrid) add entry color -label "Symbolic color name"
+    set e [$itk_component(topgrid) component color]
+    bind $e <FocusOut> "$this _newcolor"
+    bind $e <Return>   "$this _newcolor"
+
+    itk_component add pickcolor {
+        button $itk_component(topgrid).pickcolor \
+                -text "List..." \
+                -command "$this _browser" \
+                -pady 3 -padx 8
+    }
+    grid $itk_component(pickcolor) \
+            -row 5 \
+            -column 4
+
+   # Frame for displaying colors
+    itk_component add colors {
+	frame $itk_component(hull).frame.colors -relief raised -borderwidth 2
+    } {
+	keep -cursor -background
+    }
+    grid $itk_component(colors) \
+            -row 0 -column 1 -rowspan 2 \
+            -ipadx 12 -ipady 12
+
+    # Frame for displaying the color sample
+    itk_component add sample {
+	frame $itk_component(hull).frame.sample -relief raised -borderwidth 2
+    } {
+	keep -cursor -background
+    }
+    grid $itk_component(sample) -sticky nsew \
+            -row 1 -column 0
+
+    itk_component add sampleinside {
+	frame $itk_component(hull).frame.sample.inside \
+                -relief sunken -borderwidth 1
+    } {
+	keep -cursor
+    }
+    pack $itk_component(sampleinside) \
+            -fill both -expand on -padx 20 -pady 20
+
+    grid rowconfigure $itk_component(frame) 1 -weight 1
+
+    # Color swatches will have their bindtags set to respond
+    # to the tag "swatch." Set up the bindings for them
+    bind swatch <ButtonPress-1> "\[winfo toplevel %W\] click %W"
+
+    # The text samples
+    itk_component add blacktext {
+        label $itk_component(sampleinside).black \
+                -text "Black text" \
+                -foreground black \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor e
+    } {
+        keep -cursor
+    }
+    itk_component add whitetext {
+        label $itk_component(sampleinside).white \
+                -text "White text" \
+                -foreground white \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor w
+    } {
+        keep -cursor
+    }
+    pack $itk_component(blacktext) \
+            -side top -expand yes -fill x -padx 12
+    pack $itk_component(whitetext) \
+            -side top -expand yes -fill x -padx 12
+
+    # Add the close button
+    set bbox [component bbox]
+    $bbox add close \
+            -text "Close" \
+            -command "destroy $itk_component(hull)" \
+            -column 1
+    $bbox default close
+
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+
+    # Load the colors
+    refresh
+}
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
+
+######################################################################
+#### _browser
+# Bring up the color browser.
+#
+body ::tycho::ColorPicker::_browser {} {
+    set color [$itk_component(topgrid) get color]
+    set color [::tycho::querycolor {Pick One} $color]
+    $itk_component(topgrid) assign color $color
+    _newcolor
+}
+
+######################################################################
+#### _newhsv
+# Process a change to the HSV value from the option menus.
+#
+body ::tycho::ColorPicker::_newhsv {} {
+    set hue [$itk_component(topgrid) get hue]
+    set sat [$itk_component(topgrid) get saturation]
+    set val [$itk_component(topgrid) get value]
+
+    if { $hue != "" } {
+         set rgb [::tycho::color -hsv $hue $sat $val]
+        $itk_component(topgrid) assign color {}
+        _setrgb $rgb
+    }
+}
+
+######################################################################
+#### _newrgb
+# Process a change to the RGB value from the entry widget.
+#
+body ::tycho::ColorPicker::_newrgb {} {
+    set rgb [$itk_component(topgrid) get rgb]
+    if [string match {*(invalid)} $rgb] {
+        return
+    }
+    # Attempt to make sense of what's in the box
+    set rgb [string trimleft $rgb " "]
+    if ![string match #* $rgb] {
+        if { [regexp {^[0-9a-fA-F]+$} $rgb] || [string length $rgb] == 6 } {
+            set rgb #$rgb
+        }
+    }
+    if { ![regexp {^#[0-9a-fA-F]+$} $rgb] || [string length $rgb] != 7 } {
+        if { $rgb != "" } {
+            $itk_component(topgrid) assign rgb "$rgb (invalid)"
+        }
+        return
+    }
+    $itk_component(topgrid) assign color {}
+    $itk_component(topgrid) assign hue {}
+    $itk_component(topgrid) assign saturation {}
+    $itk_component(topgrid) assign value {}
+    _setrgb $rgb
+}
+
+######################################################################
+#### _newcolor
+# Process a change to the symbolic color name value from the
+# entry widget.
+#
+body ::tycho::ColorPicker::_newcolor {} {
+    set color [$itk_component(topgrid) get color]
+    if [string match {*(unknown)} $color] {
+        return
+    }
+    if { $color != "" } {
+        $itk_component(topgrid) assign hue {}
+        $itk_component(topgrid) assign saturation {}
+        $itk_component(topgrid) assign value {}
+        set rgb [::tycho::color -lookup $color]
+        # Helpfully, the color manager returns black if
+        # it doesn't understand the color name. About
+        # all we can do is provide an indication...
+        if { $rgb == "#000000" } {
+            $itk_component(topgrid) assign color "$color (unknown)"
+        } else {
+            _setrgb $rgb
+        }
+    }
+}
+
+######################################################################
+#### click
+# Process a single click. The argument is the widget that got the click.
+#
+body ::tycho::ColorPicker::click {widget} {
+    $itk_component(topgrid) assign color {}
+    if [::info exists _hsv($widget)] {
+        foreach {h s v} $_hsv($widget) {}
+    } else {
+        set h {}
+        set s {}
+        set v {}
+    }
+    $itk_component(topgrid) assign hue $h
+    $itk_component(topgrid) assign saturation $s
+    $itk_component(topgrid) assign value $v
+    
+    _setrgb [$widget cget -bg]
+}
+
+######################################################################
+#### _setrgb
+# Respond to a new rgb value.
+#
+body ::tycho::ColorPicker::_setrgb {rgb} {
+    $itk_component(sampleinside) configure -bg $rgb
+    $itk_component(blacktext) configure -bg $rgb
+    $itk_component(whitetext) configure -bg $rgb
+
+    $itk_component(topgrid) assign rgb $rgb
+}
+
+######################################################################
+#### refresh
+# Redraw the colors.
+#
+body ::tycho::ColorPicker::refresh {} {
+    set colors $itk_component(colors)
+
+    # If colors already exists, delete
+    foreach f [winfo children $colors] {
+        destroy $f
+    }
+
+    # Draw the greys
+    set i 0
+    set r 0
+    label $colors.l -text grey
+    grid $colors.l -row 0 -column 0 -columnspan 3
+    frame $colors.0
+    grid $colors.0 -row 1 -column 0 -columnspan 3
+    set v 0
+    set k 0
+    foreach max {50 100} {
+        set l 0
+        while {$v <= $max} {
+            set rgb [::tycho::color -hsv grey $v]
+            frame $colors.0.$k$l -width 25 -height 25 -bg $rgb
+            grid $colors.0.$k$l -row $k -column $l
+            bindtags $colors.0.$k$l {swatch Frame all}
+            incr l
+            incr v 5
+        }
+        incr k
+    }
+    incr r 2
+    grid rowconfigure $colors $r -minsize 6
+    incr r
+    incr i
+
+    # Get hues, etc. Could be faster...
+    set hues [::tycho::ColorManager::hue]
+    set sats [::tycho::ColorManager::saturation]
+    set vals [::tycho::ColorManager::value]
+
+    # Make into three columns
+    while { $hues != "" } {
+        set hs [lrange $hues 0 2]
+        set hues [lreplace $hues 0 2]
+        set j 0
+        # This is a single row
+        foreach h $hs {
+            set k 0
+
+            # Create the label and the containing frame
+            label $colors.l$i$j -text $h
+            grid $colors.l$i$j -row $r -column $j
+            frame $colors.$i$j
+            grid $colors.$i$j -row [expr $r+1] -column $j -padx 8 -pady 2
+
+            # bottom, increase brightness from left to right
+            foreach s $sats {
+                set l 0
+                foreach v $vals {
+                    set rgb [::tycho::color -hsv $h $s $v]
+                    frame $colors.$i$j.$k$l -width 25 -height 25 -bg $rgb
+                    grid $colors.$i$j.$k$l -row $k -column $l
+                    bindtags $colors.$i$j.$k$l {swatch Frame all}
+                    set _hsv($colors.$i$j.$k$l) [list $h $s $v]
+                    incr l
+                }
+                incr k
+            }
+            incr j
+        }
+        incr r 2
+        grid rowconfigure $colors $r -minsize 6
+        incr r
+        incr i
+    }
+}
+

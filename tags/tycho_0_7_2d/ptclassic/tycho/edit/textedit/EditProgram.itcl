@@ -1,0 +1,833 @@
+# Definition of a text editor with facilities for editing programs
+# in various languages.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)EditProgram.itcl	1.60	01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+# FIXME: Known bugs
+#
+# - The commentSelection and indentSelection command cannot be undone
+#   by the undo command.  To change this, they should be rewritten to
+#   delete the region of text using deleteRegion and insert modified
+#   text using insertString.
+#
+# - The "indent region" command does not recognize close braces
+#   on a line that is a "backslash continuation" line.
+#   Example:
+# 
+# 		btt {
+# 		    set family \
+# 			    [option get . fixedFontFamily $topLevelClass] }
+# 		    set weight bold
+# 		}
+# 
+#   Note the extra close brace at the end of the third line.
+# 
+
+
+#######################################################################
+#### EditProgram
+# This class defines a widget that provides an emacs-like editor
+# specialized for editing program files. It colorizes the code,
+# identifying comments, automatically indents the code, and fills
+# blocks of comments. Derived classes are specialized to particular
+# programming languages. This class provides a common infrastructure.
+# In particular, it provides a common mechanism for handling
+# line-oriented comments, and indentation driven by brackets, braces,
+# and parentheses. It also tags and colors colors comments and the
+# strings "FIXME" and "NOTE", provides infrastructure for tagging and
+# coloring keywords, and provides a method for commenting out a region.
+#
+# Note that there is both a procedure and a method that will generate
+# documentation. The <CODE>gendoc</CODE> procedure can be used to
+# generate documentation for any file, and the file does not have to be
+# currently opened by tycho. <CODE>gendoc</CODE> is used by the Ptolemy
+# man command. The <CODE>gendocBuffer</CODE> method is used to generate
+# documentation for the current contents of a editor.  <CODE>gendoc</CODE>
+# and <CODE>gendocBuffer</CODE> both call internal functions 
+# (<CODE>gendocFileInternal</CODE> and <CODE>gendocBufferInternal</CODE>
+# that do the real work.  Child classes will usually redefine 
+# <CODE>gendoc</CODE> and <CODE>gendocBuffer</CODE>.
+# 
+class ::tycho::EditProgram {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The color of strings.
+    itk_option define -stringcolor stringColor StringColor black {
+	$itk_component(text) tag configure string \
+		-foreground $itk_option(-stringcolor)
+    }
+
+    # The color of comments.
+    itk_option define -commentcolor commentColor CommentColor black {
+	$itk_component(text) tag configure comment \
+		-foreground $itk_option(-commentcolor)
+    }
+
+    # The color of "FIXME".
+    itk_option define -fixmecolor fixmeColor FixmeColor black {
+	$itk_component(text) tag configure fixme \
+		-foreground $itk_option(-fixmecolor)
+    }
+
+    # The color of keywords.
+    itk_option define -keywordcolor keywordColor KeywordColor black {
+	$itk_component(text) tag configure keyword \
+		-foreground $itk_option(-keywordcolor)
+    }
+
+    # The color of procedure names.
+    itk_option define -proccolor procColor ProcColor black {
+	$itk_component(text) tag configure procname \
+		-foreground $itk_option(-proccolor)
+    }
+
+    # The color of class names.
+    itk_option define -classcolor classColor ClassColor black {
+	$itk_component(text) tag configure classname \
+		-foreground $itk_option(-classcolor)
+    }
+
+    # The color of method names.
+    itk_option define -methodcolor methodColor MethodColor black {
+	$itk_component(text) tag configure methodname \
+		-foreground $itk_option(-methodcolor)
+    }
+
+    # The color of variable names.
+    itk_option define -variablecolor variableColor VariableColor black {
+	$itk_component(text) tag configure varname \
+		-foreground $itk_option(-variablecolor)
+    }
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Match an open paranthesis and also indent the line, if appropriate.
+    method closeParen {paren}
+
+    # Insert the fill prefix at the beginning of every line in the selection.
+    method commentSelection {}
+
+    # Fill the set of lines identified by the selection, make comments.
+    method fillSelection {}
+
+    # Generate and display a docfile from the current file.
+    method gendocBuffer {}
+
+    # Open a help window.  This should be redefined in derived classes.
+    method help {}
+
+    # Get the blank itcl template for a file and insert it into the window
+    method fileTemplate { fileTemplate {newClassName {}}}
+
+    # Indent the line with the insertion cursor.
+    method indentLine {}
+
+    # Indent the set of lines identified by the selection.
+    method indentSelection {}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
+    # In derived classes, returns a string with keywords separated by "|".
+    method keywords {} {return {}}
+
+    # Color the code in a region.
+    method parseNow {start stop}
+
+    # Returns a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {comment}}
+
+    # Remove the fill prefix in a range of lines.
+    method uncommentSelection {}
+
+    ####################################################################
+    ####           public procedures                                ####
+
+    # Generate documentation for an arbitrary file.
+    proc gendoc {file}
+
+    # Helper proc for gendoc.
+    proc gendocFileInternal { file setDocCommand genCommand}
+
+    ####################################################################
+    ####           protected methods and variables                  ####
+
+    # Return the regular expression used to find line-oriented comments.
+    protected method commentRegexp {}
+
+    # Generate documentation.  Not all derived classes can do this.
+    protected method gendocBufferInternal { setDocCommand genCommand}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Change this to 0 in derived classes if keywords are not case sensitive.
+    protected variable caseSensitiveKeywords 1
+
+    ##########################################################################
+    ####                     private variables and methods                ####
+
+    # Initialize the menubar
+    private method _initializeMenubar {menubar}
+}
+
+###################################################################
+#
+body ::tycho::EditProgram::constructor {args} {
+    
+    eval itk_initialize $args
+
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -stringcolor   editcolors stringColor \
+	    -commentcolor  editcolors commentColor \
+	    -fixmecolor    editcolors fixmeColor \
+	    -keywordcolor  editcolors keywordColor \
+	    -classcolor    editcolors classColor \
+	    -methodcolor   editcolors methodColor \
+	    -variablecolor editcolors variableColor \
+	    -proccolor     editcolors procColor
+
+    # The default fill prefix works for Tcl and shell scripts.
+    set fillPrefix "#"
+    
+    # Bind the Tab character to automatically indent the line.
+    bind $itk_component(text) <Tab> "$this indentLine; break"
+
+    # Used to have emacs-like bindings here:
+    # Now rely on menu traversal.  Could perhaps reintroduce virtual
+    # events for these:
+    #   C-L  recolorize (capital L)
+    #   M-C-\ indent selection
+    #   Esc C-\ indent selection
+}
+
+#####################################################################
+#### closeParen
+# Override the base-class closeParen to also perform indentLine
+# if the closeParen is the first character on the line.
+#
+body ::tycho::EditProgram::closeParen {paren} {
+    Edit::closeParen $paren
+
+    # Indent the line if the closeParen is the first non-space character.
+    if [regexp {^[ 	]*[]\}\)]} \
+	    [$itk_component(text) get "insert linestart" "insert lineend"]] {
+	indentLine
+    }
+}
+
+#####################################################################
+
+#####################################################################
+#### commentSelection
+# Insert the fill prefix at the beginning of every line contained
+# in the selection. Note that this command is undone (more or less)
+# by "uncommentSelection", and not by the usual undo mechanism.  If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.
+#
+body ::tycho::EditProgram::commentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    $itk_component(text) insert $lineno.0 "$fillPrefix "
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
+#####################################################################
+#### fillSelection
+# Fill the set of lines identified by the selection so that they
+# are roughly the same length. Put the comment prefix on each, and
+# mark the region as a comment.
+#
+body ::tycho::EditProgram::fillSelection {} {
+    if $readOnly {bell; return}
+    Edit::fillSelection
+    parseRegion $fillStart insert
+}
+###################################################################
+#### gendocBuffer
+# Generate and display a doc file from the current file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This is a dummy implementation, it merely copies the current file into
+# a .html file and displays it.  Child classes will probably redefine this
+# method
+body ::tycho::EditProgram::gendocBuffer {} {
+   return [gendocBufferInternal {set docfile $root.html} \
+            {exec cp $tail $docfile}]
+
+}
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditProgram::help {} {
+    global ::TYCHO
+
+    ::tycho::File::openContext \
+        [file join $TYCHO edit textedit doc usersGuides \
+	    EditProgramHelp.html] html
+}
+
+#####################################################################
+#### fileTemplate
+# Insert the blank template into the file.
+# The fileTemplate argument names the template file that should by used.  
+# $TYCHO/edit/textedit/templates contains some sample templates.
+# If the optional className argument is set, then its value will 
+# be substituted wherever the template file contains the string 'ClassName'
+#
+body ::tycho::EditProgram::fileTemplate {fileTemplate {newClassName {}}} {
+    global TYCHO
+
+    if {$fileTemplate!= "" && $fileTemplate != "NoName"} {
+	if {[file exists $fileTemplate]} {
+	    if {[file readable $fileTemplate]} {
+
+		# Read in the template file and stuff it into editor
+		set fd [open $fileTemplate r]
+		set data [read $fd]
+		close $fd
+		insertData $data
+                markModified
+
+		if { $newClassName != {} } {
+		    substituteText ClassName $newClassName
+		}
+	    } {
+		safeEval ::tycho::warn "File is not readable: $fileTemplate"
+	    }
+	} {
+	    safeEval ::tycho::warn "File does not exist: $fileTemplate"
+	}
+    }
+}
+
+#####################################################################
+#### indentLine
+# Indent the line with the insert mark based on the indentation of
+# of the previous non-blank line.  If that line contains any unmatched
+# parentheses, brackets, or braces, then the line will be indented
+# an extra four spaces for each such unmatched.  If the previous line
+# ends in a slash, then this line will be indented an extra 8 spaces.
+#
+body ::tycho::EditProgram::indentLine {} {
+    if $readOnly {bell; return}
+    resetUndo
+    
+    # To be able to sensibly place the insertion cursor, we
+    # we record the current status.
+    set ins [$itk_component(text) index insert]
+    set atEnd [$itk_component(text) compare insert == "insert lineend"]
+    set atStart [$itk_component(text) compare insert == "insert linestart"]
+    
+    regexp {([0-9]+)\.([0-9]+)} $ins match lineno charno
+    $itk_component(text) mark set insert $lineno.0
+    set indent 0
+    while {[incr lineno -1] >= 0} {
+	
+	set line [$itk_component(text) get $lineno.0 "$lineno.0 lineend"]
+	if {[regexp {^[ 	]*$} $line] == 0} {
+	    
+	    # Found a non-blank line to use as a reference.
+	    # Determine the position of the first non-space character
+	    # on the reference line. First
+	    # replace all tabs with 8 spaces in the reference line
+	    regsub -all {[	]} $line "        " modline
+	    regexp -indices {([^ 	])} $modline match fc
+	    set indent [lindex $fc 0]
+	    
+	    # If the line before it ends a backslash, then adjust for
+	    # the expected indentation due to the backslash
+	    if {$lineno > 0 } {
+		set prevline [expr $lineno-1]
+		if {[$itk_component(text) get "$prevline.0 lineend -1 char"] \
+			== "\\"} {
+		    set indent [expr $indent-8]
+		}
+	    }
+	    
+	    # Check for open or close parentheses
+	    # and lines ending in \ (this should be an immediately
+	    # preceeding line.  This is a pretty simple algorithm,
+	    # and would be easy to fool.
+	    if [regexp "\[\[\(\{\]\[ 	\]\*\$" $line] {
+		set indent [expr $indent+4]
+	    } elseif [regexp {\\$} $line] {
+		set indent [expr $indent+8]
+	    }
+	    
+	    # The line being edited:
+	    set line [$itk_component(text) get insert "insert lineend"]
+	    
+	    # If the first character is a close parenthesis, adjust
+	    if [regexp {^[ 	]*[]\}\)]} $line] {
+		if {$indent >= 4} {incr indent -4}
+	    }
+	    
+	    # Clear the leading space characters on the insertion line.
+	    if [regexp -indices {^([ 	]+)} $line match fc] {
+		set lastspace [lindex $fc 1]
+		deleteRange "insert linestart" \
+			"insert + $lastspace chars +1 char"
+	    }
+	    
+	    # Do not use tabs for indenting.
+	    set str ""
+	    while {$indent > 0} {
+		append str " "
+		incr indent -1
+	    }
+	    insertString insert $str
+	    break
+	}
+    }
+    # Put the insertion cursor back where it was or at the end of
+    # of the line, if it was before at the end.
+    if {$atEnd} {
+	$itk_component(text) mark set insert "$ins lineend"
+    } elseif {!$atStart} {
+	$itk_component(text) mark set insert $ins
+    }
+    
+    # Recolorize - no point in deferring.
+    parseNow {insert linestart} {insert lineend}
+}
+
+#####################################################################
+#### indentSelection
+# Indent the set of lines identified by the selection, if there is
+# a selection.  If there is no selection, ignore.
+#
+body ::tycho::EditProgram::indentSelection {} {
+    if $readOnly {bell; return}
+    if {[getSelection] !=  {}} {
+	if [safeEval ::tycho::askuser "No Undo. Ok to proceed?"] {
+	    set prevInsert [$itk_component(text) index insert]
+	    $itk_component(text) mark set insert sel.first
+	    while {[$itk_component(text) compare insert < sel.last] == 1} {
+		indentLine
+		# To handle the case where the selection goes to the end
+		# of the text, verify that the insertion pointer is truly
+		# incremented.
+		set oldinsert [$itk_component(text) index insert]
+		$itk_component(text) mark set insert "insert +1 line"
+		if [$itk_component(text) compare insert <= $oldinsert] {
+		    break
+		}
+	    }
+	    $itk_component(text) mark set insert $prevInsert
+	    selection clear -displayof $itk_component(text)
+	    resetUndo
+	}
+    }
+}
+
+#####################################################################
+#### indicateReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::EditProgram::indicateReadOnly {bool} {
+    chain $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disable commentregion
+            menubar disable uncommentregion
+            menubar disable indentline
+            menubar disable indentregion
+            menubar disable tab
+	} {
+            menubar enable commentregion
+            menubar enable uncommentregion
+            menubar enable indentline
+            menubar enable indentregion
+            menubar enable tab
+	}
+    }
+}
+
+#####################################################################
+#### parseNow
+# Tag and color line-oriented comments, strings that are entirely on
+# one line, the strings "NOTE" and "FIXME", and keywords in the
+# specified range of text. What constitutes a comment is determined by
+# the protected method "commentRegexp", which returns a regular
+# expression that identifies a comment. Keywords are specified by the
+# method "keywords". If that method returns a null string, no keywords
+# are highlighted. Note that highlighting keywords is a fairly
+# expensive operation, so it may not be desirable to always highlight
+# keywords.
+#
+body ::tycho::EditProgram::parseNow {start stop} {
+
+    # Remove tags first, if necessary
+    set text $itk_component(text)
+    $text tag remove comment $start $stop
+    $text tag remove notcomment $start $stop
+    $text tag remove fixme $start $stop
+    $text tag remove string $start $stop
+    
+    set comregexp [commentRegexp]
+
+    set ind $start
+    set endc $stop
+    while {[set res [$text search -count len -regexp $comregexp \
+	    $ind $stop]] != {}} {
+	$text tag add notcomment $ind $res
+	set endc [$text index "$res + $len chars +1 char"]
+	$text tag add comment $res $endc
+	set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    $text tag add notcomment $ind $stop
+    
+    # Now tag all occurrences of "FIXME" and "NOTE" within the range.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {FIXME|NOTE} $ind $stop]] != {}} {
+
+	set endf [$text index "$ind + $cnt chars"]
+	$text tag add fixme $ind $endf
+	set ind $endf
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Now tag all single line strings.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {"[^"]*"} $ind $stop]] != {}} {             ;# "
+
+	set endf [$text index "$ind + $cnt chars"]
+	$text tag add string $ind $endf
+	set ind $endf
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Finally, tag keywords.
+    set kw [keywords]
+    if {$kw != {}} {
+        # Search case sensitive (by default), regexp, and wholeword.
+        findAll keyword $caseSensitiveKeywords 1 1 $kw $start $stop {notcomment}
+    }
+
+    # Set the visual characteristics of the tagged text
+    $text tag lower string comment
+    $text tag lower comment fixme
+}
+
+#####################################################################
+#### uncommentSelection
+# Remove the fill prefix at the beginning of every line contained
+# in the selection. Note that this command is (more or less) undone
+# by "commentSelection", and not by the usual undo mechanism. If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.  
+#
+body ::tycho::EditProgram::uncommentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+	
+	# In case the fillPrefix contains any characters
+	# used in regular expressions, escape each character.
+	append safeFillPrefix "\(\\" \
+		[join [split $fillPrefix {}] "\\"] "\[ \t\]\*\)"
+	
+	append matchpat "\^\[ \t\]*" $safeFillPrefix "\[ \t\]*"
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    if [regexp -indices $matchpat \
+		    [$itk_component(text) get $lineno.0 "$lineno.0 lineend"] \
+		    junkmatch toremove] {
+		$itk_component(text) delete $lineno.[lindex $toremove 0] \
+			"$lineno.[lindex $toremove 1] +1 char"
+	    }
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
+####################################################################
+####################################################################
+####                    public procedures                       ####
+
+#####################################################################
+#### gendoc
+# Generate documentation for <CODE>file</CODE>.
+# This procedure will probably be redefined in child classes
+#
+body ::tycho::EditProgram::gendoc {file} {
+    return [::tycho::EditProgram::gendocFileInternal [filename] \
+            {set docfile $root.html} \
+            {exec cp $tail $docfile}]
+}
+
+###################################################################
+#### gendocFileInternal
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This is a procedure so that we can generate documentation for arbitrary
+# files that are not necessarily being edited.  
+#
+# This method takes three arguments, the last two are are eval'd.
+# <MENU>
+# <LI> The <CODE>file</CODE> argument is the name of the file to generate
+# documentation for
+# <LI> The <CODE>setDocCommand</CODE> argument should contain the tcl
+# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
+# which contains the filename of the generated doc file.
+# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
+# command(s) to evaluate to actually generate the doc file.  Usually
+# this command refers to <CODE>$tail</CODE>
+# </MENU>
+#
+# In the example below, we open the makefile and then sort it.
+# <TCL><PRE>
+#   ::tycho::EditProgram::gendocFileInternal makefile &#92
+#       {set docfile $root.sort} {exec sort $tail > $docfile}
+# </PRE></TCL>
+#
+body ::tycho::EditProgram::gendocFileInternal { filename setDocCommand genCommand} {
+    set dir [file dirname $filename]
+    set tail [file tail $filename]
+    set root [file rootname $tail]
+    eval $setDocCommand
+    set fulldoc [file join $dir $docfile]
+    set retval ""
+    if {![file exists $fulldoc] || \
+            [file mtime $filename] > [file mtime $fulldoc] } {
+        # Need to regenerate the doc.  Check permissions first.
+        # It is sufficient for the directory to be writable.
+	set docdir [file dirname $fulldoc]
+        if {[file isdirectory $docdir] && ! [file writable $docdir]} {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to write in the \
+		    existing documentation directory `$docdir'."
+	} {
+            set savedir [pwd]
+            cd $dir
+            set retval [eval $genCommand]
+            cd $savedir
+        }
+    }
+    if [regexp -nocase "error|warning" $retval] {
+        ::tycho::warn "Documentation generation had the following \
+                warnings:\n$retval"
+    }
+    if [file exists $fulldoc] {
+        return [::tycho::File::openContext $fulldoc]
+    }
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### commentRegexp
+# Return the regular expression used to identify line-oriented 
+# comments.  Here, comments are lines that contain the fillPrefix.
+#
+body ::tycho::EditProgram::commentRegexp {} {
+
+    # In case the fillPrefix contains any characters
+    # used in regular expressions, escape each character.
+    append safeFillPrefix "\(\\" \
+	    [join [split $fillPrefix {}] "\\"] "\[ \t\]\*\)"
+
+    return "$safeFillPrefix\.*\$"
+}
+
+###################################################################
+#### gendocBufferInternal
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This method takes two arguments, both of which are eval'd.
+# <MENU>
+# <LI> The <CODE>setDocCommand</CODE> argument should contain the tcl
+# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
+# which contains the filename of the generated doc file.
+# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
+# command(s) to evaluate to actually generate the doc file.  Usually
+# this command refers to <CODE>$tail</CODE>
+# </MENU>
+#
+# See the <code>gendocFileInternal</code> procedure for an example
+# illustrating the use of <CODE>setDocCommand</CODE> and
+# <CODE>genCommand</CODE>.
+#
+body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
+    set filename [filename]
+    set dir [file dirname $filename]
+    set tail [file tail $filename]
+    set root [file rootname $tail]
+    eval $setDocCommand
+    set fulldoc [file join $dir $docfile]
+
+    # If necessary, save the file
+    saveQuery
+    set retval ""
+    if {![file exists $fulldoc] || \
+            [file mtime $filename] > [file mtime $fulldoc] } {
+        # Need to regenerate the doc.  Check permissions first.
+        # It is sufficient for the directory to be writable.
+	set docdir [file dirname $fulldoc]
+        if {[file isdirectory $docdir] && ! [file writable $docdir]} {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to write in the \
+		    existing documentation directory `$docdir'."
+        } {
+            set savedir [pwd]
+            cd $dir
+            if [catch {eval $genCommand} retval] {
+                # Doc generation threw an error. Recover and rethrow.
+                cd $savedir
+                putStatus ""
+                global errorInfo
+                error $retval $errorInfo
+            }
+            cd $savedir
+        }
+    }
+    if [regexp -nocase "error|warning" $retval] {
+        ::tycho::warn "Documentation generation had the following \
+                warnings:\n$retval"
+    }
+    if [file exists $fulldoc] {
+        set window [::tycho::File::openContext $fulldoc]
+	# Return the window that we opened so the test suite can close it
+	return $window
+    }
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditProgram::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditProgram::_initializeMenubar $menubar
+    }
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar. Adds entries specific to this class.
+#
+body ::tycho::EditProgram::_initializeMenubar {menubar} {
+    # Add to the format menu commands to comment and uncomment
+    # the regions defined by the selection.
+    $menubar add separator formatsep3 format
+        
+    $menubar command commentregion format \
+	    -label "Comment Out Region" \
+            -underline 8 \
+            -command "$this commentSelection"
+    
+    $menubar command uncommentregion format \
+	    -label "Uncomment Region" \
+            -underline 1 \
+            -command "$this uncommentSelection"
+    
+    $menubar add separator formatsep4 format
+    
+    $menubar command recolorize format \
+	    -label "Recolorize" \
+            -underline 0 \
+            -command "$this parseRegion 1.0 end"
+    
+    $menubar command indentline format \
+	    -label "Indent Line" \
+            -underline 0 \
+            -accelerator "Tab" \
+            -command "$this indentLine"
+    
+    $menubar command tab format \
+	    -label "Tab" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Tab] \
+            -command "$this insertString insert {\t}"
+    
+    $menubar command indentregion format \
+	    -label "Indent Region" \
+            -underline 2 \
+            -command "$this busy $this indentSelection"   
+}

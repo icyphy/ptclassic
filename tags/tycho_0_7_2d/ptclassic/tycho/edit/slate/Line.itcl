@@ -1,0 +1,533 @@
+##########################################################################
+# @Version: @(#)Line.itcl	1.21 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Line
+#
+# The shape of lines. Items with
+# this shape include <I>line</I> and <I>SmartLine</I>.
+#
+#  <P><b>Primitive features</b>
+#
+# <ul>
+# <li><B>vertex-</B><I>n</I>: The <I>n</I>'th vertex of the line.
+# <li><B>start</B>: The start of the line.
+# <li><B>end</B>: The end of the line.
+# </ul>
+#
+# <p><b>Bugs</b>: (none).
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">An overview of Shape classes</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="../codeDoc/index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Line {
+    inherit ::tycho::Shape
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
+
+    # Attach a set of grapples to an item
+    proc _grapple {id canvas slate interactor args}
+
+    # Reshape one or more features of an item
+    proc _reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc _reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc _reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc _reshaperelease {id canvas slate}
+
+    # Get one or more features of a line
+    proc feature {coords args}
+
+    # Find the "center" point of a line
+    proc center {coords}
+
+    # Find the direction at a given point
+    proc direction {coords x y}
+
+    # Reflect a line about the specified x coordinate
+    proc flip {coords x0}
+
+    # Reflect a line about the specified y coordinate
+    proc flop {coords y0}
+
+    # Find the nearest point on the line
+    proc nearest {coords x y}
+
+    # Reshape one or more features of a line
+    proc reshape {coords x y args}
+
+    # Reverse the direction of a line
+    proc reverse {coords}
+
+    # Rotate a line about the specified x and y coordinates
+    proc rotate {coords x y angle}
+
+    # Find on which segment of the line a point lies 
+    proc segment {coords x y}
+}
+
+#######################################################################
+#### _feature
+#
+body ::tycho::Line::_feature {id canvas slate args} {
+    array set opts {-features {}}
+    array set opts $args
+    set coords [$slate coords $id]
+
+    if { $opts(-features) == "" } {
+	set result "start"
+	set length [expr [llength $coords] / 2 - 1]
+	for {set i 1} {$i < $length} {incr i} {
+	    lappend result "vertex-$i"
+	}
+	lappend result "end"
+	return $result
+    } else {
+	return [eval feature [list $coords] $opts(-features)]
+    }
+}
+
+#######################################################################
+#### _reshape
+#
+body ::tycho::Line::_reshape {id canvas slate x y args} {
+    array set opts {-features {}}
+    array set opts $args
+
+    eval $slate coords $id \
+	    [eval reshape [list [$slate coords $id]] $x $y $opts(-features)]
+}
+
+#######################################################################
+#### _reshapeclick
+#
+body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
+    # Extract options
+    array set opts {-ghost 0 -features {}}
+    array set opts $args
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
+    }
+
+    # Remember how I am now.
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # Get the coordinates of the line into an efficient-to-process form
+    set i 0
+    set scratch(indexes.$unique) {}
+    foreach {a b} [$slate coords $id] {
+	set scratch(x.$i.$unique) $a
+	set scratch(y.$i.$unique) $b
+	lappend scratch(indexes.$unique) $i
+	incr i
+    }
+
+    # Figure out the vertices that will be changed
+    set scratch(vertices.$unique) {}
+    foreach feature $opts(-features) {
+	::tycho::assign a n [split $feature "-"]
+	switch -exact $a {
+	    "start" {
+		lappend scratch(vertices.$unique) 0
+	    }
+	    "end" {
+		lappend scratch(vertices.$unique) \
+			[lindex $scratch(indexes.$unique) end]
+	    }
+	    "vertex" {
+		lappend scratch(vertices.$unique) $n
+	    }
+	    default {
+		error "Invalid feature \"$feature\" of line shape"
+	    }
+	}
+    }
+    # Make sure there are no duplicates
+    set scratch(vertices.$unique) [::tycho::lnub $scratch(vertices.$unique)]
+
+    # If the -ghost flag is set, draw the ghost line.
+    if { $opts(-ghost) } {
+	$slate ghost $id
+	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
+    }
+}
+
+#######################################################################
+#### _reshapedrag
+#
+body ::tycho::Line::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
+
+    # Remember the current coordinates
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # Add the delta coordinates to the vertices
+    foreach v $scratch(vertices.$unique) {
+    	set scratch(x.$v.$unique) [expr $scratch(x.$v.$unique) + $deltaX]
+    	set scratch(y.$v.$unique) [expr $scratch(y.$v.$unique) + $deltaY]
+    }
+
+    # Rebuild the coordinates list and change coordinates
+    set coords {}
+    foreach i $scratch(indexes.$unique) {
+	lappend coords $scratch(x.$i.$unique) $scratch(y.$i.$unique)
+    }
+
+    # If there's a ghost, reshape it. Otherwise reshape the item.
+    if $scratch(ghost.$unique) {
+	eval $canvas coords ghost.$id $coords
+    } else {
+	eval $slate coords $id $coords
+    }
+}
+
+#######################################################################
+#### _reshaperelease
+#
+body ::tycho::Line::_reshaperelease {id canvas slate} {
+    set unique $id.[$slate uniqueid]
+
+    # If there's a ghost, reshape the item to its shape
+    # and then delete the ghost.
+    if $scratch(ghost.$unique) {
+	# Reshape the item
+	eval $slate coords $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
+    }
+
+    # General cleaning up
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
+
+    foreach v $scratch(indexes.$unique) {
+    	unset scratch(x.$v.$unique)
+    	unset scratch(y.$v.$unique)
+    }
+    unset scratch(vertices.$unique)
+    unset scratch(indexes.$unique)
+}
+
+#######################################################################
+#### feature
+#
+# Return features of a line. Valid features are "start,"
+# "end," or <code>vertex-</code><i>n</i>, where _n_ is
+# between 0 and the number of vertices less one.
+#
+body ::tycho::Line::feature {coords args} {
+    set result {}
+
+    foreach feature $args {
+	set a [lindex [split $feature "-"] 0]
+	switch -exact $a {
+	    "start" {
+		lappend result [lindex $coords 0] [lindex $coords 1]
+	    }
+	    "end" {
+		lappend result \
+			[lindex $coords [expr [llength $coords] - 2]] \
+			[lindex $coords end]
+	    }
+	    "vertex" {
+		set n [lindex [split $feature "-"] 1]
+		lappend result \
+			[lindex $coords [expr 2*$n]] \
+			[lindex $coords [expr 2*$n + 1]]
+	    }
+	    default {
+		error "Invalid feature \"$feature\" of line shape"
+	    }
+	}
+    }
+    return $result
+}
+
+#######################################################################
+#### center
+#
+# Find the center point of a line. If the line has an odd number of
+# coordinates, this is the middle vertex; if it has an even number
+# of coordinates, this is the center of the middle segment.
+#
+body ::tycho::Line::center {coords} {
+    set len [llength $coords]
+    set N [expr $len / 2]
+    if { $len & 3 } {
+	# Not divisible by four, so there are an odd number of vertices
+	list [lindex $coords [expr $N-1]] [lindex $coords $N]
+    } else {
+	# Divisible by four, so get the center of the middle segment
+	list \
+		[expr ([lindex $coords [expr $N-2]] \
+		+ [lindex $coords $N]) / 2.0] \
+		\
+		[expr ([lindex $coords [expr $N-1]] \
+		+ [lindex $coords [expr $N+1]]) / 2.0]
+    }
+}
+
+#######################################################################
+#### direction
+#
+# Find the "direction" of a line at the given point. This works only
+# with perpendicular lines, and only if the point is exactly
+# on the line.
+#
+body ::tycho::Line::direction {coords x y} {
+    set segment [segment $coords $x $y]
+    ::tycho::assign a b c d [lrange $coords [expr $segment*2] end]
+    if { $x == $a && $x == $c } {
+        if { $b < $d } {
+            return s
+        } else {
+            return n
+        }
+    } else {
+        if { $a < $c } {
+            return e
+        } else {
+            return w
+        }
+    }	
+}
+
+##########################################################################
+#### flip
+#
+# Reflect a line about the specified x coordinate.
+#
+body ::tycho::Line::flip {coords x0} {
+    set result {}
+    foreach {x y} $coords {
+	set x [expr 2 * $x0 - $x]
+	lappend result $x $y
+    }
+    return $result
+}
+
+##########################################################################
+#### flop
+#
+# Reflect a line about the specified y coordinate.
+#
+body ::tycho::Line::flop {coords y0} {
+    set result {}
+    foreach {x y} $coords {
+	set y [expr 2 * $y0 - $y]
+	lappend result $x $y
+    }
+    return $result
+}
+
+#######################################################################
+#### nearest
+#
+# Find the point on a line nearest the given coordinates.
+# This works only for perpendicular lines, and only if the
+# given point is quite close on the line.
+#
+# FIXME: Implement properly.
+#
+body ::tycho::Line::nearest {coords x y} {
+    set i 0
+    set point [list $x $y]
+    set distance 1000000
+    while { [llength $coords] >= 4 } {
+        ::tycho::assign a b c d $coords
+        if { $a == $c } {
+            # Vertical segment
+            set d [expr abs($x - $a)]
+            if { $d < $distance } {
+                set distance $d
+                set point [list $a $y]
+            }
+        } else {
+            # Horizontal segment
+            set d [expr abs($y - $b)]
+            if { $d < $distance } {
+                set distance $d
+                set point [list $x $b]
+            }
+        }
+        set coords [lreplace $coords 0 1]
+    }
+    # This is a failure...
+    return $point
+}
+
+#######################################################################
+#### reshape
+#
+# Reshape one or more features of a line by the specified amount.
+# Reshape each feature by the specified _x_ and _y_ relative
+# values.
+#
+body ::tycho::Line::reshape {coords x y args} {
+    # Get the coordinates of the line into an efficient-to-process form
+    set i 0
+    set indexes {}
+    foreach {a b} $coords {
+	set _x($i) $a
+	set _y($i) $b
+	lappend indexes $i
+	incr i
+    }
+
+    # Process all features to change coordinates
+    foreach feature $args {
+	::tycho::assign a n [split $feature "-"]
+	switch -exact $a {
+	    "start" {
+		set _x(0) [expr $_x(0) + $x]
+		set _y(0) [expr $_y(0) + $y]
+	    }
+	    "end" {
+		set n [lindex $indexes end]
+		set _x($n) [expr $_x($n) + $x]
+		set _y($n) [expr $_y($n) + $y]
+	    }
+	    "vertex" {
+		set _x($n) [expr $_x($n) + $x]
+		set _y($n) [expr $_y($n) + $y]
+	    }
+	    default {
+		error "Invalid feature \"$feature\" of line shape"
+	    }
+	}
+    }
+
+    # Rebuild the coordinates list and return
+    set coords {}
+    foreach i $indexes {
+	lappend coords $_x($i) $_y($i)
+    }
+    return $coords
+}
+
+##########################################################################
+#### reverse
+#
+# Reverse the direction of a line. Basically just reverse
+# a list of coordinates.
+#
+body ::tycho::Line::reverse {coords} {
+    set result {}
+    foreach {x y} $coords {
+	set result [concat $x $y $result]
+    }
+    return $result
+}
+
+##########################################################################
+#### rotate
+#
+# Rotate a line about the specified x and y coordinates, by the
+# specified angle (in degrees).
+#
+body ::tycho::Line::rotate {coords x y angle} {
+    set angle [radians $angle]
+    set result {}
+
+    while { [llength $coords] > 0 } {
+	set a [lindex $coords 0]
+	set b [lindex $coords 1]
+	set coords [lreplace $coords 0 1]
+
+	if { $a == $x && $y == $b } { ;# same point
+	    lappend result $a $b
+	} else {
+	    set dx [expr $a - $x]
+	    set dy [expr $b - $y]
+
+	    set radius [expr sqrt($dx*$dx+$dy*$dy)]
+	    set theta  [expr atan2($dy, $dx) + $angle]
+
+	    set a [expr $x + $radius * cos($theta)]
+	    set b [expr $y + $radius * sin($theta)]
+
+	    lappend result $a $b
+	}
+    }
+    return $result
+}
+
+#######################################################################
+#### segment
+#
+# Find the segment of a line on which a particular point is.
+# This works only for perpendicular lines, and only if the
+# given point is exactly on the line.
+#
+body ::tycho::Line::segment {coords x y} {
+    set i 0
+    while { [llength $coords] >= 4 } {
+        ::tycho::assign a b c d $coords
+        if { $x == $a && $x == $c \
+                && ($b <= $y && $d >= $y || $b >= $y && $d <= $y) } {
+            return $i
+        }
+        if { $y == $b && $y == $d \
+                && ($a <= $x && $c >= $x || $a >= $x && $c <= $x) } {
+            return $i
+        }
+        incr i
+        set coords [lreplace $coords 0 1]
+    }
+    # This is a failure...
+    return 0
+}

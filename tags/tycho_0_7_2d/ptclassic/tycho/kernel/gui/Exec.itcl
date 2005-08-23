@@ -1,0 +1,531 @@
+# Ptolemy Tycho class that exec's a process and displays the output
+#
+# @Authors: Christopher Hylands and Kevin Chang
+#
+# @Version: @(#)Exec.itcl	1.52 01/27/99
+#
+# @Copyright (c) 1996-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# o f this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### execModal
+# Short cut to run a Modal Exec by creating a Monitor widget,
+# automatically starting and automatically exiting.
+# If you call this proc with no arguments, then 'make' is run. 
+#
+# This proc returns a two element list, the first element is 
+# the state of the Exec widget, either "running", "abnormal, or "normal"
+# The second element of the list is the name of the Exec widget
+# that was created.  If this proc is called with the third argument *execWidget*
+# being a non-empty string, then the Exec widget named by *execWidget*
+# is reused.  If the third argument is the empty string, then
+# a new Exec widget is created.
+#
+# Here's an example of executing, and get the name of the Monitor widget.
+# Because the following command will generate an error, the widget will
+# not close after successful execution.
+# <tcl><pre>
+#    set win [::tycho::execModal {make MAKE_DOESNT_EXIST} {}]
+# </pre></tcl>
+#
+# Here's an example of reusing the same widget, if it still exists.
+# You can use this only if the previous command has been executed:
+# <tcl><pre>
+#    if [winfo exists [lindex $win 1]] {
+#        ::tycho::execModal {ls -al} {} [lindex $win 1]
+#    }
+# </pre></tcl>
+# The above example runs <code>make MAKE_DOESNT_EXIST</code> the first 
+# time, and make will return "abnormal" status. The Monitor window
+# will not autoclose if an error status is returned from the execution.
+# The second command will check to see if the window still exists, and
+# reuse the window if it is still alive.
+#
+proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
+    if {$execWidget == {}} {
+        #set win [::tycho::autoName .makeExec]
+        set execWidget [::tycho::view Monitor -toolbar 1 \
+            -dir $dir -command $command -autostart 1 -autodestroy 5]
+    } else {
+        [$execWidget displayer] raiseWindow
+        if {$command!={}} {
+            $execWidget configure -command $command
+        }
+        if {$dir!={}} {
+            $execWidget configure -dir $dir
+        }
+        $execWidget execProcess
+    }
+
+    # Get the name of the variable that will contain the status of 
+    # exec after the exec is deleted
+    if [catch {set statusVariableName [$execWidget getStatusVariableName]}] {
+        # If execWidget was closed, then catch the error.
+        return
+    }
+    global $statusVariableName
+    
+    # If statement is used to prevent crashing
+    if [info exists $statusVariableName] {
+        return [list [$execWidget getStatusWait] $execWidget]
+    } else {
+        error "ERROR IN execModal: $statusVariableName doesn't exist!"
+    }
+}
+
+#######################################################################
+#### Exec
+# This is the basic non-graphical based Exec.
+#
+# See <a href="../../../basic/doc/internals/exec.html">$TYCHO/kernel/basic/doc/internals/exec.html</a>
+# for further documentation.
+#
+# Here is a quick mini-tutorial to get familiar with this 
+# non-graphical Exec:<br>
+# <ol>
+# <li>Create a name, then create object
+# <tcl><pre>
+#   set execName [::tycho::autoName execObject]
+#   ::tycho::Exec $execName
+# </pre></tcl>
+#
+# <li>Execute process, and check for return type. Return
+# could be either "abnormal" or "normal".
+# <tcl><pre>
+#   $execName execProcess {ls -al} {~}
+#   set status [$execName getStatusWait]
+#   tycho::inform "The return status is \"$status\""
+#   tycho::inform "The output is [$execName getHistory]"
+# </pre></tcl>
+#
+# <li>Alternatively, there are asynchronous calls to use
+# (ie. getStatusNow can immediately return the status of the 
+# process, whether it is "running", "normal", or "abnormal").
+# <tcl><pre>
+#   $execName execProcess
+#   # The return status is most likely still \"running\"
+#   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
+#   # By now, the process has probably exited with a status.
+#   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
+# </pre></tcl>
+#
+# <li>A process is killed with <i>killProcess</i>.
+# <tcl><pre>
+#   $execName execProcess
+#   $execName killProcess
+#   tycho::inform "The return status is \"[$execName getStatusWait]\""
+# </pre></tcl>
+#
+# <li>Maximum number of lines can be set by the user. This is useful
+# especially if a process could potentially output a large file.
+# <tcl><pre>
+#   $execName execProcess {} {} {8}
+#   set status [$execName getStatusWait]
+#   tycho::inform "History:\n [$execName getHistory]"
+# </pre></tcl>
+#
+# <li>The following commands are used frequently, especially
+# by the Monitor class. Feel free to experiment:
+# <tcl><pre>$execName execProcess</pre></tcl>
+# <tcl><pre>$execName clearHistory</pre></tcl>
+# <tcl><pre>$execName getHistory</pre></tcl>
+# <tcl><pre>$execName getStatusWait</pre></tcl>
+# <tcl><pre>$execName getStatusNow</pre></tcl>
+# </ol>
+class ::tycho::Exec {
+    inherit ::tycho::Object
+    constructor {{cmd make} {dir {}} {maxline {}}} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # The name of the global variable that will contain the exit status.
+    public variable statusVariableName {}
+
+    # Add a line entry to history log
+    method addHistory {line} {}
+
+    # clear history log to {}
+    method clearHistory {} {set history {}; set maxLineAllow 0}
+
+    # Set the action for each output from the execution. Used for line by line
+    # parsing, etc.
+    method doEachLine {action} {set doEachLine $action}
+
+    # This is similar to doEachLine, except the action here
+    # is processed as soon as the process has exited.
+    method doWhenDone {action} {set doWhenDone $action}
+
+    # Exec a process, if there is any output, save it to history.
+    method execProcess {{cmd {}} {dir {}} {maxline {999999}}}
+
+    # Get the contents of the history window, if any.
+    method getHistory {} {}
+
+    # Get the name of the global variable that will contain the return status.
+    # NOTE: Global variable is used, because tkwait can only wait for
+    # global variables.
+    method getStatusVariableName {} {return $statusVariableName}
+
+    # Wait patiently until the forked process ends and returns status
+    method getStatusWait {{timeToWait {}} } {}
+
+    # Get the immediate status, "created", "running", etc...
+    method getStatusNow {} 
+
+    # Stop a process now.
+    method killProcess {{parent {}}}
+
+    # Read from the file descriptor, and close if we are at eof.
+    method readOrClose {fd}
+
+    # Open a help window.
+    method help {}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # File descriptor of the process. Process id is simply pid = [pid $fd]
+    private variable fd {}
+
+    # History is the buffer (used to be just history in Tk canvas)
+    # Otheres used to be embedded in Tk, now they're simply variables
+    private variable history {}
+
+    # Command to execute for this object
+    private variable commandToExec {}
+
+    # Directory to execute from
+    private variable dirToExecFrom {}
+
+    # Maximum number of lines allowed to output, used for long parsing.
+    private variable maxLineAllow {}
+
+    # Number of lines output by the process, used by maxLineAllow
+    private variable linecount 0
+
+    # Commands to execute from 3rd party methods. Potentially this 
+    # could be used for line by line parsing (line-parse-on-demand as
+    # opposed to waiting until process ends, then parse).
+    # This is currently not used.
+    private variable doWhenDone {}
+
+    # Similar to doWhenDone
+    private variable doEachLine {}
+}
+
+#######################################################################
+# This is used within the constructor to set the global
+# variable name. This is used so that tkwait can wait for
+# the global variable to change from "running" to either
+# "normal" or "abnormal"
+#
+proc setGlobal {name value} {
+    global $name
+    set $name $value
+}
+
+#### constructor
+#
+body ::tycho::Exec::constructor { {cmd make} {dir {}} {maxline {}} } {
+    set history {}
+
+    set commandToExec $cmd
+    set dirToExecFrom $dir
+    set maxLineAllow $maxline
+
+    set statusVariableName [::tycho::autoName gExecStatus]
+
+    #FIXME: the following lines do not work for some reason!
+    #       As a hack, proc setGlobal is added.
+    #global $statusVariableName
+    #set $statusVariableName "constructed"
+    setGlobal $statusVariableName "constructed"
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::Exec::destructor {} {
+    # Adding this close seems to hang the window manager
+    #close $fd
+    # Unregister our fileevent handler
+    catch {fileevent $fd readable {}}
+
+    # Mark the editor as unmodified so that we are not prompted as
+    # to whether we want to save it.
+    catch {unset ::tycho::Exec::$statusVariableName}
+}
+
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### execProcess
+# Execute a process.  If there is any output, append to history
+# The arguments are: command line, directory name, and maximum lines
+# of output allowed.
+#
+body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
+    clearHistory
+    global $statusVariableName tcl_platform tyjavapresent
+    if {[getStatusNow] == "running"} {
+        error "Sorry, process is already running"
+    }
+
+    # Manually set the command, or use the previous value
+    if {$cmd != {}} {set commandToExec $cmd}
+    if {$dir != {}} {set dirToExecFrom $dir}
+    if {$maxline != {}} {set maxLineAllow $maxline}
+
+    # If necessary, cd to the proper directory.
+    if { $dirToExecFrom != {} } {
+        set saveDir [pwd]
+        cd "$dirToExecFrom"
+        # Add command to history log...
+        addHistory "<<Running: $commandToExec in $dirToExecFrom>>\n"
+    } else {
+        addHistory "<<Running: $commandToExec in [pwd]>>\n"
+    }
+
+    #set continue 0
+    #after 1000 set continue 1
+    #tkwait variable continue
+    ::tycho::safeUpdate $this
+
+    # If we are running under Unix, and Java is not present, then
+    # we can use nonblocking I/O. 
+    switch $tcl_platform(platform) {
+	macintosh { error "Sorry exec is not supported on the mac" }
+	unix { set useNonBlockingIO 1 }
+	windows { set useNonBlockingIO 0}
+    }     
+    if {[info exists tyjavapresent] && $tyjavapresent == 1} {
+	set useNonBlockingIO 0
+    }
+
+    if { $useNonBlockingIO == 1 } {
+	# Open a non-blocking pipe from the command
+	# FIXME: Unixism - Brent Welch says to use '|& cat' here to get
+	# standard error.  However, this presupposes that 'cat' is a
+	# command, which might not be true under Windows or Macintosh.
+	#
+	# Under tycho -java, this code hangs 
+	if [catch {set fd [open \
+		[concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} \
+		errMsg] {
+	    set $statusVariableName "abnormal"
+	    addHistory "$errMsg\n"
+            # The following will hang Monitor
+	    #error "$errMsg"
+            i::tycho::inform "$errMsg"
+            return
+        }
+	# Execution is okay, so register our file event handler
+	fileevent $fd readable "$this readOrClose $fd"
+    } else {
+	# There is no NONBLOCK I/O under windows, so we just
+	# run the process and hang the UI while it is running and then
+	# return.
+
+        # Under Windows, prepend 'command.com /c' if the command is
+        # less than 89 chars.  If the command is more than 89 chars
+        # then either we get no results, or a 'could not execute' string.
+        if {[string length $commandToExec] < 89} {
+            set commandToExec "command.com /c $commandToExec"
+        }
+	if [ catch {eval exec $commandToExec} errMsg] {
+	    set $statusVariableName "abnormal"
+	} else {
+            set $statusVariableName "normal"
+        }
+	#config -cursor $oldCursor
+
+        # This might not be an error message, it might just be whatever
+        # exec returned.  We process it one line at a time so we
+	# can create hotlinks to the errors.
+	set historyList [split $errMsg '\n']
+	foreach historyLine $historyList {
+	    addHistory "$historyLine\n"
+	}
+
+	if {$statusVariableName == "abnormal"} {
+            addHistory "<<Process exited Abnormally.>>\n"
+	}
+	# Go back to our original directory before the execution
+	if { $dirToExecFrom != {} } {
+	    cd "$saveDir"
+	}
+
+	return $statusVariableName
+    }
+
+    # Go back to our original directory before the execution
+    if { $dirToExecFrom != {} } {
+        cd "$saveDir"
+    }
+
+    set $statusVariableName "running"
+    return $statusVariableName
+}
+
+
+#####################################################################
+#### stopExec
+# Manually force stop the process
+#
+body ::tycho::Exec::killProcess {{parent {}}} {
+    global $statusVariableName
+    if {[getStatusNow]=="killed"} {
+        error "Process already killed."
+    }
+    catch {close $fd}
+    if {$parent=={}} {
+        addHistory "<<Process killed>>\n"
+    } else {
+        addHistory "<<Process killed by $parent>>\n"
+    }
+
+    set $statusVariableName "killed"
+    if {$doWhenDone!={}} {eval $doWhenDone}
+}
+
+
+#####################################################################
+#### getHistory
+# Return the contents of the history buffer, if any.
+# 
+body ::tycho::Exec::getHistory {} {
+    #return [$itk_component(history) get $start $end]
+    #FIXME: return according to start and end
+    return $history
+}
+#####################################################################
+#### getHistory
+# Return the contents of the history buffer, if any.
+# 
+body ::tycho::Exec::addHistory {line} {
+    append history "$line" ;# Note: carriage return must be explicitly used!!!
+    # This is for outer interface (ie. scribbling notes, etc)
+    if {$doEachLine!={}} {eval $doEachLine}
+}
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Exec::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel gui doc usersGuides ExecHelp.html] html
+}
+
+
+#####################################################################
+#### readOrClose
+# Read from the file descriptor.  If we are at the end of file, then
+# close it.  It is expected that the name of this method will be passed
+# to fileevent.
+# Note that this should be a protected method, but 'fileevent' calls
+# things in the global scope.
+#
+body ::tycho::Exec::readOrClose {fd} {
+    global $statusVariableName
+
+    incr linecount            ;# Do not exceed maxLineAllow
+    # Check if the command outputs more lines than we want.
+    if {$maxLineAllow != {}} {
+        if {$linecount > $maxLineAllow} {
+            killProcess $this
+            set msg "Command '$commandToExec'\
+                    exceeded maximum lines ($maxLineAllow) allowed."
+            addHistory $msg
+            error $msg
+        }
+    }
+
+    # We append history here.
+    set line [gets $fd]
+    addHistory "$line\n"
+
+    # If we are at the end of the file, close the descriptor.
+    # See the man page for the fileevent tcl command.
+    if [eof $fd] {
+        #config -cursor $oldCursor
+        if ![catch {close $fd} errMsg] {
+            set $statusVariableName "normal"
+	    addHistory "<<Process exited Normally>>\n"
+            #if {[get autoDestroy] == "Yes" } {
+            #    after 5000 delete object $this
+            #}
+        } else {
+            set $statusVariableName "abnormal"
+	    addHistory "<<Process exited Abnormally>>\n"
+        }
+        # Action to perform when done (ie. parse the entire output, etc...)
+        if {$doWhenDone!={}} {eval $doWhenDone}
+    }
+}
+
+
+#####################################################################
+#### getStatusWait
+# Wait patiently until the forked process ends and returns status
+# Default wait time is forever!
+#
+body ::tycho::Exec::getStatusWait {{timeToWait {}} } {
+    global $statusVariableName
+
+    # If we don't want to wait forever, we'd set timeToWait
+    if {$timeToWait !={}} {
+        after $timeToWait set $statusVariableName "timeout"
+    }
+
+    # If the process is running, then you can wait
+    while {[getStatusNow]=="running" || \
+            [getStatusNow]=="constructed"} {
+        tkwait variable $statusVariableName
+        if {[getStatusNow]=="timeout"} {
+            addHistory "Timeout after $timeToWait\n"
+            killProcess "$this and ::getStatusWait"
+        }
+    }
+    return [getStatusNow]
+}
+
+#####################################################################
+#### getStatusWait
+# Immediately get the status of a process now, whether it is
+# running or not. This could return "stopped", "running", etc etc...
+#
+body ::tycho::Exec::getStatusNow {} {
+    global $statusVariableName
+    return [uplevel #0 "set $statusVariableName"]
+}

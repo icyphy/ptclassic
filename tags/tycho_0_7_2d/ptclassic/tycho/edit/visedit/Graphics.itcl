@@ -1,0 +1,1900 @@
+# A graphical viewer and editor widget based on the Tk canvas.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)Graphics.itcl	1.57	01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: Known bugs:
+# - When scrollbars are added or removed, actions bound to <Configure>
+#   are triggered three times.  This can be very expensive.
+#
+# FIXME: To do:
+# - Create a font hiearchy (huge, large, medium, ...),
+#   and use that.
+# - Make undo mechanism multi-level.
+# - Methods to insert HTML
+# - Method to move an item
+# - Support canvas itemconfigure method and modify the stored create
+#   command accordingly.
+
+
+#######################################################################
+#### Graphics
+# This widget is the principal Tycho interface to the Tk Canvas.
+# It creates a widget that contains a canvas with optional scrollbars.
+# A set of methods support commonly used operations and encourage a
+# a consistent look to graphical displays and editors.
+# <p>
+# The widget manages a set of <i>items</i> consisting of one or more
+# canvas items. Items can be saved in files and edited using
+# customizable editors. Their creation and deletion can be interfaced
+# to the undo and clipboard mechanisms. The <code>create</code> method
+# is the simplest way to create an item, which in this case is a simple
+# canvas item. The <code>create</code> method passes all its arguments
+# to the Tk <code>canvas create</code> command. Items with more complex
+# behavior, such as centered text that adjusts to changes in window
+# sizes and insertion of other items, can also be created. Derived
+# classes provide yet more complex items.
+# <p>
+# If you use its <code>create</code> method to create items in the
+# canvas, then then undo and clipboard operations will work on this
+# item and the details about the item will be reported by the
+# <code>describe</code> method, which is used to save the contents to a
+# file. If this object is embedded in a <code>Graphics</code> object,
+# then items created this way are automatically saved in files. Any
+# item created with the <code>create</code> method should be removed
+# using the <code>delete</code> method. Commands that are issued
+# directly to the canvas are ignored for the purposes of undo, the
+# clipboard, and saving to a file. The <code>describe</code> method
+# will not reflect any such commands.
+# <p>
+# The <code>describe</code> method also reports the current canvas size.
+# Thus, if the data reported by this method is saved (as is done by the
+# <code>Graphics</code> class), then the size of the canvas is persistent.
+# <p>
+# A set of methods and options are provided to encourage a consistent
+# look and feel in graphical editors and displays.  The
+# <code>centeredText</code> method can be used to create titles, subtitles,
+# author information, etc.  These can be specified or edited interactively.
+# <p>
+# The widget supports a set of default interaction mechanisms using
+# tags. Drawn items tagged with "selectable" can be selected with button
+# 1; items also tagged with "movable" can be selected and moved freely.
+# Button 1 can also be used to "drag-select" one
+# or more items. If the shift key is pressed when selecting an item or when
+# starting drag-selecting, items are toggled in and out of the selection set.
+# <p>
+# This class is a base class for more interesting graphical displays
+# and editors. It is not meant to be used on its own. Derived classes
+# may create objects in the canvas without using the <code>create</code>
+# method.  Such objects can be registered using the <code>register</code>
+# method.
+# <p>
+# This design has borrowed some ideas from the scrolled canvas widget
+# written by Mark Ulferts and Sue Yockey of DSC Technologies Corporation,
+# but goes well beyond the intent of that widget.
+#
+class ::tycho::Graphics {
+    inherit ::tycho::File
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the height of the canvas widget, in pixels.
+    itk_option define -canvasheight canvasHeight CanvasHeight 300
+
+    # Specify the width of the canvas widget, in pixels.
+    itk_option define -canvaswidth canvasWidth CanvasWidth 400
+
+    # Specify what type of scrolling to use: bars, bars, or none.
+    itk_option define -scrolling scrolling Scrolling {auto}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Return the name of the Tk canvas, for interfacing to non-Itcl code.
+    # FIXME: This should go....
+    method canvasName {} {return $canvas}
+
+    # Create centered text.
+    method centeredText {text {tag {}} {below {}} {color black} {font {}}}
+
+    # Interactively edit centered text.
+    method centeredTextEdit {{tag {}}}
+
+    # Clear the display, discarding the current items.
+    method clear {}
+
+    # Save the specified items to the clipboard, or if none, the selected items.
+    method copy {{ids {}}}
+
+    # Create a canvas items, recording for undo, and registering for saving.
+    method create {args}
+
+    # Remove and save to the clipboard the specified items or the selection.
+    method cut {{ids {}}}
+
+    # Delete one or more canvas items, recording for undo.
+    method delete {args}
+
+    # Declare that a child item depends on a parent item.
+    method dependenceAdd {parenttag childtag {update {}}}
+
+    # Update items in the dependence list.
+    method dependenceUpdate {args}
+
+    # Describe the contents of the canvas as a list of method invocations.
+    method describe {}
+
+    # Edit the specified items, or if none, the selected items.
+    method edit {{ids {}}}
+
+    # Open a dialog to export the canvas contents in one of various formats.
+    method export {}
+
+    # Generate a GIF file with the contents of the canvas.
+    method exportGif {filename}
+
+    # Generate an encapsulated postscript file with the contents of the canvas.
+    method exportEps \
+            {filename {orientation portrait} {colormode color} {pwidth {}}}
+
+    # Generate an X window dump file with the contents of the canvas.
+    method exportXwd {filename}
+
+    # Give the canvas the focus.
+    method focusin {}
+
+    # Open a help window.
+    method help {}
+
+    # Insert the specified data into the canvas.
+    method insertData {data}
+
+    # If the argument is non-zero, enable the undo system and automatic updates.
+    method interactiveEnable {bool} {set interactiveEnabled $bool}
+
+    # Execute the arguments as a command in this scope, marking modified.
+    method modify {args}
+
+    # Insert from the clipboard.
+    method paste {}
+
+    # Print the contents of the canvas.
+    method print {}
+
+    # Redo using the current redo buffer.
+    method redo {}
+
+    # Find the item identified by "name".
+    # FIXME: Implement this.
+    # method seeFragment {point}
+
+    # Query the user for the type of scrollbars to use.
+    method scrollQuery {}
+
+    # Set the scrolling style (use with scrollQuery).
+    method scrollSet {dialog}
+
+    # Select all selectable objects under the cursor.
+    method select {{append 0}}
+
+    # Return a list of the ids of selected objects.
+    method selected {} {return [$slate find withtag "sel"]}
+
+    # Clear the selection.
+    method selectionClear {}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
+
+    # Interactively add title information.
+    method titleAdd {{newcategory 0}}
+
+    # Set the title, subtitle, author, etc.
+    method titleSet {category text}
+
+    # Undo using the current undo buffer.
+    method undo {}
+
+    # Append a command to the end of the undo or redo buffer.
+    method undoAppend {command}
+
+    # Start a new undo buffer.
+    method undoBoundary {}
+
+    # Append a command to the beginning of the undo or redo buffer.
+    method undoPrepend {command}
+
+    # Update the scrollbars to reflect the current canvas contents.
+    method updateScrollbars {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Add or configure a textual display at the bottom.
+    protected method addInfo {tag label value {width {}} {description {}}}
+
+    # Return the y position of the bottom of the lowest item matching the tags.
+    protected method bottomOf {args}
+
+    # Find all the items in the canvas that have all of the specified tags.
+    protected method findAll {args}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # If the argument is non-null, return it.  Otherwise, return the selection.
+    protected method itemlist {{items {}}}
+
+    # Access the "graphics" preferences
+    protected method preference {mode args}
+
+    # Register the creation, undo, deletion, and edit commands for an item.
+    protected method register {id create undo remove {edit {}}}
+
+    # Return the text to be saved.
+    protected method saveText {}
+   
+    ###################################################################
+    ####                   protected variables                     ####
+    
+    # The name of the raw Tk canvas. Use with caution!
+    protected variable canvas {}
+
+    # The default file format for the export command.
+    protected common exportFormat eps
+
+    # An array of commands that will export the graphic some file format.
+    protected variable fileformats
+
+    # Flag indicating whether undo and automatic updates are enabled.
+    protected variable interactiveEnabled 0
+
+    # An object that manages editing of text items
+    protected variable lineeditor
+
+    # FIXME: The initial value of the following should be options
+
+    # Width of most recent print request.
+    protected common printWidth {}
+
+    # Color mode of most recent print request.
+    protected common printColor {color}
+
+    # Orientation of most recent print request.
+    protected common printOrient {landscape}
+
+    # The name of the slate contained within this widget
+    protected variable slate {}
+
+    ##########################################################################
+    ####                         private methods                          ####
+    
+    # The updateScrollbars method schedules this method for execution.
+    private method configureScrollbars {}
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # The name of the dependence graph
+    private variable dependenceGraph {}
+
+    # An array of commands used to create items.
+    private variable itemCreate
+
+    # An array of commands used to delete items.
+    private variable itemDelete
+
+    # An array of commands used to edit items.
+    private variable itemEdit
+
+    # The redo buffer
+    private variable redoCommands {}
+
+    # The undo buffer
+    private variable undoCommands {}
+
+    # Flag indicating whether we are undoing or redoing
+    private variable undoing 0
+
+    # The mouse follower
+    private variable follower ""
+
+    # The item selector
+    private variable selector ""
+
+    ###################################################################
+    ####                   private procs                           ####
+
+    # Update the export dialog after a change in the file type.
+    private proc updateExportDialog {nm}
+
+    # Pending configuration command
+    private variable scheduledUpdate {}
+}
+
+#######################################################################
+#### -scrolling option configuration
+# If the value is "bars", then the canvas is equipped with scrollbars.
+# If the value is "auto", then the canvas is equipped with scrollbars
+# only when its contents are not all visible.
+# Otherwise, scrolling is turned off.  For the change to take effect
+# after configuring this option, call <code>updateScrollbars</code>.
+#
+configbody ::tycho::Graphics::scrolling {
+    # Do not call updateScrollbars here because this configuration occurs
+    # too often.
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Graphics::constructor {args} {
+    global tcl_platform
+
+    interactiveEnable 0
+
+    # Set the view "type" for the Window menu
+    set viewType "graphics"
+
+    # Create a top frame to contain both the canvas and vertical 
+    # scrollbar and a bottom frame to hold the horizontal scrollbar and 
+    # some filler.
+    itk_component add top {
+	frame $itk_interior.top
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(top) -fill both -expand yes -side top
+
+    # The canvas.
+    itk_component add slate {
+        uplevel #0 ::tycho::slate $itk_component(top).slate
+    } {
+        keep -cursor
+        rename -background -canvascolor canvasColor CanvasColor
+        rename -height -canvasheight canvasHeight CanvasHeight
+        rename -width -canvaswidth canvasWidth CanvasWidth
+    }
+    set slate $itk_component(slate)
+    set canvas [$slate component canvas]
+    pack $slate -expand yes -fill both -side left
+
+    # NOTE: This used to be bound to the hull of TopLevel, which caused
+    # Focusin to be called a very large number of times.
+    bind $slate <Map> "$this focusin; break"
+
+    # Create vertical scrollbar. This may not be packed.
+    itk_component add vsb {
+        scrollbar $itk_component(top).vsb \
+                -orient vertical \
+                -command "$slate yview"
+    } {
+        keep -background -cursor
+    }
+    
+    # Frame to hold the horizontal scrollbar and filler.
+    itk_component add bottom {
+	frame $itk_interior.bottom
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(bottom) -fill both -side bottom \
+            -before $itk_component(top)
+
+    # Create horizontal scrollbar. This may not be packed.
+    itk_component add hsb {
+        scrollbar $itk_component(bottom).hsb \
+                -orient horizontal \
+                -command "$slate xview"
+    } {
+        keep -background -cursor
+    }
+
+    # Filler frame for the lower right corner.
+    itk_component add filler {
+	frame $itk_component(bottom).filler
+    } {
+	keep  -background -cursor
+    }
+
+    $slate configure \
+            -xscrollcommand "$itk_component(hsb) set" \
+            -yscrollcommand "$itk_component(vsb) set"
+
+    # Add a widget at the bottom for displaying info
+    itk_component add info {
+	frame $itk_interior.info -relief sunken
+    } {
+	keep -background -cursor
+    }
+    # Use some packing tricks so that the info frame doesn't disappear
+    # when the window is resized. I (hjr) am not 100% certain that
+    # this is the right way to do it, but it appears to work...
+    pack $itk_component(info) -expand no -fill x \
+            -side bottom \
+            -before $itk_component(bottom)
+
+    eval itk_initialize $args
+
+    # Modify the binding tags of the canvas so that this megawidget
+    # gets events too. This is unfortunate but appears to be necessary
+    set tl [winfo toplevel $itk_component(hull)]
+    set canvas [$slate component canvas]
+    bindtags $canvas \
+	    "$tl $itk_component(hull) $slate Slate all"
+
+    # Prevent shadowing of bindings in the Displayer class.
+    bind $slate <Control-x> {continue}
+
+    # Allow cursor/keyboard control of slate
+    bind $slate <Up> "$slate yview scroll -1 unit"
+    bind $slate <Down> "$slate yview scroll 1 unit"
+    bind $slate <Left> "$slate xview scroll -1 unit"
+    bind $slate <Right> "$slate xview scroll 1 unit"
+
+    bind $slate <Prior> "$slate yview scroll -1 page"
+    bind $slate <Escape><v> "$slate yview scroll -1 page"
+    bind $slate <Meta-v> "$slate yview scroll -1 page" 
+    bind $slate <Next> "$slate yview scroll 1 page"
+    bind $slate <Control-v> "$slate yview scroll 1 page"
+
+    bind $slate <Home> "$slate xview scroll -1 page"
+    bind $slate <End> "$slate xview scroll 1 page"
+
+    # Simpler bindings provided because this is not a text editor.
+    # These are fashioned after the Macintosh commands
+    bind $slate <z> "$this undo; break"
+    bind $slate <d> "$this redo; break"
+    bind $slate <x> "$this modify cut; break"
+    bind $slate <c> "$this copy; break"
+    bind $slate <v> "$this modify paste; break"
+    bind $slate <e> "$this edit; break"
+
+    # Specialized bindings.
+    bind $slate <T> "$this titleAdd; break"
+
+    # Bindings provided for compatibility with emacs conventions.
+    # These must be specified after the simpler bindings above.
+    bind $slate <Meta-x> {continue}
+    bind $slate <Control-x><u> "$this undo; break"
+    bind $slate <Control-w> "$this modify cut; break"
+    bind $slate <Meta-w> "$this copy; break"
+    bind $slate <Control-y> "$this modify paste; break"
+
+    # Bind configure events to update the display.
+    # Interactivity is enabled only after the first configure event.
+    bind $itk_component(bottom) <Configure> \
+            "$this updateScrollbars; $this dependenceUpdate resize"
+
+    # Defer until after constructors in derived classes have completed.
+    after idle [list catch "$this interactiveEnable 1"]
+
+    # Enable selection with button 1; shift-click toggles
+    set selector [$slate interactor Selector]
+    $selector bind selectable -button 1
+    $selector bind selectable -button 1 \
+            -modifiers shift -toggle 1
+
+    # Create the interactor to move selected items
+    set follower [$slate interactor Follower]
+    $selector delegate $follower moveable -button 1 
+    $selector delegate $follower moveable -button 1 \
+            -modifiers shift
+
+    # Set up export commands.  The mac does not have exec, so we 
+    # can't do everything.
+    if {$tcl_platform(platform) == "macintosh"} {
+	array set fileformats {
+	    eps exportEps
+	}
+    } else {
+	array set fileformats {
+	    eps exportEps
+	    gif exportGif
+	    xwd exportXwd
+	}
+    }
+
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -canvasheight graphics canvasHeight \
+	    -canvaswidth  graphics canvasWidth \
+	    -canvascolor  graphics canvasColor
+
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::Graphics::destructor {} {
+    if {$scheduledUpdate != {}} {
+        after cancel $scheduledUpdate
+    }
+    if {$dependenceGraph != {}} {
+        ::delete object $dependenceGraph
+    }
+}
+
+###################################################################
+###################################################################
+####                      public methods                       ####
+
+#######################################################################
+#### clear
+# Clear the display, discarding the current graphics.
+#
+body ::tycho::Graphics::clear {} {
+    if [getReadOnly] {bell; return}
+    
+    # Delete all items on the slate _except_ the background
+    $slate addtag temp all
+    $slate dtag background temp
+    $slate delete temp
+}
+
+# NOTE: The following implementation assumes that the visible portion
+# of the canvas always has the origin at the upper right.  Is this a
+# safe assumption?
+
+#######################################################################
+#### centeredText
+# Create text that is centered in the portion of the canvas that will
+# be visible when the window is first opened. The first argument is the
+# text to insert. The text will be wrapped at word boundaries if it is
+# wider than the window. The remaining arguments are optional, although
+# if any one of them is given, then the ones before it must also be
+# given. The second argument is a tag to assign to the text (in
+# addition to "selectable", which is always assigned).
+# If any items
+# already exist with this tag, then they are deleted.  The third
+# argument is a list of tags identifying tagged items in the canvas
+# below which the text will be placed. If the tag is given, and this
+# list is non-null, then the dependence is registered so that when
+# <code>dependenceUpdate</code> is called, if any of the items in the
+# "below" list have moved, then this item will be moved. The fourth
+# argument specifies the color. Any color name accepted by
+# <code>::tycho::color</code> will work. The fifth argument specifies the
+# font in a form accepted by the <code>findFont</code> method of the
+# <code>FontManager</code> class. If the color and font are not
+# specified, then the text is black using the default variable font.
+# The text is tagged "selectable" and the id of the
+# text object is
+# returned. If the text is an empty string and the tag is given, then
+# items with that tag are simply deleted and a null string is returned.
+# The action is registered for undoing, and <code>dependenceUpdate</code>
+# is called with the argument being either the tag (if given) or
+# "centeredtext".  Thus, any object that is registered as depending
+# on "centeredtext" using <code>dependenceAdd</code> will be updated.
+#
+body ::tycho::Graphics::centeredText \
+        {text {tag {}} {below {}} {color black} {font {}}} {
+    if {$tag != {} && [$slate find withtag $tag] != {}} {
+        if [catch {set oldtext [$slate itemcget $tag -text]}] {
+            set oldtext {}
+        }
+        $slate delete $tag
+    } {
+        set oldtext {}
+    }
+    if {$text != {}} {
+        set top [eval bottomOf $below]
+        set cwidth [winfo width $slate]
+        if {$cwidth == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cwidth [cget -canvaswidth]
+        }
+        set xcoord [expr int($cwidth/2)]
+        # Allow for some padding left and right of the title.
+        if {$cwidth > 20} {
+            set cwidth [expr $cwidth-20]
+        }
+        if {$font != {}} {
+            set usefont [eval ::tycho::font $font]
+        } {
+            set usefont [::tycho::font helvetica]
+        }
+        set usecolor $color
+        set id [$slate create text $xcoord $top \
+                -width $cwidth \
+                -justify center \
+                -anchor n \
+                -fill $usecolor \
+                -text $text \
+                -tags {selectable} \
+                -font $usefont]
+        if {$tag != {}} {
+            $slate addtag $tag withtag $id
+            # NOTE: add a command to update position rather than just
+            # recreating the text on an update.
+            set cmd [list centeredText $text $tag $below $color $font]
+            foreach dep $below {
+                dependenceAdd $dep $tag $cmd
+            }
+            # FIXME: This dependence should probably be there regardless
+            # of whether there is a $tag.  The tag used should be
+            # that of the canvas object, which means it would have to
+            # be deleted.  The dependence mechanism is not quite rich
+            # enough to support this.
+            dependenceAdd resize $tag $cmd
+            dependenceAdd $tag centeredtext
+        }
+        register $id \
+                [list centeredText $text $tag $below $color $font] \
+                [list centeredText $oldtext $tag $below $color $font] \
+                [list centeredText {} $tag $below $color $font] \
+                [list centeredTextEdit $tag]
+    } {
+        # Text is simply deleted
+        undoPrepend [list centeredText $oldtext $tag $below $color $font]
+        set id {}
+    }
+    if {$tag != {}} {
+        dependenceUpdate $tag
+    } {
+        dependenceUpdate centeredtext
+    }
+    return $id
+}
+
+#######################################################################
+#### centeredTextEdit
+# Interactively edit centered text.  If the optional argument is given,
+# and a centered text item exists in the canvas with the specified tag,
+# then that item is edited.  Otherwise, if there is a selected item and
+# that item is a centered text item, that item is edited.  Otherwise,
+# an error occurs.
+#
+body ::tycho::Graphics::centeredTextEdit {{tag {}}} {
+    if {$tag == {}} {
+        set tag [lindex [selected] 0]
+    }
+    selectionClear
+    if {$tag != {}} {
+        set id [$slate find withtag $tag]
+        if {$id != {}} {
+            if {[info exists itemCreate($id)]} {
+                set create $itemCreate($id)
+                if {[lindex $create 0] == {centeredText}} {
+                    # We have a centered text item.
+                    set text [lindex $create 1]
+                    set tag [lindex $create 2]
+                    set below [lindex $create 3]
+                    set color [lindex $create 4]
+                    set font [lindex $create 5]
+                    set name [::tycho::autoName .query]
+                    set cmd "$this modify centeredText \[$name get text\] \
+                            [list $tag] [list $below] \
+                            [list $color] [list $font]"
+                    ::tycho::Query $name -queries \
+                            [list [list line text {Text:} $text]] \
+                            -okcommand [list catch $cmd]
+                    $name centerOnScreen
+                    return
+                }
+            }
+        }
+    }
+    error "No centered text item specified."
+}
+
+#######################################################################
+#### copy
+# Copy the commands to create the specified items to the clipboard. If
+# no items are specified, then copy the selected items. The argument is
+# a list of item ids.  Only items that were created with the 
+# <code>create</code> method or registered with the
+# <code>register</code> method can be copied to the clipboard.
+#
+body ::tycho::Graphics::copy {{ids {}}} {
+    set cmds {}
+    foreach id [itemlist $ids] {
+        if [info exists itemCreate($id)] {
+            lappend cmds $itemCreate($id)
+        } {
+            error "Don't know how to create item with id: $id"
+        }
+    }
+    setClipboard $cmds
+}
+
+#######################################################################
+#### create
+# Create a canvas item, recording for undo. The arguments are exactly
+# those of the Tk canvas widget. Also register the creation command so
+# that the item can be saved. Return the id of the item created.
+#
+body ::tycho::Graphics::create {args} {
+    undoBoundary
+    set id [eval $slate create $args]
+    register $id [concat create $args] [list delete $id] [list delete $id]
+    markModified
+    return $id
+}
+
+#######################################################################
+#### cut
+# Remove the specified list of items, or if none, the selected items,
+# adding to the clipboard commands to recreate them. The argument is a
+# list of item ids.
+# This method should be called via the <code>modify</code>method.
+#
+body ::tycho::Graphics::cut {{ids {}}} {
+    set ids [itemlist $ids]
+    copy $ids
+    delete $ids
+    selectionClear
+}
+
+#######################################################################
+#### delete
+# Delete one or more canvas items, recording for undo. If the items
+# were created with <code>create</code> or registered with
+# <code>register</code>, then the deletion is implemented by executing
+# the registered delete command, and the corresponding create command
+# is recorded for undo. The arguments are tags or ids of items to be
+# deleted.
+# <p>
+# Note that this method shadows the Itcl <code>delete</code> command
+# because it has the same name. To invoke that command within a method
+# or proc of a class derived from this one, use the syntax
+# <code>::delete</code>.
+# <p>
+# This method should be called via the <code>modify</code> method.
+#
+body ::tycho::Graphics::delete {args} {
+    undoBoundary
+    foreach tag $args {
+        foreach id [$slate find withtag $tag] {
+            if [info exists itemCreate($id)] {
+                if {[lindex $itemDelete($id) 0] == {delete}} {
+                    eval $slate $itemDelete($id)
+                    undoAppend $itemCreate($id)
+                } {
+                    eval $this $itemDelete($id)
+                }
+                unset itemCreate($id)
+                unset itemDelete($id)
+                unset itemEdit($id)
+            } {
+                # Nothing registered.  Just delete.
+                $slate delete $id
+            }
+        }
+    }
+    markModified
+}
+
+#######################################################################
+#### dependenceAdd
+# Declare that a child item depends on a parent item.
+# The items are specified by tag.  There is no need for items to
+# exist with the given tags.  If the optional third argument is given,
+# it is a command that will be evaluated by <code>dependenceUpdate</code>
+# when a parent has been modified.  If such a command has been previously
+# set for this child tag, it is overwritten.
+#
+body ::tycho::Graphics::dependenceAdd {parenttag childtag {update {}}} {
+    if {$dependenceGraph == {}} {
+        set dependenceGraph [uplevel #0 ::tycho::DirectedAcyclicGraph #auto]
+    }
+    if {![$dependenceGraph exists $parenttag]} {
+        # Add a new root to the graph
+        $dependenceGraph add $parenttag {}
+    }
+    if {![$dependenceGraph exists $childtag]} {
+        # Add a new leaf node to the graph
+        $dependenceGraph add $childtag $update [list $parenttag]
+    } {
+        # Both exist.  Add a new arc and overwrite the update command.
+        # Note that we assume (and don't check) that no cycle is introduced
+        # (this makes the code faster).
+        $dependenceGraph addArc $parenttag $childtag
+        if {$update != {}} {
+            $dependenceGraph setContents $childtag $update
+        }
+    }
+}
+
+#######################################################################
+#### dependenceUpdate
+# Update items in the dependence graph that have been registered with
+# calls to <code>dependenceAdd</code>. The optional arguments are nodes
+# in the dependence graph representing items that have changed. Nodes
+# that depend on those items will be updated. If no argument is given,
+# then all items that depend on root items in the dependence graph will
+# be updated. An update consists of one of two actions. If an update
+# command was given when <code>dependenceAdd</code> was called, then
+# that command is executed. Otherwise, for each updated item in the
+# dependence graph, if any items exist in the canvas with tags that
+# match the name of the item, the item is deleted and recreated using
+# registered deletion and creation commands.  If interactive mode is not
+# enabled or there is no dependence graph, this method simply returns.
+#
+body ::tycho::Graphics::dependenceUpdate {args} {
+    if {$interactiveEnabled && $dependenceGraph != {}} {
+        if {$args != {}} {
+            set rootspresent {}
+            foreach root $args {
+                if [$dependenceGraph exists $root] {
+                    lappend rootspresent $root
+                }
+            }
+            # Find all children of given roots.  This is a bit tricky
+            # because we have to avoid listing any child twice.
+            set roots {}
+            foreach root $rootspresent {
+                foreach child [$dependenceGraph children $root] {
+                    if {[lsearch -exact $roots $child] < 0} {
+                        lappend roots $child
+                    }
+                }
+            }
+            if {$roots != {}} {
+                set nodes [$dependenceGraph topologicalSort $roots]
+            } {
+                # No children.  Nothing to do.
+                return
+            }
+        } {
+            set nodes [$dependenceGraph describe]
+        }
+        foreach node $nodes {
+            set name [lindex $node 0]
+            set ids [$slate find withtag $name]
+            # Skip the node if there is nothing in the canvas that matches.
+            if {$ids == {}} {continue}
+            set contents [lindex $node 1]
+            set parents [lindex $node 2]
+            # Ignore root nodes
+            if {$parents != {}} {
+                if {$contents == {}} {
+                    # No update command has been indicated.
+                    foreach id $ids {
+                        # Ignore if we don't know how to recreate.
+                        if [info exists itemCreate($id)] {
+                            interactiveEnable 0
+                            save saveCreate $itemCreate($id)
+                            eval $this $itemDelete($id)
+                            eval $this $saveCreate
+                            interactiveEnable 1
+                        }
+                    }
+                } {
+                    # Evaluate the indicated update command.
+                    if [catch {
+                        interactiveEnable 0
+                        eval $contents
+                        interactiveEnable 1
+                    } msg] {
+                        error "Failed to evaluate dependency for $name.\n$msg"
+                    }
+                }
+            }
+        }
+    }
+}
+
+#########################################################################
+#### describe
+# Describe the contents of the canvas as a list of commands.
+# All items are included if they have been registered using the
+# <code>register</code> method, or were created using
+# the <code>create</code> method.
+#
+body ::tycho::Graphics::describe {} {
+
+    # First, describe the canvas dimensions
+    set height [winfo height $slate]
+    if {$height == 1} {
+        # Canvas has not been mapped yet
+        set height [cget -canvasheight]
+    }
+    lappend dsc [list configure -canvasheight $height]
+    set width [winfo width $slate]
+    if {$width == 1} {
+        # Canvas has not been mapped yet
+        set width [cget -canvaswidth]
+    }
+    lappend dsc [list configure -canvaswidth $width]
+
+    # Report the scrolling mode
+    lappend dsc [list configure -scrolling [cget -scrolling]]
+
+    # Next, describe the items in the canvas.
+    # Although it is undocumented, the "find withtags all" returns
+    # items in the order in which they are displayed.  We describe
+    # them in this same order.
+    foreach id [$slate find withtag all] {
+        if [info exists itemCreate($id)] {
+            lappend dsc $itemCreate($id)
+        }
+    }
+    return $dsc
+}
+
+#######################################################################
+#### edit
+# Edit the specified items, or if none, the selected items. If an edit
+# command was registered using the <code>register</code> method, then that
+# command is used to edit the item. Otherwise, if the command was
+# created using <code>create</code>, or a creation command was registered 
+# using the <code>register</code> method, then a text editor is invoked
+# to edit that creation command. If the item has not been
+# registered at all, then the item is ignored. The argument is a list
+# of item ids.
+# <p>
+# Note that the edit command will be invoked even if the object is
+# read-only.  Thus, it is up to that command to ensure that no
+# destructive changes are made.
+#
+body ::tycho::Graphics::edit {{ids {}}} {
+    set ids [itemlist $ids]
+    foreach id $ids {
+        if {[info exists itemEdit($id)] && $itemEdit($id) != {}} {
+            eval $this $itemEdit($id)
+        } elseif [info exists itemCreate($id)] {
+            set name [::tycho::autoName .query]
+            set queries [list [list \
+                    line x {Create command:} $itemCreate($id) 8]]
+            ::tycho::Query $name -queries $queries \
+                    -okcommand "if {\[infoObjects $this\] != {}} \
+                    {eval $this modify \[$name get x\]}"
+            $name centerOnScreen
+        }
+    }
+}
+
+#######################################################################
+#### export
+# Open a print dialog for exporting the contents of the canvas in various
+# formats.
+#
+body ::tycho::Graphics::export {} {
+    set nm [::tycho::autoName $prefix]
+    ::tycho::Query $nm \
+            -text {Export Graphics} -entrywidth 60 -queries [list \
+            [list line filename {Export to file:} [filename]] \
+            [list radio format {File format} \
+                    [array names fileformats] $exportFormat \
+                    -command [code updateExportDialog $nm]] \
+            [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+            [list radio color {Color mode} {color gray mono} $printColor] \
+            [list radio orient {Orientation} {landscape portrait} $printOrient]]
+
+    updateExportDialog $nm
+    set response [safeEval ::tycho::Dialog::wait $nm]
+    if {$response != {}} {
+        array set pp $response
+        set fn $pp(filename)
+        set exportFormat $pp(format)
+
+        switch -exact $exportFormat {
+            eps {
+                set printWidth $pp(width)
+                set printColor $pp(color)
+                set printOrient $pp(orient)
+                exportEps $fn $printOrient $printColor $printWidth
+            }
+            gif {
+                exportGif $fn
+            }
+            xwd {
+                exportXwd $fn
+            }
+        }
+    }
+}
+
+#######################################################################
+#### exportGif
+# Generate a GIF file with the contents of the canvas.
+# NOTE: Unix-only implementation.  Also, depends on the programs
+# xwdtopnm, ppmtogif, and xwd, which must be in your path.
+#
+body ::tycho::Graphics::exportGif {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the Graphics exportGif method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
+    set fn1 [::tycho::tmpFileName]
+    exportXwd $fn1
+    # NOTE: -transparent color option should be added for the background.
+    if [catch { ::tycho::tyexec xwdtopnm $fn1 | ppmtogif -interlace > \
+            $filename 2> /dev/null} msg] {
+        file delete $fn1
+        error $msg
+    }
+    file delete $fn1
+    # For some reason, the above leaves a non-readable file.    
+    # chmod might not be present, but if this fails, we should not die
+    catch {exec chmod +r $filename}
+    # FIXME: Should display the gif!
+}
+
+#######################################################################
+#### exportEps
+# Generate an encapsulated postscript file. The first argument (the
+# only one required) is the name of a file into which to write the
+# postscript. The second argument specifies the orientation, and should
+# be either "normal" (the default) or "rotated" (by 90 degrees). The
+# third argument specifies the color mode and should have value color
+# (the default, for full color output), gray (convert all colors to
+# their gray-scale equivalents) or mono (convert all colors to black or
+# white). The final argument optionally specifies the width of the
+# postscript image. It consists of a floating-point number followed by
+# c for centimeters, i for inches, m for millimeters, or p or nothing
+# for printer's points (1/72 inch). If it is not given, then the image
+# size is the same as on the screen.
+# <p>
+# NOTE: Currently postscript is generated for the entire image in a single
+# file.  It would be good to be able to break it down into subimages.
+# If the image does not fit on the page, then how it is cropped is
+# unpredictable.
+# <p>
+# NOTE: It would be nice to take advantage of the colormap option
+# in the canvas postscript command to be able to map colors for monochrome
+# printing.
+#
+body ::tycho::Graphics::exportEps \
+        {filename {orientation portrait} {colormode color} {width {}}} {
+    if {$orientation != "portrait"} {
+	set rotate 1
+    } else {
+	set rotate 0
+    }
+    set bbox [$slate bbox all]
+    set cheight [expr [lindex $bbox 3]-[lindex $bbox 1]]
+    set cwidth [expr [lindex $bbox 2]-[lindex $bbox 0]]
+
+    if {$width != {}} {
+        set wopt "-pagewidth $width"
+    } {
+        set wopt {}
+    }
+    eval $slate postscript \
+            -file $filename \
+            -width $cwidth \
+            -height $cheight \
+            -rotate $rotate \
+            -colormode $colormode \
+            $wopt
+}
+
+#######################################################################
+#### exportXwd
+# Generate an X window dump with the contents of the canvas.
+# NOTE: The xwd program seems to consistently give a "BadMatch" error,
+# but works nonetheless, albeit a bit slowly.  Thus, we ignore the
+# error.
+# NOTE: Unix-only implementation.
+#
+body ::tycho::Graphics::exportXwd {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the Graphics exportXwd method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
+    set id [winfo id $slate]
+    raiseWindow
+    # NOTE: Temporarily pass $prefix rather than $this until "info"
+    # is fixed in itcl.
+    ::tycho::safeUpdate $prefix
+    # NOTE: xwd always returns an error status.
+    catch {::tycho::tyexec xwd -id $id -debug -out $filename >& /dev/null} msg
+    if ![file exists $filename] {
+        error $msg
+    }
+}
+
+#########################################################################
+#### focusin
+# Put the focus in the canvas.
+#
+body ::tycho::Graphics::focusin {} {
+    focus [$slate component canvas]
+    displayer setCurrentView $this
+}
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Graphics::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    GraphicsHelp.html] html
+}
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display.
+# The data should be a list of items of the form <i>methodname args</i>,
+# where <i>methodname</i> is a method of this class (i.e. any class
+# derived from <code>Graphics</code>), and <i>args</i> is the
+# set of arguments appropriate for that method.
+# Every 30 items, this calls <code>::tycho::safeUpdate</code> in order
+# to preserve interactivity.
+#
+body ::tycho::Graphics::insertData {data} {
+    if [getReadOnly] {bell; return}
+    set count 0
+    foreach command $data {
+        if {[incr count] >= 30} {
+            ::tycho::safeUpdate $this
+            set count 0
+        }
+        if [catch {
+            eval $this $command
+        } msg] {
+            global ::errorInfo
+            set saveErr $errorInfo
+            error "Invalid item: $data\n$msg" $saveErr
+        }
+    }
+}
+
+#########################################################################
+#### modify
+# Modify the canvas by executing the arguments in the scope of this object.
+# The command is identified as a distinct action for undo, the window
+# is marked modified (if appropriate), the display is updated, and the
+# focus is returned to this object.  If the object is read-only,
+# ring the bell and return, doing nothing.
+#
+body ::tycho::Graphics::modify {args} {
+    if $readOnly {bell; return}
+    undoBoundary
+    eval $this $args
+    markModified
+    focusin
+}
+
+#######################################################################
+#### print
+# Print the contents of the canvas.  It is first converted to postscript.
+# Then the user is queried for a print command.
+#
+body ::tycho::Graphics::print {} {
+    set answer [safeEval ::tycho::query {Print Graphics} [list \
+        [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+        [list line cmd {Print command} $printCmd] \
+        [list radio color {Color mode} {color gray mono} $printColor] \
+        [list radio orient {Orientation} {landscape portrait} $printOrient] \
+    ]]
+    if {$answer != {}} {
+        array set pp $answer
+        # save for next time.
+        set printWidth $pp(width)
+        set printCmd $pp(cmd)
+        set printColor $pp(color)
+        set printOrient $pp(orient)
+        set tmpFile [::tycho::tmpFileName typr .eps]
+        exportEps $tmpFile $printOrient $printColor $printWidth
+        eval ::tycho::tyexec $printCmd $tmpFile
+        file delete $tmpFile
+    }
+}
+
+#######################################################################
+#### redo
+# Execute the current command in the redo buffer.
+# This method calls <code>undoBoundary</code>.
+#
+body ::tycho::Graphics::redo {} {
+    if {$redoCommands == {} || !$interactiveEnabled} {bell; return}
+    selectionClear
+    set undoing 0
+    undoBoundary
+    # Step through the redo commands.
+    foreach cmd $redoCommands {
+        eval $this $cmd
+    }
+    set redoCommands {}
+    menubar disable redo
+    markModified
+}
+
+#####################################################################
+#### scrollQuery
+# Query the user for the type of scrollbars to use.
+#
+body ::tycho::Graphics::scrollQuery {} {
+    set name [::tycho::autoName .query]
+    ::tycho::Query $name -okcommand "$this scrollSet $name"
+    switch -exact [cget -scrolling] {
+        bars {set default {Always use scrollbars}}
+        auto {set default {Automatic scrollbars}}
+        default {set default {Never use scrollbars}}
+    }
+    $name radio scrolling {} [list \
+            {Always use scrollbars} \
+            {Automatic scrollbars} \
+            {Never use scrollbars}] $default
+    $name centerOnScreen
+}
+
+#####################################################################
+#### scrollSet
+# Set the scrolling style of the child widget depending on the user's
+# response in the specified dialog box.
+#
+body ::tycho::Graphics::scrollSet {dialog} {
+    set prevoption [cget -scrolling]
+    switch -exact [$dialog get scrolling] {
+        {Always use scrollbars} {set option bars}
+        {Automatic scrollbars} {set option auto}
+        default {set option none}
+    }
+    if {$option != $prevoption} {
+        configure -scrolling $option
+        updateScrollbars
+        markModified
+    }
+}
+
+#######################################################################
+#### select
+# Select all objects under the current mouse position that have the tag
+# "selectable".  If there are none, then clear any selection.
+# If the argument is non-zero, then append to the selection rather than
+# replacing it.
+#
+body ::tycho::Graphics::select {{append 0}} {
+    if !$append {
+        selectionClear
+    }
+    set objs [findAll current selectable]
+    foreach obj $objs {
+	if { ! [$slate select exists $obj] } {
+	    $slate select add $obj
+	}
+        # FIXME: Put into the Tk clipboard?
+    }
+}
+
+#######################################################################
+#### selectionClear
+# Clear the selection.
+#
+body ::tycho::Graphics::selectionClear {} {
+    $slate select clear
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::Graphics::setReadOnly {bool} {
+    ::tycho::File::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disable edititem
+            menubar disable cut
+            menubar disable paste
+	} {
+            menubar enable edititem
+            menubar enable cut
+            menubar enable paste
+	}
+    }
+}
+
+#########################################################################
+#### titleAdd
+# Interactively add title information to the window. The types of title
+# information directly supported and the order in which they appear are
+# given by the titleTypes option. The dialog lists those of these that are
+# not already specified in the canvas. If all of these are specified,
+# or the optional argument is given and is non-zero, then a more
+# complicated dialog is opened allowing the user to create a new title
+# category. That more complicated dialog can also be opened via a
+# button in the first dialog.
+#
+body ::tycho::Graphics::titleAdd {{newcategory 0}} {
+    set name [::tycho::autoName .query]
+    if !$newcategory {
+        if $readOnly {bell; return}
+        set titleTypes [stylesheet get graphics titleTypes]
+        set categories {}
+        foreach cat $titleTypes {
+            if {[$slate find withtag $cat] == {}} {
+                lappend categories $cat
+            }
+        }
+        if {$categories != {}} {
+            ::tycho::Query $name -queries \
+                    [list [list line title {Text:} {}]] \
+                    -okcommand "::tycho::TWidget::evalIfExists $this modify \
+                    titleSet \[$name get category\] \[$name get title\]"
+            $name radio category {} $categories [lindex $categories 0]
+            $name addButton new -text "New Title Item" -command \
+                    "$this titleAdd 1; destroy $name"
+        } {
+            titleAdd 1
+            return
+        }
+    } {
+        # New title category
+        ::tycho::Query $name -queries [list \
+                [list line text {Text:} {}] \
+                [list line category {Tag:} {}] \
+                [list line below {Below tags:} {}] \
+                [list line color {Color:} {}] \
+                [list line font {Font:} {}]] \
+                -okcommand [list catch \
+                "$this centeredText \[$name get text\] \
+                \[$name get category\] \
+                \[$name get below\] \
+                \[$name get color\] \
+                \[$name get font\]"]
+    }
+    $name centerOnScreen
+}
+
+#########################################################################
+#### titleSet
+# Specify title information for the window. The types of title
+# information directly supported and the order in which they appear are
+# given by the titleTypes option. The first argument is one of these types
+# or some other type (all other types will appear below titleTypes types).
+# Any previous instance of such a title type will be removed.
+# The second argument is the text of the title.
+#
+body ::tycho::Graphics::titleSet {category text} {
+    # Define the order in which title categories appear by specifying tags
+    # that should come before them.
+    set titleTypes [stylesheet get graphics titleTypes]
+    set idx [lsearch -exact $titleTypes $category]
+    if {$idx >= 0} {
+        set below [lrange $titleTypes 0 [incr idx -1]]
+    } {
+        set below $titleTypes
+    }
+    set font [stylesheet get graphics ${category}Font]
+    set color [stylesheet get graphics ${category}Color]
+    centeredText $text $category $below $color $font
+}
+
+#######################################################################
+#### undo
+# Execute the command in the undo buffer.
+# This method calls <code>undoBoundary</code>.
+#
+body ::tycho::Graphics::undo {} {
+    if {$undoCommands == {} || !$interactiveEnabled} {bell; return}
+    selectionClear
+    set undoing 1
+    undoBoundary
+    # Step through the undo commands.
+    foreach cmd $undoCommands {
+        if [catch {
+            eval $this $cmd
+        } msg] {
+            set undoing 0
+            global ::errorInfo
+            set saveInfo $errorInfo
+            error $msg $saveInfo
+        }
+    }
+    set undoing 0
+    set undoCommands {}
+    menubar disable undo
+    markModified
+}
+
+#######################################################################
+#### undoAppend
+# Append a command to the end of the undo or redo buffer (the latter
+# only happens if an undo is in progress). This should be called
+# any time an object is deleted, to ensure that the deletion can be
+# undone. If an object is being created, call <code>register</code>
+# instead.
+#
+body ::tycho::Graphics::undoAppend {command} {
+    if !$interactiveEnabled {return}
+    if $undoing {
+        menubar enable redo
+        lappend redoCommands $command
+    } {
+        menubar enable undo
+        lappend undoCommands $command
+    }
+}
+
+#######################################################################
+#### undoBoundary
+# Break a sequence of commands for the purposes of undo.  Any commands
+# appended or prepended to the undo buffer between calls to this method
+# will be undone together.
+#
+body ::tycho::Graphics::undoBoundary {} {
+    if !$interactiveEnabled {return}
+    if $undoing {
+        menubar disable redo
+        set redoCommands {}
+    } {
+        menubar disable undo
+        set undoCommands {}
+    }
+}
+
+#######################################################################
+#### undoPrepend
+# Append a command to the beginning of the undo or redo buffer (the
+# latter only happens if an undo is in progress). This should be called
+# any time an object is deleted, to ensure that the deletion can be
+# undone. If an object is being created, call <code>register</code>
+# instead.
+#
+body ::tycho::Graphics::undoPrepend {command} {
+    if !$interactiveEnabled {return}
+    if $undoing {
+        menubar enable redo
+        set redoCommands [concat [list $command] $redoCommands]
+    } {
+        menubar enable undo
+        set undoCommands [concat [list $command] $undoCommands]
+    }
+}
+
+#########################################################################
+#### updateScrollbars
+# Update the range of the scrollbars so that they cover the bounding box
+# of the contents of the canvas.  This should be called after each action
+# that changes the bounding the box of the items in the canvas or the size
+# of the canvas.
+#
+body ::tycho::Graphics::updateScrollbars {} {
+    if {$scheduledUpdate == {}} {
+        set scheduledUpdate [after idle [code $this configureScrollbars]]
+    }
+}
+
+###################################################################
+###################################################################
+####                      protected methods                    ####
+
+#####################################################################
+#### addInfo
+# Add or configure textual information displayed at the bottom.
+# The arguments are: a name for the widget, the label to be displayed,
+# the value to be displayed, an optional width field and an optional
+# textual description
+# If the description argument is non-empty, then when the user moves
+# the mouse over the widget, the status line will have the description
+# displayed in it.
+# For example:
+# <pre>
+#    addInfo foo {Value of foobar} $foobar 3 {foobar is a variable}
+# </pre>
+# will create a widget with a label 'Value of foobar', a value that
+# is the value of the foobar variable and displayed with a width of 3
+# characters.
+body ::tycho::Graphics::addInfo {tag label value {width {}} \
+        {description {}}} {
+
+    if [info exists itk_component($tag)] {
+        # Display already exists.  Configure it.
+        component label_$tag configure -text $label
+        component value_$tag configure -text $value
+        if {$description != {} } {
+            bind $itk_component($tag) <Enter> \
+                    "$this putStatus \"$description\" "
+            bind $itk_component($tag) <Leave> \
+                    "$this putStatus \"\" "
+        }
+
+    } {
+        # Display does not exist. Create it.
+	itk_component add $tag {
+	    frame $itk_component(info).$tag
+	} {
+	    keep -background -cursor
+	}
+	pack $itk_component($tag) -side right -padx 5
+
+        if {$description != {} } {
+            bind $itk_component($tag) <Enter> \
+                    "$this putStatus \"$description\" "
+            bind $itk_component($tag) <Leave> \
+                    "$this putStatus \"\" "
+        }
+
+        itk_component add label_$tag {
+            label $itk_component($tag).label -text $label -relief flat
+        } {
+            keep -font -background -foreground
+        }
+        pack $itk_component(label_$tag) -side left
+
+        itk_component add value_$tag {
+            label $itk_component($tag).value -text $value -relief ridge
+        } {
+            keep -font -background -foreground
+        }
+        if {$width != {}} {
+            component value_$tag configure -width $width
+        }
+        pack $itk_component(value_$tag) -side left
+    }
+}
+
+#########################################################################
+#### bottomOf
+# Given any number of tags, return the distance from the top of the
+# canvas (in pixels) of the bottom of the lowest item found in the
+# canvas with one of the tags. This can be used in derived classes to
+# determine the uppermost range of their drawing area (placing text
+# below centered text for example). If no matching items are found,
+# return 2 (suggesting two pixels of margin at the top).
+#
+body ::tycho::Graphics::bottomOf {args} {
+    set id {}
+    set bottom 2
+    foreach tag $args {
+        foreach item [$slate find withtag $tag] {
+            set bot [expr [lindex [$slate bbox $item] 3]+2]
+            if {$bot > $bottom} {set bottom $bot}
+        }
+    }
+    return $bottom
+}
+
+#######################################################################
+#### findAll
+# Find all the items in the canvas that have all of the tags given
+# as arguments.  Return a list of ids. If no tags are given as
+# arguments, then return a list of all ids.  If no items have all
+# the specified tags, return an empty list. Note: This will execute
+# fastest if the most restrictive tag is given first.
+#
+body ::tycho::Graphics::findAll {args} {
+    if {$args == {}} {
+        return [$slate find withtag all]
+    } {
+        # Get a list of all ids with the first tag.
+        set ids [$slate find withtag [lindex $args 0]]
+
+        # Construct a list of the remaining tags
+        set rest [lrange $args 1 end]
+
+        # Construct the list to return by checking each id to
+        # verify that it has all the rest of the tags.
+        set toret {}
+        foreach id $ids {
+            set tags [$slate gettags $id]
+
+            # Verify that all tags in the list "rest" are in the list "tags"
+            set in 1
+            foreach tag $rest {
+                if {[lsearch -exact $tags $tag] < 0} {
+                    set in 0
+                    break
+                }
+            }
+            if $in {
+                lappend toret $id
+            }
+        }
+        return $toret
+    }
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::Graphics::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Graphics::_initializeMenubar $menubar
+    }
+}
+
+#######################################################################
+#### itemlist
+# If the argument is non-null, just return it.  Otherwise, return a list
+# of the ids of selected items, if there are any.  If there are also no
+# selected items, return the id of the item under the cursor, if it has
+# tag "selectable".  If there is also no such item, report an error.
+#
+body ::tycho::Graphics::itemlist {{items {}}} {
+    if {$items == {}} {
+        set items [selected]
+        if {$items == {}} {
+            set items [findAll current selectable]
+        }
+    }
+    if {$items == {}} {
+        error "No item selected"
+    }
+    return $items
+}
+
+#######################################################################
+#### paste
+# Paste the items in the clipboard by executing the commands stored
+# in the clipboard in the context of the current object.  If an error
+# occurs doing this, then assume that the item in the clipboard is raw
+# text, and insert it into the canvas as a label.
+#
+body ::tycho::Graphics::paste {} {
+    set cmds [getClipboard]
+    if {$cmds != {}} {
+        foreach cmd $cmds {
+            if [catch {
+                eval $this $cmd
+            } msg] {
+                # NOTE: We might just want to insert text label here, since
+                # this could be a paste from a text widget.
+                global ::errorInfo
+                set saveInfo $errorInfo
+                error "Cannot paste: $cmds\n$msg" $errorInfo
+            }
+        }
+    }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "graphics" preferences.
+#
+body ::tycho::Graphics::preference {mode args} {
+    eval ::tycho::preference $mode "graphics" $args
+}
+
+#######################################################################
+#### register
+# Register the creation, undo, deletion, and (optionally) edit commands for
+# an item in the canvas. This is necessary for the item to be saved when
+# the canvas is saved to a file. It also permits cut, copy, undo, and redo
+# to work with this item. The first argument is the id of a representative
+# canvas item. This need not be the only item associated with the
+# object being registered. The representative item should normally have
+# the tag "selectable". The second argument is a command (a method
+# invocation actually) that can be used to recreate the item. When
+# recreating the item, that command will be invoked verbatim as a
+# method of this object. That command should, as a side effect, also
+# register items it creates. The third argument is a command
+# to undo the creation of the object. This may, for example, restore
+# some previous item, in which case the command should register the new
+# item.  The fourth argument is a command to delete the object, which
+# will be used to delete or cut the object. This may be the same as
+# the undo command, and should have the side effect of calling
+# <code>appendUndo</code> to enable undoing the deletion.  The
+# <code>delete</code> method provides a convenient way to do this.
+# The final argument is an optional edit command.  That command will
+# be invoked to edit the item.
+# That command should, as a side effect, append to the undo buffer a
+# command that will undo the editing operation.
+#
+body ::tycho::Graphics::register {id create undo remove {edit {}}} {
+    set itemCreate($id) $create
+    set itemDelete($id) $remove
+    undoPrepend $undo
+    set itemEdit($id) $edit
+}
+
+#######################################################################
+#### saveText
+# Return the text to be saved.
+#
+body ::tycho::Graphics::saveText {} {
+    # Insert carriage returns between list elements.
+    set dsc {}
+    foreach cmd [describe] {
+        append dsc "{$cmd}"
+        append dsc "\n"
+    }
+    return $dsc
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::Graphics::_initializeMenubar {menubar} {
+
+    $menubar insert command export print \
+	    -label "Export" -underline 1 \
+	    -command "$this export"
+    
+    $menubar addMenu format -label Format -underline 1
+    
+    $menubar command scrollbars format \
+	    -label "Scrollbars..." -underline 0 \
+	    -command "$this scrollQuery"
+
+    # Add an Edit menu before the Window menu
+    # EditDAG and EditForest check the viseditViewOnly preference
+    # and delete the edit menu because editing in these graphs
+    # is not supported very well.
+
+    $menubar addMenu edit -label Edit -underline 0 -before window
+    
+    $menubar command undo edit \
+	    -label "Undo" -accelerator "M-z" \
+	    -underline 0 -command "$this undo"
+    
+    $menubar command redo edit \
+	    -label "Redo" -accelerator "M-r" \
+	    -underline 0 -command "$this redo"
+    
+    $menubar separator editsep1 edit
+    
+    if ![::tycho::stylesheet get interaction viseditViewOnly] {
+	# Cut, Copy and Paste do not work
+	$menubar command cut edit \
+		-label "Cut" -underline 0 -accelerator "C-w" \
+		-command "$this cut"
+	$menubar command copy edit \
+		-label "Copy" -underline 1 -accelerator "M-w" \
+		-command "$this copy"
+    
+	$menubar command paste edit \
+		-label "Paste" -underline 0 -accelerator "C-y" \
+		-command "$this paste"
+    }
+
+    $menubar separator editsep2 edit
+    
+    $menubar command title edit \
+	    -label "Title..." -underline 0 -accelerator "T" \
+            -command "$this titleAdd"
+
+    $menubar command edititem edit \
+	    -label "Edit Item" -underline 0 -accelerator "e" \
+	    -command "$this edit"
+
+    # Undo and Redo menu start out disabled
+    $menubar disable undo
+    $menubar disable redo
+}
+
+#########################################################################
+#### configureScrollbars
+# This method does the work of updateScrollbars, and should be called
+# via updateScrollbars.
+#
+body ::tycho::Graphics::configureScrollbars {} {
+    set bwidth 0
+    set bheight 0
+    set bbox [$slate bbox all]
+    if {$itk_option(-scrolling) == {auto}} {
+        set cwidth [winfo width $slate]
+        if {$cwidth == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cwidth [cget -canvaswidth]
+        }
+        set cheight [winfo height $slate]
+        if {$cheight == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cheight [cget -canvasheight]
+        }
+	
+        if {$bbox != {}} {
+            # So that the scrollbars don't move to the edge of the contents
+            set marg 4
+            set bbox [list [expr [lindex $bbox 0] - $marg] \
+                    [expr [lindex $bbox 1] - $marg] \
+                    [expr [lindex $bbox 2] + $marg] \
+                    [expr [lindex $bbox 3] + $marg]]
+        }
+
+        if {$bbox != {}} {
+            set bwidth [expr [lindex $bbox 2] - [lindex $bbox 0]]
+            set bheight [expr [lindex $bbox 3] - [lindex $bbox 1]]
+        }
+    } {
+        set cwidth 1
+        set cheight 1
+    }
+    if {$itk_option(-scrolling) == {bars} || \
+            $bwidth > $cwidth || \
+            $bheight > $cheight} {
+        pack $itk_component(vsb) -side right -fill y -expand 0 \
+                -before $slate
+        pack $itk_component(hsb) -side left -fill x -expand 1
+        set fillwidth [winfo reqwidth $itk_component(vsb)]
+        $itk_component(filler) configure -width $fillwidth
+        pack $itk_component(filler) -side right -expand 0
+	
+        $slate configure -scrollregion $bbox
+
+	# Add scrollbar padding to status bar
+	statusbar configure -scrollbarpad 1
+    } {
+        if [winfo ismapped $itk_component(vsb)] {
+            pack forget $itk_component(vsb)
+            pack forget $itk_component(hsb)
+            pack forget $itk_component(filler)
+            # Unpack and repack bottom so that it shrinks
+            pack forget $itk_component(bottom)
+            pack $itk_component(bottom) -fill both -side bottom \
+                    -before $itk_component(top)
+
+	    # Remove scrollbar padding from status bar
+	    statusbar configure -scrollbarpad 0
+        }
+    }
+    set scheduledUpdate {}
+}
+
+###################################################################
+###################################################################
+####                      private procs                        ####
+
+#########################################################################
+#### updateExportDialog
+# Update the export dialog after a change in the file type.
+#
+body ::tycho::Graphics::updateExportDialog {nm} {
+    set root [file rootname [$nm get filename]]
+    set ext [$nm get format]
+    $nm clear filename
+    $nm insert filename "$root.$ext"
+    if {$ext != {eps}} {
+        $nm disable color
+        $nm disable width
+        $nm disable orient
+    } {
+        $nm enable color
+        $nm enable width
+        $nm enable orient
+    }
+}

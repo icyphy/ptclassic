@@ -1,0 +1,142 @@
+#!/bin/sh
+#  WidgetTree demo script
+#    @(#)widgettree	1.1 06/09/98
+#\
+	exec itkwish -f "$0" ${1+"$@"}
+
+catch {destroy .f}
+
+# We have to load tycho.gui, so make sure
+# that the directory two levels up is in the
+# autopath.
+lappend auto_path [file dirname [file dirname [file dirname [pwd]]]]
+
+# Load the package
+package require tycho.kernel.gui
+
+# The first widget is a simple expanding widget that doesn't
+# do anything other than demonstrate how the Widgettree
+# is dynamically constructed. The tree is packed into a
+# scrolledframe widget, as it should be in order to prevent
+# nasty window resizing as the widget is used.
+
+proc expand {widget tag} {
+    puts "Adding to $tag"
+    $widget add node $tag.foo -text $tag.foo
+    $widget add node $tag.bar -text $tag.bar
+}
+
+catch {delete object .f}
+iwidgets::scrolledframe .f \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 200 -width 150
+
+set w [.f childsite].w
+::tycho::WidgetTree $w -createcommand "expand $w"
+$w add node foo -text foo
+$w add node bar -text bar
+# grid $w -sticky nw
+pack $w -fill both -expand on
+
+pack .f -fill both -expand on
+
+# The second widget illustrates how arbitrary widgets
+# can be included as leaves of the tree. The create command
+# is set to call a proc that creates the appropriate
+# preference setting panel.
+
+proc createPanel {win tag} {
+    switch -exact $tag {
+	"size" {
+	    $win add radiobox size.s
+	    set r [$win component size.s]
+	    
+	    $r add small -text "Small"
+	    $r add med -text "Medium"
+	    $r add large -text "Large"
+	    $r add xlarge -text "Biggie"
+	    $r select med
+	}
+	"address" {
+	    $win add frame address.a
+	    set f [$win component address.a]
+	    
+	    foreach {name text} {
+		name "Name" addr "Street" city "City, State" email "E-mail"
+	    } {
+		entryfield $f.$name -labeltext $text
+		grid $f.$name -sticky e
+	    }
+	}
+    }
+}
+
+catch {delete object .g}
+iwidgets::scrolledframe .g \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 200 -width 150
+
+set v [.g childsite].w
+::tycho::WidgetTree $v -createcommand "createPanel $v"
+
+$v add node size -text Size
+$v add node address -text Address
+grid $v -sticky nw
+
+pack .g -fill both -expand on
+
+
+# The third example is exactly the same, except that the tree
+# contents are created statically.
+
+set junk {
+    catch {delete object .g}
+    iwidgets::scrolledframe .g \
+	    -hscrollmode dynamic -vscrollmode dynamic \
+	    -height 200 -width 150
+
+    set v [.g childsite].w
+
+    ::tycho::WidgetTree $v {
+	node size -text Size {
+	    radiobox s
+	    with s {
+		add small -text "Small"
+		add med -text "Medium"
+		add large -text "Large"
+		add xlarge -text "Biggie"
+		select med
+	    }
+	}
+	node font -text Font {
+	    query f {
+		group family -initial times -label "Font Family" {
+		    radiobutton times -text "Times"
+		    radiobutton courier -text "Courier"
+		    radiobutton helvetica -text "Helvetica"
+		}
+		group style -initial roman -label "Font Style" {
+		    radiobutton roman -text "Roman"
+		    radiobutton italic -text "Italic"
+		    radiobutton bold -text "Bold"
+		}
+	    }
+	}
+	node address -text Address {
+	    query a {
+		entry name -label "Name"
+		entry street -label "Street"
+		entry city -label "City, State"
+		entry email -label "E-mail"
+	    }
+	}
+    }
+
+    grid $v -sticky nw
+
+    pack .g -fill both -expand on
+}
+
+wm deiconify .
+
+

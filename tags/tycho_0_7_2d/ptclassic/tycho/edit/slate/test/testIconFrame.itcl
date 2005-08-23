@@ -1,0 +1,321 @@
+# Test the IconFrame item
+#
+# @Author: John Reekie
+# 
+# @Version: @(#)testIconFrame.itcl	1.8 07/29/98
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the test package is loaded
+package require slate.test
+
+
+############################################################################
+#### Define a proc that creates a single IconFrame on the slate
+#
+proc _frame {args} {
+    global f
+    _clean
+    set f [.s create IconFrame 100 100 \
+	    -color green -tags foo \
+	    -text Hello \
+	    -hsize 60 -vsize 40 \
+	    -graphics {Frame 10 10 50 50 -color green -relief sunken;
+                Frame 50 50 90 90 -color blue}]
+    eval .s itemconfigure $f $args
+}
+
+############################################################################
+#### Define another proc that creates a single IconFrame on the slate
+#
+proc _emptyframe {args} {
+    global f
+    _clean
+    set f [.s create IconFrame 100 100 \
+	    -color green -tags foo \
+	    -hsize 60 -vsize 40 \
+	    -text Hello]
+    eval .s itemconfigure $f $args
+}
+
+#######################################################################
+#### Creation
+#
+_slate
+test IconFrame-construct-1 {Create a IconFrame item and check coords} {
+    _frame
+    .s coords [.s primary $f]
+} {70.0 80.0 130.0 120.0}
+
+#######################################################################
+#### Options
+#
+_slate
+set i 0
+
+### Defaults
+
+set f [.s create IconFrame 40 40 80 80]
+update
+foreach {opt val} {\
+        -relief raised \
+        -color background \
+        -shape point \
+        -borderwidth 2 \
+        -tags {} \
+        -text NoName \
+        -textanchor center \
+        -graphics {} \
+        -hsize 60 \
+        -vsize 40 \
+        -anchor center } {
+    incr i
+    test IconFrame-options-$i "Check default option $opt" {
+        .s itemcget $f $opt
+    } $val
+}
+_update
+
+_clean
+set f [.s create IconFrame 140 140 180 180 \
+        -relief sunken \
+        -color green \
+        -borderwidth 4 \
+        -tags foo \
+        -text Foo \
+        -textanchor s \
+        -graphics {line 0 0 100 100} \
+        -hsize 80 \
+        -vsize 20 \
+        -anchor nw]
+update
+foreach {opt val} {\
+        -relief sunken \
+        -color green \
+        -borderwidth 4 \
+        -tags foo \
+        -text Foo \
+        -textanchor s \
+        -graphics {line 0 0 100 100} \
+         -hsize 80 \
+        -vsize 20 \
+        -anchor nw } {
+    incr i
+    test IconFrame-options-$i "Check non-default option $opt" {
+        .s itemcget $f $opt
+    } $val
+}
+_update
+
+#### -relief
+
+_frame
+set i 0
+foreach r {flat raised sunken} \
+	c {{green3 green3 green3} {green1 green3 green4} \
+	{green4 green3 green1}} {
+    incr i
+    test IconFrame-relief-$i "Check coloring for relief $r" {
+	.s itemconfigure $f -relief $r
+	list \
+		[.s component $f lit itemcget -fill] \
+		[.s component $f surface itemcget -fill] \
+		[.s component $f shaded itemcget -fill]
+    } $c
+    _update
+}
+    
+_frame
+foreach r {ridge groove} \
+	c {{green1 green3 green4 green4 green1} \
+	{green4 green3 green1 green1 green4}} {
+    incr i
+    test IconFrame-relief-$i "Check coloring for relief $r" {
+	.s itemconfigure $f -relief $r
+	list \
+		[.s component $f lit itemcget -fill] \
+		[.s component $f surface itemcget -fill] \
+		[.s component $f shaded itemcget -fill] \
+		[.s component $f notlit itemcget -fill] \
+		[.s component $f notshaded itemcget -fill]
+    } $c
+    _update
+}
+
+#### -borderwidth
+    
+_frame
+set i 0
+foreach b {0 1 2} \
+	c {{70.0 80.0 131.0 121.0} {71.0 81.0 130.0 120.0} {72.0 82.0 129.0 119.0}} {
+    incr i
+    test IconFrame-borderwidth-$i "Check border width $b" {
+	.s itemconfigure $f -borderwidth $b
+	.s component $f surface coords
+    } $c
+    _update
+}
+    
+#### -color
+    
+_frame
+set i 0
+foreach c {red blue yellow} {
+    incr i
+    test IconFrame-color-$i "Check coloring change to $c" {
+	.s itemconfigure $f -color $c
+	.s component $f surface itemcget -fill
+    } ${c}3
+    _update
+}
+
+#### -textanchor
+    
+_frame -text Bar
+set i 0
+foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
+    incr i
+    test IconFrame-textanchor-$i "Check anchoring, graphics, $a" {
+        .s itemconfigure $f -textanchor $a
+        .s component $f label itemcget -anchor
+    } $p
+    _update
+}
+
+#### -anchor
+
+set i 0
+_frame
+foreach a {n s e w nw sw ne se c} {
+    incr i
+    .s itemconfigure $f -anchor $a
+    test IconFrame-anchor-$i "Test -anchor $a" {
+        eval ::tycho::Rectangle::feature [.s coords [.s primary $f]] $a
+    } {100.0 100.0}
+    _update
+}
+
+#### -hsize
+
+_frame
+test IconFrame-hsize-1 {Test -hsize} {
+    .s itemconfigure $f -hsize 100
+    .s coords [.s primary $f]
+} {50.0 80.0 150.0 120.0}
+_update
+
+_frame -anchor se
+test IconFrame-hsize-2 {Test -hsize, non-center anchor} {
+    .s itemconfigure $f -hsize 100
+    .s coords [.s primary $f]
+} {0.0 60.0 100.0 100.0}
+_update
+
+_frame
+test IconFrame-hsize-3 {Test -hsize} {
+    .s itemconfigure $f -hsize 100
+    .s coords [.s primary $f]
+} {50.0 80.0 150.0 120.0}
+_update
+
+
+#### -vsize
+
+_frame
+test IconFrame-vsize-1 {Test -vsize} {
+    .s itemconfigure $f -vsize 100
+    .s coords [.s primary $f]
+} {70.0 50.0 130.0 150.0}
+_update
+
+_frame -anchor se
+test IconFrame-vsize-2 {Test -vsize, non-center anchor} {
+    .s itemconfigure $f -vsize 100
+    .s coords [.s primary $f]
+} {40.0 0.0 100.0 100.0}
+_update
+
+test IconFrame-vsize-3 {Test invalid -vsize} {
+    catch {.s itemconfigure $f -vsize 0} msg
+    set msg
+} {Invalid -vsize: 0}
+
+
+#######################################################################
+#### Region
+#
+_frame
+test IconFrame-region-1 "Get the item region" {
+    .s region $f
+} {70.0 80.0 130.0 120.0}
+_update
+
+test IconFrame-region-1 "Change the item region" {
+    .s region $f 50 50 120 80
+    list [.s coords [.s primary $f]] \
+            [.s coords $f] \
+            [.s itemcget $f -hsize] \
+            [.s itemcget $f -vsize]
+} {{50.0 50.0 120.0 80.0} {85.0 65.0} 70 30}
+_update
+
+#######################################################################
+#### Terminals
+#
+_frame
+test IconFrame-terminal-1 "Create a terminal and access as component" {
+    .s call $f terminal input-1 Terminal 50 0 \
+            -direction n \
+            -length 20 \
+            -style doublearrowout
+    # Test: just make sure we get something
+    expr { [.s component $f input-1] != "" }
+} {1}
+_update
+
+test IconFrame-terminal-2 "Create a terminal and get coordinates" {
+    .s call $f terminal input-2 Terminal 0 50 \
+            -direction w \
+            -length 30 \
+            -style circle -fill blue
+    # Test: get the two ends of both terminals
+    list \
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
+} {{100.0 80.0 100.0 60.0} {70.0 100.0 40.0 100.0}}
+_update
+
+test IconFrame-terminal-3 "Resize and check terminals have moved" {
+    .s itemconfigure $f -hsize 100 -vsize 100
+   # Test: get the two ends of both terminals
+    list \
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
+} {{100.0 50.0 100.0 30.0} {50.0 100.0 20.0 100.0}}
+_update
+
+

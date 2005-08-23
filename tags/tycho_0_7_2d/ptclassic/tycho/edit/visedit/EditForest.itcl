@@ -1,0 +1,380 @@
+# A viewer and editor widget for a forest (set of trees) data structure.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)EditForest.itcl	1.23	01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: Known bugs
+# - Need to save scrollbar status.
+# - Scrollbars do not respond well to window resizing.
+# - If a malformed contents string is entered, such as one with non-
+#   matching braces, a corrupted data structure may result.
+# - Currently, only one node may be selected at a time.
+# - When a node is deleting, undoing does not really undo because the
+#   children nodes have been promoted.
+
+# FIXME: Missing features
+# _ Subtrees should be collapsible.
+
+#######################################################################
+#### EditForest
+# A forest is a data structure that includes any number of trees. A
+# tree is a data structure with nodes that are either a root or have
+# exactly one parent, and that have any number of children. This class
+# provides a widget to interactively build, view, and edit such a
+# data structure. The forest is displayed in outline form with root nodes
+# listed alphabetically at the left of the canvas and children below each
+# parent, indented, and also organized alphabetically.  The alphabetical
+# ordering is based on the node name, which may not be the label that is
+# displayed.
+# <p>
+# This class is meant to serve as a base class for
+# such tools as class browsers for object-oriented languages, program
+# structure displays for hierarchical programs, navigation maps for
+# hypertext documents, etc.  The <code>EditForest</code> top-level
+# window class provides a convenient container for this widget.
+# <p>
+# Data stored on the nodes of the trees are (almost) arbitrary strings.
+# The only constraint is that there for every open brace "{" there must
+# be a close brace "}". I.e., the string must be recognizable as a Tcl list.
+# However, if the data takes a certain form, then the display and behavior
+# of the editor can be controlled very precisely.  In particular, the
+# contents of the node can be a list, with items in the list being lists
+# lists of the form "{<i>keyword value</i>}".  The following keywords
+# are currently understood:
+# <dl>
+# <dt><b>label</b><dd>The <i>value</i> field gives the label used to show
+# the node in the display.  If this is not present, then the node name
+# is used.
+# <dt><b>color</b><dd>The <i>value</i> field gives the color used to show
+# the node in the display.  If this is not present, then the node color is
+# black.  The color name is processed to make sure it is valid, and if not,
+# black is used.
+# <dt><b>font</b><dd>The <i>value</i> field gives the font used to show
+# the node in the display.  If this is not present, then the default
+# variable-spacing font is chosen.  The <i>value</i> can take any form
+# understood by the <code>getFont</code> method of the <code>FontManager</code> 
+# class.
+# <dt><b>link</b><dd>The <i>value</i> field gives a list with two elements,
+# a filename and a point within the file, in the standard Tycho hyperlink
+# format.  Double clicking on the node will activate the hyperlink.
+# The filename may be absolute or relative, and may begin
+# with an environment variable (such as $TYCHO), or a user directory
+# (~<i>username</i>).  If the filename is relative, then the reference
+# directory is that of the file of the top-level editor that contains this
+# <code>EditForest</code>.  The point may be a string identifying
+# a named anchor in an HTML file, or "{line <i>linenumber</i>}" or
+# "{range <i>start end</i>}" for text files, or any other destination
+# that is understood by the <code>seeFragment</code> method of the
+# widget that will display the hyperlink.
+# <dt><b>html</b><dd>The <i>value</i> field gives HTML source code that
+# will be rendered and displayed in a message window in response to a
+# double click on the node.  If both this field and the "link" field are
+# given, then both will be activated by a double click.
+# </dl>
+# <p>
+# Here is an example of how to use the EditForest:
+# <tcl><pre>
+#     ::tycho::view EditForest
+# </pre></tcl>
+# <p>
+# The widget has a number of options. The <b>-graph</b> option gives
+# the name of an object of type <code>Forest</code> to display and
+# edit. If it is not given, the widget creates its own object of type
+# <code>Forest</code>, and destroys that object on exiting. The
+# <b>-indent</b> option gives the indentation of children with respect
+# to their parents (in pixels, default 30). The <b>-readonly</b> option
+# disables changes, making the widget a display only. The
+# <b>-vertspacing</b> option gives the vertical spacing as a multiplier of
+# the height of the font(s). The <b>-startx</b> and <b>-starty</b>
+# options gives the position of the upper left corner of the first node
+# (in pixels, default 10 and 5).  This upper left corner will be placed
+# below the title information, if there is any.
+#
+# Below is an example:
+# <tcl><pre>
+#    catch {delete object ff}
+#    ::tycho::Forest ff
+#    ff add a {label {A Node} color red font {times 16 bold r}}
+#    ff add b {label {B Node} color green}
+#    ff add c {label {C Node} font {times 40 bold r}}
+#    ff add d {label {D Node}}
+#    ff roots
+#    ff add e {e e} b
+#    set descr [ff describe]
+#    set view [::tycho::view EditForest -graph ff]
+#    set win [$view displayer windowName]
+#    wm deiconify $win
+# </pre></tcl>
+#
+class ::tycho::EditForest {
+    inherit ::tycho::EditDAG
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # Default horizontal offset for children (in pixels).
+    itk_option define -indent indent Indent 30
+
+    # Default vertical spacing (as a multiplier of font height).
+    itk_option define -vertspacing vertspacing VertSpacing 1.2
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Contract the specified node, hiding its children
+    method contract {node}
+
+    # Open a help window.
+    method help {}
+
+    # Expand the specified node, showing its children
+    method expand {node}
+
+    # Redraw the forest.
+    method redrawGraph {}
+
+    # Find the node in the forest identified by "name".
+    # FIXME: Implement this.
+    # method seeFragment {name}
+
+    ###################################################################
+    ####                   protected methods                       ####
+    
+    # Disabled.
+    protected method drawParentLines {node} {error "method disabled"}
+
+    # Draw a subtree rooted at the given root starting at the given position.
+    protected method drawSubgraph {root xcoord ycoord {pntloc {}}}
+
+    # Disabled.
+    protected method drawSubgraphVertically {root xcoord} \
+            {error "method disabled"}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Return the name of the data structure class being edited.
+    protected method structClass {} {return ::tycho::Forest}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::EditForest::constructor {args} {
+    eval itk_initialize $args
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### contract
+# Close the specified node, hiding its children.
+#
+body ::tycho::EditForest::contract {node} {
+    $mygraph verify $node
+    array set cnt [$mygraph contents $node]
+    set cnt(open) 0
+    set cnts [array get cnt]
+    setNode $node $node $cnts
+    redrawGraph
+}
+
+#######################################################################
+#### expand
+# Open the specified node showing its children.
+#
+body ::tycho::EditForest::expand {node} {
+    $mygraph verify $node
+    array set cnt [$mygraph contents $node]
+    set cnt(open) 1
+    set cnts [array get cnt]
+    setNode $node $node $cnts
+    redrawGraph
+}
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::EditForest::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditForestHelp.html] html
+}
+
+#######################################################################
+#### redrawGraph
+# Redraw the forest.
+# FIXME: Merge with base class version, allowing vertical or horizontal
+# aspects in both cases.
+#
+body ::tycho::EditForest::redrawGraph {} {
+    # Disable the undo system.
+    set saveinteractiveEnabled $interactiveEnabled
+    interactiveEnable 0
+    $slate delete node line arrow
+    selectionClear
+    catch {unset nametable}
+
+    set titleTypes [stylesheet get graphics titleTypes]
+    set ycoord [expr [eval bottomOf $titleTypes]+$itk_option(-starty)]
+    set xcoord $itk_option(-startx)
+    foreach root [lsort [$mygraph roots]] {
+        set ret [drawSubgraph $root $xcoord $ycoord]
+        if {$itk_option(-orientation) != {horizontal}} {
+            set ycoord [lindex $ret 1]
+        } {
+            set xcoord [lindex $ret 0]
+        }
+    }
+    interactiveEnable $saveinteractiveEnabled
+    # The bounding box may have changed, so...
+    updateScrollbars
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### drawSubgraph
+# Draw a subtree rooted at the given root started at the given position.
+# Return a list with the ycoordinate of the next space below this subtree
+# (for vertically stacking trees) and the next space to the right of the
+# subtree (for horizontally stacking them).
+#
+body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
+    set xincr $itk_option(-indent)
+
+    set textx [expr $xcoord+20]
+    set open [drawNode $root $textx $ycoord]
+
+    # Create the arrows.
+    set children [$mygraph children $root]
+    if {$children != {}} {
+        global ::TYCHO
+        if $open {
+            set bm [file join @$TYCHO kernel img arrowopen.xbm]
+            set cmd [list $this contract $root]
+        } {
+            set bm [file join @$TYCHO kernel img arrowclose.xbm]
+            set cmd [list $this expand $root]
+        }
+        set arrow [$slate create bitmap $xcoord $ycoord -bitmap $bm \
+                -anchor nw -tag arrow]
+        $slate bind $arrow <Button-1> $cmd
+    } {
+        set xcoord $textx
+    }
+
+    # Draw the lines from the parent, if appropriate
+    set bbox [$mygraph attribute bbox $root]
+    set x1 $xcoord
+    set y1 [lindex $bbox 1]
+    set y2 [lindex $bbox 3]
+    set x2 [lindex $bbox 2]
+    if {$pntloc != {}} {
+        set startx [lindex $pntloc 0]
+        set starty [lindex $pntloc 1]
+        set ydest [expr ($y1+$y2)/2]
+        $slate create line $startx $starty \
+                $startx $ydest \
+                $x1 $ydest \
+                -width 2.0 -tags line -fill \
+                [stylesheet get graphics lineColor]
+    }
+    set newpntloc [list \
+            [expr $x1+$xincr/2] \
+            $y2]
+
+    set max [expr $x2+10]
+
+    # Draw the children
+    if $open {
+        set childxpos [expr $xcoord+$xincr]
+        incr ycoord [expr int(($y2-$y1)*$itk_option(-vertspacing))]
+        foreach child [lsort $children] {
+            set ret [drawSubgraph $child $childxpos $ycoord $newpntloc]
+            set ycoord [lindex $ret 1]
+            set newx [lindex $ret 0]
+            if {$newx > $max} {
+                set max $newx
+            }
+        }
+    } {
+        incr ycoord [expr int(($y2-$y1)*$itk_option(-vertspacing))]
+    }
+    return [list $max $ycoord]
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditForest::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditForest::_initializeMenubar $menubar
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditForest::_initializeMenubar {menubar} {
+    if [::tycho::stylesheet get interaction viseditViewOnly] {
+	$menubar delete edit
+    }
+}

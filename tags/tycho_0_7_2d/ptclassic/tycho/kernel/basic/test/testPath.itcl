@@ -1,0 +1,294 @@
+# Test suite for testPath that will work from within itclsh
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)testPath.itcl	1.35 05/07/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
+
+
+test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
+    global env
+    set env(MYVAR) [pwd]
+    set localfile [::tycho::expandPath foo]
+    set envfile [::tycho::expandPath \
+	    [file join \$MYVAR foo]]
+    set localfilebyhand [file join [pwd] foo]
+
+    # Verify that expanding a local file results in part
+    # of the directory being tycho/kernel/test
+    set localfilecheck [string range $localfile \
+	    [ expr {[string length $localfile] - \
+	    [string length $localfilebyhand]}] end]
+
+    set envfilecheck [string range $envfile \
+	    [ expr {[string length $envfile] - \
+	    [string length $localfilebyhand]}] end]
+    
+    # Verify that localfile is the same as envfile
+    list [expr {$localfile == $envfile}] \
+            [expr {$localfilecheck == $localfilebyhand}]
+} {1 1}
+
+test Path-1.2 { tilde expand a user that does not exist} {
+    catch {::tycho::expandPath ~anonexistantUser} errMsg
+    list $errMsg
+} {{user "anonexistantUser" doesn't exist}}
+
+test Path-1.3 { tilde expand a user that does exist (Unix only)} {
+    global tcl_platform
+    if { $tcl_platform(platform) == "unix" } {
+	set rootHome [::tycho::expandPath ~root/etc/passwd]
+    } else {
+	# If we are not running under Unix, then just return the right value.
+	set rootHome /etc/passwd
+    }
+    list $rootHome
+} {/etc/passwd}
+
+test Path-1.4 { try to expand a pathname that contains a single dollar sign} {
+    catch {::tycho::expandPath \$} errmsg
+    list $errmsg
+} {{No such variable: `' in the path `$'.}}
+
+test Path-1.5 { nonexistand variable} {
+    catch {::tycho::expandPath \
+	    [file join $thisvariableisnotavariable bif bar]} errmsg
+    list $errmsg
+} {{can't read "thisvariableisnotavariable": no such variable}}
+
+test Path-2.1 { Test out uniqueFileName } {
+    set file1 [::tycho::uniqueFileName]
+    set file2 [::tycho::uniqueFileName]
+    set file3 [::tycho::uniqueFileName myfile]
+    set file4 [::tycho::uniqueFileName myfile]
+    set file5 [::tycho::uniqueFileName myfile .itcl]
+    set file6 [::tycho::uniqueFileName myfile .itcl]
+    list [expr {$file1 == $file2}] [expr {$file3 == $file4}] \
+	    [expr {$file5 == $file6}]
+} {0 0 0}
+
+test Path-2.2 { Test out tmpFileName } {
+    set file1 [::tycho::tmpFileName]
+    set file2 [::tycho::tmpFileName]
+    set file3 [::tycho::tmpFileName myfile]
+    set file4 [::tycho::tmpFileName myfile]
+    set file5 [::tycho::uniqueFileName myfile .itcl]
+    set file6 [::tycho::uniqueFileName myfile .itcl]
+    if [info exists env(TMPDIR)] {
+	set oldTMPDIR $env(TMPDIR)
+    }
+    set env(TMPDIR) $env(HOME)
+    set file7 [::tycho::tmpFileName]
+    set file8 [::tycho::tmpFileName]
+    if [info exists oldTMPDIR2] {
+	set env(TMPDIR) $oldTMPDIR
+    }
+
+    list [expr {$file1 == $file2}] [expr {$file3 == $file4}] \
+	    [expr {$file5 == $file6}] [expr {$file7 == $file8}]
+} {0 0 0 0}
+
+test Path-3.1 {Test out mkdir and rm} {
+    set myTmpDir [::tycho::tmpFileName myTmpDir .dir]
+    ::tycho::mkdir  $myTmpDir
+    set shouldExist [file isdirectory $myTmpDir]
+    file delete -force $myTmpDir
+    set shouldNotExist [file isdirectory $myTmpDir]
+    list $shouldExist $shouldNotExist
+} {1 0}
+
+proc testEq { a b } {
+    if { $a == $b } {
+	return 1
+    }
+    return [list $a $b]
+}
+
+test Path-4.1 {Test out relativePath} {
+    global env
+    if [info exist env(PTOLEMY)] {
+	set TYCHO $env(PTOLEMY)/tycho
+    }
+    if [info exist env(TYCHO)] {
+	set TYCHO $env(TYCHO)
+    }
+
+    set r1 [testEq [::tycho::relativePath [file join / a b c d e] \
+	    [file join / a b c h i]] \
+	    [file join .. .. h i]]
+    set r2 [testEq [::tycho::relativePath [file join / a b c d e] \
+	    [file join .. .. h i]] \
+	    [file join .. .. h i]]
+
+    set r3 [::tycho::relativePath . .]
+    set r4 [::tycho::relativePath .. ..]
+    set r5 [testEq [::tycho::relativePath . [file join .. a]] \
+	    [file join .. a]]
+    set r6 [::tycho::relativePath [file join / a b c d e] [file join / a b c d e]]
+    set r7 [testEq [::tycho::relativePath [file join / a b ] \
+	    [file join / a b c d e]] \
+	    [file join c d e]]
+    set r8 [testEq [::tycho::relativePath  [file join / a b c d e] \
+	    [file join / a b ]] \
+	    [file join .. .. ..]]
+    set r9 [testEq [::tycho::relativePath  [file join a b c d e] \
+	    [file join / a b ]] \
+	    [file join / a b ]]
+    set r10 [testEq [::tycho::relativePath  [file join a b ] \
+	    [file join a b .. c]] \
+	    [file join a b .. c]]
+
+    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10
+} {1 1 . .. 1 e 1 1 1 1}
+
+test Path-5.1 {Test out pathEnvSearch} {
+    set isexecutable [file executable [::tycho::pathEnvSearch itclsh]]
+    set nonexistant [::tycho::pathEnvSearch NoWayWillThisFileBeExecutable]
+    # Unset the PATH so we get the error message
+    set savePATH $env(PATH)
+    unset env(PATH)
+    catch {::tycho::pathEnvSearch itclsh} msg1
+    set env(PATH) $savePATH
+    list $isexecutable $nonexistant $msg1
+} {1 {} {pathEnvSearch: $PATH is not set!}}
+
+test Path-5.1 {Test out evalIfNewer} {
+    set fd [open Path-5.1a w]
+    puts $fd "Test file for evalIfNewer"
+    close $fd
+
+    # Delay 1 second
+    set startTime [clock seconds]
+    while {$startTime == [clock seconds]} {}
+
+    set fd [open Path-5.1b w]
+    puts $fd "Test file for evalIfNewer"
+    close $fd
+
+    set res1 [::tycho::evalIfNewer Path-5.1b Path-5.1a set a 1]
+    set res2 [::tycho::evalIfNewer Path-5.1a Path-5.1b set a 1]
+    list $res1 $res2
+} {1 {}}
+
+test Path-6.1 {Test out simplifyPath} {
+    global TYCHO env
+    set env(TYCHO) $TYCHO
+    # Simple case
+    set r1 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO README.txt]] \
+	    [list TYCHO]]
+
+    # This envvar does not exist
+    set r2 [testEq [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO doesNotExist]] \
+	    [list NOTAENVVAR]] \
+	    [file join [::tycho::expandPath \$TYCHO] doesNotExist]]
+    
+    set r3 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO foo.r3]] \
+	    [list NOTAENVVAR TYCHO]]
+
+    # This path should not be simplified
+    set r4 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join / tmp elvis  bar.r4]] \
+	    [list NOTAENVVAR TYCHO]]
+
+    list $r1 $r2 $r3 $r4
+} {{$TYCHO/README.txt} 1 {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
+
+test Path-7.1 {Test out isRelative} {
+    list \
+	    [::tycho::isRelative .] \
+	    [::tycho::isRelative ..] \
+	    [::tycho::isRelative /] \
+	    [::tycho::isRelative ~cxh] \
+	    [::tycho::isRelative \$TYCHO] \
+	    [::tycho::isRelative \$notavar/foo/../bar] \
+	    [::tycho::isRelative [file join .. a b]] \
+	    [::tycho::isRelative [file join / a b .. ..]]
+} {1 1 0 0 0 0 1 0}
+
+test Path-8.1 {Test out expandPathSplit} {
+    set env(MY_TY_TEST_VAR) [file join /a b c]
+    set path1 [file join {$MY_TY_TEST_VAR} d e f]
+    set path2 [file join {$MY_TY_TEST_VAR} g h i]
+   ::tycho::expandPathSplit "$path1:$path2:[file join j k l]"
+} {/a/b/c/d/e/f:/a/b/c/g/h/i:j/k/l}
+
+
+#######################################################################
+#### ::tycho::readFileHeader
+#
+set i 0
+foreach {c t} {
+	"Mode only, no spaces" {-*-themode-*-}
+	"Mode only, with spaces" {-*- themode -*-}
+	"Mode only, with tabs" "-*-\tthemode\t-*-"
+	"Variables, no spaces" {-*-mode:themode;other:theother-*-}
+	"Variables, with spaces" {-*- mode : themode ; other : theother -*-}
+	"Variables, with tabs" "-*-\tmode\t:\tthemode\t;\tother\t:\ttheother\t-*-"
+	"Variables, extra semicolon" {-*- mode: themode; other: theother ; -*-}
+	"Variables, multiline" "-*- mode : themode -*-\n -*- other : theother -*-"
+} r {
+	{mode themode}
+	{mode themode}
+	{mode themode}
+	{mode themode other theother}
+	{mode themode other theother}
+	{mode themode other theother}
+	{mode themode other theother}
+	{mode themode other theother}
+} {
+	incr i
+	test Path-::tycho::parseHeaderString-$i "Parse file header: $c" {
+            catch {unset arr}
+            ::tycho::parseHeaderString $t arr
+            array get arr
+	} $r
+}
+
+#######################################################################
+#### ::tycho::egrep
+#
+test Path-9.1 {Test out egrep -i and -nocase} {
+    set a [::tycho::egrep -i Author *.itcl makefile]
+    update
+    set b [::tycho::egrep -nocase Author *.itcl makefile]
+    update
+    set c [::tycho::egrep -nocase author *.itcl makefile]
+    update
+    set d [::tycho::egrep author *.itcl makefile]
+    set e [::tycho::egrep author *.notafile makefile ]
+    list [expr {$a == $b}] [expr {$a == $c}] [expr {$a == $d}] $e
+} {1 1 0 {}}
+
+

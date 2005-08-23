@@ -1,0 +1,90 @@
+#!/bin/sh
+# @(#)chktycho	1.6 05/15/97
+# Author: Christopher Hylands
+# Script to test out tycho script
+#
+# chktycho runs two sample invocations of tycho, then does an exhaustive
+# search of the command line argument combinations.
+#
+# If the -debug option is present, then you must type 'cont' and then 
+# Control-X Control-C for chktycho to continue.
+# 
+# If the -debug option is not present, then the script brings up tycho
+# and then automatically exits tycho without user intervention.
+
+# The user's tychorc file.
+tychorc=$HOME/.Tycho/tychorc.tcl
+
+# Check the tychorc file for the 'chktycho' magic line.
+# If the magic line does not exist, add it
+# The magic line exits tycho after 8 seconds
+chktychomagic="####chktychomagic####"
+egrep -s $chktychomagic $tychorc
+status=$?
+if [ $status = 1 ]; then
+	echo "Adding line to auto exit tycho to your tychorc file"
+	echo " If you stop execution of this script, then be sure to edit"
+	echo " ~/.Tycho/tychorc.tcl by hand and remove the last two lines."
+	echo " If let the script run, then the edit will be done for you."
+	echo "$chktychomagic" >> $tychorc
+	echo "puts \"$tychorc contains a line that will exit tycho after 8 seconds\"" >> $tychorc
+	echo 'after 8000 ::tycho::TopLevel::exitProgram 1' >> $tychorc
+	echo 'after 10000 ::tclexit' >> $tychorc
+fi
+
+tclscript=/tmp/tclscript$USER.tcl
+if [ ! -f $tclscript ]; then
+	echo "puts \"sourcing $tclscript\"" > $tclscript
+fi
+
+echo "---"
+echo "Complex example:"
+set -x
+#tycho -nowelcome -e $tclscript /tmp/foo.tcl /tmp/bar.c
+set +x
+
+echo "---"
+echo "Checking out the worst case"
+set -x
+#tycho -debug -nowelcome -noconsole -ptiny -e $tclscript /tmp/a.tcl /tmp/b.c
+set +x
+
+
+echo "---"
+echo "Exhaustive search of all option combinations:"
+for tclscriptflag in "-e $tclscript" ""
+do
+for debug in "" -debug
+do
+for binary in -tty "" -ptiny -ptrim -pigi -java
+do
+for noconsole in "" -noconsole
+do
+for nowelcome in "" -nowelcome
+do
+# Check out no file, one file, two files
+for filelist in "" /tmp/foo.tcl "/tmp/foo.tcl /tmp/bar.c"
+do
+	# Actually run
+	set -x
+	tycho $binary $debug $tclscriptflag $noconsole $nowelcome $filelist
+	set +x
+done
+done
+done
+done
+done
+done
+
+# Remove the magic cookie
+tmpfile=/tmp/tychorc.$$
+awk ' { if ($0 ~ /chktychomagic/) {
+		sawmagic =1
+	} else {
+		if (sawmagic!=1) {
+			print $0
+		}
+	}
+    }' $tychorc > $tmpfile
+cp $tmpfile $tychorc
+rm -f $tmpfile

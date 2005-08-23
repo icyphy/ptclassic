@@ -1,0 +1,69 @@
+#! /bin/sh
+# Command-line program for the tycho.util.ptsim utility \
+    exec itclsh "$0" "$@"
+
+# @(#)ptsim	1.1 03/04/98
+# Author: John Reekie
+
+# If the PTSIM_LIBRARY variable is set, add it to the auto_path
+if [info exists env(PTSIM_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(PTSIM_LIBRARY)] }  {
+	lappend auto_path $env(PTSIM_LIBRARY)
+    }
+}
+
+# Require the tycho.util.ptsim package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.util.ptsim}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.util.ptsim}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if ![info exists env(TYCHO)] {
+	if [info exists env(PTOLEMY)] {
+	    # TYCHO is not set, but PTOLEMY is.
+	    if [file exists [file join $env(PTOLEMY) tycho]] {
+		set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	    }
+	} 
+    }
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.util.ptsim}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.util.ptsim\". You can\n\
+	    1. Install tycho.util.ptsim in a subdirectory of your Tcl library\n\
+	    2. Install tycho.util.ptsim in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the PTSIM_LIBRARY variable to point to the \
+	    ptsim directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.util.ptsim, version 1.0"
+
+# Run the main procedure
+eval ptsim $argv
+
+# Done
+

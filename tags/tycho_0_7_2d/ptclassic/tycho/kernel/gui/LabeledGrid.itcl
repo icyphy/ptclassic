@@ -1,0 +1,1502 @@
+# A grid of labeled widgets.
+# 
+# @Author: John Reekie
+#
+# Version: @(#)LabeledGrid.itcl	1.16 11/25/98
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#
+# Usual options.
+#
+itk::usual LabeledGrid {
+    keep -font -background -cursor \
+    	-disabledforeground -foreground \
+    	-highlightthickness -highlightcolor
+}
+
+####
+# NOTE: this file doesn't quite follow the Tycho guidelines
+# because it was ported from iwidgets in a hurry.
+#
+
+#########################################################################
+#### LabeledGrid
+#
+# <b>Summary</b>
+#
+# The LabeledGrid class implements a grid of labeled widgets. It is
+# generally used to layout widgets for user inputs, such as entry fields,
+# radiobuttons and checkbuttons, option menus, and so on. It uses the
+# Tk <b>grid</b> geometry manager to do the layout, and
+# divides the grid into regions, where each region contains a labeled
+# widget, or a labeled group of widgets, each of which can itself contain
+# labeled widget or further groups. A number of display styles governing
+# label placement and the presence of a border are available.
+#
+# Because a labeled grid is typically used to provide layout for dialog
+# boxes for user input, LabeledGrid provides a set of standard operations
+# on widgets regardless of what type they are. The operations are: setting
+# the current value, reading the current value, enabling and disabling
+# user input, and creating and deleting the widget. LabeledGrid provides
+# a useful set of widgets: entry and text fields, radio and check buttons,
+# and option menus. Since the number of different kinds of widget that
+# could be placed into a LabeledGrid window is potentially unlimited,
+# the newtype{} procedure is provided to add new widget types.
+#
+# For a complete example of the use of this class, see the demonstration
+# script <b>demo/labeledgrid</b> (where the path is relative to the
+# directory the <b>tycho.kernel.gui</b> package is installed in).
+#
+# <b>Detailed description</b>
+#
+# The <i>labeledgrid</i> command creates a grid of labeled widgets for
+# user input, such as entry fields, radiobuttons and checkbuttons,
+# option menus, and so on. It uses the Tk <b>grid</b> geometry manager
+# to implement the principles of alignment and grid-based design
+# described in the book "Designing Visual Interfaces: Communication
+# Oriented Techniques", by Kevin Mullet and Darrell Sano, SunSoft Press,
+# 1995.
+#
+# Mullet and Sano propose that widget layouts use a canonical grid,
+# which is a 12-column grid that can be used to divide a window
+# into one, two, three, four, or six columns. The layout within each
+# window uses different combinations of these columns to produce a
+# pleasing and readable layout. Mullet and Sano's examples generally
+# use the left column for labels -- Labeledgrid supports this as its default
+# mode, but also adds other display styles, such as labeled bounding
+# boxes.
+#
+# Labeledgrid views a grid as being divided into groups, where each group
+# contains labeled widgets, or other groups. All widgets are
+# placed into the same layout grid, however, ensuring that alignment is
+# achieved even between logical groups. Groups can be contained within
+# other groups, to arbitrary depth, and the widget as a whole is best
+# thought of as the top-level group. Each group and widget has
+# its own label and border, as selected by the display style of
+# that group or widget (see <i>DISPLAY STYLES</i> below).
+#
+# A group has a number of options that control layout (at the top
+# level, they are specified by options to the widget, at lower levels,
+# by options to the <b>group</b> method). The <b>-columnspan</b>
+# option, for example, is the width occupied by items within the
+# group, not including rows or columns needed for labels and borders.
+# Adding items to a group places
+# the new item at the position determined by the current row and
+# column counters of that group. When the <b>-columnspan</b> of the
+# group is reached, the counters move to the next row. The default
+# values of these layout options are chosen to make is easy to
+# produce a simple layout, and possible to produce a complex one.\
+# Each group also has a <b>-childcolumnspan</b> option, which specifies
+# the defaullt column span of children; the option can be overridden
+# when a particular child is created.
+#
+# One of the unique features of Labeledgrid is its ability to perform
+# standard operations on widgets regardless of what type they are.
+# The operations are: setting the current value, reading the current
+# value, enabling and disabling user input, and creating and deleting
+# the widget. This makes access to user input very simple for
+# client programs, and relieves them of any need to understand
+# particular widgets.
+#
+# Labeledgrid provides a useful set of widgets for placing into a layout,
+# including entry and text fields, radio buttons and check buttons,
+# and option menus. However, since the number of different kinds of
+# widget that could be placed into a Labeledgrid window is potentially
+# unlimited, the <b>newtype</b> procedure is provided so that new
+# widget types can be added to Labeledgrid's collection of known widget types.
+#
+# <p>
+# <i>ITEM TYPES</i>
+#
+# By default, Labeledgrid recognises the following widget types:
+# <dl>
+# <dt>
+# <b>checkbutton</b>
+# <dd>
+# A Tk checkbutton. Checkbuttons can usefully be placed into groups,
+# as well as being labeled individually.
+# <dt>
+# <b>entry</b>
+# <dd>
+# A Tk entry widget.
+# <dt>
+# <b>labeledgrid</b>
+# <dd>
+# A nested labeled grid widget. This is used if alignment must
+# <i>not</i> be preserved between the new grid's contents and
+# its containing grid. Usually, this occurs only when there are
+# alignment problems caused by the fact that borders use up
+# whole columns or rows of the grid.
+# <dt>
+# <b>optionmenu</b>
+# <dd>
+# An Iwidgets optionmenu.
+# <dt>
+# <b>radiobutton</b>
+# <dd>
+# A Tk radiobutton. Radiobuttons are usually used within
+# a shared item group.
+# <dt>
+# <b>text</b>
+# <dd>
+# A Tk text widget.
+# <dt>
+# <b><i>type</i></b>
+# <dd>
+# A widget of some other type. New types can be added to the Labeledgrid
+# class with the <b>newtype</b> procedure, and can then be created
+# in the same way as the built-in item types.
+# </dl>
+#
+# Widgets are added to Labeledgrid with the <b>add</b> method. This method
+# accepts any options that are valid for the particular widget type,
+# and the following:
+# <dl>
+# <dt>
+# <b>-label</b> <i>string</i>
+# <dd>
+# The text to place in the item label. The default is null.
+# This option is ignored by the <b>plain</b> display style.
+# <dt>
+# <b>-columnspan</b> <i>int</i>
+# <dd>
+#  The number of columns to be spanned
+# by the created widget, not including any borders. The default is
+# the <b>-childcolumnspan</b> of the parent group.
+# <dt>
+# <b>-initial</b> <i>value</i>
+# <dd>
+#  The initial value assigned to this widget. If the widget is
+# within a shared group, this option will be ignored.
+# <dt>
+# <b>-sticky</b> <i>string</i>
+# <dd>
+#  The "stickiness" of the widget within the grid. This option
+# will be passed to the \fBgrid configure\fR command. The default is
+# the <b>-sticky</b> option specified for its type.
+# <dt>
+# <b>-style</b> <i>string</i>
+# <dd>
+#  The display style of the item. See <i>DISPLAY STYLES</i>
+# below. The default value is the <b>-childstyle</b> option of
+# the item's parent.
+# </dl>
+#
+# <p>
+# <i>ITEM GROUPS</i>
+#
+# A new group of items is added to Labeledgrid with the <b>group</b> method.
+# Groups accept many of the same options as regular items, and can
+# have labels and bounding boxes. Items within a group have hierarchical
+# ids; for example, the item <b>foo.bar</b> is within the group
+# <b>foo</b>. Groups accept the following options:
+# <dl>
+# <dt>
+# <b>-childcolumnspan</b> <i>int</i>
+# <dd>
+#  The default value of the <b>-columnspan</b> option of the
+# group's children. The default is one.
+# <dt>
+# <b>-childstyle</b> <i>string</i>
+# <dd>
+#  The default value of <b>-style</b> option of the group's children.
+# The default is \fRplain\fR
+# <dt>
+# <b>-column</b> <i>int</i>
+# <dd>
+#  The start column of the group, as an absolute
+# value (in other words, the column is not relative to the start of the
+# parent group). This is the first column that will be used for any
+# component of the group, including its label or border. This option
+# should be used sparingly, if at all. The default is the current column
+# counter of its parent group.
+# <dt>
+# <b>-columnspan</b> <i>int</i>
+# <dd>
+#  The number of columns spanned by the
+# group. This includes the label and borders of child items but does
+# <i>not</i> include the labels and borders of the group itself.
+# The default is the <b>-childcolumnspan</b> of its parent group, or the
+# number of columns remaining with the parent group, whichever is
+# smallest.
+# <dt>
+# <b>-initial</b> <i>value</i>
+# <dd>
+#  If not null, the initial value of a
+# variable created for the whole group. In this case, all items in
+# the group are given a shared variable rather than individual ones,
+# and the value of the group will be the value of this variable.
+# This is most useful for radiobutton groups. If this option is null,
+# each item will get its own variable and the value of the
+# group will be a compsite of the values of each child item.
+# <dt>
+# <b>-label</b> <i>string</i>
+# <dd>
+#  The text to place in the group's label.
+# This option is ignored by the <b>plain</b> display mode.
+# <dt>
+# <b>-row</b> <i>int</i>
+# <dd>
+#  The start row of the group, as an absolute
+# value (in other words, the row is not relative to the start of the
+# parent group). This is the first row that will be used for any
+# component of the group, including its label or border. This option
+# should be used sparingly, if at all. The default is the current row
+# counter of its parent group.
+# <dt>
+# <b>-rowspan</b> <i>int</i>
+# <dd>
+#  The number of rows spanned by the
+# group. This includes the label and borders of child items but does
+# <i>not</i> include the labels and borders of the group itself.
+# If zero, the group expands until the next sibling item
+# is added. The default is one.
+# <dt>
+# <b>-style</b> <i>string</i>
+# <dd>
+#  The display style of the group. See <i>DISPLAY STYLES</i<
+# below. The default value is the <b>-childstyle</b> option of
+# the group's parent.
+# </dl>
+#
+# <p>
+# <i>ADDING NEW TYPES</i>
+#
+# Labeledgrid provides a mechanism for defining new item types. For each
+# of the operations it supports on its items, it has a small script
+# that it evaluates to perform this action. These scripts are added
+# to the Labeledgrid class with the <b>newtype</b> procedure, which accepts
+# a number of options that specify the scripts that Labeledgrid evaluates
+# to perform operations on items of the new type. These options are:
+#
+# <dl>
+# <dt>
+# <b>-assign</b>
+# <dd>
+#  The script to assign a value to an item. If null, an attempt to assign
+# a value will raise an error. The default is \fB{set %v %a}\fR.
+# <dt>
+# <b>-create</b>
+# <dd>
+#  The script to create an item. An error will be raised if this
+# option is not specified.
+# <dt>
+# <b>-delete</b>
+# <dd>
+#  The script to delete an item. The default is \fB{destroy %w}\fR.
+# If null, an error will be raised on an attempt to delete that type.
+# <dt>
+# <b>-disable</b>
+# <dd>
+#  Disable user input to the item. If null, the type cannot be disabled.
+# The default is \fB{%w configure -state disabled}\fR.
+# <dt>
+# <b>-enable</b>
+# <dd>
+#  Enable user input to the item. If null, the widget cannot be enabled.
+# The default is \fB{%w configure -state normal}\fR.
+# <dt>
+# <b>-get</b>
+# <dd>
+#  Get the item's value. If null, the item will not appear in the
+# results of any value-getting methods. The default is \fB{set %v}\fR.
+# <dt>
+# <b>-options</b>
+# <dd>
+#  A string passed as the second argument to \fBitk_component add\fR
+# when the widget is created. The default is <b>{usual}</b>, which will
+# cause the following option-handling command to be used:
+# <pre>
+# keep -font -background -cursor \
+#     -disabledforeground -foreground \
+#     -highlightthickness -highlightcolor
+# </pre>
+# <dt>
+# <b>-sticky</b>
+# <dd> The default "stickiness" of widget of thos type.
+# </dl>
+#
+# <p>
+# Before evaluating a script, Labeledgrid performs the following
+# substitutions:
+# <ul>
+# <li>
+# <b>%a</b> is substituted with additional arguments.
+# <li>
+# <b>%x</b> is substituted with the assigned value (assign only).
+# <li>
+# <b>%t</b> is substituted with the item id.
+# <li>
+# <b>%v</b> is substituted with the control variable.
+# <li>
+# <b>%w</b> is substituted with the widget path.
+# <li>
+# <b>%Q</b> is substituted with the Labeledgrid widget.
+# </ul>
+#
+# <p>
+# <i>DISPLAY STYLES</i>
+#
+# Labeledgrid supports several display styles. A display style is simply
+# a combination of label position and item border. Different display
+# styles can be mixed, although this should of course be done with care
+# and there are some caveats (note that the default behaviour of Labeledgrid
+# is to use the same display style for every item within a group.)
+# Depending on the style, zero or more rows or columns of the grid
+# may be used, in addition to the rows and columns required to display
+# the item itself. The display styles are:
+# <dl>
+# <dt>
+# <b>plain</b>
+# <dd>
+# There is no label or border, and no additional rows or columns
+# are used. This style is generally used for groups of radiobuttons
+# or checkbuttons. It can also be used for items that need to
+# occupy the same row as another item, but without its own label,
+# and as a way of grouping related widgets without any explicit
+# visual structure.
+# <dt>
+# <b>simple</b>
+# <dd>
+# The label is drawn in the column to the left of the item. The label
+# anchor is given by the <b>-labelanchor</b> widget option.
+# There is no border drawn around the item. This style uses one additional
+# row. This is the style used in the examples in Mullet and Sano's book.
+# <dt>
+# <b>boxed</b>
+# <dd>
+# The label is drawn in the row above the item, and a border is drawn
+# around the whole item. An additional row or column on all four
+# sides is required for the border and label. This style is
+# very popular but shouldn't be used to the point of
+# cluttering the layout. Mullet and Sano comment: "While the practice
+# is encouraged by many environments, it should be used with restraint,
+# since explicit structure is a very poor substitute for effective
+# spatial segregation." (p110).
+# <dt>
+# <b>separated</b>
+# <dd>
+# The label is drawn in the row above the item, and a horizontal line
+# line spanning its width drawn under the label. This is useful for
+# separating large dialog boxes into two or three distinct vertical
+# regions. It uses a row for the separator line and a column to the
+# left of the item for spacing.
+#
+# </dl>
+#
+# The default behavior of Labeledgrid is to give top-level items the
+# <b>simple</b> style, and items within those the <b>plain</b>
+# style -- plain and simple...
+#
+# <i>COMPONENTS</i>
+#
+# <i>Labeledgrid</i> dynamically creates components as widgets and
+# groups are added to the grid.
+# <dl>
+# <dt><i>id</i>
+# <dd>
+# A widget. The <i>id</i> item is the id passed to the <b>add</b> method
+# when the widget was created. Note that if <i>id</i> is a group, there
+# will be component named <i>id\fR.
+# <dt>
+# <i>id</i><b>frame</b>
+# <dd>
+# A frame that is used in the <b>separated</b> and <b>boxed</b> display
+# styles to contain the border and label.
+# <dt>
+# <i>id</i><b>label</b>
+# <dd>
+# The label of a widget or group, created in the <b>simple</b>,
+# <b>separated</b> and <b>boxed</b> display styles. See the "label" widget
+# manual entry for details.
+# <dt>
+# <i>id</i><b>border</b>
+# <dd>
+# A border in the <b>separated</b> and <b>boxed</b> display styles. This
+# is a Tk frame -- see the "label" widget manual entry for details.
+# </dl>
+#
+# <p>
+# <b>Caveats</b>
+#
+# Labeledgrid is designed to make it easy to construct designed
+# layouts. It provides no support for changing an existing layout.
+# Although layouts can be moved around by directly calling the Tk
+# <b>grid</b> command, this is unlikely to be very reliable.
+#
+# There are also some caveats associated with mixing different display styles
+# within the same grid. Firstly, the <b>-columnspan</b> and <b>-rowspan</b>
+# options of groups need to take into account the display styles of
+# children. If display styles in an existing layout are changed, the
+# options may need tweaking to get the layout right again. Secondly, since
+# labels and borders use up whole rows or columns of the grid, some care
+# needs to be taken to avoid placing items within the same column (for
+# example) as a border in another part of the layout. A workaround is simply
+# to recursively create Labeledgrid widgets: alignment isn't preserved
+# between a nested labeled grid and the containing labeledgrid.
+#
+# <p>
+# <b>Possible enhancements</b>
+#
+# <ol>
+# <li> The Tk grid is really great, but unfortunately does not allow you to
+#      say "make columns 3 to 5 all the same width." Maybe we need this...
+# <li> The iwidgets optionmenu won't take the focus. Maybe it should, so
+#      you could use cursor keys to change the selection.
+# <li> Cursor keys should traverse the grid, like in Widgettree.
+# </ol>
+#
+#  LabeledGrid is based on the tycho::Query widget by Edward A. Lee.
+#  This widget adds more structured grid placement, different
+#  display styles, and the facility to support arbitrary widget types.
+#
+class ::tycho::LabeledGrid {
+    inherit ::tycho::TWidget
+    
+    constructor {args} {}
+    destructor {}
+    
+    #####################################################################
+    ####                          options                            ####
+
+    # The total column span of the grid.
+    itk_option define -columnspan columnSpan ColumnSpan 4
+
+    # The default column span of top-level items, not including borders.
+    itk_option define -childcolumnspan childColumnSpan ChildColumnSpan 3
+
+    # The default style of top-level items.
+    itk_option define -childstyle childStyle ChildStyle "simple"
+
+    # The foreground color propagated to child widgets
+    itk_option define -foreground foreground Foreground black
+
+    # The foreground color propagated to disabled child widgets.
+    itk_option define -disabledforeground disabledForeground DisabledForeground #a3a3a3
+
+    # Background color of entry widgets
+    itk_option define -entrybackground entryBackground Background grey90
+
+    # The main font.
+    itk_option define -font font Font \
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+
+    # The font of the text labels.
+    itk_option define -labelfont labelFont Font  \
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+
+    # The foreground color of the text labels.
+    itk_option define -labelforeground labelForeground Foreground black
+
+    # The default anchoring of the text labels in the <b>simple</b> style.
+    itk_option define -labelanchor labelAnchor Anchor "e"
+
+    # Highlight color
+    itk_option define -highlightcolor highlightColor HighlightColor black
+
+    # Highlight thickness
+    itk_option define -highlightthickness highlightThickness \
+	    HighlightThickness 2
+
+    # The horizontal padding to use when gridding widgets.
+    itk_option define -padx padX PadX 0
+
+    # The horizontal padding to use when gridding widgets.
+    itk_option define -pady padY PadY 0
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    method add     {type id args}
+    method assign  {id args}
+    method delete  {id}
+    method disable {{id {}}}
+    method enable  {{id {}}}
+    method exists  {id}
+    method get     {{id {}}}
+    method group   {id args}
+    method hskip   {{group {}} args}
+    method names   {{group {}}}
+    method reset   {group row column}
+    method type    {id}
+    method vskip   {{group {}} args}
+
+    proc newtype {type args} {}   ;# add a new type
+    
+    ###################################################################
+    ####                        protected variables                ####
+
+    # The type of each item
+    protected variable _type
+
+    # The children of each group
+    protected variable _children
+
+    # The namespace tail of this object
+    protected variable scope
+
+    ###################################################################
+    ####                         private methods                   ####
+
+    private method _drawitem \
+            {id parent style label colspan rowspan {path {}} {sticky {}}}
+    private method _do   {cmdtype id args}
+    private method _text {pathdelete  args}
+    private method _optionmenu {id path var args}
+
+    ###################################################################
+    ####                         private variables               ####
+
+    # Scripts for operating on widgets
+    private common _assign     ;# assign to a widget
+    private common _create     ;# create a new widget
+    private common _disable    ;# disable a widget
+    private common _enable     ;# enable a widget
+    private common _get        ;# get a widget's value
+    private common _sticky     ;# options for stickiness of each type
+    private common _options    ;# options for itk_component add
+
+    # Unique counters
+    private common widgetCounter 0   ;# counter to generate unique numbers
+    private variable itemCounter 0   ;# Counter to generate widget paths
+    private variable unique          ;# unique for each widget
+
+    # Gridding variables: one entry per group, indexed by id
+    private variable _firstcol      ;# first item column w/o borders
+    private variable _lastcol       ;# last column of item
+    private variable _curcol        ;# current grid column
+    private variable _currow        ;# current grid row
+    private variable _height        ;# height of the current row w/ borders
+    private variable _childspan     ;# default span of child widgets
+    private variable _childstyle    ;# default style of child widgets
+
+    # Default type options
+    private common _defaulttypeoptions {
+	-assign   {set %v %x}
+	-create   {}
+	-delete   {destroy %w}
+	-disable  {%w configure -state disabled}
+	-enable   {%w configure -state normal}
+	-get      {set %v}
+	-sticky   "ew"
+	-options  {usual}
+    }
+}
+
+#
+# Use option database to override default resources.
+#
+# option add *LabeledGrid.thickness 3 widgetDefault ???
+
+#
+# Provide a lowercase access method for the LabeledGrid class.
+#
+proc labeledgrid { path args } {
+    # Create widget
+    uplevel ::tycho::LabeledGrid $path $args
+}
+
+#########################################################################
+##                             OPTIONS
+#########################################################################
+
+#########################################################################
+#### option configuration: -childcolumnspan
+#
+# The default column span of top-level items, not including borders.
+# Changing this option only affects the default column span of
+# items subsequently added to the grid, not of items already added. 
+#
+configbody ::tycho::LabeledGrid::childcolumnspan {
+    set _childspan() $itk_option(-childcolumnspan)
+}
+
+#########################################################################
+#### option configuration: -childstyle
+#
+# The default style of top-level items. The default is "simple".
+#
+configbody ::tycho::LabeledGrid::childstyle {
+    set _childstyle() $itk_option(-childstyle)
+}
+
+#########################################################################
+#### option configuration: -columnspan
+#
+# The total column span of the grid. The default is four. Changing
+# this option only affects the layout of items subsequently added
+# to the grid, not of items already added.
+#
+configbody ::tycho::LabeledGrid::columnspan {
+    set _columnspan() $itk_option(-columnspan)
+    set _lastcol() $itk_option(-columnspan)
+}
+
+#########################################################################
+#### option configuration: -disabledforeground
+#
+# The foreground color propagated to disabled child widgets, including
+# node labels.
+#
+configbody ::tycho::LabeledGrid::disabledforeground {
+}
+
+#########################################################################
+#### option configuration: -foreground
+#
+# The foreground color propagated to child widgets, including node labels.
+#
+configbody ::tycho::LabeledGrid::foreground {
+}
+
+#########################################################################
+#### option configuration: -labelanchor
+#
+# The default anchoring of the text labels in the <b>simple</b> style.
+#
+configbody ::tycho::LabeledGrid::labelanchor {
+}
+
+#########################################################################
+#### option configuration: -labelforeground
+#
+# The foreground color of the text labels.
+#
+configbody ::tycho::LabeledGrid::labelforeground {
+}
+
+#########################################################################
+#### option configuration: -labelfont
+#
+# The font of the text labels.
+#
+configbody ::tycho::LabeledGrid::labelfont {
+}
+
+#########################################################################
+#### option configuration: -padx
+#
+# The horizontal padding to use when gridding widgets.
+#
+configbody ::tycho::LabeledGrid::padx {
+    foreach id [array names _type] {
+	if { $_type($id) != "group" } {
+	    grid configure $itk_component($id) -padx $itk_option(-padx)
+	}
+    }
+}
+
+#########################################################################
+#### option configuration: -pady
+#
+# The horizontal padding to use when gridding widgets.
+#
+configbody ::tycho::LabeledGrid::pady {
+    foreach id [array names _type] {
+	if { $_type($id) != "group" } {
+	    grid configure $itk_component($id) -pady $itk_option(-pady)
+	}
+    }
+}
+
+
+#########################################################################
+#### constructor
+#
+body ::tycho::LabeledGrid::constructor {args} {
+    set _firstcol() 0
+    set _currow() 0
+    set _curcol() 0
+    set _height() 1
+    set _type() "group"
+    set _children() {}
+
+    # Unique counter to distinguish widget instances
+    set unique [incr widgetCounter]
+    
+    # Cache the class scope
+    set scope [info class]
+
+    # It's nice to have relief and borderwidth options
+    itk_option add hull.borderwidth hull.relief
+
+    # Evaluate options
+    eval itk_initialize $args
+}
+
+
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#########################################################################
+## add type id ?option value...? 
+#
+# Add a new item to the grid. The first argument is type of widget to
+# create. This is followed by the <i>id</i> that will be used to
+# reference the widget, then an option-value list. The options can be
+# any that are valid for the widget type <i>type</i>, plus options that
+# specify labeling and positioning information, as described in the
+# section <i>Item Types</i> above. For each item, a variable is created
+# that can be used to hold its value, which can be accessed within
+# control scripts as <b>%v</b>.
+#
+body ::tycho::LabeledGrid::add {type id args} {
+    if [::info exists _type($id)] {
+	error "Item already exists: \"$id\""
+    }
+    if ![::info exists _create($type)] {
+	error "Unknown item type \"$type\": must be one of \
+		[join [array names _create] {, }]"
+    }
+    # Decompose the id
+    regexp {^((.*)\.)?[^\.]+$} $id _ _ par
+
+    # Remember key parameters
+    set _type($id) $type
+    lappend _children($par) $id
+    set path $itk_interior._[incr itemCounter]
+
+    # Extract options
+    array set opts [list \
+	    -initial {} -label {} \
+	    -columnspan $_childspan($par) \
+ 	    -style $_childstyle($par) \
+            -sticky $_sticky($type) ]
+    array set opts $args
+    
+    set value  $opts(-initial)
+    set span   $opts(-columnspan)
+    set label  $opts(-label)
+    set sticky $opts(-sticky)
+    set style  $opts(-style)
+
+    unset \
+	    opts(-initial)  \
+	    opts(-label) \
+            opts(-columnspan) \
+            opts(-sticky) \
+            opts(-style)
+    set args [array get opts]
+
+    # Use the shared variable if there is one, otherwise a local one
+    if ![::info exists ${scope}::$par$unique] {
+	set var ${scope}::$id$unique
+    } else {
+	set var ${scope}::$par$unique
+    }
+    # Create the widget and add as a component
+    eval $_create($type)
+    itk_component add $id {set path} $_options($type)
+
+    # Set its initial value if not in a shared group and the value is supplied
+    if { ![::info exists ${scope}::$par$unique] && $value != "" } {
+        eval $_assign($type)
+    }
+    # Draw the item according to its style
+    _drawitem $id $par $style $label \
+            $span 1 $itk_component($id) $sticky
+}
+
+#########################################################################
+## assign ?id? value
+#
+# Assign a value to an item. If the item is a group with a shared
+# variable, the value is be assigned to the shared variable. If the
+# group is not shared, the value must be a list of name-value pairs,
+# where each name is relative to <i>id</i>. Each group member that
+# appears in the list is assigned the corresponding value. If assignment
+# is supported for the item's type, assign <i>value</i> to the item; if
+# assignment is not supported, raise an error. Raise an error if
+# <i>id</i> does not exist.
+#
+body ::tycho::LabeledGrid::assign {id args} {
+    if { $args == "" } {
+        set value $id
+        set id {}
+    } else {
+        set value [lindex $args 0]
+    }
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    if { $_type($id) == "group" } {
+	if [::info exists ${scope}::$id$unique] {
+	    # Shared group
+	    set ${scope}::$id$unique $value
+	} else {
+	    # Not a shared group
+	    foreach {t v} $value {
+		assign $id.$t $v
+	    }
+	}
+    } else {
+	_do assign $id $value
+    }
+}
+
+#########################################################################
+## delete id
+#
+# Delete an item. If the item is a group, all members of the group will
+# also be deleted. Raise an error if <i>id</i> does not exist, or if
+# deletion is not supported for its type.
+#
+body ::tycho::LabeledGrid::delete {id} {
+    puts "delete $id"
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    if { $_type($id) == "group" } {
+	foreach t $_children($id) {
+	    delete $t
+	}
+    }
+    ####_do delete $id
+    
+    catch {destroy $itk_component($id)}
+    catch {destroy $itk_component(${id}label)}
+    catch {destroy $itk_component(${id}frame)}
+    catch {destroy $itk_component(${id}border)}
+
+    catch {grid forget $itk_component($id)}
+    catch {grid forget $itk_component(${id}label)}
+    catch {grid forget $itk_component(${id}frame)}
+    catch {grid forget $itk_component(${id}border)}
+    
+    catch {unset itk_component($id)}
+    catch {unset itk_component(${id}label)}
+    catch {unset itk_component(${id}frame)}
+    catch {unset itk_component(${id}border)}
+    
+    # Clean up internal data
+    if { $_type($id) == "group" } {
+        unset _firstcol($id)
+        unset _lastcol($id)
+        unset _currow($id)
+        unset _curcol($id)
+        unset _childspan($id)
+    }
+    ####unset _columnspan($id)
+    ####unset _rowspan($id)
+    
+    unset _type($id)
+
+    if [regexp {^((.*)\.)?[^\.]+$} $id _ _ par] {
+        set t [lsearch -exact $_children($par) $id]
+        set _children($par) [lreplace $_children($par) $t $t]
+    }
+}
+
+#########################################################################
+## disable id
+#
+# Disable an item.  If the item is a group, all members of the group
+# will also be disabled. Raise an error if <i>id</i> does not exist.
+#
+body ::tycho::LabeledGrid::disable {{id {}}} {
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    if [::info exists itk_component(${id}label)] {
+        $itk_component(${id}label) configure \
+                -foreground $itk_option(-disabledforeground)
+    }
+    if { $_type($id) == "group" } {
+        foreach t $_children($id) {
+            disable $t
+        }
+    } else {
+	_do disable $id
+    }
+}
+
+#########################################################################
+## enable id
+#
+# Enable an item. If the item is a group, all members of the group
+# will also be enabled. Raise an error if <i>id</i> does not exist.
+#
+body ::tycho::LabeledGrid::enable {{id {}}} {
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    if [::info exists itk_component(${id}label)] {
+    	$itk_component(${id}label) configure \
+    			-foreground $itk_option(-labelforeground)
+   	}
+    if { $_type($id) == "group" } {
+	foreach t $_children($id) {
+	    enable $t
+	}
+    } else {
+	_do enable $id
+    }
+}
+
+#########################################################################
+## exists id
+#
+# Return one if _id_ exists, otherwise zero.
+#
+body ::tycho::LabeledGrid::exists {id} {
+    ::info exists _type($id)
+}
+
+#########################################################################
+## get ?id?
+#
+# Get the value of one or more items. If <i>id</i> is a widget, return
+# that item's value, or null if getting the value is not supported for
+# the item's type. If <i>id</i> is a group with a shared variable,
+# return the value of the shared variable. If <i>id</i> is any other
+# group, return a name-value list of its members, where each name is
+# relative to <i>id</i>. If <i>id</i> is not supplied, return a
+# name-value list of all top-level items. Raise an error if <i>id</i> is
+# supplied but is not an item.
+#
+body ::tycho::LabeledGrid::get {{id {}}} {
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    if { $_type($id) == "group" } {
+	if [::info exists ${scope}::$id$unique] {
+	    # Shared group
+	    set ${scope}::$id$unique
+	} else {
+	    # Not a shared group.
+	    set result {}
+	    foreach t $_children($id) {
+		regsub ^[list $id]\.? $t {} nm
+		if [::info exists ${scope}::$t$unique] {
+		    lappend result $nm [set ${scope}::$t$unique]
+		} elseif { $_type($t) != "group" } {
+		    lappend result $nm [_do get $t]
+		}
+	    }
+	    return $result
+	}
+    } else {
+	# Simple widget
+        _do get $id
+    }
+}
+
+#########################################################################
+## group id $args
+#
+# Add a group.  Options are as described above.
+# Raise an error if an item with that id already exists.
+#
+body ::tycho::LabeledGrid::group {id args} {
+    if [::info exists _type($id)] {
+	error "Item already exists: \"$id\""
+    }
+    # Decompose the id
+    regexp {^((.*)\.)?[^\.]+$} $id _ _ par
+
+    # Remember key parameters
+    set _type($id) group
+    lappend _children($par) $id
+
+    # Extract options
+    array set opts [list \
+            -initial    {} \
+            -label      {} \
+            -row        $_currow($par) \
+            -column     $_curcol($par) \
+            -rowspan    1 \
+            -columnspan $_childspan($par) \
+            -childcolumnspan  1 \
+            -style      $_childstyle($par) \
+            -childstyle plain]
+    array set opts $args
+
+    # If the initial value is not null, create the shared variable and
+    # assign it -- that way we know it's a shared group later
+    if { $opts(-initial) != "" } {
+        set ${scope}::$id$unique $opts(-initial)
+    }
+
+    # Set up parameters of this group
+    set _height($id) 1
+    set _childspan($id)  $opts(-childcolumnspan)
+    set _childstyle($id) $opts(-childstyle)
+
+    # Draw the borders according to style and update layout parameters
+    _drawitem $id $par $opts(-style) $opts(-label) \
+    		$opts(-columnspan) $opts(-rowspan)
+}
+
+#########################################################################
+## hskip ?group? ?option value... ?
+#
+# Skip a column. If _group_ is supplied, then this is the group to
+# skip within. Options can be any supported by the Tk grid
+# columnconfigure{} command. If we skip past the end of the row,
+# call vskip{} to move to the next row. 
+#
+body ::tycho::LabeledGrid::hskip {{group {}} args} {
+    if { [llength $args] & 1 } {
+	set args [concat $group $args]
+	set group {}
+    }
+    if { $args != "" } {
+	eval grid columnconfigure $itk_interior $_curcol($group) $args
+    }
+    if { [incr _curcol($group)] >= $_lastcol($group) } {
+        vskip $id
+    }
+}
+
+#########################################################################
+## names ?group?
+#
+# Get a list of names. If _group_ is supplied, it must be a non-shared
+# group, and this method will return the names within that group.
+# If _group_ is not supplied, return the names at the top level.
+# Raise an error if _group_ is unknown or not an unshared group.
+#
+body ::tycho::LabeledGrid::names {{group {}}} {
+    if ![::info exists _type($group)] {
+	error "Unknown id: \"$group\""
+    }
+    if { $_type($group) != "group" } {
+	error "Cannot get names in non-group item \"$group\""
+    }
+    set result {}
+    foreach c $_children($group) {
+	lappend result [lindex [split $c .] end]
+    }
+    return $result
+}
+
+#########################################################################
+## reset group row column
+#
+# Reset the grid counters in the given group. To reset the top-level
+# counters, supply the group "". This method must be used with
+# caution.
+#
+body ::tycho::LabeledGrid::reset {group row column} {
+    set _currow($group) $row
+    set _curcol($group) $column
+}
+
+#########################################################################
+## type id
+#
+# Return the type of an item.
+# Raise an error if _id_ is unknown.
+#
+body ::tycho::LabeledGrid::type {id} {
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    return $_type($id)
+}
+
+#########################################################################
+## vskip ?group? ?option value... ?
+#
+# Skip a row. If _group_ is supplied, then this is the group to
+# skip within. Options can be any supported by the Tk grid
+# rowconfigure{} command. The number of rows skipped is the rowspan
+# of the largest item in the given group.
+#
+body ::tycho::LabeledGrid::vskip {{group {}} args} {
+    if { [llength $args] & 1 } {
+	set args [concat $group $args]
+	set group {}
+    }
+    if { $args != "" } {
+	eval grid rowconfigure $itk_interior $_currow($group) $args
+    }
+    set _curcol($group) $_firstcol($group)
+    incr _currow($group) $_height($group)
+    set _height($group) 1
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+#########################################################################
+## _do mode id ?value?
+#
+# Evaluate a command to evaluate on an item. The _cmdtype_ argument
+# selects the command type.
+#
+body ::tycho::LabeledGrid::_do {cmdtype id {value {}}} {
+    set command [set _[set cmdtype]($_type($id))]
+
+    regexp {^((.*)\.)?[^\.]+$} $id _ _ par
+    if [::info exists ${scope}::$par$unique] {
+        set var ${scope}::$par$unique
+    } else {
+        set var ${scope}::$id$unique
+    }
+    set path $itk_component($id)
+    
+    eval [set _[set cmdtype]($_type($id))]
+}
+
+#########################################################################
+## _drawitem id parent style label colspan rowspan ?path? ?sticky?
+#
+# Draw an item and update the grid parameters accordingly. Input:
+# <ul>
+# <li>_curcol($id)_ is the absolute base column of the item including borders
+# <li>_currow($id)_ is the absolute base row of the item including borders
+# <li>_colspan_ is the column span of the item _without_ borders
+# <li>_rowspan_ is the row span of the item _without_ borders
+# </ul>
+#
+# Output:
+# <ul>
+# <li><i>_curcol($id)</i> is the absolute base column of the next item
+# <li><i>_currow($id)</i> is the absolute base row of the next item
+# <li><i>_firstcol($id)</i> is the first column of this group
+# <li><i>_lastcol($id)</i> is the last column of this group
+# </ul>
+#
+body ::tycho::LabeledGrid::_drawitem {id parent style label \
+	colspan rowspan {path {}} {sticky {}}} {
+    set col $_curcol($parent)
+    set row $_currow($parent)
+
+    # Option propagation for labels depends on whether it's at the top-level
+    if { $parent == "" } {
+        set labeloptions {
+            keep -background -cursor
+            rename -font -labelfont labelFont Font
+            rename -foreground -labelforeground labelForeground Foreground
+        }
+    } else {
+        set labeloptions {usual}
+    }
+    switch -exact $style {
+	"plain" {
+	    set rowdelta 0
+	    set coldelta 0
+	}
+	"simple" {
+	    # Label
+	    itk_component add ${id}label {
+		label $itk_interior._[incr itemCounter] -text $label
+	    } $labeloptions
+
+            grid $itk_component(${id}label) \
+		    -row $row \
+		    -column $col \
+		    -sticky $itk_option(-labelanchor)
+	    
+	    # Layout parameters
+	    incr col
+	    set coldelta 0
+	    set rowdelta 0
+	}
+        "separated" {
+	    # Create and grid the frame that contains the separator and label
+            itk_component add ${id}frame {
+                frame $itk_interior._[incr itemCounter] -height 36
+            }
+            grid $itk_component(${id}frame) \
+                    -row $row -column $col \
+                    -rowspan 1 -columnspan [expr $colspan+1] \
+                    -sticky ew
+
+            # Create the label and grid it.
+            itk_component add ${id}label {
+                label $itk_interior._[incr itemCounter] -text $label
+            } $labeloptions
+
+	    grid $itk_component(${id}label) \
+		    -row $row -column $col -sticky sw -pady 9
+
+	    # Create and place the separator line
+            itk_component add ${id}border {
+                frame $itk_interior._[incr itemCounter] \
+                        -height 2 -borderwidth 1 -relief sunken
+            }
+            place $itk_component(${id}border) \
+                    -x 0 -rely 1 -y -9 \
+                    -relwidth 1 \
+                    -in $itk_component(${id}frame)
+
+            # Layout parameters
+	    incr col
+            incr row
+            set coldelta 0
+            set rowdelta 1
+	}
+	"boxed" {
+	    # Create and grid the frame that covers the whole region
+	    itk_component add ${id}frame {
+		frame $itk_interior._[incr itemCounter]
+	    }
+	    grid $itk_component(${id}frame) -row $row -column $col \
+		    -rowspan [expr $rowspan+2] \
+		    -columnspan [expr $colspan+2] \
+		    -sticky nsew
+	    
+	    # Configure the border rows and columns. (How can we avoid
+	    # doing this redundantly?)
+	    grid columnconfigure $itk_interior $col -minsize 12
+	    grid rowconfigure $itk_interior $row -minsize 24
+	    grid columnconfigure $itk_interior [expr $col+$colspan+1] \
+		    -minsize 12
+	    grid rowconfigure $itk_interior [expr $row+$rowspan+1] -minsize 12
+	    
+	    # Create the border and place it
+	    itk_component add ${id}border {
+		frame $itk_interior._[incr itemCounter] \
+			-borderwidth 2 -relief groove
+	    }
+	    place $itk_component(${id}border) \
+		    -x 6 -y 12 \
+		    -width -12 -height -18 -relwidth 1 -relheight 1 \
+		    -in $itk_component(${id}frame)
+	    
+	    # Create the label and place it. -labelanchor is ignored.
+	    itk_component add ${id}label {
+		label $itk_interior._[incr itemCounter] -text $label
+	    } $labeloptions
+
+	    place $itk_component(${id}label) -x 12 -y 12 -anchor w \
+		    -in $itk_component(${id}frame)
+	    
+	    # Layout parameters
+	    incr col
+	    incr row
+	    set coldelta 1
+	    set rowdelta 2
+	}
+	default {
+	    error "Unknown style: \"$style\""
+	}
+    }
+    # By the time we get here, col and row are the grid location to place
+    # the item into
+    if { $path != "" } {
+	# Grid the widget and raise it so it shows
+	grid $path \
+		-row $row -column $col \
+		-columnspan $colspan \
+		-rowspan $rowspan \
+		-sticky $sticky \
+		-padx $itk_option(-padx) \
+		-pady $itk_option(-pady)
+	raise $path
+    } else {
+	# Set up group parameters
+	set _curcol($id) $col
+	set _currow($id) $row
+	set _firstcol($id) $col
+	set _lastcol($id) [expr $col+$colspan]
+    }
+    # Adjust counters. rowdelta is the number of additional rows
+    # used by labels and borders. coldelta is the number of additional
+    # columns on the right side of the item used for labels and borders.
+    incr rowspan $rowdelta
+    if { $rowspan > $_height($parent) } {
+	set _height($parent) $rowspan
+    }
+    set nextcol [expr $col+$colspan+$coldelta]
+    if { $nextcol >= $_lastcol($parent) } {
+	# Wrap around to next row
+	set _curcol($parent) $_firstcol($parent)
+	incr _currow($parent) $_height($parent)
+	set _height($parent) 1
+    } else {
+	# Move on to next item.
+	set _curcol($parent) $nextcol
+    }
+}
+
+#########################################################################
+## _optionmenu path args
+#
+# Helper method to create an option menu. We don't use an iwidgets
+# optionmenu here because it doesn't support tab traversal.
+#
+body ::tycho::LabeledGrid::_optionmenu {id path var args} {
+    # Extract arguments
+    array set opts {-entries {} -command {}}
+    array set opts $args
+    set entries $opts(-entries)
+    set command $opts(-command)
+    unset opts(-entries)
+    unset opts(-command)
+    set args [array get opts]
+
+    # Create the menu button
+    eval [list menubutton $path \
+            -indicatoron 1 \
+            -menu $path.menu \
+            -textvariable $var \
+            -relief raised -bd 2 -highlightthickness 2 \
+            -anchor c \
+            -takefocus 1] \
+            $args
+
+    # Create the popup menu
+    itk_component add $id.menu {
+	menu $path.menu -tearoff 0
+    }
+
+    # Initialize the menu
+    foreach e $entries {
+        # If -command is supplied, append it to the command to
+        # update the button
+        if { $command != "" } {
+            $path.menu add command \
+                    -label $e \
+                    -command "[list set $var $e]; $command"
+        } else {
+            $path.menu add command -label $e -command [list set $var $e]
+        }
+    }
+}
+
+#########################################################################
+## _text path args
+#
+# Helper method to create a text item.
+#
+body ::tycho::LabeledGrid::_text {path args} {
+    # Create the widget
+    eval ::iwidgets::scrolledtext $path \
+	    -hscrollmode dynamic \
+	    -vscrollmode dynamic \
+	    -height 100 \
+	    $args
+
+    # Make it so that Tab traversal still works. Firstly, we
+    # have to unset the -takefocus option of various components.
+    $path component text configure -takefocus 0
+    $path component horizsb configure -takefocus 0
+    $path component vertsb configure -takefocus 0
+    
+    # [incr Tk]'s -takefocus handling is bogus. Bypass it.
+    bind $path <FocusIn> "focus [$path component text]; break"
+
+    # Now override the text widget Tab bindings to pass the focus on
+    bind [$path component text] <Tab> \
+	    "focus \[tk_focusNext [$path component text]\]; break"
+    bind [$path component text] <Shift-Tab> \
+	    "focus \[tk_focusPrev [$path component text]\]; break"
+}
+
+#########################################################################
+#########################################################################
+####                     public procedures                           ####
+
+#########################################################################
+## newtype type ?option value?
+#
+# Add a new item type to the LabeledGrid class. Following arguments are
+# an option-value list, where legal options are as described in the
+# docs. Raise an error if the _type_ already exists, or if an invalid
+# option is specified.
+#
+body ::tycho::LabeledGrid::newtype {type args} {
+    if [::info exists _create($type)] {
+	error "Type \"$type\" is already defined"
+    }
+    array set opts $_defaulttypeoptions
+    array set opts $args
+
+    # Get the control scripts and substitute for % keys
+    foreach c {assign create delete disable enable get} {
+        set script $opts(-$c)
+        unset opts(-$c)
+	regsub -all %w $script {$path} script
+        regsub -all %v $script {$var} script
+        regsub -all %t $script {$id} script
+        regsub -all %Q $script {$this} script
+        regsub -all %a $script {$args} script
+        regsub -all %x $script {$value} script
+	set _[set c]($type) $script
+    }
+
+    # Get the options and stuff
+    foreach c {sticky options} {
+	set _[set c]($type) $opts(-$c)
+        unset opts(-$c)
+    }
+    if { [array names opts] != "" } {
+	error "bad option: \"[lindex [array names opts] 0]\""
+    }
+}
+
+#########################################################################
+# Initialize predefined types. Unfortunately, we can't put this code
+# in the class definition because the proc body hasn't been defined yet...
+#
+::tycho::LabeledGrid::newtype checkbutton \
+        -create {eval ::checkbutton %w -variable {%v} %a} \
+        -sticky "w"
+
+::tycho::LabeledGrid::newtype entry \
+        -create {eval ::entry %w -textvariable {%v} %a} \
+        -assign {%w delete 0 end; %w insert 0 %x} \
+        -options {
+    usual
+    rename -background -entrybackground entryBackground Background
+}
+
+::tycho::LabeledGrid::newtype labeledgrid \
+        -create {eval ::iwidgets::labeledgrid %w %a} \
+        -assign {%w assign %x} \
+        -enable {%w enable} \
+        -disable {%w disable} \
+        -get {%w get} \
+        -sticky "nsew" \
+	-options {
+    usual
+    keep -entrybackground -labelfont -labelanchor -labelforeground
+}
+
+::tycho::LabeledGrid::newtype optionmenu \
+        -create {eval _optionmenu %t %w {%v} %a}
+
+::tycho::LabeledGrid::newtype radiobutton \
+        -create {eval ::radiobutton %w -variable {%v} %a} \
+        -sticky "w"
+
+::tycho::LabeledGrid::newtype text \
+        -create {eval _text %w %a} \
+        -assign {%w delete 0.0 end; %w insert 0.0 %x} \
+	-get {%w get 0.0 end} \
+	-options {
+    usual
+    keep -highlightthickness -highlightcolor
+    rename -textbackground -entrybackground entryBackground Background
+    rename -textfont -font font Font
+}

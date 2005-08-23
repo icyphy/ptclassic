@@ -1,0 +1,47 @@
+# -*- mode: tcl -*-
+#
+# @(#)java.style	1.4 10/07/97
+#
+# The "java" master style-sheet
+#
+configure -title "Java"
+configure -description {
+    This style contains settings for Java language
+    development.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default Java-related style.
+} {
+    parameter useEnvClassPath 1 \
+	    -type boolean \
+	    -label "Use the CLASSPATH from the environment" \
+	    -description {
+	If set, Tycho uses $CLASSPATH from the environment.
+    }
+
+    parameter classPath {{$env(JAVA_HOME)/lib/classes.zip} {$TYCHO/java}} \
+	    -label "Java classpath" \
+	    -description {
+	The colon-separated path that the java tools
+	such as javac, java and appletviewer use.  If
+	the useEnvClassPath parameter is 1, then this
+	parameter is ignored.
+    }
+
+    parameter javaHome \$JAVA_HOME \
+	    -label "Pathname to the Java JDK" \
+	    -description {
+	The location of the Java Development Kit, including the
+	javac java compiler.  The initial default is the JAVA_HOME
+	environment variable.
+    }
+
+    parameter javaCompileCommand {javac -g -deprecation} \
+	    -label "Java compile command" \
+	    -description {
+        The command that is used to compile Java files.
+    }
+}

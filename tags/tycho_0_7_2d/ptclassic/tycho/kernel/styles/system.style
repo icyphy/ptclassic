@@ -1,0 +1,66 @@
+# -*- mode: tcl -*-
+#
+# @(#)system.style	1.4 10/07/97
+#
+# The "system" master style-sheet
+#
+configure -title "System"
+configure -description {
+	This style contains system-wide application settings.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default style for the system.
+} {
+    parameter autoSaveInterval 5 \
+	    -label "Auto-save interval" \
+	    -description {
+	The auto-save interval in minutes.
+	A value of zero means no auto-save.
+    }
+
+    parameter slowNetwork 0 \
+	    -type boolean \
+	    -label "Is this a slow Network connection?" \
+	    -description {
+	If set, Tycho tries not to bring up lots
+	of graphics that will flood a slow network
+	connection.  Typically, this parameter is set
+	if you are running over a modem ppp connection.
+    }
+
+    parameter userName {} \
+	    -label "User Name (not uid)" \
+	    -description {
+	The full name of the user.
+    }
+
+    # FIXME: This doesn't belong here (or anywhere, for that matter!)
+    parameter itclHTMLPage {$tycho/doc/itclhtml/TclTkMainList.html} \
+	    -label "Pathname of Itcl TclTkMainList.html file" \
+	    -description {
+	The location of the Itcl man pages.  The
+	default location is usually a link to the Itcl sources.
+    }
+
+    parameter revisionControlTypes {SCCS RCS} \
+	    -label "Supported revision control types" \
+	    -description {
+	Types of revision control software, in order of parameter.
+	It is assumed that for each type listed, there is a class defined
+	called RevControl$type, where $type is the type, and that this
+	class is derived from RevControl.
+    }
+
+    parameter sccsAdminOptions \
+	    "-fq[clock format [clock seconds] -format %Y] -fi " \
+	    -label "Options to the \"sccs admin\" command" \
+	    -description {
+	Default options for the "sccs admin" command force there to be ID
+	keywords in the file, and also indicate that 1996 should be
+	replaced with the current year. (Use clock here, as it is much
+	faster than exec date)
+    }
+}

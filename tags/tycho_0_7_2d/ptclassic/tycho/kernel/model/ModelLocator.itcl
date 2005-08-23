@@ -1,0 +1,491 @@
+#########################################################################
+# Version: @(#)ModelLocator.itcl	1.3 07/21/98
+# Author: John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+######################################################################
+#### model
+# Perform operations on the tycho model database. This procedure is
+# simply a front-end to a single instance of the ModelLocator
+# class.
+#
+proc ::tycho::model {method args} {
+    eval [::tycho::ModelLocator::instance] $method $args
+}
+
+#########################################################################
+#### ModelLocator
+#
+# The <i>ModelLocator</i> model contains run-time information about
+# loaded models. It provides support for finding models by relative
+# path and by symbolic name, and for reference-counting models so
+# that multiple views can access models.
+#
+# This model is not usually going to be stored on disk, since
+# it represents run-time information. This is also a singleton
+# class, since there should only ever be one of these. Use the
+# instance{} procedure to get access to the unique instance.
+#
+# This model has the following types:
+# <dl>
+# <dt><b>reference</b> _name_
+# <dd>
+# A reference to a model proxy. Each instance of this type represents
+# the model found by combining a working directory with a relative
+# path.  It has the following attributes:
+#   <dl>
+#   <dt><b>-workdir</b> _path_
+#   <dd>
+#   The working directory. This must be an absolute path, or null.
+#   The default is null.
+#
+#   <dt><b>-path</b> _path_
+#   <dd>
+#   The relative path to the model.
+#
+#   <dt><b>-proxy</b> _proxy_
+#   <dd>
+#   The id of the proxy of the model that is found by searching
+#   relative to the working directory and TIM_PATH.
+#
+# </dl>
+#
+# <dt><b>proxy</b> _path_
+# <dd>
+# A reference to a model. Each instance of this type references a
+# unique model on disk. The name of the proxy is an
+# automatically-generated id. It has the following attributes:
+#   <dl>
+#   <dt><b>-class</b> _classname_
+#   <dd>
+#   The name of the subclass of Model that can load the model.
+#   If <b>-object</b> is not null, then this will be the same
+#   as its class.
+#
+#   <dt><b>-extension</b> _extension_
+#   <dd>
+#   The file name extension of the Model. This is used to find the
+#   file containing the model.
+#
+#   <dt><b>-keys</b> _keylist_
+#   <dd>
+#   A list of keys used to link clients to this model.
+#
+#   <dt><b>-modelmode</b> _mode_
+#   <dd>
+#   The mode obtained from the file header.
+#
+#   <dt><b>-modelname</b> _path_
+#   <dd>
+#   The relative path to the file which contains the model.
+#
+#   <dt><b>-object</b> _object_
+#   <dd>
+#   The model object. If null, then the model is no longer loaded.
+#
+#   <dt><b>-path</b> _path_
+#   <dd>
+#   The absolute path to the file containing this model.
+#
+# </dl>
+# </dl>
+#
+class ::tycho::ModelLocator {
+    inherit ::tycho::DataModel
+
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Link a client to the model and return a reference to it
+    method link {id key}
+
+    # Given a proxy, dereference it into a model object
+    method dereference {proxy}
+
+    # Load a model into memory, if it is not already
+    method load {proxy args}
+
+    # Given a path and possible a working directory, return a proxy
+    method locate {path args}
+
+    # Register a class name for mode or submode
+    method register {mode class}
+
+    # Reload a model from its file
+    # method reload {path}
+
+    # Unlink from a model
+    method unlink {proxy key}
+
+    #################################################################
+    ####                     public procs                      ####
+
+    # Get access to the unique instance
+    proc instance {} {
+        if { [infoWhich ::tycho::modelLocator] == "" } {
+            uplevel #0 ::tycho::ModelLocator ::tycho::modelLocator
+        }
+        return ::tycho::modelLocator
+    }
+
+    #################################################################
+    ####                   private variables                     ####
+
+    # The mapping from mode to Itcl class
+    private variable _modemap
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::ModelLocator::constructor {args} {
+    # Define the "reference" type
+    define reference \
+            :leafonly 1 \
+	    -path "" \
+	    -proxy "" \
+	    -workdir ""
+
+    # Define the "proxy" type
+    define proxy \
+            :leafonly 1 \
+            -class "" \
+            -extension "" \
+            -keys "" \
+            -modelmode "tcl" \
+            -modelname "" \
+            -object ""
+
+    # Evaluate options
+    eval configure $args
+}
+
+########################################################################
+#### destructor
+#
+body ::tycho::ModelLocator::destructor {} {
+    # We should probably delete all referenced models,
+    # but since we will be exiting Tycho at this point,
+    # there seems to be no need.
+}
+
+#########################################################################
+#########################################################################
+####                          public methods                         ####
+
+
+########################################################################
+#### dereference
+#
+# Given a proxy, return the model object represented by that proxy.
+# The model will be loaded into memory if it is not currently.
+# Note that this should be called only by clients that have already
+# used link{} to keep the model in memory.
+#
+body ::tycho::ModelLocator::dereference {proxy} {
+    if { [attrget $proxy -object] == "" } {
+	# It's not loaded, so load it
+	load $proxy
+    }
+    # Return the object
+    attrget $proxy -object
+}
+
+########################################################################
+#### link
+#
+# Link a client to the model and return a reference to the model
+# object. The object exists for as
+# long as there are clients with links to it. Two arguments must
+# be supplied: the _proxy_, which is returned by the locate{} method,
+# and a _key_ argument, which is usually the name
+# of the client. The key must be used to unlink from the model
+# later on, and is used instead of a simple reference count
+# because it is more reliable. This method raises an error
+# if the key has already been used to link to the model. If the
+# model is known but not loaded, load it. Return the model object.
+#
+body ::tycho::ModelLocator::link {proxy key} {
+    # Make sure it's loaded
+    set object [dereference $proxy]
+
+    # Check for duplicate key
+    set keys [attrget $proxy -keys]
+    if { [lsearch -exact $keys $key] != -1 } {
+        error "Key \"$key\" is already in use"
+    }
+    # Add the key
+    lappend keys $key
+    attrset $proxy -keys $keys
+
+    # Return the object
+    return $object
+}
+
+########################################################################
+#### load
+#
+# Load a model into memory, if it is not already. The argument
+# given must be a valid proxy id returned by locate{}. This
+# method is not intended for general use -- use link{}
+# and dereference{} instead.
+#
+body ::tycho::ModelLocator::load {proxy} {
+    if { [attrget $proxy -object] != "" } {
+	# It's already loaded, so just return
+	return
+    }
+
+    # Create the model
+    set cls [attrget $proxy -class]
+    set nm [::tycho::autoName [string tolower [namespaceTail $cls]]]
+    set model [uplevel #0 $cls $nm]
+ 
+    puts "Loading $cls $nm"
+
+    # Load its data
+    set path [attrget $proxy -path]
+    set fd [open $path]
+    set data [read $fd]
+    close $fd
+    if [catch {
+	$model parse $data
+    } msg] {
+	# Recovery: delete model
+	# ::delete object $model
+
+	# Re-throw error
+	global errorInfo
+	error $msg $errorInfo
+    }
+
+    # Remember the model (this must be after the call to parse{})
+    attrset $proxy -object $model
+        
+    # Give the model name its relative name
+    # FIXME: this is not reliable
+    $model configure -modelname [attrget $proxy -modelname]
+
+    # Return the absolute path
+    return $path
+}
+
+########################################################################
+#### locate
+#
+# Locate a model. _path_ can be an absolute path or a relative path.
+# If it is relative, the search path given by TIM_PATH is searched
+# to find the file, with <b>-workdir</b> substituted for any path
+# starting with ".". If the model has previously been located with
+# this path and working directory, than the existing proxy is
+# returned; otherwise a new one is created. The optional arguments
+# can include the following:
+#   <dl>
+#   <dt><b>-workdir</b> _path_
+#   <dd>
+#   The absolute path of the current working directory, which will
+#   be used for any item in the search path that starts with ".".
+#
+#   <dt><b>-force</b> _bool_
+#   <dd>
+#   Is true, then the search path will be rescanned for the model,
+#   and the reference updated.
+#
+#  </dl>
+#
+body ::tycho::ModelLocator::locate {path args} {
+    array set opts {-workdir "" -force 0}
+    array set opts $args
+
+    # See if we already have one
+    if !$opts(-force) {
+	set candidates [search -exact -path $path]
+	foreach c $candidates {
+	    if { [attrget $c -workdir] == $opts(-workdir) } {
+		# Found one!
+		return [attrget $c -proxy]
+	    }
+	}
+    } else {
+	# If we are forcing a new search, delete anu existing
+	# matching references
+	set candidates [search -exact -path $path]
+	foreach c $candidates {
+	    if { [attrget $c -workdir] == $opts(-workdir) } {
+		delete $c
+	    }
+	}
+    }
+
+    # FIXME: use TIM_PATH from: environment? preferences?
+    set searchpath [::tycho::expandPath {$TYCHO}]
+
+    # Search for the file
+    set file [::tycho::urlPathSearch $path $searchpath $opts(-workdir)]
+    if { $file == "" || ![::tycho::resource readable $file] } {
+	# We didn't find the file, or it wasn't readable.
+        return ""
+    }
+    
+    # Now, if we did find it, see if we already have a proxy
+    set proxy [search -exact -path $file]
+    if { $proxy != "" } {
+	# Already got one
+	set proxy [lindex $proxy 0] ;# shouldn't be necessary
+	
+    } else {
+	# Don't already have one, so make it
+	set proxy [::tycho::autoName proxy]
+	add proxy $proxy -path $file
+
+	# Get the default suffix-based mode
+	set filemode [::tycho::registry filemode $file]
+	set mapopts(-mode) $filemode
+	set mapopts(-modelname) $path
+
+	# Read the actual file header
+	::tycho::readFileHeader $file hdr
+	foreach {o v} [array get hdr] {
+	    set mapopts(-$o) $v
+	}
+
+	# If there is no class, see if we can get one based on the
+	# file mode
+	if ![::info exists mapopts(-class)] {
+	    if [::info exists _modemap($mapopts(-mode))] {
+		set opts(-class) $_modemap($mapopts(-mode))
+	    } elseif [::info exists _modemap($filemode)] {
+		set mapopts(-class) $_modemap($filemode)
+	    }
+	}
+	if ![::info exists mapopts(-class)] {
+	    error "Could not figure out model class for $path"
+	}
+	# Configure the proxy
+	foreach {o _} [attrget $proxy] {
+	    if [::info exists mapopts($o)] {
+		attrset $proxy $o $mapopts($o)
+	    }
+	}
+    }
+
+    # Create a reference to it
+    add reference [::tycho::autoName ref] \
+	    -path $path \
+	    -workdir $opts(-workdir) \
+	    -proxy $proxy
+
+    # Return the proxy
+    return $proxy
+}
+
+########################################################################
+#### register
+#
+# Register a class to be created to open a model file in a given
+# mode.
+#
+body ::tycho::ModelLocator::register {mode class} {
+    if [::info exists _modemap($mode)] {
+	error "Mode \"$mode\" is already registered"
+    }
+    set _modemap($mode) $class
+}
+
+########################################################################
+#### reload
+#
+# Force a reload of a TIM model file. This may be needed in situations
+# in which data is changed by a program other than Tycho and
+# views in Tycho need to be updated to reflect the change.
+# _path_ must the absolute path to the model's file as returned
+# by the locate{} and load{} methods. If the model is not currently
+# loaded, then it is simply loaded. Otherwise, the clear{} method of
+# the model is called and the model is then loaded from the file. Finally,
+# all subscribers to the model are notified of the "reload" event.
+#
+set junk {
+    body ::tycho::ModelLocator::reload {path} {
+	# Make sure it's known 
+	if ![exists $path] {
+	    error "Unknown model path \"$path\""
+	}
+	# If it's not loaded, just load it
+	set model [attrget $path -object]
+	if { $model == "" } {
+	    load $path
+	} else {
+	    # Otherwise, clear it and reload
+	    # FIXME: revert options to defaults...
+	    $model clear
+	    set fd [open $path]
+	    set data [read $fd]
+	    close $fd
+	    $model parse $data
+	    
+	    # Publish the fictional "reload" event
+	    $model notify event "reload"
+	}
+    }
+}
+
+########################################################################
+#### unlink
+#
+# Unlink from a model. _proxy_ must be a proxy returned by the
+# locate{} method. _key_ must be a key that was previously used
+# to link to the model. If this is the last link to the model,
+# then the object is deleted.
+#
+body ::tycho::ModelLocator::unlink {proxy key} {
+    # Make sure it's known 
+    if ![exists $proxy] {
+	error "Unknown proxy \"$proxy\""
+    }
+    # Get keys and check
+    set keys [attrget $proxy -keys]
+    if { [set t [lsearch -exact $keys $key]] == -1 } {
+        error "Key \"$key\" unknown for proxy \"$proxy\""
+    }
+    # Delete the key
+    set keys [lreplace $keys $t $t]
+    attrset $proxy -keys $keys
+
+    # If there are no linked clients, delete the model
+    if { $keys == "" } {
+	puts "Unloading model \"[attrget $proxy -object]\""
+
+        ::delete object [attrget $proxy -object]
+        attrset $proxy -object ""
+    }
+    return ""
+}

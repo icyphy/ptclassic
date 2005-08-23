@@ -1,0 +1,26 @@
+# -*- mode: tcl -*-
+#
+# @(#)stacktrace.style	1.3 10/07/97
+#
+# The "stacktrace" master style-sheet
+#
+configure -title "Stack trace colors"
+configure -description {
+    Additional color settings for stack trace windows.
+}
+
+style default \
+	-label "Default"  {
+    
+    parameter commentColor forestGreen \
+	    -type color \
+	    -label "Comment highlight"
+
+    parameter errorColor red \
+	    -type color \
+	    -label "Error text highlight"
+
+    parameter titleColor black \
+	    -type color \
+	    -label "Title color"
+}

@@ -1,0 +1,254 @@
+# Definition of a Makefile context-sensitive editor.
+#
+# @Authors: Joel King, Christopher Hylands
+#
+# @Version: @(#)EditMake.itcl	1.28 02/04/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+#### FIXME: Known bugs:
+# Multi-line rules are not consistently parsed correctly.
+
+
+#######################################################################
+#### EditMake
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing Make files. This editor also
+# colors comments and the strings "FIXME" and "NOTE". Note that a Tab 
+# is a literal tab, and has no special default behavior.
+#
+class ::tycho::EditMake {
+    inherit ::tycho::EditProgram
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Open a help window.
+    method help {}
+
+    # Open a Monitor window and run make.
+    method evaluate {}
+
+    # Tag and color the code in a region.
+    method parseNow {start stop}
+
+    # Generate a Microsoft Visual C++ makefile from the current buffer.
+    method genVCMakefileBuffer {}
+
+    ##########################################################################
+    ####                         protected methods                        ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ###################################################################
+    ####                      private variables                    ####
+
+    private variable monitor {}
+}
+
+###################################################################
+#
+body ::tycho::EditMake::constructor {args} {
+
+    eval itk_initialize $args
+
+    # Rebind the Tab character to insert literal Tab.
+    bind $itk_component(text) <Tab> "$this insertString insert {\t}; break"
+
+    set fillPrefix "#" 
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditMake::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit textedit doc usersGuides \
+	    EditMakeHelp.html] html
+}
+
+###################################################################
+#### evaluate
+# Open a Monitor window and run make or nmake with this makefile
+#
+body ::tycho::EditMake::evaluate {} {
+    saveQuery
+
+    if {[file extension [filename]] == ".vc"} {
+        set command "nmake /nologo /f [filename]"
+    } else {
+        set command "make -f [filename]"
+    }
+    set monitor [::tycho::view Monitor -toolbar 1 \
+            -command "$command" \
+            -dir [file dirname [filename]]]
+    puts "monitor=$monitor [file extension [filename]]"
+}
+
+#####################################################################
+#### parseNow
+# This is a very simple parser that tags and colors the lines of text
+# starting with the one containing the "start" index and ending on
+# the line containing the "stop" index.
+#
+body ::tycho::EditMake::parseNow {start stop} {
+
+    EditProgram::parseNow $start $stop
+
+    set text $itk_component(text)
+
+    # Get the line numbers from the indices
+    regexp {[0-9]+} [$text index $start] startline
+    regexp {[0-9]+} [$text index $stop] endline
+        
+    # Remove tags first, if necessary
+    $text tag remove include $startline.0 "$stop lineend"
+    $text tag remove variable $startline.0 "$stop lineend"
+    $text tag remove rule $startline.0 "$stop lineend"
+    $text tag remove refvar $startline.0 "$stop lineend"
+
+    # Scan each line of text.
+    # NOTE: This should probably be re-written to not use this line-oriented
+    # style, which is very slow.  See the other editors, like EditTcl.
+    for {set lineno $startline} {$lineno <= $endline} {incr lineno} {
+	set line [$text get $lineno.0 "$lineno.0 lineend"]
+	
+	# include and -include.
+	if [regexp "^\[ \t\]*(include|-include|!include)\[ \]+" $line] {
+	    $text tag add include \
+		    $lineno.0 "$lineno.0 lineend +1 char"
+	}
+
+	# Rules.
+	if [regexp "^.*:.*" $line] {
+	    $text tag add rule \
+		    $lineno.0 "$lineno.0 lineend +1 char"
+	    # Tag commands as well 
+	    for {set templineno [expr $lineno + 1]; set templine \
+		    [$text get $templineno.0 \
+		    "$templineno.0 lineend"]} {[regexp "^\t.*" $templine]} {\
+		    set templineno [expr $templineno + 1]; set templine \
+		    [$text get $templineno.0 "$templineno.0 \
+		    lineend"]} {
+		$text tag add rule \
+			$templineno.0 "$templineno.0 lineend +1 char"
+	    }
+	}
+
+	# Variable.
+	if [regexp -nocase "^\[ \t\]*\[a-z_\]+\[ \t\]*=" $line firstInst] {
+	    regexp -nocase "\[a-z_\]\[ \t\]*=" $line lastInst
+	    set startchar [string first $firstInst $line]
+	    set finishchar [string last $lastInst $line]
+	    $text tag add variable \
+		    $lineno.$startchar "$lineno.$finishchar +1 char"
+	}
+
+	# Referenced variables "$(VARNAME)". If you can make sense of
+	# this parsing routine is less then 5 minutes, I'll buy you 
+	# lunch. It really is that convoluted!
+	if [regexp -nocase "^.*\\$\\(\[a-z_\]+\\).*" $line] {
+	    for {set templine $line; set offset 0} \
+		    {[regexp -nocase "\\$\\(\[a-z_\]+\\).*" $templine next]} \
+		    {} {
+		set startchar [string first $next $templine]
+		set startchar [expr $startchar + $offset]
+		set offset $startchar
+		set finishchar [string first ")" $next]
+		set offset [expr $finishchar + $offset]
+		regexp "\\).*" $next templine
+		set finishchar [expr $finishchar + $startchar]
+		$text tag add refvar \
+			$lineno.$startchar "$lineno.$finishchar +1 char"
+		
+	    }
+	}
+
+    }
+    
+    # Set the visual characteristics of the tagged text
+    $text tag configure rule -foreground \
+	    [stylesheet get makefile ruleColor]
+    $text tag configure include -foreground \
+	    [stylesheet get makefile includeColor]
+    $text tag configure variable -foreground \
+	    [stylesheet get makefile variableColor]
+    $text tag configure refvar -foreground \
+	    [stylesheet get makefile refvarColor]
+
+    $text tag lower rule comment
+    $text tag lower include comment
+    $text tag lower variable comment
+    $text tag lower refvar comment
+}
+
+
+
+#####################################################################
+#### genVCMakefile
+# Generate a Microsoft Visual C++ makefile from a Unix makefile.
+#
+body ::tycho::EditMake::genVCMakefileBuffer {} {
+    global TYCHO
+    saveQuery
+    ::genVCMakefile [filename]
+    set makefile [filename].vc
+    if [ file readable $makefile] {
+        set window [::tycho::openContext $makefile]
+        $window reload
+        return $window
+    } else {
+        return {}
+    }
+}
+
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditMake::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if { $menubar != "" \
+	    && "[filename]" != "" \
+	    && ! [regexp {.vc$} [filename]]} {
+        $menubar separator specialsep1 special
+
+        $menubar command genVCMakefile special \
+                -label "Generate VC Makefile" -underline 0 \
+                -command "$this genVCMakefileBuffer"
+    }
+}

@@ -1,0 +1,92 @@
+#!/bin/sh
+# the next line restarts using tclsh \
+exec itclsh "$0" "$@"
+#
+# itcl2dag - Convert a set of itcl classes to a Tycho Directed Acyclic Graph
+# Authors: Christopher Hylands
+# Version: @(#)itcl2dag	1.4 03/29/98
+
+# Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# See the file $TYCHO/copyright.txt for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+
+# Usage:
+# itcl2dag	- Generate $TYCHO/doc/tychoClasses.dag, 
+#		the class diagram for the default Tycho Tree
+# itcl2dag [-t title] dagfile ItclFile.itcl . . .
+#		- Generate $dagfile, which will contain a class diagram
+#		for all the classes in the Itcl files.
+
+namespace ::tycho
+
+# This section is straight from $TYCHO/kernel/Tycho.tcl.  We use
+# code duplication here because this is a standalone script and there
+# is no easy way to source tycho kernel files until we set the tycho tcl var.
+global env tk_library tk_version
+global ptolemy PTOLEMY
+global tycho TYCHO
+
+if [info exist env(TYCHO)] {
+    set tycho $env(TYCHO)
+    set TYCHO $env(TYCHO)
+}
+
+if [info exist env(PTOLEMY)] {
+    set ptolemy $env(PTOLEMY)
+    set PTOLEMY $env(PTOLEMY)
+    if {![info exists tycho]} {
+	set env(TYCHO) $ptolemy/tycho
+	set tycho $ptolemy/tycho
+	set TYCHO $ptolemy/tycho
+    }
+}
+
+if {![info exists tycho]} {
+    # Neither environment variable is set.
+    # See whether there is a ~ptolemy or ~ptdesign user, in that order,
+    # that has tycho installed.
+    if [file exists [glob -nocomplain ~ptolemy/tycho]] {
+	set tycho [glob ~ptolemy/tycho]
+	set TYCHO $tycho
+    } {
+	if [file exists [glob -nocomplain ~ptdesign/tycho]] {
+	    set tycho [glob ~ptdesign/tycho]
+	    set TYCHO $tycho
+	}
+    }
+}
+
+if {![info exists tycho] || ![file exists $tycho]} {
+    # All of the above failed, give up
+    error {To run tycho, set your environment variable TYCHO to the tycho home}
+}
+# End of duplicated code from Tycho.tcl
+
+namespace ::tycho
+source $tycho/kernel/tychoMakeClassDAG.tcl
+set ::auto_path [linsert $auto_path 0 [file join $tycho kernel] ]
+
+set title "Tycho Class Hierarchy"
+set switchCount 0
+for {set n 0} {$n < $argc} {incr n} {
+    if { [ lindex $argv $n] == "-t" } {
+	set title [lindex $argv [incr n]]
+	incr switchCount 2
+    }
+}
+
+if {$argc == 0 || $argc == $switchCount} {
+    set retval [tychoStandardDAG]
+} else {
+    if {$argc < 2 } {
+	error "Usage: itcl2dag \[-t title\] dagoutput itclinput"
+    }
+    set retval [eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
+	[split [lrange $argv [expr $switchCount + 1] end]]]
+
+}
+if {$retval != {}} {
+    puts stderr $retval
+}
+		

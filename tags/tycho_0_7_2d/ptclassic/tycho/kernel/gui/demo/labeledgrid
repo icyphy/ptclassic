@@ -1,0 +1,235 @@
+#!/bin/sh
+#  LabeledGrid demo script
+#   @(#)labeledgrid	1.1 06/09/98
+#\
+	exec itkwish -f "$0" ${1+"$@"}
+
+catch {destroy .f}
+
+# We have to load tycho.gui, so make sure
+# that the directory two levels up is in the
+# autopath.
+lappend auto_path [file dirname [file dirname [file dirname [pwd]]]]
+
+# Load the package
+package require tycho.kernel.gui
+
+iwidgets::scrolledframe .f \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 400 -width 500
+
+set w [.f childsite].w
+::tycho::WidgetTree $w -createcommand "createQuery $w" \
+	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
+	
+foreach tag {simple double mixed boxed separated} label {
+    "A labeledgrid with a single column of widgets"
+    "A labeledgrid with two labeled columns of widgets"
+    "A labeledgrid with mixed-span widgets"
+    "A labeledgrid with boxed groups"
+    "A labeledgrid with separated groups"
+} {
+    $w add node $tag -text $label
+}
+grid $w -sticky nw
+
+pack .f -fill both -expand on
+wm deiconify .
+raise .
+
+# This is the proc that create the queries when panels are opened.
+
+proc createQuery {win tag} {
+    # So we can play with the widgets later
+    global a b c d e
+    switch -exact $tag {
+        "simple" {
+            $win add labeledgrid simple.q -labelforeground blue
+            set a [$win component simple.q]
+
+            $a add entry foo -label "An entry" -initial "Some text"
+            $a add entry oof -label "Another entry" -initial "Some more text"
+
+	    $a vskip -minsize 4
+	    $a add text t -label "A text widget" \
+		    -initial "This\nis\na\nsmall\ntext\nwidget\n" \
+		    -height 60
+	    $a vskip -minsize 4
+
+            $a add optionmenu option -label "An option menu" \
+		    -entries {Unix VMS Linux OS/2 {Windows NT} DOS} \
+		    -initial DOS \
+                    -command "puts \[$a get option\]"
+
+            $a add checkbutton baz -label "A checkbutton" \
+                    -initial 1 -text "Check me!"
+
+            $a group gee -label "Groupies" -rowspan 4 -initial foo \
+                    -rowspan 2
+            $a add radiobutton gee.a -text Foo -value foo
+            $a add radiobutton gee.b -text Bar -value bar
+            $a add radiobutton gee.c -text Baz -value baz
+            $a add radiobutton gee.d -text Goo -value goo
+            $a add radiobutton gee.e -text Boo -value boo
+            $a add radiobutton gee.f -text "A longer name" -value loo
+        }
+        "double" {
+            $win add labeledgrid double.q -columnspan 8 -childcolumnspan 3 \
+		    -labelforeground blue
+            set b [$win component double.q]
+
+            $b add entry foo -label "An entry" -initial "Some text"
+            $b add entry oof -label "Another entry" -initial "Some more text"
+            $b add entry bar -label "And so on..."
+            $b add entry rab -label "And so on"
+
+  	    $b group gee -label "Groupies" -rowspan 2 -initial foo 
+            $b add radiobutton gee.a -text Foo -value foo
+            $b add radiobutton gee.b -text Bar -value bar
+            $b add radiobutton gee.c -text Baz -value baz
+            $b add radiobutton gee.d -text Goo -value goo
+            $b add radiobutton gee.e -text Boo -value boodest
+            $b add radiobutton gee.f -text "A longer name" -value loo
+
+            $b group checkies -label Checkies -rowspan 2 -columnspan 1
+            $b add checkbutton checkies.a -label "A checkbutton" \
+                    -initial 1 -text "Check me!"
+            $b add checkbutton checkies.b -label "Another" \
+                    -text "Me too!"
+        }
+        "mixed" {
+            # Layout from page 164 of Mullet and Sano
+            $win add labeledgrid mixed.q -columnspan 4 -childcolumnspan 1 \
+		    -labelforeground blue
+	    set c [$win component mixed.q]
+
+            $c add entry name -label "Name:" -columnspan 3
+            $c add entry street -label "Street:" -columnspan 3
+            $c add entry city -label "City/State:" -columnspan 2
+            $c add entry state -style plain
+            $c add entry zip -label "ZIP:"
+            $c vskip
+            $c add entry phone -label "Phone/FAX:"
+            $c add entry fax -style plain
+            $c vskip
+            $c add entry email -label "E-mail:" -columnspan 2
+            $c vskip
+            $c vskip -minsize 12
+
+            $c group interests -label "Interests:" -columnspan 3
+            $c add checkbutton interests.compilers -text "Compilers"
+            $c add checkbutton interests.databases -text "Databases" \
+                    -initial 1
+            $c add checkbutton interests.productivity -text "Productivity"
+            $c add checkbutton interests.prototyping -text "Prototyping"
+            $c add checkbutton interests.teamware -text "Teamware" \
+                    -initial 1
+            $c add checkbutton interests.networking -text "Networking"
+        }
+        "boxed" {
+            $win add labeledgrid boxed.q -columnspan 8 -childcolumnspan 3 \
+                    -childstyle boxed -labelforeground blue
+            set d [$win component boxed.q]
+
+            $d group entries -label "Enter here" -rowspan 2 \
+                    -childcolumnspan 2 -childstyle simple
+
+            $d add entry entries.foo -label "An entry" \
+                    -initial "Some text"
+            $d add entry entries.oof -label "Another entry" \
+                    -initial "Some more text"
+
+            $d group checks -label "Check here" -rowspan 2 -columnspan 1
+            $d add checkbutton checks.a -label "A checkbutton" \
+                    -onvalue On -offvalue Off \
+                    -initial On -text "Check me!"
+            $d add checkbutton checks.b -label "Another" \
+                    -onvalue On -offvalue Off \
+                    -initial On -text "Check me too!"
+
+            $d group gee -label "Group here" \
+                    -rowspan 4 -childcolumnspan 3 -childstyle simple
+
+            $d group gee.a -label "Choose one" -initial foo
+            $d add radiobutton gee.a.a -text Foo -value foo
+            $d add radiobutton gee.a.b -text Bar -value bar
+
+            $d group gee.b -label "Choose another" -initial goo
+            $d add radiobutton gee.b.a -text Goo -value goo
+            $d add radiobutton gee.b.b -text Boo -value boo
+
+            $d group radio -label "Radio here" -rowspan 4 -columnspan 1 \
+                    -initial M
+            $d add radiobutton radio.a -value M -text "Mars calling"
+            $d add radiobutton radio.b -value E -text "Earth calling"
+        }
+       "separated" {
+            $win add labeledgrid separated.q  -columnspan 3 \
+                    -childstyle separated \
+		    -labelforeground blue \
+		    -labelanchor w
+            set e [$win component separated.q]
+
+	   $e group entries -label "Enter here" -rowspan 2 \
+                    -childcolumnspan 3 -childstyle simple
+
+            $e add entry entries.foo -label "An entry" \
+                    -initial "Some text"
+            $e add entry entries.oof -label "Another entry" \
+                    -initial "Some more text"
+
+            $e group checks -label "Check here" -rowspan 2
+            $e add checkbutton checks.a -text "Check me!"
+            $e vskip checks
+            $e add checkbutton checks.b -text "Me too!"
+            
+            $e vskip
+ 	    $e group gee -label "Group here" -rowspan 4 -initial foo \
+                    -rowspan 2
+            $e add radiobutton gee.a -text Foo -value foo
+            $e add radiobutton gee.b -text Bar -value bar
+            $e add radiobutton gee.c -text Baz -value baz
+            $e add radiobutton gee.d -text Goo -value goo
+            $e add radiobutton gee.e -text Boo -value boo
+            $e add radiobutton gee.f -text "A longer name" -value loo
+
+ 	    $e add text ranting -label "Write here" \
+		    -initial "This is a text widget."
+       }
+    }
+}
+
+set junk {
+    $win add labeledgrid boxed.q \
+	    -columnspan 8 -childcolumnspan 3 \
+            -childstyle boxed -labelforeground blue {
+	
+	group entries -label "Enter here" \
+		-rowspan 2 -colspan 2 \
+                -childcolumnspan 2 -childstyle simple {
+	    
+	    add entry foo -label "An entry" -initial "Some text"
+	    add entry oof -label "Another entry" -initial "Some more text"
+	}
+	group checks -label "Check here" -rowspan 2 -columnspan 1
+	add checkbutton a -label "A checkbutton" -initial 1 -text "Check me!"
+	add checkbutton b -label "Another" -initial 1 -text "Check me too!"
+    }
+    group gee -label "Group here" \
+	    -rowspan 2 -childcolumnspan 3 -childstyle simple {
+
+	group a -label "Choose one" -initial foo {
+	    add radiobutton a -text Foo -value foo
+	    add radiobutton b -text Bar -value bar
+	}
+	group b -label "Choose another" -initial goo {
+	    add radiobutton a -text Goo -value goo
+	    add radiobutton b -text Boo -value boo
+	}
+    }
+    group radio -label "Radio here" -rowspan 2 -columnspan 1 -initial A {
+	add radiobutton a -value M -text "Mars calling"
+	add radiobutton b -value E -text "Earth calling"
+    }
+}
+set junk ""

@@ -1,0 +1,80 @@
+# Test suite for Monitor class. 
+# This uses graphics, so it must be run with tycho -e
+#
+# @Author: Kevin Chang
+#
+# @Version: @(#)testMail.itcl	1.3 03/23/98
+#
+# @Copyright (c) 1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.html
+
+
+# NOTE: We can test the error messages of ResourceMail, but we
+# can't test a successful send. That would require either
+# 1) the test case to read /usr/mail/spool manually 
+#   or
+# 2) let the user interactively select whether the message was sent
+#    successfully.
+#
+test mail-badaddress0 {Mailing to a bad address that doesn't exists} {
+    set mailobj [::tycho::resource new mailto:kchang@i.do.not.exist12321.com]
+    $mailobj open
+    $mailobj puts "Subject: Auto Test 1"
+    $mailobj puts ""
+    $mailobj puts "This is an automated test of ResourceMail.itcl"
+    set msg {}
+    catch {$mailobj close} msg
+    after 5000 "delete object $mailobj"
+    set msg
+} {Can't open i.do.not.exist12321.com, 25}
+
+#
+#
+test mail-badreceiver0 {Mailing to a bad user name that doesn't exist} {
+    set mailobj [::tycho::resource new \
+            mailto:test_bounced_mail@ptolemy.eecs.berkeley.edu]
+    $mailobj open
+    $mailobj puts "Subject: Auto Test 2, ***** ERASE ME *****"
+    $mailobj puts ""
+    $mailobj puts "You have just ran Tycho's automated test."
+    $mailobj puts "This bounced mail is a result of testMail.itcl"
+    $mailobj puts "to test ResourceMail.itcl."
+    $mailobj puts ""
+    $mailobj puts "Please erase this message, as it is generated"
+    $mailobj puts "automatically within the test suite."
+    set msg {}
+    catch {$mailobj close} msg
+    after 5000 "delete object $mailobj"
+    set msg
+} {0}
+
+
+
+

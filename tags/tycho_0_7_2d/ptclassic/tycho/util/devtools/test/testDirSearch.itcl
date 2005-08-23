@@ -1,0 +1,75 @@
+# Test suite for widgets in tycho.
+#
+# @Authors: Edward A. Lee, Christopher Hylands
+#
+# @Version: @(#)testDirSearch.itcl	1.2 03/23/98
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.util.devtools
+package require tycho.kernel.gui
+
+#set VERBOSE 1
+
+######################################################################
+#### test the DirSearch widget
+# 
+test EditDirSearch-1.1 {Test the DirSearch widget} {
+    cd [file join $env(DEVTOOLS_LIBRARY) test]
+    # This is a proc, not a test body, so it is not executed in the global
+    # scope, so we need to declare TY_TEST_MODAL as global
+    global TY_TEST_MODAL
+    # This script is executed inside Dialog::wait 
+    set TY_TEST_MODAL {
+	{
+	    %0 insert entry  "*.itcl"
+	    %0 insert regexp "foo"
+	    update idletasks
+	    after 500
+	    # FIXME: THis is broken: OK doesn't return the window
+	    set indexwin [%0 ok]
+            $indexwin goto 1
+            # Don't hit the ok button, we won't be able to close the window
+            #$indexwin ok
+            update
+            after 500
+            destroy $indexwin
+	}
+    }
+
+    set w [::tycho::autoName .dirsearch];
+    ::tycho::DirSearch $w -geometry +0+0;
+    wm deiconify $w
+    ::tycho::Dialog::wait $w
+    update
+    after $duration destroy $w
+    after $duration cd [file join $TYCHO kernel test]
+    # It would be nice if we could get a return value here.
+    list {}
+} {{}}

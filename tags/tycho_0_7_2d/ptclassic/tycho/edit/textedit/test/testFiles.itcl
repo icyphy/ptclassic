@@ -1,0 +1,70 @@
+# Test suite for widgets in tycho/editors/textedit by opening files
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)testFiles.itcl	1.3 04/29/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# A number of windows will be created, and then some time after, destroyed.
+# You should just watch.  Do not push any buttons, or you could trigger
+# spurious errors.  If no errors occur during the test, there will be no
+# windows left at the end.  Currently, windows are left open for 4 seconds.
+# Run from within tycho (can just source this file and execute it).
+#
+# Limitations:
+#  - Modal dialogs are not tested so that the test can proceed automatically.
+#  - This is assumed to be run in $TYCHO/editors/textedit/test
+#  - The tests are by no means complete.
+#
+# The modal dialogs are adequately tested by the demo script.
+
+
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.textedit
+
+#set VERBOSE 1
+
+############################################################################
+#### openContext
+test openContext-1.1 {openContext} {
+    openAllFiles \
+	    Blink.java \
+	    CTestFile.c \
+	    CppTestFile.cc \
+	    ItclClassListFile.icl \
+	    PtclTestFile.pt \
+	    SDFMyRamp.pl \
+	    makefile \
+	    testFiles.itcl \
+	    wristwatch.strl \
+	    \$TYCHO/doc/index.html \
+	    \$TYCHO/kernel/Tycho.tcl
+} {}
+
+

@@ -1,0 +1,868 @@
+# A Resource for accessing files on HTTP servers
+# 
+# @Author: Kevin Chang
+#
+# @Version: @(#)ResourceHTTP.itcl	1.38 08/05/98
+# 
+# @Copyright (c) 1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+######################################################################
+#### ResourceHTTP
+#
+# This class provides an abstraction of remote files through HTTP. 
+# Using this class, remote attributes are abstracted away
+# from functionalities that Resource has.
+#
+# Here is a quick mini-tutorial to get familiar with this class. These
+# should be executed sequentially. Please look at the global procedure 
+# "::tycho::resource" to see how it interacts with this class.<br>
+# <ul>
+# <li><b>Select one of the following sites to see...</b><br>
+# <tcl><pre>set site "http://ptolemy.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.cs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://http.cs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www-inst.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.berkeley.edu"</pre></tcl>
+#
+# <li><b>See if the object exists or not</b><tcl>
+# <pre>  ::tycho::ResourceHTTP::exists $site
+# </pre></tcl>
+#
+# <li><b>Create a new HTTP object, and set the pathname</b><tcl>
+# <pre>  set httpobj [::tycho::autoName httpdemo]
+#   ::tycho::ResourceHTTP $httpobj
+#   $httpobj connect $site
+# </pre></tcl>
+#
+# <li><b>Open for reading</b><tcl>
+# <pre>  $httpobj open r
+# </pre></tcl>
+#
+# <li><b>Print out next 25 lines in this HTML file</b><tcl>
+# <pre>  set i 0
+#   set line {}
+#   while {![$httpobj eof] && [incr i]!=25} {
+#     append line "[$httpobj gets]\n"
+#   }
+#   ::tycho::inform $line
+# </pre></tcl>
+# </ul>
+#
+# <hr><!----------------------------------->
+# <br>
+# Here is another demo that demonstrates simultaneous download
+# of HTTP files:
+# <ul>
+# <li><b>Setup the sites to download</b><tcl>
+# <pre>set site1 "http://ptolemy.eecs.berkeley.edu"
+# set site2 "http://www.eecs.berkeley.edu"
+# set site3 "http://www.berkeley.edu"</pre></tcl>
+#
+# <li><b>Create objects that correspond with these sites</b><tcl>
+# <pre>set httpobj1 [::tycho::autoName httpdemo]
+# set httpobj2 [::tycho::autoName httpdemo]
+# set httpobj3 [::tycho::autoName httpdemo]
+# ::tycho::ResourceHTTP $httpobj1
+# ::tycho::ResourceHTTP $httpobj2
+# ::tycho::ResourceHTTP $httpobj3
+# $httpobj1 connect $site1
+# $httpobj2 connect $site2
+# $httpobj3 connect $site3</pre></tcl>
+#
+# <li><b>Open up connection, download simultaneously:</b><tcl>
+# <pre>$httpobj1 open r
+# $httpobj2 open r
+# $httpobj3 open r</pre></tcl>
+#
+# <li><b>Read in the lines (you can press multiple times)</b><tcl>
+# <pre>set line {}
+# append line "site1 returns:\n[$httpobj1 gets]\n\n"
+# append line "site2 returns:\n[$httpobj2 gets]\n\n"
+# append line "site3 returns:\n[$httpobj3 gets]\n\n"
+# ::tycho::inform $line</pre></tcl>
+# </ul>
+class ::tycho::ResourceHTTP {
+    inherit ::tycho::ResourceRemote
+
+    constructor {args} {}
+    destructor {}
+
+    #####################################################################
+    ####                          options                            ####
+
+    # Command to execute on each line received. It need not invoke
+    # any kind of updates to keep the user interface "live", but
+    # it doesn't matter if it does.
+    public variable notifycommand ""
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Open the resource
+    method open {{mode "r"}}
+
+    # Write a string to a streamable resource.
+    # Can't write into HTTP file! Read permission of off
+    method puts {string}
+
+    # Return the progess indicator, as a decimal number. 1.0 is full.
+    method progress {}
+
+    # Write to the file
+    method write {data}
+
+    ###################################################################
+    ####                      public procedures                    ####
+
+    # Change the permissions of a resource
+    proc chmod {permissions path} {error "Cannot chmod HTTP files"}
+
+    # Return the content type of the open file.
+    proc contenttype {url}
+
+    # Delete a resource
+    proc delete {path} {error "Cannot delete HTTP files"}
+
+    # Return a directory listing
+    proc dirlist {path}
+
+    # Test if a given resource exists
+    proc exists {path}
+
+    # Create a new directory
+    proc mkdir {path} {error "Cannot mkdir HTTP files"}
+
+    # Create a new resource object
+    proc new {path args}
+
+    # Query properties of a file
+    proc query {path option}
+
+    # Get the status of a resource
+    proc stat {path varName}
+
+    # Parse a url, this is a hack
+    proc splitURL {url}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Used by proc contenttype, and mostly exists
+    protected method getcontenttype {} {return $contenttype}
+
+    # Used by exists
+    protected method getdate {} {return $lastmodified}
+
+    # Used by exists
+    protected method getsize {} {return $contentlength}
+
+    # Abort an HTTP GET
+    protected method httpabort {}
+
+    # Test is currently performing a GET
+    protected method httpbusy {}
+
+    # Clean up after completing a get
+    protected method httpdone {}
+
+    # Initiate an HTTP get. Type is file or header.
+     method httpget {url type}
+
+    # The file event handler
+    protected method httpread {}
+
+    # FIXME
+    method info {} {
+        error "This shouldn't be called!"
+	concat [array get _forward] [array get _statinfo]
+    }
+
+    # FIXME
+    method openerror {str} {
+	::puts $str
+    }
+
+    ###################################################################
+    ####                        protected commons                  ####
+
+    ###################################################################
+    ####                        protected variables                ####
+
+    # The get mode: "file" or "header"
+    protected variable requestMode {}
+
+   # The id of the http socket
+    protected variable socketid {}
+
+    # Returning status of a http get. 200 by default is "normal"
+    protected variable status -1
+
+    # The last modified date of this http file. Used for caching purpose.
+    protected variable lastmodified {}
+
+    # Content type of this http file.
+    protected variable contenttype {}
+
+    # The content length of this http file.
+    protected variable contentlength {}
+
+    # The content loaded so far
+    protected variable contentloaded 0
+
+    # Location of this file, if the returning status is 300-399 (forward)
+    protected variable forwardlocation {}
+
+    # FIXME: need to find out where to collect protocols that Tycho
+    # understands. Also, this should be more specific (no wildcard!!!):
+    protected variable accept {text/* image/*}
+
+    ###################################################################
+    ####                         private variables               ####
+
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::ResourceHTTP::destructor {} {
+    # If we're still loading, forget it
+    if {0} {
+	if [httpbusy] {
+	    httpabort
+	}
+    }
+}
+
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#####################################################################
+#### open
+# Open an HTTP file. If it's already been downloaded into
+# a local temporary file, just use that file; otherwise
+# download it into a temporary file and then download it.
+#
+body ::tycho::ResourceHTTP::open {{mode "r"}} {
+    set url [forward [path]]
+
+    if { $mode != "r" } {
+	error "File $url is not writable"
+    }
+    if { ! [exists $url] } {
+	error "File $url does not exist"
+    }
+
+    # Seek out on network for the file
+    if {![::tycho::cache exists $url]} {
+	# Get it if not already
+	httpget $url "file"
+	remotewait
+    }
+
+    # We could potentially get a forwarded location
+    set url [forward $url]
+
+    # Check again in case something went wrong
+    if { ! [::tycho::cache exists $url] } {
+	error "URL $url (cache: [::tycho::cache getcachefile $url]) \
+                is not accessible"
+    }
+    # Open the cache file
+    set cachefileid [::open [::tycho::cache getcachefile $url] "r"]
+    set fileIsOpen 1
+}
+
+#########################################################################
+#### progress
+# Get the current progress of a non-blocking read. Won't make sense
+# if not called during a non-blocking read.
+#
+body ::tycho::ResourceHTTP::progress {} {
+    if {$contentlength==0} {
+        return 0
+    }
+    expr $contentloaded / $contentlength.0
+}
+
+#####################################################################
+#### puts
+body ::tycho::ResourceHTTP::puts {string} {
+    error "HTTP files are not writable"
+}
+
+#####################################################################
+#### write
+body ::tycho::ResourceHTTP::write {string} {
+    error "HTTP files are not writable"
+}
+
+#########################################################################
+#########################################################################
+####                          public procedures                      ####
+
+#####################################################################
+#### contenttype
+# Return the content type of the open file.
+body ::tycho::ResourceHTTP::contenttype {url} {
+    # In order to speed up, check the cache manager
+    set URLexists [exists $url]
+    set url [forward $url]
+
+    if {[::tycho::cache exists $url] && $URLexists} {
+        return [::tycho::cache getcontenttype $url]
+    } else {
+        error "URL $url does not exist"
+    }
+}
+
+#####################################################################
+#### dirlist
+# Get a "listing" of files in a "directory." This parses
+# a received file to extract names from it. The
+# list is sorted, with directory names ending in "/",
+# in a similar fashion to ls -F.
+#
+body ::tycho::ResourceHTTP::dirlist {url} {
+    # ::puts "::tycho::ResourceHTTP::dirlist $url"
+    # If a non-existent directory, return nothing
+    if { ! [exists $url] } {
+	return {}
+    }
+    # If for some reason it's not a directory, return it
+    if { ! [query $url isdirectory] } {
+	return [list $url]
+    }
+    # Get the index data
+    set data [::tycho::resource read $url]
+    # Here's the list we generate
+    set list {}
+
+    # Take a wild pot-shot here: if the data does _not_ contain
+    # the string "Index of foo", where "foo" is the path component,
+    # of the URL, then add "index.html" to the list of files.
+    if ![regexp "Index of [lindex [splitURL $url] 2]" $data] {
+        lappend list index.html
+    }
+
+    # Scan for anything that looks vaguely like a hyperlink
+    # Currently this just looks for: href="foo"
+    # This will probably need to be tightened up to deal
+    # with different servers. Links will be extracted only up to
+    # first # mark.
+    while { [regexp -nocase {href="([^#\"]+)"} $data dummy href] } {
+	# Got a cross-reference. If it's relative, add 
+        # it to the list of files and directories.
+        if { [::tycho::url pathtype $href] == "relative" } {
+            # Ignore odd things like mailto:
+            if ![regexp {^[a-z]+:} $href] {
+                set splat [split $href /]
+                # Directories have slashes in them, or
+                # don't have an extension
+                if { [llength $splat] > 1 \
+                        || [file extension $href] == ""} {
+                    lappend list [lindex $splat 0]/
+                } else {
+                    lappend list [lindex $splat 0]
+                }
+            }
+        }
+        # Dump the front of the string
+        regexp -nocase -indices {href="([^\"]+)"} $data dummy hidx
+        set data [string range $data [lindex $hidx 1] end]
+    }
+    # Remove duplicates, sort and return
+    lsort [::tycho::lnub $list]
+}
+
+#####################################################################
+#### exists
+# Check if the file exists on network or no. At the same time, if it
+# is on the network, check if it's in our cache (through CacheManager).
+# If so, check if they are the same file, through size, date, and
+# contenttype.
+#
+# Returns 0 if the server cannot be accessed or if the file
+# does not exist on the server.
+#
+body ::tycho::ResourceHTTP::exists {url} {
+    set url [forward $url]
+
+    # The following is used to speed up transaction (cache every session).
+    if {[::info exists _exists($url)]} {return $_exists($url)}
+
+    # Otherwise create an new HTTP object, and get the information.
+    set resource [new $url]
+    $resource httpget $url "header"
+    $resource remotewait
+    # Remember the latest size, and see if it matches with the cache database.
+    set newsize        [$resource getsize]
+    set newdate        [$resource getdate]
+    set newcontenttype [$resource getcontenttype]
+    after idle "::delete object $resource"
+
+    # If necessary, cache the file if it doesn't already exists.
+    # If cached, but remote file has been modified, then fetch and
+    # cache again.
+    set url [forward $url]
+    if {![::tycho::cache exists $url] || \
+            ([::tycho::cache exists $url] && \
+            ![tycho::cache same $url $newdate $newsize $newcontenttype])} {
+        set resource [new $url]
+        $resource httpget $url "file"
+        $resource remotewait
+        after idle "::delete object $resource"
+    }
+
+    set url [forward $url]
+    return $_exists($url)
+}
+
+#####################################################################
+#### new
+# Create a new HTTP object.
+#
+body ::tycho::ResourceHTTP::new {path args} {
+    #::puts "::tycho::ResourceHTTP::new $path $args"
+    uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] $args
+}
+
+#####################################################################
+#### query
+# Query properties of the http class. See the comment in
+# ::tycho::Resource::query for details.
+#
+body ::tycho::ResourceHTTP::query {url option} {
+    # ::puts "::tycho::ResourceHTTP::query $url $option"
+    set url [forward $url]
+
+    switch -exact -- $option {
+	"executable" {
+	    # FIXME: Do directories need to be executable to read them?
+	    if [query $url isdirectory] {
+		return 1
+	    } else {
+		return 0
+	    }
+	}
+	"exists" {
+	    # FIXME: Do directories need to be executable to read them?
+	    exists $url
+	}
+	"isdirectory" {
+	    # If we already know, just return it
+            stat $url opt
+	    #if [::info exists opt(isdirectory)] {
+            #    return $opt(isdirectory)
+	    #}
+	    # Otherwise we have to work it out. Currently, we say
+	    # that a URL is a directory if a) it does not have a file
+	    # extension and b) its content type is text/html.
+	    set isdir 0
+	    if [exists $url] {
+		if { [::tycho::url extension $url] == "" \
+			&& $opt(type) == "text/html" } {
+		    set isdir 1
+		}
+		set oldcode {
+		    # As a second guess, it's a directory if it contains the
+		    # string "Index of foo", where "foo" is the path component
+		    # of the URL.
+		    set path [lindex [splitURL $url] 2]
+		    set data [::tycho::resource read $url]
+		    set isdir [regexp "Index of $path" $data]
+		}
+		# Remember what it is
+                #lappend _statinfo($url) isdirectory $isdir
+		return $isdir
+	    }
+	    return 0
+	}
+	"isfile" {
+	    # A URL is a file if it exists and is not a directory
+	    if [exists $url] {
+		return [expr { ! [query $url isdirectory] }]
+	    }
+	    return 0
+	}
+	"readable" {
+	    exists $url
+	}
+	"isremote" {
+	    return 1
+	}
+	"writable" {
+	    return 0
+	}
+	default {
+	    error "Unknown option \"$option\" on $url"
+	}
+    }
+}
+
+#####################################################################
+#### stat
+# Set the array referenced by _varName_ in the calling
+# context to a set of status flags. The only flags guaranteed
+# to be set are *mtime*, which is the last-modified date
+# of the given url, and *size*, which is the size of the
+# content, and *url*, the last forwarded location.
+# <br><br>
+# Other flags are set but are intended for internal
+# use only. If the URL cannot be accessed then nothing
+# is done.
+#
+body ::tycho::ResourceHTTP::stat {url varName} {
+    set url [forward $url]
+
+    if [exists $url] {
+        upvar $varName v
+        set statinfo [concat \
+                [list mtime [::tycho::cache getdate        $url]] \
+                [list size  [::tycho::cache getsize        $url]] \
+                [list type  [::tycho::cache getcontenttype $url]] \
+                [list url   $url]]
+
+        array set v $statinfo
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     protected methods                           ####
+
+#########################################################################
+#### httpabort
+# Cancel the current GET. Any data that has been obtained will
+# still be in the cache file, but it may be incomplete.
+# (There should be a status flag to deal with this.)
+#
+body ::tycho::ResourceHTTP::httpabort {} {
+    # Set the status so that httpdone knows what to do
+    remotestatus _remotestatus "abort"
+
+    # Terminate with httpdone. This will enable any
+    # threads hanging off tkwait to continue.
+    httpdone
+}
+
+#########################################################################
+#### httpbusy
+# Return true if the HTTP GET is still running.
+#
+body ::tycho::ResourceHTTP::httpbusy {} {
+    global _remotestatus
+
+    debugputs "httpbusy{} returns [expr { [::info exists _remotestatus] \
+	    && ! [string compare $_remotestatus done] }]"
+
+    expr { [::info exists _remotestatus] \
+	    && ! [string compare [remotestatus] done] }
+}
+
+#########################################################################
+#### httpdone
+# Clean up after getting a header or file.
+#
+body ::tycho::ResourceHTTP::httpdone {} {
+    # Close socket
+    debugputs "Closing $socketid"
+    ::close $socketid
+    set socketid -1
+
+    # Close cache file
+    if { $requestMode == "file" } {
+	debugputs "Closing $cachefileid"
+	::close $cachefileid
+	set cachefileid -1
+    }
+
+    # Update length
+    set contentloaded $contentlength
+
+    # Copy some local data to common arrays if the file exists
+    if {$status>=400} {
+	# The request failed -- remember that the file doesn't exist
+	set _exists($currentURL) 0
+    } else {
+        set _exists($currentURL) 1
+	if { $requestMode == "file" } {
+            # Save the file in cache
+            ::tycho::cache update \
+                    $currentURL \
+                    $lastmodified \
+                    $contentlength \
+                    $contenttype \
+                    $cachefilename
+        }
+    }
+    # To be picky, let's check that the content size is the
+    # same as what we actually got...
+    # Unfortunately, this is bogus, since our httpread{}
+    # is putting an additional end-of-line at the end of the file.
+    set junkcode {
+	if { [remotestatus] != "abort" && $requestMode == "file" } {
+	    if { [::file size $cachefilename] != $contentlength } {
+		if $debug {
+		    # debugputs "Received HTTP file size ([::file size \
+			    $cachefilename]) \
+			    is not the same as content length ($contentlength)"
+		}
+	    }
+	}
+    }
+    # Set the status
+    #uplevel #0 "set _remotestatus done"
+    remotestatus "done"
+    
+    # One last update of notifycommand
+    if { $notifycommand != "" } {
+	uplevel #0 $notifycommand
+    }
+}
+
+#########################################################################
+#### httpget
+# Opening an HTTP connection, and set the right fileevent depending on
+# the type argument, which can be either "file" or "header". 
+#
+body ::tycho::ResourceHTTP::httpget {url type} {
+    debugputs "\nHTTP GET $url $type"
+
+    # Parse URL into hostname, port, and path
+    set currentURL $url
+    ::tycho::assign hostname port path [splitURL $url]
+
+    # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[catch {socket -async $hostname $port} socketid]} {
+	catch {unset socketid}
+	error "Can't open $hostname, $port"
+    }
+    # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    debugputs "Connect $hostname:$port on $socketid"
+
+    # Create the cache file if getting the whole file.
+    if { $type == "file" && $cachefileid <= 0 } {
+        set cachefilename [::tycho::cache tmpCacheName $url]
+        #[::tycho::tmpcachefilename httpCache][::tycho::url extension $url]
+        set cachefileid [::open $cachefilename "w+"]
+	debugputs "Cache file $cachefilename on $cachefileid"
+    }
+
+    remotestatus "header"
+    set status -1                   ;# Initial status - ?
+    set requestMode $type           ;# header or file
+    set contentloaded 0             ;# how much is loaded
+    set contentlength 1             ;# in case of progress{}
+
+    # Set up the file events for incoming data
+    ::fileevent $socketid w {}
+    ::fileevent $socketid readable [list catch \
+	    [list @scope ::tycho::ResourceHTTP [list $this httpread]]]
+
+    # Request the URL
+    # FIXME: Need to figure out how to set the Accept-Encoding field
+    ::fconfigure $socketid -blocking no -translation crlf
+    ::puts $socketid "GET $path HTTP/1.0\n\
+            Accept-Encoding: $accept\n\
+            User-Agent: Tycho Browser (http://ptolemy.eecs.berkeley.edu)"
+    ::puts $socketid ""
+    ::flush $socketid
+    ::fconfigure $socketid -translation auto
+
+    debugputs "-> GET $path HTTP/1.0"
+    #debugputs "-> User-Agent: Tycho Jr. Beta"
+    #debugputs "-> Accept-Encoding: $accept"
+    #debugputs "->"
+}
+
+#########################################################################
+#### httpread
+# This is called by the file event handler, from httpget. This will get
+# just the header info or the whole file and save it to a temporary
+# cache file, depending on the *requestMode* variable.
+#
+# This method parses the possible header information (200-299 is okay,
+# 300-399 is special, 400+ is error):
+# <pre>
+# HTTP/1.0 200 Document follows
+# Date: Wed, 21 May 1997 00:54:29 GMT
+# Server: NCSA/1.4.1
+# Content-type: text/html
+# Last-modified: Fri, 16 May 1997 21:18:58 GMT
+# Content-length: 8215
+#
+# HTTP/1.0 302 Found
+# Date: Wed, 21 May 1997 01:17:59 GMT
+# Server: NCSA/1.4
+# Location: http://HTTP.CS.Berkeley.EDU/~kchang/
+# Content-type: text/html
+# 
+# HTTP/1.0 404 Not Found
+# Date: Wed, 21 May 1997 01:20:18 GMT
+# Server: NCSA/1.4
+# Content-type: text/html
+# Last-modified: Mon, 12 May 1997 18:46:57 GMT
+# Content-length: 683
+# </h5></pre>
+#
+body ::tycho::ResourceHTTP::httpread {} {
+    # Disconnect the file handler. It gets reconnected again
+    # at the end of this method. This is the only way
+    # I can find of keeping the user interface live when
+    # connected to a fast server. (Using any kind of update
+    # in the file handler is no good, because the handler
+    # gets called recursively and Tcl bombs out with a stack
+    # overflow.)
+    ::fileevent $socketid readable {}
+
+    # If at eof, we're done
+    if [::eof $socketid] {
+	httpdone
+	return
+    }
+
+    # Currently reading header or body?
+    if { [remotestatus] == "header" } {
+        # Get a line
+        ::gets $socketid line
+	# Header mode, the information about this http get.
+	if { $line != {} } {
+	    debugputs "            <- $line"
+	    # Parse the possible header fields (see comment for this method)
+	    regexp {^HTTP/[0-9]+.[0-9]+ ([0-9]+)} $line match status
+	    regexp -nocase {^Last-modified: (.+)} $line match lastmodified
+	    regexp -nocase {^Content-type: (.+)} $line match contenttype
+	    regexp -nocase {^Location: (.+)} $line match forwardlocation
+	    regexp -nocase {^Content-length: ([0-9]+)} $line match contentlength
+	} else {
+	    # End of header is denoted by an empty line
+	    debugputs "            <-"
+            #uplevel #0 "set _remotestatus body"
+            remotestatus "body"
+
+	    # Check status codes
+	    if {$status>=300 && $status<=399} {
+		# If the header return status is 300-399, then we need to 
+		# automatically forward the HTTP location.
+		debugputs "Closing $socketid"
+		::close $socketid
+
+                if {[regexp -nocase \
+                        {^http:///(.*)$} $forwardlocation _ rest]} {
+                    # The following check is needed because Apache Server 1.2+
+                    # may return the forward: http:///<etc><etc>, omitting the
+                    # site name completely to save transfer time.
+                    set site [lindex [::tycho::url split $currentURL] 1]
+                    set _forward($currentURL) "http://$site/$rest"
+                } else {
+                    # NCSA and Netscape Enterprise server don't do anything
+                    # fancy like Apache.
+                    set _forward($currentURL) $forwardlocation
+                }
+                set _exists($currentURL) 1
+		httpget $_forward($currentURL) $requestMode
+
+	    } elseif { $requestMode == "header" } {
+		# If in header-only mode, we're done!
+		httpdone
+                return
+	    } else {
+                # Going to get body next
+                fconfigure $socketid -translation lf
+                fconfigure $cachefileid -translation lf
+            }
+	}
+    } elseif { [remotestatus] == "body" } {
+	# Body mode (content of http get), write to the cache file.
+	# Note that we only do this if the status _is_ "body," in
+	# case an abort is in progress.
+
+        # Method of get will depend on the content type.
+        if {[string match *text* $contenttype]} {
+            ::gets $socketid line
+            ::puts $cachefileid $line
+            set contentloaded [expr $contentloaded + [string length $line] + 1]
+        } else {
+            set contentloaded 0  ;# Binary file can't use Resource's "gets"
+            set readsize 0
+            # This is using unsupported call! This is to make sure that
+            # binary (8-bit clean) format is correctly downloaded in a
+            # perfect byte-to-byte format.
+
+            # In Tcl8, this should be called "fcopy"
+            catch {unsupported0 $socketid $cachefileid} readsize
+            ::seek $cachefileid -$readsize end
+            set line [::read -nonewline $cachefileid]
+        }
+    }
+    # Update client-specified command and reconnect the file handler
+    if { $notifycommand != "" } {
+        uplevel #0 $notifycommand
+    }
+    after idle [list ::fileevent $socketid readable \
+            [list catch [list @scope ::tycho::ResourceHTTP \
+            [list $this httpread]]]]
+}
+
+#########################################################################
+#### splitURL
+# Parse a url into the hostname, port, and return them
+# as a three-element list.
+#
+body ::tycho::ResourceHTTP::splitURL {url} {
+    set _port 80
+    set _hostname {}
+    set _path /
+
+    # The following parses the url into hostname, port, and path
+    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
+	    hosttmp optport porttmp pathtmp]} {
+	if {$hosttmp!={}} {set _hostname $hosttmp} ;# Supply reasonable default
+	if {$porttmp!={}} {set _port $porttmp}     ;# HTTP default service
+	if {$pathtmp!={}} {set _path $pathtmp}
+    } else {
+	# Recover from malformed URL
+	if {![string match */* $url]} {
+	    # Assume only the hostname:port has been given
+	    regexp {([^:]*)(:(.*))?} $url match \
+		    hosttmp optport porttmp
+	    if {$hosttmp != {}} {set _hostname $hosttmp}
+	    if {$porttmp != {}} {set _port $porttmp}
+	    set _path /
+	} else {
+	    error "no hostname given in URL \"$url\""
+	}
+    }
+    return [list $_hostname $_port $_path]
+}
+
+
+
+

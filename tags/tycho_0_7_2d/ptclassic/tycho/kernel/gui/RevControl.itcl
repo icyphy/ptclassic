@@ -1,0 +1,860 @@
+# Definition of the class which handles revision control.
+#
+# @Authors: Joel King and Edward A. Lee
+#
+# @Version: @(#)RevControl.itcl	1.59    01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### RevControl
+# Base class for revision control objects. The main entry point is is
+# the procedure <code>setup</code>, which will create a revision
+# control window of the appropriate type. The list of revision control
+# types is given by the option "revisionControlTypes", which lists them
+# in order of preference (e.g. "SCCS RCS", which is the default value).
+# It is assumed that for each type listed, there is a class defined
+# called <code>RevControl$</code><i>type</i>, where $<i>type</i> is the
+# type, and that this class is derived from <code>RevControl</code>.
+#
+class ::tycho::RevControl {
+    inherit ::tycho::Dialog
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         options                           ####
+
+    # Specify the File object under version control.
+    itk_option define -object object Object ""
+
+    ###################################################################
+    ####                      public methods                       ####
+
+    # Check in the file and update revision control information.
+    method checkInAndUpdate {}
+
+    # Check out the file and update revision control information.
+    method checkOutAndUpdate {}
+
+    # Get the specified version checked from the checkbuttons and open the file.
+    method compareVersion {} {}
+
+    # Diff the most recent files. This is just a macro (quick button)
+    method checkRecent {text} {}
+
+    # Help, invoke HTML help
+    method help {} {}
+
+    # Check out the most recent version, and delete it from history
+    method fixRecentAndUpdate {} {}
+
+    # Put the file under revision control.
+    method initializeRevControl {} {}
+
+    # Unedit the file, reverting to the previously checked in version.
+    method unedit {}
+
+    # Shortcut to use retrieveVersion and openContext on it
+    method openVersion {version} {}
+
+    # Takes a format as input, and outputs a version number
+    method returnVersion {line} {}
+
+    # return the most recent version in either SCCS or RCS
+    method returnRecentVersion {} {return [returnVersion [lindex $filelist 1]]}
+
+    # Get the specified version.
+    method retrieveVersion {version} {error "Not in base class!"}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Check in the file associated with the given File object.
+    proc checkIn {object} {}
+
+    # Check out the file associated with the given File object.
+    proc checkOut {object} {}
+
+    # Return 1 if the given file is under revision control, 0 otherwise.
+    proc isUnderRevControl {file} {return 0}
+
+    # Make a revision control object of the specified type.
+    proc makeRev {type editorWin editorObj} {}
+
+    # Setup revision control for an editor of type File.
+    proc setup {editorWin editorObj} {}
+
+    # Return the revision control class controlling a File object, if any.
+    proc whichRevClass {obj} {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Enable one of "checkin" or "checkout" buttons and make it the default.
+    protected method enableButton {button}
+
+    # Return 1 if the file is checked out, 0 otherwise.
+    protected method isCheckedOut {} {return 0}
+
+    # Revision control dependent, returns the user name who checked it out.
+    protected method isCheckedOutBy {} {return {}}
+
+    # Check if the file is writable, used to check whether check-in button
+    # should be enabled.
+    protected method isWritable {} {return [file writable [$object filename]]}
+
+    # Update the history information, if it is on display.
+    protected method updateHistory {}
+
+    # Parse the history information and insert a synopsis into the text window.
+    protected method parseHistory {history text}
+
+    # Update the files to diff stack
+    public method updateDiff {buttonName} {}
+
+    # Reset all the buttons
+    protected method resetDiff {} {}
+
+
+    ###################################################################
+    ####                   private methods                         ####
+
+
+    ###################################################################
+    ####                  protected procs                          ####
+
+    # Change to the given directory with appropriate error checks.
+    protected proc cdDir {dir} {}
+
+    # Query the user for comments (to be used on checkin).
+    protected proc getComments {} {}
+
+    ###################################################################
+    ####              protected/public variables                   ####
+
+    # The text widget object that we are associated with.
+    protected variable textobject {}
+
+    # The object that we are associated with.
+    protected variable object {}
+
+    # The file that we are associated with.
+    protected variable file {}
+
+    # The list of different versions.
+    protected variable filelist {}
+
+    # The stack of files to diff.
+    protected variable difflist {}
+
+    # This is used to represent the most current version
+    protected variable INFINITY {99999}
+}
+
+#########################################################################
+#### -object configuration
+# Specify the File object under version control.
+# If the specified object is not a <code>::tycho::File</code> object,
+# or does not exist, then trigger an error.
+# 
+configbody ::tycho::RevControl::object {
+    set object $itk_option(-object)
+    # NOTE: It would be nice to check:
+    #     [uplevel #0 info objects $object] == {}
+    # However, "info" in itcl is basically broken.  It does not
+    # understand scoping annotations like a prefix "::".
+    if {$object == {} || ![$object isa ::tycho::File]} {
+	error "You must specify a File object with the -object option"
+    }
+    set file [$object cget -file]
+    configure -title "Revision control for $file"
+    if { [whichRevClass $object] == "" } {
+	initializeRevControl
+    }
+    if {[isCheckedOut] && [isWritable]} {
+	enableButton checkin
+    } {
+	enableButton checkout
+    }
+}
+
+###################################################################
+#### constructor
+#
+body ::tycho::RevControl::constructor {args} {
+    eval itk_initialize $args
+    
+    addButton checkin -text "Checkin" -underline 5 \
+            -command "$this checkInAndUpdate"
+    addButton checkout -text "Checkout" -underline 5 \
+            -command "$this checkOutAndUpdate"
+    addButton unedit -text "Unedit" -underline 0 \
+            -command "$this unedit"
+    addButton help -text "Help" -underline 0 \
+            -command "$this help"
+    addButton cancel -text "Close" -underline 0 \
+            -command "$this prevWindow; delete object $this"
+
+    # This contains frame for the help panel and the history log
+    itk_component add historyframe {
+        frame $itk_component(hull).historyframe
+    } {
+        #FIXME: Which ones do I keep?
+    }
+    
+    itk_component add history {
+        ::tycho::Edit $itk_component(historyframe).history -textheight 28
+    } {
+        keep -readonly -textwidth -background \
+                -highlightbackground -highlightcolor -selectforeground \
+                -cursor -insertbackground -textforeground \
+                -textbackground
+        # textfont
+    }
+    set hsttext $itk_component(history)
+    $hsttext configure -readonly 1
+    $hsttext markUnmodified
+    bind $hsttext <i> "$this invoke checkin"
+    bind $hsttext <o> "$this invoke checkout"
+    bind $hsttext <u> "$this invoke unedit"
+    bind $hsttext <h> "$this invoke help"
+    bind $hsttext <c> "$this invoke cancel"
+
+    itk_component add historybutton {
+        ::tycho::ButtonBox $itk_component(historyframe).historybutton \
+                -spacingx 3 -spacingy 2 -buttonwidth 20
+    } {
+        keep -background -cursor -font -padx -pady
+    }
+    $itk_component(historybutton) add diffcheckedfiles \
+            -text "Diff Checked Files" -underline 0 \
+            -command "$this compareVersion"
+    $itk_component(historybutton) add undolastcheckin \
+            -text "Undo Last Checkin" -underline 5 \
+            -command "$this fixRecentAndUpdate"
+
+    pack \
+            $itk_component(historybutton) \
+            $itk_component(history)
+
+    itk_component add historypanel {
+	::tycho::Subpanel $itk_component(hull).pan \
+		-text "View History" -underline 0 \
+		-childwidget $itk_component(historyframe) \
+		-execute "$this viewHistory"
+    } {}
+    pack $itk_component(historypanel) -anchor nw
+
+    bind $hsttext <v> "$itk_component(historypanel) toggle; break"
+    bind $itk_component(hull) <d> \
+            "if \{\[$itk_component(historypanel) cget -state\] == \{open\}\} \
+            \{$itk_component(historybutton) invoke diffcheckedfiles\}"
+    bind $itk_component(hull) <l> \
+            "if \{\[$itk_component(historypanel) cget -state\] == \{open\}\} \
+            \{$itk_component(historybutton) invoke undolastcheckin\}"
+    bind $hsttext <d> "$itk_component(historybutton) invoke diffcheckedfiles"
+    bind $hsttext <l> "$itk_component(historybutton) invoke undolastcheckin"
+}
+
+###################################################################
+#### checkInAndUpdate
+# Check in the file, update the state of the control buttons,
+# and update the history information, if it is being viewed.
+#
+body ::tycho::RevControl::checkInAndUpdate {} {
+    # This saveQuery has been removed, since saying No would
+    # just get you another query (in checkIn{}).
+    # $object saveQuery
+
+    # Procs are not virtual. Itcl bug?
+    [info class]::checkIn $object
+    if {![isCheckedOut]} {
+        enableButton checkout
+        updateHistory
+    }
+}
+
+###################################################################
+#### checkOutAndUpdate
+# Check out the file, update the state of the control buttons,
+# and update the history information, if it is being viewed.
+#
+body ::tycho::RevControl::checkOutAndUpdate {} {
+    # Procs are not virtual. Itcl bug?
+    [info class]::checkOut $object
+    if [isCheckedOut] {
+        enableButton checkin
+        updateHistory
+    }
+}
+
+body ::tycho::RevControl::fixRecentAndUpdate {} {
+    if {[::tycho::askuser \
+            "You are going to check out the latest\
+            revision([returnRecentVersion]),\
+            then delete it from the history log. Proceed?"]} {
+        [info class]::fixRecent $object [returnRecentVersion]
+        if [isCheckedOut] {
+            enableButton checkin
+            updateHistory
+        } 
+    }
+}
+
+###################################################################
+#### compareVersion
+# Compare versions set by the button boxes.
+#
+body ::tycho::RevControl::compareVersion {} {
+    if {[llength $difflist]!=2} {
+        error "You need to select exactly two files to compare."
+    }
+
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    cdDir $dir
+
+    # We originally have the formal UNIQUEID+12345_678
+    set version1 [returnVersion [lindex $difflist 0]]
+    set version2 [returnVersion [lindex $difflist 1]]
+
+    # Note: VERSION $INFINITY.$INFINITY indicates the latest original file.
+    # Now, sort the version number. The first file should be the higher
+    # version number so that EditDiff will place it on top. However, if it
+    # is verison $INFINITY.$INFINITY, then it has precedence.
+    set versions [lsort -real -decreasing [list $version1 $version2]]
+    set version1 [lindex $versions 0]
+    set version2 [lindex $versions 1]
+
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] [file extension $basefile]]
+
+    # Now make sure that version $INFINITY.$INFINITY is the original file
+    if {$version1=="$INFINITY.$INFINITY"} {
+        set tmpFile1 $file
+    } else {
+        set tmpFile1 [retrieveVersion $version1]
+    }
+
+    if {$version2=="$INFINITY.$INFINITY"} {
+        set tmpFile2 $file
+    } else {
+        set tmpFile2 [retrieveVersion $version2]
+    }
+
+    # We have the files! Now safely invoke diffWidget
+    # FIXME: the text height should be a "set" preference, so this is
+    # just a hack.
+    set diffWidget [::tycho::view EditDiff -toolbar 1 \
+            -textheight [expr [stylesheet get layout textHeight] - 7] \
+            -filename1 $tmpFile1 -filename2 $tmpFile2]
+    $diffWidget compareFile
+
+    cd $olddir
+}
+
+###################################################################
+#### checkRecent
+# check the two most recent files
+body ::tycho::RevControl::checkRecent {text} {
+    # Clear up all the buttons
+    resetDiff
+    # The following will generate error if we open up a file
+    # with only 0 or 1 revisions, and then we try to invoke
+    # a check button that doesn't exist.
+    catch {
+        if {[isCheckedOut]} {
+            $text.[lindex $filelist 0] invoke
+            $text.[lindex $filelist 1] invoke
+        } else {
+            $text.[lindex $filelist 1] invoke
+            $text.[lindex $filelist 2] invoke
+        }
+    }
+}
+
+###################################################################
+#### initializeRevControl 
+# Put the file under revision control.
+#
+body ::tycho::RevControl::initializeRevControl {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+    $object saveQuery
+}
+
+###################################################################
+#### unedit
+# Query the user for confirmation, then unedit the file, reverting to
+# the previously checked in version.  This base class method
+# only does the query.  If the user does not confirm, exit with
+# a silent error.
+#
+body ::tycho::RevControl::unedit {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+}
+
+###################################################################
+#### openVersion
+# Uses children's retrieveVersion (SCCS or RCS) to get the
+# file, then do a openContext on the file. This is used as
+# a shortcut by the button bindings (see parseHistory).
+body ::tycho::RevControl::openVersion {version} {
+    set tmpFile [$this retrieveVersion $version]
+    set myView [::tycho::File::openContext $tmpFile]
+    $myView configure -tmpfile 1
+}
+
+###################################################################
+#### returnVersion
+# Takes input in the following format:
+# UNIQUEID+NUMBER1+NUMER2 and outputs as the following format:
+# NUMBER1.NUMER2
+# This is used because each of the check boxes have a unique
+# name associated with it.
+#
+body ::tycho::RevControl::returnVersion {line} {
+    set version {}
+    regexp {.*\+(.*)} $line match version
+    set version [join [split $version _] .]
+    return $version
+}
+
+
+
+###################################################################
+###################################################################
+####                     public procs                          ####
+
+###################################################################
+#### checkIn
+# Check in the file associated with the specified File object.
+#
+body ::tycho::RevControl::checkIn {object} {
+    if {$object == {}} {
+        error "No object specified for check in"
+    }
+    if {![$object isa ::tycho::File]} {
+        error "Cannot check in object $object: Not a ::tycho::File."
+    }
+    set file [$object filename]
+    if {$file == {}} {
+	error "checkIn: no file associated with the object $object"
+    }
+    $object saveQuery
+}
+
+###################################################################
+#### checkOut
+# Check out the file associated with the specified File object.
+#
+body ::tycho::RevControl::checkOut {object} {
+    if {$object == {}} {
+        error "No object specified for check out"
+    }
+    if {![$object isa ::tycho::File]} {
+        error "Cannot check out object $object: Not a ::tycho::File."
+    }
+    set file [$object filename]
+    if {$file == {}} {
+	error "checkOut: no file associated with the object $object"
+    }
+}
+
+###################################################################
+#### makeRev
+# Make a revision control object of the specified type.
+# The first argument is the type (SCCS, RCS, ...),
+# the second argument is the window name for the editor, and
+# the third argument is the editor object, which must be an
+# instance of <code>::tycho::File</code> or a class derived from that.
+#
+body ::tycho::RevControl::makeRev {type editorWin editorObj} {
+    # Create a revision control window
+    uplevel #0 " \
+	    $type $editorWin.revcontrol \
+	    -object $editorObj \
+	    -geometry +0+0"
+    wm deiconify $editorWin.revcontrol
+    after 1 $editorWin.revcontrol focusin
+    $editorWin.revcontrol focusin
+    return $editorWin.revcontrol
+}
+
+
+###################################################################
+#### help
+# Open a help window.
+# This should be redefined in derived classes.
+#
+body ::tycho::RevControl::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+            [file join $TYCHO kernel gui doc usersGuides \
+	    RevControlHelp.html] html
+}
+
+###################################################################
+#### setup
+# Setup revision control for an editor. The arguments are the name of
+# the top-level editor window and the name of the editor object, which
+# must be an instance of <code>::tycho::File</code> or a class derived
+# from that.
+#
+# This proc returns the name of the dialog box that is created so we
+# can access it for testing, or a null string if user cancels.
+#
+body ::tycho::RevControl::setup {editorWin editorObj} {
+    # If a rev control window is already open, use it.
+    if [winfo exists $editorWin.revcontrol] {
+	wm deiconify $editorWin.revcontrol
+	raise $editorWin.revcontrol
+	$editorWin.revcontrol focusin
+	return
+    }
+
+    set pref [::tycho::stylesheet get system revisionControlTypes]
+    set revclass [whichRevClass $editorObj]
+
+    # If the file is not under revision control, query the user
+    # for permission to put it under revision control.
+    if {$revclass == {}} {
+	set dlg [::tycho::autoName .rev]
+	::tycho::Dialog $dlg -text \
+		"This file is not currently under revision control.\
+		Do you want it placed under revision control?"
+
+	set default {}
+	foreach type $pref {
+            set bnm [string tolower $type]
+	    $dlg addButton $bnm \
+                    -text "Yes ($type)" -command \
+		    [code "::tycho::RevControl::makeRev \
+                    ::tycho::RevControl$type $editorWin \
+		    $editorObj; $dlg prevWindow; delete object $dlg"]
+	    if {$default == {}} {
+		$dlg default $bnm
+		set default $type
+	    }
+	}
+	$dlg addButton no -text "No <Esc>" -command \
+                [code "$dlg prevWindow; delete object $dlg"]
+	bind $dlg <Escape> \
+                [code "$dlg prevWindow; delete object $dlg"]
+	return [::tycho::Dialog::wait $dlg]
+    } else {
+	return [::tycho::RevControl::makeRev $revclass $editorWin $editorObj]
+    }
+}
+
+###################################################################
+#### whichRevClass
+# Return the name of a suitable revision control class if the given
+# object is under revision control. Otherwise, return an empty string.
+# The object must be a <code>::tycho::File</code> object.
+#
+body ::tycho::RevControl::whichRevClass {obj} {
+    if {![$obj isa ::tycho::File]} {
+        error "Cannot check revision control for $obj: Not a ::tycho::File."
+    }
+    set pref [::tycho::stylesheet get system revisionControlTypes]
+    set filename [$obj filename]
+    set revclass {}
+
+    # Step through possible revision control systems and determine
+    # whether they control the file.
+    foreach type $pref {
+	if [::tycho::RevControl${type}::isUnderRevControl $filename] {
+	    set revclass "::tycho::RevControl$type"
+	    break
+	}
+    }
+    return $revclass
+}
+
+###################################################################
+###################################################################
+####                     protected methods                     ####
+
+###################################################################
+#### enableButton
+# Enable one of "checkin" or "checkout" buttons and make it the default.
+# The argument must be one of "checkin" or "checkout".
+# The other button is disabled.
+#
+body ::tycho::RevControl::enableButton {button} {
+    if {$button == {checkin}} {
+	$itk_component(bbox) buttonconfigure checkin -state normal
+	default checkin
+	$itk_component(bbox) buttonconfigure checkout -state disabled
+        $itk_component(bbox) buttonconfigure unedit -state normal
+    } {
+	$itk_component(bbox) buttonconfigure checkout -state normal
+	default checkout
+	$itk_component(bbox) buttonconfigure checkin -state disabled
+        $itk_component(bbox) buttonconfigure unedit -state disabled
+    }
+}
+
+#####################################################################
+#### updateHistory
+# Update the history information, if it is on display.
+# This does nothing in the base class.
+# 
+body ::tycho::RevControl::updateHistory {} {
+}
+
+###################################################################
+###################################################################
+####                     protected procs                       ####
+
+#####################################################################
+#### cdDir
+# Change to the given directory with appropriate error checks.
+# 
+body ::tycho::RevControl::cdDir {dir} {
+    if {[file isdirectory $dir] && [file executable $dir]} {
+	cd $dir
+    } else {
+	error "The directory \"$dir\" is not writable."
+    }
+}
+
+#####################################################################
+#### getComments
+# Open a dialog box to query the user for comments.
+# 
+body ::tycho::RevControl::getComments {} {
+    set comments [lindex [::tycho::query {Summarize changes} \
+                {{lines body {} {} 5}} 60] 1]
+    return [join [split $comments "\n"] "\\\n"]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                   private methods                         ####
+
+#####################################################################
+#### parseHistory
+# Parse the history information and insert a synopsis into the text window.
+# History contains the entire "sccs prs" or "rlog" history list.
+# Info contains the status of the current file (empty means not checked out).
+body ::tycho::RevControl::parseHistory {history text} {
+    # FIXME: oldCursor is empty from [$itk_component(history) config -cursor]
+    set oldCursor top_left_arrow
+    set newCursor dot
+    
+    set file [$object filename]
+    set basefile [file tail $file]
+    set lines [split $history "\n"]
+
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) clear
+
+    # Clear up all the checked files (with check button)
+    resetDiff
+
+    # FIXME: Error recovery scheme should be more complicated!
+    if {[llength $lines] < 2} {
+	$text insert insert $lines
+	return
+    }
+
+    # FIXME: The editcolors style is not in ther kernel!
+    # Because of that, just hard-wire them to the defaults
+    # set commentColor [stylesheet get editcolors commentColor]
+    # set versionColor [stylesheet get editcolors versionColor]
+    set commentColor firebrick
+    set versionColor blue
+
+    # Diff list is currently empty (nothing in revision control yet)
+    set filelist {}
+    set uniqueID [join [split [string tolower $basefile] .] ""]
+
+    # strip off leading ::
+    #regexp {(::)?(.*)} $uniqueID match leadingTrailingJunk uniqueID
+    set uniqueID [string trim $uniqueID :]+
+
+    set background [$text cget -background]
+
+    # Create a line entry for the original file
+    # The original file could be compared with
+    set version $INFINITY\_$INFINITY
+    set start [$text index insert]
+    set buttonName $uniqueID$version
+    
+    # This is here because when the file isn't checked out, this button 
+    # doesn't get inserted into the text, and as a result, when the text
+    # is deleted and when this function is called again itcl will complain
+    # that button already exists.
+    if {![winfo exists $text.$buttonName]} {
+        checkbutton $text.$buttonName -variable $buttonName \
+                -command "$this updateDiff $buttonName" \
+                -background $background -foreground $background \
+                -relief flat -padx 0 -pady 0
+    }
+
+    # If file is checked out, we want to make sure that you can't
+    # Undo Last Checkin.
+    if [isCheckedOut] {
+        $text window create end -window $text.$buttonName -padx 0 -pady 0
+        $text insert insert "Current file"
+	$text insert insert ", [isCheckedOutBy]\n"
+        $itk_component(historybutton) buttonconfigure undolastcheckin \
+                -state disabled
+    } {
+        $itk_component(historybutton) buttonconfigure undolastcheckin \
+                -state normal
+    }
+
+    $text tag add v$version $start insert
+    $text tag configure v$version -foreground $versionColor -underline 1
+    $text tag bind v$version <Double-Button-1> \
+            "::tycho::File::openContext $file"
+    $text tag bind v$version <Enter> \
+            "$itk_component(history) configure -cursor $newCursor"
+    $text tag bind v$version <Leave> \
+            "$itk_component(history) configure -cursor $oldCursor"
+
+
+    lappend filelist $buttonName
+    if {[uplevel #0 "set $buttonName"]==1} {lappend difflist $buttonName}
+    $text insert insert "\n"
+
+    # Skip first two lines
+    foreach line [lrange $lines 2 end] {
+	if [regexp -nocase {D ([0-9.]*) ([0-9/]*) ([0-9:]*) ([a-z]*)} \
+		$line junk version date time user] {
+	    set start [$text index insert]
+
+            # Check button name, must be unique for each editor.
+            set buttonName $uniqueID[join [split $version .] "_"]
+            checkbutton $text.$buttonName -variable $buttonName \
+                    -command "$this updateDiff $buttonName" \
+                    -background $background -foreground $background \
+                    -relief flat -padx 0 -pady 0
+            lappend filelist $buttonName
+            if {[uplevel #0 "set $buttonName"]==1} {
+                if {[llength $difflist]<2} {
+                    lappend difflist $buttonName
+                } else {
+                    # This is an attempt of error recovery, if list is >2
+                    uplevel #0 "set $buttonName 0"
+                }
+            }
+            $text window create end -window $text.$buttonName -padx 0 -pady 0
+            
+            # Insert Name, Version number, etc...
+	    $text insert insert "$version $date $time, checked in by $user\n"
+	    $text tag add v$version $start insert
+	    $text tag configure v$version -foreground $versionColor \
+                    -underline 1
+            $text tag bind v$version <Double-Button-1> \
+                    "$this openVersion $version"
+            $text tag bind v$version <Enter> \
+                    "$itk_component(history) configure -cursor $newCursor"
+            $text tag bind v$version <Leave> \
+                    "$itk_component(history) configure -cursor $oldCursor"
+
+
+	} elseif [regexp {MRs:|COMMENTS:} $line] {
+	    # ignore
+	} else {
+	    set start [$text index insert]
+	    $text insert insert "$line\n"
+	    $text tag add comment $start insert
+	    $text tag configure comment -foreground $commentColor
+	    $text tag configure comment -lmargin1 0.5c
+	    $text tag configure comment -lmargin2 0.5c
+	}
+    }
+    checkRecent [$itk_component(history) textWinName]
+    $itk_component(history) configure -readonly 1
+    $itk_component(history) markUnmodified
+}
+
+    ###################################################################
+    ###################################################################
+    ####                   private methods                         ####
+
+
+#####################################################################
+#### updateDiff
+# update the check buttons so that only two is activated at once.
+# updateDiff takes in the argument of the name of the button, and
+# decides whether it should set the other button off or not, and
+# adds the list of names (file names) to the diff list
+#
+body ::tycho::RevControl::updateDiff {buttonName} {
+    global $buttonName [lindex $difflist 0]
+    
+    # Clicking on or off
+    if {[uplevel #0 "set $buttonName"]==1} {
+        # click on
+        # push off the oldest file name
+        if {[llength $difflist]>=2} {
+            # Disable the check button
+            uplevel #0 "set [lindex $difflist 1] 0"
+        }
+        # put in a new one.
+        set difflist "[lindex $difflist 0] $buttonName"
+    } else {
+        # click off
+        if {$buttonName==[lindex $difflist 0]} {
+            set difflist [lindex $difflist 1]
+        } else {
+            set difflist [lindex $difflist 0]
+        }
+    }
+    if {[llength $difflist]==2} {
+        $itk_component(historybutton) buttonconfigure diffcheckedfiles \
+                -state normal
+    } {
+        $itk_component(historybutton) buttonconfigure diffcheckedfiles \
+                -state disabled
+    }
+}
+
+# Reset all the buttons to click on nothing, and clear the list of
+# checked files.
+#
+body ::tycho::RevControl::resetDiff {} {
+    foreach i $filelist {
+        uplevel #0 "set $i 0"
+    }
+    set difflist {}
+}

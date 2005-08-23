@@ -1,0 +1,574 @@
+# The abstract superclass of file-like "resources"
+# 
+# @Author: John Reekie
+#
+# @Version: @(#)Resource.itcl	1.36   06/07/98
+# 
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#####################################################################
+#### resourceClass
+# Get the class that deals with a resource.
+# With just the path argument, return the name of the
+# class that deals with resources with that path. If the
+# second argument is supplied, call the proc with that name
+# in the resource class, passing any additional arguments
+# to it, and return the proc's result. If no protocol is
+# recognized, assume the "file" protocol.
+#
+proc ::tycho::resourceClass {path {procname {}} args} {
+	# Get the (syntactic) protocol
+    ::set protocol [::tycho::url protocol $path]
+    if { $protocol == "" } {
+    	::set protocol "file"
+    }
+    # Get the class registered for it
+    ::set rclass [::tycho::registry protocolcget $protocol -class]
+ 	# Return the class if no additional arguments are given,
+ 	# otherwise call a procedure on it.
+     if { $procname == "" } {
+	return $rclass
+    } else {
+	eval [list ${rclass}::$procname $path] $args
+    }
+}
+
+#######################################################################
+#### ::tycho::resource
+#
+# Access a resource by URL-style name. This procedure provides options
+# that are similar to many of the options of the Tcl file{}
+# command. (See also the procedure
+# <a href="Path.html"><code>:tycho::url</code></a>,
+# which provides syntactic manipulation of URL-style names.) The options
+# are:
+# <dl>
+# <dt><code>cachefile</code> _path_
+# <dd> Return the name of a cached copy of the file. This is provided
+# solely for the purpose of working around Tk's lack of support
+# for binary data, and should not be used unless absolutely necessary.
+# <i>Do not delete or write to the cache file.</i> An error will be
+# triggered if this is not a streamable resource.
+# <dt><code>contenttype</code> 
+# <dd> Return the type of the content (binary, text/*, etc...)
+# <dt><code>chmod</code> _path_ _mode_
+# <dd> Change access permissions of a resource. The exact values of
+# _mode_ has not yet been determined but is probably a subset of the
+# first argument to the UNIX *chmod* command.
+# <dt><code>delete</code> _path_
+# <dd> Delete the given file. Will trigger an error if the file
+# does not exist or is not writable.
+# <dt><code>dirlist</code> _path_
+# <dd> Get a listing of a directory. Sub-directories have names
+# ending in a slash; files do not.
+# <dt><code>executable</code> _path_
+# <dd> Test if a resource is executable. <b>FIXME</b>: what does this
+# mean for directories -- should be adopt the bogus UNIX convention?
+# <dt><code>exists</code> _path_ ?_timeout_?
+# <dd> Test if a resource exists. If the _timeout_ argument is given
+# and the resource is remote, this procedure will return zero when that
+# time expires.
+# <dt><code>isdirectory</code> _path_
+# <dd> Test if a resource exists and is a directory.
+# <dt><code>isfile</code> _path_
+# <dd> Test if a resource exists and is a file.
+# <dt><code>isremote</code> _path_
+# <dd> Test if a resource is remote. (It may not exist.)
+# <dt><code>mkdir</code> _path_
+# <dd> Create a new directory at the given path.
+# <dt><code>mtime</code> _path_
+# <dd> Get the last-modified time of the resource (what format?)
+# <dt><code>new</code> _path_ ?_option value_ ...?
+# <dd> Create a new resource object, passing any options to its constructor.
+# The connect{} method will be called on the new object.
+# <dt><code>read</code> _path_ ?_timeout_?
+# <dd> Return the contents of a resource. An error is signaled if the
+# resource is not streamable. An error is also signaled if the resource
+# is remote and access times out on the optional _timeout_ argument.
+# <dt><code>readable</code> _path_
+# <dd> Test if a resource exists and is readable.
+# <dt><code>size</code> _path_
+# <dd> Get the size in bytes of a resource.
+# <dt><code>source</code> _path_ ?_timeout_?
+# <dd> Source the contents of a resource as a Tcl script. An error is
+# signaled if the
+# resource is not streamable. An error is also signaled if the resource
+# is remote and access times out on the optional _timeout_ argument.
+# <dd> Get the status of a resource into the array _varName_. The
+# indexes of the array may vary, but <code>mtime</code> and <code>size</code>
+# are guaranteed.
+# <dt><code>writable</code> _path_
+# <dd> Test if a resource exists and is writable.
+# <dt><code>write</code> _path_ _data_ ?_timeout_?
+# <dd> Write data to a resource. An error is signaled if the
+# resource is not streamable. An error is also signaled if the resource
+# is remote and access times out on the optional _timeout_ argument.
+# </dl>
+#
+ensemble ::tycho::resource {
+    # Get a cached copy of the file
+    option cachefile {path} {
+	set resource [::tycho::resource new $path]
+	if ![$resource streamable] {
+	    error "$path is not streamable"
+	}
+	$resource open "r"
+	set result [$resource cachefile]
+	$resource close
+	return $result
+    }
+    # Change access permissions of a resource
+    option chmod {path mode} {
+	::tycho::resourceClass $path chmod $mode
+    }
+    # Return "text*", "directory*", or others
+    option contenttype {path} {
+        ::tycho::resourceClass $path contenttype
+    }
+    # Delete a given resource
+    option delete {path} {
+	if ![::tycho::resource exists $path] {
+	    error "File \"$path\" does not exist"
+	}
+	if ![::tycho::resource writable $path] {
+	    error "File \"$path\" is not writable"
+	}
+	::tycho::resourceClass $path delete
+    }
+    # Get a directory listing in ls -F style format
+    option dirlist {path} {
+	::tycho::resourceClass $path dirlist
+    }
+    # Test if a resource path is executable
+    option executable {path} {
+	::tycho::resourceClass $path query executable
+    }
+    # Test if a resource exists.
+    option exists {path} {
+	::tycho::resourceClass $path exists
+    }
+    # Test if a resource path is a directory
+    option isdirectory {path} {
+	::tycho::resourceClass $path query isdirectory
+    }
+    # Test if a resource path is a file
+    option isfile {path} {
+	::tycho::resourceClass $path query isfile
+    }
+    # Get the last-modified time
+    option mtime {path} {
+	::tycho::resource stat $path results
+	return $results(mtime)
+    }
+    # Create a new directory
+    option mkdir {path} {
+	::tycho::resourceClass $path mkdir
+    }
+    # Get a new resource object
+    option new {path args} {
+	set obj [eval ::tycho::resourceClass [list $path] new $args]
+	$obj connect $path
+	return $obj
+    }
+    # Read from a resource.
+    option read {path} {
+	set resource [::tycho::resource new $path]
+	if ![$resource streamable] {
+	    error "$path is not streamable"
+	}
+	$resource open "r"
+	set result [$resource read]
+	$resource close
+	::delete object $resource
+	return $result
+    }
+    # Test if a resource is readable
+    option readable {path} {
+	::tycho::resourceClass $path query readable
+    }
+    # Test if a resource is remote
+    option isremote {path} {
+	::tycho::resourceClass $path query isremote
+    }
+    # Get the size
+    option size {path} {
+	::tycho::resource stat $path results
+	return $results(size)
+    }
+    # Source a streamable resource as Tcl
+    option source {path} {
+	set resource [::tycho::resource new $path]
+	if ![$resource streamable] {
+	    error "$path is not streamable"
+	}
+	$resource open "r"
+	set result [$resource source]
+	$resource close
+	::delete object $resource
+	return $result
+    }
+    # Get resource status
+    option stat {path varName} {
+	upvar $varName v
+	# Can't pass the proc name (stat) to resource class
+	# because of the need to do an upvar. Do it the long way.
+	set rclass [::tycho::resourceClass $path]
+	${rclass}::stat $path v
+    }
+    # Test if a resource is writable
+    option writable {path} {
+	::tycho::resourceClass $path query writable
+    }
+    # Write data to a resource file.
+    option write {path data} {
+	set resource [::tycho::resource new $path]
+	if ![$resource streamable] {
+	    error "$path is not streamable"
+	}
+	$resource open "w+"
+	set result [$resource write $data]
+	$resource close
+	::delete object $resource
+	return $result
+    }
+}
+
+#######################################################################
+#### Resource
+#
+# The Resource class abstracts the notion of files and (to some extent)
+# a file system. Subclass of this one provide the concrete
+# implementation of accessing difference kinds of resource.
+# There is both a procedural interface to resources (through
+# <code>::tycho::resource</code> and a method interface to individual
+# resource objects. These interfaces are approximately equivalent
+# to the notions of file system and file respectively. All types
+# of resource are accessed via a URL-ilke naming scheme, in which
+# names begin with a protocol or resource type, such as <code>http</code>
+# or <code>file</code>. (Names that do not being this way are
+# taken to be local files.).
+#
+# There are two key qualities of different resource types. 
+# The first is whether or not a resource is _streamable_. This
+# is indicated by the streamable{} method of resource objects.
+# Streamable resources are like files in that they can only
+# be read or written sequentially. The second quality is whether
+# the resource is _local_ or _remote_. This is indicated by the
+# isremote{} option of <code>::tycho::resource</code> procedure.
+# The key distinction between local and remote resources is that
+# remote resource may a) take a long time to access and b) be
+# unreliable. Remote resources support non-blocking access
+# via the *-donecommand*, the *-statusbar* option (for
+# progress updates), and the *-timeout* option.
+#
+# Streamable and non-streamable resource support two different
+# read-write interfaces, and clients must be prepared to support
+# both (or at least check that a resource is the type they are
+# prepared to use.) The interface that must be supported by the
+# two resource types is as follows. (Tcl doesn't support any
+# better way of doing this; in a stricter language, these would be
+# captured in an interface ar abstract subclasses.) Note that
+# these methods are in addition to those defined in this superclass.
+#
+# <br><br>
+# <b>Tutorial on reading HTTP objects</b><br>
+# Create a new HTTP object pointing to Ptolemy homepage<br>
+# <tcl><pre>set obj [::tycho::resource new "http://ptolemy.eecs.berkeley.edu/"]
+# $obj open
+# </pre></tcl>
+#
+# Get next 10 lines (click on this multiple times)<br>
+# <tcl><pre>set ret {}
+# for {set i 0} {$i < 10} {incr i} {append ret [$obj gets]\n}
+# ::tycho::inform $ret
+# </pre></tcl>
+#
+# <p> 
+# <b>Tutorial on reading/writing local objects</b><br>
+# Create a new file, open, write, close.
+# <tcl><pre>set filename [::tycho::tmpFileName Testfile]
+# set obj [::tycho::resource new $filename]
+# $obj open "w+"
+# for {set i 0} {$i < 10} {incr i} {$obj puts "Number $i"}
+# $obj close
+# </tcl></pre>
+# <br><br>
+# <b>Tutorial on reading local objects</b>
+# <tcl><pre>set obj [::tycho::resource new $filename]
+# $obj open "r"
+# set ret {}
+# while {![$obj eof]} {append ret [$obj gets]\n}
+# $obj close
+# ::tycho::inform $ret
+# </pre></tcl>
+#
+# <p>
+# <b>Tutorial on using mail object</b><br>
+# Create a new destination, write, close.
+# <tcl><pre>::tycho::Query .bb
+# .bb line destination {Enter destination} "user@location.edu"
+# wm deiconify .bb
+# set destination [lindex [::tycho::Dialog::wait .bb] 1]
+# </pre></tcl><br>
+# <br>
+# Create a new mail object, send 0-9, close.
+# <tcl><pre>
+# if {$destination != {}} {
+#     set obj [::tycho::resource new mailto:$destination]
+#     $obj open
+#     for {set i 0} {$i < 10} {incr i} {$obj puts "LINE $i"}
+#     $obj close
+# }
+# </pre></tcl>
+#
+class ::tycho::Resource {
+    inherit ::tycho::Object
+
+    constructor {args} {}
+    destructor {}
+
+    #####################################################################
+    ####                          options                            ####
+
+    # A command to execute when the current access is done
+    public variable donecommand {}
+    
+    # A statusbar to keep updated of progress (remote resources)
+    public variable statusbar {}
+    
+    # Remote access timeout, in ms. -1 means no timeout.
+    public variable timeout -1
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Get a cached copy of the data. Here, just return the file name.
+    method cachefile {}
+
+    # Close the resource
+    method close {} {::tycho::abstractMethod close}
+
+    # Connect a resource to a path name
+    method connect {path}
+
+    # Return the end of file status. Here, return eof status of local cache.
+    method eof {} {::tycho::abstractMethod eof}
+
+    # Read a string from a streamable resource. Get from a local cache file.
+    method gets {{varName {}}} {::tycho::abstractMethod gets}
+
+    # Test if the resource is currently open
+    method isopen {} {::tycho::abstractMethod isopen}
+
+    # Open the resource to which this object is connected. The optional
+    # argument defaults to "r", which opens it for reading. The
+    # legal value of this argument are the same as for the Tcl open{}
+    # command.
+    method open {{mode "r"}} {::tycho::abstractMethod open}
+
+    # Get the current full resource path
+    method path {}
+
+    # Return the progess indicator, as a decimal number. 1.0 is full.
+    method progress {}
+
+    # Write a string to a streamable resource.
+    method puts {string} {::tycho::abstractMethod puts}
+
+    # Return a string containing the data in a streamable resource.
+    method read {} {::tycho::abstractMethod read}
+
+    # Source the resource as Tcl
+    method source {}
+
+    # Return 1 if this object supports the streamable interface
+    # (as documented in the class comment), and zero otherwise.
+    method streamable {} {::tycho::abstractMethod streamable}
+
+    # Write to the remote file.
+    method write {data} {::tycho::abstractMethod write}
+
+    ###################################################################
+    ####                           public procs                    ####
+
+    # Change the permissions of a resource
+    proc chmod {path permissions} {::tycho::abstractProc chmod}
+
+    # Return the content type of the resource
+    proc contenttype {path}
+
+    # Delete a resource
+    proc delete {path} {::tycho::abstractProc delete}
+
+    # Return a list of files at the given _path_. The list should be
+    # in a format similar to <code>ls -F</code>, with directories
+    # having a "/" appended. The list should also be sorted. If the
+    # resource is remote, it should generate a Tcl error{} if the
+    # time given by *-timeout* expires. 
+    proc dirlist {pattern} {::tycho::abstractProc dirlist}
+
+    # Test if a resource exists. If the resource is remote, it must
+    # return zero if the time given by the *-timeout* option is exceeded
+    # when first accessing the resource.
+    proc exists {path} {::tycho::abstractProc exists}
+    
+    # Test is a path represents a remote resource. Most subclasses
+    # can define this proc to just return zero or one.
+    proc isremote {path} {::tycho::abstractProc isremote}
+
+    # Create a new directory
+    proc mkdir {path} {::tycho::abstractProc mkdir}
+
+    # Create a new resource object
+    # Create a new resource object, and connect{} it to the given path.
+    proc new {path args} {::tycho::abstractProc new}
+
+    # Query properties of a file
+    proc query {path option} {::tycho::abstractProc query}
+
+    # Get the status of a resource
+    proc stat {path varName} {::tycho::abstractProc stat}
+
+    # Return the type of a given file
+    proc type {path} {::tycho::abstractProc type}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    ###################################################################
+    ####                        protected variables                ####
+
+    ###################################################################
+    ####                         private variables               ####
+
+    # The full name of the current file (or directory)
+    private variable currentFile ""
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Resource::constructor {args} {
+    eval configure $args
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::Resource::destructor {} {
+    # close
+}
+
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#####################################################################
+#### cachefile
+# Get a cached copy of the contents of the file. This is provided
+# to work around Tcl's lack of binary data handling.
+body ::tycho::Resource::cachefile {} {
+    return $currentFile
+}
+
+#####################################################################
+#### connect
+# Connect a resource to a name. Subclasses can override if they need
+# to check for existence or similar things. Subclasses that override
+# this method may also need to override path{}. This method is
+# called by the <code>::tycho::resource new</code> procedure. It will
+# trigger an error{} if this object cannot handle the new path.
+#
+body ::tycho::Resource::connect {path} {
+    set p [path]
+    if { $p != "" && \
+	    [::tycho::url protocol $path] != [::tycho::url protocol $p] } {
+	error "Cannot change path from $p to $path"
+    }
+    if [isopen] {
+	close
+    }
+    set currentFile $path
+}
+
+#####################################################################
+#### path
+# Return the path of this object. Subclasses that override
+# connect{} may need to override this method too.
+#
+body ::tycho::Resource::path {} {
+    return $currentFile
+}
+
+#########################################################################
+#### progress
+# Get the current progress of a non-blocking read. Won't make sense
+# if not called during a non-blocking read. By default, this method
+# always returns 1.
+#
+body ::tycho::Resource::progress {} {
+    return 1.0
+}
+
+#####################################################################
+#### source
+# Source the resource as Tcl. It must be streamable and already
+# open. Subclasses only need to override this method if they
+# have a better way of doing it.
+#
+body ::tycho::Resource::source {} {
+    if ![streamable] {
+	error "File [path] is not streamable"
+    }
+    if ![isopen] {
+    	error "File [path] is not open"
+    }
+    uplevel [read]
+}
+
+#########################################################################
+#########################################################################
+####                          public procedures                      ####
+
+#####################################################################
+#### contenttype
+# Return the content type of the open file.
+# In the very base class, look at the file extension only
+#
+body ::tycho::Resource::contenttype {path} {
+    set ext [string tolower [file extension $path]]
+    if  { $ext == ".html" || $ext == ".htm" } {
+        return "text/html"
+    } elseif { $ext == ".gif" } {
+        return "image/gif"
+    } elseif { $ext == ".jpg" || $ext == ".jpeg" } {
+        return "image/jpg"
+    } else {
+        return "text/plain"
+    }
+}

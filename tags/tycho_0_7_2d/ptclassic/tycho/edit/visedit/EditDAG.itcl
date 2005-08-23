@@ -1,0 +1,1304 @@
+# A viewer and editor widget for a DAG (directed acyclic graph) data structure.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)EditDAG.itcl	1.48	01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: Known bugs
+# -orientation and -layout options are not stored in the file.
+
+#######################################################################
+#### EditDAG
+# A directed acyclic graph (DAG) is a data structure is a set of nodes
+# with any number of parents and children such that no subset of these
+# nodes forms a cycle. This class provides a widget to interactively
+# build, view, and edit such a data structure. The DAG is displayed
+# with root nodes at the top and children below each parent. When the
+# ordering is arbitrary, alphabetical ordering is used. The
+# alphabetical ordering is based on the node name, which may not be the
+# label that is displayed.
+# <p>
+# This class is meant to serve as a base class for such tools as class
+# browsers for object-oriented languages, precedence graph displays,
+# etc. The <code>EditDAG</code> top-level window class provides a
+# convenient container for this widget.
+# <p>
+# Data stored on the nodes of the graph are lists in the form {key
+# value key value ... }, where the keys and values are arbitrary Tcl
+# strings. However, certain keywords are recognized to control the
+# display and behavior of the editor. In particular, The following
+# keywords are currently understood:
+# <dl>
+# <dt><b>label</b><dd>The <i>value</i> field gives the label used to show
+# the node in the display.  If this is not present, then the node name
+# is used.
+# <dt><b>color</b><dd>The <i>value</i> field gives the color used to show
+# the node in the display.  If this is not present, then the node color is
+# black.  The color name is processed to make sure it is valid, and if not,
+# black is used.
+# <dt><b>font</b><dd>The <i>value</i> field gives the font used to show
+# the node in the display. If this is not present, then the default
+# font given by the -defaultfont option is chosen. The <i>value</i>
+# can take any form understood by the <code>getFont</code> method of
+# the <code>FontManager</code> class.
+# <dt><b>link</b><dd>The <i>value</i> field gives a list with two elements,
+# a filename and a fragment within the file, in the standard Tycho hyperlink
+# format.  Double clicking on the node will activate the hyperlink.
+# The filename may be absolute or relative, and may begin
+# with an environment variable (such as $TYCHO), or a user directory
+# (~<i>username</i>).  If the filename is relative, then the reference
+# directory is that of the file of the top-level editor that contains this
+# <code>EditDAG</code>.  The fragment may be a string identifying
+# a named anchor in an HTML file, or "{line <i>linenumber</i>}" or
+# "{range <i>start end</i>}" for text files, or any other destination
+# that is understood by the <code>seeFragment</code> method of the
+# widget that will display the hyperlink.
+# <dt><b>altlink</b><dd>This field is the same as <i>link</i>, except
+# that the hyperlink is invoked by shift-double-clicking.
+# <dt><b>html</b><dd>The <i>value</i> field gives HTML source code that
+# will be rendered and displayed in a message window in response to a
+# double click on the node.  If both this field and the "link" field are
+# given, then both will be activated by a double click.
+# <dt><b>tcl</b><dd>The <i>value</i> field gives tcl source code to be
+# evaluated in response to a double click on the node.
+# </dl>
+# <p>
+# Here is an example of the EditDAG:
+# <tcl><pre>
+#     ::tycho::view EditDAG
+# </pre></tcl>
+# <p>
+#
+class ::tycho::EditDAG {
+    inherit ::tycho::Graphics
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # Default font
+    itk_option define -defaultfont defaultFont Font {}
+
+    # Specify the graph object to display and edit.
+    itk_option define -graph graph Graph {}
+
+    # Specify normal or alternate layout.  Must redraw after changing.
+    itk_option define -layout layout Layout {normal}
+    
+    # Specify vertical or horizontal orientation.  Must redraw after changing.
+    itk_option define -orientation orientation Orientation {horizontal}
+
+    # Default horizontal spacing (as a fraction of a nominal default)
+    itk_option define -spacingx spacingx Spacingx 1.0
+
+    # Default vertical spacing (as a fraction of a nominal default)
+    itk_option define -spacingy spacingy Spacingy 1.0
+
+    # Start position in the horizontal direction (in pixels).
+    itk_option define -startx startx StartX 10
+
+    # Start position in the vertical direction (in pixels).
+    itk_option define -starty starty StartY 5
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a node with the given name, contents, and parent.
+    method add {name contents {parents {}}}
+
+    # Add a new arc between two selected nodes.
+    method addArc {}
+
+    # Add a new child of the selected node.
+    method addChild {}
+
+    # Add a new root node to the graph.
+    method addRoot {}
+
+    # Clear the display, discarding the current DAG.
+    method clear {}
+
+    # Save the specified node and its children to the clipboard.
+    method copy {{ids {}}}
+
+    # Return the name of the current node (the one under the mouse).
+    method current {}
+
+    # Remove the node with the given name and all its children.
+    method deleteSubgraph {name}
+
+    # Describe the contents of the canvas as a list of method invocations.
+    method describe {}
+
+    # Edit the specified node.
+    method editNode {id}
+
+    # Generate an image map file to go with a GIF image of the canvas.
+    method exportImagemap {filename {keepfragment 0}}
+
+    # Return the name of the graph object being edited.
+    method graph {} {return [scope $mygraph]}
+
+    # Open a help window.
+    method help {}
+
+    # Execute the arguments as a command in this scope, then update the display.
+    method modify {args}
+
+    # Redraw the graph.
+    method redrawGraph {}
+
+    # Find the node in the DAG identified by "name".
+    # FIXME: Implement this.
+    # method seeFragment {name}
+
+    # Set a new name and contents for the specified node.
+    method setNode {oldname newname contents}
+
+    # Specify whether or not modifications are allowed in the displayed DAG.
+    method setReadOnly {bool}
+
+    # Query the user for x and y spacing.
+    method setSpacing {}
+
+    # Toggle between layout algorithms.
+    method toggleLayout {}
+
+    # Change layout from horizontal to vertical or vice versa.
+    method transpose {}
+
+    # Verify that all parents and children are present and the graph is acyclic.
+    method verify {{repair {}}}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
+
+    # convert the contents of a node into an array.
+    protected method contentsToArray {node arrayname defaults}
+
+    # Draw a node at the given position.
+    protected method drawNode {node xcoord ycoord}
+
+    # Draw a line from the specified node to one or all of its parents.
+    protected method drawParentLines {node {parent {}}}
+
+    # Insert the specified data into the canvas.
+    method insertData {data}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Access the "diagram" preferences
+    protected method preference {mode args}
+
+    # Show information about the current node, if any
+    protected method showCurrentNodeInfo {state {press 2}}
+
+    # Return the name of the data structure class being edited.
+    protected method structClass {} {return ::tycho::DirectedAcyclicGraph}
+
+    # Verify that the argument is a properly formatted list.
+    protected method verifycontents {contents}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The color of the background box
+    protected variable boxcolor
+
+    # The color of hyperlinks
+    protected variable linkcolor
+
+    # The color of lines
+    protected variable linecolor
+
+    # The default http path name for image map files
+    protected variable defaultipath {http://ptolemy.eecs.berkeley.edu/}
+
+    # The name of the graph being edited.
+    protected variable mygraph {}
+
+    # A table of names, indexed by the id of the text object.
+    protected variable nametable
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
+    # Set the "widthpos" attribute of nodes in the subgraph.
+    private method widthPos {roots ymin {parent {}}}
+
+    # Alternative to widthPos that gives a different layout.
+    private method widthPosAlt {roots ymin {parent {}}}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # List of nodes by width position (an array).
+    private variable bywidth
+
+    # First free y position by column (an array).
+    private variable firstfree
+
+    # If non-zero, then I created the graph and will delete it on exit.
+    private variable graphmine 0
+
+    # An array that indicates whether a position in the grid is taken.
+    private variable taken
+}
+
+#######################################################################
+#### -graph option configuration
+# If an non-empty string is given as the value to this argument, it is
+# taken to be the name of an instance of class
+# <code>DirectedAcyclicGraph</code> to display and edit. The instance
+# must exist already and be accessible in the current scope. Note that
+# the name of the graph cannot be the same as any of the methods of
+# this class, or the class gets confused trying to access the graph. In
+# particular, this means that the graph should not be called "graph", a
+# fairly natural name to choose. After configuring this option, you
+# must call <code>redrawGraph</code> for the new graph to be visible.
+#
+configbody ::tycho::EditDAG::graph {
+    set gph $itk_option(-graph)
+    if {$gph != {}} {
+        if {[uplevel #0 infoObjects $gph] != {} && \
+                [uplevel #0 $gph isa [structClass]]} {
+            if $graphmine {
+                if {$mygraph != {}} {
+                    ::delete object $mygraph
+                }
+                set graphmine 0
+            }
+            set mygraph $gph
+        } {
+            error "-graph option gives a non-valid Graph object: $gph"
+        }
+    }
+    verify
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::EditDAG::constructor {args} {
+    interactiveEnable 0
+
+    set mygraph [[structClass] #auto]
+    set graphmine 1
+
+    # Register that if any centered text is added, we should update display.
+    dependenceAdd centeredtext node "$this redrawGraph"
+
+    bind $slate <Key-A> "$this addArc; break"
+    bind $slate <Key-R> "$this addRoot; break"
+    bind $slate <Key-C> "$this addChild; break"
+
+    # Bindings for enter and leave
+    $slate bind node <Enter> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s]"
+    $slate bind node <Leave> "$this putStatus {}"
+
+    bind $slate <KeyPress-Shift_L> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
+    bind $slate <KeyRelease-Shift_L> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 0]"
+    bind $slate <KeyPress-Shift_R> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
+    bind $slate <KeyRelease-Shift_R> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 0]"
+
+    # Create the context-sensitive popup menu
+    contextmenu create $itk_component(slate)
+
+    # The following is done once in the constructor because it's fairly
+    # expensive.
+    set boxcolor  [eval ::tycho::color [stylesheet get graphics nodeBoxColor]]
+    set linkcolor [eval ::tycho::color [stylesheet get graphics linkColor]]
+    set linecolor [eval ::tycho::color [stylesheet get graphics lineColor]]
+
+    eval itk_initialize $args
+
+    # Subscribe to additional style parameters
+    stylesheet subscribe \
+	    -spacingx graphics diagram.spacingx \
+	    -spacingy graphics diagram.spacingy \
+	    -startx   graphics diagram.startx \
+	    -starty   graphics diagram.starty
+
+    # Now subscribe to the graphics font. What we are trying to do
+    # here is avoid unnecessary graph redraws. We really have to look
+    # into this issue more and come up with a good solution.
+    # FIXME: this whole thing is very broken.
+    configure -defaultfont [stylesheet get fonts graphicsFont]
+
+    # FIXME FIXME
+    # preference subscribe $this graphicsFont \
+#	    "$this configure -defaultfont \
+#	    \[::tycho::preference get fonts graphicsFont 1\]; $this reload"
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::EditDAG::destructor {} {
+    if $graphmine {
+        ::delete object $mygraph
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### add
+# Add a node with the given name, contents, and list of parents. If no
+# parents are specified, then the node is a root node.
+# The graph is not redrawn. Record the addition for undoing.
+#
+body ::tycho::EditDAG::add {name contents {parents {}}} {
+    if $readOnly {bell; return}
+    verifycontents $contents
+    $mygraph add $name $contents $parents
+    # Prepend so that undoing a series of additions occurs in reverse order.
+    undoPrepend [list deleteSubgraph $name]
+}
+
+#######################################################################
+#### addArc
+# Add a new between two currently selected nodes. The first selected node
+# will be the parent, and the second will be the child. If there are not
+# two currently selected nodes, issue a message instructing the user to
+# select a pair of nodes.
+#
+body ::tycho::EditDAG::addArc {} {
+    if $readOnly {bell; return}
+    undoBoundary
+    set nodes [selected]
+    if {[llength $nodes] != 2} {
+        safeEval ::tycho::warn \
+                "First select the parent node and then the child node. \
+                \n To select the child node, hold the shift key while clicking."
+        return
+    }
+    foreach node $nodes {
+        if {![info exists nametable($node)]} {
+            error "Item $node is not a graph node"
+        }
+    }
+    set parent $nametable([lindex $nodes 0])
+    set child $nametable([lindex $nodes 1])
+    $mygraph checkArc $parent $child
+    $mygraph addArc $parent $child
+    markModified
+    focusin
+    redrawGraph
+}
+
+#######################################################################
+#### addChild
+# Add a new child node to the currently selected node. If there is no
+# currently selected node, issue a message instructing the user to
+# select a node. Otherwise, query the user for the name and contents.
+# If there is more than one currently selected node, make the new node
+# a child of both.
+#
+body ::tycho::EditDAG::addChild {} {
+    set nodes [selected]
+    if {$nodes == {}} {
+        safeEval ::tycho::inform "Select one or more parent nodes first."
+        return
+    }
+    foreach node $nodes {
+        if {![info exists nametable($node)]} {
+            error "Item $node is not a graph node"
+        } {
+            lappend parents $nametable($node)
+        }
+    }
+    set name [::tycho::autoName .query]
+    ::tycho::Query $name -queries {
+        {line name {Node name:} {}}
+        {lines contents {Contents:} {} 8}
+    } -okcommand "$this modify add \[$name get name\] \[$name get contents\] \
+            \{ $parents \}"
+    $name centerOnScreen
+}
+
+#######################################################################
+#### addRoot
+# Add a new root node to the graph. Query the user for the name and contents.
+#
+body ::tycho::EditDAG::addRoot {} {
+    set name [::tycho::autoName .query]
+    ::tycho::Query $name -queries {
+        {line name {Node name:} {}}
+        {lines contents {Contents:} {} 8}
+    } -okcommand "$this modify add \[$name get name\] \[$name get contents\] {}"
+    $name centerOnScreen
+}
+
+#######################################################################
+#### clear
+# Clear the display, discarding the current graph.
+#
+body ::tycho::EditDAG::clear {} {
+    if [getReadOnly] {bell; return}
+    $mygraph clear
+    ::tycho::Graphics::clear
+}
+
+#######################################################################
+#### copy
+# Copy the commands to create the specified nodes and all their
+# children to the clipboard. If no items are specified, then copy the
+# selected items and their children. The argument is a list of item
+# ids.  If any of the item ids are not nodes, then the base class
+# <code>copy</code> method is used to copy them.
+#
+body ::tycho::EditDAG::copy {{ids {}}} {
+    set cmds {}
+    foreach id [itemlist $ids] {
+        if [info exists nametable($id)] {
+            set nodes [$mygraph topologicalSort [list $nametable($id)]]
+            foreach node $nodes {
+                lappend cmds [list add $node \
+                        [$mygraph contents $node] \
+                        [$mygraph parents $node]]
+            }
+        } {
+            ::tycho::Graphics::copy $ids
+            lappend cmds [lindex [getClipboard] 0]
+        }
+    }
+    setClipboard $cmds
+}
+
+#######################################################################
+#### current
+# Return the name of the current node (the one under the mouse).
+# If there is no current node, return an empty string.
+# 
+body ::tycho::EditDAG::current {} {
+    set id [lindex [findAll current node] 0]
+    if [info exists nametable($id)] {
+        return $nametable($id)
+    } {
+        return {}
+    }
+}
+
+#######################################################################
+#### deleteSubgraph
+# Delete a node with the given name and all of its children. It is an error
+# if the node does not exist.  Record the deletion for undoing.
+# This method is designed to be invoked via the <code>delete</code> method
+# of the base class.  The graph is not redrawn after the deletion.
+#
+body ::tycho::EditDAG::deleteSubgraph {name} {
+    if $readOnly {bell; return}
+    # FIXME: The following fails if a given node has two children,
+    # and one is a child of the other.
+    foreach child [$mygraph children $name] {
+        deleteSubgraph $child
+    }        
+    undoPrepend [list add $name \
+            [$mygraph contents $name] [$mygraph parents $name]]
+    $mygraph delete $name
+}
+
+#########################################################################
+#### describe
+# Describe the x and y spacing options plus all options and items
+# described by the base class method.
+#
+body ::tycho::EditDAG::describe {} {
+    set dsc [::tycho::Graphics::describe]
+    lappend dsc [list configure -spacingx [cget -spacingx]]
+    lappend dsc [list configure -spacingy [cget -spacingy]]
+    return $dsc
+}
+
+#######################################################################
+#### editNode
+# Edit the specified nodes, or if none, the selected nodes.
+# The argument is the id of the canvas item representing the node.
+#
+body ::tycho::EditDAG::editNode {id} {
+    if ![info exists nametable($id)] {
+        error "Cannot edit id $id: Not a Graph node"
+    }
+    set node $nametable($id)
+    set name [::tycho::autoName .query]
+    set queries [list \
+            [list line name {Node name:} $node] \
+            [list lines contents {Contents:} [$mygraph contents $node] 8]]
+    ::tycho::Query $name -queries $queries \
+            -okcommand "$this modify setNode [list $node] \
+            \[$name get name\] \[$name get contents\]"
+    $name centerOnScreen
+}
+
+#######################################################################
+#### exportImagemap
+# Generate an image map file to go with a GIF image of the canvas.
+# The file generated conforms to the format expected by the NCSA
+# <code>imagemap</code> program that comes with the HTTP server.
+# To use the file in conjunction with a GIF image generated by
+# the <code>exportGif</code> method, put the file in your public
+# web space, such as in ~/public_html/file.map, and reference it in your
+# HTML document as in the following example:
+# <pre>
+# &lt;a href="/cgi-bin/imagemap/~username/file.map"&gt;
+# &lt;img src="file.gif" ismap&gt;
+# &lt;/a&gt;
+# </pre>
+# The hyperlinks apparently must be absolute (i.e. a full URL), although
+# the documentation says that they can be relative to the location
+# of the imagemap file.  In either case, note that this may require that
+# you move the files that are the hyperlink destination. You may also
+# need to edit the imagemap file if the hyperlink destination uses
+# special features of Tycho, such as specifying a file name relative
+# to an environment variable.
+# If the optional second argument is given and has value 1 then
+# the fragment information in the hyperlink is preserved.  Otherwise,
+# it is discarded. The default is to throw away the fragment information
+# since many Tycho syntaxes for this will be incomprehensible to most
+# Web viewers.
+#
+body ::tycho::EditDAG::exportImagemap {filename {keepfragment 0}} {
+    set defaultipath \
+            [safeEval ::tycho::queryinfo "Base path for hyperlinks:" \
+            $defaultipath 80]
+    set fid [open $filename w]
+    puts $fid "# Image map for [filename]"
+    set id [array startsearch nametable]
+    while {[set xid [array nextelement nametable $id]] != {}} {
+        set node $nametable($xid)
+        contentsToArray $node cnt [list link {}]
+        if {$cnt(link) != {}} {
+            set bbox [$slate bbox $xid]
+            set x1 [lindex $bbox 0]
+            set y1 [lindex $bbox 1]
+            set x2 [lindex $bbox 2]
+            set y2 [lindex $bbox 3]
+            if $keepfragment {
+                set dest "$defaultipath/[lindex $cnt(link) 0]#[lindex $cnt(link) 1]"
+            } {
+                set dest "$defaultipath/[lindex $cnt(link) 0]"
+            }
+            puts $fid "rect $dest $x1,$y1 $x2,$y2"
+        }
+    }
+    puts $fid "default /cgi-bin/donothing"
+    close $fid
+    array donesearch nametable $id
+}
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::EditDAG::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditDAGHelp.html] html
+}
+
+#########################################################################
+#### modify
+# Modify the canvas by executing the arguments in the scope of this object.
+# The command is identified as a distinct action for undo, the window
+# is marked modified (if appropriate), the display is updated, and the
+# focus is returned to this object.  If the object is read-only,
+# ring the bell and return, doing nothing.  Redraw the graph.
+#
+body ::tycho::EditDAG::modify {args} {
+    eval ::tycho::Graphics::modify $args
+    redrawGraph
+}
+
+######################################################################
+#### insertData
+# Insert data into the current file. This is redefined in order to redraw
+# the graph. Also, the graph is checked to make sure that all referenced
+# parents and children are present, and that the graph is acyclic. It
+# is repaired if not by deleting the offending references.
+#
+body ::tycho::EditDAG::insertData {data} {
+    undoBoundary
+    chain $data
+    verify repair
+
+    # Defer the actual drawing until the slate is mapped.
+    whenMapped slate "$this redrawGraph"
+}
+
+#######################################################################
+#### redrawGraph
+# Redraw the graph.  The vertical spacing between nodes is independent
+# of how the nodes are displayed.  The horizontal spacing depends on
+# the width of the nodes.  The rationale for this is that for textual
+# node displays, it is more appealing to have the vertical spacing
+# be uniform than to have it vary with font changes.
+# This method calls <code>::tycho::safeUpdate</code>, so that even
+# for large graphs, the system will remain interactive while the graph
+# is being drawn.
+#
+body ::tycho::EditDAG::redrawGraph {} {
+    # Disable the undo system.
+    set saveinteractiveEnabled $interactiveEnabled
+    interactiveEnable 0
+    $slate delete node line arrow
+    selectionClear
+    catch {unset nametable}
+
+    set titleTypes [stylesheet get graphics titleTypes]
+
+    # The following sets the depth attribute of each node.
+    set depthsort [$mygraph depthSort]
+    
+    # Set the widthpos attribute for each node.
+    $mygraph attributeInit widthpos {}
+    catch {unset firstfree}
+    catch {unset bywidth}
+    catch {unset taken}
+    # Initialize depth position so that it only happens once.
+    $mygraph attributeInit depth -1
+    if {$itk_option(-layout) != {normal}} {
+        widthPosAlt [$mygraph roots] 0
+    } {
+        widthPos [$mygraph roots] 0
+    }
+    
+    # Calculate the horizontal and vertical position of each node.
+    set ypos [expr [eval bottomOf $titleTypes]+$itk_option(-starty)]
+    set yincr [expr int($itk_option(-spacingy)*30)]
+    set xpos $itk_option(-startx)
+    set xincr [expr int($itk_option(-spacingx)*30)]
+    if {$itk_option(-orientation) != {horizontal}} {
+        # Vertical case: ypos depends on depth.
+        foreach level $depthsort {
+            foreach node $level {
+                $mygraph attributeSet ypos $node $ypos
+            }
+            incr ypos $yincr
+            # FIXME: Check to see whether modifying the graph during
+            # this update causes problems.
+            ::tycho::safeUpdate $this
+        }
+        # xpos depends on widthpos and the width of the items.
+        set wpos 0
+        while {[array get bywidth $wpos] != {}} {
+            set max $xpos
+            foreach node $bywidth($wpos) {
+                drawNode $node $xpos [$mygraph attribute ypos $node]
+                set myright [lindex [$mygraph attribute bbox $node] 2]
+                if {$myright > $max} {
+                    set max $myright
+                }
+            }
+            set xpos [expr $max+$xincr]
+            incr wpos
+        }
+    } {
+        # Horizontal case: ypos depends on widthpos.
+        set wpos 0
+        while {[array get bywidth $wpos] != {}} {
+            foreach node $bywidth($wpos) {
+                $mygraph attributeSet ypos $node $ypos
+            }
+            incr ypos $yincr
+            incr wpos
+        }
+        # xpos depends on depth.
+        foreach level $depthsort {
+            set max $xpos
+            foreach node $level {
+                drawNode $node $xpos [$mygraph attribute ypos $node]
+                set myright [lindex [$mygraph attribute bbox $node] 2]
+                if {$myright > $max} {
+                    set max $myright
+                }
+            }
+            set xpos [expr $max+$xincr]
+            ::tycho::safeUpdate $this
+        }
+    }
+    # Draw the lines.
+    foreach level $depthsort {
+        foreach node $level {
+            drawParentLines $node
+        }
+        ::tycho::safeUpdate $this
+    }
+    # Lower lines beneath nodes. Check that nodes exist.
+    if { [$slate find withtag node] != "" } {
+	$slate lower line node
+    }
+
+    interactiveEnable $saveinteractiveEnabled
+    # The bounding box may have changed, so...
+    updateScrollbars
+}
+
+#######################################################################
+#### setNode
+# Set a new name and contents for the specified node.
+# It is an error if the new name is already the name of another node.
+# To change the contents without changing the name of the node, just
+# specify the same name twice.
+#
+body ::tycho::EditDAG::setNode {oldname newname contents} {
+    undoAppend [list setNode $newname $oldname [$mygraph contents $oldname]]
+    $mygraph setContents $oldname $contents
+    if {$oldname != $newname} {
+        $mygraph rename $oldname $newname
+    }
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::EditDAG::setReadOnly {bool} {
+    ::tycho::Graphics::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disable newroot
+            menubar disable newchild
+	} {
+            menubar enable newroot
+            menubar enable newchild
+	}
+    }
+}
+
+#######################################################################
+#### setSpacing
+# Query the user for x and y spacing.
+#
+body ::tycho::EditDAG::setSpacing {} {
+    set result [safeEval ::tycho::query \
+            {Enter x and y scaling as a fraction of the default} \
+            [list \
+            [list line x {x scaling} $itk_option(-spacingx)] \
+            [list line y {y scaling} $itk_option(-spacingy)]]]
+    array set vals $result
+    configure -spacingx $vals(x)
+    configure -spacingy $vals(y)
+    redrawGraph
+}
+
+#####################################################################
+#### toggleLayout
+# Toggle between layout algorithms.
+#
+body ::tycho::EditDAG::toggleLayout {} {
+    if {[cget -layout] != {normal}} {
+        configure -layout normal
+    } {
+        configure -layout alternate
+    }
+    redrawGraph
+}
+
+#####################################################################
+#### transpose
+# Change layout from horizontal to vertical or vice versa.
+#
+body ::tycho::EditDAG::transpose {} {
+    if {[cget -orientation] != {horizontal}} {
+        configure -orientation horizontal
+    } {
+        configure -orientation vertical
+    }
+    redrawGraph
+}
+
+#######################################################################
+#### verify
+# Verify that all parents and children of all nodes exist as nodes in
+# the graph and that the graph is acyclic. If no argument is given, or
+# if the argument is an empty string, then trigger an error on the
+# first invalid one encountered. Otherwise, repair the graph by
+# removing the offending reference to a parent or child.
+#
+body ::tycho::EditDAG::verify {{repair {}}} {
+    $mygraph verifyAll $repair
+    $mygraph verifyAcyclic $repair
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. For the Graphics widget,
+# this method looks to find out if the mouse is over a node, and creates
+# menu entries accordingly.
+#
+body ::tycho::EditDAG::configureContextMenu {} {
+    chain
+
+    set item [$slate find withtag current]
+    if { $item != "" } {
+	if { [::tycho::lmember [$slate gettags $item] node] } {
+	    set node $nametable($item)
+	    set contents [$mygraph contents $node]
+
+	    foreach {attr value} $contents {
+		if { $attr == "link" || $attr == "altlink" } {
+		    set filename [lindex [file split [lindex $value 0]] end]
+		    contextmenu command [list open$filename] \
+                            -label "Open $filename" \
+			    -command [list eval $this hyperJump $value]
+		}
+	    }
+	    # FIXME: Add entries for other node attributes
+	}
+    }
+}
+
+#######################################################################
+#### contentsToArray
+# Given a node name, an array name, and a set of defaults, set entries
+# in the array to the values specified by the defaults, then to the
+# values specified by the contents of the node. That is, the values
+# specified by the contents override values in the defaults. Each of
+# the defaults and the contents must be a list with an even number of
+# elements, {key value key value ...}, where each key is the index used
+# to address the array, and the value is value given to that array
+# entry.
+#
+body ::tycho::EditDAG::contentsToArray {node arrayname defaults} {
+    upvar $arrayname arr
+    array set arr $defaults
+    # Tolerate syntax errors here by using defaults.
+    if {[catch {array set arr [$mygraph contents $node]} msg] != 0} {
+        safeEval ::tycho::warn $msg
+    }
+}
+
+#######################################################################
+#### drawNode
+# Draw a node at the given position. Return a boolean indicating
+# whether the node is "open".  This is ignored in this class, but in
+# derived classes, it means that its children should be
+# drawn. As a side effect, set the "bbox" attribute to the bounding box
+# of the node.
+#
+body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
+
+    # Get color and font.  Third argument is the defaults.
+    contentsToArray $node cnt [list \
+            color black \
+            fontspec {} \
+            label $node \
+            link {} \
+            altlink {} \
+            html {} \
+	    tcl {} \
+            open 1]
+
+    if { $cnt(fontspec) != "" } {
+	set font [eval ::tycho::font $cnt(fontspec)]
+    } else {
+	set font $itk_option(-defaultfont)
+    }
+    set color [::tycho::color $cnt(color) black]
+    if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
+	set color $linkcolor
+    }
+
+    # Since we are only creating a top-level item, we can call the
+    # canvas directly here
+    set id [$canvas create text $xcoord $ycoord -anchor nw \
+            -fill $color -tags {node selectable} -text $cnt(label) -font $font]
+
+    register $id \
+            [list add $node [$mygraph contents $node] \
+            [$mygraph parents $node]] \
+            [list deleteSubgraph $node] \
+            [list deleteSubgraph $node] \
+            [list editNode $id]
+
+    $canvas lower [ \
+            eval $canvas create rectangle \
+            [$canvas bbox $id] -fill $boxcolor {-outline {}}] $id
+
+    set nametable($id) $node
+    if {$cnt(link) != {}} {
+        $slate bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
+    }
+    if {$cnt(altlink) != {}} {
+        $slate bind $id <Shift-Double-Button-1> "$this hyperJump $cnt(altlink)"
+    }
+    if {$cnt(html) != {}} {
+        $slate bind $id <Double-Button-1> \
+                "+[list ::tycho::htmlmessage $cnt(html)]"
+    }
+    if {$cnt(tcl) != {}} {
+        $slate bind $id <Double-Button-1> \
+                "eval $cnt(tcl)"
+    }
+    # Get coordinates of the node.
+    $mygraph attributeSet bbox $node [$slate bbox $id]
+    return $cnt(open)
+}
+
+#######################################################################
+#### drawParentLines
+# Draw a line from the specified node to one or all of its parents.
+# It is assumed that the node and each parent have already been drawn
+# with <code>drawNode</code>.  If no parent is specified, draw lines
+# to all parents.
+#
+body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
+
+    set bbox [$mygraph attribute bbox $node]
+    set x1 [lindex $bbox 0]
+    set x2 [lindex $bbox 2]
+    set y1 [lindex $bbox 1]
+    set y2 [lindex $bbox 3]
+    
+    # Calculate destination for lines.
+    if {$itk_option(-orientation) != {horizontal}} {
+        # 8 pixel fudge to the right -- looks better.
+        set childx [expr $x1+8]
+        set childy $y1
+        set vertical 1
+    } {
+        set childx $x1
+        set childy [expr ($y1+$y2)/2]
+        set vertical 0
+    }
+
+    if {$parent == {}} {
+        set parents [$mygraph parents $node]
+    } {
+        set parents $parent
+    }
+    foreach par $parents {
+        set bbox [$mygraph attribute bbox $par]
+        set x1 [lindex $bbox 0]
+        set x2 [lindex $bbox 2]
+        set y1 [lindex $bbox 1]
+        set y2 [lindex $bbox 3]
+    
+        # Calculate origin for lines.
+        if $vertical {
+            # 8 pixel fudge to the right -- looks better.
+            set parentx [expr $x1+8]
+            set parenty $y2
+        } {
+            set parentx $x2
+            set parenty [expr ($y1+$y2)/2]
+        }
+        # Color the lines to the parents the same color as the parent.
+        contentsToArray $par cnt [list \
+            color $linecolor]
+
+	# Draw directly on the canvas for "efficiency"
+        $canvas create line \
+                $parentx $parenty \
+                $childx $childy \
+                -tags line -fill $cnt(color)
+    }
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditDAG::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditDAG::_initializeMenubar $menubar
+    }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "diagram" preferences.
+#
+body ::tycho::EditDAG::preference {mode args} {
+    eval ::tycho::preference $mode "diagram" $args
+}
+
+#######################################################################
+#### showCurrentNodeInfo
+# Show information about the current node. The argument must be the
+# state field from a Tk event. If the second argument is supplied
+# it is used in place of the state field.
+#
+body ::tycho::EditDAG::showCurrentNodeInfo {state {press 2}} {
+    putStatus ""
+    set item [$slate find withtag current]
+    if { $item != "" } {
+	if { [::tycho::lmember [$slate gettags $item] node] } {
+            if {$press == 2} {
+                set shift [expr ($state & 1)]
+            } else {
+                set shift $press
+            }
+	    set node $nametable($item)
+	    set contents [$mygraph contents $node]
+
+	    foreach {attr value} $contents {
+		if { $attr == "link" && ! $shift \
+			|| $attr == "altlink" && $shift } {
+		    putStatus "[lindex $value 0]"
+		}
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### verifycontents
+# Verify that the argument is a properly formatted list.
+#
+body ::tycho::EditDAG::verifycontents {contents} {
+    if {$contents != {}} {
+        if [catch {array set foo $contents}] {
+            error "Contents are not formatted as a \
+                    {keyword item keyword item ...} list: $contents"
+        }
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditDAG::_initializeMenubar {menubar} {
+    if [::tycho::stylesheet get interaction viseditViewOnly] {
+	$menubar delete edit
+    } else {
+        $menubar separator editsep19 edit
+
+	$menubar command newroot edit \
+		-label "New Root" -underline 4 -accelerator "R" \
+		-command "$this addRoot"
+
+	$menubar command newchild edit \
+		-label "New Child" -underline 4 -accelerator "C" \
+		-command "$this addChild"
+
+	$menubar command newarc edit \
+		-label "New Arc" -underline 4 -accelerator "A" \
+		-command "$this addArc"
+
+	$menubar command tranpose format \
+		-label "Transpose" -underline 0 \
+		-command "$this transpose"
+
+	$menubar command alternatelayout format \
+		-label "Alternate Layout" -underline 0 \
+		-command "$this toggleLayout"
+
+	$menubar command scale edit \
+		-label "Scale" -underline 1 \
+		-command "$this setSpacing"
+    }
+}
+
+#######################################################################
+#### widthPos
+# Set the "widthpos" attribute of nodes in the subgraph with the given
+# roots. The position is an index, assuming a gridded layout. The first
+# position has index 0. The method ensures that no two of the given
+# roots are given the same position, even if some of them have been
+# previously assigned positions. It returns the first and last
+# positions assigned to the roots, as a list with two elements. As a
+# side effect, update firstfree, which indicates the position of the
+# first free slot at any depth, bywidth, which lists the nodes by
+# their width position (as an array), and taken, which keeps track
+# of positions that are taken. The "widthpos" is used as the
+# vertical position when the graph is rendered in horizontal mode, and
+# as the horizontal position otherwise.
+#
+body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
+    ::tycho::safeUpdate $this
+    # NOTE: Assume no graph with more than a million nodes.
+    set firstpos 1000000
+    set lastpos 0
+
+    foreach node $roots {
+        # Get the depth of the current node.
+        # Make sure "depth" doesn't reset cached values by passing 0 arg
+        set depth [$mygraph depth $node 0]
+        # If the node does not already have a position, give it one.
+        set wpos [$mygraph attribute widthpos $node]
+        if {$wpos == {}} {
+            # Node does not have a position.  Set a minimum position (ff)
+            if ![info exists firstfree($depth)] {
+                set firstfree($depth) 0
+                set ff 0
+            } {
+                set ff $firstfree($depth)
+            }
+            # Make sure the minimum position is not less than ymin.
+            if {$ymin > $ff} {
+                set ff $ymin
+            }
+            set children [$mygraph children $node]
+            if {$children != {}} {
+                # Get the top and bottom positions of the children
+                set range [widthPos $children $ff $node]
+                # Choose the average as the preferred position
+                set desired [expr ([lindex $range 0]+[lindex $range 1])/2]
+                # If desired position is greater than minimum, use it.
+                if {$desired > $ymin} {
+                    set wpos $desired
+                } {
+                    set wpos $ymin
+                }
+            } {
+                set wpos $ff
+            }
+            # Avoid levels that are already taken.
+            # NOTE: Using info below fails (info in Itcl is broken)
+            while {[array names taken "$depth,$wpos"] != {}} {
+                incr wpos
+            }
+            $mygraph attributeSet widthpos $node $wpos
+            # Mark the position taken.
+            set taken($depth,$wpos) 1
+            lappend bywidth($wpos) $node
+            set firstfree($depth) [expr $wpos+1]
+        }
+        if {$wpos < $firstpos} {set firstpos $wpos}
+        if {$wpos > $lastpos} {set lastpos $wpos}
+    }
+    return [list $firstpos $lastpos]
+}
+
+#######################################################################
+#### widthPosAlt
+# Set the "widthpos" attribute of nodes in the subgraph with the given
+# roots. The position is an index, assuming a gridded layout. The first
+# position has index 0. The method ensures that no two of the given
+# roots are given the same position, even if some of them have been
+# previously assigned positions. It returns the first position of any
+# of the roots that have not been previously given a position. As a
+# side effect, update firstfree, which indicates the position of the
+# first free slot at any depth, and bywidth, which lists the nodes by
+# their width position (as an array). The "widthpos" is used as the
+# vertical position when the graph is rendered in horizontal mode, and
+# as the vertical position otherwise.
+#
+body ::tycho::EditDAG::widthPosAlt {roots ymin {parent {}}} {
+    # NOTE: Assume no graph with more than a million nodes.
+    set result 1000000
+    # Pre-scan for any previously assigned positions.
+    set taken {}
+    foreach node $roots {
+        set chpos [$mygraph attribute widthpos $node]
+        if {$chpos != {}} {
+            lappend taken $chpos
+        }
+    }
+
+    foreach node $roots {
+        # Make sure "depth" doesn't reset cached values by passing 0 arg
+        set depth [$mygraph depth $node 0]
+        if ![info exists firstfree($depth)] {
+            set firstfree($depth) 0
+        }
+        set chpos [$mygraph attribute widthpos $node]
+        if {$chpos == {}} {
+            # Make sure the position is not less than ymin.
+            set ff $firstfree($depth)
+            if {$ymin > $ff} {
+                set ff $ymin
+            }
+            # Make sure the path to the parent is clear.
+            if {$parent != {}} {
+                set pdepth [$mygraph depth $parent 0]
+                while {[incr pdepth] < $depth} {
+                    if ![info exists firstfree($pdepth)] {
+                        set firstfree($pdepth) 0
+                    }
+                    if {$ff < $firstfree($pdepth)} {
+                        set ff $firstfree($pdepth)
+                    }
+                }
+            }
+            set firstfree($depth) $ff
+
+            set children [lsort [$mygraph children $node]]
+            if {$children != {}} {
+                set top [widthPosAlt $children $ff $node]
+                if {$top > $ff && $top != 1000000} {
+                    # Top child is below first free position. Move down.
+                    set ff $top
+                }
+            }
+            # Avoid levels that are already taken.
+            while {[lsearch $taken $ff] >= 0} {
+                incr ff
+            }
+            $mygraph attributeSet widthpos $node $ff
+            lappend bywidth($ff) $node
+            if {$ff < $result} {set result $ff}
+            set ymin [expr $ff+1]
+            set firstfree($depth) $ymin
+        }
+    }
+    return $result
+}

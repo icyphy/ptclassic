@@ -1,0 +1,84 @@
+# -*- mode: tcl -*-
+#
+# @(#)interaction.style	1.7    01/27/99
+#
+# The "interaction" master style-sheet
+#
+configure -title "Interaction"
+configure -description {
+	This style contains settings for key user-interaction
+	parameters.
+}
+
+style default \
+	-label "Normal" \
+	-description {
+    The default style for user interaction.
+} {
+    parameter confirmOnExit 0 \
+	    -type boolean \
+	    -label "Confirm on program exit" \
+	    -description {
+	If set, Tycho asks for confirmation before exiting.
+    }
+
+    parameter welcomeWindow 1 \
+	    -type boolean \
+	    -label "Show the welcome window on startup" \
+	    -description {
+	If set, then Tycho brings up the welcome
+	window when it starts up. Note that the
+	welcome window will not appear if the
+	'Slow network' parameter of the 'System'
+	style is on.
+    }
+
+    parameter itclClassRedefinitionWarning 1 \
+	    -type boolean \
+	    -label "Warn if a Itcl class is being redefined" \
+	    -description {
+	If set, then, when a Itcl class is being redefined,
+	bring up a dialog box asking if the user really wants
+	to redefine that class.
+    }
+
+    parameter fileBrowserUseLastDirectory 1 \
+	    -type boolean \
+	    -label "Use last directory opened in file browser"
+
+    parameter caseSensitiveCompletion 0 \
+	    -type boolean \
+	    -label "Case-sensitive name completion"
+
+    parameter viewHTMLSourceUponOpen 0 \
+	    -type boolean \
+	    -label "When opening a .html file, view the HTML source."
+
+    parameter singleStackTrace 0 \
+	    -type boolean \
+	    -label "Only create a single stack trace window"
+
+    parameter shortcuts automatic \
+            -type choice \
+            -values {automatic windows unix compromise} \
+            -value automatic \
+            -label "Keyboard shortcuts"
+
+    parameter viseditViewOnly 1 \
+	    -type boolean \
+	    -label "visedit classes are view-only"
+}
+
+style quiet \
+	-label "Quieter" \
+	-description {
+    Fewer dialogs.
+} {
+    parameter confirmOnExit 0
+    parameter welcomeWindow 0
+    parameter itclClassRedefinitionWarning 0
+    parameter fileBrowserUseLastDirectory 0
+    parameter caseSensitiveCompletion 1
+    parameter singleStackTrace 1
+    parameter shortcuts automatic
+}

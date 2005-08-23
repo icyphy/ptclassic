@@ -1,0 +1,114 @@
+# -*- mode: tcl -*-
+#
+# @(#)text.style	1.4 12/05/97
+#
+# The "text" master style-sheet
+#
+configure -title "Text"
+configure -description {
+    This style contains settings for text widgets.
+    It contains universal coloring settings such
+    as foreground and background, cursor and selection
+    colors, and so on.
+}
+
+style default \
+	-label "Black on white" \
+	-description {
+    The default text colors. This style provides
+    colors for black-on-white text.
+} {
+    parameter background grey93 \
+	    -type color \
+	    -label "Text background color"
+
+    parameter foreground black \
+	    -type color \
+	    -label "Text color"
+
+    parameter selectBackground yellow \
+	    -type color \
+	    -label "Selected text background"
+
+    parameter selectForeground black \
+	    -type color \
+	    -label "Selected text foreground"
+
+    parameter insertBackground black \
+	    -type color \
+	    -label "Cursor color"
+ 
+    parameter hyperlinkColor lightskyblue \
+	    -type color \
+	    -label "Color of hyperlinks"
+
+    parameter underlineLinks 1 \
+	    -type boolean \
+	    -label "Underline hyperlinks?"
+
+    parameter activeColor cyan4 \
+	    -type color \
+	    -label "Color of active text"
+
+    parameter parenColor lightskyblue \
+	    -type color \
+	    -label "Parenthesis match highlight"
+
+    parameter targetColor lightskyblue \
+	-type color \
+	-label "?Target color?"
+
+    group search \
+	    -label "Search and replace colors" {
+	parameter background forestGreen \
+		-type color  \
+		-label "Background color of matched search text"
+
+	parameter foreground white \
+		-type color  \
+		-label "Foreground color of matched search text"
+    }
+
+    group spell \
+	    -label "Spell-check colors" {
+	parameter background red \
+		-type color  \
+		-label "Background color of matched spell-check text"
+
+	parameter foreground white \
+		-type color  \
+		-label "Foreground color of matched spell-check text"
+    }
+}
+
+style reverse \
+	-label "White on black" {
+    parameter background black
+    parameter foreground white
+    parameter insertBackground white
+    parameter selectBackground grey50
+    parameter selectForeground white
+    parameter parenColor lightskyblue4
+}
+
+style console \
+	-label "Console" \
+	-description {
+    Text colors for console windows.
+} {
+    parameter background grey93
+    parameter foreground black
+    parameter insertBackground black
+    parameter selectBackground grey80
+}
+
+style html \
+	-label "HTML" \
+	-description {
+    Text colors for HTML viewers.
+} {
+    parameter background LightGrey
+    parameter foreground black
+    parameter insertBackground black
+    parameter selectBackground lightyellow
+}

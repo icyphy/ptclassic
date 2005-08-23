@@ -1,0 +1,914 @@
+########################################################################
+# Version: @(#)StyleSheet.itcl	1.25 07/21/98
+# Author: John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#####################################################################
+#### stylesheet
+# Perform operations on stylesheets. This procedure provides
+# access to style-sheets by name (rather than by file name),
+# and provides a better naming scheme than that implemented
+# directly by StyleSheet. The procedure has several forms:
+#
+# <dl>
+# <dt><b>access</b> _stylesheet_ ?_method_? ?_arg_ _arg_...?
+# <dd>
+# Get direct access to a stylesheet. If no arguments are provided,
+# return the StyleSheet object named _stylesheet_. If arguments
+# are present, call _method_ with _args_ on the stylesheet and
+# return the result.
+#
+# <dt><b>get</b> _stylesheet_ ?_style_? _param_
+# <dd>
+# Get the value of a stylesheet parameter. _stylesheet_ is the
+# style-sheet, _style_ the style_, and _param_ is the parameter
+# to be returned, in the same format as for the <b>subscribe</b>
+# option. If _style_ is not suppled, use the preferred global
+# style obtained from <b>::tycho::userprofile</b>. If the stylesheet
+# has a master and the given 
+# parameter is not present, ask the master. If the stylesheet
+# is a master (that is, does not itself have a master), and the 
+# requested parameter is not present, look for the same parameter
+# in the "default" style. If that doesn't exist, raise an error.
+#
+# <dt><b>register</b> _stylesheet_ ?_masterfile_? ?_userfile_?
+# <dd>
+# Register a stylesheet. _stylesheet_ is the name which will be used
+# to refer to the stylesheet in future calls. _masterfile_ is
+# the file containing the base style-sheet in TIM format, and
+# _userfile_ is the file containing user-specified styles,
+# also in TIM format. The two files are first checked for existence,
+# and if _userfile_ does not exist, then _masterfile_
+# is copied to _userfile_. The first time _stylesheet_
+# is accessed, _userfile_ is loaded into memory to create an
+# object that can be edited and modified. At that time, the modification
+# dates of _masterfile_ and _userfile_ are compared, and
+# if _masterfile_ is more recent than _userfile_, the loaded
+# model is updated to add or remove any parameters present in
+# _masterfile_ but not in _userfile_, or vice versa. If
+# _masterfile_ and _userfile_ are not supplied, the result is the
+# previously-registered value of _userfile_.
+#
+# <dt><b>set</b> _stylesheet_ ?_style_? _param_ _value_
+# <dd>
+# Set the value of a stylesheet parameter. _stylesheet_ is the
+# style-sheet, _style_ the style_, and _param_ is the parameter
+# to be returned, in the same format as for the <b>subscribe</b>
+# option.  If _style_ is not suppled, use the preferred global
+# style obtained from <b>::tycho::userprofile</b>. The parameter is set
+# using the <b>publish</b> method of the stylesheet model, so any
+# subscribers to the style will be notified of the new value.
+#
+# <dt><b>style</b> _stylesheet_ ?_subscriber_? ?_style_?
+# <dd>
+# Select or get the style used to give value to a widget's options.
+# _subscriber_ is the widget, _stylesheet_ is the name of
+# a stylesheet (as given to the <b>register</b> option), and
+# _style_ is the name of the style that will be used to update
+# the options of _subscriber_. If no style is ever specified
+# for a particular widget, then the style named "default" will
+# be used. If _subscriber_ is not given, return a list of subscribers
+# and their chosen styles; if _style_ is not given, return the
+# current style of _subscriber_; if _style is given, change the
+# style of _subscriber_ to _style_. The special style <b>delete</b>
+# will delete the subscriber from the style list.
+#
+# <dt><b>stylesheets</b> ?<b>all</b>?
+# <dd>
+# Return a list of registered and loaded stylesheets. If the
+# <b>all</b> argument is supplied, return all registered stylesheets,
+# regardless of whether they are loaded.
+#
+# <dt><b>subscribe</b> _subscriber_ _stylesheet_ ?_option_ _param_ ...?
+# <dd>
+# Subscribe a widget's options to parameters of a style-sheet.
+# The _subscriber_ is the widget, _stylesheet_ is the name of
+# a stylesheet (as given to the <b>register</b> option), each
+# _option_ is the name of an itk_option or a public variable
+# of _subscriber_, and _param_ is the name of the parameter.
+# The parameter name is different to the actual item name of
+# the StyleSheet model: it is the dot-separated parameter name
+# relative to a particular style (as specified by the <b>select</b>
+# option). For example, the name <b>colors.textColor</b> is
+# the <b>textColor</b> parameter of the <b>colors</b> group. 
+#
+# <dt><b>unsubscribe</b> _subscriber_ ?_option_ ...?
+# <dd>
+# Unsubscribe a widget's options. Each _option_ is an option
+# of _subscriber_ that was previously subscribed with
+# <b>subscribe</b>. If no options are supplied, unsubscribe
+# all options of _subscriber_.
+#
+# </dl>
+#
+ensemble ::tycho::stylesheet {
+    #### NOTE: The :: in front of each "set" is required for
+    #### tcl++ (not needed for Itcl)
+
+    # Get direct access to a stylesheet
+    option access {stylesheet {method {}} args} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+	
+	# Call or return it
+	if { $method == "" } {
+	    return $model
+	} else {
+	    eval $model $method $args
+	}
+    }
+
+    # Get a style parameter
+    option get {stylesheet style {param {}}} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+	
+	# Get default style parameter
+	if { $param == "" } {
+	    ::set param $style
+	    ::set style [::tycho::userprofile getstyle $stylesheet]
+	}
+
+	# Get it
+	$model value [concat $style [split $param .]] 1
+    }
+
+    # Register a stylesheet
+    option register {stylesheet {masterfile {}} {userfile {}}} {
+        if { $masterfile == "" } {
+            if ![@scope ::tycho::StyleSheet ::info exists \
+            		_userfile($stylesheet)] {
+                error "Style sheet \"$stylesheet\" has not been registered"
+            }
+            return [@scope ::tycho::StyleSheet set _userfile($stylesheet)]
+	}
+	if [@scope ::tycho::StyleSheet ::info exists _masterfile($stylesheet)] {
+	    error "Style sheet \"$stylesheet\" is already registered"
+	}
+	@scope ::tycho::StyleSheet set _masterfile($stylesheet) $masterfile
+	@scope ::tycho::StyleSheet set _userfile($stylesheet) $userfile
+    }
+
+    # Set a style parameter
+    option set {stylesheet style param {value {}}} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+	
+	# Get default style parameter
+	if { $value == "" } {
+	    ::set value $param
+	    ::set param $style
+	    ::set style [::tycho::userprofile getstyle $stylesheet]
+	}
+        ::set name [concat $style [split $param .]] 
+
+        # If this is a master, the parameter may not exist, so add it
+        if ![$model exists $name] {
+            $model add parameter $name
+        }
+	# Set it and publish
+	$model publish attrset [concat $style [split $param .]] -value $value
+    }
+
+    # Get or set the preferred style
+    option style {stylesheet {subscriber {}} {style {}}} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+
+	# Call it
+	$model style $stylesheet $subscriber $style
+    }
+
+    # Return a list of registered stylesheets
+    option stylesheets {{mode {}}} {
+	if { $mode == "all" } {
+	    @scope ::tycho::StyleSheet array names _userfile
+	} else {
+	    @scope ::tycho::StyleSheet array names _stylemodel
+	}
+    }
+
+    # Subscribe options
+    option subscribe {subscriber stylesheet args} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+	
+	# Call it
+	eval $model subscribe options $subscriber $args
+    }
+
+    # Unsubscribe options
+    option unsubscribe {subscriber stylesheet args} {
+	# Make sure it's loaded
+	::set model [::tycho::StyleSheet::load $stylesheet]
+	
+	# Call it
+	eval $model unsubscribe options $subscriber $args
+    }
+}
+
+##########################################################################
+#### StyleSheet
+#
+# The <i>StyleSheet</i> model provides a mechanism for widgets
+# to have configuration options controlled by a central
+# database. Each style-sheet contains one or more _styles_,
+# which is a collection of parameters with arbitrary values.
+# All styles within a sheet have exactly the same set of
+# parameters, but with differing values. Widgets can subscribe
+# an option to a parameter, and that option is then kept in sync
+# with the value of that parameter instance within the particular
+# style currently selected for that widget.
+# A style sheet has three types:
+#
+# <dl>
+#
+# <dt><b>style</b> _name_:
+# <dd>
+# A StyleSheet model contains multiple styles. One of them must be
+# named "default," while the others can have any arbitrary name.
+# Styles have the following attributes:
+#   <dl>
+#   <dt><b>-description</b> <i>description</i>
+#   <dd>
+#   An HTML description of the style in HTML which will
+#   be displayed in help windows.
+#
+#   <dt><b>-label</b> <i>label</i>
+#   <dd>
+#   A brief string describing the stylesheet. By convention, styles
+#   are only made available in user interfaces if they have a label.
+#   </dl>
+#
+# <dt><b>group</b> _name_:
+# <dd>
+# Parameters within a style can be divided into groups.
+# Groups are just a structuring mechanism for parameters, and
+# can be arbitrarily nested. Groups cannot appear at the
+# top level of a model. Groups have the following attributes:
+#   <dl>
+#   <dt><b>-description</b> <i>description</i>
+#   <dd>
+#   An HTML description of the group in HTML which will
+#   be displayed in help windows.
+#
+#   <dt><b>-label</b> <i>label</i>
+#   <dd>
+#   A brief string describing the group. By convention, groups
+#   are only made available in user interfaces if they have a label.
+#   </dl>
+# 
+# <dt><b>parameter</b> _name_:
+# <dd>
+# A parameter. Parameters cannot appear at the top level, and
+# cannot contain other items. They have the following attributes:
+#   <dl>
+#   <dt><b>-description</b> <i>description</i>
+#   <dd>
+#   An HTML description of the parameter in HTML which will
+#   be displayed in help windows.
+#
+#   <dt><b>-label</b> <i>label</i>
+#   <dd>
+#   A brief string describing the parameter. By convention, parameters
+#   are only made available in user interfaces if they have a label.
+#
+#   <dt><b>-type</b> <i>type</i>
+#   <dd>
+#   The "type" of the parameter. This will be used by the parameter
+#   editor to decide how to display and edit the parameter. Legal types are:
+#   <ul>
+#   <li><b>string</b>: Can be any arbitrary value. This is the default.
+#   <li><b>number</b>: A number.
+#   <li><b>integer</b>: An integer.
+#   <li><b>boolean</b>: A boolean value.
+#   <li><b>choice</b>: A small set of (arbitrary) possible values. These
+#   are intended for display by radiobuttons.
+#   <li><b>set</b>: A larger set of (arbitrary) possible values. These
+#   are intended for display by an option menu.
+#   <li><b>font</b>: A font value, specified as a list {_family_ _size_
+#   _style_}. The second and third elements can be omitted -- see FontManager
+#   for details.
+#   <li><b>color</b>: A symbolic color value.
+#   </ul>
+#  
+#   <dt><b>-values</b> <i>list</i>
+#   <dd>
+#   A list representing the set of legal values of
+#   the parameter. Valid for the _choice_ and _set_ types.
+# </dl>
+# </dl>
+#
+class ::tycho::StyleSheet {
+    inherit ::tycho::DataModel
+
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                   public variables                      ####
+
+    # The master stylesheet of this one
+    public variable master ""
+
+    # The filename of this stylesheet
+    public variable filename ""
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Notify on parameter update
+    method _updateoptions {widget command args}
+
+    # Get an attribute by looking at the master style-sheet
+    method dfltcget {name attribute}
+
+    # Convert a subscriber and parameter name into an item name
+    method namebysubscriber {subscriber param}
+
+    # Get or set the preferred style
+    method style {stylesheet {subscriber {}} {style {}}}
+
+    # Subscribe to this model
+    method subscribe {type {subscriber {}} args}
+
+    # Synchronize this model with a "master" model
+    method synchronize {master}
+
+    # Unsubscribe from this model
+    method unsubscribe {type subscriber args}
+
+    # Get a preference value, converting if requested
+    method value {name {convert 0}}
+
+    #################################################################
+    ####                   public procedures                     ####
+
+    # Load a stylesheet if it isn't already and return the object
+    public proc load {stylesheet}
+
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Add an edge
+    protected method _addparameter {name value args}
+
+    # Return a description of an edge
+    protected method _describeparameter {name {prefix {}}}
+
+    #################################################################
+    ####                    private methods                      ####
+
+    # Utility routine for synchronizing with the master
+    private method _sync {master rstyle context}
+
+    #################################################################
+    ####                   private variables                     ####
+
+    # Array containing {widgetname option parameter}
+    private variable _widgetoptions
+    
+    # Mapping from widget name to subscribed style
+    private variable _widgetstyle
+
+    #################################################################
+    ####               private common variables                  ####
+
+    # Mapping from sheet name to master file name
+    private common _masterfile
+
+    # Mapping from sheet name to StyleSheet object
+    private common _stylemodel
+
+    # Mapping from sheet name to user file name
+    private common _userfile
+}
+
+
+########################################################################
+#### constructor
+#
+body ::tycho::StyleSheet::constructor {args} {
+    # Define the style entity
+    define style \
+	    -label {} \
+	    -description {}
+
+    # Define the group entity
+    define group \
+	    -label {} \
+	    -description {}
+
+    # Define the parameter entity
+    define parameter \
+            :override 1 \
+	    :leafonly 1 \
+	    -label {} \
+	    -description {} \
+	    -type string \
+	    -values {}
+
+    # Evaluate options
+    eval configure $args
+    
+    # Now a little trick: the model is subscribed to itself, so
+    # it can update option subscriptions.
+    subscribe data $this "$this _updateoptions"
+}
+
+
+#########################################################################
+#########################################################################
+####                          public methods                         ####
+
+########################################################################
+#### _updateoptions
+#
+# Callback for notification when a parameter is changed. We
+# reconfigure subscribed widgets only if _command_
+# is <b>attrset</b> and _args_ contains a <b>-value</b>
+# attribute.
+#
+body ::tycho::StyleSheet::_updateoptions {command args} {
+    # Make sure we have something to do
+    if { $command != "attrset" } {
+        return
+    }
+    set name [lindex $args 0]
+    array set attrs [lreplace $args 0 0]
+    if { ! [::info exists attrs(-value)] } {
+    	return
+    }
+
+    # Get style and parameter name
+    set style [lindex $name 0]
+    set param [join [lreplace $name 0 0] .]
+
+    # Find subscribers and update. Note that we go directly to the
+    # ::itk::Archetype method in order to bypass the overridden
+    # configure{} method.
+    foreach {widget option _} [eval concat \
+            [array names _widgetoptions [list * * $param]]] {
+        if { [infoWhichCommand $widget] == "" } {
+            catch {unset _widgetstyle($widget)}
+            unset _widgetoptions([list $widget $option $param])
+            continue
+        }
+        if { $_widgetstyle($widget) == $style } {
+            $widget ::itk::Archetype::configure $option [value $name 1]
+        }
+    }
+}
+
+########################################################################
+#### dfltcget
+#
+# Get an attribute of an item. This is like <b>attrget</b>, except
+# that it searches in the master style-sheet to find missing
+# values: If the attribute is not present here, look in
+# the same stylesheet in the master. If it is not present
+# there, look in the "default" stylesheet of the master.
+#
+body ::tycho::StyleSheet::dfltcget {name attribute} {
+    if [exists $name] {
+	array set attrs [attrset $name]
+	if [::info exists attrs($attribute)] {
+	    return $attrs($attribute)
+	}
+    }
+    if { $master != "" } {
+	# Try in the master
+	$master dfltcget $name $attribute
+    } else {
+	# I am a master
+	if { [lindex $name 0] == "default" } {
+	    # Can't go any further
+	    attrget $name $attribute
+	} else {
+	    # Try default style
+	    dfltcget [lreplace $name 0 0 default] $attribute
+	}
+    }
+}
+
+########################################################################
+#### namebysubscriber
+#
+# Convert a subscriber and parameter name into a full item name. The
+# name will include the name of the style to which _subscriber_ is
+# currently subscribed.
+#
+body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
+    # Get subscriber command
+    set s [::infoWhichCommand $subscriber]
+    if { $s != "" } {
+        set subscriber $s
+    }
+	concat $_widgetstyle($subscriber) [split $param .]
+}
+
+########################################################################
+#### style
+#
+# Select or get the style used to give value to a widget's options.
+# _subscriber_ is the widget, _stylesheet_ is the name of
+# a stylesheet (as given to the <b>register</b> option), and
+# _style_ is the name of the style that will be used to update
+# the options of _subscriber_. If no style is ever specified
+# for a particular widget, then the style named "default" will
+# be used. If _subscriber_ is not given, return a list of subscribers
+# and their chosen styles. If _subscriber is given and _style_ is not,
+# return the current style preferred by _subscriber_. If _subscriber
+# is unknown, return "default". If _subscriber_ and _style_ are both given,
+# change the style of _subscriber_ to _style_.  If the widget has
+# already subscribed options (with <b>subscribe option</b>), then
+# all of the widgets subscribed options are updated with the same
+# parameters, but in _stylename_ instead of the previous style.
+# If the widget has not yet subscribed to any styles, then
+# _stylename_ will be used as the style from which to set options
+# in later calls to <b>subscribe option</b>. The special style
+# <b>delete</b> will delete the subscriber style record from this
+# stylesheet.
+#
+body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
+    if { $subscriber == "" } {
+	# Get all subscribers and styles
+	array get _widgetstyle
+    } else {
+	set s [::infoWhichCommand $subscriber]
+	if { $s != "" } {
+	    set subscriber $s
+	}
+	if { $style == "" } {
+	    # Return the style for this widget
+	    if ![::info exists _widgetstyle($subscriber)] {
+		return "default"
+	    } else {
+                return $_widgetstyle($subscriber)
+	    }
+	} elseif { $style == "delete" } {
+	    # Delete the subscriber reference
+	    catch {unset _widgetstyle($subscriber)}
+
+	} else {
+	    # Change the style. First check that it's either here
+	    # or in the master.
+            if ![exists $style] {
+                if { $master == "" || ! [$master exists $style] } {
+                    error "Unknown style \"$style\" in style-sheet \"$modelname\""
+                }
+	    }
+	    # Change the style for this widget
+	    set _widgetstyle($subscriber) $style
+
+	    # Update the widget. It is possible that a widget
+            # is created that has the same name as a widget that
+            # was created before, in which case it will already have
+            # entries in _widgetoptions, which have not yet
+            # been create in the widget. Because of this, catch
+            # the configure{}.
+	    set updatelist {}
+            foreach {_ option param} [eval concat \
+                    [array names _widgetoptions [list $subscriber * *]]] {
+                catch {
+                    $subscriber ::itk::Archetype::configure $option \
+                    		[value [namebysubscriber $subscriber $param] 1]
+                }
+            }
+        }
+    }
+}
+
+########################################################################
+#### subscribe
+#
+# Subscribe to this model. This command has three forms, depending
+# on the value of the _mode_ argument. The _subscriber_ is
+# usually the name of the widget that is subscribing to this model,
+# but remaining arguments differ according to the mode. If
+# _subscriber_ is an object or Tk window, then is is converted 
+# into its access command (for example, <code>.foo</code> will be
+# converted into <code>::.foo</code>. If it is not, then the given
+# string will be used as-is -- this string is arbitrary, but care
+# should be taken to avoid clashing with object or widget names.
+#
+# <dl>
+# <dt><b>data</b> _subscriber_ ?_name_? ?_command_?
+# <dd>
+# Subscribe to a change in data. This is the same as for 
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
+#
+# <dt><b>event</b> _subscriber_ _event_ ?_command_?
+# <dd>
+# Subscribe to a an "event" on the model. This is the same as for 
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
+#
+# <dt><b>options</b> _subscriber_ ?_option_ _name_ ...?
+# <dd>
+# Subscribe a widget option to a change in data. Each _option_ is
+# the name of an itk_option or a public variable of _subscriber_, and
+# _name_ is the item of this model that will be used to give
+# a value to _option_. _name_ is a dot-separated name relative to
+# the style that _subscriber_ has subscribed to. If _subscriber has not
+# subscribed to a style, then the <b>default</b> style is used.
+# Each _option_ of _subscriber_ is updated immediately with the
+# current value of item _name_. Furthermore, any change to _name_
+# will cause _subscriber_ to be updated again.
+#
+# </dl>
+#
+body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
+    # Get subscriber command if it exists
+    set s [::infoWhichCommand $subscriber]
+    if { $s != "" } {
+	set subscriber $s
+    }
+    switch -exact $mode {
+        "options" {
+            # Make sure we have at least the default style
+	    if ![::info exists _widgetstyle($subscriber)] {
+                set _widgetstyle($subscriber) "default"
+            }
+
+	    set updatelist {}
+	    foreach {option param} $args {
+		# Record the subscription
+		set _widgetoptions([list $subscriber $option $param]) 1
+		
+		# Build the list to update the widget now
+		lappend updatelist $option \
+			[value [namebysubscriber $subscriber $param] 1]
+	    }
+	    # Update the widget now
+	    eval $subscriber ::itk::Archetype::configure $updatelist
+        }
+    	default {
+	    eval chain $mode $subscriber $args
+    	}
+    }
+}
+
+########################################################################
+#### synchronize
+#
+# Synchronize this model with a master model. The purpose of this
+# is to ensure that the user stylesheet does not contain obsolete
+# data. The synchronization process uses a style called "default"
+# and, for each style in this stylesheet, deletes any groups or
+# parameters that are not in the master.
+#
+body ::tycho::StyleSheet::synchronize {master} {
+    foreach s [match style] {
+	_sync $master $s {}
+    }
+}
+
+########################################################################
+#### unsubscribe
+#
+# Unsubscribe from this model. This command has three forms, depending
+# on the value of the _mode_ argument. The _subscriber_ is
+# always the name of the widget that is subscribing to this model,
+# but remaining arguments differ according to the mode.
+#
+# <dl>
+# <dt><b>data</b> _subscriber_ ?_name_?
+# <dd>
+# Unsubscribe from data changes. This is the same as for 
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
+#
+# <dt><b>event</b> _subscriber_ ?_event_?
+# <dd>
+# Unsubscribe from an "event" on the model. This is the same as for 
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
+#
+# <dt><b>options</b> _subscriber_ ?_option_ ...?
+# <dd>
+# Unsubscribe widget options from data. Each _option_ is
+# the name of an itk_option or a public variable of _subscriber_, that
+# has previously been subscribed with <b>subscribe option</b>.
+# If no options are given, then the widget is unsubscribed from all
+# options.
+#
+# </dl>
+#
+body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
+    switch -exact $mode {
+        "options" {
+            # Get subscriber command if it exists
+            set s [::infoWhichCommand $subscriber]
+            if { $s != "" } {
+                set subscriber $s
+            }
+            if { $args == "" } {
+                # Unsubscribe from everything
+		catch {unset _widgetstyle($subscriber)}
+		foreach i [array names _widgetoptions([list $subscriber * *])] {
+		    unset _widgetoptions($i)
+		}
+	    } else {
+		# Unsubscribe from selected options		
+		foreach option $args {
+		    foreach i [array names \
+			    _widgetoptions([list $subscriber $option *])] {
+			unset _widgetoptions($i)
+		    }
+		}
+	    }
+	}
+    	default {
+	    eval chain $mode $subscriber $args
+    	}
+    }
+}
+
+########################################################################
+#### value
+#
+# Get the value of a parameter. _style_ is the style_ and _param_ is
+# the parameter to be returned, as a dot-separated name. If the stylesheet
+# has a master and the given parameter is not present, ask the master.
+# If the stylesheet is a master (that is, does not itself have a
+# master), and the requested parameter is not present, look for the
+# same parameter in the "default" style. If that doesn't exist,
+# raise an error. If _convert_ is set, translate fonts and colors from
+# symbolic into raw X values.
+#
+body ::tycho::StyleSheet::value {name {convert 0}} {
+    # Get value, reverting to default if encessary
+    set value [dfltcget $name -value]
+
+    # Convert if requested
+    if { $convert } {
+	switch -exact [dfltcget $name -type] {
+	    "font" {
+		set value [eval ::tycho::font $value]
+	    }
+	    "color" {
+		set value [eval ::tycho::color $value]
+	    }
+	}
+    }
+    return $value
+}
+
+
+#########################################################################
+#########################################################################
+####                         public procedures                       ####
+
+########################################################################
+#### load
+#
+body ::tycho::StyleSheet::load {stylesheet} {
+    # Check it
+    if ![::info exists _userfile($stylesheet)] {
+	error "Unknown stylesheet \"$stylesheet\""
+    }
+    # If it's not loaded, load it
+    if ![::info exists _stylemodel($stylesheet)] {
+	set userfile [::tycho::expandPath $_userfile($stylesheet)]
+	set masterfile [::tycho::expandPath $_masterfile($stylesheet)]
+	
+	# Create the master
+	set master [uplevel #0 ::tycho::StyleSheet \
+		[::tycho::autoName masterstylesheet] \
+		-modelname master$stylesheet \
+		-filename $masterfile]
+	
+	# Load it
+	set fd [open $masterfile]
+	$master parse [read $fd]
+	close $fd
+	
+	# Create the user stylesheet
+	set model [uplevel #0 ::tycho::StyleSheet \
+		[::tycho::autoName stylesheet] \
+		-modelname $stylesheet \
+		-filename $userfile \
+		-master [infoWhichCommand $master]]
+	set _stylemodel($stylesheet) $model
+	
+	# If the user file exists, load it
+	if [::file exists $userfile] {
+	    set fd [open $userfile]
+	    $model parse [read $fd]
+	    close $fd
+	    
+	    # If the master file is more recent than the user file,	
+	    # "synchronize" it with the master, and rewrite the user file.
+	    # FIXME: Based on experience with the earlier preferences manager
+	    # (WidgetPreferences), the date comparison is not likely to be
+	    # very robust. We need to use version numbers.
+	    if { [::file mtime $masterfile] > [::file mtime $userfile] } {
+		$model synchronize $master
+		set fd [open $userfile "w"]
+		puts $fd [$model describe]
+		close $fd
+	    }
+	}
+    } else {
+	set model $_stylemodel($stylesheet)
+    }
+    # Return the full namespace path so it can be passed around
+    # return ::tycho::StyleSheet::$model
+    return $model
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+########################################################################
+#### _addparameter
+#
+# Add a parameter.
+#
+body ::tycho::StyleSheet::_addparameter {tail value args} {
+    # Get the full name of the item
+    set name [concat [set ${ns}::_context_] $tail]
+    
+    # Add it.
+    eval [list add parameter $name -value $value] $args
+}
+
+########################################################################
+#### _describeparameter
+#
+# Return a string describing a parameter.
+#
+body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
+    # Start string with type followed by local name
+    set string "${prefix}parameter [lindex $name end]"
+
+    # Print value
+    array set attrs [attrset $name]
+    lappend string $attrs(-value)
+    unset attrs(-value)
+
+    # Print remaining attributes
+    foreach attr [lsort [array names attrs]] {
+        append string " \\\n$prefix        "
+        lappend string $attr $attrs($attr)
+    }
+    return $string\n
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+########################################################################
+#### _sync
+#
+# Synchronize with a master stylesheet. Called by the
+# synchronize{} method.
+#
+body ::tycho::StyleSheet::_sync {master style context} {
+    set mgroups [$master match group [concat default $context]]
+    set groups [match group [concat $style $context]]
+
+    # Delete groups
+    foreach g [::tycho::lsubtract $groups $mgroups] {
+		delete [concat $style $context $g]
+    }
+    # Recursively synchronize groups
+    foreach g [::tycho::lintersection $groups $mgroups] {
+		_sync $master $style [concat $context $g]
+    }
+
+    # Process parameters in this context
+    set mparams [$master match parameter [concat default $context]]
+    set params [match parameter [concat $style $context]]
+
+    # Delete parameters
+    foreach p [::tycho::lsubtract $params $mparams] {
+		delete [concat $style $context $p]
+    }
+}

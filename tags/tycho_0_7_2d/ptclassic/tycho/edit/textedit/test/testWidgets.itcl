@@ -1,0 +1,223 @@
+# Test suite for widgets in tycho/editors/textedit
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)testWidgets.itcl	1.4 05/12/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# A number of windows will be created, and then some time after, destroyed.
+# You should just watch.  Do not push any buttons, or you could trigger
+# spurious errors.  If no errors occur during the test, there will be no
+# windows left at the end.  Currently, windows are left open for 4 seconds.
+# Run from within tycho (can just source this file and execute it).
+
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.textedit
+
+#set VERBOSE 1
+
+############################################################################
+#### EditC
+test EditC-1.1 {Test EditC} {
+    set view [::tycho::view EditC]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditCpp
+test EditCpp-1.1 {Test EditCpp} {
+    set view [::tycho::view EditCpp]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+######################################################################
+#### Generate a DAG of classes
+# 
+if ![catch {package require tycho.edit.visedit}] {
+    test EditCpp-2.1 {Generate a DAG of classes} {
+	file delete -force class.dag    
+	set view [::tycho::openContext EditCppTest.h]
+	set win [$view displayer windowName] 
+	set dagview [$view classDAG]
+	set dagwin [$dagview displayer windowName]
+	after $duration removeobj $win
+	after $duration removeobj $dagwin
+	set retval [file exists class.dag]
+	#file delete -force class.dag    
+	list $retval
+    } {1}
+}
+
+############################################################################
+#### EditEsterel
+test EditEsterel-1.1 {Test EditEsterel} {
+    set view [::tycho::view EditEsterel]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditHTML
+test EditHTML-1.1 {Test EditHTML} {
+    set view [::tycho::view EditHTML]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+# If we just do openContext on a .html file, then we will get the graphical
+# html browser.
+test EditHTML-1.2 {Put a file into the textual HTML editor} {
+    set view [tycho::view EditHTML -file \
+	    [::tycho::expandPath [file join $TYCHO doc index.html]]]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditItcl
+test EditItcl-1.1 {Test EditItcl} {
+    set view [::tycho::view EditItcl]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+test EditItcl-1.2 {Test EditItcl gendocBuffer} {
+    set savedir [pwd]
+    cd [file join $env(TEXTEDIT_LIBRARY) test]
+    file delete -force EditItcl.itcl
+    file copy ../EditItcl.itcl .
+    file delete -force doc
+    set view [::tycho::File::openContext EditItcl.itcl]
+    set win [$view displayer windowName]
+    set html [$view gendocBuffer]
+    after $duration removeobj $win
+    if { "$html" != "" } {
+	# If we get an error, then by the time the after happens the 
+	# line below could be invalid
+	set wname [$html displayer windowName]
+	after $duration removeobj $wname
+    }
+    update
+    file delete -force EditItcl.itcl
+    cd $savedir
+    file exists [file join doc codeDoc EditItcl.html]
+} {1}
+
+test EditItcl-1.3 {Test EditItcl gendoc} {
+    set savedir [pwd]
+    cd [file join $env(TEXTEDIT_LIBRARY) test]
+    file delete -force EditItcl.itcl
+    file copy ../EditItcl.itcl .
+    file delete -force doc
+    set html [::tycho::EditItcl::gendoc EditItcl.itcl]
+    if { "$html" != "" } {
+	# If we get an error, then by the time the after happens the 
+	# line below could be invalid
+	set wname [$html displayer windowName]
+	after $duration removeobj $wname
+    }
+    update
+    file delete -force EditItcl.itcl
+    cd $savedir
+    file exists [file join doc codeDoc EditItcl.html]
+} {1}
+
+############################################################################
+#### EditJava
+test EditJava-1.1 {Test EditJava} {
+    set view [::tycho::view EditJava]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditMake
+test EditMake-1.1 {Test EditMake} {
+    set view [::tycho::view EditMake]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+######################################################################
+#### Test generating makefile.vc files
+# 
+test EditMake-1.1 {Test generating makefile.vc files} {
+    cd [file join $env(TEXTEDIT_LIBRARY) test]
+    file delete -force vctest.mk
+    file copy makefile vctest.mk
+    set view [::tycho::openContext vctest.mk]
+    set win [$view displayer windowName]
+    file delete -force vctest.mk.vc
+    set vcview [$view genVCMakefileBuffer]
+    set vcwin [$vcview displayer windowName]
+    after $duration removeobj $win
+    after $duration removeobj $vcwin
+    after $duration file delete -force vctest.mk vctest.mk.vc
+    update
+} {}
+
+############################################################################
+#### EditProgram
+test EditProgram-1.1 {Test EditProgram} {
+    set view [::tycho::view EditProgram]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditTcl
+test EditTcl-1.1 {Test EditTcl} {
+    set view [::tycho::view EditTcl]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+

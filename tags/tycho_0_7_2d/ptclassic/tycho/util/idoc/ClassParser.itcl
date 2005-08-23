@@ -1,0 +1,619 @@
+# Parse class from code and generate class models.
+#
+# @Author: Cliff Cordeiro
+#
+# @Contributor: Christopher Hylands
+#
+# @Version: @(#)ClassParser.itcl	1.40	07/23/98
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### ClassParser
+# ClassParser is the superclass of all classes that parse source
+# code files to generate class models (of class <a href = 
+# "../../../../kernel/doc/codeDoc/ClassModel.idoc">::tycho::ClassModel
+# </a>).
+#
+# The procedure <code>::tycho::ClassParser::generateIDoc</code> accepts
+# a list of filenames. It examines their extensions, and uses
+# <code>ClassParser::generator</code> to create an instance of the
+# correct parsing class to process that file.
+# (Currently, <a href = "ItclParser.idoc">[incr Tcl]</a> and 
+# <a href ="JavaParser.idoc">Java</a> are supported). If a subsequent file
+# is of the same type, it uses the same generator.
+#
+# This procedure is also tied to the make idocs command as well as the 
+# Generate IDoc Documentation menu item in the Itcl and Java editors.
+# 
+# A timesaving feature of the ClassParser is that it will not generate 
+# documentation unnecessarily. It checks this in the modCheck proc, which
+# works in the same way as generateIDoc by calling the appropriate subclass.
+# modCheck examines a source file (given as an argument) for defined classes.
+# If there exists documentation of those defined classes which is newer than 
+# the source code <b>and</b> the generator for that type, new documentation
+# is not generated.
+#
+class ::tycho::ClassParser {
+    inherit ::tycho::Object
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Generate an index of the IDocumentation (in HTML) FIXME
+    method generateIDocIndex { {title {"Index of classes"}}}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Generate the IDocumentation for the files in $filelist
+    public proc generateIDoc {debug generateIndex title filelist}
+
+    # Return a list of all the classes defined in the given source file.
+    public proc getClassesInSource {filename}
+
+    # Return the DocSys type that generates IDocs for the given file.
+    public proc generator {filename}
+
+    # Check if the given file is newer than its related documentation.
+    public proc modCheck {filename}
+
+    ###################################################################
+    ####                   protected methods                       ####
+    
+    # Format the class comment, removing tags and things.
+    protected method formatClassComment {comment}
+
+    # Format a description properly
+    protected method formatDesc {comment}
+
+    # Format an explanation properly (in HTML)
+    protected method formatExpl {comment {parsetags 1}}
+
+    # Uncapitalize and unpluralize a docTag (Authors -> author)
+    protected method formatTag {docTag}
+
+    # Format a description in a short form (when only an explanation is found).
+    protected method shortDesc {comment}
+
+    ###################################################################
+    ####                   protected procs                         ####
+
+    # ::tycho::safeUpdate copied here
+    protected proc idocUpdate {obj}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The author of the current source file
+    protected variable _author ""
+
+    # The contributor(s) to the current source file
+    protected variable _contributor ""
+
+    # The package the current source file belongs to
+    protected variable _package ""
+    
+    # The version of the current source file
+    protected variable _version ""
+
+    # The first line of the copyright information from the current source file
+    protected variable _copyright ""
+
+    # language for the current file
+    protected variable _language
+
+    # an array of ::tycho::ClassModel objects for this file
+    protected variable _classmodels
+
+    # true if there is outside class information
+    protected variable _relatedModified
+
+    # The current source file name
+    protected variable _sourceFile
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::ClassParser::constructor {args} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### generateIDocIndex
+# Fixme!
+#
+body ::tycho::ClassParser::generateIDocIndex { {title {"Index of classes"}}} {
+# FIXME: FIXME: FIXME!
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#####################################################################
+#### generateIDoc
+# Generate IDoc files for all the files named in filelist, placing the
+# output in the doc/codeDoc subdirectory.
+#
+# If there are many files, catch errors and return all of the messages.
+# If there is only one file, don't catch it so the user can trace the
+# stack.
+#
+# debug - a boolean enabling verbose debugging output. (Currently this
+# consists only of the names of the files as they are parsed.)
+#
+# generateIndex  a boolean specifying whether an index should be 
+# generated. This is ignored in the current implementation as HTML is still
+# the preferred method for browsing. It would be simple to port the HTML 
+# index code to IDoc.
+#
+# title - the title of the index file to be generated. Ignored.
+#
+# filelist - the list of files to generateIDocs for. The files may be any
+# file type that IDoc supports.  
+#
+body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
+    set ClassParser ""
+
+    set oneFileOnly [expr [llength $filelist] == 1] 
+
+    if ![file isdirectory doc/codeDoc] {
+        exec mkdir -p doc/codeDoc
+    }
+    set retval ""
+    foreach filename $filelist {
+        set generator [generator $filename]
+        if {$ClassParser != "" && [infoWhich $ClassParser] != {}} {
+            if ![$ClassParser isa $generator] {
+                delete object $ClassParser
+                set ClassParser [$generator [::tycho::autoName ClassParser]]
+            }
+        } {
+            # First file
+            set ClassParser [$generator [::tycho::autoName ClassParser]]
+        }
+
+        if ![${generator}::modCheck $filename] {
+            # file does not need to be redocumented if not modified
+            if $debug {
+              #  puts "$filename <not modified>"
+            }
+            continue
+        }
+
+        if $debug {
+            puts "$filename"
+        }
+
+        if ![file readable $filename] {
+            set retval "$retval\nWarning: generateIDoc: $filename is not readable"
+        } else {
+            if {$oneFileOnly} {
+                # Don't catch errors
+                $ClassParser readFile $filename
+                cd doc/codeDoc
+                $ClassParser generateSingleFileIDoc $filename
+                cd ../..
+            } else {
+                # Catch and accumulate errors for multiple files.
+                if [catch {$ClassParser readFile $filename} errMsg] {
+                    set retval "$retval\nWarning: $errMsg"
+                } else {
+                    cd doc/codeDoc
+                    if [catch {$ClassParser generateSingleFileIDoc $filename} \
+                            errMsg] {
+                        set retval "$retval\nWarning: $errMsg"
+                    }
+                    cd ../..
+                }
+            }
+        }
+    }
+    if {$generateIndex == 1} {
+        cd doc/codeDoc
+        # Uses the last ClassParser object...not implemented anyway. :)
+        if [catch {$ClassParser generateIDocIndex $title} errMsg] {
+            set retval "$retval\nWarning: $errMsg"
+        }
+        cd ../..
+    }
+    delete object $ClassParser
+    return $retval
+}
+
+#####################################################################
+#### generator
+# Return the class name which generates ::tycho::ClassModel models of the
+# given file. Returns {} if none exists.
+#
+# NOTE: This should not be redefined in it's children, rather when 
+# a new child is written, this method should be updated.
+#
+body ::tycho::ClassParser::generator {filename} {
+    set extension [file extension $filename]
+
+    # Note files with no extension are assumed to be Itcl or tcl scripts
+    switch $extension {
+        ".itcl" {return "::tycho::ItclParser"}
+        ".itk"  {return "::tycho::ItclParser"}
+        ".tcl"  {return "::tycho::ItclParser"}
+        ".tk"   {return "::tycho::ItclParser"}
+        ".java" {return "::tycho::JavaParser"}
+        ""      {return "::tycho::ItclParser"}
+    }
+    return {}
+}
+
+#####################################################################
+#### getClassesInSource
+# Quickly scan the source file for the classes which are defined within.
+#
+# Calls the procedure in the appropriate child class for the given file
+# extension.
+#
+body ::tycho::ClassParser::getClassesInSource {filename} {
+    set generator [generator $filename]
+
+    if {$generator != {}} {
+        return [${generator}::getClassesInSource]
+    }
+
+    error "Unsupported extension."
+}
+
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so.
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. In Itcl, this takes about 
+# 5 percent of the time to create the docs.
+#
+# A more ideal system would check which classes need to be redocumented.
+# However, there are few sources with more than one class so this is a
+# decent compromise.
+#
+# Works by calling the appropriate subclass proc for the file extension.
+#
+# For unsupported files, it silently returns 1 because it can't tell.
+#
+body ::tycho::ClassParser::modCheck {filename} {
+    set generator [generator $filename]
+
+    if {$generator != {}} {
+        return [${generator}::modCheck $filename]
+    }
+
+    return 1
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected procs                      ####
+
+#######################################################################
+#### idocUpdate
+# Safe update, local copy so we can run this in a script w/o Tycho.
+# This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
+#
+body ::tycho::ClassParser::idocUpdate {obj} {
+    update
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[infoWhichCommand $obj] == {}} {
+        # If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+        
+        #::tycho::silentError
+        set savetkerror [info body ::tkerror]
+        proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+        error silent   
+    }
+    return 0
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#####################################################################
+#### formatClassComment
+# This method parses the 
+# comment preceding the class definition, formatting it into HTML,
+# removing the copyright, and creating the footer with tagged 
+# information, including the first line of the copyright, the author,
+# the contributors, and the version of the source file.
+#
+# If more than one class occupies a file, this information is
+# saved. That is, if the tags are not redefined for a new class,
+# some of the old information (author, contributors, copyright, and 
+# version) is used.
+#
+body ::tycho::ClassParser::formatClassComment {expl} {
+    # save old information
+    set oldauthor $_author
+    set oldcontrib $_contributor
+    set oldversion $_version
+    set oldcopyright $_copyright
+
+    # clear it
+    set _author {}
+    set _contributor {}
+    set _version {}
+    set _copyright {}
+    set _desc {}
+
+    # Parse line by line
+    set explList [split $expl "\n"]
+    set docTag desc
+    foreach explLine $explList {
+        if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
+		$explLine dummy docTag docValue] {
+	    set explLine $docValue
+            set docTag _[formatTag $docTag]
+	    # puts "ct: $docTag, cl: $docValue"
+	}
+	if {$docTag == "_copyright"} {
+	    if {[set $docTag] == "" } {
+		# We save only the first line of the copyright
+		append $docTag $explLine "\n"
+            } else {
+                if {[regexp {COPYRIGHTENDKEY} $explLine]} {
+                    # ignore until the key
+                    set docTag _desc
+                }
+            }
+        } else {
+	    append $docTag $explLine "\n"
+        }
+    }
+    
+    set expl [formatExpl $_desc]
+
+    # Restore old information if necessary
+    if {$_author == {}} { set _author $oldauthor }
+    if {$_contributor == {}} { set _contributor $oldcontrib }
+    if {$_version == {}} { set _version $oldversion }
+    if {$_copyright == {}} { set _copyright $oldcopyright }
+
+    # Append the footer
+    append expl <hr>
+    if {$_author != ""} {
+        if {[llength $_author] <= 2} {
+            append expl "<br>Author: $_author"
+        } {
+            append expl "<br>Authors: $_author"
+        }
+    }
+    if {$_contributor != ""} {
+        if {[llength $_contributor] == 1} {
+            append expl "<br>Contributor: $_contributor"
+        } {
+            append expl "<br>Contributors: $_contributor"
+        }
+    }
+    if {$_version != ""} {
+        append expl "<br>Version: $_version"
+    }
+    if {$_copyright != ""} {
+        append expl "<br>Copyright: $_copyright"
+    }
+
+    return $expl
+}
+
+#####################################################################
+#### formatTag
+# Uncapitalize and singularize a docTag so that it can be added to the
+# standard protected variables: copyright, author, contributor, version
+# Do the same to strange ones (lowercase and remove trailing s's). 
+# The error is encountered in the caller if it is an error.
+#
+body ::tycho::ClassParser::formatTag {docTag} {
+    set docTag [string tolower $docTag]
+    set docTag [string trimright $docTag "s"]
+    return $docTag
+}
+
+#####################################################################
+#### formatDesc
+# Format the description appropriately by removing carriage returns
+# and returning a filler value if no description is found. (The IDoc
+# viewer requires a description.)
+#
+body ::tycho::ClassParser::formatDesc {comment} {
+    # remove carriage returns
+    set commentList [split $comment "\n"]
+    set comment [join $commentList " "]
+    set comment [string trim $comment " "]
+
+    if {$comment == {}} {
+        # IDoc assumes all entities have a description
+        return " "
+    }
+
+    # Catch comments that don't have a terminating period (or other
+    # suitable mark)
+    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
+
+    # Remove HTML tags. 
+    while "\[regexp \{^(.*)\[ 	\]*<\[^>\]*>\[ 	\]*(.*)\$\} \
+            \$comment dmy first last\]" {
+        set comment "$first $last"
+    }
+
+    return $comment
+}
+
+#####################################################################
+#### formatExpl
+# Format the explanation appropriately by substituting HTML tags for
+# comment conventions such as _underlines_ and *asterisks*. Include a
+# &lt;p&gt; tag for every empty line in a comment. Surround proc and
+# method names with &lt;code&gt; tags.
+#
+# If parsetags is set (as it is by default), javadoc tags are removed
+# from the comment and formatted in a more useful way. Javadoc tags are
+# supported in Itcl comments as well as in Java. Currently, this recognizes
+# return, param, and exception. Since, deprecated, and see are not supported
+# as yet. See is most useful of the three.
+#
+body ::tycho::ClassParser::formatExpl {comment {parsetags 1}} {
+    if {"$comment" == "\n"} {
+        return {}
+    }
+
+    # Knows: return, param, exception
+    # Ignores: since, deprecated FIXME: see
+    if {$parsetags} {
+        # Parse line by line
+        set desc ""
+        set param ""
+        set return ""
+        set exception ""
+        set docTag desc
+        set commList [split $comment "\n"]
+        
+        foreach commLine $commList {
+            if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
+                    $commLine dummy docTag docValue] {
+                set commLine $docValue
+                set docTag [formatTag $docTag]
+                append $docTag "\n"
+                # puts "ct: $docTag, cl: $docValue"
+            }
+            if {$docTag == "param" || $docTag == "return"\
+                    || $docTag == "exception"} {
+                append $docTag $commLine " "
+            } else {
+                append $docTag $commLine "\n"
+            }
+        }
+
+        set comment $desc
+
+        # Parameter comments
+        if {$param != {}} {
+            set paramList [split $param "\n"]
+            append comment "\n<b>Parameters</b><ul>\n"
+            foreach par $paramList {
+                if {$par != {}} {
+                    set parname [lindex $par 0]
+                    append comment "<li><i>$parname</i> [lreplace $par 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+
+        # Exception comments
+        if {$exception != {}} {
+            set throwList [split $exception "\n"]
+            append comment "\n<b>Throws</b><ul>\n"
+            foreach throw $throwList {
+                if {$throw != {}} {
+                    set throwname [lindex $throw 0]
+                    append comment \
+                            "<li><i>$throwname</i> [lreplace $throw 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+        
+        # Return comment (only one?)
+        if {$return != {}} {
+            set return [string trimleft $return " \t\n"]
+            append comment "\n<b>Returns</b> $return\n"
+        }
+    }
+    
+    # Blank lines are a new paragraph, so insert <p> tags.
+    # However, we don't want to do this inside a <pre></pre>
+    # tag. First, escape newlines and ampersands inside <pre></pre>:
+    while { [regexp -nocase "<pre>.*\n.*</pre>" $comment pre] } {
+        regsub -all \n $pre {!n!} pre
+        regsub -all {\&} $pre {!a!} pre
+        regsub -nocase "<pre>.*\n.*</pre>" $comment $pre comment
+    }
+    # Add <p> to blank lines
+    regsub -all "\n\[ \t\]*\n" $comment "\n<p>" comment
+    # Restore text inside <pre></pre>
+    regsub -all {!n!} $comment "\n" comment
+    regsub -all {!a!} $comment {\&} comment
+
+   # Underscores delimit italicized text. Because of the way regsub
+    # works, we have to do it twice to catch eg "_x_ _y_." We also
+    # need to be careful to catch the start and end of the string.
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub {^_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {<i>\1</i>\2} comment
+    regsub {([^a-zA-Z0-9])_([^_]*)_$} $comment \
+	    {\1<i>\2</i>} comment
+
+    # Asterisks delimit _single_ program code words
+    regsub -all {([^a-zA-Z0-9])\*([^\* ]*)\*([^a-zA-Z0-9])} $comment \
+	    {\1<code>\2</code>\3} comment
+
+    # A single word followed by {} is a method or proc name
+    regsub -all {([a-zA-Z0-9_-]+)\{\}} $comment \
+           {<code>\1</code>} comment
+
+
+    return "$comment"
+}
+
+#####################################################################
+#### shortDesc
+# Format a description into a short form. Used when only an explanation
+# is provided (like in outside/related procs).
+#
+# Only one of formatDesc and shortDesc need be called (short calls format)
+#
+body ::tycho::ClassParser::shortDesc {comment} {
+    set comment [formatDesc $comment]
+
+    # Return the first sentence.
+    regexp {^([^.!?]*[.!?]+)[ 	]+} $comment dmy comment
+
+    # Drop everything after an @ is seen.
+    regexp {^([^@]*)@} $comment dmy comment
+
+    return $comment
+}

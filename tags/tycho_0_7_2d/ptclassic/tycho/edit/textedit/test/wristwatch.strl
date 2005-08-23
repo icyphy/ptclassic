@@ -1,0 +1,133 @@
+% The main WRISTWATCH module for watch, stopwatch1, alarm
+% Version: @(#)wristwatch.strl	1.2 12/29/96
+
+module WRISTWATCH :
+
+% The wristwatch buttons:
+
+input UL, % upper-left button
+      UR, % upper-right button
+      LL, % lower-left button
+      LR; % lower-right button
+
+% The time units:
+
+input HS, % quartz - 1/100 second
+      S;  % quartz - second
+
+% The input relations:
+
+relation UL # UR # LL # LR # HS,
+         S => HS;       
+
+% The main display:
+
+type MAIN_DISPLAY_TYPE;
+
+output MAIN_DISPLAY : MAIN_DISPLAY_TYPE;
+
+% The mini display:
+
+type MINI_DISPLAY_TYPE;
+
+output MINI_DISPLAY : MINI_DISPLAY_TYPE;
+
+% The alphabetic display:
+
+output ALPHABETIC_DISPLAY : string;
+
+% The display positions:
+
+type DISPLAY_POSITION;
+
+output START_ENHANCING : DISPLAY_POSITION,
+       STOP_ENHANCING : DISPLAY_POSITION;
+
+% The watch boolean indicators:
+
+output CHIME_STATUS : boolean;
+
+% The stopwatch boolean indicators:
+
+output STOPWATCH_RUN_STATUS : boolean,
+       STOPWATCH_LAP_STATUS : boolean;
+
+% The alarm boolean indicators:
+
+output ALARM_STATUS : boolean;
+
+% The beeper and the beep combination function:
+
+type BEEP_TYPE;
+function COMBINE_BEEPS (BEEP_TYPE, BEEP_TYPE) : BEEP_TYPE;
+
+output BEEP : combine BEEP_TYPE with COMBINE_BEEPS;
+
+% Internal types used in submodule communication
+
+% For the watch:
+
+type WATCH_TIME_TYPE;
+type WATCH_TIME_POSITION;
+
+% For the stopwatch:
+
+type STOPWATCH_TIME_TYPE;
+
+% For the alarm:
+
+type ALARM_TIME_TYPE;
+type ALARM_TIME_POSITION;
+
+% Body of WRISTWATCH
+
+signal WATCH_MODE_COMMAND, 
+       STOPWATCH_MODE_COMMAND,
+       ALARM_MODE_COMMAND,
+
+       TOGGLE_24H_MODE_COMMAND,
+       TOGGLE_CHIME_COMMAND,
+
+       ENTER_SET_WATCH_MODE_COMMAND,
+       SET_WATCH_COMMAND,
+       NEXT_WATCH_TIME_POSITION_COMMAND,
+       EXIT_SET_WATCH_MODE_COMMAND,
+
+       WATCH_TIME : WATCH_TIME_TYPE,
+       WATCH_BEING_SET,
+
+       WATCH_START_ENHANCING : WATCH_TIME_POSITION,
+       WATCH_STOP_ENHANCING : WATCH_TIME_POSITION,
+
+       START_STOP_COMMAND,
+       LAP_COMMAND,
+       STOPWATCH_TIME : STOPWATCH_TIME_TYPE,
+
+       TOGGLE_ALARM_COMMAND,
+
+       ENTER_SET_ALARM_MODE_COMMAND,
+       NEXT_ALARM_TIME_POSITION_COMMAND,
+       EXIT_SET_ALARM_MODE_COMMAND,
+       SET_ALARM_COMMAND,
+       STOP_ALARM_BEEP_COMMAND,
+
+       ALARM_TIME : ALARM_TIME_TYPE,
+
+       ALARM_START_ENHANCING : ALARM_TIME_POSITION,
+       ALARM_STOP_ENHANCING : ALARM_TIME_POSITION in
+
+   run BUTTON
+||
+   run WATCH [ signal WATCH_START_ENHANCING / START_ENHANCING,
+                      WATCH_STOP_ENHANCING / STOP_ENHANCING ]
+||
+   run STOPWATCH 
+||
+   run ALARM [ signal ALARM_START_ENHANCING / START_ENHANCING,
+                      ALARM_STOP_ENHANCING / STOP_ENHANCING ]
+||
+   run DISPLAY
+end signal
+
+end module
+

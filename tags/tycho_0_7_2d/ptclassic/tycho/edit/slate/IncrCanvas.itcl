@@ -1,0 +1,1774 @@
+##########################################################################
+# A canvas mega-widget for manipulating complex graphical items.
+#
+# @Version: @(#)IncrCanvas.itcl	1.34 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+## icanvas pathName args
+#
+# Create an icanvas. This procedure creates a new widget, as
+# recommended on the itk web pages. See ::tycho::slate for comments.
+#
+proc ::tycho::icanvas {pathName args} {
+    uplevel ::tycho::IncrCanvas $pathName $args
+
+    # FIXME: probably doesn't work with obstcl
+    if [info exists ::itcl::version] {
+	set icanvastags  [bindtags $pathName]
+	set canvastags [bindtags [$pathName component canvas]]
+
+	bindtags [$pathName component canvas] \
+		[lreplace $canvastags 1 1 [lindex $icanvastags 1]]
+	bindtags $pathName [lreplace $icanvastags 1 1]
+    }
+    return $pathName
+}
+
+#######################################################################
+#### IncrCanvas
+#
+# The IncrCanvas ("icanvas") is a widget based on the Tk canvas that
+# supports "complex" items, each of which can contain many "simple"
+# canvas items. All methods of the IncrCanvas can manipulate either
+# simple or complex items more-or-less transparently. For an
+# overview of the methods in this class, see the
+# <a href="../internals/icanvas.html">IncrCanvas methods</a>
+# document.
+#
+# This is a total re-write of the earlier design. In this new design,
+# complex items are not represented by [incr Tcl] objects, but by an
+# associative array containing just enough information to allow
+# hierarchical item construction and object-oriented-like
+# item manipulation.
+#
+# In addition to the IncrCanvas class itself, there are a number of
+# other classes that work with the icanvas to implement its full
+# functionality. These classes are grouped into several categories,
+# according to their function:
+#
+# <ul>
+# <li><a href="../internals/items.html"><i>ComplexItem</i></a> and subclasses.
+# These classes implement the functionality needed by the icanvas to 
+# actually create complex items. Subclasses of ComplexItem includes things
+# like ``3D'' rectangles and
+# polygons, and ``smart'' objects like self-routing lines.
+# </ul>
+#
+# To create an icanvas, do not call the constructor directly, but call
+# the procedure <code>::tycho::icanvas</code>:
+#
+# <tcl><pre>
+#     ::tycho::icanvas .s
+#     pack .s -fill both -expand on
+#     wm deiconify .
+# </pre></tcl>
+#
+# The IncrCanvas class is almost fully compatible with the canvas.
+# Differences are mostly related to tagging:
+#
+# <ul>
+# <li>Tags must not start with the characters "_" or "!". These
+# characters are used internally by the IncrCanvas.
+# <li>Any item with the tag "#" is an "invisible" item: it will be
+# ignored by many methods unless explicitly requested. For example,
+# <code>delete all</code> will not delete invisible items.
+# Such items should be used for "background" items that you do not
+# want to respond to the mouse, such as grids and so on.
+# </ul>
+#
+# Note that there is a subclass of _IncrCanvas_,
+# <a href="Slate.html">_Slate_</a>, which adds
+# further functionality.
+#
+class ::tycho::IncrCanvas {
+    inherit ::itk::Widget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a tag to items using a search spec
+    method addtag {add searchSpec args}
+
+    # Get the bounding box of one or more items
+    method bbox {args}
+
+    # Bind a command to an item or tag
+    method bind {id {sequence {}} args}
+
+    # Call a "method" on a complex item
+    method call {id method args}
+
+    # Convert a screen x coordinate into a canvas x coordinate
+    method canvasx {screenx {gridspacing {}}}
+
+    # Convert a screen y coordinate into a canvas y coordinate
+    method canvasy {screeny {gridspacing {}}}
+
+    # Get the children of an item
+    method children {tag}
+
+    # Access a component of a complex item
+    method component {tag {component {}} {method {}} args}
+
+    # Set or get the coordinates of an item
+    method coords {tag args}
+
+    # Create a new item
+    method create {type args}
+
+    # Create a new item
+    method create* {tags type args}
+
+    # Create a component item
+    method createchild {parent type args}
+
+    # Create a component item
+    method createchild* {parent ptags tags type args}
+
+    # Create a root component item
+    method createrootchild {parent type args}
+
+    # Create a root component item
+    method createrootchild* {parent ptags tags type args}
+
+    # Delete characters
+    method dchars {id first {last {}}} {
+	eval $canvas dchars $id $first $last
+    }
+
+    # Delete items
+    method delete {args}
+
+    # Delete a tag from items
+    method dtag {tag {tagToDelete {}}}
+
+    # Find items according to a search spec
+    method find {searchSpec args}
+
+    # Focus on an item
+    method focus {args} {
+	eval $canvas focus $args
+    }
+
+    # Focus on the icanvas
+    method focusin {}
+
+    # Get the tags of an item
+    method gettags {tag}
+
+    # Get the tags to give to children
+    method getchildtags {id}
+
+    # Get the tags to give to root children
+    method getrootchildtags {id}
+
+    # Test if an item has a given tag
+    method hastag {id tag}
+
+    # Set the insertion cursor
+    method icursor {id index} {
+	$canvas icursor $id $index
+    }
+
+    # Return the numerical value of a symbolic index
+    method index {id index} {
+	$canvas index $id $index
+    }
+
+    # Insert text at the insertion cursor
+    method insert {id beforeThis string} {
+	$canvas insert $id $beforeThis $string
+    }
+
+    # Get a configuration option of an item
+    method itemcget {tag option}
+
+    # Configure an item
+    method itemconfigure {tag args}
+
+    # Lower an item
+    method lower {tag {belowThis {}}}
+
+    # Move items
+    method move {tag xAmount yAmount}
+
+    # Get the parent of an item
+    method parent {tag}
+
+    # Get the primary component of an item
+    method primary {tag}
+
+    # Generate postscript
+    method postscript {args}
+
+    # Raise an item
+    method raise {tag {aboveThis {}}}
+
+    # Get the root of an item
+    method root {id}
+
+    # Scale an item
+    method scale {tag xOrigin yOrigin xScale yScale}
+
+    # Scanning on an item
+    method scan {option args} {
+	eval $canvas scan $option $args
+    }
+
+    # Search for items of a different region to the previous find
+    method search {mode tag x0 y0 x1 y1}
+
+    # Manipulate the selection
+    method select {option {id {}} {index {}}}
+
+    # Return the item type
+    method type {id}
+
+    # Return the unique ID number of this icanvas
+    method uniqueid {}
+
+    # Set the horizontal view for scrolling
+    method xview {args}
+
+    # Set the vertical view for scrolling
+    method yview {args}
+
+    ###################################################################
+    ####                    protected methods                      ####
+
+    # Helper method for deleting a complex items
+    protected method delete_ {id}
+
+    # Find the item above the given one
+    protected method findabove {tag}
+
+    # Find all items on the canvas
+    protected method findall {}
+
+    # Find the item below the given one
+    protected method findbelow {tag}
+
+    # Find the closest item
+    protected method findclosest {args}
+
+    # Find items enclosed by the given region
+    protected method findenclosed {x0 y0 x1 y1}
+    
+    # Find items overlapping the given region
+    protected method findoverlapping {x0 y0 x1 y1}
+
+    # Find items with the given tag
+    protected method findwithtag {tag}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The canvas on which I draw
+    protected variable canvas
+
+    # An array storing parent-child links
+    private variable parentChild
+
+    # An array storing items and tags
+    private variable taggedItems
+
+    # Remember the class of each complex item
+    protected variable itemClass
+
+    # Storage for temporary variables
+    protected variable scratch
+
+    ###################################################################
+    ####                    private variables                      ####
+
+    # Unique IDs and tags are created using this counter.
+    # Note: this _must_ be common so item ids are unique across 
+    # all icanvases -- because ComplexItem classes use common arrays
+    # indexed by ID.
+    private common secretcounter 0
+
+    # Unique IDs for Icanvases are generated with this counter
+    private common anothersecretcounter 0
+
+    # The unique ID of the icanvas
+    private variable uniqueid 0
+}
+
+
+#######################################################################
+#### constructor
+#
+# Do not call the constructor of the IncrCanvas directly: _always_
+# use the procedure ::tycho::icanvas{}.
+#
+body ::tycho::IncrCanvas::constructor {args} {
+    # Create a unique (and short!) id for this icanvas
+    set uniqueid $anothersecretcounter
+    incr anothersecretcounter
+
+    # Create the canvas and pack it
+    $this itk_component add canvas {
+	# Create at the global scope to avoid calls to unknown{}
+	uplevel #0 canvas $itk_interior.canvas
+    } {
+	keep -background -cursor -relief \
+		-height -width -borderwidth \
+		-xscrollcommand -yscrollcommand \
+		-scrollregion
+    }
+    pack $itk_component(canvas) -fill both -expand yes
+
+    # Keep a pointer to the canvas to save typing
+    set canvas $itk_component(canvas)
+
+    # Give the focus to the canvas when the icanvas gets mapped. This
+    # is convenient for simple applications. For explicit focus
+    # management, use the focusin{} method.
+    ::bind $canvas <Map> "focus $canvas"
+
+    # Initialise options
+    eval $this itk_initialize $args
+}
+
+#######################################################################
+#### addtag
+#
+# Add the tag _add_ to specified items, as given by the _mode_
+# and following arguments. The search criterion is the same
+# as for the find{} method.
+#
+# Note: do not use this method to try and set the "current"
+# tag -- this will cause a failure later! If you really
+# need to do that (for testing, say ... :-/), use
+# <pre>
+#    $slate addtag current withtag [$slate primary $item]
+# </pre>
+#
+body ::tycho::IncrCanvas::addtag {add mode args} {
+    # Find all items using find{}, and then
+    # add the tag to each
+    foreach id [eval $this find $mode $args] {
+	if { [string match {[0-9]*} $id] } {
+	    # Top-level canvas item: just add the tag
+	    $canvas addtag $add withtag $id
+	} else {
+	    # Complex item
+	    set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
+	    set root [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
+	    
+ 	    if { $root == $id } {
+		# Add to a root: add to visible simple items
+		$canvas addtag $add withtag !$id
+	    } else {
+		# Add to a non-root: add to all simple items
+		# Note: this should be used only for finding
+		# items -- if a binding is made to this tag
+		# then the IncrCanvas will probably misbehave.
+		# Unfortunately I can think of no efficient way
+		# of checking for this correct usage.
+		$canvas addtag $add withtag $id
+	    }
+	    set taggedItems($add,$id) $id
+	}
+    }
+}
+
+#######################################################################
+#### bbox
+#
+# Return the bounding box of any number of items, as a four-list. Each
+# argument can be an item or a tag. If there are no
+# items matching the tags, return the null string -- the caller must
+# check for this condition. (This behavior matches that of the canvas).
+# Invisible items are ignored: this means you can safely do things like
+# find the bounding box of all items on the canvas (by supply the argument
+# "all") even though you have an "invisible" grid or background item
+# drawn.
+#
+body ::tycho::IncrCanvas::bbox {args} {
+    if { [lsearch -exact $args "all"] != -1 } {
+	$canvas addtag temp all
+	$canvas dtag # temp
+	set bbox [$canvas bbox temp]
+	$canvas dtag temp
+	return $bbox
+    } else {
+	eval $canvas bbox $args
+    }
+}
+
+#######################################################################
+#### bind
+#
+# Bind a command to an item or tag. The command accepts the 
+# following argument formats:
+#
+# <ul>
+# <li>_tagOrID_: Return the events for which _tagOrID_ has a binding.
+# <li>_tagOrID_ _event_: Return the binding on _tagOrID_ for _event_.
+# <li>_tagOrID_ _event_ _command_: Bind _command_ to the _tagOrID_
+# for _event_
+# </ul>
+#
+body ::tycho::IncrCanvas::bind {tag {sequence {}} args} {
+    # If the tag is a complex item ID, we want to use its root
+    # tag instead
+    if { [string match {_*} $tag] } {
+	set tag !$tag
+    }
+    
+    if { $sequence == "" } {
+    	# Just one arg: return events
+	return [$canvas bind $tag]
+    } elseif { $args == {} } {
+    	# Two args: return the binding
+	return [$canvas bind $tag $sequence]
+    } else {
+    	# Add a binding
+	$canvas bind $tag $sequence [lindex $args 0]
+    }
+}
+
+#######################################################################
+#### call
+#
+# Call a "method" on an item. This just looks up the method in
+# the global "virtual function table" and calls it.
+#
+# In the IncrCanvas code itself, this method is called in non-critical
+# situations; in time-critical situations, the (very obscure)
+# code here is "in-lined."
+#
+body ::tycho::IncrCanvas::call {id method args} {
+    eval [set ::tycho::$itemClass($id)::methodtable($method)] \
+            $id $canvas $this $args
+}
+
+#######################################################################
+#### canvasx
+#
+body ::tycho::IncrCanvas::canvasx {screenx {gridspacing {}}} {
+    eval $canvas canvasx $screenx $gridspacing
+}
+
+#######################################################################
+#### canvasy
+#
+body ::tycho::IncrCanvas::canvasy {screeny {gridspacing {}}} {
+    eval $canvas canvasy $screeny $gridspacing
+}
+
+#######################################################################
+#### children
+#
+# Get the children of an item -- that is, the complex items that
+# make up the passed item. If the item is a simple item, or if it is
+# a complex item with no children, null is returned.
+# If the argument is a tag, perform this operation on the first item
+# returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::children {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Scan the list of parent-child links
+    set result {}
+    foreach {_ pc} [array get parentChild $id,*] {
+	lappend result [lindex $pc 1]
+    }
+    return $result
+}
+
+#######################################################################
+#### component
+#
+# Access a component of a complex item. Pictures only support components
+# if they have been explicitly declared as such in the "components"
+# variable in the ComplexItem class.
+#
+# With one argument, return the names of the components of this
+# complex item. With two arguments, return the specified component. With
+# more than two arguments, call the specified method on the
+# component and return its result. Note that if there is more than
+# one item registered as a component (some ComplexItem classes
+# may choose to do this) then the method will be called on the
+# first one only.
+#
+# Since this method shadows the default itk method of the same name,
+# this one checks for the argument "canvas" and returns the canvas
+# name if it matches -- using component to access the canvas inside
+# the slate thus still works as expected.
+#
+# Note that this method cannot be used to _add_ a component
+# to a complex item -- this can only be done within complex
+# item classes, or by methods provided by complex item classes.
+# (The reason is that the complex item class needs to be
+# in control of what components it has so that it can implement
+# scaling properly.)
+#
+body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
+    # Check for "component canvas"
+    if { $tag == "canvas" } {
+	return $canvas
+    }
+
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Check for no component arg
+    if { $component == "" } {
+        set result {}
+        foreach i [namespace eval ::tycho::ComplexItem \
+		array names component *$id] {
+            regsub $id\$ $i {} i
+            lappend result $i
+        }
+        return $result
+    } elseif { [::info exists \
+	    ::tycho::$itemClass($id)::methodtable(component)] } {
+        # If there's a component method on a complex item, just call that
+        set item [[set ::tycho::$itemClass($id)::methodtable(component)] \
+                $id $canvas $this $component]
+    } else {
+        # Finally, read its value
+	set item [set ::tycho::ComplexItem::component([set component]$id)]
+    }
+    if { $method == {} } {
+	# Return the item or list of them
+	return $item
+    } else {
+	# Call a method on the component. Use lindex to make
+	# sure that there is only one component.
+	return [eval $this $method [lindex $item 0] $args]
+    }
+}
+
+#######################################################################
+#### coords
+#
+# Get or set the coordinates of an item. If only the first
+# argument is given, return the coordinates of that item
+# (if it is an item ID) or the first matching item
+# returned by `find withtag' (if it is a tag). If there is no
+# matching item, return
+# null. If additional arguments are given, set the coordinates
+# of the first matching item to those coordinates; the correct
+# number of coordinates depends on the item type.
+#
+body ::tycho::IncrCanvas::coords {tag args} {
+    # If the argument is a tag, use the first found item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Call the canvas or the complex item proc
+    if { [string match {[0-9]*} $id] } {
+	eval $canvas coords $id $args
+    } elseif { [string match {_*} $id] } {
+	eval [set ::tycho::$itemClass($id)::methodtable(coords)] \
+                $id $canvas $this $args
+    }
+}
+
+#######################################################################
+#### create
+#
+# Create a top-level item and return its ID.
+# If the _type_ arg starts with a lower-case
+# letter, this method creates a simple (canvas) item; if not, it
+# assumes that the type is the name of a subclass of ComplexItem, and
+# creates the corresponding complex item. In either case, _args_ contains
+# the coordinates of the item, followed by option-value pairs.
+#
+# See the canvas documentation for the coordinates and options of simple
+# items; see the <a> href="../internals/index.html">Slate reference</a>
+# for complex items implemented by the icanvas.
+#
+# This method is fully compatible with the Tk canvas create{}
+# method; for a faster non-compatible method, see create*{}.
+#
+# If you are certain that you are only creating a simple item, you
+# can call the canvas directly instead of this method.
+#
+body ::tycho::IncrCanvas::create {type args} {
+    if { [string match {[a-z]*} $type] } {
+    	# If this is a canvas type, call the canvas
+	eval $canvas create $type $args
+    } else {
+    	# Get the item ID
+	set id _$secretcounter
+	incr secretcounter
+	
+	# Remember its class
+	set itemClass($id) $type
+	
+	# Extract the tags from the options list
+	set indx [lsearch -exact $args -tags]
+	if { $indx != -1 } {
+	    set tags [lindex $args [expr $indx+1]]
+	    set args [lreplace $args $indx [expr $indx+1]]
+	    # Remember them
+	    foreach t $tags {
+		set taggedItems($t,$id) $id
+	    }
+	    lappend tags !$id $id
+	} else {
+	    set tags [list !$id $id]
+	}
+	
+	# Call the construct{} proc to create the item
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
+	return $id
+    }
+}
+
+#######################################################################
+#### create*
+#
+# Create an item and return its ID.
+# This method takes the item tags as the first argument
+# instead of in the options list, and is slightly faster
+# than create{}.
+#
+body ::tycho::IncrCanvas::create* {tags type args} {
+    if { [string match {[a-z]*} $type] } {
+	eval $canvas create $type $args
+    } else {
+	set id _$secretcounter
+	incr secretcounter
+	set itemClass($id) $type
+	set indx [lsearch -exact $args -tags]
+	foreach t $tags {
+	    set taggedItems($t,$id) $id
+	}
+	lappend tags !$id $id
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
+	return $id
+    }
+}
+
+#######################################################################
+#### createchild
+#
+# Create child item and return its ID. The child item becomes
+# a "part" of the parent 
+# item, and will be moved and scaled when the parent is moved and 
+# scaled. The first argument is its parent
+# item, the second its type, and the remainder the coordinates
+# and options.
+#
+body ::tycho::IncrCanvas::createchild {parent type args} {
+    set indx [lsearch -exact $args -tags]
+    if { $indx != -1 } {
+	# Extract tags
+	set tags [lindex $args [expr $indx+1]]
+	set args [lreplace $args $indx [expr $indx+1]]
+    } else {
+	set tags {}
+    }
+    eval [list $this createchild* $parent \
+            [$this getchildtags $parent] $tags $type] $args
+}
+
+#######################################################################
+#### createchild*
+#
+# This is a faster version of <code>createchild</code>: instead 
+# of providing the name of the parent and the tags in the options 
+# list, provide the tags of as the first argument.
+# The first argument is the hierarchy
+# tags of the parent as passed to the construct{} procs of the
+# ComplexItem classes or as obtained by *getchildtags*; the second
+# is the additional tags of the new item.
+#
+body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
+    if { [string match {[a-z]*} $type] } {
+	eval $canvas create $type $args [list -tags [concat $ptags $tags]]
+    } else {
+	set id _$secretcounter
+	incr secretcounter
+	set itemClass($id) $type
+	foreach t $tags {
+	    set taggedItems($t,$id) $id
+	}
+	set parentChild($parent,$id) [list $parent $id]
+	eval lappend tags $ptags $id
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
+	return $id
+    }
+}
+
+#######################################################################
+#### createrootchild
+#
+# Create a root child item and return its ID. The item is
+# a "logical root" that is a child of tyhe given parent.
+# The first argument is the parent, the second its type, and
+# the remainder the coordinates and options.
+#
+body ::tycho::IncrCanvas::createrootchild {parent type args} {
+    set indx [lsearch -exact $args -tags]
+    if { $indx != -1 } {
+	set tags [lindex $args [expr $indx+1]]
+	set args [lreplace $args $indx [expr $indx+1]]
+    } else {
+	set tags {}
+    }
+    eval [list $this createrootchild* $parent \
+    		[$this getrootchildtags $parent] $tags $type] $args
+}
+
+#######################################################################
+#### createrootchild*
+#
+# Create a root child item and return its ID. The first argument is
+# the hierarchy tags of the parent as passed to the construct{} procs
+# of the ComplexItem classes or as obtained by *getrootchildtags*;
+# the second is the additional tags of the new item.
+#
+body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
+    set t [lsearch $ptags {!*}]
+    set ptags [lreplace $ptags $t $t]
+
+    if { [string match {[a-z]*} $type] } {
+	set id [eval $canvas create $type $args \
+		[list -tags [concat $ptags $tags]]]
+	$canvas addtag !$id withtag $id
+    } else {
+	set id _$secretcounter
+	incr secretcounter
+	set itemClass($id) $type
+	foreach t $tags {
+	    set taggedItems($t,$id) $id
+	}
+	set parentChild($parent,$id) [list $parent $id]
+	eval lappend tags $ptags !$id $id
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
+    }
+    return $id
+}
+
+#######################################################################
+#### delete
+# 
+# Delete all matching items. Each argument can be an item ID
+# or a tag -- the item or all items with that tag are deleted.
+#
+body ::tycho::IncrCanvas::delete {args} {
+    foreach id $args {
+	if { [string match {[0-9]*} $id] } {
+	    # Delete a canvas item
+	    $canvas delete $id
+	} elseif { [string match {_*} $id] } {
+	    # Delete children and clear arrays
+	    $this delete_ $id
+
+	    # Delete canvas items
+	    $canvas delete $id
+
+	} else {
+	    # Delete by tag: call myself again for simplicity
+	    eval $this delete [$this find withtag $id]
+	}
+    }
+}
+
+#######################################################################
+#### dtag
+#
+# Delete tags from items. If _delete_ is not given, delete _tag_
+# from all items; if it is, delete the tag _delete_ from all
+# items tagged with _tag_. Invisible items will not be deleted
+# unless explicitly selected by supplying the <b>withtag</b> mode
+# and supplying a tag that they have.
+# 
+body ::tycho::IncrCanvas::dtag {tag {delete {}}} {
+    if { [string match {[0-9]*} $tag] } {
+	# Delete the tag from a canvas item.
+	eval $canvas dtag $tag $delete
+    } elseif { [string match {_*} $tag] } {
+	# Delete the tag from a complex item. Make sure _delete_ exists.
+	if { $delete != "" } {
+	    $canvas dtag $tag $delete
+	    catch {unset taggedItems($delete,$tag)}
+	}
+    } else {
+	# Doing it by tag..
+	if { $delete == "" } {
+	    set delete $tag
+	}
+	$canvas dtag $tag $delete
+	foreach {_ id} [array get taggedItems $tag,*] {
+	    catch {unset taggedItems($delete,$id)}
+	}
+    }
+}
+
+#######################################################################
+#### find
+#
+# Find items as given by _searchSpec_. The argument
+# formats are the same as for the Tk canvas; however, this
+# method mostly only returns root items. The one case in which it
+# may return a non-root item is the "withtag" search spec: in this
+# case it returns any items with the given tag, regardless of whether
+# the item is root or non-root. Note that in some cases, items with
+# the tag "#" (invisible items) are treated specially.
+#
+# <ul>
+# <li><b>above</b> _id_: Return the root item immediately above _id_.
+# <li><b>all</b>: Return every root item. Invisible items will not be
+# returned.
+# <li><b>below</b> _id_: Return the root item immediately below _id_.
+# <li><b>closest</b> _x y ?halo? ?start?_: Return the root item
+# closest to the point _(x,y)_.
+# <li><b>enclosed</b> _x0 x1 y0 y1_: Return every root item
+# enclosed by the given region. Invisible items will not be
+# returned.
+# <li><b>overlapping</b> _x0 x1 y0 y1_: Return every root
+# item that overlaps the given region. Invisible items will not be
+# returned.
+# <li><b>withtag</b> _tag_: If _tag_ is an item ID, then
+# return it. If it's the tag "current" then return the root item
+# currently hit by the mouse. Otherwise, return every item explicitly
+# given the tag. Invisible items _will_ be returned if they match
+# the given tag.
+#
+# </ul>
+#
+body ::tycho::IncrCanvas::find {mode args} {
+    eval $this find$mode $args
+}
+
+#######################################################################
+#### focusin
+#
+# Put the focus into the canvas. This is needed for explicit
+# focus control: there seems to be no way to detect that the
+# focus{} command has been called with a megawidget as an
+# argument, so instead of calling
+# <pre>
+#     focus $icanvas
+# </pre>
+# you need to call
+# <pre>
+#     $icanvas focusin
+# </pre>
+#
+body ::tycho::IncrCanvas::focusin {} {
+    uplevel #0 "focus $canvas"
+}
+
+#######################################################################
+#### gettags
+#
+# Get the tags of an item. This method returns the tags explicitly given
+# to an item -- that is, tags used by IncrCanvas to manage complex
+# items and tags inherited from a parent item will not be included in
+# the result.
+#
+# Note that this routine works properly only if called with
+# a root simple item or a complex item as argument. If a simple
+# item is supplied which is contained in a complex item, then
+# the returned tags will include all inherited tags.
+#
+# If the first argument is a tag, perform this operation on the first
+# item on the icanvas returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::gettags {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    if { [string match {_*} $id] } {
+	# Get the tags from the taggedItems array
+	set tags {}
+	foreach tagid [array names taggedItems *,$id] {
+	    lappend tags [lindex [split $tagid ,] 0]
+	}
+    } else {
+	# Simple item: get the tags from the canvas
+	set tags [$canvas gettags $id]
+    }
+    return $tags
+}
+
+#######################################################################
+#### getchildtags
+#
+# Get the tags that need to be given to the child of the given
+# item. The argument must be the ID of a complex item. Use
+# this method if creating a series of child items with
+# the createchild*{} method.
+#
+body ::tycho::IncrCanvas::getchildtags {id} {
+    $canvas gettags $::tycho::ComplexItem::primary($id)
+}
+
+#######################################################################
+#### getrootchildtags
+#
+# Get the tags that need to be given to the child of the given
+# item that is also a "root" item. The argument must be the ID
+# of a complex item. Use this method if creating a series of
+# root child items with the createrootchild*{} method.
+#
+body ::tycho::IncrCanvas::getrootchildtags {id} {
+    set tags {}
+    foreach tag [$canvas gettags $::tycho::ComplexItem::primary($id)] {
+        if { [string match {[!_]*} $tag] } {
+            lappend tags $tag
+        }
+    }
+    return $tags
+}
+
+#######################################################################
+#### hastag
+#
+# Return true if the item has the given tag. The first argument
+# must be an item ID -- it cannot be another tag.
+#
+body ::tycho::IncrCanvas::hastag {id tag} {
+    # If a complex item, get the primary ID
+    if { [string match {_*} $id] } {
+	set id $::tycho::ComplexItem::primary($id)
+    }
+    # Test if the tag is in its tags
+    expr [lsearch -exact [$canvas gettags $id] $tag] >= 0
+}
+
+##########################################################################
+#### itemcget
+#
+# Read a configuration option.  If the argument
+# is a tag, perform this operation on the first item on the
+# icanvas returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::itemcget {tag option} {
+    # If the first argument is a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return
+	} else {
+	    set id [lindex $items 0]
+	}
+    } else {
+	set id $tag
+    }
+
+    # Call the canvas or the complex item proc
+    if { [string match {[0-9]*} $id] } {
+	eval $canvas itemcget $tag $option
+    } else {
+	[set ::tycho::$itemClass($id)::methodtable(itemcget)] \
+                $id $canvas $this \
+		::tycho::$itemClass($id) $option
+    }
+}
+
+#######################################################################
+#### itemconfigure
+#
+# Set configuration options. If the argument
+# is a tag, perform this operation on the first item on the
+# icanvas returned by `find withtag'. If only the first
+# argument is given, return a list of all configuration
+# options. If a second argument is given, return a list
+# representing that option; if more argument are given,
+# they are a list of option-value pairs, and each option will
+# be set to the given value.
+#
+# <b>Note</b>: dtag{}, gettags{}, and addtag{} are faster (and safer)
+# ways of manipulating tags and should be used in preference to
+# itemcget{} and itemconfigure{}.
+#
+body ::tycho::IncrCanvas::itemconfigure {tag args} {
+    # If the first argument is a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return
+	} else {
+	    set id [lindex $items 0]
+	}
+    } else {
+	set id $tag
+    }
+
+    # Call the canvas or the complex item proc
+    if { [string match {[0-9]*} $id] } {
+	eval $canvas itemconfigure $id $args
+    } else {
+	set class ::tycho::$itemClass($id)
+	eval [set ${class}::methodtable(itemconfigure)] \
+                $id $canvas $this $class $args
+    }
+}
+
+#######################################################################
+#### lower
+#
+# Lower the specified complex items to the bottom of the display
+# list. If _belowThis_ is specified, then lower below that item,
+# or if _belowThis_ is a tag, then lower below the first matching
+# item with that tag.
+#
+body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
+    # FIXME FIXME FIXME
+    # For some reason, I removed the code below and replaced
+    # it with this line:
+    #    eval $canvas lower $tag $belowThis
+    # The SCCS comments was "Simplified and fixed." Unfortunately,
+    # I also broke calls such as "$slate raise current". Presumably
+    # the code below is broken in some way, so it needs to figured
+    # out and fixed PROPERLY! (raise{}, too)
+
+    # Figure out which item we're talking about
+    set items [$this find withtag $tag]
+    if { $items == "" } {
+	return ""
+    } else {
+	set id [lindex $items 0]
+
+	if { $belowThis == "" } {
+	    $canvas lower $id
+	} elseif { [string match {[_0-9]*} $belowThis] } {
+	    # Got an item, so use it
+	    $canvas lower $id $belowThis
+	} else {
+	    # Got a id, so use the first matching item
+	    set items [$this find withtag $belowThis]
+	    if { $items == "" } {
+		$canvas lower $id
+	    } else {
+		$canvas lower $id [lindex $items 0]
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### move
+#
+# Move one or more items the specified amount. The first argument
+# can either be a tag or an id.
+#
+body ::tycho::IncrCanvas::move {tag x y} {
+    if { [string match {[_0-9]*} $tag] } {
+	# Move an item
+	$canvas move $tag $x $y
+    } else {
+	# Find and move complex items
+	$canvas addtag temp withtag $tag
+	foreach {_ id} [array get taggedItems $tag,*] {
+	    $canvas move $id $x $y
+	    $canvas dtag $id temp
+	}
+	# Move simple items
+	$canvas move temp $x $y
+	$canvas dtag temp
+    }
+}
+
+#######################################################################
+#### parent
+#
+# Get the parent of an item. Return null of it does not have one.
+# If the argument is a tag, perform this operation on the first item
+# returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::parent {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Scan the list of parent-child links
+    set result {}
+    foreach {_ pc} [array get parentChild *,$id] {
+	lappend result [lindex $pc 0]
+    }
+    return $result
+}
+
+#######################################################################
+#### primary
+#
+# Get the primary component of a complex item. Note that calling
+# a method directly on the primary is not supported.
+#
+body ::tycho::IncrCanvas::primary {id} {
+    set ::tycho::ComplexItem::primary($id)
+}
+
+#######################################################################
+#### postscript
+#
+body ::tycho::IncrCanvas::postscript {args} {
+    eval $canvas postscript $args
+}
+
+#######################################################################
+#### raise
+#
+# Raise the specified complex item to the top of the display
+# list. If _aboveThis_ is specified, then raise above that item,
+# or if _aboveThis_ is a tag, then raise above the first item
+# with that tag.
+#
+body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
+    # FIXME FIXME FIXME
+    # For some reason, I removed the code below and replaced
+    # it with this line:
+    #    eval $canvas raise $tag $aboveThis
+    # The SCCS comments was "Simplified and fixed." Unfortunately,
+    # I also broke calls such as "$slate raise current". Presumably
+    # the code below is broken in some way, so it needs to figured
+    # out and fixed PROPERLY! (lower{}, too)
+
+    # Figure out which item we're talking about
+    set items [$this find withtag $tag]
+    if { $items == "" } {
+	return ""
+    } else {
+	set id [lindex $items 0]
+
+	if { $aboveThis == "" } {
+	    $canvas raise $id
+	} elseif { [string match {[_0-9]*} $aboveThis] } {
+	    # Got an item, so use it
+	    $canvas raise $id $aboveThis
+	} else {
+	    # Got a id, so use the first matching item
+	    set items [$this find withtag $aboveThis]
+	    if { $items == "" } {
+		$canvas raise $id
+	    } else {
+		$canvas raise $id [lindex $items 0]
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### root
+#
+# Find the root of an item -- that is, the item which will respond to
+# events on this item.  (The returned item could be this one.)
+# Note that the argument <i>must</i> be an item ID, not a tag.
+#
+body ::tycho::IncrCanvas::root {id} {
+    if { $id == "" } {
+	# This might happen: deal with it
+	return ""
+    } elseif { [string match {[0-9]*} $id] } {
+	# It's a canvas item ID. Check the tags to find the item to return
+    	set tags [$canvas gettags $id]
+    	set t [lsearch $tags {!*}]
+	if { $t == -1 } {
+	    # Top-level item
+	    return $id
+	} else {
+	    # Has a root
+	    return [string range [lindex $tags $t] 1 end]
+    	}
+    } elseif { [string match {_*} $id] } {
+	# A complex item ID. Use the primary tags to find the item to return
+	set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
+    	return [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
+    } else {
+	error "Argument ($id) is not an item ID"
+    }
+}
+
+#######################################################################
+#### scale
+#
+# Scale all matching items. <i>xOrigin</i> and <i>yOrigin</i> 
+# specify the point about which scaling occurs; <i>xScale</i> and 
+# <i>yScale</i> are the proportions to scale by.
+#
+body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
+    # Find the matching items
+    set match [$this find withtag $tag]
+
+    # Scale complex items and tag simple items
+    foreach id $match {
+	if { [string match {_*} $id] } {
+	    set newcoords {}
+	    set coords [$canvas coords $::tycho::ComplexItem::primary($id)]
+	    foreach {a b} $coords {
+		lappend newcoords \
+			[expr $xOrigin + $xScale * ($a - $xOrigin)] \
+			[expr $yOrigin + $yScale * ($b - $yOrigin)]
+	    }
+	    eval $this coords $id $newcoords
+	} else {
+	    $canvas addtag temp withtag $id
+    	}
+    }
+    
+    # Scale simple items
+    $canvas scale temp $xOrigin $yOrigin $xScale $yScale
+    $canvas dtag temp
+}
+
+#######################################################################
+#### search
+#
+# An incremental search mechanism for items within or overlapping a
+# region of the canvas. _mode_ is the search type: it can be either
+# <b>overlapping</b> or <b>enclosed</b>, with the same meaning as
+# for the find{} method. _tag_ is the tag with which found items will
+# tagged, and the remaining arguments are the coordinates of the region
+# to search in.
+#
+# The method assumes that previously some (zero or more) items were
+# tagged with _tag_. It finds items overlapping or enclosed by the
+# given coordinates, and returns two lists: the first is the items
+# in the region that were not already tagged, and the second is the
+# items that were previously tagged and are no longer in the region.
+# After it completes, only items within or overlapping the region
+# still have _tag_, so the next call with different coordinates
+# will again return items that have been uncovered or newly covered.
+#
+# This is useful for applications such as drag-selecting items
+# on the canvas. After a drag-select, a client will usually remove
+# the tag from all items with dtag{}.
+#
+# Because the items returned will often be further processed based
+# on their tags, each returned list is in fact a flat list of
+# item id and tags, which can be processed easily by foreach{}.
+#
+body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
+    # There are two sets of items: previously covered and newly covered.
+    # Use the tags "temp.uncovered" and "temp.covered" to mark them
+    #
+    # x0,y0              x1
+    # +-------------+----+
+    # |XXXXXtagXXXXX|\\\\|<- covered
+    # |XXXXXtagXXXXX|\\\\|
+    # +-------------+----+ y1
+    # |/////tag/////|<-uncovered
+    # +-------------+
+    #
+    $canvas addtag temp.covered $mode $x0 $y0 $x1 $y1
+    $canvas addtag temp.uncovered withtag $tag
+
+    # Take the differences of the sets by using tags
+    $canvas dtag temp.covered temp.uncovered
+    $canvas dtag $tag temp.covered
+
+    # Remove invisible and highlight items from both sets
+    $canvas dtag "#" temp.covered
+    $canvas dtag "highlight" temp.covered
+    $canvas dtag "#" temp.uncovered
+    $canvas dtag "highlight" temp.uncovered
+
+    # Process according to mode
+    if { $mode == "overlapping" } {
+	# Newly covered items
+	foreach i [$canvas find withtag temp.covered] {
+	    set tags [$canvas gettags $i]
+
+	    # Test for the root tag
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		# This simple item is a root, so add to result and tag it
+		set covered($i) $tags
+		$canvas addtag $tag withtag $i
+	    } else {
+		# Use the tag to extract the root item ID
+		set root [string range [lindex $tags $t] 1 end]
+
+		# Only process if not already in the result
+		if { ! [::info exists covered($root)] } {
+		    set covered($root) $tags
+		    # Add the tag to the complex item
+		    $this addtag $tag withtag $root
+                    # $canvas addtag $tag withtag $root
+		    # set taggedItems($tag,$root) $root
+		}
+	    }
+	}
+
+	# Uncovered items
+	foreach i [$canvas find withtag temp.uncovered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set uncovered($i) $tags
+		$canvas dtag $i $tag
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists uncovered($root)] } {
+		    # Only remove the item if _all_ simple items
+		    # in the complex item are outside the region.
+                    # Test for this using the bounding box of the
+                    # root tag.
+		    if { ! [eval ::tycho::Rectangle::overlap \
+			    $x0 $y0 $x1 $y1 [$canvas bbox !$root]] } {
+			set uncovered($root) $tags
+			$canvas dtag $root $tag
+			unset taggedItems($tag,$root)
+		    }
+		}
+	    }
+	}
+    } elseif { $mode == "enclosed" } {
+	# For comments, see the "overlapping" mode
+	foreach i [$canvas find withtag temp.covered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set covered($i) $tags
+		$canvas addtag $tag withtag $i
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists covered($root)] } {
+		    if { [eval eval ::tycho::Rectangle::inside \
+			    [$canvas bbox !$root] $x0 $y0 $x1 $y1] } {
+			set covered($root) $tags
+			$this addtag $tag withtag $root
+                        # $canvas addtag $tag withtag $root
+			# set taggedItems($tag,$root) $root
+		    }
+		}
+	    }
+	}
+	foreach i [$canvas find withtag temp.uncovered] {
+	    set tags [$canvas gettags $i]
+	    set t [lsearch $tags {!*}]
+	    if { $t == -1 } {
+		set uncovered($i) $tags
+		$canvas dtag $i $tag
+	    } else {
+		set root [string range [lindex $tags $t] 1 end]
+		if { ! [::info exists uncovered($root)] } {
+		    set uncovered($root) $tags
+		    $canvas dtag $root $tag
+		    unset taggedItems($tag,$root)
+		}
+	    }
+	}
+    }
+    # Delete temporary tags
+    $canvas dtag temp.covered
+    $canvas dtag temp.uncovered
+
+    # Return a pair of lists
+    return [list [array get covered] [array get uncovered]]
+}
+
+#######################################################################
+#### select
+#
+# Manipulate the selection. This method has several forms, depending
+# on the value of the _mode_ argument. If _mode_ is <b>adjust</b>,
+# <b>from</b>, or <b>to</b>, then complex items will respond
+# to this method only if they have provided a <b>select</b> procedure
+# in their method tables. Valid modes are:
+# <dl>
+# <dt><b>adjust</b> _tagOrId_ _index_
+# <dd>
+# Adjust the end of the selection to be at the specified _index_.
+#
+# <dt><b>clear</b>
+# <dd>
+# Clear the selection if it is in this canvas.
+#
+# <dt><b>from</b> _tagOrId_ _index_
+# <dd>
+# Set the selection anchor point to just before _index_.
+#
+# <dt><b>get</b> _tagOrId_
+# <dd>
+# Get the current selection if there is one, or a null string
+# if not.
+#
+# <dt><b>item</b>
+# <dd> Return the id of the item with the selection, or null
+# if no item has the selection.
+# 
+# <dt><b>to</b> _tagOrId_ _index_
+# <dd>
+# Set the end of the selection to _index_.
+#
+# </dl>
+#
+body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
+    switch -exact $mode {
+	"clear" {
+	    $canvas select clear
+	}
+        "get" {
+            set id [$canvas select item]
+            if { $id == "" } {
+                return ""
+            } else {
+                set a [$canvas index $id sel.first]
+                set b [$canvas index $id sel.last]
+                return [string range [$canvas itemcget $id -text] $a $b]
+            }
+        }
+	"item" {
+	    $this find withtag [$canvas select item]
+	}
+	"adjust" -
+        "from" -
+        "to" {
+	    # If it's a tag, get the first item
+	    if { ! [string match {[_0-9]*} $id] } {
+		set items [$this find withtag $id]
+		if { $items == "" } {
+		    return ""
+		}
+		set id [lindex $items 0]
+	    }
+	    # If it's a complex item and has a select{} method, call that
+	    if { [string match {_*} $id] } {
+                set class ::tycho::$itemClass($id)
+		if { [::info exists ${class}::methodtable(select)] } {
+		    [set ${class}::methodtable(select)] $id $canvas $this
+		} else {
+		    error "Item $id does not support select"
+		}
+	    } else {
+		# If a simple item, just call the canvas
+		eval $canvas select $mode $id $index
+	    }
+	}
+        default {
+            error "Invalid option \"$mode\": must be one of\
+                    adjust, clear, from, get, item, or to"
+        }
+    }
+}
+
+#######################################################################
+#### type
+#
+# Return the type of an item. Note that types are case-sensitive.
+# If the argument is a tag denoting more than one item, get the
+# type of the first in the list. If the tag represents no
+# items, return null.
+#
+body ::tycho::IncrCanvas::type {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [$this find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+    if { [string match {[0-9]*} $id] } {
+	$canvas type $id
+    } elseif { [string match {_[0-9]*} $id] } {
+	return $itemClass($id)
+    } else {
+	error "$id is not a valid item ID"
+    }
+}
+
+#######################################################################
+#### uniqueid
+#
+# Return an ID unique to this icanvas. This is used by Shape
+# classes that need a unique ID for each slate to distinguish
+# items stored in common arrays. Although the widget name itself
+# could be used, it is unnecessarily long...
+#
+body ::tycho::IncrCanvas::uniqueid {} {
+    return $uniqueid
+}
+
+#######################################################################
+#### xview
+#
+body ::tycho::IncrCanvas::xview {args} {
+    eval $canvas xview $args
+}
+
+#######################################################################
+#### yview
+#
+body ::tycho::IncrCanvas::yview {args} {
+    eval $canvas yview $args
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+
+#######################################################################
+#### delete_
+#
+# Helper method for deleting complex items.
+#
+body ::tycho::IncrCanvas::delete_ {id} {
+    # Delete a complex item. Make sure it still exists
+    if { ! [::info exists itemClass($id)] } {
+	return
+    }
+
+    # Call its destruct method
+    set class ::tycho::$itemClass($id)
+    if { [::info exists ${class}::methodtable(destruct)] } {
+	[set ${class}::methodtable(destruct)] $id $canvas $this
+    }
+
+    # Delete complex item components
+    foreach {_ pc} [array get parentChild $id,*] {
+	$this delete_ [lindex $pc 1]
+    }
+
+    # Remove the parent link (if there is one)
+    foreach ix [array names parentChild *,$id] {
+	unset parentChild($ix)
+    }
+
+    # Then forget the item
+    unset itemClass($id)
+    foreach i [array names taggedItems *,$id] {
+	unset taggedItems($i)
+    }
+}
+
+#######################################################################
+#### findabove
+#
+body ::tycho::IncrCanvas::findabove {tag} {
+    root [$canvas find above [$this findwithtag $tag]]
+}
+
+#######################################################################
+#### findall
+#
+body ::tycho::IncrCanvas::findall {} {
+    # In order to make the case where there are a lot of simple
+    # items fast, we have used this approach: find all root
+    # items and then remove a marker tag from each of those.
+    # Remaining items with the marker tag are simple roots.
+
+    # Find complex roots
+    foreach id [array names itemClass] {
+	set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
+	set root [string range \
+		[lindex $tags [lsearch $tags {!*}]] 1 end]
+	# If the item is not invisible and not found, mark as found
+	if { [lsearch $tags {#}] == -1 && ! [::info exists found($root)] } {
+	    set found($root) 1
+	}
+    }
+    set result [array names found]
+
+    # Tag all items and remove tag from complex items
+    $canvas addtag temp.find all
+    foreach i $result {
+	$canvas dtag $i temp.find
+    }
+            
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+            
+    # Return all roots
+    set result [concat $result [$canvas find withtag temp.find]]
+    $canvas dtag temp.find
+    return $result
+}
+
+#######################################################################
+#### findbelow
+#
+body ::tycho::IncrCanvas::findbelow {tag} {
+    root [$canvas find below [$this findwithtag $tag]]
+}
+
+#######################################################################
+#### findclosest
+#
+body ::tycho::IncrCanvas::findclosest {args} {
+    root [eval $canvas find closest $args]
+}
+
+#######################################################################
+#### findenclosed
+#
+body ::tycho::IncrCanvas::findenclosed {x0 y0 x1 y1} {
+    # Mark enclosed items
+    $canvas addtag temp.find enclosed $x0 $y0 $x1 $y1
+    
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+    
+    # Find the set of roots of each item and add to the result
+    # if it's either a top-level item or if it's a complex
+    # item and its region is entirely enclosed.
+    set found {}
+    foreach i [eval $canvas find withtag temp.find] {
+	set tags [$canvas gettags $i]
+
+	# Test for the root tag
+	set t [lsearch $tags {!*}]
+	if { $t == -1 } {
+	    # The simple item is a root
+	    lappend found $i
+	} else {
+	    # Use the tag to extract the root item ID
+	    set root [string range [lindex $tags $t] 1 end]
+	    
+	    # See if its bounding box is inside the bounding
+	    # region. To avoid calculating this twice, keep a
+	    # cache of already-added items.
+	    if { ! [::info exists temp.find($root)] } {
+		if { [eval ::tycho::Rectangle::inside \
+			[bbox $root] $x0 $y0 $x1 $y1] } {
+		    lappend found $root
+		    set temp.find($root) 1
+		}
+	    }
+	}
+    }
+    # Return the found items -- there are no duplicates
+    return $found
+}
+
+#######################################################################
+#### findoverlapping
+#
+body ::tycho::IncrCanvas::findoverlapping {x0 y0 x1 y1} {
+    # Mark overlapping items
+    eval $canvas addtag temp.find overlapping $x0 $y0 $x1 $y1
+
+    # Remove invisible items
+    $canvas dtag "#" temp.find
+
+    # Find the set of roots of each item and add to the result
+    set found {}
+    foreach i [$canvas find withtag temp.find] {
+	set tags [$canvas gettags $i]
+	
+	# Test for the root tag
+	set t [lsearch $tags {!*}]
+	if { $t == -1 } {
+	    # The simple item is a root
+	    lappend found $i
+	} else {
+	    # Use the tag to extract the root item ID
+	    lappend found [string range [lindex $tags $t] 1 end]
+	}
+    }
+    # Remove duplicates and return
+    $canvas dtag temp.find
+    return [::tycho::lnub $found]
+}
+
+#######################################################################
+#### findwithtag
+#
+body ::tycho::IncrCanvas::findwithtag {tag} {
+    # Test for special tags
+    if { [lsearch -exact {"" current all} $tag] >= 0 } {
+	if { $tag == "" } {
+	    # This may happen, so take care of it
+	    return ""
+	} elseif { $tag == "all" } {
+	    # Return all items
+	    return [$this find all]
+	} elseif { $tag == "current" } {
+	    # Return the root of the "current" item
+	    return [$this root [$canvas find withtag current]]
+	}
+    } elseif { [string match {[_0-9]*} $tag] } {
+	# An item ID -- just return it. NOTE: if you want to get
+	# the root of an item, use the root{} method.
+	return $tag
+    } else {
+	# This is a proper tag. Add a marker tag to all simple items
+	$canvas addtag temp.find withtag $tag
+
+	# Find matching complex items and remove the marker
+	set found {}
+	foreach {_ id} [array get taggedItems $tag,*] {
+	    $canvas dtag $id temp.find
+	    lappend found $id
+	}
+	
+	# Add root simple items and return
+	eval lappend found [$canvas find withtag temp.find]
+	$canvas dtag temp.find
+	return $found
+    }
+}

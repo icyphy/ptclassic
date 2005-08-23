@@ -1,0 +1,38 @@
+# @(#)DirectedAcyclicGraph.itcl	1.3 08/31/96
+
+catch {delete object foo}
+::tycho::DirectedAcyclicGraph foo
+foo add a {}
+foo add c {} a
+foo add d {} a
+foo add e {} {a d}
+foo verifyAll
+foo verifyAcyclic
+::tycho::post [foo describe]
+
+#Posts: {d {} a} {e {} {a d}} {a {} {}} {c {} a}
+
+# The graph below has a cycle in it.
+catch {delete object foo}
+::tycho::DirectedAcyclicGraph foo
+foo add c {} a
+foo add d {} a
+foo add y {} a
+foo add e {} y
+foo add f {} e
+foo add a {}
+foo addArc e a
+foo verifyAll
+foo rename a x
+foo delete y
+set descr [foo describe]
+foo clear
+foo init $descr
+# The following repairs the cycle in the graph.
+foo verifyAcyclic 1
+::tycho::post [foo describe]
+
+# Posts: {d {} x} {x {} {}} {e {} x} {f {} e} {c {} x}
+
+
+

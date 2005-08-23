@@ -1,0 +1,1398 @@
+# Manage colors for Tycho.
+#
+# @Author: Edward A. Lee, John Reekie
+#
+# @Version: @(#)ColorManager.itcl	1.21 08/05/98
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" #BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+###########################################################################
+
+##########################################################################
+#### color
+# Look up a color. If the first argument is the flag
+# <b>-hsv</b>, then the color is converted into RGB from the
+# hue-saturation-value color space, where _hue_ is one of the
+# available hues (by default,  _red_, _orange_, _yellow_, _green_, _cyan_,
+# _blue_, _purple_, _magenta_, and _crimson_), _saturation_
+# is one of the available saturation values (by default, _verypale_,
+# _pale_, _medium_, and _rich_), and _value is one of the
+# available color values, or brightness (by default, _verydark_,
+# _dark_, _medium_, and _light_.  In addition to the standard hues,
+# the special names _black_, _white_, and _grey_ will be recognized.
+# For the first two, _saturation_ and _value_ are ignored;
+# for the last, the saturation is assumed to be an integer
+# between 0 and 100, where 0 will produce black and 100 will
+# produce white, and _value_ will be ignored.
+#
+# If the first argument is the flag <b>-lookup</b>, then the
+# _hue_ is taken to be a symbolic color name, and _saturation_
+# must be either <b>black</b> or <b>white</b>. The color is looked
+# up in the color table, and, if not found, the RGB value of
+# _saturation_ is returned. If the global variable tyMonochrome
+# is set, then use the _saturation_ argument (if it is present). All
+# names are converted to lower case before looking them up.
+#
+# If the first argument is neither of these flags, then the behavior
+# is the same as if <b>-lookup</b> were specified. In either
+# case, the returned value is an RGB value in the form required
+# by Tk -- for example, <code>#80efdd</code>. If the _hue_ is already
+# in this form, it is returned unchanged.
+#
+# This procedure
+# is simply an interface to the class proc ::tycho::FontManager::getColor,
+# and is provided for convenience.
+#
+proc ::tycho::color {flag {hue {}} {saturation {}} {value {}}} {
+    ::tycho::ColorManager::getColor $flag $hue $saturation $value
+}
+
+###########################################################################
+#### updateTkPalette
+#
+# Update the Tk color palette from values obtained from the "tkpalette"
+# group of tycho preferences.
+#
+# <b>This is currently broken.</b>
+#
+proc ::tycho::updateTkPalette {args} {
+    set arglist {}
+    foreach pref {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	set color [::tycho::preference get tkpalette $pref]
+	if { $color != "" } {
+	    lappend arglist $pref $color
+	}
+    }
+    eval tk_setPalette $arglist
+}
+
+###########################################################################
+#### subscribeTkPalette
+#
+# Turn on subscription of the Tk palette to the Tycho preferences.
+# Change made to the "tkpalette" #preference group will update the
+# palette.
+#
+# <b>This is currently broken.</b>
+#
+proc ::tycho::subscribeTkPalette {} {
+    foreach name  {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	::tycho::preference subscribe tkpalette "tkpalette" #$name \
+		::tycho::updateTkPalette
+    }
+}
+
+###########################################################################
+#### unsubscribeTkPalette
+#
+# Turn off subscription of the Tk palette to the Tycho preferences.
+# Change made to the "tkpalette" #preference group will no longer
+# affect the palette.
+#
+# <b>This is currently broken.</b>
+#
+proc ::tycho::unsubscribeTkPalette {} {
+    foreach name  {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	::tycho::preference unsubscribe tkpalette "tkpalette" #$name
+    }
+}
+
+###########################################################################
+#### resetTkPalette
+#
+# A utility procedure to set the Tk palette to either the old
+# bisque color-scheme or the grey color scheme. To make this
+# run at a reasonable speed, it disables the color subscriptions
+# first, resets the palette, change the preferences, and then
+# reenables the subscription.
+#
+# <b>This is currently broken.</b>
+#
+proc ::tycho::resetTkPalette {{style grey}} {
+    ::tycho::unsubscribeTkPalette
+
+    if { $style == "bisque" } {
+	# For the record, here is what the binary values are.
+	# They're slightly different, but close enough.
+	# activeBackground    #e6ceb1 
+	# activeForeground    black 
+	# background          #ffe4c4 
+	# disabledForeground  #b0b0b0 
+	# foreground          black 
+	# highlightBackground #ffe4c4 
+	# highlightColor      black 
+	# insertBackground    black 
+	# selectColor         #b03060 
+	# selectBackground    #e6ceb1 
+	# selectForeground    black 
+	# troughColor         #cdb79e
+	foreach {name color} {
+	    activeBackground    bisque2
+	    activeForeground    black
+	    background          bisque1
+	    disabledForeground  grey69
+	    foreground          black
+	    highlightBackground bisque1
+	    highlightColor      black
+	    insertBackground    black 
+	    selectColor         maroon
+	    selectBackground    bisque2
+	    selectForeground    black
+	    troughColor         bisque3
+	} {
+	    ::tycho::preference assign tkpalette $name $color
+	}
+    } else {
+	foreach {name color} {
+	    activeBackground    grey92
+	    activeForeground    black
+	    background          grey85
+	    disabledForeground  grey64
+	    foreground          black
+	    highlightBackground grey85
+	    highlightColor      black
+	    insertBackground    black 
+	    selectColor         maroon
+	    selectBackground    grey76
+	    selectForeground    black
+	    troughColor         grey76
+	} {
+	    ::tycho::preference assign tkpalette $name $color
+	}
+    }
+    ::tycho::updateTkPalette
+    ::tycho::subscribeTkPalette
+}	    
+
+#########################################################################
+#### ColorManager
+# Tycho's color manager. This is a "non-instantiable" class.
+# It provides a collection of utilities procedures for dealing
+# with color and color names. It supports two ways of using
+# color. First, colors can be accessed by name -- for example,
+# as "red" and "floralwhite." The color manager provides a
+# fairly long list of these names and will convert them into
+# RGB values. The front-end procedure <b>::tycho::color</b>
+# should always be used to convert symbolic color names into
+# RGB values, since symbolic color names are not reliably
+# portable across platforms. The ColorBrowser class is Tycho's
+# user interface to this color scheme.
+#
+# The second (and newer) set of color functions provides a more
+# intuitive interface to colors, using the "hus-saturation-value"
+# HSV color space. The _hue_ is the color, such as red or
+# green; the _saturation_ is the purity of that color -- lower
+# saturations dilute the color with the other primary colors,
+# effectively adding white to it; _value_ is the brightness
+# of the color. This color space is apparently not very "accurate,"
+# but it's great for providing a simple and effective user
+# interface to colors. The ColorPicker class is Tycho's user
+# interface to this color scheme.
+#
+# The HSV color scheme is deliberately limited to a fairly small
+# selection of choices, in order to both minimize the number
+# of colors used by Tycho and to make it easier for the user
+# to rapidly choose colors without getting overwhelmed by
+# choice. The hues available are (in order around the color
+# spectrum) _red_, _orange_, _yellow_, _green_, _cyan_,
+# _blue_, _purple_, _magenta_, and _crimson_. For each
+# hue, there are four levels of saturation and value
+# provided. For saturation, these are named _verypale_,
+# _pale_, _medium_, and _rich_. For values, these
+# are named _verydark_, _dark_, _medium_, and _light_
+# 
+class ::tycho::ColorManager {
+    inherit ::tycho::Uninstantiable
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                        public procedures                         ####
+
+    # Get a list of available colors matching an optional pattern
+    proc colorList {{pattern *}}
+
+    # Attempt to convert an RGB color into the closest symbolic HSV color
+    proc convertColor {rgb}
+
+    # Look up a color
+    proc getColor {flag {hue {}} {saturation {}} {value {}}}
+
+    # Add, change, convert, or list color hues
+    proc hue {{hue {}} {new {}}}
+
+    # Add, change, convert, or list color saturations
+    proc saturation {{saturation {}} {new {}}}
+
+    # Add, change, convert, or list color values
+    proc value {{value {}} {new {}}}
+
+    # Convert RGB into (raw) HSV
+    proc RGBtoHSV {r g b}
+
+    # Convert (raw) HSV into RGB
+    proc HSVtoRGB {h s v}
+    
+    # Convert RGB into (raw) HLS
+    proc RGBtoHLS {r g b}
+
+    ##########################################################################
+    ####                      private common variables                    ####
+
+    # The available hues. Values are the position of each hue around
+    # the color wheel. Note that the hues are not evenly spaced, but
+    # are chosen to give a useful set of colors with good variation
+    # with saturation and lightness. In some cases, this has meant that
+    # pure colors are in fact shifted -- blue and green, for example,
+    # are not at the 120 and 240 degrees for the pure colors.
+    private common _hue
+    array set _hue {
+        red 0 
+        orange 30
+        yellow 60
+        green 120
+        cyan 180
+        blue 240
+        purple 280
+        magenta 300
+        crimson 330
+    }
+
+    # The available saturation values
+    private common _saturation
+    array set _saturation {
+        verypale 0.1
+        pale 0.25
+        medium 0.5
+        rich 1.0
+    }
+
+    # The available color values
+    private common _value
+    array set _value {
+        verydark 0.5
+        dark 0.7
+        medium 0.85
+        light 1.0
+    }
+
+    # The array of colors and their RGB values
+    private common colorlist
+
+    array set colorlist {
+        "snow" #fffafa
+        "ghostwhite" #f8f8ff
+        "whitesmoke" #f5f5f5
+        "gainsboro" #dcdcdc
+        "floralwhite" #fffaf0
+        "oldlace" #fdf5e6
+        "linen" #faf0e6
+        "antiquewhite" #faebd7
+        "papayawhip" #ffefd5
+        "blanchedalmond" #ffebcd
+        "bisque" #ffe4c4
+        "peachpuff" #ffdab9
+        "navajowhite" #ffdead
+        "moccasin" #ffe4b5
+        "cornsilk" #fff8dc
+        "ivory" #fffff0
+        "lemonchiffon" #fffacd
+        "seashell" #fff5ee
+        "honeydew" #f0fff0
+        "mintcream" #f5fffa
+        "azure" #f0ffff
+        "aliceblue" #f0f8ff
+        "lavender" #e6e6fa
+        "lavenderblush" #fff0f5
+        "mistyrose" #ffe4e1
+        "white" #ffffff
+        "black" #000000
+        "darkslategray" #2f4f4f
+        "dimgray" #696969
+        "slategray" #708090
+        "lightslategray" #778899
+        "gray" #bebebe
+        "grey" #bebebe
+        "lightgrey" #d3d3d3
+        "lightgray" #d3d3d3
+        "midnightblue" #191970
+        "navy" #000080
+        "navyblue" #000080
+        "cornflowerblue" #6495ed
+        "darkslateblue" #483d8b
+        "slateblue" #6a5acd
+        "mediumslateblue" #7b68ee
+        "lightslateblue" #8470ff
+        "mediumblue" #0000cd
+        "royalblue" #4169e1
+        "blue" #0000ff
+        "dodgerblue" #1e90ff
+        "deepskyblue" #00bfff
+        "skyblue" #87ceeb
+        "lightskyblue" #87cefa
+        "steelblue" #4682b4
+        "lightsteelblue" #b0c4de
+        "lightblue" #add8e6
+        "powderblue" #b0e0e6
+        "paleturquoise" #afeeee
+        "darkturquoise" #00ced1
+        "mediumturquoise" #48d1cc
+        "turquoise" #40e0d0
+        "cyan" #00ffff
+        "lightcyan" #e0ffff
+        "cadetblue" #5f9ea0
+        "mediumaquamarine" #66cdaa
+        "aquamarine" #7fffd4
+        "darkgreen" #006400
+        "darkolivegreen" #556b2f
+        "darkseagreen" #8fbc8f
+        "seagreen" #2e8b57
+        "mediumseagreen" #3cb371
+        "lightseagreen" #20b2aa
+        "palegreen" #98fb98
+        "springgreen" #00ff7f
+        "lawngreen" #7cfc00
+        "green" #00ff00
+        "chartreuse" #7fff00
+        "mediumspringgreen" #00fa9a
+        "greenyellow" #adff2f
+        "limegreen" #32cd32
+        "yellowgreen" #9acd32
+        "forestgreen" #228b22
+        "olivedrab" #6b8e23
+        "darkkhaki" #bdb76b
+        "khaki" #f0e68c
+        "palegoldenrod" #eee8aa
+        "lightgoldenrodyellow" #fafad2
+        "lightyellow" #ffffe0
+        "yellow" #ffff00
+        "gold" #ffd700
+        "lightgoldenrod" #eedd82
+        "goldenrod" #daa520
+        "darkgoldenrod" #b8860b
+        "rosybrown" #bc8f8f
+        "indianred" #cd5c5c
+        "saddlebrown" #8b4513
+        "sienna" #a0522d
+        "peru" #cd853f
+        "burlywood" #deb887
+        "beige" #f5f5dc
+        "wheat" #f5deb3
+        "sandybrown" #f4a460
+        "tan" #d2b48c
+        "chocolate" #d2691e
+        "firebrick" #b22222
+        "brown" #a52a2a
+        "darksalmon" #e9967a
+        "salmon" #fa8072
+        "lightsalmon" #ffa07a
+        "orange" #ffa500
+        "darkorange" #ff8c00
+        "coral" #ff7f50
+        "lightcoral" #f08080
+        "tomato" #ff6347
+        "orangered" #ff4500
+        "red" #ff0000
+        "hotpink" #ff69b4
+        "deeppink" #ff1493
+        "pink" #ffc0cb
+        "lightpink" #ffb6c1
+        "palevioletred" #db7093
+        "maroon" #b03060
+        "mediumvioletred" #c71585
+        "violetred" #d02090
+        "magenta" #ff00ff
+        "violet" #ee82ee
+        "plum" #dda0dd
+        "orchid" #da70d6
+        "mediumorchid" #ba55d3
+        "darkorchid" #9932cc
+        "darkviolet" #9400d3
+        "blueviolet" #8a2be2
+        "purple" #a020f0
+        "mediumpurple" #9370db
+        "thistle" #d8bfd8
+        "snow1" #fffafa
+        "snow2" #eee9e9
+        "snow3" #cdc9c9
+        "snow4" #8b8989
+        "seashell1" #fff5ee
+        "seashell2" #eee5de
+        "seashell3" #cdc5bf
+        "seashell4" #8b8682
+        "antiquewhite1" #ffefdb
+        "antiquewhite2" #eedfcc
+        "antiquewhite3" #cdc0b0
+        "antiquewhite4" #8b8378
+        "bisque1" #ffe4c4
+        "bisque2" #eed5b7
+        "bisque3" #cdb79e
+        "bisque4" #8b7d6b
+        "peachpuff1" #ffdab9
+        "peachpuff2" #eecbad
+        "peachpuff3" #cdaf95
+        "peachpuff4" #8b7765
+        "navajowhite1" #ffdead
+        "navajowhite2" #eecfa1
+        "navajowhite3" #cdb38b
+        "navajowhite4" #8b795e
+        "lemonchiffon1" #fffacd
+        "lemonchiffon2" #eee9bf
+        "lemonchiffon3" #cdc9a5
+        "lemonchiffon4" #8b8970
+        "cornsilk1" #fff8dc
+        "cornsilk2" #eee8cd
+        "cornsilk3" #cdc8b1
+        "cornsilk4" #8b8878
+        "ivory1" #fffff0
+        "ivory2" #eeeee0
+        "ivory3" #cdcdc1
+        "ivory4" #8b8b83
+        "honeydew1" #f0fff0
+        "honeydew2" #e0eee0
+        "honeydew3" #c1cdc1
+        "honeydew4" #838b83
+        "lavenderblush1" #fff0f5
+        "lavenderblush2" #eee0e5
+        "lavenderblush3" #cdc1c5
+        "lavenderblush4" #8b8386
+        "mistyrose1" #ffe4e1
+        "mistyrose2" #eed5d2
+        "mistyrose3" #cdb7b5
+        "mistyrose4" #8b7d7b
+        "azure1" #f0ffff
+        "azure2" #e0eeee
+        "azure3" #c1cdcd
+        "azure4" #838b8b
+        "slateblue1" #836fff
+        "slateblue2" #7a67ee
+        "slateblue3" #6959cd
+        "slateblue4" #473c8b
+        "royalblue1" #4876ff
+        "royalblue2" #436eee
+        "royalblue3" #3a5fcd
+        "royalblue4" #27408b
+        "blue1" #0000ff
+        "blue2" #0000ee
+        "blue3" #0000cd
+        "blue4" #00008b
+        "dodgerblue1" #1e90ff
+        "dodgerblue2" #1c86ee
+        "dodgerblue3" #1874cd
+        "dodgerblue4" #104e8b
+        "steelblue1" #63b8ff
+        "steelblue2" #5cacee
+        "steelblue3" #4f94cd
+        "steelblue4" #36648b
+        "deepskyblue1" #00bfff
+        "deepskyblue2" #00b2ee
+        "deepskyblue3" #009acd
+        "deepskyblue4" #00688b
+        "skyblue1" #87ceff
+        "skyblue2" #7ec0ee
+        "skyblue3" #6ca6cd
+        "skyblue4" #4a708b
+        "lightskyblue1" #b0e2ff
+        "lightskyblue2" #a4d3ee
+        "lightskyblue3" #8db6cd
+        "lightskyblue4" #607b8b
+        "slategray1" #c6e2ff
+        "slategray2" #b9d3ee
+        "slategray3" #9fb6cd
+        "slategray4" #6c7b8b
+        "lightsteelblue1" #cae1ff
+        "lightsteelblue2" #bcd2ee
+        "lightsteelblue3" #a2b5cd
+        "lightsteelblue4" #6e7b8b
+        "lightblue1" #bfefff
+        "lightblue2" #b2dfee
+        "lightblue3" #9ac0cd
+        "lightblue4" #68838b
+        "lightcyan1" #e0ffff
+        "lightcyan2" #d1eeee
+        "lightcyan3" #b4cdcd
+        "lightcyan4" #7a8b8b
+        "paleturquoise1" #bbffff
+        "paleturquoise2" #aeeeee
+        "paleturquoise3" #96cdcd
+        "paleturquoise4" #668b8b
+        "cadetblue1" #98f5ff
+        "cadetblue2" #8ee5ee
+        "cadetblue3" #7ac5cd
+        "cadetblue4" #53868b
+        "turquoise1" #00f5ff
+        "turquoise2" #00e5ee
+        "turquoise3" #00c5cd
+        "turquoise4" #00868b
+        "cyan1" #00ffff
+        "cyan2" #00eeee
+        "cyan3" #00cdcd
+        "cyan4" #008b8b
+        "darkslategray1" #97ffff
+        "darkslategray2" #8deeee
+        "darkslategray3" #79cdcd
+        "darkslategray4" #528b8b
+        "aquamarine1" #7fffd4
+        "aquamarine2" #76eec6
+        "aquamarine3" #66cdaa
+        "aquamarine4" #458b74
+        "darkseagreen1" #c1ffc1
+        "darkseagreen2" #b4eeb4
+        "darkseagreen3" #9bcd9b
+        "darkseagreen4" #698b69
+        "seagreen1" #54ff9f
+        "seagreen2" #4eee94
+        "seagreen3" #43cd80
+        "seagreen4" #2e8b57
+        "palegreen1" #9aff9a
+        "palegreen2" #90ee90
+        "palegreen3" #7ccd7c
+        "palegreen4" #548b54
+        "springgreen1" #00ff7f
+        "springgreen2" #00ee76
+        "springgreen3" #00cd66
+        "springgreen4" #008b45
+        "green1" #00ff00
+        "green2" #00ee00
+        "green3" #00cd00
+        "green4" #008b00
+        "chartreuse1" #7fff00
+        "chartreuse2" #76ee00
+        "chartreuse3" #66cd00
+        "chartreuse4" #458b00
+        "olivedrab1" #c0ff3e
+        "olivedrab2" #b3ee3a
+        "olivedrab3" #9acd32
+        "olivedrab4" #698b22
+        "darkoliveGreen1" #caff70
+        "darkoliveGreen2" #bcee68
+        "darkoliveGreen3" #a2cd5a
+        "darkoliveGreen4" #6e8b3d
+        "khaki1" #fff68f
+        "khaki2" #eee685
+        "khaki3" #cdc673
+        "khaki4" #8b864e
+        "lightgoldenrod1" #ffec8b
+        "lightgoldenrod2" #eedc82
+        "lightgoldenrod3" #cdbe70
+        "lightgoldenrod4" #8b814c
+        "lightyellow1" #ffffe0
+        "lightyellow2" #eeeed1
+        "lightyellow3" #cdcdb4
+        "lightyellow4" #8b8b7a
+        "yellow1" #ffff00
+        "yellow2" #eeee00
+        "yellow3" #cdcd00
+        "yellow4" #8b8b00
+        "gold1" #ffd700
+        "gold2" #eec900
+        "gold3" #cdad00
+        "gold4" #8b7500
+        "goldenrod1" #ffc125
+        "goldenrod2" #eeb422
+        "goldenrod3" #cd9b1d
+        "goldenrod4" #8b6914
+        "darkgoldenrod1" #ffb90f
+        "darkgoldenrod2" #eead0e
+        "darkgoldenrod3" #cd950c
+        "darkgoldenrod4" #8b6508
+        "rosybrown1" #ffc1c1
+        "rosybrown2" #eeb4b4
+        "rosybrown3" #cd9b9b
+        "rosybrown4" #8b6969
+        "indianred1" #ff6a6a
+        "indianred2" #ee6363
+        "indianred3" #cd5555
+        "indianred4" #8b3a3a
+        "sienna1" #ff8247
+        "sienna2" #ee7942
+        "sienna3" #cd6839
+        "sienna4" #8b4726
+        "burlywood1" #ffd39b
+        "burlywood2" #eec591
+        "burlywood3" #cdaa7d
+        "burlywood4" #8b7355
+        "wheat1" #ffe7ba
+        "wheat2" #eed8ae
+        "wheat3" #cdba96
+        "wheat4" #8b7e66
+        "tan1" #ffa54f
+        "tan2" #ee9a49
+        "tan3" #cd853f
+        "tan4" #8b5a2b
+        "chocolate1" #ff7f24
+        "chocolate2" #ee7621
+        "chocolate3" #cd661d
+        "chocolate4" #8b4513
+        "firebrick1" #ff3030
+        "firebrick2" #ee2c2c
+        "firebrick3" #cd2626
+        "firebrick4" #8b1a1a
+        "brown1" #ff4040
+        "brown2" #ee3b3b
+        "brown3" #cd3333
+        "brown4" #8b2323
+        "salmon1" #ff8c69
+        "salmon2" #ee8262
+        "salmon3" #cd7054
+        "salmon4" #8b4c39
+        "lightsalmon1" #ffa07a
+        "lightsalmon2" #ee9572
+        "lightsalmon3" #cd8162
+        "lightsalmon4" #8b5742
+        "orange1" #ffa500
+        "orange2" #ee9a00
+        "orange3" #cd8500
+        "orange4" #8b5a00
+        "darkorange1" #ff7f00
+        "darkorange2" #ee7600
+        "darkorange3" #cd6600
+        "darkorange4" #8b4500
+        "coral1" #ff7256
+        "coral2" #ee6a50
+        "coral3" #cd5b45
+        "coral4" #8b3e2f
+        "tomato1" #ff6347
+        "tomato2" #ee5c42
+        "tomato3" #cd4f39
+        "tomato4" #8b3626
+        "orangered1" #ff4500
+        "orangered2" #ee4000
+        "orangered3" #cd3700
+        "orangered4" #8b2500
+        "red1" #ff0000
+        "red2" #ee0000
+        "red3" #cd0000
+        "red4" #8b0000
+        "deeppink1" #ff1493
+        "deeppink2" #ee1289
+        "deeppink3" #cd1076
+        "deeppink4" #8b0a50
+        "hotpink1" #ff6eb4
+        "hotpink2" #ee6aa7
+        "hotpink3" #cd6090
+        "hotpink4" #8b3a62
+        "pink1" #ffb5c5
+        "pink2" #eea9b8
+        "pink3" #cd919e
+        "pink4" #8b636c
+        "lightpink1" #ffaeb9
+        "lightpink2" #eea2ad
+        "lightpink3" #cd8c95
+        "lightpink4" #8b5f65
+        "palevioletred1" #ff82ab
+        "palevioletred2" #ee799f
+        "palevioletred3" #cd6889
+        "palevioletred4" #8b475d
+        "maroon1" #ff34b3
+        "maroon2" #ee30a7
+        "maroon3" #cd2990
+        "maroon4" #8b1c62
+        "violetred1" #ff3e96
+        "violetred2" #ee3a8c
+        "violetred3" #cd3278
+        "violetred4" #8b2252
+        "magenta1" #ff00ff
+        "magenta2" #ee00ee
+        "magenta3" #cd00cd
+        "magenta4" #8b008b
+        "orchid1" #ff83fa
+        "orchid2" #ee7ae9
+        "orchid3" #cd69c9
+        "orchid4" #8b4789
+        "plum1" #ffbbff
+        "plum2" #eeaeee
+        "plum3" #cd96cd
+        "plum4" #8b668b
+        "mediumorchid1" #e066ff
+        "mediumorchid2" #d15fee
+        "mediumorchid3" #b452cd
+        "mediumorchid4" #7a378b
+        "darkorchid1" #bf3eff
+        "darkorchid2" #b23aee
+        "darkorchid3" #9a32cd
+        "darkorchid4" #68228b
+        "purple1" #9b30ff
+        "purple2" #912cee
+        "purple3" #7d26cd
+        "purple4" #551a8b
+        "mediumpurple1" #ab82ff
+        "mediumpurple2" #9f79ee
+        "mediumpurple3" #8968cd
+        "mediumpurple4" #5d478b
+        "thistle1" #ffe1ff
+        "thistle2" #eed2ee
+        "thistle3" #cdb5cd
+        "thistle4" #8b7b8b
+        "gray0" #000000
+        "grey0" #000000
+        "gray1" #030303
+        "grey1" #030303
+        "gray2" #050505
+        "grey2" #050505
+        "gray3" #080808
+        "grey3" #080808
+        "gray4" #0a0a0a
+        "grey4" #0a0a0a
+        "gray5" #0d0d0d
+        "grey5" #0d0d0d
+        "gray6" #0f0f0f
+        "grey6" #0f0f0f
+        "gray7" #121212
+        "grey7" #121212
+        "gray8" #141414
+        "grey8" #141414
+        "gray9" #171717
+        "grey9" #171717
+        "gray10" #1a1a1a
+        "grey10" #1a1a1a
+        "gray11" #1c1c1c
+        "grey11" #1c1c1c
+        "gray12" #1f1f1f
+        "grey12" #1f1f1f
+        "gray13" #212121
+        "grey13" #212121
+        "gray14" #242424
+        "grey14" #242424
+        "gray15" #262626
+        "grey15" #262626
+        "gray16" #292929
+        "grey16" #292929
+        "gray17" #2b2b2b
+        "grey17" #2b2b2b
+        "gray18" #2e2e2e
+        "grey18" #2e2e2e
+        "gray19" #303030
+        "grey19" #303030
+        "gray20" #333333
+        "grey20" #333333
+        "gray21" #363636
+        "grey21" #363636
+        "gray22" #383838
+        "grey22" #383838
+        "gray23" #3b3b3b
+        "grey23" #3b3b3b
+        "gray24" #3d3d3d
+        "grey24" #3d3d3d
+        "gray25" #404040
+        "grey25" #404040
+        "gray26" #424242
+        "grey26" #424242
+        "gray27" #454545
+        "grey27" #454545
+        "gray28" #474747
+        "grey28" #474747
+        "gray29" #4a4a4a
+        "grey29" #4a4a4a
+        "gray30" #4d4d4d
+        "grey30" #4d4d4d
+        "gray31" #4f4f4f
+        "grey31" #4f4f4f
+        "gray32" #525252
+        "grey32" #525252
+        "gray33" #545454
+        "grey33" #545454
+        "gray34" #575757
+        "grey34" #575757
+        "gray35" #595959
+        "grey35" #595959
+        "gray36" #5c5c5c
+        "grey36" #5c5c5c
+        "gray37" #5e5e5e
+        "grey37" #5e5e5e
+        "gray38" #616161
+        "grey38" #616161
+        "gray39" #636363
+        "grey39" #636363
+        "gray40" #666666
+        "grey40" #666666
+        "gray41" #696969
+        "grey41" #696969
+        "gray42" #6b6b6b
+        "grey42" #6b6b6b
+        "gray43" #6e6e6e
+        "grey43" #6e6e6e
+        "gray44" #707070
+        "grey44" #707070
+        "gray45" #737373
+        "grey45" #737373
+        "gray46" #757575
+        "grey46" #757575
+        "gray47" #787878
+        "grey47" #787878
+        "gray48" #7a7a7a
+        "grey48" #7a7a7a
+        "gray49" #7d7d7d
+        "grey49" #7d7d7d
+        "gray50" #7f7f7f
+        "grey50" #7f7f7f
+        "gray51" #828282
+        "grey51" #828282
+        "gray52" #858585
+        "grey52" #858585
+        "gray53" #878787
+        "grey53" #878787
+        "gray54" #8a8a8a
+        "grey54" #8a8a8a
+        "gray55" #8c8c8c
+        "grey55" #8c8c8c
+        "gray56" #8f8f8f
+        "grey56" #8f8f8f
+        "gray57" #919191
+        "grey57" #919191
+        "gray58" #949494
+        "grey58" #949494
+        "gray59" #969696
+        "grey59" #969696
+        "gray60" #999999
+        "grey60" #999999
+        "gray61" #9c9c9c
+        "grey61" #9c9c9c
+        "gray62" #9e9e9e
+        "grey62" #9e9e9e
+        "gray63" #a1a1a1
+        "grey63" #a1a1a1
+        "gray64" #a3a3a3
+        "grey64" #a3a3a3
+        "gray65" #a6a6a6
+        "grey65" #a6a6a6
+        "gray66" #a8a8a8
+        "grey66" #a8a8a8
+        "gray67" #ababab
+        "grey67" #ababab
+        "gray68" #adadad
+        "grey68" #adadad
+        "gray69" #b0b0b0
+        "grey69" #b0b0b0
+        "gray70" #b3b3b3
+        "grey70" #b3b3b3
+        "gray71" #b5b5b5
+        "grey71" #b5b5b5
+        "gray72" #b8b8b8
+        "grey72" #b8b8b8
+        "gray73" #bababa
+        "grey73" #bababa
+        "gray74" #bdbdbd
+        "grey74" #bdbdbd
+        "gray75" #bfbfbf
+        "grey75" #bfbfbf
+        "gray76" #c2c2c2
+        "grey76" #c2c2c2
+        "gray77" #c4c4c4
+        "grey77" #c4c4c4
+        "gray78" #c7c7c7
+        "grey78" #c7c7c7
+        "gray79" #c9c9c9
+        "grey79" #c9c9c9
+        "gray80" #cccccc
+        "grey80" #cccccc
+        "gray81" #cfcfcf
+        "grey81" #cfcfcf
+        "gray82" #d1d1d1
+        "grey82" #d1d1d1
+        "gray83" #d4d4d4
+        "grey83" #d4d4d4
+        "gray84" #d6d6d6
+        "grey84" #d6d6d6
+        "gray85" #d9d9d9
+        "grey85" #d9d9d9
+        "gray86" #dbdbdb
+        "grey86" #dbdbdb
+        "gray87" #dedede
+        "grey87" #dedede
+        "gray88" #e0e0e0
+        "grey88" #e0e0e0
+        "gray89" #e3e3e3
+        "grey89" #e3e3e3
+        "gray90" #e5e5e5
+        "grey90" #e5e5e5
+        "gray91" #e8e8e8
+        "grey91" #e8e8e8
+        "gray92" #ebebeb
+        "grey92" #ebebeb
+        "gray93" #ededed
+        "grey93" #ededed
+        "gray94" #f0f0f0
+        "grey94" #f0f0f0
+        "gray95" #f2f2f2
+        "grey95" #f2f2f2
+        "gray96" #f5f5f5
+        "grey96" #f5f5f5
+        "gray97" #f7f7f7
+        "grey97" #f7f7f7
+        "gray98" #fafafa
+        "grey98" #fafafa
+        "gray99" #fcfcfc
+        "grey99" #fcfcfc
+        "gray100" #ffffff
+        "grey100" #ffffff
+    }
+}
+
+
+set tyMonochrome 0
+
+# COMPATIBILITY procedure
+
+proc ptkColor {name {alternate {}}} {
+    ::tycho::color $name $alternate
+}
+
+###########################################################################
+#### colorList
+# Get a list of available colors. If an argument is given, it is
+# a glob-style pattern that selects a subset of the available
+# colors; if no argument is given, all available colors are returned.
+#
+body ::tycho::ColorManager::colorList {{pattern *}} {
+    return [array names colorlist $pattern]
+}
+
+###########################################################################
+#### convertColor
+# Given an RGB color, convert it into the nearest color in the
+# available RGB space. If the color is symbolic, convert it to RGB
+# first. Then convert the RGB value into numeric HSV and just
+# choose the nearest supported hue, saturation, and value. Needless
+# to say, this approximation is very much that: approximate.
+#
+body ::tycho::ColorManager::convertColor {rgb} {
+    ;#
+}
+
+###########################################################################
+#### getColor
+# Look up a color. If the first argument is the flag
+# <b>-hsv</b>, then the color is converted into RGB from the
+# hue-saturation-value color space, where _hue_ is one of the
+# available hues (by default,  _red_, _orange_, _yellow_, _green_, _cyan_,
+# _blue_, _purple_, _magenta_, and _crimson_), _saturation_
+# is one of the available saturation values (by default, _verypale_,
+# _pale_, _medium_, and _rich_), and _value is one of the
+# available color values, or brightness (by default, _verydark_,
+# _dark_, _medium_, and _light_. The default saturation and
+# value are _rich_ and _light_. In addition to the standard hues,
+# the special names _black_, _white_, and _grey_ will be recognized.
+# For the first two, _saturation_ and _value_ are ignored;
+# for the last, the saturation is assumed to be an integer
+# between 0 and 100, where 0 will produce black and 100 will
+# produce white, and _value_ will be ignored.
+#
+# If the first argument is the flag <b>-lookup</b>, then the
+# _hue_ is taken to be a symbolic color name, and _saturation_
+# must be either <b>black</b> or <b>white</b>. The color is looked
+# up in the color table, and, if not found, the RGB value of
+# _saturation_ is returned. If the global variable tyMonochrome
+# is set, then use the _saturation_ argument (if it is present). All
+# names are converted to lower case before looking them up.
+#
+# If the first argument is neither of these flags, then the behavior
+# is the same as if <b>-lookup</b> were specified. In either
+# case, the returned value is an RGB value in the form required
+# by Tk -- for example, <code>#80efdd</code>. If the _hue_ is already
+# in this form, it is returned unchanged.
+#
+body ::tycho::ColorManager::getColor \
+        {flag {hue {}} {saturation {}} {value {}}} {
+    if { $flag == "-hsv" } {
+        set hsv 1
+    } elseif { $flag == "-lookup" } {
+        set hsv 0
+    } else {
+        set hsv 0
+        set value $saturation
+        set saturation $hue
+        set hue $flag
+    }
+    # If already a color, return
+    if {[regexp {^#.*} $hue]} {
+        return $hue
+    }
+    # Switch according to mode
+    if $hsv {
+        set hue [string tolower $hue]
+
+        # Check special "hues"
+        if { $hue == "black" } {
+            return #000000
+        } elseif { $hue == "white" } {
+            return #ffffff
+        } elseif { $hue == "grey" || $hue == "gray" } {
+            if { $saturation < 0 || $saturation > 100 } {
+                error "Saturation out of range: $saturation"
+            }
+            set shade [expr int(2.55*$saturation+0.5)]
+            set rgb [list $shade $shade $shade]
+        } else {
+            # Get raw hue
+            set h [::tycho::ColorManager::hue $hue]
+
+            # Default is full saturation
+            if { $saturation == "" } {
+                set s 1.0
+            } else {
+                set s [::tycho::ColorManager::saturation $saturation]
+            }
+            # Default is full brightness
+            if { $value == "" } {
+                set v 1.0
+            } else {
+                set v [::tycho::ColorManager::value $value]
+            }
+            # Figure out a fudge factor to prevent low saturation/value from
+            # getting too grey
+            set fudge [expr pow(1-$s,2) * pow(1-$v,2)]
+            set s [expr $s + $fudge]
+            set v [expr $v + $fudge]
+
+            # Get the RGB value
+            set rgb [::tycho::ColorManager::HSVtoRGB $h $s $v]
+        }
+        eval format "#%02x%02x%02x" $rgb
+
+    } else {
+        set usehue $hue
+        global tyMonochrome
+        # If the color model is monochrome, use the second argument
+        if {$tyMonochrome} {
+            if {$saturation != ""} {
+                set usehue [lindex $args 0]
+            }
+        }
+        set lhue [string tolower $usehue]
+        set ahue [string tolower $saturation]
+        global colorlist
+        if [::info exists colorlist($lhue)] {
+            return $colorlist($lhue)
+        } elseif [::info exists colorlist($ahue)] {
+            return $colorlist($ahue)
+        } else {
+            return $colorlist(black)
+        }
+    }
+}
+
+###########################################################################
+#### hue
+# Add, change, convert, or list color hues. If no arguments are
+# supplied, return the list of symbolic color hues. If a single
+# argument is supplied, look it up in the list of available hues
+# and return it's value as an integer, being its position in
+# degrees around the color wheel (for reference: red is at zero,
+# green is at 120, and blue is at 240). If two arguments are
+# given, _new_ is expected to be an integer between 0 and 359,
+# and the value of _hue_ will be set to this new value. If _hue_
+# does not exist, create a new hue. This can be used to alter the
+# color map if the default values are inadequate for some reason.
+#
+body ::tycho::ColorManager::hue {{hue {}} {new {}}} {
+    if { $hue == "" } {
+        # Return list
+        set result {}
+        array set temp [::tycho::lreverse [array get _hue]]
+        foreach v [lsort -integer [array names temp]] {
+            lappend result $temp($v)
+        }
+        return $result
+    } elseif { $new == "" } {
+        # Return raw value
+        if ![::info exists _hue($hue)] {
+            error "Unknown hue \"$hue\""
+        }
+        return $_hue($hue)
+    } else {
+        # Add or change
+        if { $new < 0 || $new >= 360 } {
+            error "Hue value $new out of range"
+        }
+        set _hue($hue) $new
+    }
+}
+
+###########################################################################
+#### saturation
+# Add, change, convert, or list color saturations. If no arguments are
+# supplied, return the list of symbolic saturations. If a single
+# argument is supplied, look it up in the list of available saturations
+# and return its value as a real between zero and one. If two arguments are
+# given, set the value of _saturation_ to this new value. If _saturation_
+# does not exist, create a new symbolic saturation. This can be used
+# to alter the color map if the default values are inadequate for
+# some reason.
+#
+body ::tycho::ColorManager::saturation {{saturation {}} {new {}}} {
+    if { $saturation == "" } {
+        # Return list
+        set result {}
+        array set temp [::tycho::lreverse [array get _saturation]]
+        foreach v [lsort -real [array names temp]] {
+            lappend result $temp($v)
+        }
+        return $result
+    } elseif { $new == "" } {
+        # Return raw value
+        if ![::info exists _saturation($saturation)] {
+            error "Unknown saturation \"$saturation\""
+        }
+        return $_saturation($saturation)
+    } else {
+        # Add or change
+        if { $new < 0.0 || $new > 1.0 } {
+            error "Saturation value $new out of range"
+        }
+        set _saturation($saturation) $new
+    }
+}
+
+###########################################################################
+#### value
+# Add, change, convert, or list color values. If no arguments are
+# supplied, return the list of symbolic values. If a single
+# argument is supplied, look it up in the list of available values
+# and return its value as a real between zero and one. If two arguments are
+# given, set the value of _value_ to this new value. If _value_
+# does not exist, create a new symbolic value. This can be used
+# to alter the color map if the default values are inadequate for
+# some reason.
+#
+body ::tycho::ColorManager::value {{value {}} {new {}}} {
+   if { $value == "" } {
+        # Return list
+        set result {}
+        array set temp [::tycho::lreverse [array get _value]]
+        foreach v [lsort -real [array names temp]] {
+            lappend result $temp($v)
+        }
+        return $result
+    } elseif { $new == "" } {
+        # Return raw value
+        if ![::info exists _value($value)] {
+            error "Unknown color value \"$value\""
+        }
+        return $_value($value)
+    } else {
+        # Add or change
+        if { $new < 0.0 || $new > 1.0 } {
+            error "Color value $new out of range"
+        }
+        set _value($value) $new
+    }
+}
+
+###########################################################################
+#### RGBtoHSV
+# Convert RGB into raw HSV. The RGB input values are expected to be
+# integers ranging from 0 to 255, and the result is a three-list
+# containing the hue, saturation, and value in the forms described
+# for the <b>HSVtoRGB</b> procedure.
+#
+body ::tycho::ColorManager::RGBtoHSV {r g b} {
+    set r [expr $r/255.0] 
+    set g [expr $g/255.0]
+    set b [expr $b/255.0]
+
+    set max [::tycho::maximum $r $g $b]
+    set min [::tycho::minimum $r $g $b]
+
+    set v $max
+    set delta [expr $max - $min]
+    if { $delta == 0 } {
+        # grey
+        set s 0
+        set h 0
+    } else {
+        set s [expr $delta/$max]
+        if { $r == $max } {
+            # Mostly red
+            set h [expr ($g-$b)/$delta]
+            if { $h < 0 } {
+                set h [expr $h + 6]
+            }
+        } elseif { $g == $max } {
+            # Mostly green
+            set h [expr 2 + ($b-$r)/$delta]
+        } else {
+            # Mostly blue
+            set h [expr 4 + ($r-$g)/$delta]
+        }
+        set h [expr $h * 60]
+    }
+    return [list $h $s $v]
+}
+
+###########################################################################
+#### HSVtoRGB
+# Convert raw HSV into RGB values. The hue _h_ is an integer between
+# 0 and 359, giving the position in degrees of the hue around the
+# color circle. (For reference, pure red is at zero degrees, green
+# at 120, and blue at 240 degrees.) The saturation _s_ is a value
+# ranging from 0.0 to 1.0, where 0.0 is no saturation (grey-scale
+# only) and 1.0 is full saturation. The value _v_ is also a value
+# ranging from 0.0 to 1.0, where 0.0 is black and 1.0 is full brightness.
+#
+body ::tycho::ColorManager::HSVtoRGB {h s v} {
+    if { $s == 0 } {
+        # grey
+        set r $v
+        set g $v
+        set b $v
+    } else {
+        set h [expr $h/60.0]
+        if { $h < 1 } {
+            # Mostly red, more green than blue
+            set r $v
+            set delta [expr $s * $r]
+            set b [expr $r - $delta]
+            set g [expr $delta*$h + $b]
+        } elseif { $h < 2 } {
+            # Mostly green, more red than blue
+            set g $v
+            set delta [expr $s * $g]
+            set b [expr $g - $delta]
+            set r [expr $b - $delta*($h-2)]
+        } elseif { $h < 3 } {
+            # Mostly green, more blue than red
+            set g $v
+            set delta [expr $s * $g]
+            set r [expr $g - $delta]
+            set b [expr $delta*($h-2) + $r]
+       } elseif { $h < 4 } {
+            # Mostly blue, more green than red
+            set b $v
+            set delta [expr $s * $b]
+            set r [expr $b - $delta]
+            set g [expr $r - $delta*($h-4)]
+        } elseif { $h < 5 } {
+            # Mostly blue, more red than green
+            set b $v
+            set delta [expr $s * $b]
+            set g [expr $b - $delta]
+            set r [expr $delta*($h-4) + $g]
+        } else {
+            # Mostly red, more blue than green
+            set r $v
+            set delta [expr $s * $r]
+            set g [expr $r - $delta]
+            set b [expr $g - $delta*($h-6)]
+        }
+    }
+    set r [expr int($r*255+0.5)]
+    set g [expr int($g*255+0.5)]
+    set b [expr int($b*255+0.5)]
+
+    return [list $r $g $b]
+}
+
+###########################################################################
+#### RGBtoHLS
+#
+# Convert RGB into raw HLS. HLS (hue-lightness-saturation) is a color
+# space closely related to HSV, in which fully-saturated colors
+# occur at a lightness of 0.5 (rather than 1.0). To be honest, I'm
+# not certain what it's advantages are, except that perhaps
+# it gives a more uniform brightness scale (in HSV, useful values
+# seem to be clustered towards the higher end of the scale). For
+# our purposes, it doesn't really matter since we're only allowing
+# a set of predefined values, but here's the conversion proc
+# anyway. (I didn't have the energy to figure out the reverse
+# conversion.)
+#
+body ::tycho::ColorManager::RGBtoHLS {r g b} {
+    set r [expr $r/255.0] 
+    set g [expr $g/255.0]
+    set b [expr $b/255.0]
+
+    set max [::tycho::maximum $r $g $b]
+    set min [::tycho::minimum $r $g $b]
+    set l [expr ($max+$min)/2]
+    set delta [expr $max - $min]
+
+    if { $delta == 0 } {
+        # grey
+        set s 0
+        set h 0
+    } else {
+        if { $l < 0.5 } {
+            set s [expr $delta/($max+$min)]
+        } else {
+            set s [expr 2 - ($max+$min)]
+        }
+        if { $r == $max } {
+            # Mostly red
+            set h [expr ($g-$b)/$delta]
+            if { $h < 0 } {
+                set h [expr $h + 1]
+            }
+        } elseif { $g == $max } {
+            # Mostly green
+            set h [expr 2 + ($b-$r)/$delta]
+        } else {
+            # Mostly blue
+            set h [expr 4 + ($r-$g)/$delta]
+        }
+        set h [expr $h * 60]
+    }
+    return [list $h $l $s]
+}

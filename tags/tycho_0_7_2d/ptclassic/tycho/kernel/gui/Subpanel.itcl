@@ -1,0 +1,461 @@
+# Subpanel widget which mimics opening and closing of a drawer. 
+# 
+# @Author: Farhana Sheikh
+#
+# @Version: @(#)Subpanel.itcl	1.24 12/14/97
+# 
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Options from the derived class
+option add *Subpanel.relief sunken widgetDefault
+option add *Subpanel.labelPos w widgetDefault
+option add *Subpanel.labelMargin 2 widgetDefault
+
+# FIXME:
+# Known bugs:
+# - configure -state closed does not close the drawer.
+# - the -opencallback and -closeback options do not work if specified
+#   at definition time.  They have to be configured after.
+
+#######################################################################
+#### Subpanel
+# This class defines a Subpanel widget that can be used within windows.
+# It mimics opening and closing a drawer.  The contents of the drawer can
+# be any Tk window that is a child of the top-level window containing the
+# subpanel.  
+# <p>
+# The subpanel can be initially in an open or closed state.
+# The <i>-childwidget</i> option specifies the widget to pack into the 
+# subpanel when the drawer is opened.
+# Note that one childwidget cannot be packed into two 
+# different subpanels.  The <i>-text</i> option specifies the text that is to 
+# be inserted into the label portion of the subpanel.
+# The <i>-state</i> option specifies the state that the user would like the 
+# subpanel to have: either closed or open.  One can query the current state 
+# of the subpanel by using [cget -state].
+# By default, the subpanel is initially closed.
+# <p>
+# Here is an example of how to use the Subpanel:
+# <tcl><pre>
+# ::tycho::Displayer .w
+# pack forget .w.childsite
+# frame .w.options
+# checkbutton .w.options.a -text A
+# checkbutton .w.options.b -text B
+# pack .w.options.a
+# pack .w.options.b
+# ::tycho::Subpanel .w.s -text "Options" -childwidget .w.options \
+#      -indentwidth 15
+# ::tycho::Subpanel .w.t -text "Preferences" -childwidget .w.s
+# pack .w.t -anchor nw
+# wm deiconify .w
+# </pre></tcl>
+# <p>
+# This example first creates a window with a status bar (and a close
+# button), then creates a frame a populates it with checkbuttons.
+# It then creates a <code>Subpanel</code> that uses the frame with
+# checkbuttons as it's child widget.  When the "open" button is pushed,
+# that frame is packed.  When it is pushed again, that frame is unpacked.
+# <p>
+# As an alternative to the <i>-childwidget</i> option, the
+# -opencallback option specifies a command to execute when the subpanel
+# is opened. This should return the name of a widget to be packed into
+# the subpanel. Thus, the frame to display can be constructed
+# on-the-fly. The -closecallback option specifies the command that is
+# executed when a subpanel is closed.
+# <p>
+# For example,
+# <tcl><pre>
+# proc nb {} {
+#     button .x.b -text push
+#     return .x.b
+# }
+# ::tycho::Displayer .x
+# ::tycho::Subpanel .x.s -text "Button" \
+#      -openbm folderopen.xbm -closebm folderclose.xbm
+# .x.s configure -opencallback nb
+# .x.s configure -closecallback "destroy .x.b"
+# pack .x.s -anchor w
+# wm deiconify .x
+# </pre></tcl>
+# <p>
+# If both the childwidget and the opencallback options are
+# are used then the one that is specified last will be used.
+# The deletion of the embedded widget is left to the creator.
+#
+class ::tycho::Subpanel { 
+    inherit ::tycho::TWidget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the name of a widget to be packed into the subpanel
+    itk_option define -childwidget childWidget ChildWidget ""
+ 
+    # Specify the bitmap to use as the closed icon. Not updated by config.
+    itk_option define -closebm closeBitmap CloseBitmap arrowclose.xbm
+
+    # Specify the name of the procedure to execute when closing subpanel
+    itk_option define -closecallback closeCallback CloseCallback ""
+
+    # Specify the amount to indent the widget under the open subpanel.
+    itk_option define -indentwidth indentWidth IndentWidth 25
+ 
+    # Specify the bitmap to use as the open icon. Not updated by config.
+    itk_option define -openbm openBitmap OpenBitmap arrowopen.xbm
+  
+    # Specify the name of the procedure to execute when opening subpanel;
+    # The procedure should return the name of a widget to pack into the panel
+    itk_option define -opencallback openCallback OpenCallback ""
+   
+    # Specify the line to execute when opening subpanel;
+    # The procedure doesn't have to return anything.
+    itk_option define -execute execute ExeCute ""
+
+    # Specify the state of the subpanel, either open or closed
+    itk_option define -state state State closed
+
+    # Specify the text to be inserted in the subpanel label
+    itk_option define -text subpanelTitle SubpanelTitle ""
+
+    # The character to underline and bind in the text.
+    itk_option define -underline underline Underline {}
+
+    ###################################################################
+    ####                        public methods                     ####
+
+    # Close a subpanel.
+    method close {}
+
+    # Open a subpanel.
+    method open {}
+
+    # Toggle the state of the subpanel.
+    method toggle {}
+
+    ###################################################################
+    ####                       private variables                   ####
+     
+    private variable closecmd ""
+    private variable opencmd ""
+    private variable execcmd ""
+    private variable previousChildwidget ""
+}
+
+#######################################################################
+#### -childwidget configuration
+# Specify the name of the custom childwidget that user wants to embed in a 
+# subpanel
+# 
+configbody ::tycho::Subpanel::childwidget {
+
+    # If there's already a child widget, unpack and delete it
+    # If one needs to use the same childwidget somewhere else, it
+    # can't be done.  That is if want to use the same childwidget
+    # in two Subpanels, the childwidget in the first Subpanel gets erased.
+    if { $previousChildwidget != "" } {
+	pack forget $previousChildwidget
+	# Leave deletion of object to user of Subpanel widget
+    }
+
+    if { $itk_option(-childwidget) != ""} {
+	# Pack the new widget into the user frame
+	pack $itk_option(-childwidget) -in $itk_component(widgetFrame)
+    
+	# Why do I need this???
+	raise $itk_option(-childwidget) $itk_component(widgetFrame)
+    }
+
+    # Remember the widget for the next time...
+    set previousChildwidget $itk_option(-childwidget)
+
+    # Override the opencallback command.  We need this in case 
+    # user wants to only embed a widget and not execute
+    # a command upon opening
+    set opencmd ""
+}
+
+#######################################################################
+#### -closecallback configuration
+# Set the command to execute when subpanel is closed
+# 
+configbody ::tycho::Subpanel::closecallback {
+    set closecmd $itk_option(-closecallback)
+}
+
+#######################################################################
+#### -indentwidth configuration
+# Width of spaceframe widget which indents the contents of an open subpanel.
+#
+configbody ::tycho::Subpanel::indentwidth {
+
+    $itk_component(spaceFrame) configure -width $itk_option(-indentwidth)
+}
+
+#######################################################################
+#### -opencallback configuration
+# Set the command to execute when subpanel is opened
+# 
+configbody ::tycho::Subpanel::opencallback {
+    set opencmd $itk_option(-opencallback)
+}
+
+#######################################################################
+#### -execute configuration
+# Set the command to execute when subpanel is opened
+# 
+configbody ::tycho::Subpanel::execute {
+    set execcmd $itk_option(-execute)
+}
+
+
+#######################################################################
+#### -state configuration
+# Set state of subpanel to either open or closed
+#
+configbody ::tycho::Subpanel::state {
+    # Need the following to use bitmaps
+    global ::TYCHO
+    
+    # The meaning of open and closed here is a bit tricky.  When the 
+    # Subpanel is in the closed state then pressing the button places
+    # places the Subpanel in the open state and similarly for the open
+    # state of the Subpanel
+    switch $itk_option(-state) {
+	closed {
+	    $itk_component(arrow) configure \
+		    -bitmap [file join @$TYCHO kernel img \
+                       $itk_option(-closebm)] \
+		    -justify center \
+		    -command [code "$this open"]
+	}
+	open {
+	    $itk_component(arrow) configure \
+		    -bitmap [file join @$TYCHO kernel img \
+                       $itk_option(-openbm)] \
+		    -justify center \
+		    -command [code "$this close"]
+
+	    pack $itk_component(spaceFrame) -side left -anchor nw
+	    pack $itk_component(panelFrame) \
+		    -side left \
+		    -anchor nw \
+		    -after $itk_component(spaceFrame) 
+
+	}
+    }
+}
+
+#######################################################################
+#### -text configuration
+# Title of subpanel
+#
+configbody ::tycho::Subpanel::text {
+
+    $itk_component(title) configure -text $itk_option(-text)
+}
+
+#######################################################################
+#### -underline configuration
+# The character in the title of the subpanel to underline and bind.
+#
+configbody ::tycho::Subpanel::underline {
+
+    set ul $itk_option(-underline)
+    if {$ul != {}} {
+        $itk_component(title) configure -underline $ul
+        set char [string index $itk_option(-text) $ul]
+        if {$char != {}} {
+            # Bind to the top level.
+            set tl [winfo toplevel $itk_component(hull)]
+            bind $tl <Key-[string tolower $char]> \
+                    "$this toggle; break"
+        }
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Subpanel::constructor {args} {
+
+    # create the frame that contains everything
+    itk_component add mainFrame {
+	frame $itk_interior.mainFrame
+    } {
+        keep -background -cursor
+    }
+    pack $itk_component(mainFrame) -side left
+
+    # create frame for title and open/close button
+    itk_component add titleFrame {
+	frame $itk_component(mainFrame).titleFrame
+    } {
+        keep -background -cursor
+    }
+    pack $itk_component(titleFrame) -side top -anchor nw -expand yes
+
+    # create space holder frame so that buttons, etc. are lined up
+    # underneath the title and not the open/close button
+    itk_component add spaceFrame {
+	frame $itk_component(mainFrame).spaceFrame
+    } {
+        keep -background -cursor
+    }
+    pack propagate $itk_component(spaceFrame) off
+
+    # create frame for buttons, buttons, entry fields, etc.
+    itk_component add panelFrame {
+	frame $itk_component(mainFrame).panelFrame
+    } {
+        keep -background -cursor
+    }
+
+    # create frame for label
+    itk_component add labelFrame {
+	frame $itk_component(titleFrame).labelFrame 
+    } {
+        keep -background -cursor
+    }
+    pack $itk_component(labelFrame) -side right -anchor ne  
+
+    # Create arrow frame.
+    itk_component add arrowFrame {
+	frame $itk_component(titleFrame).arrowFrame
+    } {
+        keep -background -cursor
+    }
+    pack $itk_component(arrowFrame) -side right -padx 2 -anchor nw
+    
+    # create the arrow up or down button
+    itk_component add arrow {
+	button $itk_component(arrowFrame).arrow
+    } {
+	keep -cursor -background -foreground
+    }
+    pack $itk_component(arrow)
+
+    # create the accompanying label
+    itk_component add title {
+	label $itk_component(labelFrame).title \
+		-justify right
+    } {
+	keep -background -font -foreground -cursor
+    }
+    pack $itk_component(title) -side left
+
+    # create frame for user miscellaneous items
+    itk_component add widgetFrame {
+	frame $itk_component(panelFrame).widgetFrame
+    } {
+        keep -background -cursor
+    }
+    pack $itk_component(widgetFrame) -side top -anchor nw
+
+    eval itk_initialize $args
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+
+#######################################################################
+#### close
+# Close the subpanel and hide the widgets inside.  
+# If a command exists that is to be executed upon closing then execute
+# it before hiding the widgets.
+#
+body ::tycho::Subpanel::close {} {
+
+    # If a command exists that is to be executed upon closing the panel
+    # then execute it, otherwise just hide the custom panel.
+    if {$closecmd != ""} {
+	[code $closecmd]
+    }
+
+    pack forget $itk_component(panelFrame)
+    pack forget $itk_component(spaceFrame)
+    configure -state closed
+}
+
+#######################################################################
+#### open
+# Open the subpanel and displays the widgets  
+# If a command exists that is to be executed upon opening then execute
+# it and pack the returned widget into the subpanel so it is displayed
+# when subpanel is opened.
+#
+body ::tycho::Subpanel::open {} {
+
+    # If a command exists that is to be executed upon opening the panel
+    # then execute and pack the returned widget into the subpanel.  Flag
+    # an error if the command does not return a widget.
+    set currentChildwidget ""
+
+    if {$execcmd != ""} {eval $execcmd}
+
+    if {$opencmd != ""} {
+	set currentChildwidget [$opencmd]
+	if {$currentChildwidget != ""} {
+	    # Because the childwidget option overrides the opencallback
+	    # option, we need to remember the command
+	    set temp $opencmd
+	    configure -childwidget $currentChildwidget
+	    set opencmd $temp
+	} else {
+	    set opencmd ""
+	    error "Opencallback command did not return widget"
+	}
+    }
+    
+    # Open the panel and display the custom widget inside.
+    pack $itk_component(spaceFrame) -side left -anchor nw
+    pack $itk_component(panelFrame) \
+	    -side left \
+	    -anchor nw \
+	    -after $itk_component(spaceFrame) 
+    raise $itk_option(-childwidget) [$this windowName]
+       
+    configure -state open
+}
+
+#####################################################################
+#### toggle 
+# Toggle the state of the subpanel.  That is, if it is open, close it.
+# If it is closed, open it.
+#
+body ::tycho::Subpanel::toggle {} {
+    if {[cget -state] == {open}} {
+        close
+    } else {
+        open
+    }
+}

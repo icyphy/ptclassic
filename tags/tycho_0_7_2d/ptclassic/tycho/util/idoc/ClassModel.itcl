@@ -1,0 +1,393 @@
+##########################################################################
+# @Version: @(#)ClassModel.itcl	1.36 07/23/98
+# @Author: John Reekie
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### ClassModel
+#
+# The _ClassModel_ class implements a model of a object-oriented class. It
+# is general enough to represent classes in most OO languages, although
+# there may be reason to subclass it to provide access methods 
+# more suitable to particular languages. It is designed to be
+# usable both for documenting classes and for use in 
+# object models. The names of methods (including constructors and
+# destructors) should, in languages that support multiple
+# methods per operation, contain the full signature. For example:
+# <code>add(int,int):int</code> and <code>add(int,float):float</code>.
+#
+# The model has the following public variables:
+#
+# <dl>
+# <dt><b>-classname</b>
+# <dd>
+# The class name of the class. (i.e. ::tycho::ClassModel)
+#
+# <dt><b>-description</b>
+# <dd>
+# A short description of the class.
+#
+# <dt><b>-exceptions</b>
+# <dd>
+# Exceptions thrown by this class. An attribute
+# because exceptions don't have attributes. The default is null.
+#
+# <dt><b>-explanation</b>
+# <dd>
+# An HTML description of the class.
+#
+# <dt><b>-inherits</b>
+# <dd>
+# A list of classes from which this class inherits.
+#
+# <dt><b>-implements</b>
+# <dd>
+# A list of interfaces that this class implements.
+#
+# <dt><b>-interfacefile</b>
+# <dd>
+# The file in which the class' interface resides.
+#
+# <dt><b>-language</b>
+# <dd>
+# The language in which the class was written.
+# Default is a null string.
+#
+# <dt><b>-modifiers</b>
+# <dd>
+# Other class modifiers. Possible values depend
+# on the languages. The default is null.
+#
+# <dt><b>-package</b>
+# <dd>
+# The name of the package this class belongs to. 
+# Default is null.
+#
+# <dt><b>-protection</b>
+# <dd>
+# The protection level of the class. Usually,
+# this includes "public" and "package". The default is "public".
+#
+# <dt><b>-sourcefile</b>
+# <dd>
+# The file in which the class resides.
+#
+# </dl>
+#
+# The model has the following types:
+# <p>
+# <dl>
+# <dt><b>constructor</b> _name_
+# <dd>
+# A constructor. Constructors typically contain nested
+# _argument_ entitiers, which represent the arguments of the constructor.
+# Constructors have the following attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the constructor, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this constructor. Default
+#        is null.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the constructor, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
+#        on the languages. The default is null.
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   </dl>
+#
+# <dt><b>destructor</b> _name_
+# <dd>
+# A destructor. Destructors typically contain nested
+# _argument_ entitiers, which represent the arguments of the destructor.
+# Destructors have the following attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the destructor, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this destructor. Default
+#        is null.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the destructor, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
+#        on the languages. The default is null.
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   </dl>
+#
+# <dt><b>method</b> _name_
+# <dd>
+# A method. Methods typically contain nested _argument_ entities, which 
+# represent the arguments of the method. Methods have the following
+# attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the method, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this method. Default
+#        is null.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the method, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
+#        on the languages, but will include "virtual" for C++ and
+#        "synchronized" for Java. The default is null.
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   <dt><b>-scope</b>
+#   <dd> The scope of the method. This can be either
+#        "instance," meaning that the method operates on an instance
+#        of this class, or "class," meaning that the method operates
+#        on the shared class data. (These are called "class methods"
+#        in Smalltalk and "procs" in [Incr Tcl]). Default is
+#        "instance."
+#   <dt><b>-type</b>
+#   <dd> The return type of the method. The default is null.
+#   </dl>
+#
+# <dt><b>variable</b> _name_
+# <dd>
+# A variable of the class. Variables have the following attributes:
+#   <dl>
+#   <dt><b>-default</b>
+#   <dd> The initial/default value of the variable. The default 
+#        is null. This attribute does not apply to certain languages and
+#        should then be ignored.
+#   <dt><b>-description</b>
+#   <dd> A short description of the variable, in plain text.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the variable, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
+#        on the languages, but will include "static" for C++ and
+#        "synchronized" for Java. The default is null.
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the variable. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "protected."
+#   <dt><b>-scope</b>
+#   <dd> The scope of the variable. This can be either
+#        "instance," meaning that the method operates on an instance
+#        of this class, or "class," meaning that the method operates
+#        on the shared class data. (These are called "class variables"
+#        in Smalltalk and "common variables" in [Incr Tcl]). Default is
+#        "instance."
+#   <dt><b>-type</b>
+#   <dd> The type of the variable. The default is null.
+# </dl>
+#
+# <dt><b>argument</b> _name_
+# <dd>
+# An argument. At the top level, this is a class argument, which
+# probably only makes sense if the language supports generics
+# ("templates" in C++). Inside a method, it represents an argument
+# to the method. It has the following attributes:
+#   <dl>
+#   <dt><b>-default</b>
+#   <dd> The default value of the argument. This makes
+#       sense only if the argument is optional. Default is a null string.
+#   <dt><b>-description</b>
+#   <dd> A short description of the argument, in plain text.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the argument, in HTML.
+#   <dt><b>-optional</b>
+#   <dd> True is the argument is optional. Default
+#       is zero (false).
+#   <dt><b>-type</b>
+#   <dd> The type of the argument. Default is null.
+#   </dl>
+# </dl>
+#
+# Here is an example of a class model. This creates
+# a model and loads it with a string in TIM format. After
+# creating it, we call the describe{} method to confirm its
+# contents:
+# <pre><tcl>
+#     catch {delete object $class}
+#     set class [::tycho::ClassModel [::tycho::autoName class]]
+#     $class parse {
+#        configure -language Itcl -classname ::tycho::exampleclass
+#        configure -description {An example class.}
+#        configure -explanation {This is a <i>silly</i> class.}
+#        configure -inherits ::tycho::Mommy
+#        variable foo \
+#            -protection public \
+#            -explanation "This is a public variable."
+#        method bar \
+#            -explanation "This is a public method." {
+#            argument x
+#            argument y
+#        }
+#     }
+#     $class describe
+# </tcl></pre>
+#
+# Return the public methods of the class:
+# <pre><tcl>
+#     $class match method -protection public
+# </tcl></pre>
+#
+# Return the explanation of a method:
+# <pre><tcl>
+#     $class attrget method:bar -explanation
+# </tcl></pre>
+#
+# Return the arguments of a method:
+# <pre><tcl>
+#     $class match argument method:bar
+# </tcl></pre>
+#
+class ::tycho::ClassModel {
+    inherit ::tycho::DataModel
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+    
+    # The class name of the class. (i.e. ::tycho::ClassModel)
+    public variable classname ""
+
+    # Contributor
+    public variable contributor {}
+
+    # Copyright notice
+    public variable copyright {}
+
+    # Exceptions thrown by this class
+    public variable exceptions {}
+
+    # The HTML description of the class.
+    public variable explanation ""
+
+    # A list of classes from which this class inherits.
+    public variable inherits {}
+
+    # A list of interfaces that this class implements.
+    public variable implements {}
+
+    # The file in which the class' interface resides.
+    public variable interfacefile ""
+
+    # The language in which the class was written.
+    public variable language ""
+
+    # Other class modifiers.
+    public variable modifiers {}
+
+    # The name of the package this class belongs to. 
+    public variable package ""
+
+    # The protection level of the class.
+    public variable protection "public"
+
+    # The file in which the class resides.
+    public variable sourcefile
+
+    #################################################################
+    ####                     public methods                      ####
+
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::ClassModel::constructor {args} {
+    # Evaluate options
+    eval configure $args
+
+    # Add the new options to the "printable" list
+    lappend printable \
+            -classname \
+            -contributor \
+            -copyright \
+            -exceptions \
+	    -explanation \
+            -implements \
+	    -inherits \
+            -interfacefile \
+            -language \
+            -modifiers \
+            -package \
+            -protection \
+            -sourcefile
+
+    # Define the "argument" entity
+    define argument \
+	    -type "" \
+	    -optional 0 \
+	    -default "" \
+	    -description "" \
+	    -explanation ""
+
+    # Define the "constructor" entity
+    define constructor \
+	    -protection public \
+	    -modifiers "" \
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
+
+    # Define the "destructor" entity
+    define destructor \
+	    -protection public \
+	    -modifiers "" \
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
+
+    # Define the "method" entity
+    define method \
+	    -protection public \
+	    -modifiers "" \
+	    -type "" \
+	    -scope instance \
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
+
+    # Define the "variable" entity
+    define variable \
+	    -protection protected \
+	    -modifiers "" \
+	    -type "" \
+	    -scope instance \
+            -default "" \
+	    -description "" \
+	    -explanation ""
+}

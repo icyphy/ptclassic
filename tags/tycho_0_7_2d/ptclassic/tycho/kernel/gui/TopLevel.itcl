@@ -1,0 +1,658 @@
+# Top-level window class.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)TopLevel.itcl	1.85	01/04/99
+#
+# @Copyright (c) 1995-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+# FIXME: this is for debugging on the mac and windows
+if { [info exists tyDebug] && "$tyDebug" == 1} {
+    proc ::tclexit {} {
+	puts "You called tclexit. tyDebug was set to 1,\
+		so we are not exiting"
+    }
+} else {
+    ##########################################################################
+    #### exit
+    # Redefine the Tcl exit procedure to cleanly exit, querying the user
+    # to save work.
+    #
+    rename ::exit ::tclexit
+    proc ::exit {} {
+	::tycho::TopLevel::exitProgram
+    }
+}
+
+##########################################################################
+#### tkMbLeave
+# FIXME: For some mysterious reason¸ tk occationally issues this command
+# when the window it refers to no longer exists.  A seemly random error
+# message appears on the screen.  For now, we just catch.
+#
+rename ::tkMbLeave ::originalTkMbLeave
+proc ::tkMbLeave {arg} {
+    catch {::originalTkMbLeave $arg}
+}
+
+##########################################################################
+#### safeUpdate
+# Calling update or even "update idletasks" within a method of any Itcl
+# object is very dangerous. The itcl object may be deleted during the
+# update, so when the update returns, you will be trying to execute a
+# method for an object that no longer exists. If you really have to
+# call update inside a method, call this procedure instead, passing it the
+# name of the object you are calling from ($this). If after the call to
+# update the object no longer exists, then a silent error is triggered.
+# This unwinds the calling stack to the top level, preventing this
+# procedure from returning.  Note that if this is inside a "catch", then
+# all bets are off.  You could get a core dump if after returning from
+# the catch the object no longer exists.  The object name given in the
+# argument must be visible at the global scope.
+#
+proc ::tycho::safeUpdate {obj} {
+    update
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[infoWhichCommand $obj] == {}} {
+	# If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+        ::tycho::silentError
+    }
+    return 0
+}
+
+##########################################################################
+#### TopLevel
+# This class creates a top-level window with a single frame in it
+# (called <code>$itk_component(childsite)</code>. The class provides
+# methods and options for controlling the position of the window on the
+# screen, its size, and the focus. It also manages a global list of
+# top-level windows for controlling the switching of the focus from one
+# window to the next. It also defines miscellaneous generic procedures
+# and methods. The window is created in the withdrawn state. It is up
+# to the creator of the window to map the window using either "wm
+# deiconify" or the method "centerOnScreen". This is normally done
+# right after creating the window. The reason for requiring this
+# explicit mapping is that windows are often constructed piecemeal by
+# combining widgets, and deferring the mapping prevents the visually
+# distracting artifact of seeing the window being constructed piece by
+# piece. Also, by the time the window gets mapped, its size is known,
+# so its position can be controlled effectively.
+#
+class ::tycho::TopLevel {
+    inherit ::tycho::TArchetype
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the size and/or placement of the window.
+    itk_option define -geometry geometry Geometry "" {
+ 	wm geometry $itk_component(hull) $itk_option(-geometry)
+    }
+
+    # If non-zero, treat this window as the application master.
+    itk_option define -master master Master "0"
+
+    ####
+    itk_option define -title title Title "" {
+        wm title $itk_component(hull) $itk_option(-title)
+    }
+ 
+    #################################################################
+    ####                     public methods                      ####
+
+    # Center the window on the screen.
+    method centerOnScreen {}
+
+   # Prevent interactive resizing of the window.
+    method freezeWindowSize {}
+
+    # Shift the focus to the next window created.
+    method nextWindow {{raise 0}}
+
+    # Shift the focus to the previous window created.
+    method prevWindow {{raise 0}}
+
+    # Raise the window.
+    method raiseWindow {}
+
+    # <b>Obsolete</b>: use <code>hull</code> instead.
+    method windowName {} {return $itk_component(hull)}
+
+    #################################################################
+    ####                   public procedures                     ####
+
+    # Exit the program
+    public proc exitProgram { {exitWithNoConfirmation 0}} {}
+
+    # Specify whether to exit when the last window is closed.
+    public proc exitWhenNoMoreWindows {bool} {}
+
+    # Set or report whether C-q is bound to exit.
+    proc normalExit {{enable {}}} {}
+
+    #################################################################
+    ####                  protected methods                      ####
+
+    # Confirm that it's OK to proceed with destruction
+    protected method confirmDestruct {}
+
+    # Update the -master configuration option
+    protected method configureMaster {master}
+
+    # Return the type of widget to use for the hull
+    protected method _hulltype {} {return "toplevel"}
+
+    #################################################################
+    ####                  protected variables                    ####
+
+    # If 1, C-q will be bound in future instances to exit the program.
+    protected common normalexit 1
+
+    #################################################################
+    ####                  private procedures                     ####
+
+    # Check to see whether any windows are left and exit the program if not.
+    private proc exitIfNoMoreWindows {} {}
+
+    #################################################################
+    ####                  private variables                      ####
+
+    # Avoid self-destructing recursively -- FIXME: is this needed???
+    private variable alreadyexiting 0
+
+    # A circular list of top-level windows is kept here and supported by
+    # the <<NextWindow>> and <<PrevWindow>> bindings, which switch the focus
+    # between windows in the list.  The order of the windows in the list
+    # is determined as follows: If a window in this application has the
+    # focus when a new window is created, then the new window is put in
+    # the list right before the one with the focus.  Otherwise, it is
+    # put at the beginning of the list.  Thus, the first entry in the list
+    # list is always the one to most recently have the focus.
+    private common topLevelWindows
+
+    # To ensure that we ask the user only once for confirmation
+    # on exiting the program, we use this variable.
+    private common exitconfirmed 0
+
+    # If this is non-zero, then when the last window is closed,
+    # the program will be exited.
+    private common exitflag 1
+}
+
+#####################################################################
+#### -geometry option
+# By default, the geometry option is set to the
+# null string, deferring to the window manager the control over
+# position. It can be set alternatively to a string of the
+# form "+x+y", where x and y give the screen position of
+# the upper left corner of the window relative to the upper
+# left corner of the screen.  Using "-" instead of "+" will
+# define the screen position relative to the right or
+# bottom of the screen rather than the left or top.
+# FIXME: Putting this here causes Itcl 2.0 to crash.  Should be
+# fixed in 2.1.
+# 
+#configbody ::tycho::TopLevel::geometry {
+#    wm geometry $itk_component(hull) $itk_option(-geometry)
+#}
+
+###################################################################
+#### -master configuration
+# If the value of this option is non-zero, then this window is treated
+# as a master window in the sense that when it is closed, it queries
+# the user to see whether to exit the program. By default, a TopLevel
+# is not a master.
+#
+configbody ::tycho::TopLevel::master {
+    configureMaster $itk_option(-master)
+}
+
+#####################################################################
+#
+body ::tycho::TopLevel::constructor {args} {
+    
+    # Import the tycho namespace
+    # Removed April 98, hjr -- not needed!
+    # import add ::tycho
+
+    # Start with the window unmapped
+    wm withdraw $prefix
+    
+    # Create a childsite for the contents of the window
+    itk_component add childsite {
+	frame $itk_interior.childsite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(childsite) -fill both -expand yes
+    
+    # Create a single common instance of the topLevelWindows list.
+    if {![info exists topLevelWindows]} {
+	set topLevelWindows [::tycho::CircularList #auto]
+    }
+    
+    # Support for switching the focus from one window to the next.
+    # A top-level window is inserted in the list of windows before the
+    # window that currently has the focus, if there is one.
+    # Thus, scrolling through windows using the "C-n" binding
+    # will go from this window to the window that had the focus when
+    # it was created.
+    set before [focus]
+    # If anything at all goes wrong with the below, use the default.
+    set done 0
+
+    # Save the errorInfo so that the user sees their errors, not ours
+    global errorInfo
+    set saveErrorInfo $errorInfo
+    catch {
+        if {$before != {}} {
+            set tl [winfo toplevel $before]
+            if {$tl != {} &&  \
+		    [::infoWhichCommand $tl] != {} && \
+                    [$tl isa ::tycho::TopLevel] && \
+                    $tl != $prefix} {
+                $topLevelWindows insert $prefix $tl
+                set done 1
+            }
+        }
+    }
+    set errorInfo $saveErrorInfo
+
+    if !$done {
+        $topLevelWindows insert $prefix
+    }
+    # We use virtual event bindings so that the style sheets can change
+    # sets of bindings.
+    bind $prefix <<Close>> "$this prevWindow; delete object $this; break"
+    bind $prefix <<Iconify>> "$this prevWindow; \
+            wm iconify $itk_component(hull); break"
+    bind $prefix <<NextWindow>> "$this nextWindow 1; break"
+    bind $prefix <<PrevWindow>> "$this prevWindow 1; break"
+    bind $prefix <<Open>> {::tycho::File::openWin %W; break}
+
+    # Exit the program if in normal exit mode.
+    if {$normalexit == 1} {
+        bind $prefix <<Exit>> {::tycho::TopLevel::exitProgram}
+        bind all <Alt-F4> {::tycho::TopLevel::exitProgram}
+    } else {
+        bind $prefix <<Exit>> {}
+    }
+    
+    # Explicitly handle configs that may have been ignored earlier.
+    eval itk_initialize $args
+
+    # Grab the focus when the window gets mapped.
+    # NOTE: This causes focusin to be called a very large number of times!
+    #    bind $itk_component(hull) <Map> "$this focusin; break"
+
+    # Prevent the window manager delete function from exiting.
+    wm protocol $prefix WM_DELETE_WINDOW \
+	    "$this prevWindow; delete object $this"
+}
+
+#####################################################################
+#### Destructor
+# Destroy the window containing the widget. If this is a master window,
+# then abort the destruction with a "silent error" and schedule a
+# call to <code>::tycho::exitProgram</code>. Otherwise, destroy
+# the window; if there are no remaining top-level windows, then
+# exit the program anyway. The latter functionality
+# can be disabled by calling
+# <code>::tycho::TopLevel::exitWhenNoMoreWindows</code> with the
+# argument "0". Normally, you should call <code>prevWindow</code>
+# before destroying any top-level that has the focus. This puts the
+# focus into the next logical window in the window sequence. Note that
+# if the mouse is not over a window belonging to this application after
+# a window is deleted, the focus will be given up entirely by the
+# application.
+# <p>
+# NOTE: It would be better if the user were queried for confirmation
+# about exiting the program, but this appears to be impossible with the
+# current Itcl version.  A call to askuser in this destructor leads to
+# very strange behavior, often a core dump.
+#
+body ::tycho::TopLevel::destructor {} {
+    # Make sure that it's OK to destroy this object.
+    confirmDestruct
+
+    # If we get to here, then all we are doing is trying to delete
+    # this window. Since the destructor of the subclasses have
+    # already run, assume that all data has been successfully
+    # saved if necessary, and remove the window from the list
+    # of top-level windows.
+
+    if {[info exists topLevelWindows] && \
+	    [info exists prefix] && \
+	    [info exists exitflag]} {
+	# NOTE: It would be nice to call prevWindow here, rather than
+	# having to call it each time before invoking the destructor.
+	# However, this produces very erratic behavior.  Often, the
+	# application has lost the focus by the time the destructor
+	# gets invoked. Tk gets into a weird state.
+	$topLevelWindows remove $prefix
+	
+	# Check to see whether this is the last open window.
+	# If so, exit the program.
+	if $exitflag {
+            after 100 [code ::tycho::TopLevel::exitIfNoMoreWindows]
+        }
+    }
+}
+
+#################################################################
+#################################################################
+####                     public methods                      ####
+
+#####################################################################
+#### centerOnScreen
+# This procedure will request of the window manager that it center
+# the window.  To properly accomplish such centering, this
+# should be called after all the widgets have been packed into the
+# window, but before any tkwait visibility.
+# <p>
+# NOTE: This procedure doesn't work with widgets that defer mapping
+# (like most iwidgets).
+# The width of the button box is not taken into account despite the fact
+# that everything has been packed into it already. This is because the
+# widget actually defers the packing using an "after" command.
+#
+body ::tycho::TopLevel::centerOnScreen {} {
+    # We used to withdraw the window here, but it appears unnecessary.
+    update idletasks    
+
+    # Use the larger of the actual width and the requested width
+    set w [winfo width $prefix]
+    set rw [winfo reqwidth $prefix]
+    if {$w > $rw} {set width $w} {set width $rw}
+    
+    # Use the larger of the actual height and the requested height
+    set h [winfo height $prefix]
+    set rh [winfo reqheight $prefix]
+    if {$h > $rh} {set height $h} {set height $rh}
+    
+    set x [expr [winfo screenwidth $prefix]/2-$width/2-\
+	    [winfo vrootx [winfo parent $prefix]]]
+    set y [expr [winfo screenheight $prefix]/2-$height/2-\
+	    [winfo vrooty [winfo parent $prefix]]]
+    wm geometry $prefix +$x+$y
+    wm deiconify $prefix
+    focusin
+}
+
+#####################################################################
+#### freezeWindowSize
+# This method freezes the window at its current size, prohibiting
+# resizing by the user.
+#
+body ::tycho::TopLevel::freezeWindowSize {} {
+    wm resizable $prefix 0 0
+}
+
+#####################################################################
+#### nextWindow
+# Switch the focus to the previous window listed in the circular
+# list topLevelWindows, which is normally the one created after this one.
+# If an argument is given, and is non-zero, then raise the window as well.
+# If the focus is not currently in this window, ignore.
+#
+body ::tycho::TopLevel::nextWindow {{raise 0}} {
+    # Needed for focus to settle.
+    ::tycho::safeUpdate $this
+    if ![string match "$prefix*" [focus]] {return}
+    set wins [$topLevelWindows elements]
+    # Start with the last element of the list.
+    set nw [lindex $wins [expr [llength $wins] -1]]
+    foreach win $wins {
+	if {$win == $prefix} {break}
+        set nw $win
+    }
+    if {$nw != $prefix} {
+	if {[winfo exists $nw] && \
+		[winfo ismapped $nw] && \
+		[uplevel #0 infoWhichCommand $nw] != {} && \
+		[$nw isa ::tycho::TopLevel]} {
+            # Deferred version overrides wm focus change due to window
+            # exposure.
+	    # Use a catch in case the window has been deleted. (Why
+	    # does this happen? -- hjr )
+            after 200 [list catch "$nw focusin"]
+	    $nw focusin
+	    if {$raise != 0} {$nw raiseWindow}
+	}
+    }
+}
+
+#####################################################################
+#### prevWindow
+# Switch the focus to the next window listed in the circular list
+# topLevelWindows, which is normally the one created prior to this one.
+# If an argument is given, and is non-zero, then raise the window as well.
+# If the focus is not currently in this window, ignore.
+#
+body ::tycho::TopLevel::prevWindow {{raise 0}} {
+    # Needed for focus to settle.
+    ::tycho::safeUpdate $this
+    if ![string match "$prefix*" [focus]] {return}
+    foreach win [$topLevelWindows elements $prefix] {
+	if {$win == $prefix} {continue}
+	if {[winfo exists $win] && \
+		[winfo ismapped $win] && \
+		[uplevel #0 infoWhichCommand $win] != {} && \
+		[$win isa ::tycho::TopLevel]} {
+            # Deferred version overrides wm focus change due to window
+            # exposure.
+	    # Use a catch in case the window has been deleted. (Why
+	    # does this happen? -- hjr )
+            after 200 [list catch "$win focusin"]
+	    $win focusin
+	    if {$raise != 0} {$win raiseWindow}
+	    break
+	}
+    }
+}
+
+
+#####################################################################
+#### raiseWindow
+# Bring the corresponding window to the foreground, and make sure it
+# is deiconified.
+#
+body ::tycho::TopLevel::raiseWindow {} {
+    wm deiconify $itk_component(hull)
+    raise $itk_component(hull)
+    focusin
+}
+
+#################################################################
+#################################################################
+####                   public procedures                     ####
+
+#####################################################################
+#### exitProgram
+# Confirm exit with a dialog, then quit. The destructors will query
+# for save of any windows with modified data.  If this routine returns,
+# it will return 0 if the user canceled the exit, and 1 if the exit
+# is in progress.
+#
+# If the optional argument 'exitWithNoConfirmation' is non-zero, then
+# we don't check the preferences, we just exit.  We need this optional
+# argument if we want to call this proc from itclsh, since preferences
+# require tk, so we can't load them in.  Any change to this proc should
+# be verified by running the test suite.
+#
+body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
+    if { $exitWithNoConfirmation == 0 && \
+	    [::tycho::stylesheet get interaction confirmOnExit] } {
+	set response [::tycho::askuser "OK to exit the program?"]
+    } else {
+	set response 1
+    }
+    if {$exitconfirmed} {return 1}
+    if {$response} {
+	set exitconfirmed 1
+	# Need to delete all TopLevel objects first to make sure destructors
+	# are invoked before the exit process begins.  Catch errors here
+	# because an error means that the exit was aborted.
+	if {[catch {
+	    foreach win [$topLevelWindows elements] {
+		# Make sure the window exists...
+		if { [::infoWhichCommand $win] != "" } {
+		    # Also, defer destruction of any master windows
+		    # until later.
+		    if { ! [$win cget -master] } {
+			# Delete the window. If the user cancels
+			# then this will abort and get caught by the
+			# catch{} we are in, and this routine will
+			# exit without exiting the program. Note that
+			# the window will remove itself from the
+			# topLevelWindows list.
+			delete object $win
+		    }
+		}
+	    }
+	    # Now repeat for master windows
+	    foreach win [$topLevelWindows elements] {
+		if { [::infoWhichCommand $win] != "" } {
+		    delete object $win
+		}
+	    }
+        }] == 0} {
+	    ::tclexit
+	} {
+	    set exitconfirmed 0
+	}
+    }
+    return 0
+}
+
+#####################################################################
+#### exitWhenNoMoreWindows
+# If the argument is zero, then disable the feature (which is enabled
+# by default) that when the last window is removed, the program is
+# exited (after confirmation).
+#
+body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
+    set exitflag $bool
+}
+
+###################################################################
+#### normalExit
+# If the argument is 1, then for all instances of TopLevel or derived
+# classes created henceforth, bind C-q to exit the program.
+# If the argument is 0, then make no such binding.  If the argument
+# is absent, then report whether such a binding has been set.
+# This procedure is provided for the benefit of other applications
+# that might be using Tycho, but which have their own method for exiting.
+#
+body ::tycho::TopLevel::normalExit {{enable {}}} {
+    if {$enable != {}} {
+        set normalexit $enable
+    }
+    return $normalexit
+}
+
+    #################################################################
+    #################################################################
+    ####                  protected methods                      ####
+
+#####################################################################
+#### configureMaster
+# Set this window as a "master" window: when the window is destroyed,
+# Tycho will exit. Subclasses can override if they need to change
+# state according to whether they are a master or not. By default,
+# this method does nothing.
+#
+body ::tycho::TopLevel::configureMaster {master} {
+    ;# Nothing needs to be done here
+}
+
+#####################################################################
+#### confirmDestruct
+# Confirm that it's OK to proceed with destruction if this widget.
+# This protected method must be called by any subclass of TopLevel
+# that actually destroys parts of itself _before_ it starts doing so.
+# It is needed because subclass destructors are executed _before_
+# superclass destructors, and the TopLevel class may decide to
+# defer destruction of this object until some later time. (If it
+# does, the method will never return, and execution will jump back
+# up to the main loop.)
+#
+body ::tycho::TopLevel::confirmDestruct {} {
+    # If we are in the middle of a safe update, then don't destroy this
+    # window but schedule another attempt later on.
+    if [destructionDisabled] {
+        # Schedule a future attempt at destruction.
+        after 1000 "::tycho::TWidget::evalIfExists $this prevWindow; \
+                delete object $this"
+        ::tycho::silentError
+    }
+
+    # To prevent hanging on incomplete construction, we check for
+    # existence of everything.
+    if {[info exists exitconfirmed] && [info exists itk_option(-master)]} {
+	# If exitconfirmed is not true and this is a master window, then
+	# We want to exit the entire program, not just this object.
+	# In order to get the proper safety checks and confirmation,
+	# we cancel the current destruction with silentError and
+	# then at the top-level, invoke exitProgram.
+	# Calling exitProgram from here directly is not good because
+	# it tries to delete the current object, and we are already
+	# in the middle of deleting it.
+	if { ! $exitconfirmed && $itk_option(-master) } {
+            after idle ::tycho::TopLevel::exitProgram
+            ::tycho::silentError
+	}
+    }
+}
+
+    #################################################################
+    #################################################################
+    ####                  private procedures                     ####
+
+#####################################################################
+#### exitIfNoMoreWindows
+# Check to see whether any windows are left and exit the program if not.
+#
+body ::tycho::TopLevel::exitIfNoMoreWindows {} {
+    set noMore 1
+    foreach win [$topLevelWindows elements] {
+        if [winfo exists $win] {
+	    set noMore 0
+	    break
+        }
+    }
+    if $noMore {
+        after 100 {::tclexit}
+    }
+}

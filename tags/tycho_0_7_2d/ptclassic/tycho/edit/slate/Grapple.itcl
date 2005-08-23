@@ -1,0 +1,228 @@
+#########################################################################
+# @Version: @(#)Grapple.itcl	1.10 07/29/98
+# @Author: John Reekie
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## Grapple
+#
+# A Grapple is a small item that serves as a grab handle for manipulating
+# graphical objects.
+#
+# <p><a name="Grapple class Options"></a><b>Options</b>
+#
+# <ul>
+# <li><b>-feature</b>:
+# The feature of the item to which this grapple is attached.
+#
+# <li><b>-fill</b>:
+# The fill color of the grapple.
+#
+# <li><b>-item</b>:
+# The id of the item to which this grapple is attached.
+#
+# <li><b>-outline</b>:
+# The color of the outline of the grapple. If "", 
+# the grapple has no outline. By default, it is null.
+#
+# <li><b>-sticky</b>:
+# The grapple will not be deleted by the <b>ungrapple</b> method of
+# the Slate.
+#
+# <li><b>-width</b>:
+# The width of the outline of the grapple, in pixels. By 
+# default, it is one.
+#
+# </ul>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Example</b>:
+#
+# See the demo directory.
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::Grapple {
+    inherit ::tycho::ComplexItem
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-feature* option
+    proc _feature {id canvas slate feature}
+
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+
+    # Update the *-item* option
+    proc _item {id canvas slate item}
+
+    # Update the *-outline* option
+    proc _outline {id canvas slate outline}
+
+    # Update the *-sticky* option
+    proc _sticky {id canvas slate sticky}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
+
+    # Create a new item
+    proc construct {id canvas slate tags x y args}
+
+    # Set or get the item's coordinates
+    proc coords {id canvas slate args}
+    
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+}
+
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Grapple {
+    #### Set method table
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+
+    set methodtable(_feature)   ::tycho::Grapple::_feature
+    set methodtable(_fill)     ::tycho::Grapple::_fill
+    set methodtable(_item)     ::tycho::Grapple::_item
+    set methodtable(_outline)  ::tycho::Grapple::_outline
+    set methodtable(_sticky)   ::tycho::Grapple::_sticky
+    set methodtable(_width)    ::tycho::Grapple::_width
+
+    set methodtable(construct) ::tycho::Grapple::construct
+    set methodtable(coords)    ::tycho::Grapple::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+
+    set optiondefault(-feature)  ""
+    set optiondefault(-fill)    "cyan3"
+    set optiondefault(-item)    ""
+    set optiondefault(-outline) ""
+    set optiondefault(-shape)   "point"
+    set optiondefault(-sticky)  0
+    set optiondefault(-width)   1
+}
+
+##########################################################################
+## -feature option configuration
+#
+body ::tycho::Grapple::_feature {id canvas slate feature} {
+    set option(feature) $feature
+}
+
+##########################################################################
+## -fill option configuration
+#
+body ::tycho::Grapple::_fill {id canvas slate fill} {
+    set option(fill$id) $fill
+    $canvas itemconfigure $primary($id) -fill $fill
+}
+
+##########################################################################
+## -item option configuration
+#
+body ::tycho::Grapple::_item {id canvas slate item} {
+    set option(item) $item
+}
+
+##########################################################################
+## -outline option configuration
+#
+body ::tycho::Grapple::_outline {id canvas slate outline} {
+    set option(outline$id) $outline
+    $canvas itemconfigure $primary($id) -outline $outline
+    if { $option(text$id) != "" } {
+	$canvas itemconfigure $component(label$id) -fill $outline
+    }
+}
+
+##########################################################################
+## -sticky option configuration
+#
+body ::tycho::Grapple::_sticky {id canvas slate sticky} {
+    set option(sticky$id) $sticky
+}
+
+##########################################################################
+## -width option configuration
+#
+body ::tycho::Grapple::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $width
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::Grapple::construct {id canvas slate tags x y args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
+    }
+    # Create the primary component. This is the displayed rectangle.
+    set primary($id) [eval $canvas create rectangle \
+	    [::tycho::Rectangle::stretch $x $y $x $y 4] \
+	    [list -fill $option(fill$id) -outline $option(outline$id) \
+	    -width $option(width$id) -tags $tags]]
+}
+
+##########################################################################
+#### coords
+#
+# Set or read the grapple's coordinates
+#
+body ::tycho::Grapple::coords {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
+    # No args: just return coordinates
+    if { $args == "" } {
+        eval ::tycho::Rectangle::feature $coords c
+    } else {
+        eval $canvas coords $primary($id) \
+                [eval ::tycho::Rectangle::stretch $coords 4]
+    }
+}

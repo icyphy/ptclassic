@@ -1,0 +1,498 @@
+# Ptolemy Retargetting mechanism: Gather information about domains
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)DomainInfo.itcl	1.17 04/29/97
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+catch {delete class DomainInfo}
+
+#######################################################################
+#### DomainInfo
+# One DomainInfo object contains information about all the stars
+# in that domain.  This class uses ptcl commands that are part of Ptolemy
+# so you should start tycho with -pigi, -ptrim or -ptiny.
+# <p>
+# Here is an example of how to use the DomainInfo that diffs the SDF
+# and CGC domains
+# <tcl><pre>
+#     ::tycho::DomainInfo .sdf SDF
+#     ::tycho::DomainInfo .cgc CGC
+#     ::tycho::DiffStars .sdf .cgc
+# </pre></tcl>
+#
+# Note that this class will handle both the older ptcl interface
+# and the newer pitcl interface.  Which interface you get depends on 
+# what binary you start.
+# ptcl is present in pigi, ptiny, ptrim, ptcl, ptcl.ptiny, ptcl.ptrim
+# pitcl is present in tycho -pigi, tycho -ptiny, tycho -ptrim,
+# pitcl, pitcl.ptiny, pitcl.ptrim 
+# 
+# FIXME: once pitcl is everywhere, the older ptcl sections of this class
+# should be removed.
+#
+class ::tycho::DomainInfo {
+    inherit ::tycho::Object
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Return the descriptor for starName.
+    method descriptor {starName} {}
+
+    # Return the multiports for starName.
+    method multiports {starName} {}
+
+    # Return the ports for starName.
+    method ports {starName} {}
+
+    # Return the 'print' output for one star in the current DomainInfo object.
+    method printStar {id}
+
+    # Return the 'print' output for all the stars in the current DomainInfo object.
+    method printStars {}
+    
+    # Return a list of all the stars.
+    method stars {} {}
+
+    # Return the states for starName.
+    method states {starName} {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Return a list of all the domains.
+    public proc domains {}
+
+    # Compare two domainInfo objects.
+    public proc diffDomains {domainA domainB}
+
+    # Return the list of known blocks in domain.
+    public proc knownBlocks {domain}
+
+    # Return the 'print' output for starName in domain.
+    public proc print {starName domain}
+
+    # Bring up ListBox with all the domains, return the user's choice.
+    public proc queryDomain { {msg "Choose a Domain:"} {default {}} } {}
+
+    ###################################################################
+    ####                   protected procs                         ####
+
+    # Compare the stars in two domainInfo objects.
+    protected proc diffStars {domainA domainB}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Return the star information as a list of keyword value pairs.
+    private method starInfo {starName}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # This object contains information about the domainName domain.
+    private variable domainName
+
+    # Array that contains the data for individual stars in keyword
+    # value pairs.
+    private variable stars
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::DomainInfo::constructor {args} {
+    set domainName [lindex $args 0]
+    # Cycle through the list of all stars and fill the array
+    foreach star [knownBlocks $domainName] {
+        set stars($star) [starInfo $star]
+    }
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::DomainInfo::destructor {} {
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+
+
+#######################################################################
+#### stars
+# Return all of the stars
+body ::tycho::DomainInfo::stars {} {
+    return [array names stars]
+}
+
+#######################################################################
+#### descriptor
+# Return the descriptor for starName
+body ::tycho::DomainInfo::descriptor {starName} {
+    set starList $stars($starName)
+    return [lindex $starList [lsearch $starList {Descriptor*}]]
+}
+
+#######################################################################
+#### ports
+# Return the descriptor for starName
+body ::tycho::DomainInfo::ports {starName} {
+    set starList $stars($starName)
+    return [lindex $starList [lsearch $starList {Ports*}]]
+}
+
+#######################################################################
+#### multiports
+# Return the descriptor for starName
+body ::tycho::DomainInfo::multiports {starName} {
+    set starList $stars($starName)
+    return [lindex $starList [lsearch $starList {MultiPorts*}]]
+}
+
+#######################################################################
+#### states
+# Return the descriptor for starName
+body ::tycho::DomainInfo::states {starName} {
+    set starList $stars($starName)
+    return [lindex $starList [lsearch $starList {States*}]]
+}
+
+#######################################################################
+#### printStars
+# Print all the stars in the current DomainInfo object
+#
+body ::tycho::DomainInfo::printStars {} {
+    foreach id [array names stars] {
+       lappend results [printStar $id ]
+    }
+    return [list $domainName $results] 
+}
+
+#######################################################################
+#### printStar
+# Print one star in the current DomainInfo object
+# DomainInfo::printStar differs from DomainInfo::print in that printStar
+# returns a list of elements for a star in the DomainInfo object,
+# and print returns a string for any star in any domain.
+#
+body ::tycho::DomainInfo::printStar {id} {
+    set stateList [lindex [states $id] 1]
+    set stateResults {}
+    foreach state $stateList {
+        lappend stateResults [format "\t%s\n" [join $state ]]
+    }
+    return [format "%s\n\t%s\n\t%s\n\t%s\n\tState\n\t%s\n" \
+            $id [descriptor $id] \
+            [ports $id] \
+            [multiports $id] \
+            $stateResults]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### domains
+# Return a list of all the domains.
+#
+body ::tycho::DomainInfo::domains {} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
+        return [split [::pitcl::knownDomains]]
+    } {
+        return [::domains]
+    }
+}
+
+#######################################################################
+#### diffDomains
+# Compare two domains, passed in as strings.
+# Return a list consisting of five sublists:
+# <OL>
+# <LI>stars that are common to both
+# <LI>stars that are common, but have port mismatches
+# <LI>stars that are common, but have multiport mismatches
+# <LI>stars that are common, but have state mismatches
+# <LI>stars only in domainA
+# <LI>stars only in domainB
+# </OL>
+body ::tycho::DomainInfo::diffDomains {domainA domainB} {
+    ::tycho::DomainInfo .domainA $domainA
+    ::tycho::DomainInfo .domainB $domainB
+    set retVal [::tycho::DomainInfo::diffStars .domainA .domainB]
+    delete object .domainA .domainB
+    return $retVal
+}
+
+#######################################################################
+#### knownBlocks
+# Return the list of known blocks in domain.
+# 
+body  ::tycho::DomainInfo::knownBlocks {domain} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
+        return [::pitcl::knownBlocks $domain]
+    } {
+        domain $domain
+        return [knownlist]
+    }
+}
+
+#######################################################################
+#### print
+# Given the starName and domain, print the star
+#
+body ::tycho::DomainInfo::print {starName domain} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
+        return [::pitcl::print $starName $domain]
+    } {
+        ::domain $domain
+        return [::print $starName]
+    }
+}
+
+#######################################################################
+#### queryDomain
+# Bring up ListBox with all the domains, return the user's choice.
+# This public proc is very similar to ::tycho::queryfilename.
+# <tcl><pre>
+# ::tycho::DomainInfo::queryDomain {Which domain is your favorite?} {SDF}
+# </pre></tcl>
+#
+body ::tycho::DomainInfo::queryDomain { {msg "Choose a Domain:"} \
+        {default {}} } {
+    set nm [::tycho::autoName .queryDomain]
+    uplevel #0 ::tycho::ListBrowser $nm -text [list $msg]
+    $nm appendItems [::tycho::DomainInfo::domains]
+    if {$default != {} } {
+        $nm configure -default $default
+    }
+    return [::tycho::Dialog::wait $nm]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected procedures                 ####
+
+#######################################################################
+#### diffStars
+# Compare two domainInfo objects.
+# Return a list consisting of five sublists:
+# <OL>
+# <LI>stars that are common to both
+# <LI>stars that are common, but have port mismatches
+# <LI>stars that are common, but have multiport mismatches
+# <LI>stars that are common, but have state mismatches
+# <LI>stars only in domainA
+# <LI>stars only in domainB
+# </OL>
+body ::tycho::DomainInfo::diffStars {domainA domainB} {
+    set starsA [$domainA stars]
+    set starsB [$domainB stars]
+    set commonButPortsMismatch {}
+    set commonButMultiPortsMismatch {}
+    set commonButStatesMismatch {}
+    set commonStars {}
+    set domainAOnly {}
+    set domainBOnly {}
+    foreach starA $starsA {
+        if { [lsearch -exact $starsB $starA] != -1 } {
+            if { [$domainA ports $starA] != [$domainB ports $starA] } { 
+                lappend commonButPortsMismatch $starA
+            } else {
+                if { [$domainA multiports $starA] != \
+                        [$domainB multiports $starA] } { 
+                    lappend commonButMultiPortsMismatch $starA
+                } else {
+                    if {[$domainA states $starA] != [$domainB states $starA]} {
+                        lappend commonButStatesMismatch $starA
+
+                    } else {
+                        lappend commonStars $starA
+                    }
+                }
+            }
+        } else {
+            lappend domainAOnly $starA
+        }
+    }
+
+    foreach starB $starsB {
+        if { [lsearch -exact $starsA $starB] == -1 } {
+            lappend domainBOnly $starB
+        }
+    }
+    return [list $commonStars $commonButPortsMismatch \
+            $commonButMultiPortsMismatch $commonButStatesMismatch \
+            $domainAOnly $domainBOnly]
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### starInfo
+# Return the star information as a list of keyword value pairs
+#
+# This procedure parses the ptcl print output.  In theory the ptcl print
+# command should be modified to return information as a list.
+#
+# I chose to use the ptcl print command, and parse the output so that
+# this tool would work (in theory) with a 0.6 tysh (I have not tried
+# it).
+# 
+# Also, by using the ptcl print command, then we are querying the stars
+# that are actually in the binary, instead of looking for source files
+# that may or may not be out of date.
+#
+body ::tycho::DomainInfo::starInfo {starName} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
+        set printResults [::pitcl::print $starName $domainName]
+    } {
+        domain $domainName
+        set printResults [::print $starName]
+    }
+    # Search printResults for keywords
+    set descriptor {}
+    set ports {}
+    set multiports {}
+    set tmpStates {}
+    set states {}
+
+    # Look for the star name and the descriptor.  All objects must
+    # have these.
+    if {![regexp {^Star: (.*)
+Descriptor:(.*)} $printResults dummy star rest]} {
+        if {![regexp {^GALAXY: (.*)
+Descriptor:(.*)} $printResults dummy star rest]} {
+             error "Error while parsing Descriptor: $printResults"
+        }
+    }
+    
+    set status [regexp {(.*)
+Ports:(.*)
+MultiPorts:(.*)
+States:(.*)
+(__+)
+} $rest dummy descriptor ports multiports tmpStates trash]
+
+    if {!$status} {
+        set status [regexp {(.*)
+MultiPorts:(.*)
+States:(.*)
+(__+)
+} $rest dummy descriptor multiports tmpStates trash]
+    }
+
+    if {!$status} {
+        set status [regexp {(.*)
+Ports:(.*)
+States:(.*)
+(__+)
+} $rest dummy descriptor ports tmpStates trash]
+    }
+
+   if {!$status} {
+        set status [regexp {(.*)
+Ports:(.*)
+MultiPorts:(.*)
+(__+)
+} $rest dummy descriptor ports multiports trash]
+    }
+
+    if {!$status} {
+        set status [regexp {(.*)
+Ports:(.*)
+(__+)
+} $rest dummy descriptor ports trash]
+    }
+
+    if {!$status} {
+        set status [regexp {(.*)
+MultiPorts:(.*)
+(__+)
+} $rest dummy descriptor multiports trash]
+    }
+
+    if {!$status} {
+        set status [regexp {(.*)
+States:(.*)
+(__+)
+} $rest dummy descriptor tmpStates trash]
+    }
+
+
+    if {!$status} {
+        set descriptor $rest
+        # The object did not have a multiport, it could be a base?
+        #puts "DomainInfo::starInfo{}: No multiport: $star, $rest"
+    }
+
+
+    # Process the states into sublist
+    set stateList {}
+    if {$tmpStates != {} } {
+        set tmpStateList [split $tmpStates {
+}]
+        foreach state $tmpStateList {
+            if { $state != {}} {
+                if {[regexp {[\t ]*(.*) type: (.*)} $state dummy \
+                        stateName type]} {
+                    if {![regexp {A_NONSETTABLE} $type]} {
+                        # Don't include internal states
+                        lappend stateList [list [string trim $stateName] $type]
+                    }
+                }
+            }
+        }
+    }
+    
+    return [list [list Star $star] \
+            [list Descriptor $descriptor] \
+            [list Ports $ports] \
+            [list MultiPorts $multiports] \
+            [list States $stateList]]
+}
+
+
+

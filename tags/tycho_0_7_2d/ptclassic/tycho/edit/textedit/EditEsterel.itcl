@@ -1,0 +1,296 @@
+# Definition of an Esterel context-sensitive editor.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)EditEsterel.itcl	1.13	01/27/99
+#
+# @Copyright (c) 1996-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# This is a first cut at an Esterel editor. If you have any comments please
+# send me mail at eal@eecs.berkeley.edu.
+
+#######################################################################
+#### EditEsterel
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing Esterel files. The editor
+# automatically indents a line in response to a Tab character, and
+# provides a command for indenting a region (the selection). To enter a
+# literal Tab, enter the sequence <Control-q><Tab>. This editor also
+# colors comments, strings, and the words "FIXME" and "NOTE".
+#
+class ::tycho::EditEsterel {
+    inherit ::tycho::EditProgram
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Open a help window.
+    method help {}
+
+    # Indent the current line (the one with the insertion cursor).
+    method indentLine {}
+
+    # Return a string with keywords separated by "|".
+    method keywords {}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    ###################################################################
+    ####                         private methods                   ####
+
+    # Return 1 if the given line is the start of an indented block.
+    private method startline {line}
+
+    # Return 1 if the given line is the end of an indented block.
+    private method endline {line}
+
+    # Return 1 if the given line is to be continued on the next line.
+    private method tbcline {line}
+}
+
+###################################################################
+#
+body ::tycho::EditEsterel::constructor {args} {
+
+    set fillPrefix "%"
+
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### keywords
+# Return a list of keywords separated by "|".
+#
+body ::tycho::EditEsterel::keywords {} {
+    return {abort|and|await|boolean|call|case|combine|comment|constant|do|each|else|elsif|emit|end|every|exec|exit|false|function|halt|handle|if|immediate|in|input|inputoutput|integer|loop|module|not|nothing|or|output|present|procedure|relation|repeat|return|run|sensor|signal|suspend|task|test|then|timeout|times|to|trap|true|type|upto|var|watching|weak|when|with|\|\|}
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditEsterel::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO edit textedit doc usersGuides \
+	    EditEsterelHelp.html] html
+}
+
+####################################################################
+#### indentLine
+# Base indentation on Esterel keywords rather
+# than parentheses and brackets, as used in the base class. Lines are
+# classified into four nonoverlapping categories: start, end,
+# to-be-continued (tbc), and other. Let "line" denote the current line,
+# "pline" denote the first (non-blank, non-comment) line previous to the one
+# being indented, and "ppline" denote the first (non-blank, non-comment)
+# line before that. The indentation algorithm is then:
+# <pre>
+#    if (pline == start) indent+4
+#    if (line == end) indent-4
+#    if (pline == tbc && ppline != tbc && line != end) indent+8
+#    if (pline == tbc && ppline == tbc && line == end) indent-8
+#    if (pline != tbc && pline != end && ppline == tbc && pline != end)
+#                   indent-8
+# </pre>
+# Lines of class "start" are those that start an indented block.
+# Lines of class "end" end an indented block.
+# "To-be-continued" (tbc) lines are neither start or end, and do not end in a
+# semicolon.  "Other" lines are none of the above.
+# The syntax "indent+4" above means that we increase the indentation
+# by 4 spaces.
+# 
+body ::tycho::EditEsterel::indentLine {} {
+    resetUndo
+
+    set text $itk_component(text)
+    
+    # To be able to sensibly place the insertion cursor,
+    # we record the current status.
+    set ins [$text index insert]
+    set atEnd [$text compare insert == "insert lineend"]
+    set atStart [$text compare insert == "insert linestart"]
+    
+    regexp {([0-9]+)\.([0-9]+)} $ins match lineno charno
+    $text mark set insert $lineno.0
+    set indent 0
+    set continuation 0
+
+    # Find the two previous non-blank, non-comment
+    # lines to determine the indentation.
+    set pline {}
+    set ppline {}
+    while {[incr lineno -1] > 0} {
+	set line [$text get $lineno.0 "$lineno.0 lineend"]
+	if {![regexp {^[ \t]*$} $line]} {
+            # Found a non-blank line.  Continue if it's a comment.
+            if [regexp {^[ \t]*%} $line] {continue}
+            if {$pline == {}} {
+                set pline $line
+            } {
+                set ppline $line
+                break
+            }
+        }
+    }
+    # Get the current line
+    set line [$text get {insert linestart} {insert lineend}]
+
+    # To debug, change all "# puts" to "puts"
+    # puts "line: $line"
+    # puts "pline: $pline"
+    # puts "ppline: $ppline"
+    # Determine the position of the first non-space character on the
+    # reference line. First replace all tabs with 8 spaces in the
+    # reference line:
+    regsub -all "\t" $pline "        " modline
+    regexp -indices "^(\[ \t\])*" $modline match firstchar
+    set indent [lindex $firstchar 0]
+    incr indent
+
+    # Here is the algorithm, repeated from above:
+    #    if (pline == start) indent+4
+    #    if (line == end) indent-4
+    #    if (pline == tbc && ppline != tbc && line != end) indent+8
+    #    if (pline == tbc && ppline == tbc && line == end) indent-8
+    #    if (pline != tbc && pline != end && ppline == tbc && pline != end)
+    #                   indent-8
+    if [startline $pline] {
+        # puts "pline is a startline"
+        set indent [expr $indent+4]
+    }
+    set ptbc [tbcline $pline]
+    set pptbc [tbcline $ppline]
+    set end [endline $line]
+    set pend [endline $pline]
+    if $end {
+        # puts "line is an endline"
+        set indent [expr $indent-4]
+    }
+    if {$ptbc && !$pptbc && !$end} {
+        # puts "ptbc && !pptbc && !end"
+        set indent [expr $indent+8]
+    } 
+    if {$ptbc && $pptbc && $end} {
+        # puts "ptbc && pptbc && end"
+        set indent [expr $indent-8]
+    } 
+    if {!$ptbc && $pptbc && !$end && !$pend} {
+        # puts "!ptbc && pptbc && !end"
+        set indent [expr $indent-8]
+    }
+
+    # Clear the leading space characters on the insertion line.
+    if [regexp -indices {^([ 	]+)} $line match firstchar] {
+	set lastspace [lindex $firstchar 1]
+	deleteRange "insert linestart" "insert + $lastspace chars +1 char"
+    }
+	    
+    set str ""
+    # Do not use tabs for indenting.
+    while {$indent > 0} {
+        append str " "
+        incr indent -1
+    }
+    insertString insert $str
+
+    # Put the insertion cursor back where it was or at the end of
+    # of the line, if it was before at the end.
+    if {$atEnd} {
+	$text mark set insert "$ins lineend"
+    } elseif {!$atStart} {
+	$text mark set insert $ins
+    }
+    
+    # Recolorize
+    parseNow "insert linestart" "insert lineend"
+}
+
+#####################################################################
+#####################################################################
+####                    protected methods                        ####
+
+#####################################################################
+#####################################################################
+####                     private methods                         ####
+
+#####################################################################
+#### startline
+# Return 1 if the given line is the start of an indented block.
+# The local variable "startpats" is the regular expression pattern
+# used to determine this.  The patterns in that variable may be
+# preceeded by white space only and followed by a comment and/or
+# white space for the match to succeed.
+#
+body ::tycho::EditEsterel::startline {line} {
+
+    # If a line contains a matching "end", it does not start a block
+    set startendpats {(abort[^%]+when.*|await[^%]+do[^%]+end|do[^%]+end|else[^%]end|every[^%]+do[^%]end|[^%]*in[^%]+end|loop[^%]+each.*|present[^%]+then[^%]+end|present[^%]+else[^%]+end|repeat[^%]+times[&^]end|suspend[^%]+when.*|.*then[%^]+end|var[^%]+in[^%]+end|watching[^%]+timeout[^%]+end|weak abort[^%]+when[^%]+do[^%]+end|when[^%]+do[^%]+end|when[^%]+end|\[[^%]+\])}
+
+    if [regexp "^\[ \t\]*$startendpats\[ \t\]*(%.*)?\$" $line] {
+        return 0
+    }
+    
+    set startpats {(abort|await|await[^%]+do|case.*|do|else|every[^%]+do|handle[^%]*|[^%]*in|loop|present|present[^%]+else|repeat[^%]+times|suspend|.*then|var[^%]+in|watching[^%]+timeout|weak abort|when[^%]+do|when|\[|\|\|)}
+
+    return [regexp "^\[ \t\]*$startpats\[ \t\]*(%.*)?\$" $line]
+}
+
+#####################################################################
+#### endline
+# Return 1 if the given line is the end of an indented block.
+# The local variable "endpats" is the regular expression pattern
+# used to determine this.  The patterns in that variable may be
+# preceeded by white space only and followed by a comment and/or
+# white space for the match to succeed.
+#
+body ::tycho::EditEsterel::endline {line} {
+    set endpats {(case.*|each.*|else|elsif.*|end.*|handle.*|upto.*|watching.*|when.*|\]|\|\|)}
+    return [regexp "^\[ \t\]*$endpats\[ \t\]*(%.*)?\$" $line]
+}
+
+#####################################################################
+#### tbcline
+# Return 1 if the given line is a command to be continued.
+# A "tbc" line is one that is neither a start line nor an end line,
+# does not end in a semicolon (possibly followed by white space and/or
+# a comment), is not a comment line, and is not a module declaration
+# line.
+#
+body ::tycho::EditEsterel::tbcline {line} {
+    if {[startline $line] || [endline $line] || $line == {} || \
+            [regexp "(;\[ \t\]*(%.*)?\$)|(^\[ \t\]*%.*\$)" $line] || \
+            [regexp "^\[ \t\]*module.*:" $line]} {
+        return 0
+    } {
+        return 1
+    }
+}

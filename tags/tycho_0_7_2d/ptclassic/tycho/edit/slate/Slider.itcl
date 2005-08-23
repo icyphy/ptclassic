@@ -1,0 +1,638 @@
+##########################################################################
+# @Version: @(#)Slider.itcl	1.27 07/29/98
+# @Author: H. John Reekie and William Chen
+#
+# @Copyright (c) 1990-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#
+# Usual options for Slider
+#
+#itk::usual Slider {
+#    keep -font -background -cursor
+#}
+
+#######################################################################
+#### Slider
+#
+# A slider widget. This widget provides an alternative to the
+# Tk <code>scale</code> widget, and is supposed to be reminiscent
+# of a vertical ``slider'' as used in audio equipment. It also
+# provides a good example of how Tycho's
+# <a href="Slate.html">
+# <i>Slate</i></a> widget can be used to (relatively) quickly
+# create new interactive components.
+# <p>
+# To create a simple slider:
+# <tcl><pre>
+#    catch {delete object .d}
+#    ::tycho::Displayer .d
+#    ::tycho::Slider .d.s -label Fred -resolution 0.5 -to 11
+#    pack .d.s
+#    .d centerOnScreen
+# </pre></tcl>
+# <p>
+# To move the slider, use the left button on the horizontal ``bar''
+# and click and drag. Clicking the left button anywhere near the vertical
+# ``trough'' but not on the bar will cause the bar to move in increments.
+# Clicking the middle button anywhere near the trough will cause the
+# bar to jump to that position; it can then be dragged.
+#
+# Slider uses the following interactor classes:
+# <ul>
+# <li>
+# <a href="Bounder.html">
+# <i>Bounder</i></a>: moves the bar vertically
+# <li>
+# <a href="Stepper.html">
+# <i>Stepper</i></a>: moves the bar in discrete steps
+# <li>
+# <a href="Repeater.html">
+# <i>Repeater</i></a>: moves the bar in increments while the mouse is pressed.
+# </ul>
+class ::tycho::Slider {
+    inherit ::tycho::TWidget
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # The command prefix to be called whenever the slider moves.
+    itk_option define -command command Command ""
+
+    # The number of significant digits to display.
+    itk_option define -digits digits Digits 1
+
+    # The value when the slider is at the bottom.
+    itk_option define -from from From 0
+
+   # The font used for the label
+    itk_option define -font font Font \
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+
+    # The slider's label, which appears underneath it.
+    # <i>FIXME</i>: Can't have an empty label
+    itk_option define -label label Label "."
+
+    # The vertical movement of the slider.
+    itk_option define -length length Length 108
+
+    # The resolution of the slider. If zero, there is no quantization.
+    itk_option define -resolution resolution Resolution 0
+
+    # The type of scale: linear or log. <i>NOT IMPLEMENTED.</i>
+    itk_option define -scale scale Scale "linear"
+
+    # The value when the slider is at the top.
+    itk_option define -to to To 10
+
+    # The total width of the slider widget.
+    itk_option define -totalwidth totalwidth TotalWidth 34
+
+    # The width of the slider trough.
+    itk_option define -width width Width 4
+
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Get the current value of the slider
+    method get {}
+
+    # Jump the slider to a position indicated by coordinates.
+    method jump {x y}
+
+     # Set the position of the slider.
+    method set {x}
+
+    # Move the slider up one increment
+    method up {}
+
+    # Move the slider down one increment.
+    method down {}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Jump the slider to a position indicated by coordinates.
+    private method shiftjump {ignore x y}
+
+    # Redraw the slider completely
+    private method redraw {}
+
+    # Update the slider display
+    private method updatevalue {args}
+
+    # Given hit coordinates, move the slider up or down one increment
+    private method upordown {x y}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # The items that make up the slider
+    private variable back
+    private variable bar
+    private variable labellabel
+    private variable trough
+    private variable valuelabel
+
+    # The interactors that operate on the slider items
+    private variable stepper
+    private variable bounder
+    private variable shifter
+    private variable repeater
+
+    # The dimensions of various things
+    private variable barwidth
+    private variable barheight
+
+    private variable interspace 3
+    private variable protrudeby 1
+
+    private variable troughtop
+    private variable troughbottom
+
+    private variable slidertop
+    private variable sliderbottom
+
+    # A hack variable to prevent errors in initialization
+    private variable initialized 0
+
+    # Remember the -length option to save unnecessary redraws
+    private variable length 108
+
+    # Remember the -width option to save unnecessary redraws
+    private variable width 4
+}
+
+
+
+#######################################################################
+#### -digits configuration
+#
+configbody ::tycho::Slider::digits {
+    if { $initialized } {
+	updatevalue
+    }
+}
+
+#######################################################################
+#### -from configuration
+#
+# The value when the slider is at the bottom.
+# <br>
+# NOTE: This value must always be greater than the <code>to</code> option.
+#
+configbody ::tycho::Slider::from {
+    if { $initialized } {
+	updatevalue
+    }
+}
+
+#######################################################################
+#### -label configuration
+#
+configbody ::tycho::Slider::label {
+    if { $initialized } {
+        $itk_component(slate) itemconfigure $labellabel \
+                -text $itk_option(-label)
+
+	# Set the height of the slate
+	$itk_component(slate) configure -width $itk_option(-totalwidth) \
+		-height [expr \
+		[lindex [$itk_component(slate) bbox $labellabel] 3] \
+		+ $interspace]
+    }
+}
+
+#######################################################################
+#### -length configuration
+#
+configbody ::tycho::Slider::length {
+    if { $initialized && $itk_option(-length) != $length } {
+	::set length $itk_option(-length)
+	redraw
+    }
+}
+
+
+#######################################################################
+#### -resolution configuration
+#
+# The resolution of the slider. If zero, the resolution is exactly
+# one pixel. The interactors are set up to quantize movement of
+# the bar if resolution is non-zero. When set, the bar is moved to
+# a multiple of the resolution.
+#
+configbody ::tycho::Slider::resolution {
+    if { $initialized } {
+	if { $itk_option(-resolution) != 0 } {
+	    # The resolution is non-zero, so configure the
+	    # stepping interactor with the right step and
+	    # the update command.
+	    ::set stepsize [expr double($itk_option(-resolution)) \
+		    / ($itk_option(-to) - $itk_option(-from)) \
+		    * $itk_option(-length)]
+
+	    $stepper configure \
+		    -stepsize $stepsize \
+		    -dragcommand [list @scope [info class] "$this updatevalue"]
+
+	    # The other interactors forward to the stepping interactor
+	    $bounder  cascade $stepper
+	    $repeater cascade $stepper
+	    $shifter  cascade $stepper
+
+	    # Adjust the slider position
+	    ::set offset [expr $sliderbottom - \
+		    [lindex [$itk_component(slate) coords $bar] 1] \
+		    - $barheight/2 ]
+	    ::set offsetdash [::tycho::roundTo $offset $stepsize]
+	    $itk_component(slate) move $bar 0 [expr $offset - $offsetdash]
+
+	    # Get the value represented by the slider
+	    ::set value [expr $itk_option(-from) \
+		    + $offsetdash/$itk_option(-length) \
+		    * ($itk_option(-to) - $itk_option(-from))]
+
+	    # Update the label
+	    $itk_component(slate) itemconfigure $valuelabel \
+		    -text [format %.$itk_option(-digits)f $value]
+
+	    # Call the command prefix
+	    if { $itk_option(-command) != "" } {
+		eval $itk_option(-command) $value
+	    }
+	} else {
+	    # The resolution is zero, so remove the stepping interactor
+	    # from the interaction chain.
+	    $bounder  uncascade
+	    $repeater uncascade
+	    $shifter  uncascade
+	}
+    }
+}
+
+
+#######################################################################
+#### -to configuration
+#
+# The value when the slider is at the top.
+# <br>
+# NOTE: This value must always be greater than the <code>from</code> option.
+#
+configbody ::tycho::Slider::to {
+    if { $initialized } {
+	updatevalue
+    }
+}
+
+
+#######################################################################
+#### -totalwidth configuration
+#
+configbody ::tycho::Slider::totalwidth {
+    if { $initialized } {
+	redraw
+    }
+}
+
+#######################################################################
+#### -width configuration
+#
+configbody ::tycho::Slider::width {
+    if { $initialized && $itk_option(-width) != $width } {
+	::set width $itk_option(-width)
+	redraw
+    }
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Slider::constructor {args} {
+
+    # Create the slate on which everything gets drawn.
+    itk_component add slate {
+	::tycho::slate $itk_interior.slate
+    } {
+	keep -background -cursor -relief \
+		-borderwidth
+    }
+    pack $itk_component(slate)
+
+
+    # Create the interactors
+    ::set bounder [$itk_component(slate) interactor Bounder \
+	    -constrain y \
+	    -dragcommand [list @scope [info class] "$this updatevalue"]]
+
+    ::set repeater [$itk_component(slate) interactor Repeater]
+
+    ::set shifter [$itk_component(slate) interactor Bounder \
+	    -constrain y \
+	    -dragcommand [list @scope [info class] "$this updatevalue"]]
+
+    ::set stepper [$itk_component(slate) interactor Stepper]
+
+    # Initialize options.
+    eval itk_initialize $args
+
+    # Set the _initialized_ flag and redraw the slider
+    ::set initialized 1
+    redraw
+}
+
+
+#######################################################################
+#### down
+#
+# Move the slider down. If the resolution option is non-zero,
+# move it that far; if it is zero, move it one pixel.
+# In either case, don't move past the end of the trough.
+#
+body ::tycho::Slider::down {} {
+    if { $itk_option(-resolution) != 0 } {
+	# Get the current value and subtract the resolution
+	$this set [expr [$this get] - $itk_option(-resolution)]
+    } else {
+	# Move the bar and then get the value it represents and set it back
+	$itk_component(slate) move $bar 0 1
+	$this set [expr [$this get]]
+    }
+}
+
+
+#######################################################################
+#### get
+#
+# Get the current slider value from its position.
+#
+body ::tycho::Slider::get {} {
+    ::set position [expr \
+	    [lindex [$itk_component(slate) coords $bar] 1] + $barheight/2]
+    ::set value [expr $itk_option(-from) \
+	    + ($sliderbottom-$position)/$itk_option(-length) \
+	    * ($itk_option(-to) - $itk_option(-from))]
+
+    return $value
+}
+
+#######################################################################
+#### jump
+#
+# Given x and y coordinates (relative to the slate), move the
+# bar to that position. (Currently, y is ignored.)
+#
+body ::tycho::Slider::jump {x y} {
+    ::set value [expr $itk_option(-from) \
+	    + double($sliderbottom-$y)/$itk_option(-length) \
+	    * ($itk_option(-to) - $itk_option(-from))]
+    $this set $value
+}
+
+#######################################################################
+#### redraw
+#
+# Redraw the slider components. PRIVATE.
+#
+body ::tycho::Slider::redraw {} {
+
+    # Delete existing items
+    #
+    # FIXME: Should resize/move existing components (if they exist)!
+    if { [info exists trough] } {
+	$itk_component(slate) delete $trough
+	$itk_component(slate) delete $back
+	$itk_component(slate) delete $bar
+	$itk_component(slate) delete $labellabel
+	$itk_component(slate) delete $valuelabel
+    }
+
+    # Set up display parameters
+    ::set xcenter [expr $itk_option(-totalwidth) / 2]
+    ::set textbase 20
+
+    ::set barwidth 20
+    ::set barheight 10
+
+    ::set interspace 3
+    ::set protrudeby 1
+
+    ::set troughtop    [expr $textbase + $interspace]
+    ::set slidertop    [expr $troughtop + $protrudeby + $barheight/2]
+    ::set sliderbottom [expr $slidertop + $itk_option(-length)]
+    ::set troughbottom [expr $sliderbottom + $protrudeby + $barheight/2]
+
+    # Create the value display.
+    ::set valuelabel [$itk_component(slate) create text \
+	    $xcenter $textbase \
+	    -text $itk_option(-from) -anchor s -fill blue]
+
+    # Create the label underneath the sliders
+    ::set labellabel [$itk_component(slate) create text \
+	    $xcenter [expr $troughbottom + $interspace] \
+	    -text $itk_option(-label) -anchor n -justify center]
+
+    # Create the "trough" along which the slider bar moves
+    ::set trough [$itk_component(slate) create Frame \
+	    [expr $xcenter - $itk_option(-width)/2] \
+	    $troughtop \
+	    [expr $xcenter + $itk_option(-width)/2] \
+	    $troughbottom \
+	    -color darkgrey \
+	    -borderwidth [expr $itk_option(-width)/2] \
+	    -relief sunken]
+
+    # Create the background object used for "jumping" the bar
+    ::set back [$itk_component(slate) create rectangle \
+	    [expr $xcenter - $itk_option(-totalwidth)/2] \
+	    [expr $troughtop - 12] \
+	    [expr $xcenter + $itk_option(-totalwidth)/2] \
+	    [expr $troughbottom + 12] \
+	    -outline ""]
+
+    # Create the slider bar
+    ::set bar [$itk_component(slate) create Frame \
+	    [expr $xcenter - $barwidth/2] \
+	    [expr $troughbottom - $protrudeby - $barheight] \
+	    [expr $xcenter + $barwidth/2] \
+	    [expr $troughbottom - $protrudeby] \
+	    -color darkseagreen \
+	    -borderwidth 3]
+
+    # Set the height of the slate
+    $itk_component(slate) configure -width $itk_option(-totalwidth) \
+	    -height [expr [lindex [$itk_component(slate) bbox $labellabel] 3] \
+	       + $interspace]
+
+    # Configure the interactor that directly moves the bar
+    ::set bounds [list 0 [expr $slidertop - $barheight/2] \
+	    0 [expr $sliderbottom + $barheight/2]]
+    $bounder configure -bounds $bounds
+    $bounder bind $bar -button 1
+
+    # Configure the interactor that "jumps" and moves the bar
+    $shifter configure \
+            -activatecommand "@scope [info class] $this shiftjump" \
+            -bounds $bounds
+    $shifter bind $back -button 2
+
+    # Configure the interactor that moves the bar one step at a time
+    $repeater configure -command "@scope [info class] $this upordown"
+    $repeater bind $back -button 1
+
+    # Configure the resolution to make sure the slider starts
+    # in the right place.
+    configure -resolution $itk_option(-resolution)
+}
+
+
+#######################################################################
+#### set
+#
+# Set the slider to a specified value.
+#
+body ::tycho::Slider::set {x} {
+    # Adjust the value to be within range and on the specified
+    # resolution.
+    if { $x < $itk_option(-from) } {
+	::set x $itk_option(-from)
+    } elseif { $x > $itk_option(-to) } {
+	::set x $itk_option(-to)
+    }
+
+    if { $itk_option(-resolution) != 0 } {
+	::set x [::tycho::roundTo $x $itk_option(-resolution)]
+    }
+
+    # Calculate the corresponding bar position and move the
+    # bar there.
+    ::set position [expr $sliderbottom \
+	    - ($x-$itk_option(-from)) \
+	    / double($itk_option(-to)-$itk_option(-from)) \
+	    * ($sliderbottom-$slidertop)]
+
+    $itk_component(slate) move $bar \
+	    0 [expr $position - $barheight/2 - \
+	    [lindex [$itk_component(slate) coords $bar] 1]]
+
+    # Update the label
+    $itk_component(slate) itemconfigure $valuelabel \
+	    -text [format %.$itk_option(-digits)f $x]
+
+    # Call the command prefix
+    if { $itk_option(-command) != "" } {
+	eval $itk_option(-command) $x
+    }
+}
+
+#######################################################################
+#### shiftjump
+#
+# Call-back from the shifter interactor when middle button is
+# pressed.
+#
+body ::tycho::Slider::shiftjump {ignore x y} {
+    # Move the slider
+    jump $x $y
+
+    # Set target of the shifter so it moves the bar
+    $shifter target $bar
+}
+
+#######################################################################
+#### up
+#
+# Move the slider up. If the resolution option is non-zero,
+# move it that far; if it is zero, move it one pixel.
+# In either case, don't move past the end of the trough.
+#
+body ::tycho::Slider::up {} {
+    if { $itk_option(-resolution) != 0 } {
+	# Get the current value and add the resolution
+	$this set [expr [$this get] + $itk_option(-resolution)]
+    } else {
+	# Move the bar and then get the value it represents and set it back
+	$itk_component(slate) move $bar 0 -1
+	$this set [expr [$this get]]
+    }
+}
+
+
+#######################################################################
+#### updatevalue
+#
+# Recalculate and display the current value of the slider.
+# Call the -command option if there is one. All arguments
+# are ignored (but allowed for calling from interactor
+# callbacks).
+#
+body ::tycho::Slider::updatevalue {args} {
+    if { ! $initialized } {
+	return
+    }
+
+    # Get the current value from the slider
+    ::set value [$this get]
+
+    # Now for a bit of trickery: because the quantization
+    # of the slider movement may cause positioning errors,
+    # quantize the value and adjust the slider position.
+    #
+    # As it turns out, the errors are so small that this is
+    # not worth worrying about, so I commented it out --hjr--
+    #
+    # ::set value [adjust $value]
+    # slide $value
+
+    # Update the label
+    $itk_component(slate) itemconfigure $valuelabel \
+	    -text [format %.$itk_option(-digits)f $value]
+
+    # Call the command prefix
+    if { $itk_option(-command) != "" } {
+	eval $itk_option(-command) $value
+    }
+}
+
+
+#######################################################################
+#### upordown
+#
+# Given hit coordinates, move the slider up or down one increment
+#
+body ::tycho::Slider::upordown {x y} {
+    if { $y < [lindex [$itk_component(slate) coords $bar] 1] } {
+	$this up
+    } elseif { $y > [lindex [$itk_component(slate) coords $bar] 3] } {
+	$this down
+    }
+}

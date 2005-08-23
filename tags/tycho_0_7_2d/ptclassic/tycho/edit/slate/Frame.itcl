@@ -1,0 +1,457 @@
+#########################################################################
+# @Version: @(#)Frame.itcl	1.43 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## Frame
+#
+# <i>Frame</i> is a pseudo-3D rectangle, with a border and a relief.
+# <i>Frame</i> implements its scaling code so that the borderwidth remains 
+# constant when the item is resized. In all other respects, it can be 
+# treated like any other rectangular item.
+#
+# <p><a name="Frame class Options"></a><b>Options</b>
+#
+# <dl>
+# <li><dd>
+# <dl>
+# <li><b>-borderwidth</b>:
+# The width of the border of the item. By default, it is two. For
+# various reasons, the borderwidth is actually twice this value if the
+# <code>-relief</code> option is <i>groove</i> or <i>ridge</i>.
+#
+# <li><b>-color</b>:
+# The color of the item. This is a "generic" color as implemented by
+# the <a href="../codeDoc/Shades.html">Shades</a> class -- this will
+# soon be replaced by an enhanced version of
+# <a href="../../../../kernel/gui/doc/codeDoc/ColorManager.html">ColorManager</a>.
+# By default, the color is the same as the standard Tk background color
+# ("grey85").
+#
+# <li><b>-relief</b>:
+# The "relief" of the pseudo-3D item. This can be one of:
+# <i>raised</i>, <i>sunken</i>, <i>groove</i>, <i>ridge</i>, or
+# <i>flat</i>. The meanings of these are the same as for the Tk
+# <code>frame</code> widget. The default is <i>raised</i>.
+#
+# </dl></dl>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>lit</b>:
+# The polygon that is "lit".
+# <li><b>notlit</b>:
+# The polygon in the inside shadow (ridge and groove reliefs only).
+# <li><b>shaded</b>:
+# The polygon that is "shaded."
+# <li><b>notshaded</b>:
+# The polygon in the inside lit region (ridge and groove reliefs only).
+# <li><b>surface</b>:
+# The rectangular surface.
+# </ul>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>label</b>:
+# The editable text label.
+# </ul>
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b>
+#
+# In an earlier version of the Slate, the Frame
+# had an additional option,<code>-fill</code>, which could take
+# values <i>none</i>,  <i>gloss</i>,  and <i>matt</i>. In the first 
+# case, the Frame had no "surface" -- that is, it was transparent, which 
+# was particularly useful if <code>-relief</code> was <i>ridge</i>. This 
+# should be reimplemented.
+#
+# <p><b>Example</b>
+# 
+# Create some Frames with various options. These can be moved around
+# with the mouse:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "Some Frame items"]
+#   $slate create Frame 30 30 70 50 -color green -tags moveable
+#   $slate create Frame 100 20 120 40 -color lightblue &#92
+# 	-relief ridge -tags moveable
+#   $slate create Frame 30 130 70 150 -relief sunken  &#92
+# 	-borderwidth 4 -tags moveable
+# </pre></tcl>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::Frame {
+    inherit ::tycho::ComplexItem
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-borderwidth* option
+    proc _borderwidth {id canvas slate borderwidth}
+    
+    # Update the *-color* option
+    proc _color {id canvas slate color}
+    
+    # Update the *-relief* option
+    proc _relief {id canvas slate relief}
+
+    # Create a new item with arguments already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+
+    # Set or get the item's coordinates
+    proc coords {id canvas slate args}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+}
+
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Frame {
+    #### Set method table
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+
+    set methodtable(_borderwidth) ::tycho::Frame::_borderwidth
+    set methodtable(_color)       ::tycho::Frame::_color
+    set methodtable(_relief)      ::tycho::Frame::_relief
+
+    set methodtable(construct)   ::tycho::Frame::construct
+    set methodtable(coords)      ::tycho::Frame::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+
+    set optiondefault(-color)       background
+    set optiondefault(-borderwidth) 2
+    set optiondefault(-relief)      raised
+    set optiondefault(-shape)       rectangle
+}
+
+##########################################################################
+## -borderwidth option configuration
+#
+body ::tycho::Frame::_borderwidth {id canvas slate borderwidth} {
+    set option(borderwidth$id) $borderwidth
+
+    set coords [$canvas	coords $primary($id)]
+
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 1]
+    set x1 [expr [lindex $coords 2] + 1]
+    set y1 [expr [lindex $coords 3] + 1]
+
+    set	a0 [expr $x0 + $borderwidth]
+    set	b0 [expr $y0 + $borderwidth]
+    set	a1 [expr $x1 - $borderwidth]
+    set	b1 [expr $y1 - $borderwidth]
+
+    $canvas coords $component(lit$id) \
+	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
+    $canvas coords $component(shaded$id) \
+	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1
+
+    if { $option(relief$id) == "ridge" || $option(relief$id) == "groove" } {
+	set x0 $a0
+	set y0 $b0
+	set x1 $a1
+	set y1 $b1
+
+	set a0 [expr $x0 + $borderwidth]
+	set b0 [expr $y0 + $borderwidth]
+	set a1 [expr $x1 - $borderwidth]
+	set b1 [expr $y1 - $borderwidth]
+	
+	$canvas coords $component(notlit$id) \
+		$x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
+	$canvas coords $component(notshaded$id) \
+		$x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1
+    }
+
+    if { [::info exists component(surface$id)] } {
+	$canvas coords $component(surface$id) $a0 $b0 $a1 $b1
+    }
+}
+
+##########################################################################
+## -color option configuration
+#
+# FIXME: Use a new procedural color manager instead of color objects.
+#
+body ::tycho::Frame::_color {id canvas slate color} {
+    set option(color$id) $color
+    set variable(color$id) [::tycho::Shades::new $color]
+
+    # FIXME: quick and dirty
+    _relief $id $canvas $slate $option(relief$id)
+    $canvas itemconfigure $component(surface$id) \
+	    -fill [$variable(color$id) matt]
+}
+
+##########################################################################
+## -relief option configuration
+#
+# Update the relief of the Frame. Can be one of: flat, raised,
+# sunken. ridge, or groove. The coloring for the raised and ridge
+# options is the same: the coloring for the sunken and grooved options
+# is the same -- the difference is only in whether the notlit and
+# notshaded components exist.
+#
+body ::tycho::Frame::_relief {id canvas slate relief} {
+    set option(relief$id) $relief
+    if { $relief == "ridge" || $relief == "groove" } {
+	
+	set light [$variable(color$id) light]
+	set dark  [$variable(color$id) dark]
+
+	if { $relief == "groove" } {
+	    set light $dark
+	    set dark [$variable(color$id) light]
+	}
+
+	# Change the color of the lit and shaded components
+	$canvas itemconfigure $component(lit$id) -fill $light
+	$canvas itemconfigure $component(shaded$id) -fill $dark
+
+	# If the relief has changed to ridge or groove, then we
+	# have to create the inside border polygons, and move
+	# the surface if it exists.
+	if { ! [info exists component(notlit$id)] } {
+
+	    set coords [$canvas coords $primary($id)]
+	    set tags [$canvas gettags $primary($id)]
+
+	    set x0 [expr [lindex $coords 0] + $option(borderwidth$id)]
+	    set y0 [expr [lindex $coords 1] + $option(borderwidth$id)]
+	    set x1 [expr [lindex $coords 2] - $option(borderwidth$id) + 1]
+	    set y1 [expr [lindex $coords 3] - $option(borderwidth$id) + 1]
+
+	    set a0 [expr $x0 + $option(borderwidth$id)]
+	    set b0 [expr $y0 + $option(borderwidth$id)]
+	    set a1 [expr $x1 - $option(borderwidth$id)]
+	    set b1 [expr $y1 - $option(borderwidth$id)]
+
+	    set component(notlit$id) [$canvas create polygon \
+		    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1 \
+		    -fill $dark -tags $tags]
+
+	    set component(notshaded$id) [$canvas create polygon \
+		    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1 \
+		    -fill $light -tags $tags]
+
+	    if { [::info exists component(surface$id)] } {
+		$canvas coords $component(surface$id) $a0 $b0 $a1 $b1
+	    }
+	} else {
+	    $canvas itemconfigure $component(notshaded$id) -fill $light
+	    $canvas itemconfigure $component(notlit$id) -fill $dark
+	}
+    } else {
+	set light [$variable(color$id) light]
+	set dark  [$variable(color$id) dark]
+
+	if { $relief == "sunken" } {
+	    set light $dark
+	    set dark [$variable(color$id) light]
+	} elseif { $relief == "flat" } {
+	    set light [$variable(color$id) matt]
+	    set dark $light
+	}
+
+	# Change the color of the various components
+	$canvas itemconfigure $component(lit$id) -fill $light
+	$canvas itemconfigure $component(shaded$id) -fill $dark
+
+	# If the relief has changed from ridge or groove, then we
+	# delete the inside border polygons and move the surface.
+	if {  [::info exists component(notlit$id)] } {
+
+	    $canvas delete $component(notlit$id)
+	    $canvas delete $component(notshaded$id)
+	    unset component(notlit$id)
+	    unset component(notshaded$id)
+
+	    if { [::info exists component(surface$id)] } {
+		set coords [$canvas coords $primary($id)]
+
+		set x0 [lindex $coords 0]
+		set y0 [lindex $coords 1]
+		set x1 [expr [lindex $coords 2] + 1]
+		set y1 [expr [lindex $coords 3] + 1]
+
+		set a0 [expr $x0 + $option(borderwidth$id)]
+		set b0 [expr $y0 + $option(borderwidth$id)]
+		set a1 [expr $x1 - $option(borderwidth$id)]
+		set b1 [expr $y1 - $option(borderwidth$id)]
+
+		$canvas coords $component(surface$id) $a0 $b0 $a1 $b1
+	    }
+	}
+    }
+}
+
+##########################################################################
+#### _construct
+#
+body ::tycho::Frame::_construct {id canvas slate tags x0 y0 x1 y1} {
+    # This object is used to get the shades of color
+    set variable(color$id) [::tycho::Shades::new $option(color$id)]
+    
+    # Create the primary component for the outline coordinates.
+    # Note that this has an outline, but it will be obscured
+    # by other components. DO NOT give this rectangle a blank
+    # outline, because then it will respond to mouse events on
+    # its inside (even though invisible), which makes see-through
+    # frames impossible.
+    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
+	    -tags $tags]
+
+    # The way that the polygon co-ordinates is set up in the Tk
+    # canvas seems somewhat bogus, so we have to futz with the
+    # coordinates here.
+    set	y1 [expr $y1+1]
+    set	x1 [expr $x1+1]
+
+    # Create the borders and the fill. This is set for the default
+    # _relief (raised).
+    set	a0 [expr $x0 + $option(borderwidth$id)]
+    set	b0 [expr $y0 + $option(borderwidth$id)]
+    set	a1 [expr $x1 - $option(borderwidth$id)]
+    set	b1 [expr $y1 - $option(borderwidth$id)]
+
+    set component(lit$id) [$canvas create polygon \
+ 	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1 \
+ 	    -fill [$variable(color$id) light] -tags $tags]
+
+    set component(shaded$id) [$canvas create polygon \
+ 	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1 \
+ 	    -fill [$variable(color$id) dark] -tags $tags]
+
+    set component(surface$id) [$canvas create rectangle \
+            $a0 $b0 $a1 $b1 \
+            -fill [$variable(color$id) matt] \
+            -outline {} -tags $tags]
+
+    # Adjust the relief if not the default
+    if { $option(relief$id) != "raised" } {
+	_relief $id $canvas $slate $option(relief$id)
+    }
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::Frame::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt value} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $value
+    }
+    # Call the proc that does the work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
+}
+
+##########################################################################
+#### coords
+#
+# Set or read the Frame's coordinates
+#
+body ::tycho::Frame::coords {id canvas slate args} {
+    # No args: just return coordinates
+    if { $args == "" } {
+	return [$canvas coords $primary($id)]
+    }
+
+    # Move the primary
+    set coords $args
+    eval $canvas coords $primary($id) $coords
+
+    # Change the co-ordinates of the outside borders.
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 1]
+    set x1 [expr [lindex $coords 2] + 1]
+    set y1 [expr [lindex $coords 3] + 1]
+
+    set a0 [expr $x0 + $option(borderwidth$id)]
+    set b0 [expr $y0 + $option(borderwidth$id)]
+    set a1 [expr $x1 - $option(borderwidth$id)]
+    set b1 [expr $y1 - $option(borderwidth$id)]
+
+    $canvas coords $component(lit$id) \
+	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
+
+    $canvas coords $component(shaded$id) \
+	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1
+
+    # If the relief is "ridge" or "groove," change the coordinates
+    # of the inside borders.
+    if { $option(relief$id) == "ridge" || $option(relief$id) == "groove" } {
+	set x0 $a0
+	set y0 $b0
+	set x1 $a1
+	set y1 $b1
+
+	set a0 [expr $x0 + $option(borderwidth$id)]
+	set b0 [expr $y0 + $option(borderwidth$id)]
+	set a1 [expr $x1 - $option(borderwidth$id)]
+	set b1 [expr $y1 - $option(borderwidth$id)]
+
+	$canvas coords $component(notlit$id) \
+		$x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
+	
+	$canvas coords $component(notshaded$id) \
+		$x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1
+    }
+
+    # If there is a surface component, change its coordinates
+    if { [::info exists component(surface$id)] } {
+	$canvas coords $component(surface$id) $a0 $b0 $a1 $b1
+    }
+}

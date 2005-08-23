@@ -1,0 +1,511 @@
+# Base class for dialog boxes in Tycho.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)Dialog.itcl	1.24	01/17/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+##########################################################################
+#### Dialog class.
+# This is a top-level dialog window to which buttons and other widgets
+# are added in the derived classes. It provides a message window that
+# contains an optional bitmap, a message, and a separator. In the
+# derived classes, buttons are added below the separator using the
+# addButton method. For example,
+# <tcl><pre>
+# ::tycho::Dialog .m -text {A dialog}
+# .m addButton pushme -text {Push Me} -underline 0 &#92
+#      -command {::tycho::post thanks; delete object .m}
+# .m centerOnScreen
+# </pre></tcl>
+# A childsite is provided for additional widgets below the label and
+# above the separator.  It is a frame with name $itk_component(childsite).
+# <p>
+# The window starts out in the withdrawn state. To be visible, it must
+# be mapped using the "wm deiconify" command or the "centerOnScreen"
+# method. The reason for deferring the mapping is to avoid the visually
+# distracting effect of mapping a partial window and then filling it
+# in.
+# <p>
+# The Escape key is bound to dismiss the dialog.
+# If the -underline option is given to the <code>addButton</code> method,
+# then it specifies a character in the text label of the button to underline.
+# The character becomes a shortcut for invoking the button.
+# <p>
+# There are a couple of convenience procedures. The <code>new</code>
+# procedure will create and map a window onto the screen. The
+# <code>wait</code> procedure will map a window onto the
+# screen and then wait for it to be dismissed (this is called a
+# <a name="modal dialog"><i>modal dialog</i></a>). If the dialog object
+# sets a result in the common variable commandResult(<i>name</i>),
+# where <i>name</i> is the name of the widget, then that result will be
+# returned. Otherwise, an empty string will be returned.
+# <p>
+# The design is fashioned somewhat after the DialogShell widget by
+# by Mark L. Ulferts. A major difference is that instead of mapping
+# and unmapping this window, the window is destroyed when it is dismissed.
+#
+class ::tycho::Dialog {
+    inherit ::tycho::TopLevel
+    constructor {args} {}
+
+    #####################################################################
+    ####                          options                            ####
+
+    # The bitmap to display to the left of the message.
+    itk_option define -bitmap bitmap Bitmap ""
+
+    # An image to display to the left of the message.
+    itk_option define -image image Image ""
+
+    # The message to display at the top of the widget.
+    itk_option define -text text Text ""
+
+    # The font to use the message and labels
+    itk_option define -font font Font [::tycho::font helvetica]
+
+    # The font to use for buttons
+    itk_option define -buttonfont buttonFont Font [::tycho::font helvetica]
+
+    # The font to use for "message" displays
+    itk_option define -messagefont messageFont Font [::tycho::font helvetica]
+
+    #####################################################################
+    ####                        public methods                       ####
+
+    # Add a button to the set of buttons at the bottom.
+    method addButton {args}
+
+    # Specify the default button.
+    method default {id}
+
+    # Execute a command given by an option and set commandResult.
+    method execCommand {option args}
+
+    # Invoke the command associated with a button.
+    method invoke {args}
+
+    #####################################################################
+    ####                        public procedures                    ####
+
+    # This procedure simply returns its argument.  Used for default commands.
+    proc answer {value} {return $value}
+
+    # Center an instance on the screen and wait for it to be dismissed.
+    proc wait {instance {autoraise 1}}
+
+    # Create an object instance and return the name.
+    proc new {class instance args} {}
+
+    #####################################################################
+    ####                       protected variables                   ####
+
+    # Modal dialogs should put their return value in this array,
+    # with the array index being the name of the instance.
+    protected common commandResult
+}
+
+#########################################################################
+#### -bitmap option configuration
+# If a non-null bitmap option is given, insert the bitmap left of the text.
+# Typical values are "error", "warning", "info", "hourglass", or
+# "questhead".  The default is a null string, which means no bitmap.
+# 
+configbody ::tycho::Dialog::bitmap {
+    if {$itk_option(-bitmap) != ""} {
+	if [info exists itk_component(bitmap)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(bitmap) configure -bitmap $itk_option(-bitmap)
+	} {
+	    # Component does not exist, so we create it.
+	    itk_component add bitmap {
+		label $itk_component(top).bitmap -bitmap $itk_option(-bitmap)
+	    } {
+		keep -background -cursor -foreground
+	    }
+	    pack $itk_component(bitmap) -side left
+	}
+    }
+}
+
+#########################################################################
+#### -image option configuration
+# If a non-null image option is given, insert the image left of the text.
+# The value of the option is assumed to be the name of an image that has
+# been created with the Tk "image create" command.
+# 
+configbody ::tycho::Dialog::image {
+    if {$itk_option(-image) != ""} {
+	if [info exists itk_component(image)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(image) configure -image $itk_option(-image)
+	} {
+	    # Component does not exist, so we create it.
+	    itk_component add image {
+		label $itk_component(top).image -image $itk_option(-image)
+	    } {
+		keep -background -cursor -foreground -background
+	    }
+	    pack $itk_component(image) -side left
+	}
+    }
+}
+
+#########################################################################
+#### -text option configuration
+# If a non-null text option is given, insert the text in the message.
+# The text will be left justified and filled.  If there are newline
+# characters in the text, they become line breaks in the message.
+# If there are more than 30 newline characters in the message, then
+# the message is truncated so that it is reasonably sure to fit on
+# the screen (there is still no guarantee because it will depend
+# on the length of the lines).
+# 
+configbody ::tycho::Dialog::text {
+    set msg $itk_option(-text)
+    if {$msg != ""} {
+        set temp [split $msg "\n"]
+        if {[llength $temp] > 30} {
+            set temp [lrange $temp 0 29]
+            lappend temp {... MESSAGE TRUNCATED ...}
+            set msg [join $temp "\n"]
+        }
+	if [info exists itk_component(message)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(message) configure -text $msg
+	} {
+	    # Create the message window.
+	    itk_component add message {
+		message $itk_component(top).message \
+			-width 15c \
+			-justify left \
+			-text $msg
+	    } {
+		keep -background -cursor -foreground -font
+	    }
+	    pack $itk_component(message) -side right -fill both
+	}
+    }
+}
+
+#####################################################################
+#
+body ::tycho::Dialog::constructor {args} {
+
+    # Create a frame to contain the text of the dialog, but also to
+    # have room for a bitmap, inserted in derived classes.
+    itk_component add top {
+	frame $itk_component(childsite).top -border 10
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(top) -side top
+    
+    # Create a separator
+    # FIXME: If -borderwidth is 1.5, then under Itk3.0 and Windows the
+    # separator appears to be transparent
+    itk_component add separator {
+	frame $itk_component(hull).separator \
+		-relief sunken \
+		-width 3 \
+		-height 3 \
+		-borderwidth 1
+    } {
+	keep -background
+    }
+    pack $itk_component(separator) -expand no -fill x \
+	    -after $itk_component(childsite)
+    
+    # Create a button box, and pack it with a bit of space
+    # around it. Give the buttons some spacing too.
+    # Buttons are given a width of 14, although some subclasses
+    # may need to make this larger.
+    itk_component add bbox {
+	::tycho::ButtonBox $itk_component(hull).bbox \
+		-spacingx 6 -spacingy 2 -buttonwidth 14
+    } {
+	keep -background -cursor -padx -pady
+	rename -font -buttonfont buttonFont Font
+    }
+    pack $itk_component(bbox) -expand no -padx 2 -pady 4\
+	    -after $itk_component(separator)
+    
+    # FIXME: In itcl2.0-beta, the following silliness appears to be
+    # necessary to enable commandResult to be an array.
+    #    set commandResult(junk) ""
+
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+  	    -padx        layout buttonPadX \
+  	    -pady        layout buttonPadY \
+  	    -font        fonts  labelFont \
+  	    -buttonfont  fonts  menuFont \
+  	    -messagefont fonts  messageFont
+
+    # Most dialog windows don't want the user resizing. Those that
+    # do should reverse this.
+    global tcl_platform
+    if { $tcl_platform(platform) != "windows" } {
+	# FIXME: under NT4.0 and Itcl2.1, if we freeze the window size
+	# then we never see the buttons
+	freezeWindowSize
+    }
+    
+    # Bind Escape to dismiss the dialog.
+    bind $prefix <Escape> "$this prevWindow; delete object $this"
+}
+
+######################################################################
+######################################################################
+####                         public methods                       ####
+
+#########################################################################
+#### addButton
+# Add a button to the right of the existing buttons. 
+# The arguments are options understood by the Tk button command. The
+# most useful options are -command, which specifies the command to
+# execute, -text, which specifies the label in the button, -width,
+# which specifies the desired width of the button, and -underline,
+# which specifies which character in the text label to underline.
+# In addition, if -underline is given, the specified character is
+# bound to invoke the button.  In addition, the -row and -column options
+# can be used to specify the positioning of the button within a grid.
+body ::tycho::Dialog::addButton {args} {
+    eval [concat $itk_component(bbox) add $args]
+    if [::tycho::getopt underline args] {
+        if [::tycho::getopt text args] {
+            set char [string index $text $underline]
+            if {$char != {}} {
+                # Assumes the tag of the button is the first arg.
+                bind $itk_component(hull) <Key-[string tolower $char]> \
+                        "$this invoke [lindex $args 0]; break"
+            }
+        }
+    }
+}
+
+#########################################################################
+#### default
+# Specify the default button (the one invoked by the Return key).
+# This button will have an extra frame around it.  It can be specified
+# either by the path name or a unique text (its label) or bitmap name.
+#
+body ::tycho::Dialog::default {id} {
+    eval [list $itk_component(bbox) default $id]
+    bind $itk_component(hull) <Return> "$this invoke $id; break"
+}
+
+######################################################################
+#### execCommand
+# Execute the command given by an option, if it has been
+# defined. The first argument gives the name of the option, including
+# the leading minus sign.  For example, several of the derived classes
+# have a -okcommand option, which specifies the command to invoke in
+# response to pressing the "OK" button.  This command is invoked
+# as follows, where $obj is the name of the object:
+# <pre>
+#    $obj execCommand -okcommand
+# </pre>
+# The execCommand method sets the commandResult(<i>name</i>)
+# to the value returned by the command executed.
+# Any arguments beyond the option name to use
+# are passed to the command as arguments. The command is executed in the
+# global scope. If you need to access a method in a class derived from
+# Dialog, the following sequence in the constructor will work,
+# for example:
+# <pre>
+#     $obj configure -okcommand "$this mymethod"
+#     addButton b -text "Push Me" \
+#             -command "$this execCommand -okcommand"
+# </pre>
+# The "this" variable returns a fully qualified name for the object
+# that includes the namespace context.
+# <p>
+# This method is public only because it is often invoked by key or
+# mouse bindings.
+#
+body ::tycho::Dialog::execCommand {option args} {
+    set retval ""
+    if {[info exists itk_option($option)] && $itk_option($option) != ""} {
+
+	# Intercept any errors in the command and issue a message.
+	if {[catch {set retval \
+		[uplevel #0 $itk_option($option) $args]} errcode] != 0} {
+            # Schedule deletion of the object, since its state may be
+            # corrupted.
+            after idle "catch \{delete object $this\}"
+            global ::errorInfo
+            set saveInfo $errorInfo
+	    error "Failed to execute command:\n$errcode" \
+		    $saveInfo
+	}
+    }
+    set commandResult($prefix) $retval
+}
+
+#########################################################################
+#### invoke
+# Invoke the command associated with a button. If no argument is
+# specified, then the current default button is invoked. Otherwise,
+# the argument is expected to be a list of buttons to invoke. Each
+# button can be specified either by the path name or a unique text
+# (its label) or bitmap name.
+#
+body ::tycho::Dialog::invoke {args} {
+    eval [list $itk_component(bbox) invoke $args]
+}
+
+######################################################################
+######################################################################
+####                         public procedures                    ####
+
+######################################################################
+#### wait
+# This procedure maps the named object (which must be a
+# <code>Dialog</code>) to the screen and returns only when that
+# object is destroyed. If the object sets a value in
+# $commandResult($name), then that value is returned. Otherwise, a null
+# string is returned.  Normally, once the window is created, any mouse
+# movement or click will raise it.  This can be a problem, for example,
+# if the window has menus.  If a second argument is given and has value 0,
+# then this auto-raise feature is disabled.
+#
+# This procedure has a special behavior of the global variable
+# TY_TESTING exists and is set. If the TY_TEST_MODAL global
+# variable exists and is not null, then it is taken to be
+# a list of scripts. This procedure evaluates the first
+# script in this list in the global context, with the name of
+# the dialog instance substituted for every occurrence of the string
+# "%0". It removes the script from the list so that the next modal
+# dialog will have the next dialog executed. This allows a series
+# of modal dialog invocation to be tested without user intervention.
+# The return result is the result of the dialog box.
+# In the case that TY_TEST_MODAL is not set, this procedure
+# returns the name of the dialog box.
+#
+body ::tycho::Dialog::wait {instance {autoraise 1}} {
+    if ![$instance isa ::tycho::Dialog] {
+        error "wait expects a Dialog but got: $instance"
+    }
+    # Call update to make sure the focus has settled.
+    update idletasks
+
+    set commandResult($instance) {}
+    $instance centerOnScreen
+    update idletasks
+
+    # Do not continue in this thread until the window is dismissed.
+    if [winfo exists $instance] {
+        grab set $instance
+        # NOTE: This seems to need to be both deferred and done now
+        # probably because window events might give the focus to some
+        # other window (e.g. if some window gets deleted).
+        after 1 [list catch "$instance focusin"]
+        $instance focusin
+        if $autoraise {
+            # If the user mouses in another window, raise
+            bind $instance <Button> "+raise $instance"
+            # If the user moves the mouse in another window, raise
+            bind $instance <Motion> "+raise $instance"
+        }
+        # If we are running the test suite
+        # then we don't use tkwait to wait for the dialog to
+        # close. If the TY_TEST_MODAL global variable is set,
+        # then execute the first script in that list with the
+        # dialog substitued for any occurrence of %0.
+        global TY_TESTING TY_TEST_MODAL
+	if { [::info exists TY_TESTING] && $TY_TESTING == 1 } {
+            if { [::info exists TY_TEST_MODAL] && $TY_TEST_MODAL != "" } {
+                set temp_script [lindex $TY_TEST_MODAL 0]
+                set TY_TEST_MODAL [lreplace $TY_TEST_MODAL 0 0]
+                if { $TY_TEST_MODAL == "" } {
+                    unset TY_TEST_MODAL
+                }
+                regsub -all %0 $temp_script $instance temp_script
+                after 1000
+                uplevel #0 $temp_script
+            } else {
+                return $instance
+            }
+        } else {
+	    # Normally, wait for the window to be deleted
+	    # and then return.
+	    tkwait window $instance
+	}
+        
+        # Because of the above grab, it is not safe to return before
+        # the window actually disappears.  The grab may never be released
+        # if an I/O operation is done before the window is released.
+        update idletasks
+    }
+    set returnVal $commandResult($instance)
+    unset commandResult($instance)
+    return $returnVal
+}
+
+######################################################################
+#### new
+# This procedure creates an instance of the named class at the global
+# scope with the given instance name. The window is mapped to the
+# screen. The procedure returns immediately, returning the instance
+# name. A typical call would be:
+# <tcl><pre>
+#    ::tycho::Dialog::new YesNoQuery .y -text "Are you sure"
+# </pre></tcl>
+# The arguments after the class and instance names are just passed
+# directly to the constructor of the class.
+# The class is assumed to be defined in namespace ::tycho, so the
+# string "::tycho::" is prepended to the class name.
+# If the option -geometry is given, then it specifies the placement
+# of the window.  Otherwise, the window is centered on the screen.
+#
+body ::tycho::Dialog::new {class instance args} {
+    uplevel #0 ::tycho::$class $instance $args
+
+    # If -geometry option is given, use deiconify.  Otherwise, center.
+    if {[lsearch -exact $args {-geometry}] >= 0} {
+	update idletasks
+	wm deiconify $instance
+    } {
+	$instance centerOnScreen
+    }
+    update idletasks
+    if [$instance isa ::tycho::Dialog] {
+        if [info exists commandResult($instance)] {
+            unset commandResult($instance)
+        }
+    }
+    # NOTE: Not sure why this needs to be deferred.
+    # after idle [list catch "$instance focusin"]
+    # The delay appears to be unnecessary now -- hjr, Dec 97
+    $instance focusin
+    return $instance
+}

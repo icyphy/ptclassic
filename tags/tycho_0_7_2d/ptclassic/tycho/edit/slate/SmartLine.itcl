@@ -1,0 +1,947 @@
+#########################################################################
+# @Version: @(#)SmartLine.itcl	1.28 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## SmartLine
+#
+# A line item that understands how to place itself given start and end
+# points and their directions. The directions are specified as compass
+# directions: "n", "s", "e", or "w". The line can also be placed
+# manually, and in the future, will support user-driven reshaping.
+#
+# When a line is drawn, it is first rotated so that its start is in
+# the "east" direction. Lines with the end pointing "north" are
+# flipped about the horizontal axis so that there are three types
+# of line (going by the direction of the end point): "east," "west,"
+# and "south." Each of these has a number of different shapes, depending
+# on the relative positions of the start and end points; each shape
+# is represented by a state of a finite-state machine. Each shape is
+# such that it can be drawn with no conditionals (and is therefore
+# as efficient as possible to generate). Transitions
+# between states occur when the _x_ or _y_ coordinates (of the end-point,
+# relative to the start point) meets some condition that requires
+# a different line shape. If _x_ or _y_ changes, the line may go through
+# several states before reaching an acceptable one -- this makes the
+# transitions simple to code. When a new line is created, it starts in
+# state 0, and may pass through several states before settling on an
+# acceptable line shape.
+#
+# <p><b>Options</b>:
+#
+# <ul>
+# <li><b>-alpha</b>:
+# The minimum distance from an end-point of a line
+# to the first vertex.
+#
+# <li><b>-autoshape</b>:
+# A flag that says whether the line is to automatically reshape
+# itself when either of the features "start" or "end" are reshaped,
+# or when either of the options <b>-start</b> or <b>-end</b> are
+# set. Even if it is on, explicitly setting the coordinates will
+# change the line to the given coordinates, until the next time
+# <b>start</b> or <b>end</b> is reshaped or <b>-start</b> or
+# <b>-end</b> is set. When this happens, all coordinates except the
+# start and end will be ignored.
+#
+# <li><b>-arrow</b>:
+# The location of the arrow-head on the line: can be
+# one of <i>none</i>, <i>first</i>, <i>last</i>, or <i>both</i>. 
+# <i>none</i> by default.
+#
+# <li><b>-beta</b>:
+# The preferred distance between vertices that "wrap" back
+# in the opposite direction.
+#
+# <li><b>-capstyle</b>:
+# The capstyle of the line: butt, projecting, or round. Default is butt.
+#
+# <li><b>-end</b>:
+# The direction of the line end-point. Can be one of the
+# four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
+# <i>e</i> by default.
+#
+# <li><b>-fill</b>:
+# The color of the line. Black by default.
+#
+# <li><b>-joinstyle</b>:
+# The joinstyle of the line: bevel, miter, or round. Default is miter.
+#
+# <li><b>-smooth</b>:
+# A flag controlling whether the line is
+# drawn with curves instead of straight segments. Off by default.
+#
+# <li><b>-start</b>:
+# The direction of the line start-point. Can be one of the
+# four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
+# <i>e</i> by default.
+#
+# <li><b>-state</b>:
+# The current "state" of the line. This is provided to make it possible to
+# duplicate lines, since a line between two given points may be drawn
+# in different ways.
+#
+# <li><b>-width</b>:
+# The width of the line.
+#
+# </ul>
+#
+# <p><b>Components</b>: (none)
+#
+# <b>Bugs</b>: (none)
+# 
+# <b>Enhancements</b>
+#
+# SmartLine needs to support "manual" 
+# dragging of line segments and vertices.
+#
+#  <P><b>Example</b>
+#
+# <tcl quiet><pre>
+#   package require slate.demo
+#   ::demo::demoSmartLine
+# </pre></tcl>
+#
+class ::tycho::SmartLine {
+    inherit ::tycho::ComplexItem
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-alpha* option
+    proc _alpha {id canvas slate alpha}
+
+    # Update the *-arrow* option
+    proc _arrow {id canvas slate arrow}
+
+    # Update the *-autoshape* option
+    proc _autoshape {id canvas slate auto}
+
+    # Update the *-beta* option
+    proc _beta {id canvas slate beta}
+
+    # Update the *-capstyle* option
+    proc _capstyle {id canvas slate style}
+
+    # Update the *-end* option
+    proc _end {id canvas slate end}
+
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+
+    # Update the *-joinstyle* option
+    proc _joinstyle {id canvas slate style}
+
+    # Update the *-smooth* option
+    proc _smooth {id canvas slate smooth}
+
+    # Update the *-start* option
+    proc _start {id canvas slate start}
+
+    # Update the *-state* option
+    proc _state {id canvas slate start}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
+
+    # Constructor for subclasses
+    proc _construct {id canvas slate tags args}
+
+    # Create a new item
+    proc construct {id canvas slate tags args}
+
+    # Set or get the lines's coordinates
+    proc coords {id canvas slate args}
+
+    # Reshape one or more features of an item
+    proc reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc reshaperelease {id canvas slate}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+
+    ###################################################################
+    ####                        private procs                      ####
+
+    # Figure out the next state
+    proc nextstate {id type state x y}
+
+    # Redraw the line
+    proc redraw {id canvas slate}
+
+    # Auto-route an "east" line
+    proc route_e {id state x y}
+
+    # Auto-route a "west" line
+    proc route_w {id state x y}
+
+    # Auto-route a "south" line
+    proc route_s {id state x y}
+
+    ###################################################################
+    ####                      private variables                    ####
+
+    # An array saying how to rotate a line endpoint
+    private common rotate
+
+    # Actually, the above is a bit of a mystery... the last line should
+    #   w-n s w-s n w-e w w-w e
+    # But this gets the wrong line shape. Later on, maybe this
+    # will show up as another bug....
+
+    # An array saying how to normalize a line
+    private common normalize
+
+    # An array saying how to "un-normalize" a line
+    private common unnormalize
+
+    # An array of next states. Each entry is a list of expression-
+    # nextstate pairs. The expression is evaluated inside the
+    # nextstate{} method, and if satisfied, the state is changed
+    private common transitions
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::SmartLine {
+    #### Set method table
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+
+    set methodtable(_alpha)	::tycho::SmartLine::_alpha
+    set methodtable(_arrow)	::tycho::SmartLine::_arrow
+    set methodtable(_autoshape)	::tycho::SmartLine::_autoshape
+    set methodtable(_beta)	::tycho::SmartLine::_beta
+    set methodtable(_capstyle)	::tycho::SmartLine::_capstyle
+    set methodtable(_end)	::tycho::SmartLine::_end
+    set methodtable(_fill)      ::tycho::SmartLine::_fill
+    set methodtable(_joinstyle)	::tycho::SmartLine::_joinstyle
+    set methodtable(_smooth)	::tycho::SmartLine::_smooth
+    set methodtable(_state)	::tycho::SmartLine::_state
+    set methodtable(_start)	::tycho::SmartLine::_start
+    set methodtable(_width)	::tycho::SmartLine::_width
+
+    set methodtable(construct)  ::tycho::SmartLine::construct
+    set methodtable(coords)     ::tycho::SmartLine::coords
+    set methodtable(reshape)    ::tycho::SmartLine::reshape
+    set methodtable(reshapeclick)   ::tycho::SmartLine::reshapeclick
+    set methodtable(reshapedrag)    ::tycho::SmartLine::reshapedrag
+    set methodtable(reshaperelease) ::tycho::SmartLine::reshaperelease
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+
+    set optiondefault(-autoshape) 1
+    set optiondefault(-alpha)	  12
+    set optiondefault(-arrow)     none
+    set optiondefault(-beta)	  30
+    set optiondefault(-capstyle)  butt
+    set optiondefault(-end)	  "e"
+    set optiondefault(-fill)	  black
+    set optiondefault(-joinstyle) miter
+    set optiondefault(-shape)     line
+    set optiondefault(-smooth)    off
+    set optiondefault(-start) 	  "e"
+    set optiondefault(-state) 	  0
+    set optiondefault(-width) 	  1
+
+    array set rotate {
+	n-n e n-s w n-e s n-w n
+	s-n w s-s e s-e n s-w s
+	e-n n e-s s e-e e e-w w
+	w-n n w-s s w-e w w-w e
+    }
+    array set normalize {
+	n {[expr -($y)] $x}
+	s {$y [expr -($x)]}
+	e {$x $y}
+	w {[expr -($x)] $y}
+    }
+    array set unnormalize {
+	n {$y [expr -($x)]}
+	s {[expr -($y)] $x}
+	e {$x $y}
+	w {[expr -($x)] $y}
+    }
+    array set transitions {
+	"e,0" {
+	    {$x < $a} "7"
+	    {$y < 0}  "1"
+	    {$y > 0}  "2"
+	}
+	"e,1" {
+	    {$x < 2*$a} "3"
+	    {$y >= 0}   "0"
+	}
+	"e,2" {
+	    {$x < 2*$a} "4"
+	    {$y <= 0}   "0"
+	}
+	"e,3" {
+	    {$x >  2*$a} "1"
+	    {$y > -2*$b} "5"
+	}
+	"e,4" {
+	    {$x > 2*$a} "2"
+	    {$y < 2*$b} "6"
+	}   
+	"e,5" {
+	    {$x >  2*($a-$b)} "7"
+	    {$y < -2*$b}      "3"
+	    {$y > 0}          "9"
+	}
+	"e,6" {
+	    {$x > 2*($a-$b)}  "8"
+	    {$y > 2*$b}       "4"
+	    {$y < 0}          "10"
+	}
+	"e,7" {
+	    {$x <  2*($a-$b)} "5"
+	    {$x >  2*$a}      "1"
+	    {$y < -2*$b}      "3"
+	    {$y > 0}          "11"
+	}
+	"e,8" {
+	    {$x < 2*($a-$b)} "6"
+	    {$x > 2*$a}      "2"
+	    {$y > 2*$b}      "4"
+	    {$y < 0}         "11"
+	}
+	"e,9" {
+	    {$x > 2*($a-$b)} "11"
+	    {$y < 0}         "5"
+	    {$y > 2*$b}      "4"
+	}
+	"e,10" {
+	    {$x >  2*($a-$b)} "12"
+	    {$y < -2*$b}      "3"
+	    {$y > 0}          "6"
+	}
+	"e,11" {
+	    {$x <  2*($a-$b)} "9"
+	    {$x >  2*$a}      "2"
+	    {$y >  2*$b}      "4"
+	    {$y <  0}         "7"
+	}
+	"e,12" {
+	    {$x <  2*($a-$b)} "10"
+	    {$x >  2*$a}      "1"
+	    {$y < -2*$b}      "3"
+	    {$y >  0}         "8"
+	}
+	"w,0" {
+	    {$x < 0}  "2"
+	    {$y < $b} "10"
+	}
+	"w,1" {
+	    {$x < 0}   "3"
+	    {$y > -$b} "11"
+	}
+	"w,2" {
+	    {$x > 0}  "0"
+	    {$y < $b} "4"
+	}
+	"w,3" {
+	    {$x > 0}   "1"
+	    {$y > -$b} "5"
+	}
+	"w,4" {
+	    {$x > -2*$a} "6"
+	    {$y < -$b}   "3"
+	    {$y > $b}    "2"
+	}
+	"w,5" {
+	    {$x > -2*$a} "7"
+	    {$y < -$b}   "3"
+	    {$y > $b}    "2"
+	}
+	"w,6" {
+	    {$x < -2*$a} "4"
+	    {$x > 0}     "8"
+	    {$y < 0}     "7"
+	}
+	"w,7" {
+	    {$x < -2*$a} "5"
+	    {$x > 0}     "9"
+	    {$y > 0}     "6"
+	}
+	"w,8" {
+	    {$x < 0}    "6"
+	    {$x > 2*$a} "10"
+	    {$y < 0}    "9"
+	}
+	"w,9" {
+	    {$x < 0}    "7"
+	    {$x > 2*$a} "11"
+	    {$y > 0}    "8"
+	}
+	"w,10" {
+	    {$x < 2*$a} "8"
+	    {$y < -$b}  "1"
+	    {$y > $b}   "0"
+	}
+	"w,11" {
+	    {$x < 2*$a} "9"
+	    {$y < -$b}  "1"
+	    {$y > $b}   "0"
+	}
+	"s,0" {
+	    {$x < $a} "5"
+	    {$y < $a} "1"
+	}
+	"s,1" {
+	    {$x < $a+$b} "2"
+	    {$y > $a}    "0"
+	}
+	"s,2" {
+	    {$x < $a-$b} "3"
+	    {$x > $a+$b} "1"
+	    {$y > $a-$b} "6"
+	}
+	"s,3" {
+	    {$x > $a-$b} "2"
+	    {$y > $a-$b} "4"
+	}
+	"s,4" {
+	    {$x > $a-$b} "6"
+	    {$y < $a-$b} "3"
+	    {$y > $a+$b} "5"
+	}
+	"s,5" {
+	    {$x > $a}    "0"
+	    {$y < $a+$b} "4"
+	}
+	"s,6" {
+	    {$x < $a-$b} "4"
+	    {$x > $a+$b} "1"
+	    {$y < $a-$b} "2"
+	    {$y > $a && $x > $a} "0"
+	    {$y > $a+$b} "5"
+	}
+    }
+}
+
+##########################################################################
+## -alpha option configuration
+#
+body ::tycho::SmartLine::_alpha {id canvas slate alpha} {
+    set option(alpha$id) $alpha
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+## -arrow option configuration
+#
+body ::tycho::SmartLine::_arrow {id canvas slate arrow} {
+    set option(arrow$id) $arrow
+    $canvas itemconfigure $primary($id) -arrow $arrow
+}
+
+##########################################################################
+## -autoshape option configuration
+#
+# If autoshaping is turned off, the reshaping procedures are
+# removed from the method table.
+#
+body ::tycho::SmartLine::_autoshape {id canvas slate auto} {
+    if { $option(auto$id) && ! $auto } {
+        unset methodtable(reshape)
+        unset methodtable(reshapeclick)
+        unset methodtable(reshapedrag)
+        unset methodtable(reshaperelease)
+    } elseif { !$option(auto$id) && $auto } {
+        set methodtable(reshape)    ::tycho::SmartLine::reshape
+        set methodtable(reshapeclick)   ::tycho::SmartLine::reshapeclick
+        set methodtable(reshapedrag)    ::tycho::SmartLine::reshapedrag
+        set methodtable(reshaperelease) ::tycho::SmartLine::reshaperelease
+    }
+    set option(autoshape$id) $autoshape
+    if $auto {
+        redraw $id $canvas $slate
+    }
+}
+
+##########################################################################
+## -beta option configuration
+#
+body ::tycho::SmartLine::_beta {id canvas slate beta} {
+    set option(beta$id) $beta
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+## -capstyle option configuration
+#
+body ::tycho::SmartLine::_capstyle {id canvas slate style} {
+    set option(capstyle$id) $style
+    $canvas itemconfigure $primary($id) -capstyle $style
+}
+
+##########################################################################
+## -end option configuration
+#
+body ::tycho::SmartLine::_end {id canvas slate end} {
+    if { $option(end$id) != $end } {
+        set option(end$id) $end
+        redraw $id $canvas $slate
+    }
+}
+
+##########################################################################
+## -fill option configuration
+#
+body ::tycho::SmartLine::_fill {id canvas slate fill} {
+    set option(fill$id) $fill
+    $canvas itemconfigure $primary($id) -fill $fill
+}
+
+##########################################################################
+## -joinstyle option configuration
+#
+body ::tycho::SmartLine::_joinstyle {id canvas slate style} {
+    set option(joinstyle$id) $style
+    $canvas itemconfigure $primary($id) -joinstyle $style
+}
+
+##########################################################################
+## -smooth option configuration
+#
+body ::tycho::SmartLine::_smooth {id canvas slate smooth} {
+    set option(smooth$id) $smooth
+    $canvas itemconfigure $primary($id) -smooth $smooth
+}
+
+##########################################################################
+## -start option configuration
+#
+body ::tycho::SmartLine::_start {id canvas slate start} {
+    if { $option(start$id) != $start } {
+        set option(start$id) $start
+        redraw $id $canvas $slate
+    }
+}
+
+##########################################################################
+## -state option configuration
+#
+body ::tycho::SmartLine::_state {id canvas slate state} {
+    set option(state$id) $state
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+## -width option configuration
+#
+body ::tycho::SmartLine::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $option(width$id)
+}
+
+##########################################################################
+#### _construct
+#
+# Low-level constructor for subclasses to call.
+#
+body ::tycho::SmartLine::_construct {id canvas slate tags args} {
+    # Create the primary component -- the line
+    set primary($id) [eval $canvas create line $args [list \
+            -arrow   $option(arrow$id) \
+            -width   $option(width$id) \
+            -fill    $option(fill$id) \
+            -smooth  $option(smooth$id) \
+            -capstyle  $option(capstyle$id) \
+            -joinstyle $option(joinstyle$id) \
+            -tags $tags]]
+
+    # Call redraw to reshape it
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::SmartLine::construct {id canvas slate tags args} {
+    # Split coordinates and options
+    if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
+	set options [lrange $args $t end]
+	set args [lreplace $args $t end]
+    } else {
+	set options {}
+    }
+
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $options] {
+        set option([string trimleft $opt -]$id) $val
+    }
+
+    # Create the primary component -- the line
+    set primary($id) [eval $canvas create line $args [list \
+            -arrow   $option(arrow$id) \
+            -width   $option(width$id) \
+            -fill    $option(fill$id) \
+            -smooth  $option(smooth$id) \
+            -capstyle  $option(capstyle$id) \
+            -joinstyle $option(joinstyle$id) \
+            -tags $tags]]
+
+    # Call redraw to reshape it
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+#### coords
+#
+# Set or read the SmartLine's coordinates
+#
+body ::tycho::SmartLine::coords {id canvas slate args} {
+    # No args: just return coordinates
+    if { $args == "" } {
+        return [$canvas coords $primary($id)]
+    }
+    # Set the coordinates. Do not reshape.
+    eval $canvas coords $primary($id) $args
+}
+
+#######################################################################
+#### reshape
+#
+# Reshape the line. Currently, only <b>start</b> and <b>end</b> can
+# be reshaped.
+#
+body ::tycho::SmartLine::reshape {id canvas slate x y args} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	eval ::tycho::Line::_reshape $id $canvas $slate $x $y $args
+	redraw $id $canvas $slate	
+}
+
+#######################################################################
+#### reshapeclick
+#
+body ::tycho::SmartLine::reshapeclick {id canvas slate x y args} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	eval ::tycho::Line::_reshapeclick $id $canvas $slate $x $y $args
+}
+
+#######################################################################
+#### reshapedrag
+#
+body ::tycho::SmartLine::reshapedrag {id canvas slate x y} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	::tycho::Line::_reshapedrag $id $canvas $slate $x $y
+	redraw $id $canvas $slate	
+}
+
+#######################################################################
+#### reshaperelease
+#
+body ::tycho::SmartLine::reshaperelease {id canvas slate} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	::tycho::Line::_reshaperelease $id $canvas $slate
+	redraw $id $canvas $slate
+}
+
+
+##################################################################
+##################################################################
+####                       private procs                      ####
+
+##########################################################################
+#### redraw
+#
+# Redraw the line.
+#
+body ::tycho::SmartLine::redraw {id canvas slate} {
+    # If autoshape is not on, just return
+    if !$option(autoshape$id) {
+        return
+    }
+    set flipped 0
+    
+    # Get the coordinates
+    set coords [$canvas coords $primary($id)]
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 1]
+    set x1 [lindex [lreplace $coords end end] end]
+    set y1 [lindex $coords end]
+
+    # "Normalize" the line
+    set x [expr $x1-$x0]
+    set y [expr $y1-$y0]
+
+    set type $rotate($option(start$id)-$option(end$id))
+    ::tycho::assign x y [eval list $normalize($option(start$id))]
+
+    # Swap north-south if needed
+    if { $type == "n" } {
+	set flipped 1
+	set type "s"
+	set y [expr -$y]
+   }
+
+    # Get the relative coordinates
+    set option(state$id) [nextstate $id $type $option(state$id) $x $y]
+    set coords [route_$type $id $option(state$id) $x $y]
+
+    # Swap north-south again if needed
+    if { $flipped } {
+	set temp $coords
+	set coords {}
+	foreach {x y} $temp {
+	    lappend coords $x [expr -$y]
+	}
+	set type "n"
+    }
+
+    # Rotate back to correct orientation
+    set temp $coords
+    set coords {}
+    foreach {x y} $temp {
+	eval lappend coords "$unnormalize($option(start$id))"
+    }
+
+    # Redraw the line
+    eval $canvas coords $primary($id) $coords
+
+    # Move to correct coordinates
+    $canvas move $primary($id) $x0 $y0
+}
+
+##########################################################################
+#### route_e
+#
+# Route an "east" line given its state and the
+# relative positions of its end points.
+#
+body ::tycho::SmartLine::route_e {id state x y} {
+    set a $option(alpha$id)
+    set b $option(beta$id)
+    
+    switch -exact $state {
+	"0" {
+	    return [list 0 0 $x $y]
+	}
+	"1" -
+	"2" {
+	    set xi [expr $x / 2]
+	    return [list 0 0 $xi 0 $xi $y $x $y]
+	}
+	"3" -
+	"4" {
+	    set x0 [expr $a]
+	    set x1 [expr $x-$a]
+	    set yi [expr $y / 2]
+	}
+	"5" {
+	    set x0 [expr $a]
+	    set x1 [expr $x-$a]
+	    set yi [expr $y-$b]
+	}
+	"6" {
+	    set x0 [expr $a]
+	    set x1 [expr $x-$a]
+	    set yi [expr $y+$b]
+	}
+	"7" {
+	    set x0 [expr $x-$a+2*$b]
+	    set x1 [expr $x-$a]
+	    set yi [expr $y-$b]
+	}
+	"8" {
+	    set x0 [expr $x-$a+2*$b]
+	    set x1 [expr $x-$a]
+	    set yi [expr $y+$b]
+	}
+	"9" {
+	    set x0 [expr $a]
+	    set x1 [expr $x-$a]
+	    set yi [expr -$b]
+	}
+	"10" {
+	    set x0 [expr $a]
+	    set x1 [expr $x-$a]
+	    set yi [expr $b]
+	}
+	"11" {
+	    set x0 [expr $a]
+	    set x1 [expr $a-2*$b]
+	    set yi [expr -$b]
+	}
+	"12" {
+	    set x0 [expr $a]
+	    set x1 [expr $a-2*$b]
+	    set yi [expr $b]
+	}
+    }
+    return [list 0 0 $x0 0 $x0 $yi $x1 $yi $x1 $y $x $y]
+}
+
+##########################################################################
+#### route_w
+#
+# Route a "west" line given its state and the
+# relative positions of its end points.
+#
+body ::tycho::SmartLine::route_w {id state x y} {
+    set a $option(alpha$id)
+    set b $option(beta$id)
+    
+    switch -exact $state {
+	"0" -
+	"8" -
+	"1" -
+	"9" {
+	    set xi [expr $x+$a]
+	    return [list 0 0 $xi 0 $xi $y $x $y]
+	}
+	"2" -
+	"6" -
+	"3" -
+	"7" {
+	    set xi [expr $a]
+	    return [list 0 0 $xi 0 $xi $y $x $y]
+	}
+	"4" {
+	    set x0 [expr $a]
+	    set x1 [expr $x+$a]
+	    set yi [expr $b]
+	}
+	"5" {
+	    set x0 [expr $a]
+	    set x1 [expr $x+$a]
+	    set yi [expr -$b]
+	}
+	"10" {
+	    set x0 [expr $a]
+	    set x1 [expr $x+$a]
+	    set yi [expr $y-$b]
+	}
+	"11" {
+	    set x0 [expr $a]
+	    set x1 [expr $x+$a]
+	    set yi [expr $y+$b]
+	}
+    }
+    return [list 0 0 $x0 0 $x0 $yi $x1 $yi $x1 $y $x $y]
+}
+
+##########################################################################
+#### route_s
+#
+# Route a "south" line given its state and the
+# relative positions of its end points.
+#
+body ::tycho::SmartLine::route_s {id state x y} {
+    set a $option(alpha$id)
+    set b $option(beta$id)
+    
+    switch -exact $state {
+	"0" {
+	    return [list 0 0 $x 0 $x $y]
+	}
+	"1" -
+	"3" {
+	    set xi [expr $a]
+	    set yi [expr $y-$a]
+	}
+	"2" {
+	    set xi [expr $x+$b]
+	    set yi [expr $y-$a]
+	}
+	"4" {
+	    set xi [expr $a]
+	    set yi [expr -$b]
+	}
+	"5" {
+	    set xi [expr $a]
+	    set yi [expr $y-$a]
+	}
+	"6" {
+	    set xi [expr $x+$b]
+	    set yi [expr -$b]
+	}
+    }
+    return [list 0 0 $xi 0 $xi $yi $x $yi $x $y]
+}
+
+##########################################################################
+#### nextstate
+#
+# Given a line "type" and its current state, return the best state
+# for it to be in. This method works through the state table until
+# it finds a state for which none of the transition conditions
+# are satisfied. 
+#
+body ::tycho::SmartLine::nextstate {id type state x y} {
+    # Line parameters used by transition expressions
+    set a $option(alpha$id)
+    set b $option(beta$id)
+
+    # Check that the state option has not been set incorrectly
+    if { ! [::info exists transitions($type,$state)] } {
+	set option(state$id) 0
+	set state 0
+    }
+
+    # We jump out of the while loop when no transitions are satisfied
+    while { 1 } {
+	set laststate $state
+	# Try each transition expression
+	foreach {condition nextstate} $transitions($type,$state) {
+	    if { [eval expr $condition] } {
+		# The condition is satisfied, so change state and move on
+		set state $nextstate
+		break
+	    }
+	}
+	# If we haven't changed state, then we're done
+	if { $state == $laststate } {
+	    break
+	}
+    }
+    return $state
+}

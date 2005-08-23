@@ -1,0 +1,204 @@
+#########################################################################
+# @Version: @(#)LabeledOval.itcl	1.29 07/29/98
+# @Author: John Reekie, Bilung Lee
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## LabeledOval
+#
+# <i>LabeledOval</i> is an oval with a text label and graphics.
+# In all other respects, it can be treated like any other oval item.
+#
+# <p><a name="LabeledOval class Options"></a><b>Options</b>
+#
+# <ul>
+# <li><b>-fill</b>:
+# The color with which the oval is filled. By default, 
+# it is "", which means that the oval is not filled.
+#
+# <li><b>-outline</b>:
+# The color of the outline of the oval. If "", 
+# the oval has no outline. By default, it is black.
+#
+# <li><b>-width</b>:
+# The width of the outline of the oval, in pixels. By 
+# default, it is one.
+#
+# </ul>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Example</b>: Create a labeled oval:
+# <tcl quiet><pre>
+#   package require slate.demo
+#   set slate [::demo::newslate "A LabeledOval demo"]
+#   $slate create LabeledOval 40 40 100 80 -fill white -outline blue &#92
+# 		-width 4 -text Foo -tags moveable
+# </pre></tcl>
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::LabeledOval {
+    inherit ::tycho::LabeledItem
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Create a new item with options already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+
+    # Update the *-outline* option
+    proc _outline {id canvas slate outline}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+
+    # Set or get the item's coordinates
+    proc coords {id canvas slate args}
+    
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::LabeledOval {
+    #### Set method table
+    array set methodtable [array get ::tycho::LabeledItem::methodtable]
+
+    set methodtable(_fill)     ::tycho::LabeledOval::_fill
+    set methodtable(_outline)  ::tycho::LabeledOval::_outline
+    set methodtable(_width)    ::tycho::LabeledOval::_width
+
+    set methodtable(construct) ::tycho::LabeledOval::construct
+    set methodtable(coords)    ::tycho::LabeledOval::coords
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
+
+    set optiondefault(-fill)    ""
+    set optiondefault(-outline) "black"
+    set optiondefault(-shape)   oval
+    set optiondefault(-width)   "1"
+}
+
+
+##########################################################################
+## -fill option configuration
+#
+body ::tycho::LabeledOval::_fill {id canvas slate fill} {
+    set option(fill$id) $fill
+    $canvas itemconfigure $primary($id) -fill $fill
+}
+
+##########################################################################
+## -outline option configuration
+#
+body ::tycho::LabeledOval::_outline {id canvas slate outline} {
+    set option(outline$id) $outline
+    $canvas itemconfigure $primary($id) -outline $outline
+    if { $option(text$id) != "" } {
+	    $canvas itemconfigure $component(label$id) -fill $outline
+	}
+}
+
+##########################################################################
+## -width option configuration
+#
+body ::tycho::LabeledOval::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $width
+}
+
+##########################################################################
+#### _construct
+#
+body ::tycho::LabeledOval::_construct {id canvas slate tags x0 y0 x1 y1} {
+    # Create the primary component. This is the displayed oval.
+    set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 \
+	    -fill $option(fill$id) -outline $option(outline$id) \
+	    -width $option(width$id) -tags $tags]
+
+    # Create the graphics and text label -- do not change the order!
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
+    }
+    # Call the proc to do the real work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
+}
+
+##########################################################################
+#### coords
+#
+# Set or read the oval's coordinates
+#
+body ::tycho::LabeledOval::coords {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
+    # No args: just return coordinates
+    if { $args == "" } {
+        return $coords
+    }
+
+    # Move the oval itself
+    eval $canvas coords $primary($id) $args
+
+    # Move and scale the text and graphics
+    eval ::tycho::LabeledItem::coords $id $canvas $slate $coords $args
+}

@@ -1,0 +1,136 @@
+<!-- @(#)index.html	1.10 05/11/98 -->
+<html>
+<head>
+<title>Tycho's Timer Package
+</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><a name="Tycho's Timer Package">Tycho's Timer Package
+</a></h1>
+<HR>
+
+ <P>TyTimer is a simple extension to Tycho that adds a real-time
+timer. The timer is designed for use with Tycho's
+<A HREF="../../typt/controls/doc/codeDoc/Scheduler.html"><code>Scheduler</code></A>
+class, and should not be used other than in the style documented in
+the Scheduler documentation. The package has both a C interface for
+use by other C packages, and a Tcl interface for use by "tasks" in
+Tcl.
+
+ <P>To run a demonstration of the timer as used by the scheduler:
+<tcl quiet><pre>
+    source $tycho/src/tytest/testtask.tcl
+</pre></tcl>
+
+The top number is the counter incremented by the C task; the bottom
+one is the counter incremented in Tcl.  To more clearly see the
+interleaving of these two tasks:
+
+<tcl quiet><pre>
+    ::tycho::timer period 200
+</pre></tcl>
+
+ <P>Source files:
+<ul>
+<li><A HREF="../tytest/test.tcl">Simple test file</A>
+<li><A HREF="../tytest/testtask.tcl">The two-task test file</A>
+<li><A HREF="tytimer.h">Header file</A>
+<li><A HREF="tytimer.c">C source file</A>
+</ul>
+
+
+<h2>::tycho::timer</h2>
+
+<P><code>::tycho::timer</code> is a Tcl procedure that manipulates and
+queries the real-time timer.  To ensure that it is in the
+<code>::tycho</code> namespace, always load the tyEvent package with
+
+<a href="../../kernel/basic/doc/codeDoc/Loader.html"><code>::tycho::loadIfNotPresent</code></a>.
+
+It accepts the following argument formats:
+
+<dl>
+ <P><dt><code>::tycho::timer elapsed</code>
+
+<dd>Return 1 if the timer is not running. Note that, if the timer
+has not been started, 1 will be returned anyway. A Tcl script can use
+this to find out when the timer has stopped. Note that there is no way
+for a Tcl script to be notified asynchronously: it <I>must</I> use this
+procedure to query the timer. The overhead is very low -- lower than
+reading the value of a Tcl variable, in fact!
+
+ <P><dt><code>::tycho::timer period <I>?period?</I></code>
+
+<dd>Get or set the timer period. If <CODE><I>period</I></CODE> is
+given, the timer period is set to <CODE><I>period</I></CODE>
+milli-seconds; if not, the current period is returned.
+
+ <P><dt><code>::tycho::timer start <I>?period?</I></code>
+
+<dd>Start the timer. If <CODE><I>period</I></CODE> is given, the timer
+period is set to <CODE><I>period</I></CODE> milli-seconds; otherwise, the
+previously set value if used. When the package is first loaded, the
+period is set to 20 ms.
+
+ <P><dt><code>::tycho::timer stop</code>
+
+<dd>Stop the timer. This should be called by a Tcl task that
+finishes it processing before its time is up.
+
+
+</dl>
+
+<h2>C Functions</h2>
+
+The C functions are provided to allow a C module to cooperate
+with the Tycho scheduler. A module that implements a C task
+must include a callback that performs its processing. For best
+efficiency, this callback must start the timer, and, each time
+through its loop, check whether the timer has elapsed. When it
+has, it must return. See the Scheduler documentation.
+
+<dl>
+ <P><dt>void <code>Ty_TimerPeriod ( int <I>period</I> )</code>
+
+<dd>Set the timer period, where <CODE><I>period</I></CODE> is in milli-seconds.
+When the package is loaded, the period is set to 20 ms. C tasks
+should not normally set the period.
+
+ <P><dt>void <code>Ty_TimerStart ( )</code>
+
+<dd>Start the timer running. The timer will elapse with the period
+previously set.
+
+ <P><dt>void <code>Ty_TimerStop ( )</code>
+
+<dd>Stop the timer running. This should be called by a task
+that terminates before its given time is up.
+
+ <P><dt>int <code>Ty_TimerElapsed ( )</code>
+
+<dd>Return 1 if the timer has elapsed, or 0 if it has not. Tasks
+should call this once each time through their "loop" to
+test whether their time is up.
+
+ <P><dt>void <code>Ty_DoAllEvents ( )</code>
+
+<dd>If the timer has elapsed, process all pending Tk events.  This is
+provided for C programs that are structured as a single loop that runs
+forever or until completion, without regard to the Tycho
+scheduler. Such a program should periodically call
+<CODE>Ty_DoAllEvents</CODE> to ensure that Tk events are
+processed. This style of C module is strongly discouraged, since it
+will not allow the Tycho scheduler to operate.
+
+</dl>
+
+
+ <P>
+<HR>
+Copyright &#169 1996-1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/11/98,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>

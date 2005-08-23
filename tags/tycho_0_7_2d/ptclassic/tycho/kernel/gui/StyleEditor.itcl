@@ -1,0 +1,712 @@
+# A Widget for editing a stylesheet.
+#
+# @Version: @(#)StyleEditor.itcl	1.28 06/29/98
+# @Author: John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+## styleeditor
+#
+# Open a dialog for editing a style sheet. If there already
+# is one, bring it to the top. If _style_ is given, display
+# that style, otherwise display the default style.
+#
+proc ::tycho::styleeditor {stylesheet {style {}}} {
+    if { $style == "" } {
+        set style [::tycho::userprofile getstyle $stylesheet]
+    }
+    if { [::infoWhichCommand .styles.$stylesheet] != "" } {
+        if [winfo ismapped .styles.$stylesheet] {
+            raise .styles.$stylesheet
+        } else {
+            wm deiconify .styles.$stylesheet
+        }
+        .styles.$stylesheet configure -style $style
+    } else {
+	uplevel #0 [list ::tycho::StyleEditor .styles.$stylesheet \
+		-title "Tycho Style Preferences" \
+		-stylesheet $stylesheet \
+                -style $style]
+	wm deiconify .styles.$stylesheet
+    }
+}
+
+#######################################################################
+#### StyleEditor
+#
+# A widget for editing a stylesheet.
+#
+class ::tycho::StyleEditor {
+    inherit ::tycho::Dialog
+
+    constructor {args} {}
+    destructor {}
+
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The font to use in labels 
+    itk_option define -labelfont labelFont Font [::tycho::font helvetica]
+
+    # The name of the style-sheet I am editing
+    itk_option define -stylesheet styleSheet StyleSheet {}
+
+    # The name of the style currently being edited
+    itk_option define -style style Style default
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Make bindings to an entry widget
+    method _entrybind {param}
+
+    # Update a color
+    method _updatecolor {param}
+
+    # Update a parameter
+    method _update {param}
+
+    # Load data from stylesheet
+    method _loaddata {stylesheet style {group {}} {context {}}}
+
+    # Reload data from stylesheet
+    method _refresh {{group {}} {context {}}}
+
+    # Get or change the current style
+    method currentstyle {{style {}}}
+
+    ###################################################################
+    ####                       private variables                   ####
+
+    # The mapping from style labels to style names
+    private variable _index
+
+    # The mapping from style names to style labels
+    private variable _unindex
+
+    # The model I'm editing
+    private variable _model ""
+
+    # The master of the model I'm editing
+    private variable _master ""
+ 
+
+    ###################################################################
+    ####                       STUFF TO MOVE                       ####
+
+    # Legal colors. First line are manufactured shades of grey,
+    # other lines are color shades found using showrgb. These
+    # should probably be found dynamically.
+    private common _colornames {
+        white black
+	background lightgrey grey darkgrey
+	antiquewhite aquamarine azure bisque blue
+	coral
+	darkslategray
+	gold
+	goldenrod green
+	ivory khaki
+	lightblue lightcyan
+	lightskyblue lightsteelblue
+	magenta 
+	pink
+	plum red royalblue
+	seagreen sienna
+	slategray steelblue tan
+	violetred
+    }
+    set oldjunk {
+        private common _colornames {
+            background lightgrey grey darkgrey
+            antiquewhite aquamarine azure bisque blue
+            brown burlywood cadetblue chartreuse
+            chocolate coral cornsilk cyan darkgoldenrod
+            darkolivegreen darkorange darkorchid
+            darkseagreen darkslategray deeppink
+            deepskyblue dodgerblue firebrick gold
+            goldenrod green honeydew hotpink indianred
+            ivory khaki lavenderblush lemonchiffon
+            lightblue lightcyan lightgoldenrod lightpink
+            lightsalmon lightskyblue lightsteelblue
+            lightyellow magenta maroon mediumorchid
+            mediumpurple mistyrose navajowhite olivedrab
+            orange orangered orchid palegreen
+            paleturquoise palevioletred peachpuff pink
+            plum purple red rosybrown royalblue salmon
+            seagreen seashell sienna skyblue slateblue
+            slategray snow springgreen steelblue tan
+            thistle tomato turquoise violetred wheat
+            yellow
+        }
+    }
+    private proc _colors {} {
+        return $_colornames
+    }
+    private proc _shades {} {
+        return {light medium dark verydark}
+    } 
+    private proc _mkshade {s} {
+        switch -exact $s {
+            1 {return light}
+            "" -
+            2 {return medium}
+            3 {return dark}
+            4 {return verydark}
+            default {
+                return ""
+            }
+        }
+    } 
+    private proc _decolor {colorname} {
+        regexp {([^0-9]+)([0-9]*)} $colorname _ color shade
+        switch -exact $color {
+            "white" -
+            "black" {
+                return [list $color $shade]
+            }
+            "grey" -
+            "gray" {
+                switch -exact $shade {
+                    93 {return {background light}}
+                    88 {return {background medium}}
+                    85 {return {background dark}}
+                    75 {return {background verydark}}
+
+                    70 {return {darkgrey light}}
+                    60 {return {darkgrey medium}}
+                    50 {return {darkgrey dark}}
+                    30 {return {darkgrey verydark}}
+                
+                    90 {return {grey light}}
+                    80 {return {grey medium}}
+                    70 {return {grey dark}}
+                    50 {return {grey verydark}}
+
+                    100 {return {lightgrey light}}
+                    90  {return {lightgrey medium}}
+                    80  {return {lightgrey dark}}
+                    70  {return {lightgrey verydark}}
+
+                    default {
+                        return [list $color$shade {}]
+                    }
+                }
+            }
+            default {
+                switch -exact $shade {
+                    1 {return [list $color light]}
+                    2 {return [list $color medium]}
+                    3 {return [list $color dark]}
+                    4 {return [list $color verydark]}
+                    default {
+                        if [lsearch -exact $_colornames $color] {
+                            return [list $color medium]
+                        } else {
+                            return [list $color {}]
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private proc _mkcolor {color {shade {}}} {
+        if { $shade == "" } {
+            return $color
+        }
+        switch -exact $color {
+            "black" -
+            "white" {
+                return $color
+            }
+            "background" {
+                set color "grey"
+		set light    "93"
+		set medium   "88"
+		set dark     "85"
+		set verydark "75"
+	    }
+	    "lightgrey" {
+                set color "grey"
+		set light    "100"
+		set medium   "90"
+		set dark     "80"
+		set verydark "70"
+	    }
+	    "grey" {
+                set color "grey"
+		set light    "90"
+		set medium   "80"
+		set dark     "70"
+		set verydark "50"
+	    }
+	    "darkgrey" {
+                set color "grey"
+                set light    "70"
+		set medium   "60"
+		set dark     "50"
+		set verydark "30"
+	    }
+	    default {
+		set light    1
+		set medium   2
+		set dark     3
+		set verydark 4
+	    }
+        }
+        return $color[set $shade]
+    }
+}
+
+#######################################################################
+#### -stylesheet
+#
+configbody ::tycho::StyleEditor::stylesheet {
+    set sheet $itk_option(-stylesheet)
+    if { $sheet == "" } {
+	return
+    }
+    set _model [::tycho::stylesheet access $sheet]
+    set _master [$_model cget -master]
+    configure -title [$_master cget -title]
+
+    # If not already created, create the "style chooser" at the top
+    if ![::info exists itk_component(style-chooser)] {
+        set styles {}
+        # Get styles from master
+        foreach style [$_master match style] {
+            if [$_master exists $style -label] {
+                set label [$_master attrget $style -label]
+                if { $label != "" } {
+                    set _index($label) $style
+                    set _unindex($style) $label
+                }
+            }
+        }
+        # Get additional styles from the user model
+        foreach style [$_model match style] {
+            if [$_model exists $style -label] {
+                set label [$_model attrget $style -label]
+                if { $label != "" } {
+                    set _index($label) $style
+                    set _unindex($style) $label
+                }
+            }
+        }
+        # Get the current style to be the default
+        set current $_unindex($itk_option(-style))
+
+        # Add the option menu
+        $itk_component(items) add optionmenu style-chooser \
+                -label "Style" \
+                -entries [array names _index] \
+                -initial $current \
+                -command "$this _refresh"
+
+        # Leave a gap
+        $itk_component(items) vskip -minsize 12
+
+        # Now, if there's only one style, disable it...
+        if { [array size _index] == 1 } {
+            $itk_component(items) disable style-chooser
+        }
+    }
+    # Load the data
+    _loaddata $sheet $itk_option(-style)
+}
+
+#######################################################################
+#### -style
+#
+configbody ::tycho::StyleEditor::style {
+    # If the options are not evaluated in the "right" order,
+    # postpone doing this one until later
+    if { $itk_option(-stylesheet) == "" } {
+	whenConstructed "$this configure -style $itk_option(-style)"
+	return
+    }
+    set style $itk_option(-style)
+    $itk_component(items) assign style-chooser $_unindex($style)
+    foreach parameter [$_master match parameter $style] {
+        # If it's not in the labeled grid, ignore
+        if ![$itk_component(items) exists $parameter] {
+            continue
+        }
+        set type [$_master attrget "default $parameter" -type]
+        set value [$_model dfltcget "$style $parameter" -value]
+        switch -exact $type {
+            "font" {
+                foreach {f x s} $value {}
+                if { $x == "" } {
+                    set x 12
+                }
+                if { $s == "" } {
+                    set s "roman"
+                }
+                $itk_component(items) assign $parameter \
+                        [list family $f size $x style $s]
+            }
+           "color" {
+               set c [_decolor $value]
+               set color [lindex $c 0]
+               set shade [lindex $c 1]
+               $itk_component(items) assign $parameter \
+                        [list entry $value color $color shade $shade]
+            }
+            default {
+                $itk_component(items) assign $parameter $value
+            }
+        }
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::StyleEditor::constructor {args} {
+    # Create the labeled grid. Give it a columnspan of just 2
+    itk_component add items {
+	labeledgrid $itk_component(childsite).items \
+                -columnspan 6 -childcolumnspan 5 \
+                -labelforeground blue
+    } {
+	keep -background -cursor -font -labelfont
+    }
+    pack $itk_component(items) -fill both -expand on -padx 8 -pady 8
+
+    # Add the buttons to the bottom
+    # FIXME: Add help
+    set bbox [component bbox]
+    $bbox configure -buttonwidth 6
+ 
+    # $bbox add undo \
+            -text "Undo" \
+            -command "$this undo"
+    # $bbox add redo \
+            -text "Redo" \
+            -command "$this redo"
+    # $bbox add apply \
+            -text "Apply" \
+            -command "$this apply"
+    # $bbox add cancel \
+            -text "Cancel" \
+            -command "$this cancel"
+    $bbox add close \
+            -text "Close" \
+            -command "::delete object $this"
+    
+    $bbox default close
+
+    #addButton apply -text "Apply <M-a>" -command "$this update"
+    #configure -okcommand "$this update"
+
+    # Meta-a performs update
+    #bind $itk_component(hull) <Meta-a> \
+	#    "$this update; break"
+
+    # Initialize options
+    eval itk_initialize $args
+
+   # Subscribe to styles
+    # FIXME: Add entry font? main font?
+    stylesheet subscribe \
+            -labelfont fonts labelFont
+}
+
+#######################################################################
+#### _entrybind
+#
+# Bind to an entry widget. This adds bindings so that the style
+# parameter is updated when a) Return is pressed, or b) the
+# focus moves out of the entry.
+#
+body ::tycho::StyleEditor::_entrybind {param} {
+    bind [$itk_component(items) component $param] <FocusOut> \
+            "$this _update $param"
+    bind [$itk_component(items) component $param] <Return> \
+            "$this _update $param"
+}
+
+#######################################################################
+#### _updatecolor
+#
+# Update a style parameter when a color changes
+#
+body ::tycho::StyleEditor::_updatecolor {param} {
+    set color [$itk_component(items) get $param.color]
+    set shade [$itk_component(items) get $param.shade]
+    $itk_component(items) assign $param.entry \
+            [_mkcolor $color $shade]
+    _update $param
+}
+
+
+#######################################################################
+#### _update
+#
+# Update a style parameter
+#
+body ::tycho::StyleEditor::_update {param} {
+    set name [list $itk_option(-style) $param]
+    set oldvalue [$_model dfltcget $name -value]
+    set dfltvalue [$_master dfltcget $name -value]
+    set itemtype [$_model dfltcget $name -type]
+    set newvalue [$itk_component(items) get $param]
+
+    # Some types need special treatment to extract the value
+    switch -exact $itemtype {
+        "font" {
+            array set t $newvalue
+            set newvalue [list $t(family) $t(size) $t(style)]
+        }
+         "color" {
+	     array set t $newvalue
+             set newvalue $t(entry)
+        }
+    }
+    
+    if { $oldvalue != $newvalue } {
+        # Update. If the style doesn't exist in the user model, create it.
+        if ![$_model exists $itk_option(-style)] {
+            $_model add style $itk_option(-style)
+        }
+        if ![$_model exists $name] {
+            # FIXME: groups
+            $_model add parameter $name -value $newvalue
+            # Erk... we have to publish with an attrset, otherwise
+            # it gets ignored by StyleSheet::_notify...
+            $_model publish attrset $name -value $newvalue
+        } else {
+           $_model publish attrset $name -value $newvalue
+        }
+        # Having done that, we see if it's different to the default, and
+        # if not, delete it. This keeps the user model clean, and means
+        # that any updates to the master are allowed to propagate to the
+        # user model
+        if { $newvalue == $dfltvalue } {
+            $_model delete $name
+        }
+    }
+}
+
+#######################################################################
+#### _loaddata
+#
+body ::tycho::StyleEditor::_loaddata \
+	{stylesheet style {group {}} {context {}}} {
+    # FIXME: Groups
+    set sheet $itk_option(-stylesheet)
+    if { $sheet == "" } {
+	return
+    }
+    # Build list of parameters by type
+    foreach parameter [$_master match parameter default] {
+	set name [list default $parameter]
+	set label [$_master attrget $name -label]
+	set type [$_master attrget $name -type]
+	if { $label != "" } {
+	    set _[set type]($label) $parameter
+	}
+	# Subscribe to the parameter so undo and redo update the display
+	#::tycho::parameter subscribe $group $this $parameter \
+		#	"$this clear $parameter; $this insert $parameter \
+		#	\[::tycho::parameter get $group $parameter\]"
+    }
+
+
+    set items [component items]
+
+    # If there is more than one font, make the labeled grid wider.
+    # This is sort-of flaky, but it works for now...
+    if { [array size _font] >= 2 } {
+        $items configure -columnspan 12
+    }
+
+    # Sort the parameters by label
+    foreach type {boolean choice set font color integer string number} {
+	set sorted($type) [lsort [array names _$type]]
+    }
+    # Build the parameters queries. Booleans are a checkbox.
+    foreach label $sorted(boolean) {
+	set param $_boolean($label)
+	set value [$_model dfltcget [list $style $param] -value]
+	$items add checkbutton $param \
+		-label $label \
+		-initial $value \
+                -command "$this _update $param"
+    }
+    # Choice is a set of radiobuttons
+    foreach label $sorted(choice) {
+	set param $_choice($label)
+	set value [$_model dfltcget [list $style $param] -value]
+        set entries [$_model dfltcget [list $style $param] -values]
+        set rowspan [expr int(ceil([llength $entries]/3.0))]
+	$items group $param \
+		-label $label \
+		-initial $value
+        foreach e $entries {
+            $items add radiobutton $param.$e \
+                    -text $e \
+                    -value $e \
+                    -command "$this _update $param"
+        }
+    }
+    # Set is an option menu
+    foreach label $sorted(set) {
+	set param $_set($label)
+	set value [$_model dfltcget [list $style $param] -value]
+        set entries [$_model dfltcget [list $style $param] -values]
+
+	$items add optionmenu $param \
+		-label $label \
+                -entries $entries \
+		-initial $value \
+                -command "$this _update $param"
+    }
+    # Numbers and strings are entry widgets
+    foreach label $sorted(number) {
+	set param $_number($label)
+	set value [$_model dfltcget [list $style $param] -value]
+	$items add entry $param \
+		-label $label \
+		-initial $value
+        _entrybind $param
+    }
+    foreach label $sorted(integer) {
+	set param $_integer($label)
+	set value [$_model dfltcget [list $style $param] -value]
+	$items add entry $param \
+		-label $label \
+		-initial $value
+        _entrybind $param
+    }
+    foreach label $sorted(string) {
+	set param $_string($label)
+	set value [$_model dfltcget [list $style $param] -value]
+	$items add entry $param \
+		-label $label \
+		-initial $value
+        _entrybind $param
+    }
+
+    # Colors are a group containing an entry box, color, and shade
+    $itk_component(items) vskip
+    if { $sorted(color) != "" } {
+        set colors [lsort [_colors]]
+        set shades [_shades]
+
+        foreach label $sorted(color) {
+            set param $_color($label)
+            set value [$_model dfltcget [list $style $param] -value]
+            set c [_decolor $value]
+            set color [lindex $c 0]
+            set shade [lindex $c 1]
+
+            # Create the group and option menus
+            $items group $param \
+                    -label $label \
+                    -style simple \
+                    -columnspan 6 \
+                    -childcolumnspan 1 \
+                    -rowspan 3
+
+            $items add optionmenu $param.color \
+                    -entries $colors \
+                    -initial $color \
+                    -command "$this _updatecolor $param"
+            $items add optionmenu $param.shade \
+                    -entries $shades \
+                    -initial $shade \
+                    -command "$this _updatecolor $param"
+ 
+           $items add entry $param.entry \
+                    -initial $value
+
+            bind [$itk_component(items) component $param.entry] <FocusOut> \
+                    "$this _update $param"
+            bind [$itk_component(items) component $param.entry] <Return> \
+                    "$this _update $param"            
+        }
+    }
+
+    # Fonts are a group containing family, size, and style menus
+    $itk_component(items) vskip
+    if { $sorted(font) != "" } {
+        set families [lsort [::tycho::FontManager::family]]
+        set sizes [::tycho::FontManager::size]
+        set styles {roman italic bold bolditalic}
+
+        foreach label $sorted(font) {
+            set param $_font($label)
+            set value [$_model dfltcget [list $style $param] -value]
+            # Get current family, size and style
+            foreach {f x s} $value {}
+            if { $x == "" } {
+                set x 12
+            }
+            if { $s == "" } {
+                set s roman
+            }
+            # Create the group and option menus
+            $items group $param \
+                    -label $label \
+                    -style boxed \
+                    -columnspan 6 \
+                    -childcolumnspan 5 \
+                    -childstyle simple \
+                    -rowspan 3
+            $items add optionmenu $param.family \
+                    -label "Family" \
+                    -entries $families \
+                    -initial $f \
+                    -command "$this _update $param"
+            $items add optionmenu $param.size \
+                    -label "Size" \
+                    -entries $sizes \
+                    -initial $x \
+                    -command "$this _update $param"
+            $items add optionmenu $param.style \
+                    -label "Style" \
+                    -entries $styles \
+                    -initial $s \
+                    -command "$this _update $param"
+        }
+    }
+}
+
+#######################################################################
+#### _refresh
+#
+# Reload data after changing style
+#
+body ::tycho::StyleEditor::_refresh {{group {}} {context {}}} {
+    # FIXME: Groups
+    set style $_index([$itk_component(items) get style-chooser])
+    configure -style $style
+}

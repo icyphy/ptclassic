@@ -1,0 +1,389 @@
+##########################################################################
+# @Version: @(#)Shape.itcl	1.24 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Shape
+#
+# The superclass of the shape class hierarchy. The Slate, by default, 
+# gives every item a "shape," which is one of _point_, _line_,
+# _polygon_, _rectangle_, or _oval_. This shape is what the Slate
+# uses to determine how to respond to requests to reshape an item,
+# for example. Complex item classes can also override their default shape
+# behavior by providing appropriate procedures.
+#
+# The Shape
+# classes are, like the ComplexItem class, really just collections
+# of procedures with shared data that use item IDs to "simulate"
+# real objects. The Slate separates the concept of "shape" into a
+# separate hierarchy to enhance re-usability -- after all, there
+# could be dozens of different items types shaped like a "rectangle",
+# which would probably not fit neatly into a class hierarchy in which
+# all of these inherited from a Rectangle class. In the OO design pattern
+# community, this kind of class structure is known as a "strategy."
+# (Although we are faking it here -- shapes and complex items are not
+# really proper classes -- the concept is the same.)
+#
+# Each Shape class has two kinds of procedure. The first all start with
+# an underscore: these procedures are called by the slate to implement
+# methods such as feature{} and reshape{}, or to implement interactive
+# moving or reshaping{}. The first three arguments to these are always
+# the item ID, the canvas the item is drawn on, and the slate the item
+# is drawn on. The second type of procedure are purely functional
+# utility procedures that take one or more sets of coordinates in the
+# argument list and produce some result. They do not modify a slate
+# item -- they are, however, used by some of the item-modifying
+# procedures to calculate coordinates. These procedures can be called
+# from anywhere in Tycho.
+#
+# <p><b>Options</b>
+#
+# Shape classes have no options.
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">An overview of Shape classes</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="../codeDoc/index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Shape {
+    inherit ::tycho::Uninstantiable
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
+
+    # Attach a set of grapples to an item
+    proc _grapple {id canvas slate interactor args}
+
+    # Start a move interaction sequence
+    proc _moveclick {tag canvas slate x y args}
+
+    # Continue a move interaction sequence
+    proc _movedrag {tag canvas slate x y}
+
+    # Terminate a move interaction sequence
+    proc _moverelease {tag canvas slate}
+
+    # Reshape one or more features of an item
+    proc _reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc _reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc _reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc _reshaperelease {id canvas slate}
+
+    # Get a compass point transformed in some way
+    proc compass {compass transformation}
+
+    # Get a compass point from a vector
+    proc compassFromVector {x y}
+
+     # Convert a compass point into a vector
+    proc compassToVector {c}
+
+    # Convert radians into degrees
+    proc degrees {r}
+
+    # Convert degrees into radians
+    proc radians {r}
+
+    ###################################################################
+    ####                  protected variables                      ####
+
+    # Storage for temporary variables. Note: all methods must be careful
+    # to make array indexes unique, since this array stores data for
+    # multiple slates. The best way to do this is to make the slate
+    # name part of the index.
+    protected common scratch
+
+    ## pi and friends
+    protected common pi    3.14159265358979
+    protected common twoPi [expr 2.0 * $::tycho::Shape::pi]
+    protected common piOverTwo [expr 0.5 * $::tycho::Shape::pi]
+    protected common piOverFour [expr 0.25 * $::tycho::Shape::pi]
+    protected common threePiOverTwo [expr 1.5 * $::tycho::Shape::pi]
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Compass rotation
+    private common compassTransformation
+
+    # Compass as vector
+    private common compassToVector
+}
+
+###################################################################
+####                  class initialization                     ####
+
+array set ::tycho::Shape::compassTransformation {
+    cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
+    ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
+    rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
+    lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
+    ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
+    ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
+}
+
+array set ::tycho::Shape::compassToVector {
+    n {0 -1} s {0 1} e {1 0} w {-1 0} 
+    ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
+}
+
+#######################################################################
+#### _feature
+#
+# _Abstract procedure._
+#
+body ::tycho::Shape::_feature {id canvas slate args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### _grapple
+#
+# _Abstract procedure._
+#
+body ::tycho::Shape::_grapple {id canvas slate interactor args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### _moveclick
+#
+body ::tycho::Shape::_moveclick {tag canvas slate x y args} {
+    set unique $tag.[$slate uniqueid]
+
+    # Remember where we started
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # If the -ghost option is specified, create the ghost
+    if { [lsearch -exact $args -ghost] != -1 } {
+	$slate ghost $tag
+	set scratch(start.$unique) [list $x $y]
+	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
+    }
+    # Add a temporary tag to all highlights and grapples
+    foreach id [$slate find withtag $tag] {
+        $slate addtag moveable.$unique withtag highlight.$id
+        $slate addtag moveable.$unique withtag grapple.$id
+    }
+}
+
+#######################################################################
+#### _movedrag
+#
+body ::tycho::Shape::_movedrag {tag canvas slate x y} {
+    set unique $tag.[$slate uniqueid]
+    set deltax [expr $x - $scratch(prevX.$unique)]
+    set deltay [expr $y - $scratch(prevY.$unique)]
+
+    # If there's a ghost, move it, else move the item, highlights, and
+    # grapples. Note that we use the IncrCanvas method here, to avoid
+    # doubly moving highlights
+    if $scratch(ghost.$unique) {
+	$slate ::tycho::IncrCanvas::move ghost.$tag $deltax $deltay
+    } else {
+	$slate ::tycho::IncrCanvas::move $tag $deltax $deltay
+	$slate ::tycho::IncrCanvas::move moveable.$unique $deltax $deltay
+    }
+
+    # Remember the new position
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+}
+	
+#######################################################################
+#### _moverelease
+#
+body ::tycho::Shape::_moverelease {tag canvas slate} {
+    set unique $tag.[$slate uniqueid]
+
+    # If there's a ghost, move the item, with an tags and grapples,
+    # to its position and then delete the ghost. Again note the use
+    # of the IncrCanvas version of move{}.
+    if $scratch(ghost.$unique) {
+        ::tycho::assign a b $scratch(start.$unique)
+        set deltax [expr $scratch(prevX.$unique) - $a]
+        set deltay [expr $scratch(prevY.$unique) - $b]
+
+	$slate ::tycho::IncrCanvas::move $tag $deltax $deltay
+	$slate ::tycho::IncrCanvas::move moveable.$unique $deltax $deltay
+ 
+	$slate delete ghost.$tag
+	unset scratch(start.$unique)
+    }
+
+    # Clean up
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
+
+    $slate dtag moveable.$unique
+}
+
+#######################################################################
+#### _reshape
+#
+# _Abstract procedure._
+#
+body ::tycho::Shape::_reshape {id canvas slate x y args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### _reshapeclick
+#
+# _Abstract procedure._
+# Start a click-drag-release sequence for reshaping an item. This
+# assumes that a release action has been called since previous
+# drag actions. The optional -ghost flag indicates that the item
+# is to be reshaped by dragging a ``ghost'' of the item. One or
+# more features can be specified.
+#
+body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### _reshapedrag
+#
+# _Abstract procedure._
+# Reshape the features previously specified by click{}
+# to the specified value. Aspects are modified by the relevant
+# x or y coordinate only.
+# Drag assumes that click has already been called on the item,
+# and will function unpredictably if not.
+#
+body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### _reshaperelease
+#
+# _Abstract procedure._
+# Terminate a click-drag-release sequence. If a ghost is
+# being reshaped, then the item is reshaped to the shape of the ghost
+# and the ghost is deleted. Note: A release must be used to terminate
+# the click-drag-release sequence, even if not ghosting the item.
+#
+body ::tycho::Shape::_reshaperelease {id canvas slate} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### compass
+#
+# Change a compass coordinate into a related one. Valid values
+# of the second argument are:
+#
+# <ul>
+# <li><b>cw</b>: Rotate the point 90 degrees clockwise
+# <li><b>ccw</b>: Rotate the point 90 degrees counter-clockwise
+# <li><b>rev</b>: Rotate the point 180 degrees
+# <li><b>lr</b>: Reflect the point about the vertical axis
+# <li><b>ud</b>: Reflect the point about the horizontal axis
+# <li>blank string: Return the point.
+# </ul>
+# 
+body ::tycho::Shape::compass {compass transformation} {
+    return $compassTransformation($transformation,$compass)
+}
+
+#######################################################################
+#### compassFromVector
+#
+# Given two _x_ and _y_ values, return a compass direction that
+# approximates it. For example, the values 1 and 0 will return "e."
+# of the second argument are:
+# 
+body ::tycho::Shape::compassFromVector {x y} {
+    if { $x == 0 } {
+	set h {}
+    } elseif { $x > 0 } {
+	set h e
+    } else {
+	set h w
+    }
+    if { $y == 0 } {
+	set v {}
+    } elseif { $y > 0 } {
+	set v s
+    } else {
+	set v n
+    }
+    join [list $v $h] ""
+}
+
+#######################################################################
+#### compassToVector
+#
+# Given a compass point, generate two _x_ and _y_ values representing
+# a unit vector in that direction.
+# For example, the compass point ne will return <code>{1 -1}</code>.
+# 
+body ::tycho::Shape::compassToVector {c} {
+    return $compassToVector($c)
+}
+
+##########################################################################
+#### degrees r
+#
+# Convert radians to degrees.
+#
+body ::tycho::Shape::degrees {r} {
+    return [expr $r * 180.0 / $pi]
+}
+
+##########################################################################
+#### radians r
+#
+# Convert degrees to radians.
+#
+body ::tycho::Shape::radians {d} {
+    return [expr $d / 180.0 * $pi]
+}

@@ -1,0 +1,86 @@
+# -*- mode: tcl -*-
+#
+# @(#)layout.style	1.5 10/07/97
+#
+# The "style" master style-sheet
+#
+configure -title "Layout"
+configure -description {
+    This style contains settings for widget dimensions.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default layout parameters. These parameters are
+    suitable for a high-resolution screen.
+} {
+    parameter textWidth 80 \
+	    -type integer \
+	    -label "Default text width"
+
+    parameter textHeight 40 \
+	    -type integer \
+	    -label "Default text height"
+
+    parameter fillColumn 70 \
+	    -type integer \
+	    -label "Default fill column"
+
+    parameter textRelief raised \
+	    -type choice \
+	    -values {raised sunken flat} \
+	    -label "Text widget relief"
+    
+    parameter buttonPadX 12 \
+	    -type integer \
+	    -label "Horizontal padding of buttons"
+
+    parameter buttonPadY 4 \
+	    -type integer \
+	    -label "Vertical padding of buttons"
+
+    parameter menuPadX 8 \
+	    -type integer \
+	    -label "Horizontal padding of menu buttons"
+
+    parameter menuPadY 4 \
+	    -type integer \
+	    -label "Vertical padding of menu buttons"
+
+    parameter entryWidth 30 \
+	    -type integer \
+	    -label "Default width of entry widgets"
+
+    group browsers \
+	    -label Browsers \
+	    -description {
+	Layout parameters for browsers
+    } {
+	parameter fileBrowserWidth 30 \
+		-type integer  \
+		-label "Default width of file browser"
+
+	parameter fileBrowserHeight 12 \
+		-type integer  \
+		-label "Default height of file browser"
+
+	parameter indexBrowserWidth 30 \
+		-type integer  \
+		-label "Default width of index browser"
+
+	parameter indexBrowserHeight 20 \
+		-type integer \
+		-label "Default height of index browser"
+    }
+}
+
+style fullscreen \
+	-label "Full screen" \
+	-description {
+    Layout parameters that work well using the small fonts for
+    a high-resolution screen.
+} {
+    parameter textHeight 56
+}
+

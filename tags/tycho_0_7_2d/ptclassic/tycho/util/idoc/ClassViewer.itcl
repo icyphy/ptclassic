@@ -1,0 +1,1268 @@
+# A viewer for ClassModel objects.
+#
+# @Author: Cliff Cordeiro
+#
+# @Version: @(#)ClassViewer.itcl	1.67 01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### ClassViewer
+# This class defines a combination of a MultiPanel widget and two HTML
+# widgets which is used for efficient class browsing of Itcl and Java
+# source.
+#
+# The MultiPanel widget along the left side of the screen is used
+# for controlling the contents of the two HTML widgets. A click brings 
+# items into the proper HTML widgets, and placing the mouse over an item
+# puts an abbreviated version of the information in the statusbar at the
+# bottom of the screen. Items within the Panel can be expanded and 
+# contracted are able to scroll as well.
+#
+# The top HTML widget holds entire-class information, usually will
+# be sized larger than the bottom one, and changes less often.
+# 
+# The bottom HTML widget holds specific information relating to
+# constructs the user selects in the Panel on the left. 
+#
+# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.idoc">
+# ::tycho::Class</a> model. The model is in turn generated from the code.
+# (See <a href="ClassViewerSys.idoc">::tycho::IdocSys</a> for
+# information about generation.)
+# 
+# ClassViewer supports any language that can be encoded into a ::tycho::Class
+# representation. Currently, keywords are correct for Itcl as well as Java.
+# However, the default behaviour will allow browsing of any language,
+# though certain information may be left out in the current implementation.
+#
+# ClassViewer can be subclassed to make a more language-specific
+# viewer. A number of method may need to be overridden, including:
+# <ul> 
+# <li><b>_displayConstructors</b> Chooses the names and
+# ordering for constructors in the MultiPanel. 
+# <li><b>_displayDestructors</b> Chooses the names and ordering
+# for destructors in the MultiPanel.
+# <li><b>_displayExternal</b> Chooses the names and ordering for related class 
+# information in the MultiPanel. 
+# <li><b>_displayMethods</b> Chooses the names and ordering for
+# methods in the MultiPanel.
+# <li><b>_displayVariables</b> Chooses the names and ordering
+# for variables in the MultiPanel.
+# <li><b>_formatExpl</b> Formats the explanations of variables
+# and methods in HTML.
+# <li><b>_hyperLink</b> Creates links to the code.
+# <li><b>docFile</b> Given a class name, returns a documentation file name
+# and path.
+# <li><b>relFile</b> Given a class name, returns the relative documentation
+# file name and path.
+# <li><b>generateHtml</b> Transforms the current main Class into a standalone
+# HTML document.
+# <li><b>_generateHtmlContents</b> Generates the table of contents for the 
+# standalone HTML.
+# <li><b>_generateHtmlBody</b> Generates the body of the standalone HTML.
+# </ul>
+# 
+# ClassViewer also is able to transform ::tycho::Class
+# models into pure HTML documents.
+#  
+# To use this class, go to the Special menu in either the Itcl or Java editors
+# and select _Generate ClassViewer Documentation_. 
+#
+class ::tycho::ClassViewer {
+    inherit ::tycho::File
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # Whether or not to generate verbose HTML
+    itk_option define -verbose verbose Verbose 0
+
+    # The color of inherited entities.
+    itk_option define -inheritcolor inheritColor InheritColor grey
+
+    # The color of Itcl options.
+    itk_option define -optioncolor optionColor OptionColor black
+  
+    # The color of public constructs.
+    itk_option define -publiccolor publicColor PublicColor black
+    
+    # The color of protected constructs.
+    itk_option define -protectedcolor protectedColor ProtectedColor black
+
+    # The color of package protection constructs.
+    itk_option define -packagecolor packageColor PackageColor black
+    
+    # The color of private constructs.
+    itk_option define -privatecolor privateColor PrivateColor black 
+
+    # The default head font -- an X font which should be made 
+    # symbolic in Tk 8.0
+    itk_option define -headfont headFont Font [::tycho::font \
+            {New Century Schoolbook} 18 Roman]
+
+    # The default body font -- an X font which should be made 
+    # symbolic in Tk 8.0
+    itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
+    
+    # The height of the entire compound widget.
+    itk_option define -height height Height "15 c"
+    
+    # The width of the entire compound widget.
+    itk_option define -width width Width "20 c"
+
+    # The relative width of the contents widget compared to the entire window.
+    itk_option define -relwidth relWidth RelWidth 0.22
+
+    # The relative height of the top HTML widget. (The bottom is 1-relheight). 
+    itk_option define -relheight relHeight RelHeight 0.6
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                      public methods                       ####
+
+    # Reinitialize the internal data.
+    public method clear {}
+
+    # Return a description of the main or given class.
+    public method describe {{class {}}}
+
+    # Return the filename of the documentation of the given class.
+    public method docFile {classname}
+    
+    # Make the fonts in all FIMXE: widgets smaller.
+    public method downSize {}
+
+    # Generate a DAG for the current class and it's parents.
+    public method generateDAG {}
+
+    # Generate an HTML representation of the current class.
+    public method generateHtml {}
+
+    # Place a ghost handle a certain number of pixels from the actual one.
+    public method ghostHandle {horizontal pixels}
+
+    # Bring up the User's Guide
+    public method help {} 
+
+    # Import the main class' parents, the parents' parents, etc.
+    public method inheritAll {{redisplay 1}}
+
+    # Insert the specified data.
+    public method insertData {data}
+    
+    # Insert HTML into myHtml(Top or Bottom) widget
+    public method putHtml {class data {top 1}}
+
+    # Return the filename of the relative documentation of the given class.
+    public method relFile {classname}
+
+    # Resize the appropriate frame.
+    public method resizeFrame {horizontal pixels}
+    
+    # Make the fonts in all FIMXE: widgets bigger.
+    public method upSize {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    ###################################################################
+    ####                      protected variables                  ####
+    # The name of the currently displayed class (others are related to this)
+    protected variable _currentclass
+
+    # Array of class model objects indexed by class -> _classmodels(::foo::bar)
+    protected variable _classmodels
+
+    # List of classes in _classmodels() in inheritance order.
+    protected variable _heritage ""
+   
+    # My class diagram
+    protected variable _classdag
+
+    # Data currently shown in bottom HTML widget.
+    protected variable myBottomData ""
+
+    # Data currently shown in top HTML widget.
+    protected variable myTopData ""
+
+    # The levels of protection the current language supports. Set in display.
+    protected variable _protections
+
+    ###################################################################
+    ####                     protected methods                     ####
+
+    # Bind a description to <enter>ing a label.
+    protected method _bindDesc {class type item label}
+  
+    # Bind an explanation to button 1 clicking a label.
+    protected method _bindExpl {class type item label}
+
+    # Display the contents of the current class in contents widget.
+    protected method _display {}
+
+    # Display the constructor(s) in the contents widget.
+    protected method _displayConstructors {}
+    
+    # Displayer the destructor(s) in the contents widget.
+    protected method _displayDestructors {}
+
+    # Display the proper methods/procedures in the contents widget.
+    protected method _displayMethods {protection}
+
+    # Display the related procs in the contents widget.
+    protected method _displayExternal {}
+
+    # Display the proper variables in the contents widget.
+    protected method _displayVariables {protection}
+    
+    # Format the explanation of the given item in HTML.
+    protected method _formatExpl {class item type {extern 0}}
+
+    # Create the body of an HTML document describing the current class.
+    protected method _generateHtmlBody {}
+
+    # Create the internal links for an HTML output of the class model. 
+    protected method _generateHtmlContents {}
+
+    # Format the given item as an HTML link
+    protected method _hyperLink {class item type {text {}} {itemtype {}}}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Delete the classes in the _classmodels array and unset the array.
+    private method _deleteClasses {{all 1}}
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
+    # Calculate a new -relwidth parameter (doesn't reset it)
+    private method _newRelWidth {pixels}
+
+    # Calculate a new -relheight parameter (doesn't reset it)
+    private method _newRelHeight {pixels}
+
+    # Reload the data in HTML widgets after an event has cleared them.
+    private method _resetHtml {{top 1}}
+
+    # Setup the resizing handles to behave properly.
+    private method _setupHandles {}
+}
+
+#########################################################################
+#### -headfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for the display font
+#
+configbody ::tycho::ClassViewer::headfont {
+
+    set f $itk_option(-headfont)
+    foreach panel [$itk_component(contents) panels] {
+        $itk_component(contents) itemconfig $panel -font $f
+    }
+    # must be caught because class may not exist
+    catch {$itk_component(contents) itemconfig class -font $f}
+}
+
+#########################################################################
+#### -bodyfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for the display font
+#
+configbody ::tycho::ClassViewer::bodyfont {
+
+    set f $itk_option(-bodyfont)
+    foreach label [$itk_component(contents) labels] {
+        if {$label != "class"} {    
+            $itk_component(contents) itemconfig $label -font $f
+        }
+    }
+}
+
+#########################################################################
+#### -height configuration
+# Height of the compound widget must be passed to the displayer.
+#
+configbody ::tycho::ClassViewer::height {
+    displayer config -height $itk_option(-height)
+}
+
+#########################################################################
+#### -width configuration
+# Width of the compound widget must be passed to the displayer.
+#
+configbody ::tycho::ClassViewer::width {
+    displayer config -width $itk_option(-width)
+}
+
+#########################################################################
+#### -relheight configuration
+# Reset the placement of widgets to reflect the new relative height
+# priorities.
+#
+configbody ::tycho::ClassViewer::relheight {
+
+    set h $itk_option(-relheight)
+    set cw $itk_option(-relwidth)
+    set hw [expr 1 - $cw]
+
+    place $itk_component(html1) -anchor ne -relx 1.0 -rely 0.0 \
+            -relheight $h -relwidth $hw -in $itk_interior
+
+    place $itk_component(html2) -anchor se -relx 1.0 -rely 1.0 \
+            -relheight [expr 1 - $h] -relwidth $hw -in $itk_interior
+
+    place $itk_component(leftright) -anchor n -relx $cw -rely 0.0 \
+            -relheight 1.0 -in $itk_interior
+
+    place $itk_component(updown) -anchor e -relx 1.0 -rely $h \
+            -relwidth $hw -in $itk_interior
+}
+
+#########################################################################
+#### -relwidth configuration
+# Reset the placement of widgets to reflect the new relative width
+# priorities.
+#
+configbody ::tycho::ClassViewer::relwidth {
+
+    set h $itk_option(-relheight)
+    set cw $itk_option(-relwidth)
+    set hw [expr 1 - $cw]
+
+    place $itk_component(contents) -relx 0.0 -rely 0.0 \
+            -relheight 1.0 -relwidth $cw -in $itk_interior
+
+    place $itk_component(html1) -anchor ne -relx 1.0 -rely 0.0 \
+            -relheight $h -relwidth $hw -in $itk_interior
+
+    place $itk_component(html2) -anchor se -relx 1.0 -rely 1.0 \
+            -relheight [expr 1 - $h] -relwidth $hw -in $itk_interior
+    
+    place $itk_component(leftright) -anchor n -relx $cw -rely 0.0 \
+            -relheight 1.0 -in $itk_interior
+
+    place $itk_component(updown) -anchor e -relx 1.0 -rely $h \
+            -relwidth $hw -in $itk_interior
+}
+
+###################################################################
+#### constructor
+#
+body ::tycho::ClassViewer::constructor {args} {
+    # Set the view "type" for the Window menu
+    set viewType "graphics"
+
+    # Top HTML viewer
+    itk_component add html1 {
+        ::tycho::HTML $itk_interior.html1
+    } {
+        keep -background -cursor
+    }
+    # Bottom HTML viewer
+    itk_component add html2 {
+        ::tycho::HTML $itk_interior.html2
+    } {
+        keep -background -cursor
+    }
+    # Contents panel
+    itk_component add contents {
+        ::tycho::MultiPanel $itk_interior.contents
+    } {
+       keep -background -cursor
+    }
+
+    set itk_component(contents) $itk_component(contents)
+
+    # add handle to resize frames vertically
+    itk_component add updown {
+        frame $itk_interior.updown
+    } {
+        keep -cursor
+    }
+    
+    # add handle to resize frames horizontally
+    itk_component add leftright {
+        frame $itk_interior.leftright
+    } {
+        keep -cursor
+    }
+
+    # add ghost handles which move with the mouse
+    itk_component add hGhost {
+        frame $itk_interior.hGhost
+    } {
+        usual
+    }
+
+    itk_component add vGhost {
+        frame $itk_interior.vGhost
+    } {
+        usual
+    }
+
+    # NOTE: placing of widgets occurs in the configbody of -relheight/-relwidth
+
+    eval itk_initialize $args
+
+    # Configure the handles
+    _setupHandles
+
+    # Something annoying inherited insists on creating this thing
+    pack forget $itk_interior.childsite
+}
+
+###################################################################
+#### destructor
+# FIXME: unset the -file option in the HTML widgets. This was set
+# in order to make hyperlinks work. This is the fix of least cost.
+# However, a better fix would be to somehow separate the file=widget 
+# assumption.
+#
+body ::tycho::ClassViewer::destructor {args} {
+    $itk_component(html1) config -file "NoName"
+    $itk_component(html2) config -file "NoName"
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### clear
+# Clear the internal data.
+#
+body ::tycho::ClassViewer::clear {} {
+}
+
+#####################################################################
+#### describe 
+# Return a description of the current class by calling describe. The 
+# class must be loaded. Calling with no arguments describes the _currentclass.
+#
+body ::tycho::ClassViewer::describe {{class {}}} {
+    if {$class == {}} {
+        set class $_currentclass
+    }
+    return [$_classmodels($class) describe]
+}
+
+#####################################################################
+#### docFile
+#
+# Return the documentation file for a given classname. This
+# can be any class of the language of the current ClassViewer.
+# This method will attempt to find the file using a language
+# specific algorithm and will return the filename or {} if one isn't found.
+#
+body ::tycho::ClassViewer::docFile {classname} {
+    # FIXME: Provide default implementation
+    abstractMethod docFile
+}
+
+#####################################################################
+#### downSize
+# Call downSize (decrease the current font size) on the constituent (HTML)
+# widgets.
+# 
+body ::tycho::ClassViewer::downSize {} {
+    $itk_component(html1) downSize
+    $itk_component(html2) downSize
+}
+
+#####################################################################
+#### generateDAG
+# Generate the DAG for the current class and its parents.
+#
+body ::tycho::ClassViewer::generateDAG {} {
+    if {$_heritage == {}} {
+        inheritAll 0
+    }
+    if ![info exists _classdag] {
+        set _classdag [::tycho::EditDAG $this.[::tycho::autoName dag]]
+        set _classdag [namespaceTail $_classdag]
+        # FIXME: does not place anywhere!
+    }
+    foreach parent "$_currentclass $_heritage" {
+        set docfile [docFile $parent]
+        set source [$_classmodels($parent) cget -sourcefile]
+        set sourcedir [::tycho::expandPath [file join \
+                [file dirname $docfile] .. ..]]
+        set source [file join $sourcedir $source]
+        set parents [concat \
+        	[$_classmodels($parent) cget -inherits] \
+        	[$_classmodels($parent) cget -implements]]
+        lappend DAGinfo "add $parent \{label [namespaceTail $parent] \
+                link $source altlink $docfile\} \{$parents\}"
+    }
+    $_classdag clear
+    puts $_classdag
+    foreach entry $DAGinfo {
+        eval "$_classdag $entry"
+    }    
+}
+
+#####################################################################
+#### generateHtml
+# Output the class data in HTML form. 
+#
+body ::tycho::ClassViewer::generateHtml {} {
+    set verbose $itk_option(-verbose)
+    set classModel $_classmodels($_currentclass)
+    set className [$classModel cget -classname]
+    
+    set html "<!-- Automatically generated by the Tycho ClassViewer viewer -->\
+            \n<html>\
+            \n<title>Class $className</title>\
+            \n</head>\
+            \n<body bgcolor=\"$itk_option(-background)\">\
+            \n<h1> Class "
+
+    # FIXME
+    switch [$_classmodels($_currentclass) cget -language] {
+        Itcl {
+            append html "\
+                    <a name = \"[namespaceTail $className] \
+                    class documentation ([namespaceQualifiers \
+                    $className] namespace)\">\
+                    $className</a></h1>\n"
+        }
+        Java {
+            append html "\
+                    <a name = \"$className\
+                    class documentation ([$classModel cget -package]\
+                    package)\">\
+                    $className</a></h1>\n"
+          }
+      }
+      
+      append html [_generateHtmlContents]
+      append html [_generateHtmlBody]
+      append html "</body>\n</html>\n"
+      
+      # Save it as blah_i.html where the current file is blah.idoc
+      # set htmlFile [file root [docFile $_currentclass]]_i.html
+      set htmlFile [file root [docFile $_currentclass]].html
+      set fp [open $htmlFile w]
+      puts $fp $html
+      close $fp
+      ::tycho::File::openContext $htmlFile 
+}
+
+#####################################################################
+#### ghostHandle
+# Control the ghost handle (for lack of a standard name), which is the
+# handle (Iwidgets' panedwindow calls it a "sash") that moves when you
+# are resizing a frame. This is done by _placing_ a frame of the correct
+# size on top of the proper location.
+#
+body ::tycho::ClassViewer::ghostHandle {horizontal pixels} {
+    if {$horizontal} {
+        if {$pixels == 0} {
+            # when the mouse is released, sent ghostHandle 1 0
+            place forget $itk_component(hGhost)
+        } {
+            set newRelX [_newRelWidth $pixels]
+
+            place $itk_component(hGhost) -anchor n -relx $newRelX \
+                    -rely 0.0 -width 4 -relheight 1.0 -in $itk_interior
+        }
+    } {
+        if {$pixels == 0} {
+            # when the mouse is released, sent ghostHandle 0 0
+            place forget $itk_component(vGhost)
+        } { 
+            set hw [expr 1 - $itk_option(-relwidth)]
+
+            set newRelY [_newRelHeight $pixels]
+
+            place $itk_component(vGhost) -anchor e -relx 1.0 -rely $newRelY \
+                    -relwidth $hw -height 4 -in $itk_interior
+        }   
+    }
+}
+
+#########################################################################
+#### help
+# Open a window with help on the ClassViewer widget.
+#
+body ::tycho::ClassViewer::help {} {
+    global env
+    ::tycho::File::openContext \
+	    [file join $env(IDOC_LIBRARY) doc \
+	    ClassViewerHelp.html] html
+}
+
+#######################################################################
+#### inheritAll
+# Load the current _currentclass' parents, then recurse until no new classes
+# need to be loaded. Inherited methods are placed properly in the 
+# hierarchy according to language and protection levels. (Parent classes
+# _must_ of course be the same language as the current class. This is not
+# explicitly checked here.)
+#
+body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
+    set classModel $_classmodels($_currentclass)
+
+    # clear inherited classes
+    _deleteClasses 0
+
+    set parents [$classModel cget -inherits]
+
+    while {[llength $parents] != 0} {
+        set parent [lindex $parents 0]
+        set parents [lreplace $parents 0 0]
+        
+        if [info exists _classmodels($parent)] {
+            catch {delete object $_classmodels($parent)}
+            unset _classmodels($parent)
+        }
+        
+        # Create a new class model if the parent can be found.
+        set parentFile [docFile $parent]
+        if {$parentFile != {}} {
+            # NOTE: parents which aren't loaded aren't part of _heritage
+            lappend _heritage $parent
+
+            set _classmodels($parent) \
+            		[uplevel #0 ::tycho::ClassModel \
+                            [::tycho::autoName class]]
+            putStatus "Loading $parent"
+            ::tycho::safeUpdate $this
+            set fd [open $parentFile]
+            $_classmodels($parent) parse [read $fd]
+            close $fd
+            
+            # Load my parents too.
+            set newparents [$_classmodels($parent) cget -inherits]
+            set parents "$parents $newparents"
+        } else {
+            putStatus "$parent idoc file not found."
+        }
+    }
+    if {$redisplay} {
+        putStatus "Redisplaying contents."
+        ::tycho::safeUpdate $this
+        _display
+    }
+    putStatus ""
+}
+
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display. The data is in the
+# form of a ::tycho::Class and is read by methods from that class.
+#
+body ::tycho::ClassViewer::insertData {data} {
+    if [getReadOnly] {bell; return}
+    _deleteClasses
+    set tempClass [uplevel #0 ::tycho::ClassModel [::tycho::autoName class]]
+    $tempClass parse "$data"
+    set language [$tempClass cget -language]
+    set _currentclass [$tempClass cget -classname]
+    set _classmodels($_currentclass) $tempClass
+    
+    # get the related file, if it exists
+    set relfile [relFile $_currentclass]
+    if {$relfile != {}} {
+        set _classmodels(related) \
+                [uplevel #0 ::tycho::ClassModel [::tycho::autoName class]]
+        set fd [open $relfile]
+        $_classmodels(related) parse [read $fd]
+        close $fd    
+    }
+    
+    _display
+    putHtml $_currentclass [$tempClass cget -explanation]
+}
+
+#########################################################################
+#### putHtml
+# Load a portion of HTML into the proper HTML widget. Add tags to format
+# properly. If top is true, format the data for the upper HTML widget. If 
+# show is true, reload the data in the HTML widget. Show is set to false 
+# when generating HTML for output to a file.
+#
+body ::tycho::ClassViewer::putHtml {class data {top 1}} {
+    switch $top {
+        1 {
+            set myTopData "
+               <head>
+               <title>Class [$_classmodels($class) cget -classname]</title>
+               </head>
+               <body bgcolor=\"$itk_option(-background)\">
+               <h1><a href = \"[$_classmodels($class) cget -sourcefile]\">
+               Class [$_classmodels($class) cget -classname]</a></h1>
+               $data
+               </body>
+               </html>"
+            _resetHtml 1
+            $itk_component(html1) config -file [docFile $class]
+        }
+        0 {
+            set myBottomData "
+               <html>
+               <body bgcolor=\"$itk_option(-background)\">
+               $data
+               </body>
+               </html>"
+            _resetHtml 0
+            $itk_component(html2) config -file [docFile $class]
+        }
+    }
+}
+
+
+#####################################################################
+#### relFile
+# FIXME: this is a hack and not valid under all (many) cases 
+# This should use the class model -source option and modify that
+# to get the _rel.idoc name.
+# 
+body ::tycho::ClassViewer::relFile {classname} {
+    set relname "[namespaceTail $classname]_rel.idoc"
+
+    lappend dirs {$TYCHO/kernel/basic}
+    lappend dirs {$TYCHO/kernel/model}
+    lappend dirs {$TYCHO/kernel/gui}
+    lappend dirs {$TYCHO/kernel/html}
+    lappend dirs {$TYCHO/edit/textedit}
+    lappend dirs {$TYCHO/edit/slate}
+    lappend dirs {$TYCHO/edit/visedit}
+    lappend dirs {$TYCHO/util/tydoc}
+    lappend dirs {$TYCHO/util/idoc}
+    
+    foreach dir $dirs {
+        set findfile [file join $dir doc codeDoc $relname]
+        set findfile [::tycho::expandPath $findfile]
+        set relfile [glob -nocomplain $findfile]
+        if {$relfile != {}} {
+            break
+        }
+    }
+    return "$relfile"
+}
+
+#####################################################################
+#### resizeFrame
+# Resize the frame after a mouse event involving either handle.
+#
+body ::tycho::ClassViewer::resizeFrame {horizontal pixels} {
+    if {$horizontal} {
+        $this config -relwidth [_newRelWidth $pixels]
+    } {
+        $this config -relheight [_newRelHeight $pixels]
+    }
+}
+
+#####################################################################
+#### upSize
+# Call upSize (increase the current font size) on the constituent (HTML)
+# widgets.
+#
+body ::tycho::ClassViewer::upSize {} {
+    $itk_component(html1) upSize
+    $itk_component(html2) upSize
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procs                         ####
+
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+###########################################################################
+#### _bindDesc
+# bind to the enter and shift release events on the given label
+# the display of the description of the given item in the statusbar
+# if such a description exists
+#
+body ::tycho::ClassViewer::_bindDesc {class type item label} {
+    set classModel $_classmodels($class)
+
+    # get the type of the label
+    switch [string range $label end end] {
+        "\p" {set type method}
+        "\m" {set type method}
+        "\v" {set type variable}
+        "\r" {set type method}
+        "\c" {set type constructor}
+        "\d" {set type destructor}
+        default {set type {}}
+    }
+
+    if {$class != $_currentclass && $class != "related"} {
+        # Don't display class it's from if it's from this class.
+        set class "<$class> "
+    } {
+        set class ""
+    }
+
+    set desc [$classModel attrget $item -description]
+    if { $desc != "" } {
+        $itk_component(contents) bind $label <Enter> \
+                "$this putStatus \{$class$desc\}"
+        $itk_component(contents) bind $label <KeyRelease-Shift_L> \
+                "$this putStatus \{$class$desc\}"
+        $itk_component(contents) bind $label <KeyRelease-Shift_R> \
+                "$this putStatus \{$class$desc\}"
+        $itk_component(contents) bind $label <Leave> \
+                "$this putStatus {}"
+    }   
+}
+
+###########################################################################
+#### _bindExpl
+# bind to the button 1 click event on the given label
+# the display of the explanation of the given item in HTML
+# the explanation includes extra information besides the
+# actual explanation field of the item
+#
+body ::tycho::ClassViewer::_bindExpl {class type item label} {
+    # get the type of the label
+    switch [string range $label end end] {
+        "\p" {set type method}
+        "\m" {set type method}
+        "\v" {set type variable}
+        "\r" {set type method}
+        "\c" {set type constructor}
+        "\d" {set type destructor}
+        default {set type {}}
+    }
+
+    # format explanation
+    set expl [_formatExpl $class $item $type]
+
+    # bind explanation to button 1 click
+    $itk_component(contents) bind $label <Button-1> \
+            [code "$this putHtml $class {$expl} {0}"]
+}
+
+###########################################################################
+#### _display
+# Display the contents of the current class in the contents widget
+#
+body ::tycho::ClassViewer::_display {} {
+    set classModel $_classmodels($_currentclass)
+
+    # clear the contents widget
+    $itk_component(contents) clear
+    ::tycho::safeUpdate $this
+
+    # insert the class name
+    # FIXME: Remove switch
+    switch [$_classmodels($_currentclass) cget -language] {
+        Java {
+            set package [$classModel cget -package]
+            if {$package != {}} {
+                set classname $package.$_currentclass
+            } {
+                set classname $_currentclass
+            }
+            $itk_component(contents) appendlabel class \
+                    -text $classname \
+                    -font [$this cget -headfont] \
+                    -fg [$this cget -publiccolor]
+        }
+        default {
+            $itk_component(contents) appendlabel class \
+                    -text $_currentclass \
+                    -font [$this cget -headfont] \
+                    -fg [$this cget -publiccolor]
+        }
+    }
+
+    $itk_component(contents) bind class <Button-1> \
+            [code "$this putHtml \
+            $_currentclass \{[$classModel cget -explanation]\}"]
+
+    # Class description is optional
+    set desc [$classModel cget -description]
+    if { $desc != "" } {
+        $itk_component(contents) bind class <Enter> [code \
+                "$this putStatus \{$desc\}"]
+        $itk_component(contents) bind class <Leave> [code \
+                "$this putStatus {}"]
+    }
+    # FIXME in general, insert class parameters here
+
+    if [info exists _classmodels(related)] {
+        putStatus "Displaying related information."
+        ::tycho::safeUpdate $this
+        _displayExternal
+    }
+    
+    # insert each type (Protected Method, etc.) by protection order
+    switch [$_classmodels($_currentclass) cget -language] {
+        "Java" {set _protections "public protected package private"}
+        default {set _protections "public protected private"}
+    }
+
+    putStatus "Displaying constructors."
+    ::tycho::safeUpdate $this
+    _displayConstructors
+
+    putStatus "Displaying destructors."
+    ::tycho::safeUpdate $this
+    _displayDestructors
+
+    foreach protection $_protections {
+        # Variables        
+        putStatus "Displaying $protection variables."
+        ::tycho::safeUpdate $this
+        _displayVariables $protection   
+        # Methods
+        putStatus "Displaying $protection methods."
+        ::tycho::safeUpdate $this
+        _displayMethods $protection
+    }
+    putStatus ""
+}
+
+#####################################################################
+#### _displayConstructors
+# Display the constructor(s) in the contents widget.
+#
+body ::tycho::ClassViewer::_displayConstructors {} {
+    # FIXME: Provide default implementation here
+    abstractMethod _displayConstructors
+}
+
+#####################################################################
+#### _displayDestructors
+# Display the destructor(s) in the contents widget.
+#
+body ::tycho::ClassViewer::_displayDestructors {} {
+    # FIXME: Provide default implementation here
+    abstractMethod _displayDestructors
+}
+
+#####################################################################
+#### _displayMethods
+# Display the methods/procedures of the given protection in the
+# contents widget.
+#
+body ::tycho::ClassViewer::_displayMethods {protection} {
+    # FIXME: Provide default implementation here
+    abstractMethod _displayMethods
+}
+
+#####################################################################
+#### _displayExternal
+# Display external procs (only) of the current class in the
+# contents widget.
+# 
+body ::tycho::ClassViewer::_displayExternal {} {
+    ;# Default does nothing...
+}
+
+#####################################################################
+#### _displayVariables
+# Display the variables of the given protection in the contents
+# widget.
+#
+body ::tycho::ClassViewer::_displayVariables {protection} {
+    # FIXME: Provide default implementation here
+    abstractMethod _displayVariables
+}
+
+#####################################################################
+#### _formatExpl
+# Format the explanation of the given item in HTML. This is usually
+# bound to a button 1 click on an item in the contents widget.
+# An item may not have an explanation, but _must_ have a description.
+# 
+# If extern is set (it's to be externally viewed), follow the Tydoc
+# style of formatting. If unset, follow the ClassViewer style.
+#
+body ::tycho::ClassViewer::_formatExpl {class item type {extern 0}} {
+    # FIXME: Move into "Format" class
+    abstractMethod _formatExpl
+}
+
+#####################################################################
+#### _generateHtmlContents
+# Create the internal links for an HTML output of the class model. 
+# If verbose is unset, only output constructors and destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+body ::tycho::ClassViewer::_generateHtmlContents {} {
+    # FIXME: Provide default implementation here
+    abstractMethod _generateHtmlContents
+}
+
+#####################################################################
+#### _generateHtmlBody
+# Create the body of an HTML document describing the current class.
+# Similar to _display{} >
+#
+# If verbose is unset, only output constructors and destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+# We could pull this information from the contents
+# widget, however, we might have to reload if it contains inherited data,
+# which we do not document in the HTML (yet). 
+#
+# It may be desirable to generate "flattened" documentation, listing all
+# methods/variables available to a class. This is a FIXME for future versions.
+#
+body ::tycho::ClassViewer::_generateHtmlBody {} {
+    # FIXME: Provide default implementation here
+    abstractMethod _generateHtmlBody
+}
+
+#####################################################################
+#### _hyperLink
+# Generates a reasonable hyperLink tag to the given item, using the text
+# field as the link text, if it's given (otherwise use item). This will
+# not work if the source is formatted differently.
+#
+body ::tycho::ClassViewer::_hyperLink \
+	{class item type {text {}} {itemtype {}}} {
+    # FIXME: Provide default implementation here
+    abstractMethod _hyperLink
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::ClassViewer::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::ClassViewer::_initializeMenubar $menubar
+    }
+
+    # Bindings
+    # font size control
+    set myDisplayer [namespaceTail [displayer]]
+    if {$myDisplayer != {}} {
+        bind $myDisplayer <Control-equal> "$this upSize; break"
+        bind $myDisplayer <Control-plus> "$this upSize; break"
+        bind $myDisplayer <Control-minus> "$this downSize; break"   
+        pack propagate $myDisplayer 0
+        $myDisplayer attachView $itk_component(html1) -menubar 0
+        $itk_component(html1) forgetDisplayer
+        $myDisplayer attachView $itk_component(html2) -menubar 0
+        $itk_component(html2) forgetDisplayer
+    }
+
+    # Subscribe to the stylesheets
+    # FIXME: This has been put into this method,
+    # when it really should be in the constructor. For some
+    # reason, moving it to the constructor doesn't get the
+    # the correct height and width
+    stylesheet subscribe \
+            -headfont fonts displayFont \
+            -bodyfont fonts entryFont \
+            -background idoc bgColor \
+            -height     idoc height \
+            -width      idoc width \
+            -publiccolor idoc publicColor \
+            -protectedcolor idoc protectedColor \
+            -packagecolor idoc packageColor \
+            -privatecolor idoc privateColor \
+            -optioncolor idoc optionColor  \
+            -inheritcolor idoc inheritColor \
+            -verbose idoc verboseHtml
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+###########################################################################
+#### _deleteClasses
+# Unset the array of classes and delete each class object if all is set. If 
+# all is 0, delete only the inherited classes. Either way, set _heritage to
+# an empty string.
+#
+body ::tycho::ClassViewer::_deleteClasses {{all 1}} {
+    if ![info exists _classmodels] {
+        return
+    }
+
+    if {$all} {
+        foreach class [array names _classmodels] {
+            catch {delete object $_classmodels($class)}
+        }
+        unset _classmodels
+    } else {
+        # Only delete inherited classes
+        foreach class $_heritage {
+            catch {delete object $_classmodels($class)}
+        }
+    }
+    set _heritage ""
+}
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::ClassViewer::_initializeMenubar {menubar} {
+    $menubar delete compareto
+    $menubar delete insert
+    $menubar delete save
+    $menubar delete saveas
+    $menubar delete evaluate
+    $menubar delete revisioncontrol
+    
+    $menubar addMenu special -label Special -after window -underline 0
+    # Add font size control
+    $menubar command biggerfont special \
+            -label "Larger Font" -underline 0\
+            -accelerator "C-+" -command "$this upSize"
+        
+    $menubar command smallerfont special \
+            -label "Smaller Font" -underline 0\
+            -accelerator "C--" -command "$this downSize"
+    
+    $menubar separator specialsep1 special
+
+    # Add a way to get the text description.
+    $menubar command describe special \
+            -label Describe \
+            -underline 0 -command "::tycho::inform \[$this describe\]"
+    
+    $menubar command inherit special \
+            -label Inherit \
+            -underline 0 -command "$this inheritAll"
+
+    $menubar command generateHtml special \
+            -label "Generate HTML" \
+            -underline 0 -command "$this generateHtml"
+    
+    # FIXME: add in when generalized place is working in displayer
+    #        $menubar command GenDAG Special \
+    #                -underline 0 -command "$this generateDAG"
+}
+
+#####################################################################
+#### _newRelWidth
+# Calculate the new -relwidth option to the placer which will put the
+# division of widgets over the cursor. _pixels_ is the distance from the 
+# old location to the desired location
+#
+body ::tycho::ClassViewer::_newRelWidth {pixels} {
+    set contentsRelW $itk_option(-relwidth)
+    set totalW [winfo width [$this windowName]]
+    set newX [expr ($totalW * $contentsRelW) + $pixels] 
+    set newRelX [expr $newX/$totalW]
+            
+    if {$newRelX < 0.0} {
+        set newRelX 0.0
+    } elseif {$newRelX > 1.0} {
+        set newRelX 1.0
+    }
+
+    return $newRelX
+}
+
+#####################################################################
+#### _newRelHeight
+# Calculate the new -relheight option to the placer which will put the
+# division of widgets over the cursor. _pixels_ is the distance from the
+# old location to the desired location
+#
+body ::tycho::ClassViewer::_newRelHeight {pixels} {
+    set topRelH $itk_option(-relheight)
+    set totalH [winfo height [$this windowName]]
+    set newY [expr ($totalH * $topRelH) + $pixels]
+    set newRelY [expr $newY/$totalH]
+
+    if {$newRelY < 0.0} {
+        set newRelY 0.0
+    } elseif {$newRelY > 1.0} {
+        set newRelY 1.0
+    }
+    
+    return $newRelY
+}
+
+#####################################################################
+#### _resetHtml
+# HTML widgets are loaded by changing their data variables and then
+# calling this procedure. It used to be necessary when sizes were
+# changed. It no longer is probably due to JohnR's removal of the 
+# -data option.
+#
+body ::tycho::ClassViewer::_resetHtml {{top 1}} {
+    # puts "::tycho::ClassViewer::_resetHtml $top"
+    switch $top {
+        "0" {$itk_component(html2) insertData $myBottomData}
+        "1" {$itk_component(html1) insertData $myTopData}
+        default {
+            $itk_component(html1) insertData $myTopData
+            $itk_component(html2) insertData $myBottomData
+        }
+    }
+}
+
+#####################################################################
+#### _setupHandles
+# Setup the resizing handles to behave properly: configure the cursor,
+# bind the behaviours. Called by the constructor.
+#
+body ::tycho::ClassViewer::_setupHandles {} {
+    set updown $itk_component(updown)
+    set leftright $itk_component(leftright)
+
+    $updown config -cursor sb_v_double_arrow -height 4 -bg black
+    $leftright config -cursor sb_h_double_arrow -width 4 -bg black
+    $itk_component(vGhost) config -cursor sb_h_double_arrow -bg white
+    $itk_component(hGhost) config -cursor sb_v_double_arrow -bg white
+    
+    bind $updown <B1-Motion> {%Q ghostHandle 0 "%y"}
+    bind $updown <ButtonRelease-1> {
+        %Q resizeFrame 0 "%y"
+        %Q ghostHandle 0 0
+    }
+
+    bind $leftright <B1-Motion> {%Q ghostHandle 1 "%x"}
+    bind $leftright <ButtonRelease-1> {
+        %Q resizeFrame 1 "%x"
+        %Q ghostHandle 1 0
+    }
+}

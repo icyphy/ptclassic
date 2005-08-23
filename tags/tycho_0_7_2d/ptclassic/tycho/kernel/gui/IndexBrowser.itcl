@@ -1,0 +1,305 @@
+# Index browser.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)IndexBrowser.itcl	1.43 01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+##########################################################################
+#### IndexBrowser
+# A browser for an index.  An index consists of a two element list:
+# <ul>
+# <li> A title.
+# <li> An index list.
+# </ul>
+# An index list is a list of entries, where each entry is a list
+# with two or three items.  If the entry has three items, they should be
+# <ul>
+# <li> The string to display in the list box.
+# <li> The name of a file to jump to when the user clicks on the item.
+# <li> The point within the file to jump to.
+# </ul>
+# The third item has any syntax supported by the <code>seeFragment</code>
+# method of the target editor.  It may be a null string, {}, in which case
+# the file is simply opened.
+# In an HTML file, it can be the name associated with any named anchor.
+# In a text file it could be a string of the form {line linenumber}
+# or {range start end}, where start and end are of the form line.character.
+# <p>
+# If an entry in the index has only two items, then they are:
+# <ul>
+# <li> A title.
+# <li> An index list.
+# </ul>
+# This allows for recursive indexes in a single file. When the user
+# clicks on one of these two-item entries, the contents of the list box
+# are replaced by the new index list.
+# <p>
+# If a hyperjump is taken into an index file, and a point is specified,
+# then the index is searched for a matching entry.  If a single matching
+# entry is found, then the link is followed for that entry.  Otherwise,
+# the index is displayed with all matching entries shown.
+# <p>
+# If the -file option is given, that file is read for the contents of
+# the listbox.  Moreover, the directory of that file is used for relative
+# filenames referenced by the index.  Otherwise, the current working directory
+# is used for relative file names.
+# <p>
+# The format of the file is that of an index, a list of two items.
+# It can contain comment lines, which begin with a pound sign (#).
+# These are ignored.
+#
+# The example below opens up the tycho index
+# <tcl><pre> 
+# set win [::tycho::IndexBrowser [::tycho::autoName .ib] &#92
+#	    -file [file join \$TYCHO lib idx tycho.idx]]
+# $win centerOnScreen
+# </pre></tcl>
+#
+class ::tycho::IndexBrowser {
+    inherit ::tycho::ListBrowser
+
+    # Specify the name of the file that contains the index.
+    itk_option define -file file File {}
+
+    # FIXME: Should remove the -command option inherited
+    # from ListBrowser (or support it?)
+
+    constructor {args} {}
+    destructor {}
+
+    ##################################################################
+    ####                     public methods                       ####
+
+    # Return the current point in a form usable by seeFragment.
+    method currentPoint {}
+
+    # Open a help window.
+    method help {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {filename {point {}}}
+
+    # Find a match in the list, and open that entry.
+    method seeFragment {point}
+
+    ##################################################################
+    ####                   protected methods                      ####
+
+    # Process a file or directory selection.
+    protected method processItem {filename}
+
+    # Fill the listbox with items.
+    protected method updateListbox {}
+
+    ##################################################################
+    ####                   protected variables                    ####
+
+    # The directory of the index file.
+    protected variable CWD {}
+
+    # The contents of the index, as a list
+    protected variable contents {}
+
+    # The entries in the index, as an array
+    protected variable entries
+}
+
+#########################################################################
+#### -file configuration
+# Set or change the name of the file that specifies the contents of the
+# listbox.  This also specifies the directory relative to which file
+# references are understood.
+#
+configbody ::tycho::IndexBrowser::file {
+    set file [::tycho::expandPath $itk_option(-file)]
+    if [ file readable $file.fst ] {
+        # Add a button that will bring up a forest browser.
+	$itk_component(bbox) add browse \
+		-text "    Browse    " \
+                -command "::tycho::File::openContext $file.fst" \
+		-row 1 -column 0
+    }
+    set fd [open $file r]
+    set contents [read $fd]
+    close $fd
+    # Remove comments.
+    regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $contents {} contents
+    set CWD [file dirname $file]
+    updateListbox
+}
+
+######################################################################
+#
+body ::tycho::IndexBrowser::constructor {args} {
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -width  layout browsers.indexBrowserWidth \
+	    -height layout browsers.indexBrowserHeight
+}
+
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
+
+#####################################################################
+#### currentPoint
+# Return the text of the current entry.
+#
+body ::tycho::IndexBrowser::currentPoint {} {
+    return [get entry]
+}
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::IndexBrowser::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel gui doc usersGuides \
+	    IndexBrowserHelp.html] html
+}
+
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is relative (it does not begin with "/"(unix), "~", or "$"), then
+# prepend the directory of the file currently being edited or viewed.
+# Then, expand the filename using <code>::tycho::expandPath</code> and
+# open the resulting file with <code>::tycho::File::openContext</code>,
+# which will choose an editor based on the filename extension. Finally,
+# invoke <code>seeFragment</code> to view the specified point within the
+# file. The format for the <i>point</i> argument depends on the type of
+# file being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+#
+body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
+    if { [::tycho::isRelative $filename] && $CWD != {}} {
+	set filename [file join $CWD $filename]
+    }
+    chain $filename $point
+}
+
+#####################################################################
+#### seeFragment
+# If a hyperjump is taken into an index file, and a point is specified,
+# then the index is searched for a matching entry.  If a single matching
+# entry is found, then the link is followed for that entry.  Otherwise,
+# the index is displayed with all matching entries shown.
+#
+body ::tycho::IndexBrowser::seeFragment {point} {
+    insert entry $point
+    set match [complete]
+    if {$match == 1} {
+        ok
+    } elseif {$match == 0} {
+        safeEval ::tycho::warn "No matching entry found in the domain index"
+    } else {
+        safeEval ::tycho::warn \
+                "Multiple matching entries found in the domain index. \
+                Use <Tab> to scroll through."
+    }
+}
+
+    ##################################################################
+    ##################################################################
+    ####                   protected methods                      ####
+
+######################################################################
+#### processItem
+# This procedure processes a user selection by performing a hyperjump
+# to the specified file and point.
+#
+body ::tycho::IndexBrowser::processItem {id} {
+
+    if {$id == {}} {return 0}
+
+    if {![info exists entries($id)]} {
+	safeEval ::tycho::warn "No such item in index: $id"
+	return 0
+    }
+
+    set entry $entries($id)
+    if {[llength $entry] == 2} {
+        # Entry is another index.
+        set contents [lindex $entry 1]
+        updateListbox
+        return 0
+    } {
+        set filename [lindex $entry 1]
+        set point [lindex $entry 2]
+        hyperJump $filename $point
+    }
+    return 1
+}
+
+######################################################################
+#### updateListbox
+# Get the hyperlink names from the index model and load the listbox.
+#
+body ::tycho::IndexBrowser::updateListbox {} {
+    if {[llength $contents] != 2} {
+	error "Syntax error in index file $itk_option(-file) \
+		Should contain the form: name { items }"
+    }
+    configure -text [lindex $contents 0]
+    configure -title [lindex $contents 0]
+    catch {unset entries}
+    set items {}
+    set count 1
+    foreach item [lindex $contents 1] {
+	set len [llength $item]
+	if {$len != 3 && $len != 2} {
+	    error "Syntax error in index item: $item \n\
+		    Should contain the form { id filename point } \
+                    or { id indexlist }"
+	}
+	set name [lindex $item 0]
+	# Special action to deal with duplicate entries.
+	if [info exists entries($name)] {
+	    incr count
+	    set name "$name $count"
+	} {
+	    set count 1
+	}
+	set entries($name) $item
+	lappend items $name
+    }
+    # Add to the listbox
+    clearListbox
+    appendItems $items
+}

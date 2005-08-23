@@ -1,0 +1,353 @@
+##########################################################################
+# @Version: @(#)Oval.itcl	1.12 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Oval
+#
+# The shape of ovals. Like rectangles, items with oval shape have
+# four coordinates, being the left, top, right, and bottom
+# coordinates. Items with this shape include <I>oval</I>
+# and <I>LabelledOval</I>.
+#
+# The TK canvas supports ellipses, or ``ovals,'' as it calls them,
+# but provides no facilities for finding points on the oval. This
+# shape includes routine to help out with some of this stuff.
+#
+# The equation of an ellipse with horizontal radius _a_ and
+# vertical radius _b_ is
+# <pre>
+#        2        2
+#       x        y
+#      ----  +  ----  =  1
+#        2        2
+#       a        b
+# </pre>
+#
+# Let m = y/x (the tangent of the angle to (x,y).
+#
+# Acknowledgement: these functions were derived from Wan-teh Chang's
+# finite-state-machine editor code.
+#
+#  <P><b>Primitive features</b>
+#
+# <ul>
+# <li><B>hradius</B>: The point at the right side of the oval; changing
+# this feature changes the horizontal width of the oval.
+# <li><B>vradius</B>: The point at the top side of the oval; changing
+# this feature changes the vertical height of the oval.
+# </ul>
+#
+# <p><b>Derived features</b>
+#
+# <ul>
+# <li><B>c</B> or <B>center</B>: The center of the oval.
+# <li><B>circumference-</B><I>x-y</I>: The point on the circumference that
+# intersects the vector (<I>x</I>, <I>y</I>) drawn from the center.
+# </ul>
+#
+# <p><b>Bugs</b>: Does not work at all.
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">An overview of Shape classes</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="../codeDoc/index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Oval {
+    inherit ::tycho::Shape
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
+
+    # Attach a set of grapples to an item
+    proc _grapple {id canvas slate interactor args}
+
+    # Reshape one or more features of an item
+    proc _reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc _reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc _reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc _reshaperelease {id canvas slate}
+
+    # Convert a rectangle into an (x,y,a,b) representation
+    proc fromRect {x0 y0 x1 y1}
+
+    # Return a point on the circumference given an angle
+    proc circumference {x y a b angle}
+
+    # Return a point on the circumference given a point
+    proc circumferenceP {x y a b p q}
+
+    # Return a point on the circumference given "m"
+    proc circumferenceM {x y a b m positive}
+}
+
+
+#######################################################################
+#### _feature
+#
+# Return the value of a feature. Valid features are "hradius,"
+# "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
+# (_x_, _y_) is a vector from the center.
+#
+body ::tycho::Oval::_feature {id canvas slate args} {
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
+    set result {}
+
+    if { $args == "" } {
+    	return {hradius vradius center circumference-x-y}
+    } else {
+	foreach feature $args {
+		set a [lindex [split $feature "-"] 0]
+	    switch -exact $a {
+		"hradius" {
+		    lappend result $x1 [expr ($y0+$y1)/2]
+		}
+		"vradius" {
+		    lappend result [expr ($x0+$x1)/2] $y0
+		}
+		"center" {
+		    lappend result [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]
+		}
+		"circumference" {
+		    lappend result ???
+		default {
+		    error "Invalid feature \"$feature\" of line shape"
+		}
+	    }
+	}
+    }
+    return $result
+}
+
+#######################################################################
+#### _reshape
+#
+# Reshape one or more features of the item by the specified amount.
+# Reshape each feature by the specified _x_ and _y_ relative
+# values. Aspects are only affected by the appropriate _x_ or _y_
+# value -- for example, if the "e" (east) feature is specified, it
+# is moved only by the _x_ amount.
+#
+body ::tycho::Oval::_reshape {id canvas slate x y args} {
+    # Get the current coordinates
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
+    
+    # For each of the two possible features, see if it is present in
+    # the features list, and if it is, alter the appropriate coordinates
+    if { [lsearch -exact $args hradius] >= 0 } {
+	set x0 [expr $x0 - $x]
+	set x1 [expr $x1 + $x]
+    }
+    if { [lsearch -exact $args vradius] >= 0 } {
+	set y0 [expr $y0 - $y]
+	set y1 [expr $y1 + $y]
+    }
+    
+    # Reshape with coords{}
+    $slate coords $id $x0 $y0 $x1 $y1
+}
+
+#######################################################################
+#### _reshapeclick
+#
+body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
+    # Extract options
+    array set opts {-ghost 0 -features {}}
+    array set opts $args
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
+    }
+
+    # Remember how I am now.
+    set scratch(features.$unique) $args
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # If the -ghost flag is set, draw the ghost oval.
+    if { $opts(-ghost) } {
+	$slate ghost $id
+ 	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
+    }
+}
+}
+
+#######################################################################
+#### _reshapedrag
+#
+body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
+    # Get the current coordinates
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
+    
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
+
+    # Remember the current coordinates
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
+
+    # For each of the two possible features, see if it is present in
+    # the features list, and if it is, alter the appropriate coordinates
+    if { [lsearch -exact $args hradius] >= 0 } {
+	set x0 [expr $x0 - $x]
+	set x1 [expr $x1 + $x]
+    }
+    if { [lsearch -exact $args vradius] >= 0 } {
+	set y0 [expr $y0 - $y]
+	set y1 [expr $y1 + $y]
+    }
+
+    # If there's a ghost, reshape it. Otherwise reshape the item.
+    if $scratch(ghost.$unique) {
+	$canvas coords ghost.$id $x0 $y0 $x1 $y1
+    } else {
+	$slate coords $id $x0 $y0 $x1 $y1
+    }
+}
+
+#######################################################################
+#### _reshaperelease
+#
+body ::tycho::Oval::_reshaperelease {id canvas slate} {
+    set unique $id.[$slate uniqueid]
+
+    # If there's a ghost, reshape the item to its shape
+    # and then delete the ghost.
+    if $scratch(ghost.$unique) {
+	# Reshape the item
+	eval $slate coords $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
+    }
+
+    # General cleaning up
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
+}
+
+##########################################################################
+#### fromRect
+#
+# Given a rectangle specifying the boundary of the ellipse,
+# return a description in the form {x y a b}.
+#
+body ::tycho::Oval::fromRect {x0 y0 x1 y1} {
+    set a [expr ($x1 - $x0) / 2.0]
+    set x [expr $x1 - $a]
+    set b [expr ($y1 - $y0) / 2.0]
+    set y [expr $y1 - $b]
+
+    return [list $x $y $a $b]
+}
+
+##########################################################################
+#### circumference
+#
+# Given an oval and an angle, return the point on the circumference
+# of the oval. The angle _must_ be between -pi and 2*pi.
+#
+body ::tycho::Oval::circumference {x y a b angle} {
+    # First calculate m, checking for vertical angles
+    if { $angle > $pi } {
+	set angle [expr $angle - $twoPi]
+    }
+
+    if {       $angle > [expr $piOverTwo - 0.01] \
+	    && $angle < [expr $piOverTwo + 0.01] } {
+	return [list $x [expr $y - $b]]
+    } elseif { $angle > [expr $threePiOverTwo - 0.01] \
+	    && $angle < [expr $threePiOverTwo + 0.01] } {
+	return [list $x [expr $y + $b]]
+    }
+    set m [expr tan($angle)]
+
+    # Calculate point based on m
+    return [circumferenceM $oval $m [expr $angle >= 0.0]]
+}
+
+##########################################################################
+#### circumferenceP
+#
+# Given an oval (x, y, a, b) and a point (p,q), return the point on
+# its circumference which intersects the line from its center to the
+# point.
+#
+body ::tycho::Oval::circumferenceP {x y a b p q} {
+    # First calculate m, checking for vertical angles
+    if { $p == $x } {
+	if { $q < $y } {
+	    return [list $x [expr $y - $b]]
+	} else {
+	    return [list $x [expr $y + $b]]
+	}
+    }
+    set m [expr ($y - $q) / ($p - $x)]
+
+    # Calculate point based on m
+    return [circumferenceM $oval $m [expr $q < $y]]
+}
+
+##########################################################################
+#### circumferenceM
+#
+# Given an oval and the tangent from its center,
+# return the point on the circumference of the oval.
+# The positive argument specifies whether the angle
+# is positive or negative.
+#
+body ::tycho::Oval::circumferenceM {x y a b m positive} {
+    set offset [expr $a*$b / sqrt($b*$b + $m*$m*$a*$a)]
+    set offset [expr ($m < 0) ^ ! $positive ? -$offset : $offset]
+
+    set pointx [expr $x + $offset]
+    set pointy [expr $y - $m * $offset]
+
+    return [list $pointx $pointy]
+}

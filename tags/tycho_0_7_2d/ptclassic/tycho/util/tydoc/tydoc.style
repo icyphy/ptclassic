@@ -1,0 +1,55 @@
+#
+# @(#)tydoc.style	1.2 10/07/97
+#
+# The "tydoc" master style-sheet
+#
+configure -title "Tycho documentation system"
+configure -description {
+    This style contains settings for the Tycho
+    documentation system.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default documentation settings.
+} {
+    parameter verboseHtml 0 \
+	    -type boolean \
+	    -label "Generate verbose HTML"
+
+    parameter bgColor "#faf0e6" \
+	    -type color \
+            -label "Background color"
+
+    parameter publicColor black \
+	    -type color \
+            -label "Color of public entities"
+
+    parameter protectedColor black \
+	    -type color \
+            -label "Color of protected entities"
+
+    parameter packageColor black \
+	    -type color \
+            -label "Color of package protected entities"
+
+    parameter privateColor black \
+	    -type color \
+            -label "Color of private entities"
+
+    parameter optionColor black \
+	    -type color \
+            -label "Color of options"
+
+    parameter inheritColor grey \
+	    -type color \
+            -label "Color of inherited entities"
+
+    parameter height "15 c" \
+            -label "Height"
+
+    parameter width "20 c" \
+            -label "Width"
+}
+

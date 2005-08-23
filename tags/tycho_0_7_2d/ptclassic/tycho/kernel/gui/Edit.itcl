@@ -1,0 +1,2733 @@
+# Definition of an editable text widget.
+#
+# @Author: Edward A. Lee
+# @Contributors:	Shuvra Bhattacharyya, Joel King
+#
+# @Version: @(#)Edit.itcl	1.163   01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: To do
+#   - Calls to warn, etc., in the constructor never return.  Why?
+#   - If an undo reverts to the previously saved version, we
+#     should mark the buffer unmodified.
+#   - Add line number display.
+#   - Add a mechanism for marking positions.
+#   - Multi-level (but not infinite) undo.
+#
+#   - fillSelection should be modified to call a new protected method,
+#     findParagraph, that finds the boundaries of a paragraph.
+#     This should then be redefined in derived classes.
+
+
+#######################################################################
+#### Edit
+# This widget contains arbitrary text and allows editing of this text.
+# It interfaces to find/change and spell check dialog boxes, and
+# supports filling of text, with an optional prefix added on each line.
+# It has an undo mechanism, although it is currently only a one-level
+# undo. It also provides an infrastructure, exploited in derived
+# classes, for parsing text in order to color it, control the font,
+# etc.
+# <p>
+# Note that sometime in the future, many of the public methods in this
+# class may become private or protected.  Currently they are public
+# to permit access from key bindings (shortcuts).  The "code" directive in Itcl
+# only makes private procedures accessible, not private methods.
+# But this may change in the future.
+#
+class ::tycho::Edit {
+    inherit ::tycho::File
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # Current base font. Text font is base font + fontOffset
+    itk_option define -basefont baseFont BaseFont {} 
+
+    # Specify whether the widget should have a scrollbar (0 or 1).
+    itk_option define -scrollbar scrollbar Scrollbar 1
+
+    # Specify the text in the edit window.
+    itk_option define -text text Text {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Capitalize the selection or the current word.
+    method capitalize {}
+
+    # Center the insertion point in the window.
+    method center {}
+
+    # Clear the text.
+    method clear {} {deleteRange 1.0 end}
+
+    # Insert a close parenthesis, bracket, or brace and highlight.
+    method closeParen {closeParen}
+
+    # Save the selection to the clipboard.
+    method copy {}
+
+    # Remove the selection and save it to the clipboard.
+    method cut {}
+
+    # Return the current insertion point in a form usable by seeFragment.
+    method currentPoint {}
+
+    # Print the status of the undo information (for debugging).
+    method debugUndo {}
+
+    # Delete the selection, a single character, or a word.
+    method del {type}
+
+    # Delete the specified range of text.
+    method deleteRange {first last {saveInClipboard 0}}
+
+    # If the selection is owned by this window and is visible, delete it.
+    method deleteSelection {}
+
+    # Decrease the size offset of the current textfont
+    method downSize {}
+
+    # Do nothing.
+    method evaluate {}
+
+    # Exec a subprocess.
+    method execProcess {command {waitForOk 1}}
+
+    # Fill the set of lines identified by the selection.
+    method fillSelection {}
+
+    # Find and tag all pattern, word, or character sequences in a range of text.
+    method findAll {tag case regexp wholeword pattern start end tags}
+
+    # Find the next pattern, word, or character sequence in the text.
+    method findOne {case backwards regexp wholeword pattern start end tags}
+
+    # Give the text window the focus.
+    method focusin {}
+
+    # Get text from the text window.
+    method get {args}
+
+    # Return the selection if it is mine, otherwise return a null string.
+    method getSelection {}
+
+    # Query the user for a line number, and then go to that line number. 
+    method gotoLine {}
+
+    # Open a help window.
+    method help {}
+
+    # Begin incremental search using the "minibuffer"
+    method incSearchMinibuffer {{backward 0}}
+
+    # Indicate whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
+    # Insert the given data at the insertion cursor.
+    method insertData {data}
+
+    # Insert the specified string at the specified index.
+    method insertString {index str}
+
+    # Remove text from the insertion pointer to the end of the line.
+    method killToEndOfLine {}
+
+    # Remove text from the insertion pointer to the end of the line.
+    method killToStartOfLine {}
+
+    # Convert the selection or the current word to lower case.
+    method lowerCase {}
+
+    # Move the insertion cursor forward or backward one word.
+    method move {type}
+
+    # Insert text from the selection if the mouse has not moved.
+    method mouseStuff {xpos ypos}
+
+    # Open a blank line of text above the insertion cursor.
+    method openLine {}
+
+    # Parse the text in the specified region for coloration, etc.
+    method parseNow {start stop}
+
+    # Parse the text in chunks as a background task.
+    method parseRegion {start stop}
+
+    # Paste the selection from the clipboard.
+    method paste {}
+
+    # Print the selection or the entire contents.
+    method print {}
+
+    # Query the user for a new right column for text fill.
+    method queryFillColumn {}
+
+    # Query the user for a new fill prefix.
+    method queryFillPrefix {}
+
+    # Record a single character entry for undo.
+    method recordCharForUndo {char}
+
+    # Record the mouse position.
+    method recordMousePos {xpos ypos}
+
+    # Replace all text regions tagged by the given tag with a new string.
+    method replaceAll {tag str}
+
+    # Scroll forward (or backwards) by one page (argument is +-1).
+    method scroll {direction}
+
+    # Open or raise a search window.
+    method search {}
+
+    # Open or raise a search window configured for backwards or read-only. 
+    method searchQuery {backwards nochange}
+
+    # Go to the specified point in the file.
+    method seeFragment {point}
+
+    # Select everything in the specified range.
+    method selectRange {start stop}
+
+    # Check the spelling.
+    method spellCheck {}
+
+    # Return a list of tags to restrict the spelling check.
+    method spellCheckTags {} {return {}}
+
+    # Substitute all instances of 'target' with 'newString'
+    method substituteText {target newstring}
+
+    # Return the full path name of the text window.
+    method textWinName {}
+
+    # Insert text from the selection.
+    method stuff {}
+
+    # Undo the last deletion and insertion.
+    method undo {}
+
+    # Break a sequence of character entries for the purposes of the undo.
+    method undoBoundary {}
+
+    # Unselect everything in the specified range.
+    method unselectRange {start stop}
+
+    # Convert the selection or the current word to upper case.
+    method upperCase {}
+
+    # Increase the size offset of the current textfont
+    method upSize {}
+
+    # Write to the specified file any text that should be spell checked.
+    method writeSpellText {filename}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # The prefix to use on each line when filling text.
+    protected variable fillPrefix ""
+
+    # After a fill, this variable will indicate the index where the fill began.
+    protected variable fillStart
+
+    # Specify how much parsing is done (how many lines of text) before
+    # the rest is deferred. This number may need to be tuned to work well
+    # on a wide range of platforms.  It determines the responsivity of the
+    # system when a large file is being opened.  If on opening the file
+    # the screen fails to be mapped before all parsing is done, then this
+    # number should be decreased.
+    protected variable maxNumLinesToParse 200
+
+    # Specify the time delay is between parsing chunks of text. This
+    # number may need to be tuned to work well on a wide range of
+    # platforms. It determines the responsivity of the system when a
+    # large file is being opened. If the system is not sufficiently
+    # responsive to mouse or keyboard actions, try increasing this
+    # number.
+    protected variable delayBeforeDeferredParsing 200
+
+    # The characters to be skipped on a word movement of the cursor.
+    protected common skipChars " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\:\"\
+        \`\~,.\/\<\>\?\[\]\{\}"
+
+    ##########################################################################
+    ####                  protected methods and procedures                ####
+
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
+
+    # Return the region of text tagged with the given tag within which
+    # the "current" mark sits.
+    protected method getTaggedText {tag}
+
+    # Process an incremental search keystroke or special message
+    protected method incSearch {key}
+    
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Reset the undo buffer.
+    protected method resetUndo {} {}
+
+    # Return the text to save.
+    protected method saveText {}
+
+    # Set the insertion cursor at the specified point.
+    protected method setInsert {index}
+
+    ##########################################################################
+    ####                     private variables and methods                ####
+
+    # Return the column number of the insertion mark.
+    private method columnNumber {}
+
+    # Initialize the menubar
+    private method _initializeMenubar {menubar}
+
+    # Number of characters from the selection to the next word.
+    private method nextWord {}
+
+    # Set up the undo buffer for an insertion at position index.
+    private method prepareInsert {index} {}
+
+    # Number of characters from the selection to the previous word.
+    private method prevWord {}
+
+    # Delete and return the selection or the current word.
+    private method selOrWord {}
+
+    # Keep track of the maximum line length for filling text.
+    private variable maxLineLength 70
+
+    # Add fontOffset to -basefont size to get current -textfont
+    private variable fontOffset 0
+
+    # To support undo and redo, we keep information about the latest
+    # insertions and deletions. For now, we implement just a one-level
+    # undo command. An infinite undo is possible, but is it wise?
+
+    private variable undoInsert 0
+    private variable lastUndo ""
+    private variable lastDelString ""
+    private variable lastDelPosition ""
+    private variable redo 0
+
+    # Variables for incremental search
+    private variable _incSearchForward 1
+    private variable _incSearchFrom 1.0
+    private variable _incSearchTo end
+    private variable _incSearchFail 0
+    private variable _incSearchText {}
+
+    # The following are used to record the mouse position when necessary,
+    # for example to determine whether the mouse has moved between two
+    # events.
+
+    private variable xMousePosition
+    private variable yMousePosition
+}
+
+#########################################################################
+#### -basefont option configuration
+# Change the current basefont. (textfont = basefont + fontOffset)
+#
+configbody ::tycho::Edit::basefont {
+    set bf [::tycho::FontManager::parseFont "$itk_option(-basefont)"]
+
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    set tf [lreplace $bf 1 1 $sz]
+    $this configure -textfont \
+            [::tycho::font [lindex $tf 0] [lindex $tf 1] [lindex $tf 2]]
+}
+
+#########################################################################
+#### -scrollbar option configuration
+# Specify whether the widget should have a scrollbar (0 or 1).
+# 
+configbody ::tycho::Edit::scrollbar {
+
+    if {$itk_option(-scrollbar) == 0} {
+	# Delete the scrollbar if it exists
+	if {[info exists itk_component(scroll)]} {
+	    destroy $itk_component(scroll)
+	}
+	$itk_component(text) configure -yscrollcommand {}
+
+	# Remove scrollbar packing from statusbar
+	# This is also done in _initializeBars{}.
+	statusbar configure -scrollbarpad 0
+    } {
+	#
+	# Add a scrollbar if it does not already exist.
+	#
+	# The scrollbar is packed "-before" the text widget to prevent the
+	# scrollbar from disappearing when the window is made smaller (see
+	# Welch page 126).
+	#
+	if {![info exists itk_component(scroll)]} {
+	    itk_component add scroll {
+		uplevel #0 [list scrollbar $itk_interior.scroll \
+			-relief sunken \
+			-command "$itk_component(text) yview"]
+	    } {
+		keep -activebackground -background -highlightcolor \
+			-troughcolor -cursor
+	    }
+	    pack $itk_component(scroll) -side right -fill y \
+		    -before $itk_component(text)
+
+	    $itk_component(text) configure \
+		-yscrollcommand "$itk_component(scroll) set"
+	}
+	# Add scrollbar packing to statusbar
+	# This is also done in _initializeBars{}.
+	statusbar configure -scrollbarpad 1
+    }
+}
+
+#########################################################################
+#### -text option configuration
+# Change the text in the edit window.
+# 
+configbody ::tycho::Edit::text {
+    # Insert text, if any
+    if {$itk_option(-text) != {}} {
+	# Delete existing text.
+	deleteRange 1.0 end
+	$itk_component(text) mark set insert @0,0
+	insertString insert $itk_option(-text)
+    }
+}
+
+###################################################################
+#
+body ::tycho::Edit::constructor {args} {
+    global tcl_platform
+
+    # The text window.
+    itk_component add text {
+        # Put at the global scope to avoid invoking "unknown".
+        uplevel #0 text $itk_interior.text \
+		-highlightthickness 1 \
+		-setgrid true
+    } {
+	keep -background -highlightbackground \
+		-highlightcolor -selectforeground -cursor \
+		-insertbackground -relief -selectbackground
+        rename -width -textwidth textWidth TextWidth
+        rename -height -textheight textHeight TextHeight
+	rename -font -textfont textfont TextFont
+	rename -foreground -textforeground textForeground TextForeground
+	rename -background -textbackground textBackground TextBackground
+    }
+    set text $itk_component(text)
+    pack $text -side left -expand yes -fill both
+
+    # Modify the Tk binding tags to add the hull, which is File object.
+    # This ensures that the file bindings work.
+    # NOTE: This used to reverse the order of the text widget and
+    # the top level.  This was in part to ensure that the top-level
+    # bindings kick in before some inappropriate built-in Tk binding
+    # (like C-o) override them.  However, it meant that if you put
+    # a text widget into a query box, then you couldn't type any
+    # character bound to a button without invoking that button.
+    # So instead, we disable Tk's bogus bindings below.
+    set tl [winfo toplevel $itk_component(hull)]
+    bindtags $text \
+            "$itk_component(hull) $text Text $tl all"
+
+    # NOTE: This used to be bound to the hull of TopLevel, which caused
+    # focusin to be called a very large number of times.
+    whenMapped text "$this focusin"
+
+    # Put the insertion cursor at the top
+    $text mark set insert @0,0
+
+    # Default bindings for key presses control whether the file is
+    # marked modified and what goes into the undo buffer. Some of
+    # the more general bindings (like <KeyPress>) are overridden
+    # below by more specific bindings. The undoBoundary method is
+    # called by control keys to break a sequence of key entries;
+    # this is a bit conservative, since many of these key bindings
+    # do not affect the text. But there are too many keys to
+    # identify the effect of each individually. Many of the keys
+    # that do not affect the text have redefined bindings below
+    # that do the right thing.
+    
+    bind $text <KeyPress> \
+	    "if \[$this recordCharForUndo %A\] {bell; break}"
+    bind $text <Control-Shift-Key> [list $this undoBoundary]
+    bind $text <Control-Key> [list $this undoBoundary]
+    bind $text <Meta-Key> [list $this undoBoundary]
+    bind $text <Meta-Shift-Key> [list $this undoBoundary]
+
+    # Stop Tycho from beeping when pressing Alt on read-only files
+    bind $text <Alt_L> { }
+    bind $text <Alt_R> { }
+
+    # Don't break on Alt-key combinations: the top-level window needs
+    # it for menu traversal
+    #bind $text <Alt-Key> { }
+    # FIXME: should this be here, or in TopLevel or in Displayer?
+    bind $text <Alt-Key> {tkTraverseToMenu %W %A;	 tkMenuUnpost {}}   
+
+    # Bindings to highlight parenthesized regions
+    bind $text <Key-parenright> \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
+	    $this closeParen paren ; break"
+    bind $text <Key-braceright> \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
+	    $this closeParen brace ; break"
+    bind $text <Key-bracketright> \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
+	    $this closeParen bracket ; break"
+    
+    # Modify the following bindings to mark modified and set up undo
+    bind $text <BackSpace> "$this del char; break"
+    bind $text <Control-BackSpace> "$this del word; break"
+    bind $text <Meta-BackSpace> "$this del word; break"
+    bind $text <Escape><BackSpace> "$this del word; break"
+    bind $text <Delete> "$this del fchar; break"
+    bind $text <Control-Delete> "$this del fword; break"
+    bind $text <Meta-Delete> "$this del fword; break"
+    bind $text <Escape><Delete> "$this del fword; break"
+
+    # Non-standard bindings
+    bind $text <Control-Key-h> "$this del char; break"
+    bind $text <Meta-Control-Key-h> "$this del word; break"
+    bind $text <Escape><Control-Key-h> "$this del word; break"
+    bind $text <Control-d> "$this del fchar; break"
+    bind $text <Meta-d> "$this del fword; break"
+    bind $text <Escape><d> "$this del fword; break"
+
+    # The virtual event <<Tab>> is the alternative for Tab.
+    # In some derived classes, the tab key is rebound.  This binding
+    # here ensures a uniform alternative.
+    bind $itk_component(text) <<Tab>> "$this insertString insert {\t}; break"
+    
+    # This seems to be necessary for C-xk to work.  Without it, it looks like
+    # the text widget is grabbing the k?
+    bind $text <<Close>> "continue" 
+
+    # Cutting and pasting
+    bind $text <<Paste>> "$this paste; break"
+    bind $text <Key-F18> "$this paste; break"
+    bind $text <Insert> "$this paste; break"
+    bind $text <<Cut>> "$this cut; break"
+    bind $text <Key-F20> "$this cut; break"
+    bind $text <<Copy>> "$this copy; break"
+    bind $text <<Copy2>> "$this copy; break"
+    bind $text <Key-F16> "$this copy; break"
+    
+    bind $text <Button-2> "$this recordMousePos %x %y"
+    bind $text <ButtonRelease-2> "$this mouseStuff %x %y; break"
+    
+    bind $text <<SelectAll>> "$this selectRange 1.0 end; break"
+
+    # The following bindings are basically the same as in the Text
+    # widget, but here they set up the undo.
+    bind $text <<ClearToEnd>> "$this killToEndOfLine ; break"
+    bind $text <<ClearToStart>> "$this killToStartOfLine ; break"
+    # Tab character alternate C-i (overridden by OpenLine)
+    # bind $text <Control-i> \
+    #      "if \[$this recordCharForUndo %A\] {bell; break}"
+    bind $text <<OpenLine>> "$this openLine; break"
+        
+    # Search commands
+    bind $text <Find> "$this search; break"
+    bind $text <<Find>> "$this search; break"
+    # NOTE: There used to be separate bindings for case sensitive
+    # and case insensitive.  Now we have only case insensitive
+    # incremental search.
+    bind $text <<Search>> "$this incSearchMinibuffer; break"
+    bind $text <<SearchBackwards>> \
+            "$this incSearchMinibuffer 1; break"
+
+    # Spelling command
+    bind $text <<Spelling>> "$this spellCheck; break"
+    bind $text <<Spelling2>> "$this spellCheck; break"
+
+    # Scrolling commands
+    bind $text <<DownPage>> "$this scroll 1; break"
+    bind $text <<UpPage>> "$this scroll -1; break"
+    bind $text <<UpPage2>> "$this scroll -1; break"
+    bind $text <<Center>> "$this center; break"
+    
+    # Regardless of binding preferences, page up and page down
+    # buttons should behave reasonably.
+    bind $text <Next> "$this scroll 1; break"
+    bind $text <Prior> "$this scroll -1; break"
+
+    # The undo command
+    bind $text <<Undo>> "$this undo; break"
+
+    # The goto command
+    bind $text <<Goto>> \
+	    "$this gotoLine; break"
+    bind $text <<Top>> \
+            "$this seeFragment {range 1.0 1.0}; break"
+    bind $text <<Bottom>> \
+            "$this seeFragment {range end-1c end-1c}; break"
+    bind $text <End> +[list $this undoBoundary]
+    bind $text <Home> +[list $this undoBoundary]
+
+    # The fillSelection commands
+    bind $text <<Fill>> "$this busy $this fillSelection; break"
+    bind $text <<Fill2>> \
+	    "$this busy $this fillSelection; break"
+    bind $text <<FillPrefix>> \
+	    "$this queryFillPrefix; break"
+    bind $text <<FillColumn>> \
+	    "$this queryFillColumn; break"
+    
+    # Case control
+    bind $text <<LowerCase>> "$this lowerCase; break"
+    bind $text <<LowerCase2>> "$this lowerCase; break"
+    bind $text <<UpperCase>> "$this upperCase; break"
+    bind $text <<UpperCase2>> "$this upperCase; break"
+    bind $text <<Capitalize>> "$this capitalize; break"
+    bind $text <<Capitalize2>> "$this capitalize; break"
+
+    # Cursor motion.
+    bind $text <<LineStart>> \
+            "tkTextSetCursor %W {insert linestart}; break"
+    bind $text <<LineEnd>> \
+            "tkTextSetCursor %W {insert lineend}; break"
+
+    # Although some of these make no sense for windows, them seem
+    # pretty harmless, so we leave them in without intermediary
+    # virtual events.
+    bind $text <Meta-f> "$this move fword; break"
+    bind $text <Escape><f> "$this move fword; break"
+    # Override Tk binding to get more emacs-like behavior.
+    bind $text <Control-Right> "$this move fword; break"
+    # So that Tk bindings work for extending the selection:
+    bind $text <Control-Shift-Right> { }
+    bind $text <Meta-Right> "$this move fword; break"
+    bind $text <Meta-b> "$this move bword; break"
+    bind $text <Escape><b> "$this move bword; break"
+    # Override Tk binding to get more emacs-like behavior.
+    bind $text <Control-Left> "$this move bword; break"
+    # So that Tk bindings work for extending the selection:
+    bind $text <Control-Shift-Left> { }
+    bind $text <Meta-Left> "$this move bword; break"
+
+    # Cursor motion keys do not set the modified flag
+    # Note that the definitions below have a blank space.
+    # This is need to tell Tk that they are real definitions,
+    # and hence will take priority over the generic binding to
+    # KeyPress above.  Note that these do not call undoBoundary,
+    # so they have no effect on the ability to undo a sequence
+    # of key entries. The first one is the control key itself.
+    bind $text <Control_L> { }
+    bind $text <Control_R> { }
+    bind $text <Shift_L> { }
+    bind $text <Shift_R> { }
+    bind $text <Meta_L> { }
+    bind $text <Meta_R> { }
+    bind $text <Caps_Lock> { }
+    bind $text <Escape> { }
+    bind $text <Multi_key> { }
+    bind $text <Mode_switch> { }
+    bind $text <F1> { }
+    bind $text <F2> { }
+    bind $text <F3> { }
+    bind $text <F4> { }
+    bind $text <F5> { }
+    bind $text <F6> { }
+    bind $text <F7> { }
+    bind $text <F8> { }
+    bind $text <F9> { }
+    bind $text <F10> { }
+    bind $text <F11> { }
+    bind $text <F12> { }
+
+    # The following do break a sequence of key entries for
+    # the purposes of the undo.  I don't know why some systems
+    # require the "KP" prefix, but here it is.
+    bind $text <Prior> +[list $this undoBoundary]
+    bind $text <Next> +[list $this undoBoundary]
+    bind $text <Up> +[list $this undoBoundary]
+    bind $text <Right> +[list $this undoBoundary]
+    bind $text <Down> +[list $this undoBoundary]
+    bind $text <Left> +[list $this undoBoundary]
+    bind $text <Pause> +[list $this undoBoundary]
+    
+    # font size control
+    bind $text <Control-equal> "$this upSize"
+    bind $text <Control-plus> "$this upSize"
+    bind $text <Control-minus> "$this downSize"
+    # for compatibility with many common programs like netscape...
+    bind $text <Control-bracketright> "$this upSize"
+    bind $text <Control-bracketleft> "$this downSize"
+    
+    # We have gotten some reported problems about these keys
+    # being undefined on some machines.  But they also seem
+    # be needed for other machines.  Hence the catch.
+    catch {
+	bind $text <KP_Insert> "$this stuff; break"
+	bind $text <KP_Prior> [list $this undoBoundary]
+	bind $text <KP_Next> [list $this undoBoundary]
+	bind $text <KP_End> [list $this undoBoundary]
+	bind $text <KP_Up> [list $this undoBoundary]
+	bind $text <KP_Right> [list $this undoBoundary]
+	bind $text <KP_Down> [list $this undoBoundary]
+	bind $text <KP_Left> [list $this undoBoundary]
+	bind $text <KP_Home> [list $this undoBoundary]
+    }
+
+    # Initialize options and tell stylesheet manager to ignore them
+    eval itk_initialize $args
+
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+	    -basefont         fonts textFont \
+	    -insertbackground text insertBackground \
+	    -textforeground   text foreground \
+	    -textbackground   text background \
+	    -selectforeground text selectForeground \
+	    -selectbackground text selectBackground \
+	    -relief           layout textRelief \
+	    -textwidth        layout textWidth \
+	    -textheight       layout textHeight
+
+    # Set this to zero because it's completely bogus
+    $text configure -selectborderwidth 0
+
+    set maxLineLength [stylesheet get layout fillColumn]
+
+    # Create the context-sensitive popup menu
+    contextmenu create $text 
+}
+
+
+##########################################################################
+##########################################################################
+####                         public methods                           ####
+
+
+#####################################################################
+#### capitalize
+# Capitalize words in the selection, or the current word if there is
+# no selection
+#
+body ::tycho::Edit::capitalize {} {
+    if $readOnly {bell; return}
+    set sel [selOrWord]
+    set caps {}
+    while {[regexp -indices \
+            "((^|\[ \t\n\]+)\[a-zA-Z\])\[^ \t\n\]*($|\[ \t\n\])" \
+            $sel whole match] != 0} {
+        set first [lindex $match 0]
+        set second [lindex $match 1]
+        set end [lindex $whole 1]
+        if {$first > 0} {
+            append caps [string range $sel 0 $first]
+        }
+        append caps [string toupper [string range $sel $first $second]]
+        set second [expr $second+1]
+        if {$second <= $end} {
+            append caps [string range $sel $second $end]
+        }
+        set sel [string range $sel [expr $end+1] end]
+    }
+    append caps $sel
+    insertString insert $caps
+}
+
+#########################################################################
+#### center
+# Center the insertion point in the window.
+#
+body ::tycho::Edit::center {} {
+    set insertline [expr int([$itk_component(text) index insert])]
+    set topline [expr int([$itk_component(text) index @0,0])]
+    set botline \
+	    [expr int([$itk_component(text) \
+	    index @0,[winfo height $itk_component(text)]])]
+    set offset [expr $insertline-int(($botline+$topline)/2)]
+    $itk_component(text) yview scroll $offset units
+    parseRegion $topline.0 $botline.0
+}
+
+#####################################################################
+#### closeParen
+# Insert a close parenthesis, bracket, or brace. Highlight the region
+# between the corresponding open parenthesis and this close parenthesis
+# if the open parenthesis is visible in the window. The single argument
+# represents one of the close parenthesis characters using a string
+# that causes fewer problems when passed around in Tcl than the
+# parentheses themselves, "paren", "brace", or "bracket".
+#
+body ::tycho::Edit::closeParen {closeparen} {
+    
+    switch $closeparen {
+	"paren" {set openparen "\("; set closeparen "\)"}
+	"brace" {set openparen "\{"; set closeparen "\}"}
+	"bracket" {set openparen "\["; set closeparen "\]"}
+	default {return}
+    }
+    $itk_component(text) insert insert [format %s $closeparen]
+    
+    # Start a backward search for a matching parenthesis
+    set top [$itk_component(text) index @0,0]
+    set start ""
+    set end [$itk_component(text) index insert]
+    
+    set point [$itk_component(text) index {insert -1 char}]
+    set depth 0
+    while {1} {
+	set point \
+		[$itk_component(text) search -backwards -regexp -- \
+		"\[$closeparen$openparen\]" $point $top]
+	if {$point == ""} {break}
+	if {[$itk_component(text) get $point] == $openparen} {
+	    if {$depth == 0} {
+		# Found a match
+		set start $point
+		break
+	    } {
+		incr depth -1
+	    }
+	} elseif {[$itk_component(text) get $point] == $closeparen} {
+	    # Found a nested parenthesis
+	    incr depth 1
+	}
+    }
+    
+    if {$start != ""} {
+	$itk_component(text) tag add paren $start $end
+	$itk_component(text) tag configure paren \
+		-background [stylesheet get text parenColor]
+	after 1000 "catch {$itk_component(text) tag delete paren}"
+    }
+}
+
+#####################################################################
+#### copy
+# Save the selection to the clipboard.
+#
+body ::tycho::Edit::copy {} {
+    set win $itk_component(text)
+    if {[set sel [getSelection]] != {}} {
+	setClipboard $sel
+    }
+}
+
+###################################################################
+#### currentPoint
+# Return the current insertion point in a form usable by seeFragment.
+#
+body ::tycho::Edit::currentPoint {} {
+    set idx [$itk_component(text) index insert]
+    return [list range $idx $idx]
+}
+
+#####################################################################
+#### cut
+# Remove the selection and save it to the clipboard.
+#
+body ::tycho::Edit::cut {} {
+    
+    if $readOnly {bell; return}
+    
+    if {[set sel [getSelection]] != {}} {
+        copy
+	deleteRange sel.first sel.last
+    }
+}
+
+#####################################################################
+#### debugUndo
+# Print the status of the undo information (for debugging).
+#
+body ::tycho::Edit::debugUndo {} {
+    puts "============== last insertion info =================="
+    puts "undoInsert flag: $undoInsert"
+    if {$undoInsert} {
+	puts "lastInsertFirst index: \
+		[$itk_component(text) index lastInsertFirst]"
+	puts "lastInsertLast index: \
+		[$itk_component(text) index lastInsertLast]"
+    }
+    puts "============== last deletion info ==================="
+    puts "lastDelString: $lastDelString"
+    puts "lastDelPosition: $lastDelPosition"
+    puts "lastUndo: $lastUndo"
+    puts "insert: [$itk_component(text) index insert]"
+}
+
+#####################################################################
+#### del
+# If there is a selection, delete it and return.  Otherwise,
+# delete a single character or word and record for undo.
+# The type argument should be "char" or "word" for backwards
+# deletion or "fchar" or "fword" for forwards deletion.
+#
+body ::tycho::Edit::del {type} {
+    
+    if $readOnly {bell; return}
+    
+    # There is a selection owned by us, just delete it and return.
+    if {[getSelection] != {}} {
+	resetUndo
+	deleteRange sel.first sel.last
+	markModified
+	return
+    }
+    
+    # Do nothing if the insertion point is 
+    # at the beginning of the buffer for backward deletions
+    # or the end of the buffer for forward deletions.
+    if {$type == "char" || $type == "word"} {
+	if [$itk_component(text) compare insert == 1.0] {return}
+    }
+    if {$type == "fchar" || $type == "fword"} {
+	if [$itk_component(text) compare insert == end] {return}
+    }
+    
+    markModified
+    
+    switch $type {
+	char {deleteRange {insert - 1 char} insert}
+	word {deleteRange "insert - [prevWord] char" insert}
+	fchar {deleteRange insert {insert + 1 char}}
+	fword {deleteRange insert "insert + [nextWord] char"}
+    }
+}
+
+#####################################################################
+#### deleteRange
+# Delete the specified range and record the deletion for undoing. If
+# either the beginning or the end of the range align with the contents
+# of the previous deletion or insertion, then the deleted range is
+# appended to undo buffer rather than replacing it. The arguments are
+# indices in any form understood by the Tk text widget.
+#
+body ::tycho::Edit::deleteRange {first last {saveInClipboard 0}} {
+    
+    if $readOnly {bell; return}
+    
+    set charsDeleted [$itk_component(text) get $first $last]
+    set delfirst [$itk_component(text) index $first]
+    set dellast [$itk_component(text) index $last]
+    if {$delfirst == $lastUndo} {
+	append lastDelString $charsDeleted
+    } elseif {$dellast == $lastUndo} {
+	set lastDelString "$charsDeleted$lastDelString"
+    } {
+	# It is safe to reset the undo buffer here because for
+	# commands that contain both deletions and insertions,
+	# the deletions are done first.
+	resetUndo
+	set lastDelString $charsDeleted
+    }
+    # NOTE:  Some users find it counterintuitive that even
+    # single character deletions go into the clipboard.  However,
+    # if the single character is a newline, then it is intuitive
+    # to emacs users.  However, everyone else finds this behavior
+    # annoying, since it results in lost data in the clipboard.
+    if {$saveInClipboard} {
+	setClipboard $lastDelString
+    }
+
+    set lastUndo [$itk_component(text) index $first]
+    set lastDelPosition [$itk_component(text) index $first]
+    
+    $itk_component(text) delete $first $last
+    markModified
+}
+
+#####################################################################
+#### deleteSelection
+# If the selection is owned by this window and is visible, delete it
+# and return 1. Otherwise return 0.  It is not deleted if it is not
+# visible because this was found to cause erroneous editing of files.
+#
+body ::tycho::Edit::deleteSelection {} {
+    
+    if $readOnly {bell; return 0}
+    
+    # If there is a selection, and this window owns
+    # it, and it is visible, delete it.
+    #
+    if {[set sel [getSelection]] != {} && \
+            ([$itk_component(text) bbox sel.first] != {} || \
+            [$itk_component(text) bbox sel.last] != {})} {
+
+        # If the selection is nontrivial, delete it
+        set lastDelString ""
+	deleteRange sel.first sel.last
+	selection clear -displayof $itk_component(text)
+	    
+	# Indicated that a selection was cleared
+	markModified
+	return 1
+    }
+    return 0
+}
+
+#####################################################################
+#### downSize
+# Decrease the size of the offset added to -basefont to get the
+# current -textfont. -basefont is set by preference and the 
+# offset is reset to 0 for every new editor.
+#
+body ::tycho::Edit::downSize {} {
+    set bf [::tycho::FontManager::parseFont $itk_option(-basefont)]
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    
+    # heuristic to get good relative size changes
+    set decr [expr $sz / 6 + 1]
+
+    # increase offset
+    set fontOffset [expr $fontOffset - $decr]
+    set sz [expr $sz - $decr]
+    
+    $this configure -textfont \
+            [::tycho::font [lindex $bf 0] $sz [lindex $bf 2]]
+}
+
+#####################################################################
+#### execProcess
+# Exec a subprocess.  The optional arg `waitForOk' determines whether
+# the process is started immediately, or if we wait for the user to
+# hit ok.
+#
+body ::tycho::Edit::execProcess {command {waitForOk 1}} {
+    ::tycho::view Monitor -toolbar 1 \
+            -command $command -dir [file dirname [filename]] \
+            -autostart $waitForOk
+}
+
+#####################################################################
+#### evaluate
+# In this base class, just issue an error message.
+#
+body ::tycho::Edit::evaluate {} {
+    error "Don't know how to evaluate plain text"
+}
+
+#####################################################################
+#### fillSelection
+# Fill the set of lines identified by the selection so that they
+# are roughly the same length. If there is no selection, then the
+# fill region is a paragraph. A paragraph is delimited by either a
+# blank line or a line with only the fillPrefix on it.  In the future,
+# there may be a more flexible mechanism for identifying a paragraph.
+# Note that the implementation here is too slow, and needs to be
+# improved.
+#
+body ::tycho::Edit::fillSelection {} {
+    if {$readOnly} {bell; return}
+    
+    set filltext ""
+    if {[set filltext [getSelection]] != {}} {
+	
+	# Use the selection to provide the fill text.
+	
+	# Put the insertion mark at the beginning of the selection
+	$itk_component(text) mark set insert sel.first
+	
+	# Find the leading spaces (blanks and tabs)
+	# in the first line. This determines the indentation.
+	# Previously, we converted tabs to 8 spaces, but this
+	# appears to be unnecessary.
+	set firstline [$itk_component(text) get "sel.first linestart" \
+		"sel.first lineend"]
+	
+	# Delete the selection
+	deleteSelection
+    } {
+	# No selection.  Identify a paragraph.
+
+	# In case the fillPrefix contains any characters
+	# used in regular expressions, escape each character.
+	if {$fillPrefix != ""} {
+	    append safeFillPrefix "\(\\" \
+		    [join [split $fillPrefix {}] "\\"] "\)\*"
+	} {
+	    set safeFillPrefix ""
+	}
+	
+	# The regular expression search pattern to use
+	append searchPat "\^\[ \t\]\*" $safeFillPrefix "\[ \t\]\*\$"
+	
+	# If the line I am on matches the pattern, return.
+	if [regexp $searchPat \
+		[$itk_component(text) get {insert linestart} \
+		{insert lineend}]] {
+	    set fillStart [$itk_component(text) index insert]
+	    $itk_component(text) config -cursor 
+	    return
+	}
+	
+	# Search backwards for the first line that is either
+	# blank or contains only one or more consecutive
+	# instances of the fillPrefix.  If that line is the
+	# current line, we want to identify it.
+	set start [$itk_component(text) search -backwards -regexp -- \
+		$searchPat insert 0.0]
+	if {$start == ""} {
+	    set start 0.0
+	} {
+	    # Do not include the separator line in the paragraph.
+	    set start [$itk_component(text) index "$start +1 line"]
+	}
+	
+	# Search forwards.
+	set end [$itk_component(text) search -forwards -regexp -- \
+		$searchPat insert end]
+	if {$end == ""} {
+	    set end end
+	}
+	# Do not include the separator line nor the final
+	# character in the paragraph.
+	set end [$itk_component(text) index "$end -1 char"]
+	
+	# Get the fill text
+	set filltext [$itk_component(text) get $start $end]
+	
+	# Put the insertion mark at the beginning of the text
+	$itk_component(text) mark set insert $start
+	
+	# Find the leading spaces (blanks and tabs)
+	# in the first line. This determines the indentation.
+	# Previously, we converted tabs to 8 spaces, but this
+	# appears to be unnecessary.
+	set firstline [$itk_component(text) get $start "$start lineend"]
+	
+	# Delete the selection
+	deleteRange $start $end
+    }
+    
+    set fillStart [$itk_component(text) index insert]
+    
+    # We have now deleted the text to be removed.
+    # Time to add the replacement text.
+    if {$filltext != ""} {
+	
+	# Make sure a trailing newline or space is maintained
+	set last [expr [string length $filltext]-1]
+	set lastchar [string range $filltext $last $last]
+	
+	set firstchar [string range $filltext 0 0]
+	
+	# Remove from the text all leading spaces on a line,
+	# and replace newlines with a special string.
+	set filltext [string trim $filltext " \t"]
+	regsub -all "\n\[ \t\]*" $filltext { ###NeWlInE### } filltext
+	
+	# Split the filltext at spaces, tabs.
+	set words [split $filltext " \t"]
+	
+	# User the firstline to find the indent string.
+	regexp "^\[\t \]*" $firstline indentstr
+	
+	# Figure out at what character position the insertion
+	# mark is at.
+	set charno [columnNumber]
+	
+	if {$charno == 0} {
+	    set newline 1
+	    insertString insert $indentstr$fillPrefix
+	    set space 0
+	} {
+	    set newline 0
+	    if {$firstchar == " " || $firstchar == "\t"} {
+		set space 1
+	    } {
+		set space 0
+	    }
+	}
+	
+	# Marks first line in a paragraph
+	set first 1
+	
+	set trimmedFillPrefix [string trim $fillPrefix]
+	
+	foreach word $words {
+	    if {$word == {}} {continue}
+	    if {$newline && $word == $trimmedFillPrefix} {continue}
+	    
+	    if {$word == {###NeWlInE###}} {
+		if {$newline} {
+		    # Two newlines in a row on the input.
+		    # Paragraph boundary.
+		    insertString insert "\n$indentstr$fillPrefix"
+		    if {!$first} {
+			insertString insert "\n$indentstr$fillPrefix"
+			set first 1
+		    }
+		    set space 0
+		}
+		set newline 1
+		continue
+	    } {
+		set newline 0
+	    }
+	    
+	    if {[expr $charno+[string length $word]] > $maxLineLength} {
+		insertString insert "\n$indentstr$fillPrefix"
+		set space 0
+	    }
+	    
+	    # If the prefix is non-null, we always insert a space.
+	    if {$space || $fillPrefix != ""} {
+		insertString insert " "
+	    }
+	    insertString insert "$word"
+	    
+	    set space 1
+	    set first 0
+	    
+	    # Figure again out at what character position the insertion
+	    # mark is at.
+	    set charno [columnNumber]
+	}
+	
+	# Terminate a fill region with a newline or space, if appropriate.
+	if {$lastchar == "\n" && !$first} {
+	    insertString insert "\n"
+	}
+	if {$lastchar == "\t" || $lastchar == " "} {
+	    insertString insert " "
+	}
+    }
+}
+
+#####################################################################
+#### findAll
+# Find and tag all occurrences of the given pattern in a range of the text.
+# The arguments are as a follows:
+# <pre>
+#    tag       the tag to attach to matching text
+#    case      if 0, ignore case
+#    regexp    if 0, return only exact matches
+#    wholeword if 0, ignore word boundaries
+#    pattern   the pattern or string to search for
+#    start     the start index
+#    end       the end index
+#    tags      the list of tags to restrict the search to
+# </pre>
+# The method uses specific arguments rather than options because it
+# is frequently invoked and the overhead needs to be minimized.
+# If the "regexp" option is 1, then the pattern is interpreted as a
+# regular expression.
+# If "wholeword" is 1, then match only whole words.
+# In this case, "regexp" is ignored because we have to use a
+# regexp search to identify word boundaries.  A whole word is any
+# string bounded by characters that are not alphabetic, numeric, or
+# an underscore.
+# <p>
+# When restricting the search to certain tagged text (i.e. when the
+# last argument is not a null list), then if one or more characters in
+# the match are tagged with one the tags in the given list, the match
+# is accepted.
+#
+body ::tycho::Edit::findAll \
+        {tag case regexp wholeword pattern start end tags} {
+
+    set text $itk_component(text)
+
+    $text tag remove $tag $start $end
+    set ind $start
+    set len 0
+    while 1 {
+	set start [$text index "$ind + $len chars"]
+	set ret [findOne $case 0 $regexp \
+		$wholeword $pattern $start $end $tags]
+	if {$ret == {}} {
+	    break
+	} {
+            set ind [lindex $ret 0]
+            set len [lindex $ret 1]
+	    $text tag add $tag $ind "$ind + $len chars"
+            # Make sure the search starts at least one character ahead.
+            if {$len <= 0} {set len 1}
+	}
+    }
+}
+
+#####################################################################
+#### findOne
+# Search for a pattern, word, or character sequence in the text. Return
+# a two-element list containing the position and length of the match.
+# If there is no match, return an empty string. This is amazingly
+# complicated primarily because of wanting to support searches for
+# whole words, but also because of the desire to search only certain
+# tagged text. The arguments are as a follows:
+# <pre>
+#    case      if 0, ignore case
+#    backwards if 0, search forwards from the start position
+#    regexp    if 0, return only exact matches
+#    wholeword if 0, ignore word boundaries
+#    pattern   the pattern or string to search for
+#    start     the start index
+#    end       the end index
+#    tags      the list of tags to restrict the search to
+# </pre>
+# The method uses specific arguments rather than options because it
+# is frequently invoked and the overhead needs to be minimized.
+# If the "regexp" option is 1, then the pattern is interpreted as a
+# regular expression.
+# If "wholeword" is 1, then match only whole words.
+# In this case, "regexp" is ignored because we have to use a
+# regexp search to identify word boundaries.  A whole word is any
+# string bounded by characters that are not alphabetic, numeric, or
+# an underscore.
+# <p>
+# When restricting the search to certain tagged text (i.e. when the
+# last argument is not a null list), then if one or more characters in
+# the match are tagged with one the tags in the given list, the match
+# is accepted.
+#
+body ::tycho::Edit::findOne \
+	{case backwards regexp wholeword pattern start end tags} {
+    set tw $itk_component(text)
+    if $backwards \
+            {set direction {-backwards}} \
+            {set direction {-forwards}}
+    if $regexp \
+            {set type {-regexp}} \
+            {set type {-exact}}
+    if $wholeword {
+	set searchpat "\(^|\[^a-zA-Z0-9_\]\)($pattern)\(\$|\[^a-zA-Z0-9_\]\)"
+	set type {-regexp}
+        # For backwards whole-word searches, have to adjust start position.
+        if {$direction == {-backwards}} {
+            set start [$tw index "$start -1 char"]
+        }
+    } {
+	set searchpat $pattern
+    }
+    while 1 {
+	if $case {
+	    set ind [$tw search -count len $direction $type -- \
+                    $searchpat $start $end]
+	} {
+	    set ind [$tw search -count len -nocase $direction $type -- \
+		    $searchpat $start $end]
+	}
+	if {$ind == {}} {
+	    return {}
+	} {
+	    if {$tags != {}} {
+		set tagged 0
+		set endmt [$tw index "$ind + $len chars"]
+		foreach tag $tags {
+		    # Regrettably, the Tk text widget gives no way to
+		    # determine what tags are used in a range of text.
+		    # So we have to search character by character (!).
+		    set sttag $ind
+		    while {[$tw compare $sttag <= $endmt] == 1} {
+			set indtags [$tw tag names $sttag]
+			if {[lsearch -exact $indtags $tag] >= 0} {
+			    set tagged 1
+			    break
+			}
+			set sttag [$tw index "$sttag +1 char"]
+		    }
+		    if $tagged {break}
+		}
+		if !$tagged {
+		    # The text is not tagged as needed.  Continue search.
+		    if [$tw compare $endmt >= $end] {
+			return {}
+		    } else {
+			set start $endmt
+			continue
+		    }
+		}
+	    }
+	    if $wholeword {
+		set wordWdelims [$tw get $ind "$ind + $len chars"]
+		if $case {
+		    set ret [regexp -indices $searchpat $wordWdelims \
+			    full delim1 range delim2]
+		} else {
+		    set ret [regexp -indices -nocase $searchpat $wordWdelims \
+			    full delim1 range delim2]
+		}
+		if !$ret {
+		    # This should not occur.
+		    error "Edit::findOne method: internal error"
+		}
+		set first [lindex $range 0]
+		set last [lindex $range 1]
+		return [list \
+			[$tw index "$ind + $first chars"] \
+			[expr $last-$first+1]]
+	    }
+	    return [list $ind $len]
+	}
+    }
+}
+
+#########################################################################
+#### focusin
+# Grab the focus.
+#
+body ::tycho::Edit::focusin {} {
+    focus $itk_component(text)
+    displayer setCurrentView $this
+}
+
+#####################################################################
+#### get
+# Get text from the text widget (thin wrapper for the text widget get).
+#
+body ::tycho::Edit::get {args} {
+    return [eval $itk_component(text) get $args]
+}
+
+#####################################################################
+#### getSelection
+# If the selection is owned by this window, return the text in it.
+# Otherwise return a null string.
+#
+body ::tycho::Edit::getSelection {} {
+    if {[$itk_component(text) tag nextrange sel 1.0 end] != {}} {
+	return [$itk_component(text) get sel.first sel.last]
+    } {
+	return {}
+    }
+}
+
+#####################################################################
+#### gotoLine
+# Query the user for line number, then goto it.
+#
+body ::tycho::Edit::gotoLine {} {
+    set number [safeEval ::tycho::queryinfo "Enter line number:" 1 10]
+    if {$number == {}} {return}
+    if {![regexp "^\[1-9\]\[0-9\]*$" $number]} {
+	safeEval ::tycho::inform "You must enter an integer."
+	return
+    }
+    seeFragment "line $number"
+}
+
+###################################################################
+#### help
+# Open a help window.
+# This should be redefined in derived classes.
+#
+body ::tycho::Edit::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel gui doc usersGuides EditHelp.html] html
+}
+
+#####################################################################
+#### incSearchMinibuffer
+# Use the minibuffer for an incremental search. An incremental search
+# is where a pattern is matched as characters are typed into the
+# minibuffer. Typing return or escape closes the minibuffer and returns
+# the focus to the text widget. If the single (optional) argument is
+# non-zero, search forwards. Otherwise, search backwards. This is meant
+# to be a faster and sometimes more convenient alternative to the
+# search dialog, although the search dialog should be used when more
+# options are needed (like regular-expression search, full-word search,
+# etc.). Repeatedly typing the shortcut that originally invokes the
+# incremental search results in searching for the next instance of the
+# pattern in the minibuffer.
+#
+# This method operates by opening an entry widget in the status bar
+# (this entry widget is the minibuffer) and setting up bindings so that
+# the method incSearch is called when characters are typed. If there is
+# no status bar, then the search dialog is opened.
+#
+body ::tycho::Edit::incSearchMinibuffer {{backward 0}} { 
+    # Because of Tcl's event model need to scope for callbacks
+    set incSearch "@scope ::tycho::Edit $this incSearch"
+
+    if { [statusbar] == "" } {
+        search
+    } else {
+        # As a side effect, the following binds <Return> to end a search.
+        statusbar entry "i-search:"\
+                -default $_incSearchText \
+                -command "$incSearch end" \
+                -keycommand "$incSearch %A"
+
+        # set point to start search
+        set _incSearchFrom [$itk_component(text) index insert]
+
+        # set point to end search
+        if {$backward} {
+            set _incSearchTo 1.0
+            set _incSearchForward 0
+        } else {
+            set _incSearchTo end
+            set _incSearchForward 1
+        }
+
+        # set failure status
+        set _incSearchFail 0
+
+        set entryWidget [statusbar _entrywidget]
+
+        # Use return and escape to get out
+        bind $entryWidget <Escape> "$incSearch end; break"
+
+        # BackSpace keys
+        bind $entryWidget <BackSpace> "$incSearch del"
+        bind $entryWidget <Control-h> "$incSearch del"
+
+        # repeated searches
+        bind $entryWidget <<Search>> "$incSearch forward"
+
+        # repeated backward searches
+        bind $entryWidget <<SearchBackwards>> "$incSearch backward"
+    }    
+}
+
+
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar, in the menus, and by the mouse cursor,
+# whether modifications are allowed on the buffer.
+#
+body ::tycho::Edit::indicateReadOnly {bool} {
+    chain $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            $itk_component(text) config -cursor {}
+            menubar disable undoredo
+            menubar disable cut
+            menubar disable paste
+            menubar disable fillregion
+            menubar disable rightfillcolumn
+            menubar disable setfillprefix
+            menubar disable capitalize
+            menubar disable lowercase
+            menubar disable uppercase
+	} {
+            $itk_component(text) config -cursor xterm
+            menubar enable undoredo
+            menubar enable cut
+            menubar enable paste
+            menubar enable fillregion
+            menubar enable rightfillcolumn
+            menubar enable setfillprefix
+            menubar enable capitalize
+            menubar enable lowercase
+            menubar enable uppercase
+	}
+    }
+}
+
+###################################################################
+#### insertData
+# Insert the given data at the insertion cursor.
+#
+body ::tycho::Edit::insertData {data} {
+    insertString insert $data
+}
+
+#####################################################################
+#### insertString
+# Insert the specified string at the specified index. If there is a
+# selection, delete it first. This command sets up the undo and
+# starts a parsing operation (which may not complete before this
+# returns).
+#
+body ::tycho::Edit::insertString {index str} {
+    set start [$itk_component(text) index $index]
+    if $readOnly {bell; return}
+    prepareInsert $index
+    $itk_component(text) insert insert $str
+    parseRegion $start [$itk_component(text) index insert]
+}
+
+#########################################################################
+#### killToEndOfLine
+# Delete characters from the insertion mark to the end of the line.
+# If the insertion cursor is at the end of the line, delete the end-of-line
+# character, joining the next line.
+#
+body ::tycho::Edit::killToEndOfLine {} {
+    if $readOnly {bell; return}
+    
+    # Do nothing if we are at the end of the buffer
+    if [$itk_component(text) compare insert == {end -1 char}] {return}
+    
+    if [$itk_component(text) compare insert == {insert lineend}] {
+	# The line has only the return character.  Delete it.
+	deleteRange insert {insert +1 char}
+    } {
+	# tycho_bindings is set in gui.tcl
+	global tycho_bindings
+	if {$tycho_bindings == {unix}} {
+	    # If the user types a Control-K and has chosen unix style 
+	    # bindings, then we copy the rest of the line into the
+	    # clipboard
+	    set saveInClipboard 1
+	    deleteRange insert {insert lineend} $saveInClipboard
+	} else {	
+	    deleteRange insert {insert lineend}
+	}
+    }
+}
+
+#########################################################################
+#### killToStartOfLine
+# Delete characters from the insertion mark to the start of the line.
+# If the insertion cursor is at the beginning of the line, delete the
+# previous end-of-line character, joining with the previous line.
+#
+body ::tycho::Edit::killToStartOfLine {} {
+    if $readOnly {bell; return}
+    
+    # Do nothing if we are at the beginning of the buffer
+    if [$itk_component(text) compare insert == 1.0] {return}
+
+    if [$itk_component(text) compare insert == {insert linestart}] {
+	# The line has only the return character.  Delete it.
+	deleteRange {insert -1 char} insert
+    } {
+	deleteRange {insert linestart} insert
+    }
+}
+
+#####################################################################
+#### lowerCase
+# Convert the selection or the current word to lower case.
+#
+body ::tycho::Edit::lowerCase {} {
+    if $readOnly {bell; return}
+    set sel [selOrWord]
+    insertString insert [string tolower $sel]
+}
+
+#####################################################################
+#### move
+# Move the insertion cursor forward or backward one word, using the 
+# Emacs rules. fword: forward, bword: backward
+#
+body ::tycho::Edit::move {type} {
+    # Do nothing if the insertion point is 
+    # at the beginning of the buffer for bword
+    # or the end of the buffer for fword 
+    if {$type == "bword"} {
+	if [$itk_component(text) compare insert == 1.0] {return}
+    } elseif {$type == "fword"} {
+	if [$itk_component(text) compare insert == end] {return}
+    }
+    switch $type {
+        "fword" { setInsert "insert + [nextWord] char"}
+        "bword" { setInsert "insert - [prevWord] char"}
+    }
+}
+
+#########################################################################
+#### mouseStuff
+# Insert text from the selection if the mouse has not moved since it
+# was first pushed.  We take "not moved" to mean "not moved more than
+# three pixels".
+#
+body ::tycho::Edit::mouseStuff {xpos ypos} {
+    set xmove [expr abs($xMousePosition-$xpos)]
+    set ymove [expr abs($yMousePosition-$ypos)]
+    if {$xmove < 4 && $ymove < 4} {
+	# Mouse has not moved.  Stuff from the selection.
+	stuff
+    }
+}
+
+#########################################################################
+#### openLine
+# Open a blank line of text above the insertion cursor.
+#
+body ::tycho::Edit::openLine {} {
+    if $readOnly {bell; return}
+    resetUndo
+    insertString "insert linestart" "\n"
+    setInsert "insert -1 line"	
+}
+
+#####################################################################
+#### parseNow
+# Many derived classes tag the text in various ways, such as to color
+# comments. The methods that do the work are called "parseNow."  In
+# this base class, nothing is done here.
+#
+body ::tycho::Edit::parseNow {start stop} {
+}
+
+#####################################################################
+#### parseRegion
+# Many derived classes tag the text in various ways, such as to color
+# comments. The methods that do the work, called "parseNow" are
+# accessed through this parseRegion method. This method breaks up large
+# regions to be parsed into chunks, parses the first chunk, and then
+# schedules the parsing of the remaining chunks to occur in the future.
+# The amount of text processed in one chunk and the duration of the
+# delay for the rest are determined by the value of the protected
+# variables maxNumLinesToParse and delayBeforeDeferredParsing.
+#
+body ::tycho::Edit::parseRegion {start stop} {
+    # For large text regions, we defer some of the processing.
+    set text $itk_component(text)
+    set limit [$text index "$start + $maxNumLinesToParse lines"]
+    if [$text compare $stop > $limit] {
+	parseNow $start $limit
+	after $delayBeforeDeferredParsing \
+		catch [list [list $this parseRegion $limit $stop]]
+    } {
+	parseNow $start $stop
+    }
+}
+
+#####################################################################
+#### paste
+# Paste the selection from the clipboard.
+#
+body ::tycho::Edit::paste {} {
+    if $readOnly {bell; return}
+    resetUndo
+    catch {
+	insertString insert [getClipboard]
+    }
+}
+
+#####################################################################
+#### print
+# Print the selection or, if there is no selection, the entire contents.
+# Query the user for the print command to use.  A temporary file is
+# created and then deleted to do the printing.  The name of that file
+# will be appended to the end of the command specified by the user before
+# it is invoked.
+#
+body ::tycho::Edit::print {} {
+    if {[set sel [getSelection]] == {}} {
+        set sel [get 1.0 end]
+        set msg "Command to print contents"
+    } {
+        set msg "Command to print selection"
+    }
+    if {[set printCmd [safeEval ::tycho::queryinfo $msg $printCmd]] != {}} {
+        set fn [::tycho::tmpFileName]
+        set fd [open $fn w]
+        puts $fd $sel
+        close $fd
+        # Unix-isms here
+        eval ::tycho::tyexec $printCmd $fn
+        ::tycho::rm $fn
+    }
+}
+
+#####################################################################
+#### queryFillColumn
+# Query the user for a new right column for text fill.
+#
+body ::tycho::Edit::queryFillColumn {} {
+    set maxLineLength \
+            [safeEval ::tycho::queryinfo "Right column for text fill:" \
+            [stylesheet get layout fillColumn] \
+            15]
+}
+
+#####################################################################
+#### queryFillPrefix
+# Query the user for a new fill prefix.
+#
+body ::tycho::Edit::queryFillPrefix {} {
+    set fillPrefix [safeEval ::tycho::queryinfo "Fill prefix:" $fillPrefix 15]
+}
+
+#####################################################################
+#### recordCharForUndo
+# Record a single character entry for undo.
+# If the file is read-only, do nothing and return 1.
+# Otherwise, return 0.
+#
+body ::tycho::Edit::recordCharForUndo {char} {
+    if $readOnly {return 1}
+    set delflag [deleteSelection]
+    set insflag [prepareInsert insert]
+    if {!$delflag && !$insflag} {
+	
+	# If there was not a selection, and this is the first
+	# character in a character sequence, reset the undo buffer.
+	resetUndo
+	
+	# Then restore the parts of the undo buffer pertinent to
+	# this one character entry.
+	set undoInsert 1
+	set lastUndo "insert"
+    }
+    return 0
+}
+
+#########################################################################
+#### recordMousePos
+# Record the mouse position.
+#
+body ::tycho::Edit::recordMousePos {xpos ypos} {
+    set xMousePosition $xpos
+    set yMousePosition $ypos
+}
+
+#####################################################################
+#### replaceAll
+# Replace all the text intervals tagged by the given tag with the
+# specified string.
+#
+body ::tycho::Edit::replaceAll {tag str} {
+    if [safeEval ::tycho::askuser "No undo, OK to proceed?"] {
+	set ind 1.0
+	while {[set res \
+		[$itk_component(text) tag nextrange $tag $ind end]] != {}} {
+	    eval deleteRange $res
+	    insertString [lindex $res 0] $str
+	}
+    }
+}
+
+#########################################################################
+#### scroll
+# Scroll forward (or backwards) by one page.  If direction is +1,
+# scroll forward one page. If it is -1, scroll backward one page.
+# Two lines of overlap are left between the old and new pages.
+# The insertion point is placed at the top of the new page.
+# As a side effect, the selection (if there is one) is cleared.
+#
+body ::tycho::Edit::scroll {direction} {
+    $itk_component(text) yview scroll $direction pages
+    $itk_component(text) mark set insert @0,0
+    selection clear -displayof $itk_component(text)
+}
+
+#####################################################################
+#### search
+# If a search window already exists, raise it and shift the focus to
+# it.  Otherwise, create one.
+#
+body ::tycho::Edit::search {} {
+    if {$readOnly} {
+	searchQuery 0 1
+    } {
+	searchQuery 0 0
+    }
+}
+
+#####################################################################
+#### searchQuery
+# If a search window already exists, raise it and shift the focus to
+# it.  Otherwise, create one.  The direction should be 1 for backwards
+# and zero for forwards.  The nochange should be 1 for windows where
+# changes will not be allowed and 0 otherwise.
+#
+body ::tycho::Edit::searchQuery {backwards nochange} {
+    if $readOnly {set nochange 1}
+    set tl $itk_component(hull)
+    if [winfo exists $tl.search] {
+	wm deiconify $tl.search
+	raise $tl.search
+	$tl.search configure -nochange $nochange
+	$tl.search configure -backwards $backwards
+        $tl.search select pattern range 0 end
+
+	$tl.search focusin
+    } {
+	if {$tl != {} &&  \
+		[uplevel #0 infoObjects $tl] != {} && \
+		[$tl isa ::tycho::File]} {
+	    set tlname [$tl filename]
+	} {
+	    set tlname $tl
+	}
+
+	uplevel #0 "
+	    ::tycho::EditSearch $tl.search \
+		    -edit $this \
+		    -backwards $backwards \
+		    -nochange $nochange \
+		    -geometry +0+0 \
+		    -title [list $tlname]
+	    wm deiconify $tl.search
+            $tl.search select pattern range 0 end
+        "
+    }
+}
+
+#####################################################################
+#### seeFragment
+# Go to the specified point in the text, moving the insertion cursor
+# to that point, and adjusting the view so that the point is in view.
+# The point can be specified in any of three ways:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    <i>regexp</i>
+# </pre>
+# In the first two forms, the point is a list beginning with the keyword
+# "line" or "range".  If the point has neither of these forms, then
+# it is interpreted as a regular expression, and the first match of
+# the regular expression is taken to be the specified point.
+# In all cases, the background color of the matching text is changed
+# temporarily.  Notice that this will not be visible if the "range" form
+# is used and the two indices are equal.  As a side effect, the selection
+# (if there is one) is cleared.
+#
+# This method uses the whenMapped{} method to ensure that the
+# jump to the indicated point takes place after the text widget
+# has been mapped to the screen, thus ensuring that
+# the jump works properly.
+#
+body ::tycho::Edit::seeFragment {point} {
+    set text $itk_component(text)
+    if {[llength $point] == 2 && [lindex $point 0] == {line}} {
+        # First form: A line number.
+        set ln [lindex $point 1]
+        set sidx [$text index "$ln.0"]
+        set eidx [$text index "$ln.0 lineend +1 char"]
+    } elseif {[llength $point] == 3 && [lindex $point 0] == {range}} {
+        # Second form: A range of indexes
+        set sidx [lindex $point 1]
+        set eidx [lindex $point 2]
+    } {
+        # Third form: a regular expression
+        set sidx [$text search -count nc -regexp $point 1.0 end]
+        # Check for no match.
+        if {$sidx == {}} {return}
+        set eidx [$text index "$sidx + $nc chars"]
+    }
+    if {$sidx != {} && $eidx != {}} {
+	$text tag add hypertarget $sidx $eidx
+	$text tag configure hypertarget -background \
+                [stylesheet get text targetColor]
+	$text tag configure hypertarget -foreground black
+
+        # The moving of the insertion index is also delayed in case the
+        # binding that triggered this also involves the insertion cursor.
+        # This used to have a time delay of 200, which was then changed
+	# to "idle."
+
+        # Now, we use whenMapped{}, which defers this code
+	# until the text widget is mapped to the screen.
+        #whenMapped text [list catch " \
+        #        $text mark set insert $sidx; 	\
+        #        selection clear -displayof $text; \
+	#	$this center"]
+
+	# The above command caused problems with evaluateConstruct
+	# in EditTcl.  Basically, the entire file was getting
+	# evaluated, instead of just a body.
+        after idle [list catch " \
+                ::tycho::safeUpdate $prefix; \
+                $text mark set insert $sidx; 	\
+                selection clear -displayof $text; $this center"]
+
+        # Clear the hypertarget mark after some time.
+        # The catch is in case the window doesn't exist anymore.
+        after 8000 [list catch [list $text tag delete hypertarget]]
+    }
+    focusin
+}
+
+#####################################################################
+#### selectRange
+# Select everything in the specified range.
+# Place the insertion cursor at the beginning of the selected range,
+# break the undo sequence, and move the view to see the beginning of
+# the selected range.
+#
+body ::tycho::Edit::selectRange {start stop} {
+    set text $itk_component(text)
+    $text mark set insert $start
+    undoBoundary
+    $text see $start
+    $text tag add sel $start $stop
+}
+
+#####################################################################
+#### spellCheck
+# If a spell check window already exists, raise it and shift the focus to
+# it.  Otherwise, create one.
+#
+body ::tycho::Edit::spellCheck {} {
+    set tl $itk_component(hull)
+    if [winfo exists $tl.spell] {
+	wm deiconify $tl.spell
+	raise $tl.spell
+	$tl.spell configure -nochange $readOnly
+	$tl.spell focusin
+    } {
+	if {$tl != {} &&  \
+		[uplevel #0 infoObjects $tl] != {} && \
+		[$tl isa ::tycho::File]} {
+	    set tlname [$tl filename]
+	} {
+	    set tlname $tl
+	}
+
+	uplevel #0 "
+	    ::tycho::EditSpell $tl.spell \
+		    -edit $this \
+		    -nochange $readOnly \
+		    -geometry +0+0 \
+		    -title $tlname
+	    wm deiconify $tl.spell
+	"
+    }
+}
+
+#########################################################################
+#### stuff
+# Insert text from the selection.
+#
+body ::tycho::Edit::stuff {} {
+    if $readOnly {bell; return}
+    resetUndo
+
+    # Note that we cannot use getSelection here, because we may not
+    # own the selection.
+    if {[catch {set sel [selection get -displayof $itk_component(text)]}]==0} {
+	insertString insert $sel
+	$itk_component(text) see insert
+    }
+}
+
+#####################################################################
+#### substituteText
+# Substitute all instances of 'target' with 'newString'
+# This method just substitutes all instances of target without user
+# intervention.  If you want user intervention, use the EditSearch window.
+# This is a shortcut method because there are many findAll arguments.
+# 
+body ::tycho::Edit::substituteText {target newString} {
+    # Find all the target strings
+
+    # The arguments for findAll are:
+    # tag them 'toBeSubstituted', 1 - don't ignore case,
+    # 0 - return only exact matches, 0 -ignore word boundaries,
+    # search for 'target', search from the start to the end,
+    # {} - don't restrict the search.
+    findAll toBeSubstituted 1 0 0 $target 0.0 end {}
+    
+    # Substitute $target for $newString
+    set ind 1.0
+    while {[set res \
+	    [$itk_component(text) tag nextrange \
+	    toBeSubstituted $ind end]] != {}} {
+	eval deleteRange $res
+	insertString [lindex $res 0] $newString
+    }
+
+}
+
+#####################################################################
+#### textWinName
+# Return the full path name of the text widget. Note that this path
+# name is defined as a command at the global scope. This is intended
+# only to be used for interfacing to legacy Tcl/Tk code that interacts
+# directly with a Tk text widget. A null string is returned if for some
+# reason the text window name does not exist (due to an error in
+# construction).
+#
+body ::tycho::Edit::textWinName {} {
+    if [info exists itk_component(text)] {
+	return $itk_component(text)
+    } {
+	return {}
+    }
+}
+
+#####################################################################
+##### undo
+# Undo the last deletion and insertion.
+# As a side effect, this unselects any selected text.
+#
+body ::tycho::Edit::undo {} {
+    if $readOnly {bell; return}
+    $itk_component(text) tag remove sel 1.0 end
+    # To be able to redo, copy the state, and reset the undo
+    if {$undoInsert} {
+	set ifirst [$itk_component(text) index lastInsertFirst]
+	set ilast [$itk_component(text) index lastInsertLast]
+	set iflag 1
+    } {
+	set iflag 0
+    }
+    if {$lastDelString != ""} {
+	set dstr $lastDelString
+	set dpos $lastDelPosition
+    } {
+	set dstr ""
+    }
+    
+    set sredo $redo
+    
+    resetUndo
+    
+    set didsomething 0
+    
+    # Undo the insertion first
+    if {$iflag} {
+	deleteRange $ifirst $ilast
+	$itk_component(text) mark set insert $ifirst
+	$itk_component(text) see insert
+	set didsomething 1
+    }
+    
+    # Undo the deletion next
+    if {$dstr != ""} {
+	insertString $dpos $dstr
+	$itk_component(text) mark set insert $dpos
+	$itk_component(text) see insert
+	set didsomething 1
+    }
+    
+    if {$didsomething} {
+	markModified
+	undoBoundary
+	if {$sredo} {
+	    set redo 0
+	} {
+	    set redo 1
+	}
+    }
+}
+
+#####################################################################
+#### undoBoundary
+# Break a sequence of character entries for the purposes of the undo
+# command.  I.e., if a sequence of characters is entered, then this
+# is called, then another sequence of characters is entered, only
+# the second sequence of characters will be undone by the undo command.
+#
+body ::tycho::Edit::undoBoundary {} {
+    set lastUndo ""
+}
+
+#####################################################################
+#### unselectRange
+# Unselect everything in the specified range.
+#
+body ::tycho::Edit::unselectRange {start stop} {
+    $itk_component(text) tag remove sel $start $stop
+}
+
+#####################################################################
+#### upSize
+# Increase the size of the offset added to -basefont to get the
+# current -textfont. -basefont is set by preference and the 
+# offset is reset to 0 for every new editor.
+#
+body ::tycho::Edit::upSize {} {
+    set bf [::tycho::FontManager::parseFont $itk_option(-basefont)]
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    
+    # heuristic to get good relative size changes
+    set incr [expr $sz / 6 + 1]
+
+    # increase offset
+    set fontOffset [expr $fontOffset + $incr]
+    set sz [expr $sz + $incr]
+
+    $this configure -textfont \
+            [::tycho::font [lindex $bf 0] $sz [lindex $bf 2]]
+}
+
+#####################################################################
+#### upperCase
+# Convert the selection or the current word to upper case.
+#
+body ::tycho::Edit::upperCase {} {
+    if $readOnly {bell; return}
+    set sel [selOrWord]
+    insertString insert [string toupper $sel]
+}
+
+#####################################################################
+#### writeSpellText
+# Write to the specified file any text that should be spell checked,
+# which is that text tagged with any one of the tags returned by the
+# method spellCheckTags. If spellCheckTags returns an empty string,
+# then the entire file is written.
+#
+body ::tycho::Edit::writeSpellText {filename} {
+    # First make sure the text is parsed.
+    # Note that this cannot occur in the background.
+    parseNow 1.0 end
+
+    set fd [open $filename w+]
+    set tags [spellCheckTags]
+    if {$tags == {}} {
+	puts -nonewline $fd [get 1.0 {end -1 char}]
+    } {
+	foreach tag $tags {
+	    set upto 1.0
+	    while {[set ret [$itk_component(text) tag nextrange \
+		    $tag $upto]] != {}} {
+		set upto [lindex $ret 1]
+		puts $fd [get [lindex $ret 0] $upto]
+	    }
+	}
+    }
+    close $fd
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. By default, this
+# menu contains menu entries for Undo, Cut, Copy, Paste, Delete and 
+# two entries that provide information about the widget.
+#
+# Subclasses that create a context menu (by calling "contextmenu create"
+# on themselves) should override this method.
+#
+body ::tycho::Edit::configureContextMenu {} {
+    # Clear the menu
+    contextmenu clear
+
+    contextmenu command undo \
+	    -label "Undo" \
+	    -command "$this undo"
+
+    contextmenu separator contextsep1
+
+    contextmenu command cut \
+	    -label "Cut" \
+	    -command "$this cut"
+
+    contextmenu command copy \
+	    -label "Copy" \
+	    -command "$this copy"
+
+    contextmenu command paste \
+	    -label "Paste" \
+	    -command "$this paste"
+
+    contextmenu command delete \
+	    -label "Delete" \
+	    -command "$this deleteSelection"
+
+    contextmenu separator contextsep2
+
+    contextmenu command usersguide \
+            -label "Guide to the [info class] widget" \
+	    -command "$this help"
+
+    contextmenu command widgetname \
+            -label "Name of this [info class] widget..." \
+            -command "::tycho::post $this"
+}
+
+#####################################################################
+#### getTaggedText
+# Return the region of text tagged with the given tag within which
+# the "current" mark sits.  If there is no such tagged text, return
+# the empty string.
+#
+body ::tycho::Edit::getTaggedText {tag} {
+    set ranges [$itk_component(text) tag ranges $tag]
+    set start 1.0
+    set end 1.0
+    set current [$itk_component(text) index current]
+    set even 0
+    foreach point $ranges {
+	if $even {
+	    if [$itk_component(text) compare $current < $point] {
+		# Found the range
+		set end $point
+		break
+	    }
+	    set even 0
+	} {
+	    set start $point
+	    set even 1
+	}
+    }
+    if [$itk_component(text) compare $end > $start] {
+	return [$itk_component(text) get $start $end]
+    } {
+	return {}
+    }
+}
+
+#####################################################################
+#### incSearch
+# Callback for incremental searching. This is called whenever the user
+# presses a key while the focus is in the minibuffer. The single
+# argument is either a single key being added to the buffer, a string
+# with value "forward" or "backward" (to set or change the direction of
+# the search), the string "del" to delete a character, or the string
+# "end" to end a search. Searches are case-insensitive. Regular
+# expression searches are not supported.
+#
+body ::tycho::Edit::incSearch {key} {
+    # To avoid responding to Control key, etc., return if no key
+    if {$key == {}} {return}
+
+    # Local variables 
+    set entryWidget [statusbar _entrywidget]
+    set textWidget $itk_component(text)
+
+    set _incSearchText [$entryWidget get]
+
+    # End the search
+    if {$key == "end"} {
+        statusbar putMessage {}
+        focus $textWidget
+        return 
+    }
+
+    # Switch direction
+    set incremented 0
+    if {$key == "forward"} {
+        # add one character to avoid "refinding" 
+        set _incSearchFrom [$textWidget index $_incSearchFrom+1c]
+        set incremented 1
+        if {!$_incSearchForward} {
+            # switch direction
+            set _incSearchTo end
+            set _incSearchFail 0
+            set _incSearchForward 1
+        } 
+    } elseif {$key == "backward"} {
+        if {$_incSearchForward} {
+            # switch direction
+            set _incSearchTo 1.0
+            set _incSearchFail 0
+            set _incSearchForward 0
+        } 
+    } elseif {$key == "del"} {
+        set _incSearchText [string range $_incSearchText 0 \
+                [expr [string length $_incSearchText] - 2]]        
+    } else {
+        if {!$_incSearchForward} {
+            # Searching backwards, and just added one character.
+            # Increment the search position so that in-place matches
+            # are identified.
+            set _incSearchFrom [$textWidget index $_incSearchFrom+1c]
+            set incremented 1
+        }
+        append _incSearchText $key
+    }
+
+    # Set forward/backward flag
+    if {$_incSearchForward} {
+        set dirflag "-forward"
+    } else {
+        set dirflag "-backward" 
+    }
+    
+    set foundLength 0
+    # Search the text
+    set searchIndex [$textWidget search \
+            $dirflag -exact -count foundLength -nocase -- \
+            $_incSearchText $_incSearchFrom $_incSearchTo]
+    
+    # Test for success
+    if {$searchIndex != {}} {
+      # The behaviour of the selection tag changed in Tk 8.
+        # The changes file says:
+        #
+        # 11/25/96 (feature change) Under Windows and Macintosh, the selection
+        # highlight is now hidden whenever an entry or text widget loses focus.
+        # Also, the previous selection information is not lost when a new
+        # selection is made in a different widget. (SS)
+        # Remove the selection
+
+
+        $textWidget tag remove sel 1.0 end
+        $textWidget tag delete currmatch    
+
+        # Add selection
+        set _incSearchFail 0
+        $textWidget tag add sel $searchIndex \
+               "$searchIndex + $foundLength chars"
+
+        $textWidget tag add currmatch $searchIndex \
+                "$searchIndex + $foundLength chars"
+        $textWidget tag raise sel currmatch
+        $textWidget tag configure currmatch \
+                -background [stylesheet get text search.background] \
+                -foreground [stylesheet get text search.foreground]
+
+        # Show selection
+        $textWidget see $searchIndex
+        setInsert $searchIndex
+        set _incSearchFrom $searchIndex
+    } else { 
+       # Fix to keep from losing place
+        if $incremented {
+            set _incSearchFrom [$textWidget index $_incSearchFrom-1c]
+        }
+        if {!$_incSearchFail} {
+            # First time
+            set _incSearchFail 1
+            bell
+        } else {
+            # Second time -- start over
+            set _incSearchFail 0
+            if {$_incSearchForward} {
+                set _incSearchFrom 1.0
+                incSearch forward
+            } else {
+                set _incSearchFrom end
+                incSearch backward
+            }
+        }
+    }
+}
+
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::Edit::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Edit::_initializeMenubar $menubar
+    }
+    # Set the statusbarpadding according to the -scrollbar option
+    statusbar configure -scrollbarpad $itk_option(-scrollbar)
+}
+
+#####################################################################
+#### resetUndo
+# Reset the undo buffer.
+#
+body ::tycho::Edit::resetUndo {} {
+    set undoInsert 0
+    set lastDelString ""
+    undoBoundary
+    set redo 0
+}
+
+###################################################################
+#### saveText
+# Return the text to save.
+#
+body ::tycho::Edit::saveText {} {
+    return [get 1.0 {end -1 char}]
+}
+
+#####################################################################
+#### setInsert 
+# Set the insertion mark at the specified index.
+# This is done by a protected method so that it can be overridden
+# in derived classes.
+#
+body ::tycho::Edit::setInsert {index} {
+    $itk_component(text) mark set insert $index
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+
+#####################################################################
+#### columnNumber
+# Return the column number of the insertion mark, taking into account
+# that tabs occupy 8 spaces.
+body ::tycho::Edit::columnNumber {} {
+    set str [$itk_component(text) get "insert linestart" insert]
+    regsub -all "\t" $str "        " str
+    return [string length $str]
+}
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar. Adds entries specific to this class.
+#
+body ::tycho::Edit::_initializeMenubar {menubar} {
+    global tcl_platform
+
+    # Insert items in the menu bar.
+    if {$tcl_platform(platform) == "macintosh"} {
+	$menubar disable compile
+    }
+
+    # Add an Edit menu
+    $menubar addMenu edit -label Edit -before window -underline 0
+    
+    $menubar command undoredo edit \
+	    -label "Undo/Redo" \
+            -accelerator [::tycho::Shortcuts::getLabel Undo] \
+	    -underline 0 \
+            -command "$this undo"
+    
+    $menubar separator editsep1 edit
+    
+    $menubar command cut edit \
+	    -label "Cut" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Cut] \
+	    -command "$this cut"
+    
+    $menubar command copy edit \
+	    -label "Copy" \
+            -underline 1 \
+            -accelerator [::tycho::Shortcuts::getLabel Copy] \
+	    -command "$this copy"
+    
+    $menubar command paste edit \
+	    -label "Paste" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Paste] \
+	    -command "$this paste"
+    
+    $menubar separator editsep2 edit
+    
+    $menubar command selectall edit \
+            -label "Select All" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel SelectAll] \
+            -command "$this selectRange 1.0 end"
+    
+    $menubar command unselect edit \
+	    -label "Unselect" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel UnselectAll] \
+            -command "$this unselectRange 1.0 end"
+    
+    $menubar separator editsep3 edit
+    
+    $menubar command findchange edit \
+	    -label "Find/Change..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Find] \
+            -command "$this search"
+    
+    $menubar command search edit \
+	    -label "Incremental Search" \
+            -underline 8 \
+	    -accelerator [::tycho::Shortcuts::getLabel Search] \
+            -command "$this incSearchMinibuffer"
+    
+    $menubar command searchbackwards edit \
+	    -label "Search Backwards" \
+            -underline 3 \
+	    -accelerator [::tycho::Shortcuts::getLabel SearchBackwards] \
+            -command "$this incSearchMinibuffer 1"
+    
+    $menubar command spelling edit \
+	    -label "Spelling..." \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Spelling] \
+            -command "$this spellCheck"
+
+    if {$tcl_platform(platform) == "macintosh"} {
+	$menubar disable spelling
+    }
+
+    $menubar command gotoline edit \
+	    -label "Goto Line..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Goto] \
+            -command "$this gotoLine"
+    
+    # Add a Format menu
+    $menubar addMenu format -label Format -underline 1
+    
+    # $menubar separator formatsep0 format
+
+    $menubar command fillregion format \
+	    -label "Fill Region" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Fill] \
+            -command "$this busy $this fillSelection"
+    
+    $menubar command rightfillcolumn format \
+	    -label "Right Fill Column" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel FillColumn] \
+            -command "$this queryFillColumn"
+    
+    $menubar command setfillprefix format \
+	    -label "Set Fill Prefix" \
+            -underline 1 \
+	    -accelerator [::tycho::Shortcuts::getLabel FillPrefix] \
+            -command "$this queryFillPrefix"
+
+    $menubar separator formatsep1 format
+
+    $menubar command capitalize format \
+	    -label "Capitalize" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Capitalize] \
+            -command "$this capitalize"
+
+    $menubar command lowercase format \
+	    -label "Lower Case" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel LowerCase] \
+            -command "$this lowerCase"
+
+    $menubar command uppercase format \
+	    -label "Upper Case" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel UpperCase] \
+            -command "$this upperCase"
+
+    # Add a Special menu for file templates and so on
+    $menubar addMenu special -label Special -underline 0
+    
+    # Add font size control
+    $menubar command biggerfont special \
+	    -label "Larger Font" \
+            -underline 0 \
+            -accelerator "C-\]" \
+            -command "$this upSize"
+
+    $menubar command smallerfont special \
+	    -label "Smaller Font" \
+            -underline 0 \
+            -accelerator "C-\[" \
+            -command "$this downSize"
+}
+
+#####################################################################
+#### nextWord
+# Return the number of characters from the selection to the next "word"
+# using Emacs rules. If the next word is farther than 1 line away, 
+# return the number of characters to the next line.
+#
+body ::tycho::Edit::nextWord {} {
+    set string [$itk_component(text) get insert "insert + 1 line"]
+    return [::tycho::wordright $string 0 $skipChars]
+}
+
+#####################################################################
+#### prepareInsert
+# Set up the undo buffer for an insertion at position index.
+# Return 1 if this insertion is contiguous with an immediately
+# preceding insertion. Return 0 otherwise.
+#
+body ::tycho::Edit::prepareInsert {index} {
+    
+    set contflag 0
+    
+    $itk_component(text) mark set insert $index
+    
+    # Contiguous inserts that occur between undoBoundary calls
+    # will be undone together.
+    set ind [$itk_component(text) index insert]
+    if {$lastUndo != "insert" ||
+    ($ind != [$itk_component(text) index lastInsertFirst] &&
+    $ind != [$itk_component(text) index lastInsertLast])} {
+	
+	# This is not a contiguous insertion
+	$itk_component(text) mark set lastInsertFirst \
+		[$itk_component(text) index insert]
+	$itk_component(text) mark set lastInsertLast \
+		[$itk_component(text) index insert]
+	
+	# To ensure that lastInsertFirst stays at the
+	# beginning of the insert string:
+	$itk_component(text) mark gravity lastInsertFirst left
+    } {
+	# This insertion is part 2 or higher of a contiguous set
+	set contflag 1
+    }
+    
+    set undoInsert 1
+    set lastUndo "insert"
+    
+    markModified
+    
+    return $contflag
+}
+
+#####################################################################
+#### prevWord
+# Return the number of characters from the selection to the previous "word"
+# using Emacs rules. (returns a positive number) If the previous word is 
+# farther than 1 line away, return the number of characters to the previous 
+# line.
+#
+body ::tycho::Edit::prevWord {} {
+    if {[$itk_component(text) index insert] < 2.0} {
+        set prevline 1.0
+    } else {
+        set prevline "insert - 1 line"
+    }
+    set string [$itk_component(text) get $prevline insert]
+    set length [string length $string]
+    return [expr $length - [::tycho::wordleft $string $length $skipChars]]
+}
+
+#####################################################################
+#### selOrWord
+# Identify the current selection or the current word, delete it, and
+# return the deleted text.  This is used by all commands that modify
+# the "selection or word".  The current word is the word within which
+# the insertion cursor is placed.  If the insertion cursor is at a space,
+# then the current word is the next word.
+#
+body ::tycho::Edit::selOrWord {} {
+    
+    if $readOnly {bell; return {}}
+    
+    if {[set sel [getSelection]] != {}} {
+	deleteRange sel.first sel.last
+    } {
+        # Check whether we are at white space
+        if [regexp "\[ \t\n\]" [get insert]] {
+            set text $itk_component(text)
+            set nextword [$text search -regexp "\[^ \t\]" insert]
+            if {$nextword == {}} {
+                bell
+                return {}
+            }
+            $text mark set insert $nextword
+        }
+        set sel [get "insert wordstart" "insert wordend"]
+        deleteRange "insert wordstart" "insert wordend"
+    }
+    return $sel
+}

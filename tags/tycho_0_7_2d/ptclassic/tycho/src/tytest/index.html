@@ -1,0 +1,77 @@
+<!-- @(#)index.html	1.8 05/11/98 -->
+<html>
+<head>
+<title>Test package for Tycho packages
+</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><a name="Tycho package test package">Test package for Tycho packages
+</a></h1>
+<HR>
+
+ <P>TyTest is a Tycho package that contains C code for testing other
+Tycho C packages.
+
+ <P><B>Contents</B>
+<ul>
+<li><A HREF="#::tycho::testtask">Example Tycho "task" in C</A>
+</ul>
+
+<h2><a name="::tycho::testtask">::tycho::testtask</a></h2>
+
+<P><code>::tycho::testtask</code> is a Tcl procedure that implements a
+C "task" in the structure required by the Tycho 
+<A HREF="../../typt/controls/doc/codeDoc/Scheduler.html"><code>Scheduler</code></A>.
+All it does is count furiously until its time slice is up, and then
+sets a Tcl variable to the value of the counter. Although this
+functionality is rather useless, it does provide an interesting
+comparison of the relative execution speed of C and Tcl! It has three
+argument formats:
+
+<dl>
+ <P><dt><code>::tycho::testtask setup <I>countername</I></code>
+
+<dd>Initialize the task: The counter is set to
+zero. <CODE><I>countername</I></CODE> is the name of the Tcl variable
+that will be updated at the end of its time slice.
+
+ <P><dt><code>::tycho::testtask execute</code>
+
+<dd>Count for one timeslice -- the time is as set by the Tycho
+scheduler, and defaults to 20 ms.
+
+ <P><dt><code>::tycho::testtask wrapup</code> 
+
+<dd>Stop and clean up the task. In this case, nothing needs to be done.
+
+</dl>
+
+ <P>To run a demonstration of the C task:
+<tcl quiet><pre>
+    source $tycho/src/tytest/testtask.tcl
+</pre></tcl>
+
+The top number is the counter incremented by the C task; the bottom
+one is the counter incremented in Tcl.  To more clearly see the
+interleaving of these two tasks:
+
+<tcl quiet><pre>
+    ::tycho::timer period 200
+</pre></tcl>
+
+ <P>Source files:
+<ul>
+<li><A HREF="../tytest/testtask.tcl">Test file</A>
+<li><A HREF="tyTimerTest.c">C source file</A>
+</ul>
+
+
+ <P>
+<HR>
+Copyright &#169 1996-1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 05/11/98,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>

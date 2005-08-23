@@ -1,0 +1,846 @@
+# Definition of a Tcl editor that handles Ptolemy Tcl extensions
+#
+# @Author: Christopher Hylands
+#
+# @Version: @(#)EditPtcl.itcl	1.31 01/27/99
+#
+# @Copyright (c) 1996-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### EditPtcl
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing Ptolemy Tcl files. Tcl is an
+# interpreted language developed by John Ousterhout of Berkeley. 
+# Ptolemy extends Tcl with new commands, these commands are called
+# ptcl commands.
+# 
+# This editor is like the Tcl editor, but it can also use the oct2ptcl
+# binary to convert Octtools facets to ptcl commands.
+#
+class ::tycho::EditPtcl {
+    inherit ::tycho::EditItcl
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the name of the Oct facet associated with the data being edited.
+    itk_option define -facet facet File ""
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Return a list of domains that have stars in this universe 
+    method domains {}
+
+    # Generate a universe from the current universe
+    method generateUniverse {}
+
+    # Return the default implementation.
+    method getPLFileName {}
+
+    # Return a list of stars, organized as {{instance {domain star}} ...}
+    method getStarInfoList {}
+
+    # Open a help window.
+    method help {}
+
+    # Open a Oct facet, call oct2ptcl and read in the oct2ptcl output
+    method openFacet {}
+
+    # Color the Tcl code in a region.
+    method parseNow {start stop} {}
+
+    # Register the star-implementation pair.
+    method registerImplementation {starinfo impl}
+
+    # Open a retargetting window.
+    method retarget {}
+
+    # Evaluate the file and then run it for 'iterations', and call wrapup
+    method run {iterations}
+
+    # Save the list of implementations
+    method saveImplementation {}
+
+    # Select an implementation for the star.
+    method selectImplementation {{default {}}}
+
+    # Select a star to specify the implementation.
+    method selectStar {stars {default {}}}
+
+    # Specify implementations for stars.
+    method setImplementation {}
+
+    # Color the Tcl code in a region.
+    # Return a list of the stars in the file, organized as { {DOMAIN star} ...}
+    method stars {}
+
+    # Tag identifiers in the file that are defined elsewhere.
+    method tagLinks {}
+
+    # Return the universe name
+    method universeName {}
+
+    # Update the list of star-implementation pairs
+    method updateImplementationList {}
+
+    ####################################################################
+    ####                    protected methods                       ####
+
+    # Return the regular expression used to identify line-oriented comments.
+    protected method commentRegexp {}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    ####################################################################
+    ####                   protected variables                      ####
+
+    # Counter for hyperlinks.
+    protected variable hypcount 0
+
+    ####################################################################
+    ####                     private methods                        ####
+
+    # Return the list of candidate implementations.
+    private method getCandidates {starinfo}
+
+    # Return the implementation.
+    private method getImplementation {starinfo}
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
+    ####################################################################
+    ####                     private variables                      ####
+
+    # List of the star-implementation pairs.
+    private variable implementationList {}
+
+    # New list of the star-implementation pairs.
+    private variable implementationListNew {}
+
+    # Name of query to set implementations.
+    private variable queryName {}
+
+    # Name of the universe defined in this file
+    private variable univName {}
+
+    # Constant string for the unspecified implementation.
+    private common notSpecified "Not Specified"
+}
+
+###################################################################
+#
+body ::tycho::EditPtcl::constructor {args} {
+    eval itk_initialize $args
+    
+    # Set the fill prefix to be the comment character for Tcl.
+    set fillPrefix "#"
+}
+
+#######################################################################
+#### -facet configuration
+# Use oct2ptcl to convert a facet from Oct to Ptcl format.
+# If you configure this option after construction, you must invoke
+# <code>reload</code> to view the facet.
+#
+configbody ::tycho::EditPtcl::facet {
+    set facet $itk_option(-facet)
+    if {$facet != "" } {
+	set facet [::tycho::expandPath $facet]
+	set facetTmpFile [::tycho::tmpFileName [file tail $facet] .pt]
+
+	# Unix-ism here.  Why anyone would buy (let alone write)
+	# an operating system without an exec is beyond me. :-)
+	#
+	# oct2ptcl is part of Ptolemy, it converts Oct facets to Ptolemy
+	# tcl commands.  
+	# -r recursive translation: convert sub-galaxies
+	# -g append a run and a wrap up command
+	exec oct2ptcl -rg $facet > $facetTmpFile
+
+	configure -file $facetTmpFile
+    }
+}
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+###################################################################
+#### domains
+# Return a list of domains that have stars in this universe 
+#
+body ::tycho::EditPtcl::domains {} {
+    # Get the list of stars, in the form {domain star} {domain star}
+    set domainStarList [stars]
+    set domainList {}
+    foreach domainStar $domainStarList {
+        if {[lsearch $domainList [lindex $domainStar 0]] == -1 } {
+            lappend domainList [lindex $domainStar 0]
+        }
+    }
+    return $domainList
+}
+
+#####################################################################
+#### generateUniverse
+# Generate a universe from the current universe by replacing stars with
+# specified implementation.
+# 
+body ::tycho::EditPtcl::generateUniverse {} {
+    set generatedFile "/tmp/generateduniverse.pt"
+    set fid [open $generatedFile w]
+    array set implementation $implementationList
+
+    set text $itk_component(text)
+
+    set start 0.0
+    set stop end
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set id "\[^ \t\]*"
+    set starregexp "^$spaces*(star)$spaces+($id)$spaces+($id)"
+
+    while {[set newind [$text search -count len -regexp $starregexp \
+	    $ind $stop]] != {}} {
+
+	set prevlines [$text get $ind $newind]
+	puts -nonewline $fid $prevlines
+
+	set endc [$text index "$newind + $len chars"]
+	set line [$text get $newind $endc]
+	
+	regexp $starregexp $line match star starInstance starType
+	if [info exists implementation($starInstance)] {
+	    set starname [lindex $implementation($starInstance) 1]
+	    regsub "(\[ \t\])$starType*\$" $line \
+		    "\\1$starname" line
+	}
+	puts -nonewline $fid $line
+
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    set restlines [$text get $ind end]
+    puts -nonewline $fid $restlines
+    close $fid
+
+    ::tycho::view EditPtcl -file $generatedFile
+}
+
+#####################################################################
+#### getPLFileName
+# Return the implementation of the star which is on the "sel_impl" query.
+# In case that the implementation has not been specified yet, return
+# the default instead.
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getPLFileName {} {
+    set def_impl [$queryName get sel_impl]
+    if {$def_impl == $notSpecified} {
+	set starinfo [$queryName get sel_star]
+	set candidateList [getCandidates $starinfo]
+	set def_impl [lindex $candidateList 0]
+    }
+    return [eval ::tycho::EditPtlang::getPtlangFile $def_impl]
+}
+
+#####################################################################
+#### getStarInfoList
+# Return a list of the stars in the file, organized as 
+# { {instance_name {domain star}} ...}
+body ::tycho::EditPtcl::getStarInfoList {} {
+    set text $itk_component(text)
+
+    if [catch {domain} currentDomain] {
+        # We don't have ptcl commands, so we punt
+        set currentDomain SDF
+    }
+
+    set start 0.0
+    set stop end
+    set results {}
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set lineregexp "^$spaces*(domain|star|newuniverse).*"
+    set procregexp "^$spaces*(domain|star)$spaces+(\[^ \t\]*)"
+    set starregexp "^$spaces*(star)$spaces+(\[^ \t\]*)$spaces+(\[^ \t\]*)"
+    while {[set ind [$text search -count len -regexp $lineregexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+	# Procedures
+	if [regexp $procregexp $line match domainOrStar domain] {
+            if { $domainOrStar == "domain" } {
+                set currentDomain $domain
+            } else {
+                if [regexp $starregexp $line \
+                        match star starInstance starType] {
+                    set domainStarList [list $currentDomain $starType]
+		    lappend results [list $starInstance $domainStarList]
+                }
+            }
+
+	}
+
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    return $results
+}
+
+###################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::EditPtcl::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO typt edit doc usersGuides EditPtclHelp.html] html
+}
+
+#####################################################################
+#### openFacet
+# Bring up a file browser, allow the user to select an octtools
+# facet, then run oct2ptcl on the facet.  Grab the output of oct2ptcl
+# and put it into a buffer.
+body ::tycho::EditPtcl::openFacet {} {
+}
+
+###################################################################
+#### retarget
+# Open a retarget window.
+#
+body ::tycho::EditPtcl::retarget {} {
+    set w [::tycho::Retarget .retrg#auto -edit [$this textWinName]]
+    $w centerOnScreen
+}
+
+#####################################################################
+#### run
+# Evaluate the contents of the text window as Tcl commands
+# in the global context.  Display and return the result of the evaluation.
+#
+body ::tycho::EditPtcl::run {iteration} {
+    set code [getSelection]
+    if { $code == {} } {
+	set code [get 1.0 end]
+	set type "File"
+    } else {
+	set type "String"
+    }
+
+    set ret [uplevel #0 $code]
+    if {$ret != {}} {
+	puts $ret
+	putStatus "$type evaluated"
+	safeEval ::tycho::inform "$type evaluation returned:\n$ret"
+	putStatus ""
+    } {
+        putStatus "$type evaluated (empty result)"
+    }
+    return $ret
+    focusin
+}
+
+#####################################################################
+#### parseNow
+# Invoke the base class parser to color comments and the strings
+# "NOTE" and "FIXME".  Then tag and color procedure names.
+#
+body ::tycho::EditPtcl::parseNow {start stop} {
+
+    EditItcl::parseNow $start $stop
+    set text $itk_component(text)
+
+    # Remove tags first, if necessary
+    $text tag remove procname $start $stop
+
+    # Search for procedure definitions.
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set procregexp "^$spaces*((defgalaxy|newuniverse)$spaces+)(\[^ \t\]*)"
+    while {[set ind [$text search -count len -regexp $procregexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+	# Procedures
+	if [regexp -indices $procregexp $line match access procName] {
+	    # Procedure definitions. Tag the procedure name.
+	    # Note that we support Itcl qualifiers here.
+	    # Should they be colored too?
+	    set first [lindex $procName 0]
+	    set last [lindex $procName 1]
+	    $text tag add procname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	}
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged text
+    $text tag configure procname -foreground \
+	    [option get $itk_component(hull) procColor EditPtcl]
+}
+
+#####################################################################
+#### registerImplementation
+# Register the star-implementation pair. The list is organized as
+# {instance1 implementation1 instance2 ...} so that it could be
+# processed further easily with the array command.
+#
+body ::tycho::EditPtcl::registerImplementation {starinfo impl} {
+    array set implementation $implementationListNew
+    set instance [lindex $starinfo 0]
+    set implementation($instance) $impl
+    set implementationListNew {}
+    foreach instance [array names implementation] {
+	lappend implementationListNew $instance
+	lappend implementationListNew $implementation($instance)
+    }
+}
+
+#####################################################################
+#### saveImplementation
+# Save the list of implementations, which are specified for each star,
+# under the name of .impl.
+#
+body ::tycho::EditPtcl::saveImplementation {} {
+    set implfile [::tycho::expandPath [string range $itk_option(-file) 0 \
+	    [expr [string last .pt $itk_option(-file)] - 1]].impl]
+    set fid [open $implfile w]
+    puts $fid $implementationList
+    close $fid
+}
+
+#####################################################################
+#### selectImplementation
+# Make a list browser which lists up implementations. When the OK button
+# is hit, record the star-implementation pair.
+#
+body ::tycho::EditPtcl::selectImplementation {{default {}}} {
+    set nm [::tycho::autoName .lb]
+    ::tycho::ListBrowser $nm -default $default -entrywidth 0 -width 0
+    $nm appendItems [getCandidates [$queryName get sel_star]]
+    $nm centerOnScreen
+
+    set impl [::tycho::Dialog::wait $nm]
+    
+    if { $impl == $notSpecified } { 
+	set impl $default 
+    } else {
+	registerImplementation [$queryName get sel_star] $impl
+    }
+
+    return $impl
+}
+
+#####################################################################
+#### selectStar
+# Make a list browser which lists up stars.
+#
+body ::tycho::EditPtcl::selectStar {stars {default {}}} {
+    set nm [::tycho::autoName .lb]
+    ::tycho::ListBrowser $nm -default $default
+    $nm appendItems $stars
+    $nm centerOnScreen
+
+    set starinfo [::tycho::Dialog::wait $nm]
+
+    if { $starinfo == "" } { 
+	set starinfo $default 
+    } else {
+	# Update the default implementation.
+	set def_impl [getImplementation $starinfo]
+	$queryName insert sel_impl $def_impl
+    }
+    
+    return $starinfo
+}
+
+#####################################################################
+#### setImplementation
+# Specify implementations for stars, which will substitute when a
+# fixed-point universe is generated.
+body ::tycho::EditPtcl::setImplementation {} {
+    # Initialize the implementation list from the init file, if exists
+    set implfile [::tycho::expandPath [string range $itk_option(-file) 0 \
+	    [expr [string last .pl $itk_option(-file)] - 1]].impl]
+    if [file exists $implfile] {
+	set fid [open $implfile r]
+	set implementationList [read -nonewline $fid]
+	close $fid
+    }
+
+    # Prepare a working list of star-implementation pairs.
+    set implementationListNew $implementationList
+
+    # "starinfo" has the form of "instance {domain star}".
+    set starinfolist [getStarInfoList]
+    set def_starinfo [lindex $starinfolist 0]
+    set def_impl [getImplementation $def_starinfo]
+
+    set queryName [::tycho::autoName .query]
+    set query {}
+    lappend query [list \
+	    mediated sel_star {Star Name:} $def_starinfo \
+	    [list $this selectStar $starinfolist]]
+    lappend query [list \
+	    mediated sel_impl {Implementation:} $def_impl \
+	    "$this selectImplementation"]    
+    lappend query [list \
+	    addButton open -text "Open Ptlang File" \
+	    -command "::tycho::view EditPtlang -file \
+	                  \[$this getPLFileName\]"]
+    lappend query [list \
+	    addButton apply -text "Apply" \
+	    -command "$this updateImplementationList"]
+
+    ::tycho::MatrixQuery $queryName \
+	    -matrixqueries "$query" \
+	    -text "Select Implementation" \
+	    -okcommand "$this updateImplementationList; \
+	                $this saveImplementation" \
+	    -geometry +0+0 \
+	    -entrywidth 60
+
+    wm deiconify $queryName
+}
+
+#####################################################################
+#### stars
+# Return a list of the stars in the file, organized as { {DOMAIN star} ...}
+body ::tycho::EditPtcl::stars {} {
+    set text $itk_component(text)
+
+    if [catch {domain} currentDomain] {
+        # We don't have ptcl commands, so we punt
+        set currentDomain SDF
+    }
+
+    set start 0.0
+    set stop end
+    set results {}
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set lineregexp "^$spaces*(domain|star|newuniverse).*"
+    set procregexp "^$spaces*(domain|star)$spaces+(\[^ \t\]*)"
+    set starregexp "^$spaces*(star)$spaces+(\[^ \t\]*)$spaces+(\[^ \t\]*)"
+    while {[set ind [$text search -count len -regexp $lineregexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+	# Procedures
+	if [regexp $procregexp $line match domainOrStar domain] {
+            if { $domainOrStar == "domain" } {
+                set currentDomain $domain
+            } else {
+                if [regexp $starregexp $line \
+                        match star starInstance starType] {
+                    set domainStarList [list $currentDomain $starType]
+                    if {[lsearch $results $domainStarList] == -1 } {
+                        lappend results $domainStarList
+                    }
+                }
+            }
+
+	}
+
+        # Check for newuniverse, if it is present then save the value
+        regexp {newuniverse[ \t]+([^ \t]+)} $line match univName
+
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    return $results
+}
+
+#####################################################################
+#### tagLinks
+# This method tags identifiers in the file that are defined elsewhere
+# and are registered for auto-loading in the global array "auto_index".
+# A binding is attached to the tag to perform a hyper jump to the file
+# given in the auto_index array, annotated with the name of the identifier.
+#
+body ::tycho::EditPtcl::tagLinks {} {
+
+    global ::auto_index
+    
+    # Construct regular expressions for all identifiers in the
+    # auto_index array. Delimiters that might be found before or after
+    # a classname invocation or procedure call.  Some care is required
+    # here because there may be many items in the array, and the size
+    # of a regular expression is limited.  Thus, we construct a set
+    # of regular expressions.  The size is limited to 100 entries.
+
+    set count 0
+    set delim "\[\] \t\[\(\)\{\}\:\;\]"
+    foreach entry [array names auto_index] {
+	if {$count >= 100} {
+	    set count 0
+	    append ids "\)\(\$\|$delim\)"
+	    lappend regexps $ids
+	}
+	if {$count == 0} {
+	    set ids "\(\^\|$delim\)\($entry"
+	} {
+	    append ids "|$entry"
+	}
+	incr count
+    }
+    append ids "\)\(\$\|$delim\)"
+    lappend regexps $ids
+
+    set text $itk_component(text)
+
+    # The following finds the line number of the line beyond the end
+    set end [$text index end]
+    regexp {[0-9]+} $end endline
+    
+    # We now step through each line, one at a time, for each regexp.
+    foreach ids $regexps {
+
+	set next 1.0
+	while {[set next [$text search -regexp $ids $next end]] \
+		!= {}} {
+	    set line [$text get $next "$next lineend"]
+	    if [regexp -indices $ids $line match p1 key p2] {
+		set start "$next +[lindex $key 0] char"
+		set stop "$next +[lindex $key 1] char +1 char"
+		$text tag add hyperlink$hypcount $start $stop
+		$text tag configure hyperlink$hypcount \
+			-foreground \
+			[option get $itk_component(hull) procColor EditPtcl]
+		$text tag configure hyperlink$hypcount \
+			-underline 1
+		
+		set word [$text get $start $stop]
+		
+		# Remove the "source " from the auto_index word
+		set filename [string range $auto_index($word) 7 end]
+		
+		# FIXME: Despite the "break" here, some other binding kicks
+		# in after this one, causing text to be selected.  Tk bug?
+		$text tag bind hyperlink$hypcount \
+			<Double-Button-1> \
+			"$this hyperJump $filename $word; break"
+		
+		incr hypcount
+		set next [$text index \
+			"$next +[string length $word] char"]
+	    } else {
+		set next [$text "$next lineend"]
+	    }
+	    # The following appears to be needed to prevent infinite loops.
+	    if [$text compare $next >= end] {break}
+	}
+    }
+}
+
+#####################################################################
+#### universeName
+# Return the name of the universe
+body ::tycho::EditPtcl::universeName {} {
+    # The stars method will also find the universe name for us.
+    stars
+    return $univName
+}
+
+#####################################################################
+#### updateImplementationList
+# Update the list of star-implementation pairs.
+body ::tycho::EditPtcl::updateImplementationList {} {
+    set implementationList $implementationListNew
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### commentRegexp
+# Return the regular expression used to identify line-oriented comments.
+#
+body ::tycho::EditPtcl::commentRegexp {} {
+    return "(^|;)\[ \t\]*#.*\$"; #line comment
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditPtcl::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditPtcl::_initializeMenubar $menubar
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### getCandidates
+# Return the list of candidate implementations of the star.
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getCandidates {starinfo} {
+    set domainstarpair [lindex $starinfo 1]
+    set domain [lindex $domainstarpair 0]
+    set starname [lindex $domainstarpair 1]*
+    set newdomainstarpair [lreplace $domainstarpair 1 1 $starname]
+    set implist [eval ::tycho::EditPtlang::getPtlangFile $newdomainstarpair]
+    set candidates {}
+    foreach impl $implist {
+	set begin [expr [string last $domain $impl] + [string length $domain]]
+	set end [expr [string last .pl $impl] - 1]
+	set starname [string range $impl $begin $end]
+	lappend candidates [list $domain $starname]
+    }
+    return $candidates
+}
+
+#####################################################################
+#### getImplementation
+# Return the implementation of the star. If the implementation has not
+# been specified, return "Not Specified".
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getImplementation {starinfo} {
+    array set implementation $implementationListNew
+    set instance [lindex $starinfo 0]
+    if [info exists implementation($instance)] {
+	set impl $implementation($instance)
+    } else {
+	set impl $notSpecified
+    }
+    return $impl
+}
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditPtcl::_initializeMenubar {menubar} {
+    global PTOLEMY
+
+    # Delete these menus from the parent EditItcl class, they make no sense.
+    $menubar delete bodytemplate
+    $menubar delete filetemplate
+    $menubar delete testtemplate
+    $menubar delete generatedoc
+    $menubar delete generateidoc
+    $menubar delete generateclassdiagram
+    $menubar delete specialsep2
+ 
+    # Add my own menu entries
+    $menubar command retargetthisfile special \
+	    -label "Retarget This File" -underline 0 \
+            -command "::tycho::view Retarget -edit $this -toolbar 1"
+
+    if {[catch {::pitcl::knownDomains}] == 1 } {
+	$menubar disable retarget
+    }
+    $menubar command listdomains special \
+	    -label "List Domain(s)" -underline 5 \
+            -command "::tycho::inform \
+	    \"Domain(s) used: \[$this domains\]\""
+
+    $menubar command liststars special \
+	    -label "List Stars" -underline 6 \
+            -command "::tycho::inform \
+	    \"Stars used: \[$this stars\]\""
+
+    $menubar command universename special \
+	    -label "Universe Name" -underline 0 \
+            -command "::tycho::inform \
+            \" Universe: \[$this universeName\]\""
+
+    $menubar command openfacet file \
+	    -label "Open Facet" -underline 0 \
+	    -command "$this openFacet"
+
+    # Stuff for the help menu
+    # Moved to the special menu -- johnr
+    $menubar separator specialsep3 special
+    $menubar command ptuniverses special \
+	    -label "Ptolemy Universes" -underline 0 \
+            -command "::tycho::File::openContext \
+	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
+
+    $menubar command starxref special \
+	    -label "Star/Demo Xref" -underline 10 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY doc star-demo-index index.html]"
+
+    $menubar command ptstars special \
+	    -label "Ptolemy stars" -underline 6 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY src domains starHTML.idx.fst]"
+
+    # Menu for fixed-point simulation
+    # Removed-- Needs updating.
+#     $menubar separator specialsep4 special
+#     $menubar command setimplementation special \
+#             -label "Set Implementation" -underline 4 \
+#             -command "$this setImplementation"
+# 
+#     $menubar command generateuniverse special \
+#             -label "Generate Universe" -underline 9 \
+#             -command "$this generateUniverse"
+}
+
+

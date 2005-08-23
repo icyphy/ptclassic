@@ -1,0 +1,334 @@
+# Create a dialog box for the user to edit preferences with.
+#
+# @Version: @(#)StyleChooser.itcl	1.31 06/29/98
+# @Author: John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+#######################################################################
+## stylechooser
+#
+# Open a dialog for choosing style preferences. If there already
+# is one, bring it to the top.
+#
+proc ::tycho::stylechooser {} {
+    if { [::infoWhichCommand .styles] != "" } {
+	raise .styles
+    } else {
+	uplevel #0 [list ::tycho::StyleChooser .styles \
+		-title "Tycho Style Preferences"]
+	wm deiconify .styles
+    }
+}
+
+
+#######################################################################
+#### StyleChooser
+#
+# A window that controls a set of preference editors.
+#
+class ::tycho::StyleChooser {
+    inherit ::tycho::Dialog
+
+    constructor {args} {}
+    destructor {}
+
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The font to use in labels 
+    itk_option define -labelfont labelFont Font [::tycho::font helvetica]
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Change to a new style -- callback
+    method _changestyle {stylesheet}
+
+    # Display styles
+    method _displaystyles {{mode {}}}
+
+    # Raise this window and all child editors
+    method _raise {visibility}
+
+    # Close this window, querying if any styles have changed
+    method close {}
+
+    ###################################################################
+    ####                       private variables                   ####
+
+    # Mapping from {stylesheet label} to style id
+    private variable _stylemap
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::StyleChooser::constructor {args} {
+    # Create the labeled grid. Give it a columnspan of just 2
+    itk_component add items {
+	labeledgrid $itk_component(childsite).items \
+                -columnspan 2 -childcolumnspan 1 \
+                -labelforeground blue
+    } {
+	keep -background -cursor -font -labelfont
+    }
+    pack $itk_component(items) -fill both -expand on -padx 8 -pady 8
+
+    # Give the option menus a minimum width
+    # FIXME: Make accessible from labeledgrid.itk
+    # FIXME: Get from a style sheet
+    grid columnconfigure [$itk_component(items) component hull] 1 \
+            -minsize 150
+
+    # Display the styles
+    _displaystyles
+
+    # Add the buttons to the bottom
+    # FIXME: Add help
+    set bbox [component bbox]
+    $bbox add close \
+            -text "Close" \
+            -command "$this close" \
+            -column 1
+    $bbox default close
+
+    if { [llength [::tycho::stylesheet stylesheets]] \
+            != [llength [::tycho::stylesheet stylesheets all]] } {
+        $bbox add loadall \
+                -text "Load all" \
+                -command "$this _displaystyles all" \
+                -column 0
+    }
+
+    # If we raise this window, raise all style windows
+    # Bind to a component, not the top-level window, to avoid
+    # a call for each component!
+    bind [component bbox] <Visibility> "$this _raise %s"
+
+    # Register this window so it appears on the menus
+    ::tycho::register window Preferences $this \
+            -label "Tycho Preferences" \
+            -category tool
+
+    # Initialize options
+    eval itk_initialize $args
+
+    # Subscribe to styles
+    # FIXME: Add entry font? main font?
+    stylesheet subscribe \
+            -labelfont fonts labelFont
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::StyleChooser::destructor {} {
+    # Deregister this window
+    ::tycho::deregister window Preferences $this
+}
+
+#######################################################################
+#### _changestyle
+#
+body ::tycho::StyleChooser::_changestyle {stylesheet} {
+    # Figure out what the style is
+    set label [$itk_component(items) get $stylesheet]
+    set style $_stylemap([list $stylesheet $label])
+
+    # Change it
+    ::tycho::userprofile registerstyle $stylesheet $style
+
+    # Update all subscribers
+    # FIXME: I can't help feeling that this should really be
+    # happening using the subscription mechanism in UserProfile...
+    foreach {subscriber oldstyle} [::tycho::stylesheet style $stylesheet] {
+
+        # Avoid non-existent subscribers
+        if { [::infoWhichCommand $subscriber] == "" } {
+            continue
+        }
+        # Get the style -- note that it won't necesserily change,
+        # because the subscriber may have an override.
+        set style [::tycho::userprofile getstyle $stylesheet $subscriber]
+
+        # If it's different, update it
+        if { $style != $oldstyle } {
+            ::tycho::stylesheet style $stylesheet $subscriber $style
+        }
+    }
+}
+
+#######################################################################
+#### _displaystyles
+#
+# Display styles into the display. If _mode_ is "all", display
+# all styles, otherwise just currently loaded styles.
+# 
+body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
+    # Get style sheets
+    # Only process the difference between gotten ones and loaded ones
+    set sheets [::tycho::stylesheet stylesheets $mode]
+    set sheets [::tycho::lsubtract $sheets [component items names]]
+    if { $sheets == "" } {
+        return
+    }
+    
+    # Collect their labels, choices,
+    # and current global style preference
+    foreach stylesheet $sheets {
+	set model [::tycho::stylesheet access $stylesheet]
+	set master [$model cget -master]
+
+	# Get title -- ignore if no title
+	set label [$master cget -title]
+	if { $label == "" } {
+	    continue
+	}
+	set index($label) $model
+	set sheet($label) $stylesheet
+    }
+    # Process in alphabetical order
+    foreach l [lsort [array names index]] {
+	set model $index($l)
+	set stylesheet $sheet($l)
+        set labels {}
+
+	# Get styles and their labels, from the stylesheet and its master
+        foreach m [list [$model cget -master] $model] {
+            foreach s [$m match style] {
+                set label [$m attrget $s -label]
+                if { $label == "" } {
+                    continue
+                }
+                set _stylemap([list $stylesheet $label]) $s
+                lappend labels $label
+            }
+        }
+    
+	# Get current preference
+	set current [::tycho::userprofile getstyle $stylesheet]
+
+	# Create the entry
+	$itk_component(items) add optionmenu $stylesheet \
+		-label $l \
+		-entries [lsort $labels] \
+                -initial [$model dfltcget $current -label] \
+                -command "$this _changestyle $stylesheet"
+        
+        # If it has only one entry, disable it
+        if { [llength $labels] == 1 } {
+            $itk_component(items) disable $stylesheet
+        }
+
+        # Add an edit button for it
+        # FIXME
+        itk_component add edit$stylesheet {
+            button $itk_component(items).edit$stylesheet \
+                    -text Edit \
+                    -command "::tycho::styleeditor $stylesheet" \
+                    -pady 3 -padx 8
+        }
+        array set gridinfo \
+                [grid info [$itk_component(items) component $stylesheet]]
+        grid $itk_component(edit$stylesheet) \
+                -row $gridinfo(-row) \
+                -column 2
+    }
+
+    # Disable the load-all button
+    if { $mode == "all" } {
+        component bbox disable loadall
+    }
+}
+
+#######################################################################
+#### _raise
+#
+# Raise children of this window, but not above the window itself.
+# 
+body ::tycho::StyleChooser::_raise {visibility} {
+    if { $visibility == "VisibilityUnobscured" } {
+        foreach sheet [::tycho::stylesheet stylesheets] {
+            if { [infoWhichCommand .styles.$sheet] != "" } {
+                lower .styles.$sheet .styles
+            }
+        }
+    }
+}
+
+#######################################################################
+#### close
+#
+# Close the style chooser. If any styles have changed, query on whether
+# to save them.
+# 
+body ::tycho::StyleChooser::close {} {
+    set save {}
+    foreach sheet [::tycho::stylesheet stylesheets] {
+        set model [::tycho::stylesheet access $sheet]
+        if { [lsearch -exact [$model mark names] saved] == -1 } {
+            $model mark set saved first
+        }
+        if [$model mark compare current > saved] {
+            lappend save $sheet $model
+        }
+    }
+    # If there's at least one changed, offer to save it. Note that
+    # this is a little dense: it thinks that a style has been changed
+    # even if a parameter was changed once, and then changed back to
+    # the default.
+    if { $save != "" } {
+        set nm [::tycho::autoName .yeahyeahyeah]
+        set text    "The following style-sheets have been changed.\n"
+        append text "Do you want to save the changes permanently?\n\n"
+        foreach {sheet model} $save {
+            append text "[[$model cget -master] cget -title]\n"
+        }
+        ::tycho::YesNoCancel $nm -text $text
+        set answer [::tycho::Dialog::wait $nm]
+        if { $answer == 1 } {
+            foreach {sheet model} $save {
+                set file [::tycho::stylesheet register $sheet]
+		if {![file isdirectory [file dirname $file]]} {
+                    file mkdir [file dirname $file]
+                }
+                set fd [open $file "w"]
+                puts $fd [$model describe]
+                ::close $fd
+                $model mark set saved current
+            }
+        }
+        if { $answer == 0 || $answer == 1 } {
+            delete object $this
+        }
+    } else {
+        delete object $this
+    }
+}

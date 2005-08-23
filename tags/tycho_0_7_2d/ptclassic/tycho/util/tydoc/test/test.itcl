@@ -1,0 +1,222 @@
+##
+# @summary	Test file for the tycho doc system
+# @author	Christopher Hylands
+# @version	@(#)test.itcl	1.13 05/07/98
+# @copyright (c) 1995-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+# Here, we define two classes and then run the docsystem on them
+# To run this test file, type: 
+#  itclsh test.itcl
+
+namespace ::tycho
+catch {delete class ::tycho::DocSysTest}
+catch {delete class ::tycho::DocSysTestSimple}
+catch {delete class ::tycho::DocSysTestChild}
+
+# This method is outside a class, and should end up in a separate file
+proc ::tycho::methodOutsideAClass {} {
+    puts "foo"
+}
+
+#######################################################################
+## DocSysTest
+# This class is a test class for the tycho doc system.
+#
+# The line above intentionally left blank
+#
+# Here's a sample embedded tcl section that has empty curly brackets 
+# <tcl><pre>
+# puts stdout {}
+# puts "Here are empty curlies: {}"
+# </pre></tcl>
+#
+class ::tycho::DocSysTest {
+    ##
+    # A generic constructor
+    #
+    constructor {args} {
+    }
+
+    ##
+    # A public variable with a backslash and an initializer
+    public variable \
+      aPublicVariable "initalValue"
+    # A protected variable with no initializer.  Note that there
+    # is no blank line between this construct and the one above, but
+    # these two variables should have different doc comments
+    protected variable aProtectedVariable
+
+    ##
+    # A variable with a backslash but no initializer
+    variable \
+      publicVariableNoInitializer
+
+    # A private common with an initializer
+    private common aCommon "args summary author copyright desc expl see"
+    ##
+    # A bunch of public variables, but only one gets the doc comment
+    # FIXME: should these all share the same doc comment?
+    public variable firstVar "1"
+    public variable secondVar "2"
+    public variable thirdVar "3"
+    public variable fourthVar "4"
+    public variable fifthVar "5"
+
+    # Here we test out the array and set constructs
+    array set anArray {one 1 two 2}
+    set anArray(three) 3
+
+    # A proc with one arg and a null body
+    proc oneArgProc {statementType} {}
+
+    # A private proc with no args . . 
+    private proc privateProcNoArgs {}
+
+    # A public method with two args, one of which takes a default
+    public method publicTwoArgMethod \
+	{firstArg {secondArg {aDefault}}} \
+	{
+	    # a body
+	    firstArg
+	}
+}
+
+##
+#### privateProcNoArgs
+# A private proc with no args. . .
+# Here's the body of something we declared in the class interface above
+# This comment has { curly brackets } and " double quotes"
+# We should preserve the new lines in the following text
+# <tcl><pre>
+# Console .c -text "A fresh Tcl console\n"
+# .c centerOnScreen
+# </pre></tcl>
+#
+# Also, here is a separate paragraph, there should be a white space above this
+#
+body ::tycho::DocSysTest::privateProcNoArgs {} {
+    set fcatch [foo {bar}]
+    puts "privateProcNoArgs"
+}
+
+# A configbody for testing
+configbody ::tycho::DocSysTest::aPublicVariable {
+    puts "body of configbody for aPublicVariable"
+}
+
+# This class is used to test documentation of multiple inheritance.
+class ::tycho::DocSysTestSimple {
+    constructor {args} { puts "DocSysTestSimple"}
+}
+
+# This is a child class that test the ability of more than one class
+# to appear in one file.  This comment is fairly long, in hopes of
+# causing trouble with the index page.
+class ::tycho::DocSysTestChild {
+    inherit DocSysTest DocSysTestSimple
+    ## constructor
+    #
+    # Here we test a constructor that has a body inside the class {}
+    #
+    constructor {} {
+	# Initialise the hierarchy tags
+    }
+
+    # A destructor
+    destructor {#Do some destruction} 
+    
+    #### publicTwoArgMethod
+    # This public method takes two args, the second is optional
+    public method publicTwoArgMethod \
+	{firstArg {secondArg {aDefault}}} \
+	{
+	}
+}
+
+
+proc getDirname {} {
+    global env
+    if {! [info exists env(TYCHO)]} {
+	return $env(PTOLEMY)/tycho/kernel
+    } else {
+	return $env(TYCHO)/kernel
+    }
+}
+
+## testHTMLDocSys
+# Produce documentation for the file named by the filename argument
+proc testHTMLDocSys {filename} {
+    puts "Producing documentation for $filename"
+    ::tycho::HTMLDocSys::generateHTML 1 1 1 "tydoc test" [list $filename]
+#    ::tycho::HTMLDocSys .HTMLDocSys
+#    .HTMLDocSys readFile $filename
+#    .HTMLDocSys generateClassHTML
+#    .HTMLDocSys generateOutsideClassHTML
+#    .HTMLDocSys resetOutsideClassComment
+#    .HTMLDocSys generateHTMLIndex
+#    delete object .HTMLDocSys
+}
+
+## testHTMLDocSysThisFile
+# Run the documentation system on just this file
+# This procedure is what we use to do simple regression tests on the doc system
+proc testHTMLDocSysThisFile {} {
+    testHTMLDocSys [getDirname]/../util/tydoc/test/test.itcl
+}
+
+## testHTMLDocSysKernelFiles
+# Call testAllHTMLDocSys to run the documentation system on all the files
+# in the kernel.
+proc testHTMLDocSysKernelFiles {} {
+    set dirname [getDirname]
+    ::tycho::HTMLDocSys .HTMLDocSys
+    foreach filename [lsort [glob $dirname/*.itcl]] {
+	puts "$filename"
+	.HTMLDocSys readFile $filename
+	.HTMLDocSys generateHTML
+    }
+    .HTMLDocSys generateHTMLIndex
+    delete object .HTMLDocSys
+}
+
+proc foo {} {
+# This always worked
+curlybracket-followed-by-squarebracket-1 [list {foo new zoo} ]
+# This caused problems
+curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
+}
+
+source ../TyDocMain.itcl
+source ../../../kernel/basic/Path.tcl
+
+# Run the doc system on this file
+testHTMLDocSysThisFile
+
+# testHTMLDocSys /users/cxh/pt/tycho/kernel/RevControlSCCS.itcl
+# testHTMLDocSys /users/cxh/pt/tycho/editors/textedit/EditCppText.itcl
+# testHTMLDocSys /users/cxh/pt/tycho/util/tydoc/DocSys.itcl
+# testHTMLDocSysKernelFiles
+

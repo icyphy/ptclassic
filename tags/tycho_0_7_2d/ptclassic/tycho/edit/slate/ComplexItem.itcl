@@ -1,0 +1,423 @@
+#########################################################################
+# @Version: @(#)ComplexItem.itcl	1.42 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+## ComplexItem
+#
+# An "empty" item to which items can be added to create a complex item.
+# Clients can create a complex item directly (by calling the slate's
+# create{} method) and add items into it by manipulating hierarchy tags.
+# often, however, the behavior of a complex item will need to be tailored,
+# and this is done by subclassing ComplexItem (or one of its subclasses)
+# and adding procedures to override the default implementations
+# in this class.
+#
+# ComplexItem and its subclasses are not classes in the usual sense:
+# instead of instantiating these classes, the Slate creates a new item
+# ID that uniquely identifies it; instead of calling methods on an 
+# object, the slate calls procedures in 
+# those classes with the ID of the item as the first argument;
+# instead of instance variables, these classes manipulate common arrays
+# indexed by item ID. The ComplexItem class and its subclasses have
+# mechanism to simulate inheritance and to give complex items options
+# just like regular Tk canvas items. This evilness is needed to avoid
+# creating large numbers of objects, which is just too inefficient
+# in Itcl. (I know this because I did it first...)
+#
+# Because every "method" is just a procedure, each takes as its first 
+# three arguments the item ID, the canvas on which the item is being
+# drawn, and the slate on which the item is being drawn. Arguments
+# following those three are arguments that would be passed to 
+# methods if these classes implemented objects in the normal way.
+#
+# This class contains a number of common arrays that must be used
+# in the expected ways by subclasses. The following protected
+# common arrays are used by all subclasses:
+# <ul>
+# <li><b>component</b>: Subclasses should store canvas items
+# they create in this array, indexed by the component name
+# followed by the item ID. For example, a subclass that creates
+# text label would store the id of that text item as
+# <code>component(label$id)</code>.
+#
+# <li><b>option</b>: Each option of an item is stored in this array,
+# indexed by <code>option(<i>name</i>$id)</code>, where _name_ does not
+# include the leading dash.
+#
+# <li><b>primary</b>: Each item must create exactly one simple
+# canvas item called its "primary" component, and store it in this
+# array indexed by the item ID. (It does not also need to be
+# stored in the *component* array.)
+#
+# <li><b>variable</b>: Variables created by the item that need
+# to be kept around. These are stored in this array instead of in
+# individual arrays in order to make it possible to mimic
+# multiple inheritance.
+#
+# </ul>
+#
+# The following private
+# common arrays must be redeclared by all subclasses:
+# <ul>
+# <li><b>methodtable</b>: An array of procedure names indexed by
+# the "methoid" name. This is used to simulate method calls
+# on complex items.
+# <li><b>optiondefault</b>: An array of values indexed by the
+# option name (including the leading dash), giving the default
+# values of the item's options.
+# </ul>
+#
+# <p><b>Options</b>:
+# 
+# <ul>
+# <li><b>-shape</b>. The "shape" of this item, used for manipulating
+# the shape of an item.
+# Note that although the shape of a complex item is accessible as
+# an option, and can be changed arbitrarily, you should be
+# very careful of doing so, and only change it if the documentation
+# for an item says it can be changed.
+# </ul>
+#
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
+class ::tycho::ComplexItem {
+    inherit ::tycho::Uninstantiable
+
+    # Create a new complex item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    
+    # Delete a complex item (NOT USED)
+    # proc destruct {id canvas slate}
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Update the *-shape* option
+    proc _shape {id canvas slate shape}
+
+    # Get or set the coordinates of the item
+    proc coords {id canvas slate args}
+
+    # Create a "ghost" of the item for moving and resizing
+    proc ghost {id canvas slate}
+    
+    # Get a configuration option of an item
+    proc itemcget {id canvas slate scope opt}
+
+    # Configure an item
+    proc itemconfigure {id canvas slate scope args}
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # The components of each item. Each subclass should place 
+    # component items into this array, instead of creating
+    # their own common arrays. This makes it much easier to build
+    # complex items out of existing complex items. Note: subclasses
+    # are _not_ to create their own copy of this variable.
+    protected common component
+
+    # The options of each item. Note: subclasses are _not_ to
+    # create their own copy of this variable.
+    protected common option
+
+    # Every ComplexItem class must create exactly one primitive canvas item
+    # and place its ID into this array indexed by the complex item ID.
+    # The Slate uses this component to manipulate the coordinates of
+    # complex items. Note: subclasses are _not_ to create their own 
+    # copy of this variable.
+    protected common primary
+
+    # The instance variables of each item. Each subclass should place
+    # all local variables into this array, instead of creating
+    # their own common arrays. This makes it much easier to build
+    # complex items out of existing complex items. Note: subclasses
+    # are _not_ to create their own copy of this variable.
+    protected common variable
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table. This is a common array indexed by
+    # method name, with contents being the actual procedure to call
+    # to implement the method. Every subclass of ComplexItem must create
+    # its own copy of this array, and fill it with methods names and
+    # procedures. For example, the ComplexItem class has an
+    # entry named "coords" which contains "::tycho::ComplexItem::coords".
+    # This array implements "inheritance": if a method is not implemented
+    # in a given class, then the array contains the name of a procedure
+    # in one of its superclasses.
+    private common methodtable
+
+    # Default values of this item's options. Every class must create
+    # its own copy of this array and initialize it with the default 
+    # values of the item's options.
+    private common optiondefault
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::ComplexItem {
+    #### Set method table
+    set methodtable(_shape)        ::tycho::ComplexItem::_shape
+    set methodtable(construct)     ::tycho::ComplexItem::construct
+    set methodtable(coords)        ::tycho::ComplexItem::coords
+    set methodtable(itemcget)      ::tycho::ComplexItem::itemcget
+    set methodtable(itemconfigure) ::tycho::ComplexItem::itemconfigure
+    
+    #### Set option defaults
+    set optiondefault(-shape) rectangle
+}
+
+##########################################################################
+#### -shape option configuration
+#
+body ::tycho::ComplexItem::_shape {id canvas slate shape} {
+    set option(shape$id) $shape
+}
+
+##########################################################################
+#### construct
+#
+# Create a new complex item. This procedure is used in place of
+# an object constructor. The default implementation just creates
+# the primary component (which must be present in _all_ complex items)
+# as a rectangle at the given coordinates. From now on, this item
+# will be used to get and set the coordinates of the new item.
+# Components items can then be added to the new complex item with
+# the Slate's create{} method.
+#
+# The arguments to every construct{} procedure are the item ID,
+# the canvas, the slate, the tags to be given to each item added to the
+# complex item, two or more coordinate values, and
+# zero or more option-value pairs.
+# 
+body ::tycho::ComplexItem::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt value} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $value
+    }
+
+    # Create the primary component for the outline coordinates.
+    # Because this item is completely blank, it will actually respond to
+    # events inside it -- I don't know if this is good or bad, but that's
+    # the way it is.
+    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
+	    -outline "" -tags $tags]
+}
+
+##########################################################################
+#### destruct
+#
+# Delete a complex item. This procedure is used in place of
+# an object destructor. The default implementation does nothing.
+# This procedure does not need to delete component items, as
+# that is done automatically by the Slate.
+#
+# body ::tycho::ComplexItem::destruct {id canvas slate} {}
+#
+
+##########################################################################
+#### coords
+#
+# Set or read a complex item's coordinates. With no arguments, return the
+# coordinates of the item as given by the primary component. With
+# arguments, set the coordinates of the item to those coordinates.
+# In the default implementation, the coordinates of the primary
+# components are set to the given coordinates and all other components
+# are scaled accordingly. If the coordinates are a rectangular region
+# (such as for items with a rectangle or oval as the primary component)
+# then the components are moved and scaled according to the size of the
+# original and new regions in the horizontal and vertical directions.
+# if the coordinates are not rectangular, then the bounding box of the
+# primary component is used to determine the moving and scale
+# figures.
+#
+# Note that the scaling of all components is uniform -- subclasses will
+# want to override this behavior if non-uniform scaling is required. 
+# (For example, the _Frame_ class scales so that its borders remain
+# the same width.)
+#
+body ::tycho::ComplexItem::coords {id canvas slate args} {
+
+    # Get the current coordinates
+    set coords [$canvas coords $primary($id)]
+
+    # If there are no arguments, return the coords
+    if { $args == "" } {
+	return $coords
+    }
+
+    # If the primary is rectangular, use those coords. If not,
+    # base it on the bounding box.
+    if { [llength $coords] != 4 } {
+	set oldbox [eval ::tycho::Rectangle::shrink \
+		[$canvas bbox $primary($id)] 2]
+	eval $canvas coords $primary($id)($id) $args
+	set newbox [eval ::tycho::Rectangle::shrink \
+		[$canvas bbox $primary($id)] 2]
+    } else {
+	set oldbox $coords
+	set newbox $args
+    }
+
+    # Scale the item
+    ::tycho::assign x0 y0 x1 y1 $oldbox
+    ::tycho::assign a0 b0 a1 b1 $newbox
+
+    set xdelta [expr $a0-$x0]
+    set ydelta [expr $b0-$y0]
+    set xscale [expr double($a1-$a0)/($x1-$x0)]
+    set yscale [expr double($b1-$b0)/($y1-$y0)]
+
+    # Hack hack! This prevents the canvas from barfing
+    # on zero scale factor
+    if { $xscale == 0.0 } {
+	set xscale 0.01
+    }
+    if { $yscale == 0.0 } {
+	set yscale 0.01
+    }
+
+    # Move and scale each of the components
+    foreach pict [$slate children $id] {
+	$slate move  $pict $xdelta $ydelta
+	$slate scale $pict $a0 $b0 $xscale $yscale
+    }
+
+    # Move and scale the items belonging to this item
+    $canvas move  !$id $xdelta $ydelta
+    $canvas scale !$id $a0 $b0 $xscale $yscale
+
+    # Fix the primary coordinates (non-rectangular)
+    if { [llength $coords] != 4 } {
+	eval $canvas coords $primary($id) $args
+    }
+}
+
+
+##########################################################################
+#### itemcget
+#
+body ::tycho::ComplexItem::itemcget {id canvas slate scope opt} {
+    # Process -tags specially
+    if { ! [string compare $opt -tags] } {
+	# Return the tags
+	$slate gettags $id
+    } elseif { [namespace eval $scope [list ::info exists optiondefault($opt)]] } {
+	# Read the value directly from the class
+	return $option([string trimleft $opt -]$id)
+    } else {
+	error "unknown option $opt"
+    }
+}
+
+#######################################################################
+#### itemconfigure
+#
+body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
+    if { [llength $args] == 0 } {
+	# We've been asked for all configuration values. Use
+	# the defaultoptions array to get the names of all options,
+	# and read their values.
+	set result {}
+	foreach opt [namespace eval $scope {array names optiondefault}] {
+	    # Read its value
+	    set value $option([string trimleft $opt -]$id)
+	    # Read default value
+	    set default [namespace eval $scope [list set optiondefault($opt)]]
+	    # Add to result
+	    lappend result [list $opt {} {} $default $value]
+	}
+	# Add the tags
+	lappend result [list -tags {} {} {} [$slate gettags $id]]
+	return $result
+
+    } elseif { [llength $args] == 1 } {
+	set opt [lindex $args 0]
+	if { $opt == "-tags" } {
+	    return [list {} {} {} [$slate gettags $id]]
+	} elseif { [namespace eval $scope \
+		[list ::info exists optiondefault($opt)]] } {
+	    # Read its value
+	    set value $option([string trimleft $opt -]$id)
+	    # Read default value
+	    set default [namespace eval $scope [list set optiondefault($opt)]]
+	    
+	    return [list $opt {} {} $default $value]
+	    
+	} else {
+	    error "unknown option \"$opt\""
+	}
+    } else {
+	foreach {opt value} $args {
+	    if { ! [string compare $opt -tags] } {
+		# Set the tags of the complex item. This is awkward and
+		# slow... First get the tags of the item
+		set tags [$slate gettags $id]
+
+		# Process given tags to find out what to add
+		foreach tag $value {
+		    # If the tag is a hierarchy tag, ignore
+		    if { [string match {[!_]*} $tag] } {
+			continue
+		    } elseif { [lsearch -exact $tags $tag] == -1 } {
+			# If the item doesn't already have the tag, add it
+			$slate addtag $tag withtag $id
+		    }
+		}
+		
+		# Process existing tags to find out what to delete
+		foreach tag $tags {
+		    if { [lsearch -exact $value $tag] == -1 } {
+			$slate dtag $id $tag
+		    }
+		}
+	    } else {
+		# Call the proc on the class to set the option
+		if { [namespace eval $scope \
+			[list ::info exists optiondefault($opt)]] } {
+                    namespace eval $scope [list eval \
+                        \[set methodtable(_[string trimleft $opt -])\] \
+                        $id $canvas $slate [list $value]]
+
+		} else {
+		    error "unknown option \"$opt\""
+		}
+	    }
+	}
+    }
+}

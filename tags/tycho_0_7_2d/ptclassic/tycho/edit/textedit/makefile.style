@@ -1,0 +1,17 @@
+#
+# @(#)makefile.style	1.3 11/25/97
+#
+# The "makefile" master style-sheet
+#
+configure -title "Makefile colors"
+configure -description {
+    Additional color settings for makefile editors.
+}
+
+style default \
+	-label "Default"  {
+    parameter variableColor DeepPink -type color -label "?variableColor?"
+    parameter includeColor  blue -type color -label "?includeColor?"
+    parameter ruleColor     forestGreen -type color -label "?ruleColor?" 
+    parameter refvarColor   purple -type color -label "?refvarColor?"
+}

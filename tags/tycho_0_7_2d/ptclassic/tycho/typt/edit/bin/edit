@@ -1,0 +1,69 @@
+#! /bin/sh
+# Command-line program for the tycho.typt.edit utility \
+    exec itclsh "$0" "$@"
+
+# @(#)edit	1.3 05/07/98
+# Author: John Reekie
+
+# If the PTEDIT_LIBRARY variable is set, add it to the auto_path
+if [info exists env(PTEDIT_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(PTEDIT_LIBRARY)] }  {
+	lappend auto_path $env(PTEDIT_LIBRARY)
+    }
+}
+
+# Require the tycho.typt.edit package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.typt.edit}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.typt.edit}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if ![info exists env(TYCHO)] {
+	if [info exists env(PTOLEMY)] {
+	    # TYCHO is not set, but PTOLEMY is.
+	    if [file exists [file join $env(PTOLEMY) tycho]] {
+		set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	    }
+	} 
+    }
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.typt.edit}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.typt.edit\". You can\n\
+	    1. Install tycho.typt.edit in a subdirectory of your Tcl library\n\
+	    2. Install tycho.typt.edit in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the PTEDIT_LIBRARY variable to point to the \
+	    edit directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.typt.edit, version 0.2.1"
+
+# Run the main procedure
+eval edit $argv
+
+# Done
+

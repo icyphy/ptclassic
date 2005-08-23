@@ -1,0 +1,91 @@
+#!/bin/sh
+# ----------------------------------------------------------------------
+#  DEMO: SimpleView and SimpleModel
+# @(#)simpleview	1.4 05/20/98
+# ----------------------------------------------------------------------
+#\
+	exec itkwish -f "$0" ${1+"$@"}
+
+# Source enough code to make this demo work
+namespace ::tycho
+source ../List.tcl
+source ../Object.itcl
+source ../Model.itcl
+source ../DataModel.itcl
+source SimpleModel.itcl
+source SimpleView.itcl
+
+# SimpleView is a view that illustrates the model-view architecture.  It
+# is a display of the contents of an instance of the <a
+# href="SimpleModel.html">SimpleModel</a> class.  Firstly, create the
+# model and give it some data:
+
+catch {delete object $model}
+set model [::tycho::SimpleModel #auto]
+$model type configure item -email ""
+$model parse {
+    # Create some items
+    item john -email johnr@eecs
+    item christopher -email cxh@eecs -office "493-Cory"
+
+    # This item has items inside it
+    item edward -email eal@eecs {
+	item sato -phone 1-800-BIGDOGGY -color "Grey-ish, I think"
+	item grendel -color "Black and white"
+    }
+}
+
+# Now, create two instances of the SimpleView class. Usually, we would
+# use the ::tycho::view procedure to place these views into a Displayer,
+# but to keep this example portable, here we will just pack them into
+# top-level windows.
+
+catch {destroy .t1 .t2 .t1.v .t2.v}
+toplevel .t1
+toplevel .t2
+set view1 [::tycho::SimpleView .t1.v]
+set view2 [::tycho::SimpleView .t2.v]
+pack $view1 -fill both -expand on
+pack $view2 -fill both -expand on
+
+# Tell each instance which model it is viewing. This will cause the view
+# to initialize itself with the data in the model.
+
+$view1 configure -model $model
+$view2 configure -model $model
+
+# Now, subscribe each view to the model. The view is subscribed to
+# "data" with the tag all to indicate that the view is to be notified
+# whenever any data changes. This is done in the view constructors:
+
+# $model subscribe data $view1
+# $model subscribe data $view2
+
+# Now, any changes made to the model via the publish command will be
+# reflected in both views. For example, change the -phone attribute of
+# item John:
+
+update
+after 1000
+$model publish attrset john -phone 3-7683
+
+# What this does is cause the model to look for subscribers interested
+# in item john, Since both views have subscribed to "all" data, both
+# will have their notify methods called with (in this case) the
+# arguments john attrset -phone 3-7683. The notify method of SimpleView
+# must take appropriate action -- in this case, changing the displayed
+# value. You can enter data into either window, and clicking on the
+# "Apply" button will update the model with the new data, and both views
+# will change. Any other data-modifying command can be recorded. Delete
+# an item:
+
+update
+after 1000
+$model publish delete john
+
+# Delete an attribute: 
+
+$model publish attrdel {edward sato} -phone
+
+# Now, you can play with the widgets to observe the model
+# mechanisms working!

@@ -1,0 +1,197 @@
+##########################################################################
+# @Version: @(#)Reshaper.itcl	1.5 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Reshaper
+#
+# Reshaper is an interactor designed to be used to reshape graphical
+# items. It is usually bound to grab handles attached to an item,
+# or "grapples." The Slate methods <b>grapple</b> and <b>ungrapple</b>
+# provide this support. When a grapple is clicked-on, the Resizer
+# interactor figures out which features of the item are being reshaped,
+# and forwards reshape commands to the slate to reshape the item.
+# It then queries the slate for the coordinates of the changed
+# features and moves each grapple to that coordinate.
+#
+# <p><b>Options</b>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-selecttag</b>
+# <dd>If not null, the Reshaper finds other grapples on the slate
+# that also have this tag, and forwards reshaping commands for
+# all items to which these grapples are attached.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Example</b>
+# <p>Create some items on the slate:
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   set frame [$slate create Frame 100 100 200 200 &#92
+#       -color green]
+#   set solid FIXME
+# </pre></tcl>
+#
+# Add grapples to them:
+# <tcl quiet><pre>
+#   $slate grapple $frame
+#   $slate grapple $solid
+# </pre></tcl>
+#
+# (Try clicking and dragging the grapples.) Add quantization to the
+# reshaping by cascading the reshaping interactor with a 
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interactors.html">How interactors work</a>
+# <li><a href="../internals/interactors.html">An overview of
+#                    interactor classes</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Reshaper {
+    inherit ::tycho::Follower
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+	$this configure -action "reshape"
+	eval $this configure $args
+    }
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The selection tag for other grapples
+    public variable selecttag ""
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Start interaction sequence
+    method click {x y args}
+
+    # Continue interaction sequence
+    method drag {x y}
+
+    # Terminate interaction sequence
+    method release {}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The features being reshaped, indexed by item
+    private variable _features
+
+    # The grapple being targets
+    private variable _grapple ""
+}
+
+#######################################################################
+#### click
+#
+# Start the interaction. Find all items with appropriately-tagged
+# grapples and figure out what features are being modified.
+#
+body ::tycho::Reshaper::click {x y args} {
+    set _grapple $target
+
+    # As a temporary hack, recolor the grapple
+    $slate itemconfigure $_grapple -fill black
+
+    # Get selected grapples
+    if { $selecttag != "" } {
+	set selected [$slate find withtag $selecttag]
+    } else {
+	set selected $target
+    }
+    # Get corresponding items and features
+    foreach g $selected {
+        set i [$slate itemcget $g -item]
+	lappend _features($i) [$slate itemcget $g -feature]
+    }
+    # Forward the click for each item
+    foreach {item features} [array get _features] {
+	$this target $item
+	eval [list chain $x $y -features $features] $args
+    }
+}
+
+#######################################################################
+#### drag
+#
+# Continue an interaction sequence. For each item with selected grapples,
+# forward an appropriate reshape command. Then move _all_ grapples
+# attached to that item.
+#
+body ::tycho::Reshaper::drag {x y} {
+    # Forward the reshaping interaction
+    foreach item [array names _features] {
+	$this target $item
+	chain $x $y
+    }
+
+    # Move all grapples of each item
+    foreach i [array names _features] {
+        foreach g [$slate find withtag grapple.$item] {
+	    set xy [$slate feature $i [$slate itemcget $g -feature]]
+	    eval $slate moveto $g $xy "c"
+	}
+    }
+}
+
+#######################################################################
+#### release
+#
+# Terminate an interaction sequence.
+#
+body ::tycho::Reshaper::release {} {
+    # As a temporary hack, recolor the grapple
+    $slate itemconfigure $_grapple -fill cyan3
+
+    # Forward the release event
+    foreach i [array names _features] {
+	$this target $i
+	chain
+    }
+    unset _features
+}

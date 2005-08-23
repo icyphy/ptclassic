@@ -1,0 +1,42 @@
+# -*- mode: tcl -*-
+#
+# @(#)console.style	1.3 10/07/97
+#
+# The "console" master style-sheet
+#
+configure -title "Console parameters"
+configure -description {
+    Additional settings for console windows.
+}
+
+style default \
+	-label "Default"  {
+    
+    parameter answerForeground blue \
+	    -type color \
+	    -label "Color of result text"
+
+    parameter promptForeground firebrick \
+	    -type color \
+	    -label "Color of prompt text"
+
+    parameter width 60 \
+	    -type integer \
+	    -label "Default console width"
+
+    parameter height 8 \
+	    -type integer \
+	    -label "Default console height"
+}
+
+style alternate \
+	-label "Alternate"  {
+    
+    parameter width 72 \
+	    -type integer \
+	    -label "Default console width"
+
+    parameter height 8 \
+	    -type integer \
+	    -label "Default console height"
+}

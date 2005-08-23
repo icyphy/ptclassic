@@ -1,0 +1,794 @@
+##########################################################################
+# @Version: @(#)ItclViewer.itcl	1.11 07/23/98
+# @Author: Cliff Cordeiro, John Reekie
+#
+# @Copyright (c) 1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### ItclViewer
+#
+# The _ItclViewer_ class extends its _ItclViewer_ superclass
+# to generate an display Itcl-specific class viewer.
+#
+class ::tycho::ItclViewer {
+    inherit ::tycho::ClassViewer
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+    
+    #################################################################
+    ####                     public methods                      ####
+
+    # Return the filename of the documentation of the given class.
+    public method docFile {classname}
+    
+    ###################################################################
+    ####                     protected methods                     ####
+
+    # Display the constructor(s) in the contents widget.
+    protected method _displayConstructors {}
+    
+    # Displayer the destructor(s) in the contents widget.
+    protected method _displayDestructors {}
+
+    # Display the proper methods/procedures in the contents widget.
+    protected method _displayMethods {protection}
+
+    # Display the related procs in the contents widget.
+    protected method _displayExternal {}
+
+    # Display the proper variables in the contents widget.
+    protected method _displayVariables {protection}
+    
+    # Format the explanation of the given item in HTML.
+    protected method _formatExpl {class item type {extern 0}}
+
+    # Create the body of an HTML document describing the current class.
+    protected method _generateHtmlBody {}
+
+    # Create the internal links for an HTML output of the class model. 
+    protected method _generateHtmlContents {}
+
+    # Format the given item as an HTML link
+    protected method _hyperLink {class item type {text {}} {itemtype {}}}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::ItclViewer::constructor {args} {
+    # Evaluate options
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### docFile
+#
+# Return the documentation file for a given classname. This method will
+# attempt to find the file using a language specific algorithm and
+# will return the filename or {} if one isn't found.
+#
+# FIXME: The Itcl implementation is a hack and not valid under all cases.
+# There needs to be a facility for specifying where classes are.
+#
+body ::tycho::ItclViewer::docFile {classname} {
+    if {$classname == $_currentclass} {
+        return [$this cget -file]
+    }
+    
+    set docname "[namespaceTail $classname].idoc"
+    
+    lappend dirs {$TYCHO/kernel/basic}
+    lappend dirs {$TYCHO/kernel/model}
+    lappend dirs {$TYCHO/kernel/gui}
+    lappend dirs {$TYCHO/kernel/html}
+    lappend dirs {$TYCHO/edit/textedit}
+    lappend dirs {$TYCHO/edit/slate}
+    lappend dirs {$TYCHO/edit/visedit}
+    lappend dirs {$TYCHO/util/tydoc}
+    lappend dirs {$TYCHO/util/idoc}
+
+    foreach dir $dirs {
+	set findfile [file join $dir doc codeDoc $docname]
+	set findfile [::tycho::expandPath $findfile]
+	set docfile [glob -nocomplain $findfile]
+	if {$docfile != {}} {
+	    break
+	}
+    }
+    return "$docfile"
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#####################################################################
+#### _displayConstructors
+# Display the constructor(s) in the contents widget.
+#
+body ::tycho::ItclViewer::_displayConstructors {} {
+    set classModel $_classmodels($_currentclass)
+
+    set subnames {}
+    foreach constructor [$classModel match constructor] {
+	# put label into contents widget
+	$itk_component(contents) appendlabel $constructor\c \
+		-text $constructor \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -publiccolor]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass constructor $constructor $constructor\c
+	_bindExpl $_currentclass constructor $constructor $constructor\c
+	lappend subnames $constructor\c
+    }
+    
+    # No inherited (overloading) constructors
+    
+    # insert panel if a constructor found
+    # FIXME: Why do we need a separate panel -- there is only
+    # one constructor...
+    if {$subnames != {}} {
+	set subnames [lsort $subnames]
+	$itk_component(contents) append constructor\c "$subnames" \
+		-text "Constructor" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -publiccolor]
+    }
+}
+
+#####################################################################
+#### _displayDestructors
+# Display the destructor(s) in the contents widget.
+#
+body ::tycho::ItclViewer::_displayDestructors {} {
+    set classModel $_classmodels($_currentclass)
+
+    set subnames {}
+    foreach destructor [$classModel match destructor] {
+	# put label into contents widget
+	$itk_component(contents) appendlabel $destructor\d \
+		-text $destructor \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -publiccolor]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass destructor $destructor $destructor\d
+	_bindExpl $_currentclass destructor $destructor $destructor\d
+	lappend subnames $destructor\d
+    }
+    
+    # No inherited (overloading) destructors
+    
+    # insert panel if a destructor found
+    # FIXME: Why do we need a separate panel -- there is only
+    # one destructor...
+    if {$subnames != {}} {
+	set subnames [lsort $subnames]
+	$itk_component(contents) append destructor\d "$subnames" \
+		-text "Destructor" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -publiccolor]
+    }
+}
+
+#####################################################################
+#### _displayMethods
+# Display the methods/procedures of the given protection in the
+# contents widget.
+#
+body ::tycho::ItclViewer::_displayMethods {protection} {
+    set classModel $_classmodels($_currentclass)
+
+    # Itcl uses -scope instance to signify a method
+    # and -scope class to signify a class
+    
+    # Methods
+    set subnames {}
+    foreach method [$classModel match method \
+            -protection $protection -scope instance] {
+        # put label into contents widget
+        regexp {^m:(.*)$} $method _ label
+        $itk_component(contents) appendlabel $method\m \
+		-text $label \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -$protection\color]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass method $method $method\m
+	_bindExpl $_currentclass method $method $method\m
+	lappend subnames $method\m
+    }
+    # check for inherited methods
+    if {$protection == "public" || $protection == "protected"} {
+	foreach class $_heritage {
+	    set currLabels [$itk_component(contents) labels]
+	    set currentModel $_classmodels($class)
+	    foreach method [$currentModel match method \
+		    -protection $protection -scope instance] {
+		# put label into contents widget if not there
+                regexp {^m:(.*)$} $method _ label
+		if {[lsearch -exact $currLabels "$method\m"] == -1} {
+		    $itk_component(contents) appendlabel $method\m \
+			    -text $label \
+			    -font [$this cget -bodyfont] \
+			    -fg [$this cget -inheritcolor]
+		    # setup bindings on <Enter> and <B1-Click>
+		    _bindDesc $class method $method $method\m
+		    _bindExpl $class method $method $method\m
+		    lappend subnames $method\m
+		}
+	    }
+	}
+    }
+    # insert panel if any methods found
+    if {$subnames != {}} {
+	set temp [::tycho::capitalize $protection]
+	set subnames [lsort $subnames]
+	$itk_component(contents) append $protection\m "$subnames" \
+		-text "$temp Methods" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -$protection\color]
+    }
+
+    # Procs
+    set subnames {}
+    foreach method [$classModel match method \
+            -protection $protection -scope class] {
+	# put label into contents widget
+        regexp {^m:(.*)$} $method _ label
+	$itk_component(contents) appendlabel $method\p \
+		-text $label \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -$protection\color]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass method $method $method\p
+	_bindExpl $_currentclass method $method $method\p
+	lappend subnames $method\p
+    }
+    # check for inherited procs
+    if {$protection == "public" || $protection == "protected"} {
+	foreach class $_heritage {
+	    set currLabels [$itk_component(contents) labels]
+	    set currentModel $_classmodels($class)
+	    foreach method [$currentModel match method \
+		    -protection $protection -scope class] {
+		# put label into contents widget if not there
+                regexp {^m:(.*)$} $method _ label
+		if {[lsearch -exact $currLabels "$method\p"] == -1} {
+		    $itk_component(contents) appendlabel $method\p \
+			    -text $label \
+			    -font [$this cget -bodyfont] \
+			    -fg [$this cget -inheritcolor]
+		    # setup bindings on <Enter> and <B1-Click>
+		    _bindDesc $class method $method $method\p
+		    _bindExpl $class method $method $method\p
+		    lappend subnames $method\p
+		}
+	    }
+	}
+    }
+    # insert panel if any procs found
+    if {$subnames != {}} {
+	set temp [::tycho::capitalize $protection]
+	set subnames [lsort $subnames]
+	$itk_component(contents) append $protection\p "$subnames" \
+		-text "$temp Procs" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -$protection\color]
+    }   
+}
+
+#####################################################################
+#### _displayExternal
+# Display external procs (only) of the current class in the
+# contents widget.
+# 
+body ::tycho::ItclViewer::_displayExternal {} {
+    set classModel $_classmodels(related)
+    
+    set subnames {}
+    foreach method [$classModel match method \
+	    -protection public -scope class] {
+	# put label into contents widget
+	$itk_component(contents) appendlabel $method\r \
+		-text $method \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -publiccolor]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc related method $method $method\r
+	_bindExpl related method $method $method\r
+	lappend subnames $method\r
+    }
+    # insert panel if any procs found
+    if {$subnames != {}} {
+	set subnames [lsort $subnames]
+	$itk_component(contents) append RelatedProcs "$subnames" \
+		-text "Related Procs" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -publiccolor]
+    }   
+}
+
+
+#####################################################################
+#### _displayVariables
+# Display the variables of the given protection in the contents
+# widget.
+#
+body ::tycho::ItclViewer::_displayVariables {protection} {
+    set classModel $_classmodels($_currentclass)
+
+    # itcl uses -modifiers itk_option to signify an itk_option.
+    # check for itk_options
+    set subnames {}
+    foreach variable [$classModel match variable \
+	    -protection $protection -modifiers itk_option] {
+	# put label into contents widget
+        regexp {^v:(.*)$} $variable _ label
+	$itk_component(contents) appendlabel $variable\v \
+		-text $label \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -optioncolor]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
+	lappend subnames $variable\v
+    }
+    
+    # check for inherited itk_options
+    if {$protection == "public"} {
+	foreach class $_heritage {
+	    set currLabels [$itk_component(contents) labels]
+	    set currentModel $_classmodels($class)
+	    foreach variable [$currentModel match variable \
+		    -protection $protection -modifiers itk_option] {
+		# put label into contents widget if not there
+                regexp {^v:(.*)$} $variable _ label
+		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+		    $itk_component(contents) appendlabel $variable\v \
+			    -text $label \
+			    -font [$this cget -bodyfont] \
+			    -fg [$this cget -inheritcolor]
+		    # setup bindings on <Enter> and <B1-Click>
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
+		    lappend subnames $variable\v
+		}
+	    }
+	}
+    }
+
+    # insert panel if any itk_options found
+    if {$subnames != {}} {
+	set subnames [lsort $subnames]
+	$itk_component(contents) append $protection\i "$subnames" \
+		-text "Itk Options" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -optioncolor]
+    }
+    
+    # do other variables
+    set subnames {}
+    foreach variable [$classModel match variable \
+	    -protection $protection -modifiers {}] {
+	# put label into contents widget   
+        regexp {^v:(.*)$} $variable _ label
+	$itk_component(contents) appendlabel $variable\v \
+		-text $label \
+		-font [$this cget -bodyfont] \
+		-fg [$this cget -$protection\color]
+	# setup bindings on <Enter> and <B1-Click>
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
+	lappend subnames $variable\v
+    }
+
+    # check for inherited variables
+    if {$protection == "public" || $protection == "protected"} {
+	foreach class $_heritage {
+	    set currLabels [$itk_component(contents) labels]
+	    set currentModel $_classmodels($class)
+	    foreach variable [$currentModel match variable \
+		    -protection $protection -modifiers {}] {
+		# put label into contents widget if not there
+                regexp {^v:(.*)$} $variable _ label
+		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+		    $itk_component(contents) appendlabel $variable\v \
+			    -text $label \
+			    -font [$this cget -bodyfont] \
+			    -fg [$this cget -inheritcolor]
+		    # setup bindings on <Enter> and <B1-Click>
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
+		    lappend subnames $variable\v
+		}
+	    }
+	}
+    }
+
+
+    # insert panel if any variables found
+    if {$subnames != {}} {
+	set subnames [lsort $subnames]
+	set temp [::tycho::capitalize $protection]
+	$itk_component(contents) append $protection\v "$subnames" \
+		-text "$temp Variables" \
+		-font [$this cget -headfont] \
+		-foreground [$this cget -$protection\color]
+    }
+}
+
+#####################################################################
+#### _formatExpl
+# Format the explanation of the given item in HTML. This is usually
+# bound to a button 1 click on an item in the contents widget.
+# An item may not have an explanation, but _must_ have a description.
+# 
+# If extern is set (it's to be externally viewed), follow the Tydoc
+# style of formatting. If unset, follow the ItclViewer style.
+#
+body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
+    set classModel $_classmodels($class)
+
+    set expl [$classModel attrget $item -explanation]
+    if { $expl == "" } {
+        set expl [$classModel attrget $item -description]
+    }
+
+    set other {}
+
+    set label $item
+    if {$type == "method" || $type == "constructor"} {
+        if {$type == "method" } {
+            regexp {^m:(.*)$} $item _ label
+        }
+
+	# Get method parameters and their defaults
+	# NOTE: Itcl destructors don't have parameters
+	set arglist {}
+	foreach arg [$classModel match argument $item] {
+	    set default [$classModel attrget [concat $item $arg] -default]
+	    if {$default == {}} {
+		lappend arglist $arg
+	    } else {
+		lappend arglist "$arg $default"
+	    }
+	}
+	if {$arglist != {}} {
+	    set other $arglist
+	}
+    } elseif {$type == "variable"} {
+        regexp {^v:(.*)$} $item _ label
+
+	# Get the variable's default value
+	set default [$classModel attrget $item -default]
+	if {$default != {}} {
+	    set other $default
+	}
+    }
+
+    # Create hyperLink to source
+    set label [_hyperLink $class $label $type]
+    
+    # Format HTML
+    if {$extern} {
+	set html "<dt><b>$label $other</b>\
+		\n<dd>$expl"
+    } else {
+	set html "<b>$label</b> <i>$other</i><p> $expl"
+    }
+
+    # Add footer for inherited items
+    if {$class != $_currentclass && $class != "related"} {
+	append html "<br><br><br><hr>\
+		<a href=\"[docFile $class]\">$class</a>"
+    }
+
+    return $html
+}
+
+#####################################################################
+#### _generateHtmlBody
+# Create the body of an HTML document describing the current class.
+# Similar to _display{} >
+#
+# If verbose is unset, only output Constructors and destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+# We could pull this information from the contents
+# widget, however, we might have to reload if it contains inherited data,
+# which we do not document in the HTML (yet). 
+#
+# It may be desirable to generate "flattened" documentation, listing all
+# methods/variables available to a class. This is a FIXME for future versions.
+#
+body ::tycho::ItclViewer::_generateHtmlBody {} {
+    set classModel $_classmodels($_currentclass)
+    set verbose $itk_option(-verbose)
+
+    # Remove "private" from the protection list if non-verbose
+    if {$verbose} {
+        set tempprotect $_protections
+    } else {
+        set tempprotect [lreplace $_protections end end]
+    }
+    
+    set html [$classModel cget -explanation]
+    # Remove footer
+    regexp {^(.*<hr>)(<br>[^:]+:.*)$} $html dmy html footer
+    
+    set of_class "of [namespaceTail $_currentclass] class"
+    
+    # Check for itk_options
+    set itk_options [$classModel match variable -protection public \
+	    -modifiers itk_option]
+    if {$itk_options != {}} {
+	append html "<H2><a name=\"itk_options $of_class\">\
+		Itk_options</a></H2>\n<dl>"
+	foreach option $itk_options {
+	    set nodash [string trimleft $option "-"]
+	    append html "<a name = \"$nodash \
+		    itk_option $of_class\"></a>"
+	    append html "[_formatExpl $_currentclass $option variable 1]"
+	}
+	append html "</dl>"
+    }
+    
+    # Check for constructor
+    if [$classModel exists constructor] {
+	if {$verbose || [$classModel attrget constructor \
+			-description] != { }} {
+	    append html "<H2><a name=\"constructor $of_class\"\
+		    >Constructor</a></H2>\n<dl>"
+	    append html "<a name = \"constructor of\
+		    $_currentclass class\"></a>"
+	    append html "[_formatExpl $_currentclass\
+		    $constructor constructor 1]"
+	    append html "</dl>"
+	}
+    }
+    
+    # Check for destructor
+    if [$classModel exists destructor:destructor]  {
+	if {$verbose || [$classModel attrget destructor:destructor \
+                -description] != { }} {
+	    append html "<H2><a name=\"destructor $of_class\"\
+		    >Destructor</a></H2>\n<dl>"
+	    append html "<a name = \"destructor of\
+		    $_currentclass class\"></a>"
+	    append html "[_formatExpl $_currentclass\
+		    $destructor destructor 1]"
+	    append html "</dl>"
+	}     
+    }
+    
+    # Check for methods/procs/variables/commons by protection
+    foreach protection $tempprotect {
+	set Protection [::tycho::capitalize $protection]
+	set temp {}
+
+	# Check for methods
+	set methods [$classModel match method -protection $protection \
+		-scope instance]
+	if {$methods != {}} {
+	    append temp "<H3><a name=\"$protection methods\
+		    $of_class\">$Protection Methods</a></H3><dl>"
+	    foreach method $methods {
+		append temp "<a name = \"$method method of $_currentclass\
+			class\"></a>"
+		append temp "[_formatExpl $_currentclass\
+			$method method 1]"
+	    }
+	    append temp "</dl>"
+	}
+	
+	# Check for procs
+	set procs [$classModel match method -protection $protection \
+		-scope class]
+	if {$procs != {}} {
+	    append temp "<H3><a name=\"$protection procs\
+		    $of_class\">$Protection Procs</a></H3><dl>"
+	    foreach proc $procs {
+		append temp "<a name = \"$proc proc of $_currentclass\
+			class\"></a>"
+		append temp "[_formatExpl $_currentclass\
+			$proc method 1]"
+	    }
+	    append temp "</dl>"
+	}
+
+	# Check for variables
+	set variables [$classModel match variable -protection $protection \
+		-scope instance -modifiers {}]
+	if {$variables != {}} {
+	    append temp "<h3><a name=\"$protection variables\
+		    $of_class\">$Protection Variables</a></h3><dl>"
+	    foreach variable $variables {
+		append temp "<a name = \"$variable variable of\
+			$_currentclass class\"></a>"
+		append temp "[_formatExpl $_currentclass\
+			$variable variable 1]"
+	    }
+	    append temp "</dl>"
+	}
+
+	# Check for commons
+	set commons [$classModel match variable -protection $protection \
+		-scope class]
+	if {$commons != {}} {
+	    append temp "<h3><a name=\"$protection commons\
+		    $of_class\">$Protection Commons</a></h3><dl>"
+	    foreach common $commons {
+		append temp "<a name = \"$common common of $_currentclass\
+			class\"></a>"
+		append temp "[_formatExpl $_currentclass\
+			$common variable 1]"
+	    }
+	    append temp "</dl>"
+	}
+	
+	if {$temp != {}} {
+	    append html "<h2>$Protection constructs</h2>"
+	    append html "$temp\n<HR>"
+	}
+    }
+
+    append html $footer
+    return $html
+}
+
+#####################################################################
+#### _generateHtmlContents
+# Create the internal links for an HTML output of the class model. 
+# If verbose is unset, only output Constructors and destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+body ::tycho::ItclViewer::_generateHtmlContents {} {
+    set classModel $_classmodels($_currentclass)
+    set verbose $itk_option(-verbose)
+    
+    # Remove "private" from the protection list if non-verbose
+    if {$verbose} {
+        set tempprotect $_protections
+    } else {
+        set tempprotect [lreplace $_protections end end]
+    }
+    
+    set html "<HR>\n"
+    set parents [$classModel cget -inherits]
+    if {$parents != {}} {
+	append html "Inherits: "
+	foreach parent $parents {
+	    append html "<a href=\"[::tycho::relativePath\
+		    [file dirname [docFile $_currentclass]]\
+		    [docFile $parent]]\">"
+	    append html "<b>$parent</b></a> -\n"
+	}
+    }
+    append html "<a href=\"[$classModel cget -sourcefile]\">Source\
+	    File</a> -\n"
+    append html "Contents:\n"
+    
+    set of_class "of [namespaceTail [$classModel cget\
+	    -classname]] class"
+    
+    # Check for itk_options
+    if {[$classModel match variable -protection public \
+	    -modifiers itk_option]!= {}} {
+	append html "<a href=\"#itk_options $of_class\"\
+		>itk_options</a> -\n"
+    }
+    
+    # Check for constructor
+    set constructor [$classModel match constructor]
+    if {$constructor != {}} {
+	if {$verbose || [$classModel attrget constructor \
+			-description] != { }} {
+	    append html "<a href=\"#constructor $of_class\"\
+		    >constructor</a> -\n"
+	}
+    }
+    
+    # Check for destructor
+    set destructor [$classModel match destructor]
+    if {$destructor != {}} {
+	if {$verbose || [$classModel attrget destructor \
+			-description] != { }} {
+	    append html "<a href=\"#destructor $of_class\"\
+		    >destructor</a> -\n"
+	}
+    }
+    
+    # Check for methods/procs/variables/commons by protection
+    foreach protection $tempprotect {
+	# Check for methods
+	if {[$classModel match method -protection $protection \
+		-scope instance] != {}} {
+	    append html "<a href=\"#$protection methods\
+		    $of_class\">$protection methods</a> -\n"
+	}
+	# Check for procs
+	if {[$classModel match method -protection $protection \
+		-scope class] != {}} {
+	    append html "<a href=\"#$protection procs\
+		    $of_class\">$protection procs</a> -\n"
+	}
+	# Check for variables
+	if {[$classModel match variable -protection $protection \
+		-scope instance -modifiers {}] != {}} {
+	    append html "<a href=\"#$protection variables\
+		    $of_class\">$protection variables</a> -\n"
+	}
+	# Check for commons
+	if {[$classModel match variable -protection $protection \
+		-scope class] != {}} {
+	    append html "<a href=\"#$protection commons\
+		    $of_class\">$protection commons</a> -\n"
+	}
+    }
+    set html "[string trimright $html "- \n"]\n<HR>\n"      
+
+    return $html
+}
+
+#####################################################################
+#### _hyperLink
+# Generates a reasonable hyperLink tag to the given item, using the text
+# field as the link text, if it's given (otherwise use item). This will
+# not work if the source is formatted differently.
+#
+body ::tycho::ItclViewer::_hyperLink {class item type {text {}} {itemtype {}}} {
+    set classModel $_classmodels($class)
+
+    if {$text == {}} {
+        set text $item
+    }
+
+    if {$type == "method" || $type == "destructor" \
+	    || $type == "constructor"} {
+	set text "<a href = \
+		\"[$classModel cget -sourcefile]#body [$classModel \
+		cget -classname]::$item\">$text</a>"
+    } elseif {$type == "variable" \
+            && [$classModel attrget v:$item -modifiers] != "itk_option"} { 
+	set text "<a href = \
+		\"[$classModel cget -sourcefile]#variable $item\">\
+		$text</a>"
+    } else {
+	# It's an itk_option, link to the itk_option define
+	set text "<a href = \
+		\"[$classModel cget -sourcefile]#itk_option\
+		define $item\">$text</a>"
+    }  
+    return $text
+}
+

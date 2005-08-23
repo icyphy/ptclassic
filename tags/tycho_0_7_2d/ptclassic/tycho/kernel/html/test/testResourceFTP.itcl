@@ -1,0 +1,123 @@
+# Test suite for Exec class, this uses graphics, so it must be run with tycho -e
+#
+# @Authors: Kevin Chang
+#
+# @Version: @(#)testResourceFTP.itcl	1.3 03/23/98
+#
+# @Copyright (c) 1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.html
+
+test ftp-error1 {Make sure that any FTP write returns error.} {
+    # Test error generators in public procs in ResourceFTP.
+    # Warning: This is very dependent on the syntax of the error message!
+    set site "ftp://a.b.c/"
+    set ftpobj [::tycho::autoName ftptest]
+    ::tycho::ResourceFTP $ftpobj
+    $ftpobj connect $site
+    catch {$ftpobj puts "Hello"} a1 ;#error
+    catch {$ftpobj write "Hi"}   a2 ;#error
+    catch {$ftpobj open w} b        ;#error
+    catch {$ftpobj open r} c        ;#error
+    catch {$ftpobj isopen} d        ;#okay
+    catch {delete object $ftpobj}
+    list $a1 $a2 $b $c $d
+} {{Method puts of class ::tycho::ResourceFTP is abstract.} {Method write of class ::tycho::Resource is abstract.} {Currently only read feature has been implemented.} {File ftp://a.b.c/ does not exist} 0}
+
+test ftp-error2 {Make sure that public proc's error message are correct} {
+    set cmd "::tycho::ResourceFTP"
+
+    # Warning: This is syntax dependent. You'll need to modify the
+    # test case each time you add/delete/change feature.
+    set actions {\
+            {{::tycho::ResourceFTP::chmod a+rx ftp://noway} {(is abstract)}}\
+            {{::tycho::ResourceFTP::delete ftp://noway} {(is abstract)}}\
+            {{::tycho::ResourceFTP::mkdir ftp://noway/no} {(is abstract)}}}
+            
+    set status {}
+    foreach action $actions {
+        catch "[lindex $action 0]" msg
+        # Match the regular expression to check the output of message
+        set reg {}
+        regexp -nocase [lindex $action 1] $msg _ reg
+        if {$reg=={}} {
+            lappend status $msg
+        } else {
+            lappend status $reg
+        }
+    }
+    list $status
+} {{{is abstract} {is abstract} {is abstract}}}
+
+test ftp-contenttype1 {Check the contenttype of the ptolemy FTP page} {
+    set site1 "ftp://ptolemy.eecs.BERKELEY.edu"
+    set site2 "$site1/README"
+    set site3 "$site1/___notexists___"
+    set cmd "::tycho::ResourceFTP::contenttype"
+    catch {$cmd $site1} a
+    catch {$cmd $site2} b
+    catch {$cmd $site3} c
+    list $a $b $c
+} {directory file {File ftp://ptolemy.eecs.BERKELEY.edu/___notexists___/ does not exist}}
+
+test ftp-dirlist {test whether listing works or not} {
+    # NOTE: This is directory dependent!!!
+    set site "ftp://PtoLeMy.eecs.berkeley.edu/"
+    set cmd "::tycho::ResourceFTP::dirlist"
+    set list [$cmd $site]
+
+    # We will only check for: README, bin, pub, and etc
+    set status {}
+    foreach i $list {
+        if [regexp -nocase (README|bin|pub|etc) $i] {
+            lappend status $i
+        }
+    }
+    lsort $status
+} {ftp://PtoLeMy.eecs.berkeley.edu/README ftp://PtoLeMy.eecs.berkeley.edu/bin ftp://PtoLeMy.eecs.berkeley.edu/etc/ ftp://PtoLeMy.eecs.berkeley.edu/pub/}
+
+test ftp-exists {This should return 0 or 1} {
+    # Check whether a ftp resource exists or not
+
+    set sites {
+        {ftp://ptolemy.EECS.berkeley.EDU}
+        {ftp://ptolemy.EECS.berkeley.EDU/README}
+        {ftp://ptolemy.EECS.berkeley.EDU/pub/README}
+        {ftp://ptolemy.EECS.berkeley.EDU/~no_person}
+        {ftp://nosite_here_possible_yeah.com/README}
+    }
+
+    set status {}
+    foreach site $sites {
+        lappend status [::tycho::ResourceFTP::exists $site]
+    }
+    list $status
+} {{1 1 1 0 0}}
+
+

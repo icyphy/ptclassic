@@ -1,0 +1,151 @@
+##########################################################################
+# @Version: @(#)Follower.itcl	1.24 07/29/98
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Follower
+#
+# The simplest interactor: follow the mouse. This interactor implements
+# the activate{} and deactivate{} methods so that
+# clicking and dragging on a target item causes corresponding actions
+# on the target -- in other words, with the default moving behavior,
+# the item is moved by clicking and dragging.
+#
+# It seems like this class goes to a lot of trouble to perform a simple
+# function. However, its real power comes from inheritance, where
+# click-and-drag behavior can be customized for more sophisticated
+# interaction. For example, 
+# <a href="Bounder.html">Bounder</a> constrains the region of mouse
+# movement, while <a href="Stepper.html">Stepper</a>
+# quantizes mouse movement.
+#
+# <p><b>Options</b>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>(none)</b>
+# <dd>
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Follower {
+    inherit ::tycho::Interactor
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+
+	eval $this configure $args
+    }
+    destructor {}
+
+    ###################################################################
+    ####                        public methods                  ####
+
+    # Attach the interactor to the current item
+    method activate {t x y args}
+
+    # Remove the interactor from the current item
+    method deactivate {args}
+}
+
+#######################################################################
+#### activate
+#
+# Activate the interactor on an item object. Motion and release events
+# are bound to the current item so that the item can be dragged
+# and so on. After setting up bindings and calling the *activatecommand*
+# option, this method calls the click{} method -- subclasses therefore
+# need only to override click{} (and drag{} and release{}) to alter the
+# interaction behavior.
+# 
+body ::tycho::Follower::activate {t x y args} {
+    # Set the target. The client can modify its options later
+    # with -activatecommand if desired.
+    $this target $t
+
+    # Set up the bindings. Do not use the modifiers to the
+    # motion and release events, so that the interactor still
+    # works if the keys are released...
+    array set opts $args
+    catch {unset opts(-modifiers)}
+
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion [array get opts]] \
+	    "$this drag %x %y; update idletasks"
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release [array get opts]] \
+	    "$this release; $this deactivate $args"
+
+    # Execute the user-specified activation command
+    if { $activatecommand != "" } {
+    	uplevel #0 $activatecommand $target $x $y
+    }
+
+    # Start the interaction sequence
+    eval $this click $x $y $args
+}
+
+#######################################################################
+#### deactivate
+#
+# Deactivate the interactor from the target. This method must be called
+# by the script bound to the release event.
+# 
+body ::tycho::Follower::deactivate {args} {
+    array set opts $args
+    catch {unset opts(-modifiers)}
+
+    # Remove bindings from the current tag
+    $slate bind $target \
+            [eval ::tycho::Interactor::event Motion [array get opts]] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release [array get opts]] {}
+
+    if { $deactivatecommand != "" } {
+        uplevel #0 $deactivatecommand $target
+    }
+    set target ""
+}

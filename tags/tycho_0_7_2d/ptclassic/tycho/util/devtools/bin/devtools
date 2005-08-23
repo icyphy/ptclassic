@@ -1,0 +1,61 @@
+#! /bin/sh
+# Command-line program for the tycho.util.devtools utility \
+    exec itclsh "$0" "$@"
+
+# @(#)devtools	1.1 02/24/98
+# Author: John Reekie
+
+# If the DEVTOOLS_LIBRARY variable is set, add it to the auto_path
+if [info exists env(DEVTOOLS_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(DEVTOOLS_LIBRARY)] }  {
+	lappend auto_path $env(DEVTOOLS_LIBRARY)
+    }
+}
+
+# Require the tycho.util.devtools package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require tycho.util.devtools}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require tycho.util.devtools}] {
+		set ok 1
+	    }
+	}
+    }
+} else {
+    set ok 1
+}
+
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require tycho.util.devtools}] {
+		set ok 1
+	    }
+	}
+    }
+}
+if !$ok {
+    puts "Cannot find \"tycho.util.devtools\". You can\n\
+	    1. Install tycho.util.devtools in a subdirectory of your Tcl library\n\
+	    2. Install tycho.util.devtools in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the DEVTOOLS_LIBRARY variable to point to the \
+	    devtools directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
+}
+
+# Print startup sig
+puts "tycho.util.devtools, version 2.0"
+
+# Run the main procedure
+eval devtools $argv
+
+# Done
+

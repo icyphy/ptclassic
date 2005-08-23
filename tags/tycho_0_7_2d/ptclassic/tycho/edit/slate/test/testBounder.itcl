@@ -1,0 +1,441 @@
+# Test the Bounder interactor. Assume that the Follower
+# superclass is functioning correctly.
+#
+# @Author: John Reekie
+# 
+# @Version: @(#)testBounder.itcl	1.7 07/29/98
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Make sure that the test package is loaded
+package require slate.test
+
+
+############################################################################
+#### Define a proc that creates and a rectangle around them,
+# and creates a bounder.
+#
+proc _boundeditems {} {
+    global b r
+    _twoitems
+    .s raise $r
+    if { [.s find withtag title] == "" } {
+	.s create text 180 20 -text Bounder -tags title
+    }
+    .s create rectangle 40 40 180 180 -outline grey
+    set b [.s interactor Bounder -bounds {40 40 180 180}]
+}
+
+############################################################################
+#### Comments on these tests
+#
+
+#######################################################################
+#### constructor
+#
+_slate
+test Bounder-constructor-1 {Create a bounder} {
+    set b [.s interactor Bounder]
+    # Just test not null...
+    expr {$b != ""}
+} {1}
+
+#######################################################################
+#### options
+#
+_slate
+test Bounder-options-1 {Get default options} {
+    set b [.s interactor Bounder]
+    list [$b cget -bounds] [$b cget -constrain]
+} {{} none}
+
+_slate
+test Bounder-options-1 {Set non-default options} {
+    set b [.s interactor Bounder -bounds {10 10 20 20} -constrain x]
+    list [$b cget -bounds] [$b cget -constrain]
+} {{10 10 20 20} x}
+
+#######################################################################
+#### Test default interaction.
+#
+_slate
+_boundeditems
+
+test Bounder-basic-1 {Basic interaction, item ID} {
+    $b bind $r -button 1
+
+    # Perform a series of movements
+    _interaction $r $r 100 100 10 0 15 -button 1 ;# east
+    set result [list [.s feature $r ne]]
+
+    _interaction $r $r 100 100 0 10 15 -button 1 ;# south
+    lappend result [.s feature $r se]
+
+    _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
+    lappend result [.s feature $r nw]
+
+    set result
+} {{180.0 40.0} {180.0 180.0} {40.0 40.0}}
+
+test Bounder-basic-2 {Basic interaction, by tag} {
+    $b bind foo -button 2
+
+    # Perform a series of movements
+    _interaction foo $f 100 100 -10 0 15 -button 2 ;# west
+    set result [list [.s feature $f sw]]
+
+    _interaction foo $f 100 100 0 -10 15 -button 2 ;# north
+    lappend result [.s feature $f nw]
+
+    _interaction foo $f 100 100 10 10 15 -button 2 ;# south-east
+    lappend result [.s feature $f se]
+
+    set result
+} {{40.0 180.0} {40.0 40.0} {180.0 180.0}}
+
+#######################################################################
+#### -bounds
+#
+# With -bounds set to null, use the whole size of the slate
+#
+_slate
+_boundeditems
+update
+
+test Bounder-bounds-1 {Use bounds of slate, by item ID} {
+    $b bind $r -button 1
+    $b configure -bounds ""
+
+    # Perform a series of movements
+    _interaction $r $r 100 100 10 0 50 -button 1 ;# east
+    set result [list [.s feature $r ne]]
+
+    _interaction $r $r 100 100 0 10 50 -button 1 ;# south
+    lappend result [.s feature $r se]
+
+    _interaction $r $r 100 100 -10 -10 50 -button 1 ;# north-west
+    # Hm... we have to do a little rounding here...
+    set r [.s feature $r nw]
+    lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
+
+    set result
+} [list \
+	[list [expr double([winfo width .s])] 40.0] \
+	[list [expr double([winfo width .s])] [expr double([winfo height .s])]] \
+	[list 0 0]]
+
+test Bounder-bounds-2 {Use bounds of slate, by tag} {
+    $b bind foo -button 2
+    $b configure -bounds ""
+
+    # Perform a series of movements
+    _interaction foo $f 100 100 -10 0 50 -button 2 ;# west
+    set r [.s feature $f sw]
+    set result [list [list [expr round([lindex $r 0])] \
+	    [expr round([lindex $r 1])]]]
+
+    _interaction foo $f 100 100 0 -10 50 -button 2 ;# north
+    set r [.s feature $f nw]
+    lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
+
+    _interaction foo $f 100 100 10 10 50 -button 2 ;# south-east
+    lappend result [.s feature $f se]
+
+    set result
+} [list \
+	[list 0 180] \
+	[list 0 0] \
+	[list [expr double([winfo width .s])] [expr double([winfo height .s])]]]
+
+#######################################################################
+#### -constrain
+#
+#
+_slate
+_boundeditems
+update
+
+test Bounder-constrain-1 {Constrain to x axis} {
+    $b bind $r -button 1
+    $b configure -constrain x
+
+    # Perform a series of movements
+    _interaction $r $r 100 100 10 10 15 -button 1 ;# south-east
+    set result [list [.s feature $r ne]]
+
+    _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
+    lappend result [.s feature $r nw]
+
+    set result
+} {{180.0 40.0} {40.0 40.0}}
+
+test Bounder-constrain-2 {Constrain to y axis} {
+    $b bind $f -button 2
+    $b configure -constrain y
+
+    # Perform a series of movements
+    _interaction $f $f 100 100 -10 -10 15 -button 2 ;# north-west
+    set result [list [.s feature $f ne]]
+
+    _interaction $f $f 100 100 10 10 15 -button 2 ;# south-east
+    lappend result [.s feature $f se]
+
+    set result
+} {{180.0 40.0} {180.0 180.0}}
+
+#######################################################################
+#### -click/drag/releaseprefix
+#
+# Here, set the prefix options -- the item won't move, since
+# the prefixes are being called instead. In those prefixes,
+# just record the arguments to the prefix to check they're
+# being called correctly.
+# 
+_slate
+_boundeditems
+test Bounder-prefix-1 {Test -click/drag/releaseprefix options} {
+    # Bind bounder to rectangle
+    $b configure \
+            -clickprefix {::tycho::apply {set X [list %0 %1 %2 %3 %4]}} \
+            -dragprefix  {::tycho::apply {set Y [list %0 %1 %2]}} \
+            -releaseprefix {::tycho::apply {set Z [list %0 %1 %2]}}
+    $b bind $r -button 1
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 10 10 20 -button 1
+
+    # Test result: the coordinates of the rectangle _have not_ changed.
+    # Get the arguments given to the prefix scripts.
+    # Note that the drag and release scripts only go as far as
+    # the item has been moved, not as far as the mouse has.
+    list [.s coords $r] $X $Y $Z
+
+} [list {40.0 40.0 80.0 80.0} \
+	[list $r 100 100 -button 1] [list $r 200.0 200.0] [list $r %1 %2]]
+    
+#######################################################################
+#### -activate/drag/deactivatecommand
+#
+# Here, set the command options -- the item will still move, but
+# the commands will also be called. In those commands,
+# just record the arguments to the prefix to check they're
+# being called correctly.
+#
+# Note that *activatecommand* has the target and coords appended,
+# but not other arguments (as *-clickprefix* does).
+#
+_boundeditems
+test Bounder-command-1 {Test -activate/drag/deactivatecommand options} {
+    # Set bounder options
+    $b configure \
+            -activatecommand {::tycho::apply {set X [list %0 %1 %2 %3 %4]}} \
+            -dragcommand  {::tycho::apply {set Y [list %0 %1 %2]}} \
+            -deactivatecommand {::tycho::apply {set Z [list %0 %1 %2]}}
+    $b bind $r -button 1
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 10 10 20 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Test result: the coordinates of the rectangle _have_ changed.
+    # Get the arguments given to the prefix scripts.
+    # Note that the drag and release scripts only go as far as
+    # the item has been moved, not as far as the mouse has.
+   list [.s coords $r] $X $Y $Z
+
+} [list {140.0 140.0 180.0 180.0} \
+	[list $r 100 100 %3 %4] [list $r 200.0 200.0] [list $r %1 %2]]
+
+#######################################################################
+#### activate
+# See "basic" tests.
+
+#######################################################################
+#### bind
+# See "basic" tests.
+
+#######################################################################
+#### cascade
+#
+test Bounder-cascade-1 {Cascaded interactor} {
+    _boundeditems
+
+    # Bind follower to rectangle
+    set j [.s interactor Bounder -bounds {20 20 100 100}]
+    $b bind $r -button 1
+    $b cascade $j
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 1 1 50 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Test result: the coordinates of the rectangle. It should
+    # have stayed inside the 20 20 100 100 rectangle.
+    .s coords $r
+
+} {60.0 60.0 100.0 100.0}
+
+#######################################################################
+#### click
+# See "basic" tests.
+
+#######################################################################
+#### deactivate
+# See "basic" tests.
+
+#######################################################################
+#### debind
+
+#######################################################################
+#### disable
+#
+test Bounder-disable-1 {Disable an interactor} {
+    _boundeditems
+
+    # Bind bounder to rectangle
+    $b bind $r -button 1
+
+    # Disable it
+    $b disable
+
+    # Test result: no binding on the item
+    .s bind $r
+} {}
+
+#######################################################################
+#### drag
+# See "basic" tests.
+
+#######################################################################
+#### enable
+#
+test Bounder-enable-1 {Disable and reenable a binding} {
+    _boundeditems
+
+    # Bind bounder to rectangle
+    $b bind $r -button 1
+
+    # Disable and reenable it
+    $b disable
+    $b enable 
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 10 10 20 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Test result: the coordinates of the rectangle
+    .s coords $r
+
+} {140.0 140.0 180.0 180.0}
+
+
+#######################################################################
+#### rebind
+
+#######################################################################
+#### release
+# See "basic" tests.
+
+#######################################################################
+#### target
+#
+# Test the target method
+#
+test Bounder-target-1 {Target is null when not interacting} {
+    _boundeditems
+
+    # Bind bounder to rectangle
+    $b bind $r -button 1
+
+    # Target starts at null
+    set result [list [$b target]]
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 10 10 20 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Target ends at null
+    lappend result [$b target]
+
+} {{} {}}
+
+test Bounder-target-2 {Change target after activation} {
+    _boundeditems
+
+    # Bind bounder to rectangle. Give the interactor
+    # a -activatecommand to change the target to the Frame
+    set i [.s interactor Bounder]
+    $b bind $r -button 1
+    $b configure -activatecommand "$b target $f"
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 -1 -1 50 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Results: rectangle hasn't moved, Frame has
+    list [.s coords $r] [.s coords $f]
+
+} {{40.0 40.0 80.0 80.0} {90.0 90.0 130.0 130.0}}
+
+#######################################################################
+#### unbind
+# See "basic" tests.
+
+#######################################################################
+#### uncascade
+#
+test Bounder-uncascade-1 {Un-cascad an interactor} {
+    _boundeditems
+
+    # Bind bounder to rectangle
+    set j [.s interactor Bounder -bounds {20 20 100 100}]
+    $b bind $r -button 1
+
+    # Cascade is and then uncascade it
+    $b cascade $j
+    $b uncascade
+
+    # Simulate an interaction
+    _interaction $r $r 100 100 10 10 20 -button 1
+
+    # Unbind
+    $b unbind $r -button 1
+
+    # Test result: same as without having cascaded
+    .s coords $r
+
+} {140.0 140.0 180.0 180.0}

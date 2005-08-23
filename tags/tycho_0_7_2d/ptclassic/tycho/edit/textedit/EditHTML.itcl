@@ -1,0 +1,734 @@
+# Definition of an HTML context-sensitive editor.
+#
+# @Author: Edward A. Lee
+#
+# @Version: @(#)EditHTML.itcl	1.46 01/27/99
+#
+# @Copyright (c) 1995-1999 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### EditHTML
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing HTML files. It tags and colors
+# HTML statements enclosed by angle brackets, and makes hyperlinks live.
+# It also provides a command for checking hyperlinks.
+#
+class ::tycho::EditHTML {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The color of commands.
+    itk_option define -commandcolor commandColor CommandColor black {
+	$itk_component(text) tag configure command \
+		-foreground $itk_option(-commandcolor)
+    }
+
+    # The color of pointer.
+    itk_option define -pointercolor pointerColor PointerColor black {
+	$itk_component(text) tag configure pointer \
+		-foreground $itk_option(-pointercolor)
+    }
+
+    # The color of dests.
+    itk_option define -destcolor destColor DestColor black {
+	$itk_component(text) tag configure dest \
+		-foreground $itk_option(-destcolor)
+    }
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Check hyperlinks for validity.
+    method checkLinks {}
+
+    # Execute the HTML and display.
+    method evaluate {}
+
+    # Get the blank HTML template for a file and insert it into the window.
+    method fileTemplate {}
+
+    # Open a help window.
+    method help {}
+
+    # Insert text and move to a location n chars from the insert cursor.
+    method insertAndMove {text offset}
+
+    # Insert a string at the insertion pointer if possible.
+    method insertIfWritable {string}
+
+    # Jump to the link under the "current" mark, if any.
+    method jump {}
+
+    # Color the HTML statements in a region.
+    method parseNow {start stop}
+
+    # Find a name definition.
+    method seeFragment {point}
+
+    # Returns a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {text}}
+
+    # View the HTML in the HTML viewer.
+    method viewHTML {}
+
+    ####################################################################
+    ####                  protected methods and variables           ####
+
+    # Fix the link between start and end, which has error indicated by err.
+    protected method fixLink {link start end err}
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Given an HTML anchor, return the filename and point within the file.
+    protected method parseLink {dest}
+}
+
+###################################################################
+#
+body ::tycho::EditHTML::constructor {args} {
+    eval itk_initialize $args
+
+    # Subscribe to the stylesheet parameters
+    stylesheet subscribe \
+	    -commandcolor edithtml commandColor \
+	    -pointercolor edithtml pointerColor \
+	    -destcolor    edithtml destColor
+}
+
+#####################################################################
+#### checkLinks
+# Check hyperlinks for validity.
+#
+body ::tycho::EditHTML::checkLinks {} {
+    # Clear marks from previous checking
+    $itk_component(text) tag delete badlink
+
+    # Have to parse first, since we use the tags.
+    # Note that cannot allow the parsing to be deferred.
+    parseNow 1.0 end
+    set next 1.0
+    set even 0
+    set ok 1
+    while {[set point [$itk_component(text) tag nextrange pointer $next]] \
+	    != {}} {
+	set start [lindex $point 0]
+	set end [lindex $point 1]
+	set next $end
+	set dest [$itk_component(text) get $start $end]
+	set ret [parseLink $dest]
+	if {$ret == {}} {
+	    set ok 0
+	    if {[fixLink $dest $start $end {Malformed hyperlink}] == {}} {
+		break
+	    }
+	} {
+	    set filename [lindex $ret 0]
+	    set name [lindex $ret 1]
+	    set nameexp "<\[ \t\]*a\[ \t\]+name\[ \t\]*=\[ \t\]*\"?$name\"?>"
+	    if {$filename != {}} {
+		if {![file exists $filename]} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Non-existant file}] == {}} {
+			break
+		    }
+		    continue
+		} elseif {![file readable $filename]} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Non-readable file}] == {}} {
+			break
+		    }
+		    continue
+		}
+		if {$name != {}} {
+		    # Check that name exists in the remote file.
+		    set fid [open $filename]
+		    set contents [read $fid]
+		    close $fid
+		    if {![regexp -nocase $nameexp $contents]} {
+			set ok 0
+			if {[fixLink $dest $start $end {Bad name after #}] \
+				== {}} {
+			    break
+			}
+		    }
+		}
+	    } elseif {$name != {}} {
+		# Check that name exists in the local file
+		if {[$itk_component(text) search -nocase -regexp $nameexp 1.0] \
+			== {}} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Bad name after #}] == {}} {
+			break
+		    }
+		}
+	    }
+	}
+    }
+    if {$ok} {
+	safeEval ::tycho::inform "Hyperlinks appear to be OK"
+    } {
+	safeEval ::tycho::inform "Done checking hyperlinks"
+    }
+}
+
+#####################################################################
+#### evaluate
+# Evaluate the contents of the text window as HTML commands.
+#
+body ::tycho::EditHTML::evaluate {} {
+    $itk_component(text) evaluate
+}
+
+#####################################################################
+#### fileTemplate
+# Insert the blank html template into the file.
+#
+body ::tycho::EditHTML::fileTemplate {} {
+    global TYCHO
+
+    # The location of the template file.  Non-UCB users might want
+    # to edit this file for their own use.
+    set filename $TYCHO/edit/textedit/templates/HTMLTemplate.html
+
+    if {$filename != "" && $filename != "NoName"} {
+	if {[file exists $filename]} {
+	    if {[file readable $filename]} {
+		# Read in the template file and stuff it into editor
+		set fd [open $filename r]
+		set data [read $fd]
+		close $fd
+		insertData $data
+                markModified
+	    } {
+		safeEval ::tycho::warn "File is not readable: $filename"
+	    }
+	} {
+	    safeEval ::tycho::warn "File does not exist: $filename"
+	}
+    }
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditHTML::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO edit textedit doc usersGuides \
+	    EditHTMLHelp.html] html
+}
+
+#####################################################################
+#### insertAndMove
+# Insert text and move to a location n chars from the insert cursor
+#
+body ::tycho::EditHTML::insertAndMove {text offset} {
+    if $readOnly {bell; return}
+    resetUndo
+    insertString insert $text
+    if { $offset != 0} {
+        [textWinName] mark set insert [list insert $offset chars]
+    }
+}
+
+#####################################################################
+#### insertIfWritable 
+# Insert a string at the insertion marker if the file is writable.
+#
+body ::tycho::EditHTML::insertIfWritable {string} {
+    if $readOnly {bell; return}
+    resetUndo
+    insertString insert $string
+}
+
+#####################################################################
+#### jump
+# Jump to the link under the "current" mark, if any.
+#
+body ::tycho::EditHTML::jump {} {
+    set dest [getTaggedText pointer]
+    if {$dest != {}} {
+	set ret [parseLink $dest]
+	if {$ret != {}} {
+	    set filename [lindex $ret 0]
+	    set name [lindex $ret 1]
+	    if {$filename == {}} {
+		seeFragment $name
+	    } {
+		hyperJump $filename $name
+	    }
+	}
+    }    
+}
+
+#####################################################################
+#### parseNow
+# Tag and color HTML commands in the specified range.
+#
+body ::tycho::EditHTML::parseNow {start stop} {
+
+    set text $itk_component(text)
+
+    # Remove tags first, if necessary
+    $text tag remove command $start $stop
+    $text tag remove text $start $stop
+    $text tag remove pointer $start $stop
+    $text tag remove dest $start $stop
+    
+    # Scan the text for HTML commands.
+    set upto $start
+    while {[set ret \
+	    [$text search -count length -regexp {\<[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add text $upto $ret
+	$text tag add command $ret "$ret + $length char"
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+	set upto [$text index "$ret + $length char"]
+    }
+    $text tag add text $upto $stop
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure command -foreground \
+	    [stylesheet get edithtml commandColor]
+
+    # Scan the text for hypertext pointers.
+    set upto $start
+    while {[set upto \
+	    [$text search -count length -nocase \
+	    -regexp {\<a[ \t]+href[ \t]*=[ \t]*[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add pointer $upto "$upto + $length char"
+	set upto [$text index "$upto + $length char"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure pointer -foreground \
+	    [stylesheet get edithtml pointerColor]
+
+    # for testing
+    # $text tag configure text -foreground red
+
+    $text tag bind pointer <Double-Button-1> "$this jump"
+
+    # Scan the text for hypertext destinations.
+    set upto $start
+    while {[set upto \
+	    [$text search -count length -nocase \
+	    -regexp {\<a[ \t]+name[ \t]*=[ \t]*[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add dest $upto "$upto + $length char"
+	set upto [$text index "$upto + $length char"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure dest -foreground \
+	    [stylesheet get edithtml destColor]
+}
+
+#####################################################################
+#### seeFragment
+# Find a point within the file, center in the
+# visible part of the text window, and briefly highlight it.
+# The point can have any of three forms:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    <i>name</i>
+# </pre>
+# where in the latter form, <i>name</i> should be a named
+# anchor within the HTML file.
+#
+body ::tycho::EditHTML::seeFragment {point} {
+    if {([llength $point] == 2 && [lindex $point 0] == {line}) || \
+            ([llength $point] == 3 && [lindex $point 0] == {range})} {
+        Edit::seeFragment $point
+    } {
+        # Edit the pattern to identify the named anchor.
+        Edit::seeFragment "name\[ \t\]*=\[ \t\]*\"?$point\"?"
+    }
+}
+
+#####################################################################
+#### viewHTML 
+# View the HTML in a separate HTML viewer.
+# The EditHTML class is used to view the HTML source.  The viewHTML method
+# brings up a HTML viewer as a separate window and displays this file
+# 
+body ::tycho::EditHTML::viewHTML {} {
+    saveQuery
+    # Pass openContext the "html" mode to make it open the
+    # same file in another mode
+    ::tycho::openContext [filename] html
+}
+
+#####################################################################
+#####################################################################
+#####################################################################
+####                    protected methods                        ####
+
+#####################################################################
+#### fixLink
+# Fix the link between start and end, which has error indicated by err.
+# The user is queried for a replacement.  The first argument is the
+# original text of the bad link.  The second is the start position, the
+# third is the end position, and the final argument is a message indicating
+# what is wrong with the link.  If the user does not cancel, the link
+# will be replaced with an edited value.  Return the replacement string
+# if there is one, or the null string if the user cancels.
+#
+body ::tycho::EditHTML::fixLink {link start end err} {
+
+    $itk_component(text) tag add badlink $start $end
+    $itk_component(text) see $start
+
+    # Set up reverse video for the bad match.
+    # First lower the priority of the tag so the selection is still visible
+    # as normal.
+    $itk_component(text) tag raise sel badlink
+    $itk_component(text) tag configure badlink \
+	    -background [stylesheet get edithtml targetColor]
+
+    set nm [::tycho::autoName .entry]
+    ::tycho::Query $nm \
+	    -bitmap questhead \
+	    -text "$err: Make corrections." \
+	    -queries [list [list line correction {} $link]] \
+	    -entrywidth 80 \
+	    -geometry +0+0
+
+    # FIXME: This centers on the screen, which is not what we want.
+    # Invoking wm deiconify would work, but "wait" doesn't support this.
+    set replacement [lindex [::tycho::Dialog::wait $nm] 1]
+
+    if {$replacement != {} && $replacement != $link} {
+	deleteRange $start $end
+	insertString $start $replacement
+	$itk_component(text) tag add pointer $start \
+		"$start +[string length $replacement] chars"
+    }
+    return $replacement
+}
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditHTML::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+	# Set up menus.
+        # Bindings have been removed because they are incompatible with
+        # the use of control-c in windows for "copy" and these bindings
+        # do not seem worth setting up virtual events.
+        # First, remove irrelevant menus items...
+
+        $menubar delete evaluate
+
+	set text $itk_component(text)
+
+        menubar add separator formatsep3 format
+        
+        menubar command recolorize format \
+		-label "Recolorize" -underline 0 \
+                -command "$this parseRegion 1.0 end"
+        
+        menubar add separator editsep4 edit
+        
+        menubar command checklinks edit \
+		-label "Check Links" -underline 6 \
+                -command "$this busy $this checkLinks"
+        
+        menubar command filetemplate special \
+		-label "File Template" -underline 5 \
+                -command "$this fileTemplate"
+
+        menubar command viewhtml special \
+		-label "View HTML" -underline 0 \
+                -command "$this viewHTML"
+
+        menubar add separator formatsep4 special
+
+	# These keys are special in HTML
+        menubar add cascade chars special -label "Characters" -underline 0
+
+        menubar command ampersand chars -label "Ampersand (&)" \
+                -underline 0 \
+		-command "$this insertIfWritable {&amp;}"
+	# bind $text <Control-c><Key-ampersand> \
+        #       "$this menubar invoke ampersand; break"
+
+        menubar command greaterthan chars -label "Greater Than (>)" \
+                -underline 0 \
+		-command "$this insertIfWritable {&gt;}"
+        # bind $text <Control-c><Key-greater> \
+        #       "$this menubar invoke greaterthan; break"
+        
+        menubar command lessthan chars -label "Less Than (<)" \
+                -underline 0 \
+                -command "$this insertIfWritable {&lt;}"
+        # bind $text <Control-c><Key-less> \
+        #       "$this menubar invoke lessthan; break"
+        
+        menubar command backslash chars -label "Backslash(\\)" \
+                -underline 0 \
+                -command "$this insertIfWritable {&#92;}"
+        # bind $text <Control-c><Key-backslash> \
+        #       "$this menubar invoke backslash; break"
+        
+        # HTML blocks
+        menubar add cascade blocks special -label "Blocks" -underline 0
+        
+        menubar command address blocks -label "Address" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<address></address>} -10"
+        # bind $text <Control-c><Key-a> \
+        #       "$this menubar invoke address; break"
+        
+        menubar command blockquote blocks -label "Blockquote" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<blockquote></blockquote>} -13"
+        # bind $text <Control-c><Key-b> \
+        #       "$this menubar invoke blockquote; break"
+        
+        menubar command displaylist blocks -label "Description List" \
+                -underline 12 \
+                -command "$this insertAndMove {\n<dl>\n<dt>\n<dd>\n</dl>} -6"
+        # bind $text <Control-c><Key-d> \
+        #       "$this menubar invoke displaylist; break"
+        
+        menubar command displayitem blocks -label "Description Entry" \
+                -underline 12 \
+                -command "$this insertAndMove {\n<dt>\n<dd>} -5"
+        # bind $text <Control-c><Key-e> \
+        #       "$this menubar invoke displayitem; break"
+        
+        menubar command image blocks -label "Image" \
+                -underline 0 \
+                -command "$this insertAndMove {<img src=\"\">} -2"
+        # bind $text <Control-c><Key-g> \
+        #       "$this menubar invoke image; break"
+        
+        menubar command header1 blocks -label "1Header" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<h1></h1>\n} -6"
+        # bind $text <Control-c><Key-h><Key-1> \
+        #       "$this menubar invoke header1; break"
+        
+        menubar command header2 blocks -label "2Header" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<h2></h2>\n} -6"
+        # bind $text <Control-c><Key-h><Key-2> \
+        #       "$this menubar invoke header2; break"
+        
+        menubar command header3 blocks -label "3Header" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<h3></h3>\n} -6"
+        # bind $text <Control-c><Key-h><Key-3> \
+        #       "$this menubar invoke header3; break"
+        
+        menubar command header4 blocks -label "4Header" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<h4></h4>\n} -6"
+        # bind $text <Control-c><Key-h><Key-4> \
+        #       "$this menubar invoke header4; break"
+        
+        menubar command hyperlink blocks -label "Hyperlink" \
+                -underline 0 \
+                -command "$this insertAndMove {<a href=\"\"></a>} -6"
+        # bind $text <Control-c><Key-l> \
+        #       "$this menubar invoke hyperlink; break"
+        
+        menubar command menu blocks -label "Menu" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<menu>\n<li> \n</menu>} -8"
+        # bind $text <Control-c><Key-m> \
+        #       "$this menubar invoke menu; break"
+        
+        menubar command numberedlist blocks -label "Numbered List" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<ol>\n<li> \n</ol>} -6"
+        # bind $text <Control-c><Key-n> \
+        #       "$this menubar invoke numberedlist; break"
+        
+        menubar command unumberedlist blocks -label "Unnumbered List" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<ul>\n<li> \n</ul>} -6"
+        # bind $text <Control-c><Key-s> \
+        #       "$this menubar invoke unnumberedlist; break"
+        
+        menubar command listitem blocks -label "List Item" \
+                -underline 2 \
+                -command "$this insertAndMove {\n<li> } 0"
+        # bind $text <Control-c><Key-i> \
+        #       "$this menubar invoke listitem; break"
+        
+        menubar command paragraph blocks -label "Paragraph" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<p>} 0"
+        # bind $text <Control-c><Key-p> \
+        #       "$this menubar invoke paragraph; break"
+        
+        menubar command reference blocks -label "Reference" \
+                -underline 0 \
+                -command "$this insertAndMove {<a name=\"\"></a>} -6"
+        # bind $text <Control-c><Key-r> \
+        #       "$this menubar invoke reference; break"
+        
+        menubar command preformatted blocks -label "Preformatted" \
+                -underline 3 \
+                -command "$this insertAndMove {\n<pre>\n</pre>} -7"
+        # bind $text <Control-c><Control-p> \
+        #       "$this menubar invoke preformatted; break"
+        
+        menubar command title blocks -label "Title" \
+                -underline 0 \
+                -command "$this insertAndMove {\n<title></title>} -8"
+        # bind $text <Control-c><Key-t> \
+        #       "$this menubar invoke title; break"
+        
+        menubar command plaintext blocks -label "Plaintext" \
+                -underline 7 \
+                -command "$this insertAndMove {<xmp>\n</xmp>} -6"
+        # bind $text <Control-c><Key-x> \
+        #       "$this menubar invoke plaintext; break"
+        
+        # Various fonts
+        menubar add cascade fonts special -label "Fonts" -underline 0
+        
+        menubar command bold fonts -label "Bold" \
+                -underline 0 \
+                -command "$this insertAndMove {<b></b>} -4"
+        # bind $text <Control-c><Control-b> \
+        #       "$this menubar invoke bold; break"
+        
+        menubar command code fonts -label "Code" \
+                -underline 0 \
+                -command "$this insertAndMove {<code></code>} -7"
+        # bind $text <Control-c><Key-c> \
+        #       "$this menubar invoke code; break"
+        
+        menubar command italic fonts -label "Italic" \
+                -underline 0 \
+                -command "$this insertAndMove {<i></i>} -4"
+        # bind $text <Control-c><Tab> \
+        #       "$this menubar invoke italic; break"
+        
+        menubar command sample fonts -label "Sample" \
+                -underline 0 \
+                -command "$this insertAndMove {<samp></samp>} -7"
+        # bind $text <Control-c><Return> \
+        #       "$this menubar invoke sample; break"
+        
+        
+        menubar command cite fonts -label "Cite" \
+                -underline 2 \
+                -command "$this insertAndMove {<cite></cite>} -7"
+        # bind $text <Control-c><Control-c> \
+        #       "$this menubar invoke cite; break"
+        
+        menubar command emphasis fonts -label "Emphasis" \
+                -underline 0 \
+                -command "$this insertAndMove {<em></em>} -5"
+        # bind $text <Control-c><Control-e> \
+        #       "$this menubar invoke emphasis; break"
+        
+        menubar command fixed fonts -label "Fixed" \
+                -underline 0 \
+                -command "$this insertAndMove {<tt></tt>} -5"
+        # bind $text <Control-c><Control-f> \
+        #       "$this menubar invoke fixed; break"
+        
+        menubar command keyboard fonts -label "Keyboard" \
+                -underline 0 \
+                -command "$this insertAndMove {<kbd></kbd>} -6"
+        # bind $text <Control-c><Control-k> \
+        #       "$this menubar invoke keyboard; break"
+        
+        menubar command strong fonts -label "Strong" \
+                -underline 2 \
+                -command "$this insertAndMove {<strong></strong>} -9"
+        # bind $text <Control-c><Control-s> \
+        #       "$this menubar invoke strong; break"
+        
+        menubar command variable fonts -label "Variable" \
+                -underline 0 \
+                -command "$this insertAndMove {<var></var>} -6"
+        # bind $text <Control-c><Control-v> \
+        #       "$this menubar invoke variable; break"
+
+    }
+}
+
+#####################################################################
+#### parseLink
+# Given an HTML anchor, return a two-element list with a fully
+# expanded filename (which could be based on the location of the
+# current file we are displaying) and a point within the file.
+# It is possible for either the filename or the point within the
+# file to be an empty string, meaning that they were not specified.
+# If the parsing fails, an empty string is returned rather than a
+# two-element list.
+# FIXME: This will not work unless the parent widget is created
+# at the global scope.
+#
+body ::tycho::EditHTML::parseLink {dest} {
+    if [regexp -nocase \
+            {\<a[ \t]+href[ \t]*=[ \t]*\"?(file:)?([^>#\"]*)#?([^>\"]*)\"?\>} \
+            $dest dummy1 dummy2 filename name] {
+        # If the filename is not absolute, use the directory
+        # of the current file.  This only works if we are inside
+        # a file object.
+	if {$filename != {} } {
+	    if { ![string match /* $filename] && \
+		    ![string match "\$*" $filename] && \
+		    ![string match "~*" $filename]} {
+		set filename [file dirname [$this filename]]/$filename
+	    } else {
+		set filename [::tycho::expandPath $filename]
+	    }
+	}
+        return [list $filename $name]
+    }
+    return {}
+}

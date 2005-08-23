@@ -1,0 +1,205 @@
+##########################################################################
+# Version: @(#)SimpleModel.itcl	1.8 05/11/98
+# Author: John Reekie
+#
+# @Copyright (c) 1997-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### SimpleModel
+#
+# SimpleModel is a model that defines a single item type, <i>item</i>.
+# It provides a model for use in situations where creating a
+# dedicated sub-class of DataModel is overkill. It is also useful
+# for examples and tutorials.
+#
+# This model has the following types:
+# <dl>
+# <dt><b>item</b> _name_
+# <dd>
+# A data item. Data items can be hierarchical. They have no
+# default attributes.
+# </dl>
+#
+# Here are some examples illustrating the use of this model, and
+# data models in general. First, create a model and add some
+# data to it:
+# <pre><tcl>
+#     catch {delete object $model}
+#     set model [::tycho::SimpleModel [::tycho::autoName model]]
+#     $model describe
+# </tcl></pre>
+#
+# The constructor of this class created the <b>item</b> type,
+# with no default attributes. Configure the type to have a
+# default attribute:
+# <pre><tcl>
+#     $model type configure item -foo bar
+#     $model type configure item
+# </tcl></pre>
+#
+# Add some data to the model with the <b>parse</b> method.
+# Note that the description of the data can contain comments.
+# <pre><tcl>
+#     $model parse {
+#         # An item with no data
+#         item a
+#         # An item with attributes
+#         item b -foo "Hello!" -color green
+#         # This item has items inside it
+#         item c -foo "I am nested" {
+#             item x
+#             item y -bar far
+#         }
+#     }
+#     $model describe
+# </tcl></pre>
+#
+# We can add a new item to the model:
+# <pre><tcl>
+#     $model add d -color green -another one {
+#          item x
+#          item y
+#     }
+#     $model describe
+# </tcl></pre>
+#
+# Items have names that are constructed from their types and their
+# parent items. Here's the list of all names in this model:
+# <pre><tcl>
+#     $model names
+# </tcl></pre>
+#
+# To get the names of items of a certain type within a given context,
+# use <b>match</b>. Here are top-level items:
+# <pre><tcl>
+#     $model match item
+# </tcl></pre>
+# 
+# Note that the items in the list just returned are in the order
+# in which they were added to the model. To change the ordering,
+# use <b>reorder</b>:
+# <pre><tcl>
+#     $model reorder item {d c b a}
+#     $model match item
+# </tcl></pre>
+#
+# The ordering of items within each context also appears in the
+# description of the model:
+# <pre><tcl>
+#     $model describe
+# </tcl></pre>
+#
+# Here are the items within the item <b>c</b>:
+# <pre><tcl>
+#     $model match item c
+# </tcl></pre>
+# 
+# Here are the top-level items with the <b>-color</b> attribute
+# equal to <b>green</b>:
+# <pre><tcl>
+#     $model match item -color green
+# </tcl></pre>
+#
+# To get the value of an attribute:
+# <pre><tcl>
+#     $model attrget d -foo
+# </tcl></pre>
+#
+# To get the complete attribute list of an item:
+# <pre><tcl>
+#     $model attrget d
+# </tcl></pre>
+#
+# Note that the list includes the default value of the attribute
+# <b>-foo</b>. If you really want only attributes that have
+# been explicitly set, use <b>attrset</b>:
+# <pre><tcl>
+#     $model attrset d
+# </tcl></pre>
+#
+# This method, <b>attrset</b> is actually there so you can change
+# attributes:
+# <pre><tcl>
+#     $model attrset d -foo "I am changed!" -color purple
+#     $model attrget d
+# </tcl></pre>
+#
+# SimpleModel is a subclass of
+# <a href="../../../doc/codeDoc/Model.html">Model</a>, and therefore
+# inherits its publish-and-subscribe and history mechanisms. For
+# a working example of the subscription mechanism, see
+# <a href="SimpleView.html">SimpleView</a>. To record a change to
+# the model data, call it via the <b>record</b> method:
+# <pre><tcl>
+#     $model record add e -yogi bear
+#     $model describe
+# </tcl></pre>
+# 
+# We can examine the command history to see the command we
+# just recorded, and the corresponding undo command:
+# <pre><tcl>
+#     $model history at current
+# </tcl></pre>
+# 
+# We can undo the command:
+# <pre><tcl>
+#     $model undo
+#     $model describe
+# </tcl></pre>
+# 
+# And redo it:
+# <pre><tcl>
+#     $model redo
+#     $model describe
+# </tcl></pre>
+# 
+# Note that configuration of public variables can also be recorded.
+# In this case, the model has only one public variable, but in
+# general subclasses of DataModel will add others:
+# <pre><tcl>
+#     $model record configure -modelname NewName
+#     $model history at current
+# </tcl></pre>
+#
+class ::tycho::SimpleModel {
+    inherit ::tycho::DataModel
+
+    constructor {args} {}
+    destructor {}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::SimpleModel::constructor {args} {
+    # Evaluate options
+    eval configure $args
+
+    # The item type
+    type define item
+}
