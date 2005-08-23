@@ -209,6 +209,12 @@ makefile:	make.template $(MDEPS)
 
 makefiles:	makefile
 
+MathematicaTcl.cc MathematicaTcl.h MatlabTcl.cc MatlabTcl.h displayFile.h ganttChart.h ptclAppInit.cc ptclDescription.cc ptclDescription.h ptclError.cc ptclGantt.cc ptclInit.cc:
+	@if [ ! -f $@ ]; then \
+		echo "Linking to ../ptcl/$@"; \
+		ln -s ../ptcl/$@; \
+	fi
+
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
 
