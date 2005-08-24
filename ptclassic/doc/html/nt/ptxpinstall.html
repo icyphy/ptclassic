@@ -60,8 +60,88 @@ cd $PTOLEMY
 make install_gnu
 </pre>
 
-<li> Download and install X11 for Cygwin from
-<a href="http://www.xemacs.freeserve.co.uk/"><CODE>http://www.xemacs.freeserve.co.uk/</CODE></a>
+<li> Download the "other.src" tar file, which includes Tcl/Tk.
+<br>Note that we need to untar it in a separate directory and then copy
+the Tcl/Tk installation over.
+<br>Download
+<a href="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.other.src.tar.gz"><code>http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.other.srctar.gz</code>
+
+<li>anonmouse class type problem:
+<pre>
+  /cygdrive/c/cxh/src/ptolemy/obj.xp/gnu/gcc/gcc/xgcc
+  -B/cygdrive/c/cxh/src/ptolemy/obj.xp/gnu/gcc/gcc/
+  -B/cygdrive/c/cxh/src/ptolemy/gnu/xp/i686-pc-cygwin32/bin/
+   -c -g -O2 -fno-implicit-templates -I.
+  -I/cygdrive/c/cxh/src/ptolemy/src/gnu/src/gcc/libio
+  -I/cygdrive/c/cxh/src/ptolemy/src/gnu/src/gcc/libio/../winsup/include
+   -nostdinc++  -fpic
+   /cygdrive/c/cxh/src/ptolemy/src/gnu/src/gcc/libio/filebuf.cc
+   -o pic/filebuf.o
+cc1plus: warning: -fpic ignored for target (all code is position independent)
+In file included from /usr/include/sys/signal.h:107,
+                 from /usr/include/signal.h:5,
+                 from /usr/include/time.h:150,
+                 from /usr/include/sys/stat.h:9,
+                 from /cygdrive/c/cxh/src/ptolemy/src/gnu/src/gcc/libio/filebuf.cc:29:
+/usr/include/cygwin/signal.h:67: anonymous class type not used to declare any objects
+/usr/include/cygwin/signal.h:71: anonymous class type not used to declare any objects
+/usr/include/cygwin/signal.h:80: anonymous class type not used to declare any objects
+make[5]: *** [filebuf.o] Error 1
+make[5]: Leaving directory `/cygdrive/c/cxh/src/ptolemy/obj.xp/gnu/gcc/i686-pc-c
+ygwin32/libio'
+make[4]: *** [all-target-libio] Error 2
+make[4]: Leaving directory `/cygdrive/c/cxh/src/ptolemy/obj.xp/gnu/gcc'
+</pre>
+
+Solution: edit
+<code>ptolemy/obj.xp/gnu/gcc/i686-pc-cygwin32/libio/Makefile</code>
+and add <code> -fpermissive
+<pre>
+CXXINCLUDES = -I. -I$(srcdir) -I$(srcdir)/../winsup/include $(NOSTDINC) -fpermissive
+</pre>
+and
+<pre>
+.cc.o:
+	test x"$(enable_shared)" != xyes || \
+	  $(COMPILE.cc) -fpermissive $(PICFLAG) $< -o pic/$@
+	$(COMPILE.cc) $<
+</pre>
+See also
+<a href="http://gcc.gnu.org/ml/gcc-bugs/1999-08n/msg00914.html"><code>http://gcc.gnu.org/ml/gcc-bugs/1999-08n/msg00914.html</code></a>
+
+
+<li> 
+<pre>
+cd $PTOLEMY/..
+mkdir tmp
+cd tmp
+tar -xf /tmp/pt0.7.2devel.other.src.tar.gz 
+cd ptolemy/src/tcltk
+mv tcl* tk* $PTOLEMY/src/tcltk
+</pre>
+
+<li> Download and install X11 development libraries and headers
+by running the Cygwin setup program
+
+<li> Do some setup
+<pre>
+cd $PTOLEMY
+./MAKEARCH
+make makefiles
+cd octtools
+make makefiles
+</pre>
+
+<li> Run the builds
+<pre>
+make ntbuild
+</pre>
+This rule build tcltk, octtools and Ptolemy
+
+<hr>
+Old below here
+<hr>
+
 
 <li> Start up bash, and complete the following steps
 <pre>
@@ -412,9 +492,9 @@ Some of the notes above are from Saschas Schwarz,
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
 <A HREF="ptntbugs.html">Back to Ptolemy NT Bugs</A>
 <HR>
-Copyright &#169 1997-1999, The Regents of the University of California.
+Copyright &#169 1997-1999,2005 The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 10/26/99,
+Last updated: $Date$
 comments to: <author>cxh@eecs.berkeley.edu</author>
 
