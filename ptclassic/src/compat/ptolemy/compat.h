@@ -320,7 +320,7 @@ extern int listen(int, int);
 #if defined(PTNBSD_386) || defined(PTFREEBSD)
 extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
 #else
-#if defined(PTHPPA) && !defined(PTHPPA_CFRONT) && defined(PTHPUX10)
+#if defined(PTHPPA) && !defined(PTHPPA_CFRONT) && defined(PTHPUX10) || defined(PTXP)
 /* Under HPUX-10.20 and gcc-2.7.2, don't define lseek */
 #else
 extern long lseek();
@@ -417,7 +417,7 @@ extern int errno;
 #define PT_FOPEN_READ_BINARY "r"
 #endif    
 
-#ifdef PTNT
+#if defined(PTNT)  && !defined(PTXP)
 /* src/kernel/TimeVal.cc uses timercmp */
 #define	timercmp(tvp, uvp, cmp) \
 	/* CSTYLED */ \
