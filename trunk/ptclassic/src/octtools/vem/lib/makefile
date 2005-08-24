@@ -1,18 +1,18 @@
 # Version Identification:
-# @(#)make.template	1.1	12/15/93
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
 # 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -21,6 +21,9 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
 # Makefile for Ptolemy   # Makefile for the VEM library
 #
 # Date of creation:  11/27/93
@@ -34,10 +37,10 @@
 # root of source tree
 ROOT	      = ../../../..
 # VPATH points to the real source directory
-VPATH         = $(ROOT)/src/vem/vem/lib
+VPATH         = $(ROOT)/src/octtools/vem/lib
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 
@@ -63,56 +66,60 @@ BMS	= $(OCTTOOLS)/lib/vem/checkoff.bm \
 	  $(OCTTOOLS)/lib/vem/symbolic.bm
 
 # Applications defaults
-ADS	= Vem
+# Don't install the 'Vem' file, we don't use it anyway, and it
+# causes problems when extracting the tar files under NT
+ADS	= #Vem
 
-#-------------------------------------------------------------------------
+MISC_FILES =	Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm folder.bm hisetDot hisetMark hiunsetDot hiunsetMark newcell.bm other.bm physical.bm schematic.bm setDot setMark symbolic.bm unsetDot unsetMark vem.bindings Vem
+
 all:
-install:  makefile $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
+install:  makefile $(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) #$(OCTTOOLS)/lib/$(ADS)
 
-$(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib/vem vem.bindings
+$(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem vem.bindings
 	cp vem.bindings $(OCTTOOLS)/lib/vem/vem.bindings.$(VERSION)
 
-$(OCTTOOLS)/lib/$(ADS): $(ADS)
-	cp $(ADS) $(OCTTOOLS)/lib/$(ADS)
+#$(OCTTOOLS)/lib/$(ADS): $(ADS)
+#	cp $(ADS) $(OCTTOOLS)/lib/$(ADS)
+#
+#$(XAPP)/$(ADS):	$(ADS)
+#	-cp $(ADS) $(XAPP)/$(ADS)
 
-$(XAPP)/$(ADS):	$(ADS)
-	-cp $(ADS) $(XAPP)/$(ADS)
-
-$(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib/vem checkoff.bm
+$(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkoff.bm
 	cp checkoff.bm $(OCTTOOLS)/lib/vem/checkoff.bm
 
-$(OCTTOOLS)/lib/vem/checkon.bm:	$(OCTTOOLS)/lib/vem checkon.bm
+$(OCTTOOLS)/lib/vem/checkon.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkon.bm
 	cp checkon.bm $(OCTTOOLS)/lib/vem/checkon.bm
 
-$(OCTTOOLS)/lib/vem/checkoffhi.bm:	$(OCTTOOLS)/lib/vem checkoffhi.bm
+$(OCTTOOLS)/lib/vem/checkoffhi.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkoffhi.bm
 	cp checkoffhi.bm $(OCTTOOLS)/lib/vem/checkoffhi.bm
 
-$(OCTTOOLS)/lib/vem/checkonhi.bm:	$(OCTTOOLS)/lib/vem checkonhi.bm
+$(OCTTOOLS)/lib/vem/checkonhi.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkonhi.bm
 	cp checkonhi.bm $(OCTTOOLS)/lib/vem/checkonhi.bm
 
-$(OCTTOOLS)/lib/vem/folder.bm:	$(OCTTOOLS)/lib/vem folder.bm
+$(OCTTOOLS)/lib/vem/folder.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem folder.bm
 	cp folder.bm $(OCTTOOLS)/lib/vem/folder.bm
 
-$(OCTTOOLS)/lib/vem/newcell.bm:	$(OCTTOOLS)/lib/vem newcell.bm
+$(OCTTOOLS)/lib/vem/newcell.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem newcell.bm
 	cp newcell.bm $(OCTTOOLS)/lib/vem/newcell.bm
 
-$(OCTTOOLS)/lib/vem/other.bm:	$(OCTTOOLS)/lib/vem other.bm
+$(OCTTOOLS)/lib/vem/other.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem other.bm
 	cp other.bm $(OCTTOOLS)/lib/vem/other.bm
 
-$(OCTTOOLS)/lib/vem/physical.bm:	$(OCTTOOLS)/lib/vem physical.bm
+$(OCTTOOLS)/lib/vem/physical.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem physical.bm
 	cp physical.bm $(OCTTOOLS)/lib/vem/physical.bm
 
-$(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib/vem schematic.bm
+$(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem schematic.bm
 	cp schematic.bm $(OCTTOOLS)/lib/vem/schematic.bm
 
-$(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib/vem symbolic.bm
+$(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem symbolic.bm
 	cp symbolic.bm $(OCTTOOLS)/lib/vem/symbolic.bm
 
-$(OCTTOOLS)/lib/vem: $(OCTTOOLS)/lib
-	-mkdir $(OCTTOOLS)/lib/vem
-$(OCTTOOLS)/lib:
-	mkdir $(OCTTOOLS)/lib
+$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem:
+	-mkdir $@ 
 
+# Some versions of make require us to set LIB if we are going to
+# include common.mk
+PTLIB=none
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
