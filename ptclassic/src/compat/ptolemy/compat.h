@@ -295,9 +295,9 @@ extern int vfprintf(FILE *, const char *, char *);
 /* Under linux and libc-5.2.18, bind() takes a const second arg */
 extern int bind(int, const struct sockaddr *, int);
 #else /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 */
-#if ! defined(PTSOL7)
+#if ! defined(PTSOL7) && ! defined(PTXP)
 extern int bind(int, struct sockaddr *, int);
-#endif /* ! PTSOL7 */
+#endif /* ! PTSOL7 && !PTXP */
 #endif /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 */
 #endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA && ! PTLINUX*/
 
