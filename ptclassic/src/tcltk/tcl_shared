@@ -1,5 +1,5 @@
 #!/bin/sh
 case $PTARCH in
-    nt4*|sun4*|hppa.cfront|*static);;
+    nt4*|sun4*|hppa.cfront|*static|xp);;
     *)echo --enable-shared;; 
 esac
