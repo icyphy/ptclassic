@@ -45,9 +45,9 @@ to be used in conjunction with a DERCScheduler.
 
 
 
-#ifdef __GNUG__
-#pragma interface
-#endif
+//#ifdef __GNUG__
+//#pragma interface
+//#endif
 
 #include <math.h>
 #include <assert.h>
