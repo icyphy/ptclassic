@@ -86,6 +86,7 @@ fi
 # wanted to use -vars "FOO", they would have to edit common.mk
 # Under DEC alpha OSF1/3.2 awk can't handle more than 99 fields in input,
 # so we place each filename on its own line.
+# The sed command is to get rid of extra \r characters
 echo $makevarlist |
 	awk 'BEGIN  { print "include make.template"
 				  print "echo_pl_srcs:"
@@ -98,7 +99,7 @@ echo $makevarlist |
 				  printf("\tdo \\\n")
 				  printf("\t\techo $$file; \\\n")
 				  printf("\tdone\n")
-				}' > $mymkfile
+				}' | sed 's/\r\([^\n]\)/\1/g' > $mymkfile
 
 # Run make, convert the output into C code
 # --no-print-directory is a gnu make specific argument
