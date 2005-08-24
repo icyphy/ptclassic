@@ -421,17 +421,31 @@ ifdef ACS
 		TARGETS += $(ACST)/ACSCGCTarget.o \
 			$(ACST)/ACSCGFPGATarget.o \
 			$(ACST)/ACSCGTarget.o \
+			$(ACST)/Address.o \
 			$(ACST)/Arch.o \
+			$(ACST)/Capability.o \
 			$(ACST)/Connectivity.o \
+			$(ACST)/Connection_List.o \
+			$(ACST)/Constants.o \
+			$(ACST)/CoreList.o \
 			$(ACST)/Delay.o \
+			$(ACST)/Directory.o \
 			$(ACST)/DoubleArray.o \
 			$(ACST)/Fpga.o \
 			$(ACST)/HWTarget.o \
+			$(ACST)/HWio_add.o \
+			$(ACST)/HWio_matlab.o \
+			$(ACST)/HWutils.o \
+			$(ACST)/Pin.o \
+			$(ACST)/Port.o \
+			$(ACST)/Resource.o \
 			$(ACST)/ACSIntArray.o \
 			$(ACST)/Pipealign.o \
 			$(ACST)/Port_Timing.o \
+			$(ACST)/Sequencer.o \
 			$(ACST)/Sg_Constructs.o \
 			$(ACST)/StringArray.o \
+			$(ACST)/utilities.o \
 			$(ACST)/acs_vhdl_lang.o
 	endif
 
