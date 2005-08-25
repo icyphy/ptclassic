@@ -54,7 +54,7 @@ Ptolemy Classic uses the shift middle button to bring up
 a menu of commands.  If your mouse does not have a middle button,
 try pressing the left and right mouse buttons at the same time.
 
->Try to avoid using the Window toolbar close window button in
+Try to avoid using the Window toolbar close window button in
 the upper right (the box with the <CODE>X</CODE>) - this button
 tends to close all the Ptolemy Classic windows.  To close a 
 Ptolemy Classic window, type Control-D.
