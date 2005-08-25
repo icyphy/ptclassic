@@ -1,5 +1,5 @@
-static const char file_id[] = "DErrmanager_uldl.pl";
-// .cc file generated from DErrmanager_uldl.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl by ptlang
 /*
 copyright (c) 1996 - 1997 Dresden University of Technology,
     Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1996 - 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 #include "DErrmanager_uldl.h"
 
 const char *star_nm_DErrmanager_uldl = "DErrmanager_uldl";
@@ -19,7 +21,7 @@ ISA_FUNC(DErrmanager_uldl,DEcell_list);
 
 Block* DErrmanager_uldl :: makeNew() const { LOG_NEW; return new DErrmanager_uldl;}
 
-# line 71 "DErrmanager_uldl.pl"
+# line 71 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 // must be scope file and external linkage 
         Handy *list_h, *list_t;
 
@@ -36,7 +38,7 @@ DErrmanager_uldl::DErrmanager_uldl ()
 	addPort(MS_Position.setPort("MS_Position",this,COMPLEX));
 	addPort(cellnumb.setPort("cellnumb",this,INT));
 
-# line 89 "DErrmanager_uldl.pl"
+# line 89 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 list_h= NULL;
         list_t= NULL;
         handy= NULL;
@@ -45,7 +47,7 @@ list_h= NULL;
 }
 
 void DErrmanager_uldl::wrapup() {
-# line 280 "DErrmanager_uldl.pl"
+# line 280 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 while (list_h) {
             handy=list_h;
             list_h=list_h -> next;
@@ -56,7 +58,7 @@ while (list_h) {
 }
 
 void DErrmanager_uldl::begin() {
-# line 80 "DErrmanager_uldl.pl"
+# line 80 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 DEcell_list::begin();
         DEcell_list::time_offset();
         ejected_user= usersum= 0;
@@ -67,7 +69,7 @@ DEcell_list::begin();
 }
 
 DErrmanager_uldl::~DErrmanager_uldl() {
-# line 96 "DErrmanager_uldl.pl"
+# line 96 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 while (list_h) {
             handy=list_h;
             list_h=list_h -> next;
@@ -78,7 +80,7 @@ while (list_h) {
 }
 
 void DErrmanager_uldl::go() {
-# line 255 "DErrmanager_uldl.pl"
+# line 255 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 if (stop.dataNew) {
             stopvar=  stop.get();
             delete_handy();
@@ -107,7 +109,7 @@ if (stop.dataNew) {
 
 void DErrmanager_uldl::delete_handy ()
 {
-# line 109 "DErrmanager_uldl.pl"
+# line 109 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 if (list_t!=NULL && list_h != NULL) {    
                 if ((list_h->next==NULL) && ((list_h->startnum)==stopvar)) {
                     // delete the only member
@@ -165,7 +167,7 @@ if (list_t!=NULL && list_h != NULL) {
 
 void DErrmanager_uldl::refresh_slot_man ()
 {
-# line 168 "DErrmanager_uldl.pl"
+# line 168 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 s_time= float (zellen[cellno].time_offset+ S_time+ 1.2+ shifter* 0.15);
             e_time= float (s_time+ band* 0.15);
 }
@@ -173,7 +175,7 @@ s_time= float (zellen[cellno].time_offset+ S_time+ 1.2+ shifter* 0.15);
 
 void DErrmanager_uldl::initial_slot_man ()
 {
-# line 177 "DErrmanager_uldl.pl"
+# line 177 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 eject_user=0;
             s_time= float (zellen[cellno].time_offset+ S_time+ 1.2+ shifter* 0.15);
             e_time= float (s_time+ band* 0.15);
@@ -186,7 +188,7 @@ eject_user=0;
 
 void DErrmanager_uldl::refresh ()
 {
-# line 191 "DErrmanager_uldl.pl"
+# line 191 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 shifter=0;
             band=0;
             handy=list_h;
@@ -206,7 +208,7 @@ shifter=0;
 
 Handy * DErrmanager_uldl::new_handy ()
 {
-# line 212 "DErrmanager_uldl.pl"
+# line 212 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 int a;
             usersum++;
             cellno=   cellnum.get();

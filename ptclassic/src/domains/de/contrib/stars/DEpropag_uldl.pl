@@ -19,9 +19,7 @@ defstar {
         Moreover, the implementation highly depends on the environment I use. 
         This is not a generic path-loss-model for any AutoCad-enviroment !!!
         }
-       	hinclude { <stdio.h>, <string.h>, <fstream.h>,
-		  <complex.h>, <math.h>, <stdlib.h>, <iomanip.h>, 
-		  "pt_fstream.h" }
+       	hinclude { "pt_fstream.h" }
         input 	{
             name { MS_Position }
             type { Complex }

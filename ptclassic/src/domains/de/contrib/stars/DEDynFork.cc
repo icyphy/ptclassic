@@ -9,6 +9,8 @@ All rights reserved.
 #pragma implementation
 #endif
 
+
+# line 1 "DEDynFork.pl"
 #include "DEDynFork.h"
 
 const char *star_nm_DEDynFork = "DEDynFork";

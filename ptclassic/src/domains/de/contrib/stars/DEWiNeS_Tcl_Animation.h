@@ -1,6 +1,6 @@
 #ifndef _DEWiNeS_Tcl_Animation_h
 #define _DEWiNeS_Tcl_Animation_h 1
-// header file generated from DEWiNeS_Tcl_Animation.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,14 +10,13 @@
 Copyright (c) 1997 Dresden University of Technology,
             Mobile Communications Systems
  */
-#include "DEStar.h"
 #include "TclStarIfc.h"
 #include "ptkTclCommands.h"
-#include <complex.h>
 #include "DErrmanager_uldl.h"
+#include "DEStar.h"
 #include "IntState.h"
 #include "StringState.h"
-# line 76 "DEWiNeS_Tcl_Animation.pl"
+# line 75 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 // declare list_h for that file
             extern Handy* list_h;
             // Overload TclStarIfc for WiNeS-spezific behavior
@@ -60,11 +59,11 @@ protected:
 	/* virtual */ void go();
 	StringState tcl_file;
 	IntState Segments;
-# line 345 "DEWiNeS_Tcl_Animation.pl"
+# line 344 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 TclStarIfcWiNeS tcl;
 
 private:
-# line 349 "DEWiNeS_Tcl_Animation.pl"
+# line 348 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 Handy *mobile;
 	    Complex dummy;
 

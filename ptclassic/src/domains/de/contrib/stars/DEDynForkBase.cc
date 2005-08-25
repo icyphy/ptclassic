@@ -11,6 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 #pragma implementation
 #endif
 
+
+# line 1 "DEDynForkBase.pl"
 #include "DEDynForkBase.h"
 
 const char *star_nm_DEDynForkBase = "DEDynForkBase";

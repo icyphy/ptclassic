@@ -27,8 +27,7 @@ defstar {
 	explanation { My TclStarIfcWiNeS class contains some methods which 
         I just copied from Edward A. Lee's TclStarIfc. 
         }
-	hinclude { "TclStarIfc.h", "ptkTclCommands.h",<complex.h>,
-	"DErrmanager_uldl.h" }
+	hinclude { "TclStarIfc.h", "ptkTclCommands.h", "DErrmanager_uldl.h" }
 	ccinclude { "ptk.h" }
 	input {
             name { New_ }

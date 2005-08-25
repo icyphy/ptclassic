@@ -9,6 +9,8 @@ copyright (c) 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "DEWeighted_List.pl"
 #include "DEWeighted_List.h"
 
 const char *star_nm_DEWeighted_List = "DEWeighted_List";

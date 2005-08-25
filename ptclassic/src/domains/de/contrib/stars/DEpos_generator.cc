@@ -1,5 +1,5 @@
-static const char file_id[] = "DEpos_generator.pl";
-// .cc file generated from DEpos_generator.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DEpos_generator.pl by ptlang
 /*
 copyright (c) 1997 Dresden University of Technology,
                 Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 #include "DEpos_generator.h"
 #include <ACG.h>
 
@@ -20,7 +22,7 @@ ISA_FUNC(DEpos_generator,DEStar);
 
 Block* DEpos_generator :: makeNew() const { LOG_NEW; return new DEpos_generator;}
 
-# line 49 "DEpos_generator.pl"
+# line 49 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 extern ACG* gen;
 
 DEpos_generator::DEpos_generator ()
@@ -33,19 +35,19 @@ DEpos_generator::DEpos_generator ()
 	addState(y_min.setState("y_min",this,"50","y_min"));
 	addState(y_max.setState("y_max",this,"2600","y_max"));
 
-# line 50 "DEpos_generator.pl"
+# line 50 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 random_x = NULL;
                   random_y = NULL;
 }
 
 DEpos_generator::~DEpos_generator() {
-# line 53 "DEpos_generator.pl"
+# line 53 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 if (random_x) delete random_x;
                   if (random_y) delete random_y;
 }
 
 void DEpos_generator::setup() {
-# line 57 "DEpos_generator.pl"
+# line 57 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 if (random_x) delete random_x;
         if (random_y) delete random_y;
 	random_x = new Uniform(x_min, x_max, gen);
@@ -53,7 +55,7 @@ if (random_x) delete random_x;
 }
 
 void DEpos_generator::go() {
-# line 63 "DEpos_generator.pl"
+# line 63 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 if (restart.dataNew) {
             double re = (*random_x) ();
             double im = (*random_y) ();

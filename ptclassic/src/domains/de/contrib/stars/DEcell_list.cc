@@ -1,5 +1,5 @@
-static const char file_id[] = "DEcell_list.pl";
-// .cc file generated from DEcell_list.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DEcell_list.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DEcell_list.pl by ptlang
 /*
 copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1996 - 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 #include "DEcell_list.h"
 #include <ACG.h>
 
@@ -20,7 +22,7 @@ ISA_FUNC(DEcell_list,DEStar);
 
 Block* DEcell_list :: makeNew() const { LOG_NEW; return new DEcell_list;}
 
-# line 463 "DEcell_list.pl"
+# line 463 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 extern ACG* gen;
 	cell DEcell_list::zellen[cells];
 
@@ -31,12 +33,12 @@ DEcell_list::DEcell_list ()
 	addState(segments.setState("segments",this,"0","omnidirectional antennas, if 0,\n               some adapted antennas otherwise"));
 	addState(frequency_reuse_factor.setState("frequency_reuse_factor",this,"0","0,3,5,9 are allowed"));
 
-# line 68 "DEcell_list.pl"
+# line 68 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 random = NULL;
 }
 
 void DEcell_list::wrapup() {
-# line 486 "DEcell_list.pl"
+# line 486 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 S_time=0.3;
 	if (segments) {
 	    zellen[0].Trans_pos=    Complex (3930.0, 1750.0);
@@ -428,7 +430,7 @@ S_time=0.3;
 }
 
 void DEcell_list::begin() {
-# line 73 "DEcell_list.pl"
+# line 73 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 S_time=0.3;
 	if (segments) {
 	    zellen[0].Trans_pos=    Complex (3930.0, 1750.0);
@@ -820,12 +822,12 @@ S_time=0.3;
 }
 
 DEcell_list::~DEcell_list() {
-# line 70 "DEcell_list.pl"
+# line 70 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 if (random) delete random;
 }
 
 void DEcell_list::setup() {
-# line 479 "DEcell_list.pl"
+# line 479 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 if (random) delete random;
 	double dummy;
         dummy = offset; 
@@ -836,7 +838,7 @@ if (random) delete random;
 
 void DEcell_list::time_offset ()
 {
-# line 471 "DEcell_list.pl"
+# line 471 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 int j;
 	    for (j=0; j<cells ;j++) {
 		    zellen[j].time_offset= float( (*random) () );

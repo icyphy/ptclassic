@@ -1,6 +1,6 @@
 #ifndef _DEcell_list_h
 #define _DEcell_list_h 1
-// header file generated from DEcell_list.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DEcell_list.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,13 +10,11 @@
 copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems
  */
-#include "DEStar.h"
-#include <complex.h>
-#include <iostream.h>
 #include <Uniform.h>
+#include "DEStar.h"
 #include "IntState.h"
 #include "FloatState.h"
-# line 40 "DEcell_list.pl"
+# line 40 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 #define cells 17 
 	typedef struct cell {
 	    int 	number;         // cell number
@@ -56,7 +54,7 @@ protected:
 	FloatState offset;
 	IntState segments;
 	IntState frequency_reuse_factor;
-# line 63 "DEcell_list.pl"
+# line 63 "../../../../../src/domains/de/contrib/stars/DEcell_list.pl"
 static cell zellen[cells];
 	   float S_time;
            Uniform *random;

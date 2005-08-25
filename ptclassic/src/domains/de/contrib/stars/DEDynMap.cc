@@ -11,6 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 #pragma implementation
 #endif
 
+
+# line 1 "DEDynMap.pl"
 #include "DEDynMap.h"
 
 const char *star_nm_DEDynMap = "DEDynMap";

@@ -1,6 +1,6 @@
 #ifndef _DECIR_uldl_h
 #define _DECIR_uldl_h 1
-// header file generated from DECIR_uldl.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,17 +10,11 @@
 copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems
  */
-#include <iostream.h>
-#include <iomanip.h>
-#include <fstream.h>
-#include <complex.h>
-#include <string.h>
-#include <math.h>
 #include "DErrmanager_uldl.h"
 #include "DEpropag_uldl.h"
 #include "DEcell_list.h"
 #include "StringState.h"
-# line 51 "DECIR_uldl.pl"
+# line 50 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 //declare list_h for that file
         extern Handy *list_h;
 
@@ -46,7 +40,7 @@ protected:
 	StringState fileName;
 
 private:
-# line 55 "DECIR_uldl.pl"
+# line 54 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 DEpropag_uldl prop_class;
         Handy *mobile, *interferer, *mob_count;    
 	int slot_counter, slots_lower7, slots_lower23,ss;
