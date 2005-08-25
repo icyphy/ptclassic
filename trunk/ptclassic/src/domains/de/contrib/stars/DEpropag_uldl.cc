@@ -1,5 +1,5 @@
-static const char file_id[] = "DEpropag_uldl.pl";
-// .cc file generated from DEpropag_uldl.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl by ptlang
 /*
 copyright (c) 1996 - 1997 Dresden University of Technology,
                     Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1996 - 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 #include "DEpropag_uldl.h"
 
 const char *star_nm_DEpropag_uldl = "DEpropag_uldl";
@@ -27,7 +29,7 @@ DEpropag_uldl::DEpropag_uldl ()
 	addPort(C_dBm.setPort("C_dBm",this,FLOAT));
 	addState(fileName.setState("fileName",this,"$PTOLEMY/src/domains/de/contrib/stars/topo.dxf","File describing topology"));
 
-# line 92 "DEpropag_uldl.pl"
+# line 90 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 Gelesen = 0;
                 for (int i = 1; i < 50; i++) {
                     Art[i] = 0;
@@ -35,13 +37,13 @@ Gelesen = 0;
 }
 
 void DEpropag_uldl::begin() {
-# line 98 "DEpropag_uldl.pl"
+# line 96 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 tunnel_flag=0;
     DEcell_list::begin();
 }
 
 void DEpropag_uldl::go() {
-# line 1694 "DEpropag_uldl.pl"
+# line 1692 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 if (MS_Position.dataNew) 
        		{       
 			tunnel_flag=0;
@@ -56,7 +58,7 @@ if (MS_Position.dataNew)
 
 float DEpropag_uldl::BS_Stoerer (int I_number, int C_number, const char* topoFileName)
 {
-# line 110 "DEpropag_uldl.pl"
+# line 108 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 tunnel_flag=1;
 	 LI_number=I_number;			// interf. BS-cellnumber
 	 LC_number=C_number;		        // desired BS-Pos
@@ -68,7 +70,7 @@ tunnel_flag=1;
 
 float DEpropag_uldl::MS_Stoerer (int number, Complex Tposition, const char* topoFileName)
 {
-# line 126 "DEpropag_uldl.pl"
+# line 124 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 tunnel_flag=0;
 	 LC_number=number;			// interf. BS-cellnumber
 	 position=Tposition;		        // desired BS-Pos
@@ -80,7 +82,7 @@ tunnel_flag=0;
 
 void DEpropag_uldl::Abzweig (const char* topoFileName)
 {
-# line 143 "DEpropag_uldl.pl"
+# line 141 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int 	j, m, n;
 	double 	F1, F2, Kath_x, Kath_y;
 	
@@ -148,7 +150,7 @@ int 	j, m, n;
 
 void DEpropag_uldl::entfernen (Punkt& P1, Punkt& P2, int& I1, int& I2, double& Z1, double& Z2)
 {
-# line 216 "DEpropag_uldl.pl"
+# line 214 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 P1 = P2;
 	I1 = I2;
 	Z1 = Z2;
@@ -157,7 +159,7 @@ P1 = P2;
 
 void DEpropag_uldl::tauschen (Punkt& P1, Punkt& P2, int& I1, int& I2, double& Z1, double& Z2)
 {
-# line 229 "DEpropag_uldl.pl"
+# line 227 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 Punkt  temp1= P1;
 	int    temp2= I1;
 	double temp3= Z1;
@@ -172,7 +174,7 @@ Punkt  temp1= P1;
 
 void DEpropag_uldl::File_lesen (const char *name)
 {
-# line 250 "DEpropag_uldl.pl"
+# line 248 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int 		v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,
 		v16,v17,v18,v19,v20,v21,v22,v23,v24,v25,v26,v27,v28,
 		w1,w2,w3,w4,w5,w6,w7,w8,w9,w10,i,ok, Schalter;
@@ -708,7 +710,7 @@ int 		v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,
 
 double DEpropag_uldl::Tuer_x_schliessen (double Tuerparam1, double Tuerparam2)
 {
-# line 790 "DEpropag_uldl.pl"
+# line 788 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 if (Tuerparam1== 0)       	return 0;
 	if (Tuerparam1== 90)            return Tuerparam2;
 	if (Tuerparam1== 180)     	return 0;
@@ -719,7 +721,7 @@ if (Tuerparam1== 0)       	return 0;
 
 double DEpropag_uldl::Tuer_y_schliessen (double Tuerparam1, double Tuerparam2)
 {
-# line 805 "DEpropag_uldl.pl"
+# line 803 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 if (Tuerparam1== 0)            	return (0-Tuerparam2);
 	if (Tuerparam1== 90)           	return 0;
 	if (Tuerparam1== 180)           return Tuerparam2;
@@ -730,7 +732,7 @@ if (Tuerparam1== 0)            	return (0-Tuerparam2);
 
 int DEpropag_uldl::Namenserfassung (char B_Name[14])
 {
-# line 820 "DEpropag_uldl.pl"
+# line 818 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 if (!strcmp (B_Name,"FENSTER"))    	return 1;
 	if (!strcmp (B_Name,"FENSTER1"))     	return 2;
 	if (!strcmp (B_Name,"FENSTER2"))     	return 3;
@@ -776,7 +778,7 @@ if (!strcmp (B_Name,"FENSTER"))    	return 1;
 
 void DEpropag_uldl::Sortierung ()
 {
-# line 869 "DEpropag_uldl.pl"
+# line 867 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int i;
 
 	for (i=0; i<91; i++)      		// Tabellierung aller EinfuegePunkte 
@@ -908,7 +910,7 @@ int i;
 
 void DEpropag_uldl::Objekte_abtast ()
 {
-# line 1004 "DEpropag_uldl.pl"
+# line 1002 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int i, j;
 
 	for (i=0; i<39; i++)
@@ -1256,7 +1258,7 @@ int i, j;
 
 void DEpropag_uldl::Koord_norm (int L1, int L2)
 {
-# line 1356 "DEpropag_uldl.pl"
+# line 1354 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 A.x= EP[L1].x+ HinAn[L2].x;               // Blocklinien auf ACAD 0-Punkt normieren
 	A.y= EP[L1].y+ HinAn[L2].y;               // (  statt auf EP, wie aus DXF/File eingelesen)
 	E.x= EP[L1].x+ HinEn[L2].x;
@@ -1266,7 +1268,7 @@ A.x= EP[L1].x+ HinAn[L2].x;               // Blocklinien auf ACAD 0-Punkt normie
 
 void DEpropag_uldl::Runden (double nmbr)
 {
-# line 1370 "DEpropag_uldl.pl"
+# line 1368 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 double down = floor(nmbr);
 	double up = ceil(nmbr);
 
@@ -1279,7 +1281,7 @@ double down = floor(nmbr);
 
 void DEpropag_uldl::SP_berechnung ()
 {
-# line 1386 "DEpropag_uldl.pl"
+# line 1384 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int 	Bed_1, Bed_2, Bed_3, Bed_4;
 	double 	Fak1, Fak2, Rx, Ry, Tx, Ty, Kat_x, Kat_y, F1, F2, Z1, N1, Z2, N2;
 	
@@ -1506,7 +1508,7 @@ int 	Bed_1, Bed_2, Bed_3, Bed_4;
 
 double DEpropag_uldl::Berechnung ()
 {
-# line 1616 "DEpropag_uldl.pl"
+# line 1614 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 int    i,n,z, Paar;
 	double lambda_m, Loss_dB, Attenuat_dB = 0.0;
 

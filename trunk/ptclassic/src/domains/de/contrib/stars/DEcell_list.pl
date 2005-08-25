@@ -12,7 +12,7 @@ defstar{
            factor (4 choices), the antenna beam pattern (2 choices) as well as 
            for the time offset. Refer to the defstates for further explanations.
     }
-    hinclude { <complex.h>, <iostream.h>, <Uniform.h> }
+    hinclude { <Uniform.h> }
     ccinclude  { <ACG.h> }  
     defstate {
         name { offset } 

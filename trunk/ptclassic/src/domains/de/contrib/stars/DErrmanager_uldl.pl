@@ -13,7 +13,7 @@ defstar{
     Also, each event which changes the list's contents causes a new calculation 
     of the interference situation. }
     location { The WiNeS-Library }   
-    hinclude { <stdio.h>, <stdlib.h>, <complex.h>, "DEcell_list.h" }
+    hinclude { "DEcell_list.h" }
     input 	{
         name { start }        
         type { int }

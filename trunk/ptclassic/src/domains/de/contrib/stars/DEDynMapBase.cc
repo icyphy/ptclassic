@@ -10,6 +10,8 @@ limitation of liability, and disclaimer of warranty provisions.
 #pragma implementation
 #endif
 
+
+# line 1 "DEDynMapBase.pl"
 #include "DEDynMapBase.h"
 #include "ptk.h"
 

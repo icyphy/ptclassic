@@ -1,6 +1,6 @@
 #ifndef _DEpropag_uldl_h
 #define _DEpropag_uldl_h 1
-// header file generated from DEpropag_uldl.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,13 +10,6 @@
 copyright (c) 1996 - 1997 Dresden University of Technology,
                     Mobile Communications Systems
  */
-#include <stdio.h>
-#include <string.h>
-#include <fstream.h>
-#include <complex.h>
-#include <math.h>
-#include <stdlib.h>
-#include <iomanip.h>
 #include "pt_fstream.h"
 #include "DEcell_list.h"
 #include "StringState.h"
@@ -40,7 +33,7 @@ protected:
 	StringState fileName;
 
 private:
-# line 45 "DEpropag_uldl.pl"
+# line 43 "../../../../../src/domains/de/contrib/stars/DEpropag_uldl.pl"
 enum Umgebung { Fenster, Fenster1, Fenster2, Tuer, Tuer2, Metall_Tuer, Metall_Tuer1,
  			Glas_Tuer, Glas_Doppel_Tuer, Doppel_Tuer, Doppel_Tuer2, Fahrstuhltuer,
 		 	Saeule, Ziegelwand1, Ziegelwand2, Ziegelwand3, Ziegelwand4, Ziegelwand5,

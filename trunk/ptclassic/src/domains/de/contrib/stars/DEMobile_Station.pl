@@ -13,7 +13,6 @@ defstar {
     right cell. If the the received position is not inside of one of the rooms, 
     it demands a new position rather than dropping that mobile away.
     }
-    hinclude { <complex.h>, <fstream.h>, <iomanip.h>, <math.h>        }
     input {
         name { R_Pos }
         type { Complex }

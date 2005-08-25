@@ -1,5 +1,5 @@
-static const char file_id[] = "DECIR_uldl.pl";
-// .cc file generated from DECIR_uldl.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl by ptlang
 /*
 copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1996 - 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 #include "DECIR_uldl.h"
 
 const char *star_nm_DECIR_uldl = "DECIR_uldl";
@@ -30,12 +32,12 @@ DECIR_uldl::DECIR_uldl ()
 	addPort(strength_bs.setPort("strength_bs",this,INT));
 	addState(fileName.setState("fileName",this,"$PTOLEMY/src/domains/de/contrib/stars/topo.dxf","File describing topology"));
 
-# line 62 "DECIR_uldl.pl"
+# line 61 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 mobile= interferer= mob_count= NULL;
 }
 
 void DECIR_uldl::wrapup() {
-# line 79 "DECIR_uldl.pl"
+# line 78 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 while(list_h) {  
             interferer= list_h;
             list_h= list_h->next;
@@ -45,7 +47,7 @@ while(list_h) {
 }
 
 void DECIR_uldl::begin() {
-# line 73 "DECIR_uldl.pl"
+# line 72 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 DEcell_list::begin();
         slot_counter= slots_lower23= slots_lower7= 0;
         CIR_max= CIR_Sum= 0;
@@ -53,7 +55,7 @@ DEcell_list::begin();
 }
 
 DECIR_uldl::~DECIR_uldl() {
-# line 65 "DECIR_uldl.pl"
+# line 64 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 while(list_h) {  
             interferer=list_h;
             list_h=list_h->next;
@@ -63,7 +65,7 @@ while(list_h) {
 }
 
 void DECIR_uldl::go() {
-# line 343 "DECIR_uldl.pl"
+# line 342 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 if (check.dataNew) {
             scan_Handy();
             check.dataNew=FALSE;
@@ -73,7 +75,7 @@ if (check.dataNew) {
 
 void DECIR_uldl::angle (int Lv)
 {
-# line 92 "DECIR_uldl.pl"
+# line 91 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 double 	Z, N;
             const 	double Faktor= 57.29577951; 
             for (int n=0; n<zellen[Lv].segments; n++) {
@@ -92,7 +94,7 @@ double 	Z, N;
 
 int DECIR_uldl::angle_check (int Lv)
 {
-# line 113 "DECIR_uldl.pl"
+# line 112 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 int n, a_flag = 0, im_Bereich[6];
             double Z, N;
             const double Faktor= 57.29577951;     
@@ -135,7 +137,7 @@ int n, a_flag = 0, im_Bereich[6];
 
 void DECIR_uldl::scan_Handy ()
 {
-# line 157 "DECIR_uldl.pl"
+# line 156 "../../../../../src/domains/de/contrib/stars/DECIR_uldl.pl"
 int b, s, n, knum, angle_flag, interf_flag, intf_flag, Bedingung1, Bedingung2;
             float t1, t2, tbg, tnd, ta, te, tj, t_value = 0.0, I, I_Sum, CIR, I_Sum_jens;
 		

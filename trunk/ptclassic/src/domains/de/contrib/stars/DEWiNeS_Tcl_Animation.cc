@@ -1,5 +1,5 @@
-static const char file_id[] = "DEWiNeS_Tcl_Animation.pl";
-// .cc file generated from DEWiNeS_Tcl_Animation.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl by ptlang
 /*
 Copyright (c) 1997 Dresden University of Technology,
             Mobile Communications Systems
@@ -9,6 +9,8 @@ Copyright (c) 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 #include "DEWiNeS_Tcl_Animation.h"
 #include "ptk.h"
 
@@ -20,7 +22,7 @@ ISA_FUNC(DEWiNeS_Tcl_Animation,DEStar);
 
 Block* DEWiNeS_Tcl_Animation :: makeNew() const { LOG_NEW; return new DEWiNeS_Tcl_Animation;}
 
-# line 99 "DEWiNeS_Tcl_Animation.pl"
+# line 98 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 static int grabNew(ClientData tcl, Tcl_Interp*, int, char*[])
             {
                 InfString inputs = ((TclStarIfcWiNeS*)tcl)->getInputValue_New();
@@ -278,23 +280,23 @@ DEWiNeS_Tcl_Animation::DEWiNeS_Tcl_Animation ()
 	addState(tcl_file.setState("tcl_file",this,"$PTOLEMY/src/domains/de/contrib/stars/test.tcl","The file from which to read the Tcl script"));
 	addState(Segments.setState("Segments",this,"segments","0 = omnidiectional antennas"));
 
-# line 353 "DEWiNeS_Tcl_Animation.pl"
+# line 352 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 mobile = NULL;
 }
 
 void DEWiNeS_Tcl_Animation::wrapup() {
-# line 429 "DEWiNeS_Tcl_Animation.pl"
+# line 428 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 tcl.wrapup();
 }
 
 void DEWiNeS_Tcl_Animation::begin() {
-# line 356 "DEWiNeS_Tcl_Animation.pl"
+# line 355 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 tcl.segmente = Segments;
             tcl.mySetup( this, (const char*) tcl_file );
 }
 
 void DEWiNeS_Tcl_Animation::go() {
-# line 360 "DEWiNeS_Tcl_Animation.pl"
+# line 359 "../../../../../src/domains/de/contrib/stars/DEWiNeS_Tcl_Animation.pl"
 if (New_.dataNew) {
 		int flag;
 		dummy = New_%0;

@@ -12,7 +12,7 @@ defstar {
            value, where x is the real part and y is the imag. part of the 
            complex particle.
     }
-    hinclude { <Uniform.h>, <complex.h> }
+    hinclude { <Uniform.h>}
     ccinclude  { <ACG.h> }
     input {
         name { restart }

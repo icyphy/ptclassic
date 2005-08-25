@@ -1,5 +1,5 @@
-static const char file_id[] = "DEMobile_Station.pl";
-// .cc file generated from DEMobile_Station.pl by ptlang
+static const char file_id[] = "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl";
+// .cc file generated from ../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl by ptlang
 /*
 copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems
@@ -9,6 +9,8 @@ copyright (c) 1996 - 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 #include "DEMobile_Station.h"
 
 const char *star_nm_DEMobile_Station = "DEMobile_Station";
@@ -33,12 +35,12 @@ DEMobile_Station::DEMobile_Station ()
 }
 
 void DEMobile_Station::begin() {
-# line 48 "DEMobile_Station.pl"
+# line 47 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 DEcell_list::begin();
 }
 
 void DEMobile_Station::go() {
-# line 150 "DEMobile_Station.pl"
+# line 149 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 if (start.dataNew) {
                 restart.put(arrivalTime) << 1;
 		Rec= R_Pos.get();
@@ -57,7 +59,7 @@ if (start.dataNew) {
 
 void DEMobile_Station::cell_verif ()
 {
-# line 55 "DEMobile_Station.pl"
+# line 54 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 int angle_flag;
             angle_flag=0;
             flag=0;
@@ -90,7 +92,7 @@ int angle_flag;
 
 void DEMobile_Station::angle (int Lv)
 {
-# line 90 "DEMobile_Station.pl"
+# line 89 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 double 	Z, N;
             const 	double Faktor= 57.29577951;     
             for (int n=0; n<zellen[Lv].segments; n++) {
@@ -109,7 +111,7 @@ double 	Z, N;
 
 int DEMobile_Station::angle_check (int Lv)
 {
-# line 111 "DEMobile_Station.pl"
+# line 110 "../../../../../src/domains/de/contrib/stars/DEMobile_Station.pl"
 int n, a_flag = 0, im_Bereich[6];
 		double Z, N;
 		const double Faktor= 57.29577951;     

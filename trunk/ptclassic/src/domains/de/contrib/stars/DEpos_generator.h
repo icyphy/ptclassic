@@ -1,6 +1,6 @@
 #ifndef _DEpos_generator_h
 #define _DEpos_generator_h 1
-// header file generated from DEpos_generator.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DEpos_generator.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,9 +10,8 @@
 copyright (c) 1997 Dresden University of Technology,
                 Mobile Communications Systems
  */
-#include "DEStar.h"
 #include <Uniform.h>
-#include <complex.h>
+#include "DEStar.h"
 #include "IntState.h"
 
 class DEpos_generator : public DEStar
@@ -33,7 +32,7 @@ protected:
 	IntState x_max;
 	IntState y_min;
 	IntState y_max;
-# line 46 "DEpos_generator.pl"
+# line 46 "../../../../../src/domains/de/contrib/stars/DEpos_generator.pl"
 Uniform *random_x;
         Uniform *random_y;
 

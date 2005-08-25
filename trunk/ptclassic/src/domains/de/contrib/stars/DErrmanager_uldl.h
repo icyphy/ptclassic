@@ -1,6 +1,6 @@
 #ifndef _DErrmanager_uldl_h
 #define _DErrmanager_uldl_h 1
-// header file generated from DErrmanager_uldl.pl by ptlang
+// header file generated from ../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl by ptlang
 
 #ifdef __GNUG__
 #pragma interface
@@ -10,12 +10,9 @@
 copyright (c) 1996 - 1997 Dresden University of Technology,
     Mobile Communications Systems
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <complex.h>
 #include "DEcell_list.h"
 #include "DEcell_list.h"
-# line 54 "DErrmanager_uldl.pl"
+# line 54 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 typedef struct Tab {
             float I_value;
             float t_value;
@@ -55,7 +52,7 @@ public:
 protected:
 	/* virtual */ void go();
 private:
-# line 75 "DErrmanager_uldl.pl"
+# line 75 "../../../../../src/domains/de/contrib/stars/DErrmanager_uldl.pl"
 Handy *handy, *active;
         int band, cellno, del_cellno, startvar, stopvar, shifter, hop, eject_user, ejected_user, usersum;
         float s_time, e_time;

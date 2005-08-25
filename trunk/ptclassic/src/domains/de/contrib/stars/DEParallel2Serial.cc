@@ -9,6 +9,8 @@ copyright (c) 1997 Dresden University of Technology,
 #pragma implementation
 #endif
 
+
+# line 1 "DEParallel2Serial.pl"
 #include "DEParallel2Serial.h"
 
 const char *star_nm_DEParallel2Serial = "DEParallel2Serial";
