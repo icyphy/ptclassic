@@ -8,8 +8,7 @@
 
 
 <H2>Quick nt4 Installation Instructions</H2>
-This section is for people that don't like to read instructions.
- <br>If you have problems, see the detailed instructions below.
+
 <OL> 
 <LI> Download and install Cygwin
 <a href="http://www.cygwin.com/"><code>http://www.cygwin.com</a>
@@ -18,7 +17,9 @@ This section is for people that don't like to read instructions.
 <li> Download Ptolemy using CVS
 <pre>
 cd c:/foo
-cvs -d :ext:source.eecs.berkeley.edu:/home/cvs co ptclassic
+cvs -d :pserver:anon@source.eecs.berkeley.edu:/home/cvs/cvsanon login
+# No password needed, hit enter
+cvs -d :pserver:anon@source.eecs.berkeley.edu:/home/cvs/cvsanon co ptclassic
 mv ptclassic ptolemy
 cd ptolemy
 export PTOLEMY=`pwd`
@@ -32,7 +33,7 @@ Note that PTOLEMY should be set to
 This will avoid problems in configure.
 
 <li> Download gcc-2.95.3 from
-<a href="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.gnu.tar.gz"><code>http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.gnu.tar.gz</code>
+<a href="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.gnu.tar.gz"><code>http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.2/pt0.7.2devel.gnu.tar.gz</code></a>
 <pre>
 cd $PTOLEMY/..
 tar -xf /tmp/pt0.7.2devel.gnu.tar.gz
@@ -143,7 +144,7 @@ make ntbuild
 This rule build tcltk, octtools and Ptolemy Classic
 
 </ol>
-
+See also <a href="ptntinstall.html">The Ptolemy Window NT Installation page</
 
 <HR>
 Copyright &#169 2005 The Regents of the University of California.
