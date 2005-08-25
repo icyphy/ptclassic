@@ -21,3 +21,174 @@ For example, to print the User's Manual:
 
 The directories header and bin are used to print the star
 documentation that is automatically generated ptlang.
+
+
+Below are the steps necessary to run Ptolemy Classic on a remote machine:
+  1. Start up Exceed
+  2. Start up ssh
+
+  3. Set up ssh to have X forwarding turned on
+     Note that you cannot enable Tunnelling if ssh is already
+     logged in to a machine, you must disconnect first.
+     Do: Edit -> Settings and then select Tunnelling (under Profile
+     -> Connection) and click 'Tunnel X11 connections'.
+
+
+  4. Use ssh to connect to the remote machine
+
+  5. In the ssh window, type: 
+
+setenv PTOLEMY ~ptolemy
+cd ~ptolemy
+source .cshrc
+unsetenv LD_LIBRARY_PATH
+setenv PT_USE_X11_PXGRAPH yes
+xterm &amp;
+pigi
+
+
+Notes
+-----
+
+Ptolemy Classic uses the shift middle button to bring up
+a menu of commands.  If your mouse does not have a middle button,
+try pressing the left and right mouse buttons at the same time.
+
+>Try to avoid using the Window toolbar close window button in
+the upper right (the box with the <CODE>X</CODE>) - this button
+tends to close all the Ptolemy Classic windows.  To close a 
+Ptolemy Classic window, type Control-D.
+
+If the shift middle button menu is totally black, then try
+setting your display to 256 colors and restarting the X server.
+If you cannot set the display to 256 colors, then
+try installing the Cygwin X server by running
+the Cygwin "setup" command.  
+
+Then run "xinit &" in a Cygwin bash shell.
+When X starts up, start up a window manager by typing
+"twm &" in the terminal that comes up.
+Then, in the ssh window on the remote host, run
+pigi &"
+
+
+If an entire window comes up black, try iconifying it and
+deiconfying it.
+
+Installing under Linux
+----------------------
+
+1. Download
+The Ptolemy 0.7.2devel release is at
+
+http://ptolemy.eecs.berkeley.edu/~cxh/ptdevel
+	user:   ptdevel
+	password: ptrules
+
+
+The NT port is fairly difficult to build, and is fairly slow because
+of signal limitations in cygwin.  There are no Windows binaries available.
+See doc/html/nt/ for details
+
+ <p>Download by following the links above or using scp if you
+have an account:
+
+cd /root
+mkdir downloads
+cd downloads
+scp ptII@andrews:/vol/andrews/andrews2/ftp/pub/ptolemy/ptolemy0.7.2devel/pt0.7.2devel.other.src.tar.gz .
+scp ptII@andrews:/vol/andrews/andrews2/ftp/pub/ptolemy/ptolemy0.7.2devel/pt0.7.2devel.src.tar.gz .
+scp ptII@andrews:/vol/andrews/andrews2/ftp/pub/gnu/ptolemy0.7.2devel/pt0.7.2devel.gnu.tar.gz  .
+
+
+2. Follow the instructions in
+http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/linux.htm
+
+
+Editing the Ptolemy Classic Source Tree
+---------------------------------------
+In August, 2005, Ptolemy Classic was checked in to the
+source.eecs.berkeley.edu CVS repository.  To edit files in Ptolemy Classic,
+do
+
+1. Get a CVS account on <CODE>source.eecs</CODE> or use anonymous CVS
+
+CVS accounts are available for local users, see
+http://chess.eecs.berkeley.edu/options/request/cvsacct
+
+Check out the tree with:
+
+cvs -d :ext:source.eecs.berkeley.edu:/home/cvs co ptclassic
+
+OR
+Use anonymous cvs
+
+cvs -d :pserver:anon@source.eecs.berkeley.edu:/home/cvs/cvsanon login
+   # No password needed, hit enter
+cvs -d :pserver:anon@source.eecs.berkeley.edu:/home/cvs/cvsanon co ptclassic
+
+
+2.  Rename ptclassic to ptolemy.
+The reason is that the gcc-2.95.3 tar file has
+ptolemy as its top level.
+
+   mv ptclassic ptolemy
+
+
+3. Download the gcc-2.95.3 Ptolemy specific source files.
+gcc-3.x will not work here, you must use gcc-2.95.3
+
+http://ptolemy.eecs.berkeley.edu/~cxh/ptdevel/pt0.7.2devel.gnu.tar.gz
+	user:   ptdevel
+	password: ptrules
+
+
+
+4. Untar the gcc-2.95.3 sources from the directory
+_above_ the ptolemy directory
+
+   gtar -zxf /tmp/pt0.7.2devel.gnu.tar.gz
+
+
+5. Download the other.src tar file, which includes the Tcl/Tk sources.
+http://ptolemy.eecs.berkeley.edu/~cxh/ptdevel/pt0.7.2devel.other.src.tar.gz
+
+
+Unfortunately, the other.src tar file include the Tcl/Tk sources
+and the octtools sources, which we do not want, so we untar it
+elsewhere and move the Tcl/Tk sources.
+
+
+    mkdir tmp
+    cd tmp
+    gtar -zxf /tmp/pt0.7.2devel.other.src.tar.gz
+    mv ptolemy/src/tcltk/* ../ptolemy/src/tcltk/
+
+
+6. Go back to the ptolemy directory we created with CVS:
+
+   cd ../ptolemy
+
+
+
+7. Do the setup:
+
+    setenv PTOLEMY `pwd`
+    source ucb-.cshrc
+    make bootstrap >& boot.out &
+
+
+
+8. Problems
+
+  - GNU make is preferred
+    "<CODE>make bootstrap</CODE>" tries to build and install GNU make.
+    but it does not always work.  You may need to run
+
+      make install_gnu
+
+    a few times to get everything built
+
+   - xv does not build
+    The xv license is rather draconian, so we can distribute
+    fixes to the code so we are not shipping it.
