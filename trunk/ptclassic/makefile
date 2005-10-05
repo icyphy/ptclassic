@@ -32,14 +32,37 @@
 defaultTarget:		install
 	@echo Installation for $(PTARCH) is complete.
 
-makefiles:		obj.$(PTARCH)
+makefiles:	check_PTARCH obj.$(PTARCH)
 	@echo Updating makefiles.  Ignore messages about needing to rerun make --
 	@echo the top-level makefile will make sure it is done right.
 	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) makefiles
 
-all install:	obj.$(PTARCH) sources 
+all install:	check_PTARCH obj.$(PTARCH) sources 
 	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) $@
 	cd tycho; $(MAKE) $(MFLAGS) $@
+
+# Check to see that $PTARCH is set
+check_PTARCH: check_PTOLEMY 
+	@if [ "$(PTARCH)x" = "x" ]; then \
+	    echo "WARNING: \$$PTARCH is not set!"; \
+	    echo "   Under Windows with Cygwin and bash, set it by running"; \
+	    echo "	export PTARCH=\`\$$PTOLEMY/bin/ptarch\`"; \
+	    echo "   Under C Shell, set it by running"; \
+	    echo "	setenv PTARCH \`\$$PTOLEMY/bin/ptarch\`"; \
+	    exit 1; \
+	fi
+
+# Check to see that $PTOLEMY is set
+check_PTOLEMY: 
+	@if [ "$(PTOLEMY)x" = "x" ]; then \
+	    echo "WARNING: \$$PTOLEMY is not set!"; \
+	    echo "   Under Windows with Cygwin and bash, set it by running"; \
+	    echo "	export PTOLEMY=\`pwd\`"; \
+	    echo "   Under C Shell, set it by running"; \
+	    echo "	setenv PTOLEMY \`pwd\`"; \
+	    exit 1; \
+	fi
+
 
 clean realclean:
 	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) $@
@@ -110,18 +133,19 @@ IRIX5_GNU_BUILD_CC=cc -Wf,-XNh2000,-XNg1500 -Olimit 3000 -cckr -O1
 # irix5 /bin/make seems to need this
 SHELL=/bin/sh
 
-install_gnu:
-	@echo "Building gnu for $(PTARCH)";
-	# For HPUX, don't include CC=$(GNU_BUILD_CC), it causes problems
-	# building bison with the native /bin/cc
-	case $(PTARCH) in \
-	hppa*) 	$(MAKE) -f mk/scratch-srcs.mk \
+install_gnu: check_PTARCH
+        # For HPUX, don't include CC=$(GNU_BUILD_CC), it causes problems
+        # building bison with the native /bin/cc
+	echo "Building gnu for $(PTARCH)";
+	case "$(PTARCH)" in \
+	hppa*) $(MAKE) -f mk/scratch-srcs.mk \
 		$(MFLAGS) hpgnu_all;; \
-	irix5)	$(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
+	irix5) $(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
 		$(MFLAGS) irix5gnu_all;; \
-	*)	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
+	*) $(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
 		$(MFLAGS) gnu_all;; \
-	esac
+        esac;
+
 clean_gnu:
 	cd obj.$(PTARCH)/gnu; $(MAKE) $(MFLAGS) clean
 
