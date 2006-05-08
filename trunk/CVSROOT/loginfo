@@ -51,7 +51,7 @@ powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 
 # See http://sial.org/howto/cvs-tips/
 ^ptII $CVSROOT/CVSROOT/commit_prep
-^ptII $CVSROOT/CVSROOT/log_accum cxh@eecs.berkeley.edu \"%s\" 
+^ptII/.* $CVSROOT/CVSROOT/log_accum cxh@eecs.berkeley.edu \"%s\" 
 
 #panda releated stuff (Bart Kienhuis)
 panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
