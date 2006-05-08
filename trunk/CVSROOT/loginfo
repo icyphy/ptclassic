@@ -47,7 +47,8 @@ mica/.* mailx -s \"%s\" mica-cvs@gigascale.org
 mvsis/.* mailx -s \"%s\" mvsis-cvs@gigascale.org
 impact/.* mailx -s \"%s\" mescal-cvs@gigascale.org
 powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
-^ptII mailx -s \"%s\" ptexternal-cvs@chess.eecs.berkeley.edu 
+#^ptII mailx -s \"%s\" ptexternal-cvs@chess.eecs.berkeley.edu 
+^ptII $CVSROOT/CVSROOT/log_accum cxh@eecs.berkeley.edu \"%s\" 
 
 #panda releated stuff (Bart Kienhuis)
 panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
