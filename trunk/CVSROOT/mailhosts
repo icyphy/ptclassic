@@ -2,6 +2,6 @@
 # file, the "DEFAULT" line is used, if it is specified.
 #
 # The cvs repository names must be lower case. 
-DEFAULT cxh@chess.eecs.berkeley.edu
+DEFAULT default
 ptii ptexternal-cvs@chess.eecs.berkeley.edu
 
