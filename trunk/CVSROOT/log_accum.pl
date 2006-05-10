@@ -353,6 +353,7 @@ if (defined($mlist)) {
         } elsif (/^DEFAULT/) {
             ($list, $MLISTHOST) = split(/ /, $_, 2);
         }
+        print "log_accum.pl: lc_mlist: $lc_mlist, MLISTHOST: $MLISTHOST";
     }
     close(HOSTFILE);
     #$MAIL_TO = $lc_mlist . "-cvs\@$MLISTHOST";
