@@ -1,8 +1,7 @@
 # If the repository name does not match any of the regular expressions in this
 # file, the "DEFAULT" line is used, if it is specified.
 #
-# For example:
-#DEFAULT ecoinformatics.org
+# The cvs repository names must be lower case. 
 DEFAULT cxh@chess.eecs.berkeley.edu
-ptII ptexternal-cvs@chess.eecs.berkeley.edu
+ptii ptexternal-cvs@chess.eecs.berkeley.edu
 
