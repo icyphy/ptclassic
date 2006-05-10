@@ -347,18 +347,19 @@ if (defined($mlist)) {
     my $lc_mlist = lc($mlist);
     # Look up the mailing list host
     open(HOSTFILE, "<$HOSTLIST") || die ("Cannot open file $HOSTLIST: $!\n");
+    print("log_accum.pl: HOSTLIST: $HOSTLIST\n");
     while (<HOSTFILE>) {
         if (/^$lc_mlist/) {
             ($list, $MLISTHOST) = split(/ /, $_, 2);
         } elsif (/^DEFAULT/) {
             ($list, $MLISTHOST) = split(/ /, $_, 2);
         }
-        print "log_accum.pl: lc_mlist: $lc_mlist, MLISTHOST: $MLISTHOST";
+        print "log_accum.pl: lc_mlist: $lc_mlist, MLISTHOST: $MLISTHOST\n";
     }
     close(HOSTFILE);
     #$MAIL_TO = $lc_mlist . "-cvs\@$MLISTHOST";
     $MAIL_TO = "$MLISTHOST";
-    print "log_accum.pl: MAIL_TO: $MAIL_TO";
+    print "log_accum.pl: MAIL_TO: $MAIL_TO\n";
     $SUBJECT = "[" . $lc_mlist . "-cvs]";
 }
 # else { undef $MAIL_TO; }
