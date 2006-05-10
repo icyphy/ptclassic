@@ -340,8 +340,6 @@ $mlist = &mlist_map($files[0]);
 ##########################
 # Uncomment the following if we ever have per-repository cvs mail
 
-print "log_accum.pl: mlist: $mlist";
-
 if (defined($mlist)) {
     use locale;
     my $lc_mlist = lc($mlist);
