@@ -356,6 +356,12 @@ if (defined($mlist)) {
     }
     close(HOSTFILE);
     #$MAIL_TO = $lc_mlist . "-cvs\@$MLISTHOST";
+
+    if ("$MLISTHOST" == "default") {
+        print "log_accum.pl: skipping DEFAULT email to $MLISTHOST";
+        exit 0;
+    }
+
     $MAIL_TO = "$MLISTHOST";
     $SUBJECT = "[" . $lc_mlist . "-cvs]";
 }
