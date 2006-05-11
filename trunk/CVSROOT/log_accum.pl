@@ -356,7 +356,9 @@ if (defined($mlist)) {
     #$MAIL_TO = $lc_mlist . "-cvs\@$MLISTHOST";
 
     $MAIL_TO = "$MLISTHOST";
-    $SUBJECT = "[" . $lc_mlist . "-cvs]";
+    #$SUBJECT = "[" . $lc_mlist . "-cvs]";
+    # Don't include [foo-cvs], the mailing list will add it
+    $SUBJECT = "";
 } else {
     print "log_accum.pl: skipping email to $mlist, it is not in loginfo or mailhost\n";
    exit 0;
