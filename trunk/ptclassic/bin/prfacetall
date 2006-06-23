@@ -1,0 +1,27 @@
+#!/bin/sh
+# $Id$
+# Print all the facets in a directory
+#
+
+outbasedir=/tmp/prfacetall 
+if [ ! -d $outbasedir ]; then
+    mkdir $outbasedir
+fi
+
+facets=`find . -name "contents;" | sed 's@/schematic/contents;@@'`
+for facet in $facets
+do
+   #fulloutfile=`echo $facet | sed 's@^\./@@' | sed 's@/@_@g'`
+   #outfilebase=`echo $fulloutfile | sed 's/\./_/g'`
+   #outfile=$outdir/${outfilebase}.ps
+   
+   outdir=$outbasedir/`dirname $facet`
+   if [ ! -d $outdir ]; then
+       mkdir -p $outdir
+   fi	 
+
+   outfilebase=`basename $facet`
+   outfile=$outdir/`echo $outfilebase | sed 's/\./_/g'`.ps
+   $PTOLEMY/bin/prfacet -TOFILE $outfile -x -t -c -n -C -N $facet
+   distill $outfile
+done
