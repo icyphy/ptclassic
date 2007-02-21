@@ -74,7 +74,9 @@ static XFontStruct *norm_font;	/* Normal font      */
 
 
 /*#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))*/
+#ifndef linux
 extern char *strcpy();
+#endif
 /* These are now included in xgraph.h which includes malloc.h
  * extern char *malloc();
  * extern void free();
