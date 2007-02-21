@@ -71,10 +71,12 @@ extern void do_hardcopy();	/* Carries out hardcopy    */
 extern void ho_dialog();	/* Hardcopy dialog         */
 extern void set_X();		/* Initializes X device    */
 
-extern char *strcpy();
+//extern char *strcpy();
 extern char *strcat();
 extern char *strrchr();
-extern char *strchr();
+
+//extern char *strchr();
+
 /* 
  * extern char *malloc();
  * extern char *realloc();
