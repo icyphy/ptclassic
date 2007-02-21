@@ -37,7 +37,7 @@ makefiles:	check_PTARCH obj.$(PTARCH)
 	@echo the top-level makefile will make sure it is done right.
 	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) makefiles
 
-all install:	check_PTARCH obj.$(PTARCH) sources 
+all install:	check_PTARCH obj.$(PTARCH) sources bin/pigi
 	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) $@
 	cd tycho; $(MAKE) $(MFLAGS) $@
 
@@ -207,3 +207,6 @@ public_html/star-demo-index: MYFORCE
 	fi
 
 MYFORCE:
+
+bin/pigi:
+	(cd bin; ln -s pigiEnv.sh pigi)
