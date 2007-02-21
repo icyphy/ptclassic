@@ -117,7 +117,11 @@ int SynthTarget :: compileCode() {
 	comCode << "\n";
 	comCode << "/* Set default variables. */\n";
 	comCode << "\n";
+#ifdef linux
+	comCode << "designer = \"" << getlogin() << "\"" << "\n";
+#else
 	comCode << "designer = \"" << cuserid(NULL) << "\"" << "\n";
+#endif
 	comCode << "temp = get_unix_variable(\"SYNOPSYS\")" << "\n";
 	comCode << "search_path = \". \" + temp + \"/libraries/syn\"" << "\n";
 	comCode << "link_library = \"* class.db\"" << "\n";
