@@ -32,6 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h> //Linux: need to define string.h
 #include "StringArray.h"
 
 StringArray::StringArray(void) : total(0), strings(NULL) {}
