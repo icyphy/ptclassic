@@ -699,7 +699,11 @@ StringList CGTarget::headerComment(const char* begin, const char* end,
 	StringList header, msg;
 	time_t t = time(NULL);
 	const char* galname = galaxy() ? galaxy()->name() : "-- UNKNOWN --";
+#ifdef linux
+	msg 	<< "User:      " << getlogin() << "\n"
+#else
 	msg 	<< "User:      " << cuserid(NULL) << "\n"
+#endif
 		<< "Date:      " << ctime(&t)
 		<< "Target:    " << fullName() << "\n"
 		<< "Universe:  " << galname << "\n";
