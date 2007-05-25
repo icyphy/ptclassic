@@ -4,4 +4,5 @@
 # The cvs repository names must be lower case. 
 DEFAULT cxh@eecs.berkeley.edu
 ptii ptexternal-cvs@chess.eecs.berkeley.edu
+dgc cxh@eecs.berkeley.edu
 
