@@ -49,6 +49,7 @@ impact/.* mailx -s \"%s\" mescal-cvs@gigascale.org
 powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 #^ptII mailx -s \"%s\" ptexternal-cvs@chess.eecs.berkeley.edu 
 agv/.* mailx -s \"%s\" agv-cvs@chess.eecs.berkeley.edu
+car/.* mailx -s \"%s\" car-cvs@chess.eecs.berkeley.edu
 
 
 # See http://sial.org/howto/cvs-tips/
