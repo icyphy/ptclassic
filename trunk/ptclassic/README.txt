@@ -4,6 +4,11 @@ Version control:
 README file for Ptolemy
 -----------------------
 
+Installation instructions for Linux and Windows NT can be found at
+http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/
+
+
+
 In order to run Ptolemy, do the following:
 
 % setenv PTOLEMY This_Directory
