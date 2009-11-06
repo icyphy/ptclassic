@@ -51,6 +51,8 @@ powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 agv/.* mailx -s \"%s\" agv-cvs@chess.eecs.berkeley.edu
 car/.* mailx -s \"%s\" car-cvs@chess.eecs.berkeley.edu
 hilv/.* mailx -s \"%s\" hilv-cvs@chess.eecs.berkeley.edu
+mvsis/.* mailx -s "%s" mvsis-cvs@chess.eecs.berkeley.edu
+
 
 # See http://sial.org/howto/cvs-tips/
 ^ptII $CVSROOT/CVSROOT/log_accum.pl %s 
